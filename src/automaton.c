@@ -873,6 +873,21 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 		}
 	}
 	automaton_automaton* composition= automaton_automaton_create("Composition", ctx, alphabet_count, alphabet);
+	//get signal to automata list structure
+	bool** signal_to_automata	= malloc(sizeof(bool*) * alphabet_count);
+	for(i = 0; i < alphabet_count; i++){
+		bool* automata_having_signal	= malloc(sizeof(bool) * automata_count);
+		for(j = 0; j < automata_count; j++){
+			automata_having_signal[j]	= false;
+			for(k = 0; k < automata[j]->local_alphabet_count; k++){
+				if(automata[j]->local_alphabet[k] == alphabet[i]){
+					automata_having_signal[j]		= true;
+					break;
+				}
+			}
+		}
+		signal_to_automata[i]	= automata_having_signal;
+	}
 	//compose transition relation
 	automaton_composite_tree* tree	= automaton_composite_tree_create(automata_count);
 	uint32_t frontier_size			= LIST_INITIAL_SIZE;
@@ -904,6 +919,13 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 	}
 	//free structures
 	automaton_composite_tree_destroy(tree);
+	for(i = 0; i < alphabet_count; i++){ 
+		if(signal_to_automata != NULL){
+			free(signal_to_automata[i]);
+			signal_to_automata[i]	= NULL;
+		}
+	}
+	free(signal_to_automata);	signal_to_automata	= NULL;
 	free(tree); tree = NULL;
 	free(frontier); frontier = NULL;
 	free(current_state); current_state = NULL;
