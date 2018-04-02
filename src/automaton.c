@@ -7,7 +7,8 @@ automaton_signal_event* automaton_signal_event_clone(automaton_signal_event* sou
 	return copy;
 }
 void automaton_signal_event_copy(automaton_signal_event* source,automaton_signal_event* target){
-	target->name						= str_copy(source->name);
+	target->name						= malloc(sizeof(char) * (strlen(source->name) + 1));
+	strcpy(target->name, source->name);
 	target->type						= source->type;
 }
 automaton_alphabet* automaton_alphabet_clone(automaton_alphabet* source){
@@ -45,7 +46,8 @@ automaton_fluent* automaton_fluent_clone(automaton_fluent* source){
 	return copy;
 }
 void automaton_fluent_copy(automaton_fluent* source, automaton_fluent* target){
-	target->name					= str_copy(source->name);
+	target->name 					= malloc(sizeof(char) * (strlen(source->name) + 1));
+	strcpy(target->name, source->name);
 	target->starting_signals_count	= source->starting_signals_count;
 	target->starting_signals		= malloc(sizeof(uint32_t) * target->starting_signals_count);
 	uint32_t i;
@@ -79,7 +81,8 @@ automaton_automata_context* automaton_automata_context_clone(automaton_automata_
 	return copy;
 }
 void automaton_automata_context_copy(automaton_automata_context* source, automaton_automata_context* target){
-	target->name					= str_copy(source->name);
+	target->name					= malloc(sizeof(char) * (strlen(source->name) + 1));
+	strcpy(target->name, source->name);
 	target->global_alphabet			= automaton_alphabet_clone(source->global_alphabet);
 	target->global_fluents_count	= source->global_fluents_count;
 	target->global_fluents			= malloc(sizeof(automaton_fluent) * target->global_fluents_count);
@@ -95,7 +98,8 @@ automaton_automaton* automaton_automaton_clone(automaton_automaton* source){
 }
 void automaton_automaton_copy(automaton_automaton* source, automaton_automaton* target){
 	uint32_t i, j, inDegree, outDegree;
-	target->name					= str_copy(source->name);
+	target->name					= malloc(sizeof(char) * (strlen(source->name) + 1));
+	strcpy(target->name, source->name);
 	target->context					= source->context;
 	target->local_alphabet_count	= source->local_alphabet_count;
 	target->local_alphabet			= malloc(sizeof(uint32_t) * target->local_alphabet_count);
@@ -193,7 +197,8 @@ void automaton_alphabet_print(automaton_alphabet* alphabet, char* prefix, char* 
 	if(suffix == NULL)
 		suffix = "";
 	char	prefix2[255];
-	str_cat(prefix2, prefix, "\t");
+	strcpy(prefix2, prefix);
+	strcat(prefix2, "\t");
 	printf("Alphabet:\n");
 	for(i = 0; i < alphabet->count; i++){
 		automaton_signal_event_print(&(alphabet->list[i]), prefix2, (i < (alphabet->count - 1)? "\n":""));
@@ -260,7 +265,8 @@ void automaton_automata_context_print(automaton_automata_context* ctx, char* pre
 	if(suffix == NULL)
 		suffix = "";
 	char	prefix2[255];
-	str_cat(prefix2, prefix, "\t");
+	strcpy(prefix2, prefix);
+	strcat(prefix2, "\t");
 	printf("Ctx.%s:\n", ctx->name);
 	automaton_alphabet_print(ctx->global_alphabet, prefix2, "\n");
 	printf("%sFluents:\n", prefix2);
@@ -280,7 +286,8 @@ void automaton_automaton_print(automaton_automaton* current_automaton, bool prin
 	if(suffix == NULL)
 		suffix = "";
 	char	prefix2[255];
-	str_cat(prefix2, prefix, "\t");
+	strcpy(prefix2, prefix);
+	strcat(prefix2,  "\t");
 	printf("Aut.%s:\n", current_automaton->name);
 	automaton_automata_context* ctx		= current_automaton->context;
 	if(print_ctx){ automaton_automata_context_print(current_automaton->context, prefix2, "\n");}
@@ -349,7 +356,8 @@ automaton_automaton* automaton_automaton_create(char* name, automaton_automata_c
 
 /** INIT FUNCTIONS **/
 void automaton_signal_event_initialize(automaton_signal_event* signal_event, char* name, automaton_signal_type type){
-	signal_event->name		= str_copy(name);
+	signal_event->name		= malloc(sizeof(char) * (strlen(name) + 1));
+	strcpy(signal_event->name, name);
 	signal_event->type		= type;
 }
 void automaton_alphabet_initialize(automaton_alphabet* alphabet){
@@ -364,7 +372,8 @@ void automaton_transition_initialize(automaton_transition* transition, uint32_t 
 	transition->signals		= NULL;
 }
 void automaton_fluent_initialize(automaton_fluent* fluent, char* name, bool initial_valuation){
-	fluent->name	= str_copy(name);
+	fluent->name	= malloc(sizeof(char) * (strlen(name) + 1));
+	strcpy(fluent->name, name);
 	fluent->starting_signals_count	= 0;
 	fluent->starting_signals		= NULL;
 	fluent->ending_signals_count	= 0;
@@ -377,7 +386,8 @@ void automaton_valuation_initialize(automaton_valuation* valuation, uint32_t sta
 	valuation->active_fluents		= NULL;
 }
 void automaton_automata_context_initialize(automaton_automata_context* ctx, char* name, automaton_alphabet* alphabet, uint32_t fluents_count, automaton_fluent* fluents){
-	ctx->name					= str_copy(name);
+	ctx->name					= malloc(sizeof(char) * (strlen(name) + 1));
+	strcpy(ctx->name, name);
 	ctx->global_alphabet		= automaton_alphabet_clone(alphabet);
 	ctx->global_fluents_count	= fluents_count;
 	ctx->global_fluents			= malloc(sizeof(automaton_fluent) * ctx->global_fluents_count);
@@ -387,7 +397,8 @@ void automaton_automata_context_initialize(automaton_automata_context* ctx, char
 	}
 }
 void automaton_automaton_initialize(automaton_automaton* automaton, char* name, automaton_automata_context* ctx, uint32_t local_alphabet_count, uint32_t* local_alphabet){
-	automaton->name						= str_copy(name);
+	automaton->name						= malloc(sizeof(char) * (strlen(name) + 1));
+	strcpy(automaton->name, name);
 	automaton->context					= ctx;
 	automaton->local_alphabet_count		= local_alphabet_count;
 	automaton->local_alphabet			= malloc(sizeof(uint32_t) * local_alphabet_count);
@@ -508,7 +519,7 @@ void automaton_automaton_destroy(automaton_automaton* automaton){
 bool automaton_alphabet_has_signal_event(automaton_alphabet* alphabet, automaton_signal_event* signal_event){ 
 	uint32_t i;
 	for(i = 0; i < alphabet->count; i++){
-		if(str_cmp(alphabet->list[i].name, signal_event->name) == 0)
+		if(strcmp(alphabet->list[i].name, signal_event->name) == 0)
 			return true;
 	}
 	return false;
@@ -516,26 +527,49 @@ bool automaton_alphabet_has_signal_event(automaton_alphabet* alphabet, automaton
 bool automaton_alphabet_add_signal_event(automaton_alphabet* alphabet, automaton_signal_event* signal_event){ 
 	if(automaton_alphabet_has_signal_event(alphabet, signal_event))
 		return true;
-	uint32_t i;
+	//search for position to insert event in order
+	int32_t i, signal_ordered_index	= -1;
+	int32_t old_count	= (int32_t)alphabet->count;
+	for(i = 0; i < old_count; i++){
+		if(strcmp(signal_event->name, alphabet->list[i].name) <= 0){
+			signal_ordered_index	= i;
+			break;
+		}
+	}
+	//resize array if needed keeping proper order
 	if(alphabet->count == alphabet->size){
 		uint32_t new_size	= alphabet->size * LIST_INCREASE_FACTOR;
 		automaton_signal_event* new_list	= malloc(sizeof(automaton_signal_event) * new_size);
-		for(i = 0; i < alphabet->count; i++){
-			automaton_signal_event_copy(&(alphabet->list[i]), &(new_list[i]));
+		for(i = 0; i < old_count; i++){
+			if(signal_ordered_index >= i){
+				automaton_signal_event_copy(&(alphabet->list[i]), &(new_list[i+1]));
+			}else{
+				automaton_signal_event_copy(&(alphabet->list[i]), &(new_list[i]));
+			}
 			automaton_signal_event_destroy(&(alphabet->list[i]));
 		}
 		free(alphabet->list);
 		alphabet->list	= new_list;
 		alphabet->size	= new_size;
+	}else if(signal_ordered_index > -1){
+		for(i = (alphabet->count) - 1; i >= 0; i--){
+			if(signal_ordered_index >= i){
+				automaton_signal_event_copy(&(alphabet->list[i]), &(alphabet->list[i + 1]));
+				automaton_signal_event_destroy(&(alphabet->list[i]));
+			}
+		}
 	}
-	automaton_signal_event_copy(signal_event, &(alphabet->list[alphabet->count]));
+	if(signal_ordered_index == -1){
+		signal_ordered_index	= alphabet->count;
+	}
+	automaton_signal_event_copy(signal_event, &(alphabet->list[signal_ordered_index]));
 	alphabet->count++;
 	return false;
 }
 uint32_t automaton_alphabet_get_signal_index(automaton_alphabet* alphabet, automaton_signal_event* signal_event){
 	uint32_t i;
 	for(i = 0; i < alphabet->size; i++){
-		if(str_cmp(alphabet->list[i].name, signal_event->name) == 0)
+		if(strcmp(alphabet->list[i].name, signal_event->name) == 0)
 			return i;
 	}
 	return 0;
@@ -550,16 +584,33 @@ bool automaton_transition_has_signal_event(automaton_transition* transition, aut
 	}
 	return false;
 }
+
 bool automaton_transition_add_signal_event(automaton_transition* transition, automaton_automata_context* ctx, automaton_signal_event* signal_event){ 
 	if(automaton_transition_has_signal_event(transition, ctx, signal_event))
 		return true;
-	uint32_t i;
+	//signals should preserve order within the transition
+	int32_t i, signal_ordered_index	= -1;
+	int32_t old_count	= (int32_t)transition->signals_count;
 	uint32_t signal_index	= automaton_alphabet_get_signal_index(ctx->global_alphabet, signal_event);
-	uint32_t* new_signals	= malloc(sizeof(uint32_t) * (transition->signals_count + 1));
-	for(i = 0; i < transition->signals_count; i++)
-		new_signals[i]	= transition->signals[i];
+	for(i = 0; i < old_count; i++){
+		if(signal_index < transition->signals[i]){
+			signal_ordered_index	= i;
+			break;
+		}
+	}
+	uint32_t* new_signals	= malloc(sizeof(uint32_t) * (old_count + 1));
+	for(i = 0; i < old_count; i++){
+		if(signal_ordered_index >= i){
+			new_signals[i+1]	= transition->signals[i];
+		}else{
+			new_signals[i]	= transition->signals[i];
+		}
+	}
 	free(transition->signals);
-	new_signals[transition->signals_count]	= signal_index;
+	if(signal_ordered_index == -1){
+		signal_ordered_index	= transition->signals_count;
+	}
+	new_signals[signal_ordered_index]	= signal_index;
 	transition->signals	= new_signals;
 	transition->signals_count++;
 	return false;
@@ -639,7 +690,7 @@ bool automaton_valuation_add_fluent(automaton_valuation* valuation, automaton_au
 uint32_t automaton_automata_context_get_fluent_index(automaton_automata_context* ctx, automaton_fluent* fluent){
 	uint32_t i;
 	for(i = 0; i < ctx->global_fluents_count; i++){
-		if(str_cmp(ctx->global_fluents[i].name, fluent->name) == 0)
+		if(strcmp(ctx->global_fluents[i].name, fluent->name) == 0)
 			return i;
 	}
 	return 0;
@@ -1005,34 +1056,3 @@ uint32_t str_len(char* a) {
 	return i;
 }
 
-char* str_copy(char* a) {
-	uint32_t len	= str_len(a);
-	char* s=malloc(len);
-	while(len--!=0)
-	{ s[len]=a[len];}
-	return s;
-}
-
-int32_t str_cmp(char* a, char* b) {
-  int i=0;
-  while(a[i]==b[i] && a[i]!=0 && b[i]!=0) i++;
-  if(a[i]==0 && b[i]==0) return 0;
-  if(a[i]==0) return 1;
-  if(b[i]==0) return -1;
-  if(a[i]<b[i])
-    return 1;
-  else
-    return -1;
-}
-
-void str_cat(char* a, char* b, char* c){
-	uint32_t i;
-	uint32_t len	= str_len(b);
-	for(i = 0; i < (len - 1); i++){
-		a[i]	= b[i];
-	}
-	uint32_t len2	= str_len(c);
-	for(i = 0; i < len2; i++){
-		a[i + (len - 1)]	= c[i];
-	}
-}

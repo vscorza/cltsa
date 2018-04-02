@@ -229,9 +229,5 @@ void automaton_composite_tree_destroy(automaton_composite_tree* tree);
 void automaton_composite_tree_entry_print(automaton_composite_tree_entry* entry, bool comes_from_next, uint32_t* tabs);
 void automaton_composite_tree_print(automaton_composite_tree* tree);
 /** AUTOMATA **/
-/** AUX **/
-uint32_t str_len(char* a);
-char* str_copy(char* a);
-int32_t str_cmp(char* a, char* b);
-void str_cat(char*a, char* b, char* c);
+
 #endif
