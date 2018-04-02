@@ -1,0 +1,226 @@
+"Name"     = 'MTSA'
+"Author"   = 'Edgardo Zoppi'
+"Version"  = '1.0'
+"About"    = 'MTSA Grammar'
+
+"Case Sensitive" = 'True'
+"Start Symbol" = <Mtsa>
+
+Comment Start = '/*'
+Comment End = '*/'
+Comment Line = '//'
+
+! -------------------------------------------------
+! Character Sets
+! -------------------------------------------------
+
+{Lower} = [abcdefghijklmnopqrstuvwxyz]
+{Upper} = [ABCDEFGHIJKLMNOPQRSTUVWXYZ]
+{Octal Digit} = [01234567]
+{Dec Digit} = [123456789]
+{Hex Digit} = {Digit} + [abcdef] + [ABCDEF]
+{Ident Chars} = {Lower} + {Upper} + {Digit} + [_?]
+{String Chars} = {Printable} + {HT} - ["\]
+
+! -------------------------------------------------
+! Terminals
+! -------------------------------------------------
+
+Number = '0' {Octal Digit}* | {Dec Digit}+ | '0x' {Hex Digit}+
+Ident = {Lower} {Ident Chars}*
+UpperIdent = {Upper} {Ident Chars}*
+String = '"' ( {String Chars} | '\' {Printable} )* '"'
+
+! -------------------------------------------------
+! Rules
+! -------------------------------------------------
+
+! The grammar starts below
+<Mtsa> ::= <Statements>
+
+<Statements> ::= <Statement> <Statements>
+              | <Statement>
+
+<Statement> ::= <Import>
+             | <Menu>
+             | <Const Def>
+             | <Range Def>
+             | <Fluent Def>
+             | <Assertion Def>
+             | <Set Def>
+             | <Composition Def>
+             | <Goal Def>
+             
+<Label> ::= Ident
+         | <Set>
+         
+<Labels> ::= <Labels> ',' <Label>
+          | <Label>
+
+<Import> ::= 'import' UpperIdent '=' String
+
+<Menu> ::= 'menu' UpperIdent '=' <Label>
+
+<Range Def> ::= 'range' UpperIdent '=' <Range>
+             
+<Range> ::= <Exp> '..' <Exp>
+
+<Const Def> ::= 'const' UpperIdent '=' <Exp>
+
+<Exp> ::= <Exp2>
+       | <Exp> '==' <Exp2>
+       | <Exp> '!=' <Exp2>
+       | <Exp> '>=' <Exp2>
+       | <Exp> '<=' <Exp2>
+       | <Exp> '>' <Exp2>
+       | <Exp> '<' <Exp2>
+
+<Exp2> ::= <Exp3>
+        | <Exp2> '+' <Exp3>
+        | <Exp2> '-' <Exp3>
+
+<Exp3> ::= <Exp4>
+        | <Exp3> '*' <Exp4>
+        | <Exp3> '/' <Exp4>
+        | <Exp3> '%' <Exp4>
+
+<Exp4> ::= Ident
+        | UpperIdent
+        | Number
+        | '(' <Exp> ')'
+
+<Fluent Def> ::= 'fluent' UpperIdent '=' '<' <Fluent Set> ',' <Fluent Set> '>' 
+
+<Fluent Set> ::= Ident
+              | <Set Exp>
+
+<Set Def> ::= 'set' UpperIdent '=' <Set Exp>
+
+<Set Exp> ::= <Set>
+           | <Set Exp> '\' <Set>
+           | <Set Exp> '+' <Set>
+
+<Set> ::= UpperIdent
+       | '{' <Labels> '}'
+
+<Assertion Def> ::= <Assertion Kind> <Assertion>
+          
+<Assertion Kind> ::= 'assert'
+                  | 'constraint'
+                  | 'ltl_property'
+
+<Assertion> ::= UpperIdent '=' <Ltl Exp> <Assertion Suffix>
+             
+<Assertion Suffix> ::= '+' <Set>
+                    |
+           
+<Lts States> ::= <Lts States> ',' <Lts State>
+              | <Lts State>
+
+<Lts State Label> ::= UpperIdent <Indexes>
+                   
+<Indexes> ::= <Index> <Indexes>
+           |
+
+<Index> ::= '[' <Exp> ']'
+         | '[' ident ':' UpperIdent ']'
+         | '[' ident ':' <Range> ']'
+              
+<Lts State> ::= <Lts State Label> '=' '(' <Lts Transitions> ')'
+             | <Lts State Label> '=' <Lts State Label>
+
+<Lts Transitions> ::= <Lts Transition>
+                   | <Lts Transitions> '|' <Lts Transition>
+
+<Lts Transition> ::= <Lts Transition Prefix> <Lts Trace> '->' <Lts State Label>
+
+<Lts Transition Prefix> ::= 'when' '(' <Exp> ')'
+                         |
+
+<Lts Trace> ::= <Lts Trace Label>
+             | <Lts Trace> '->' <Lts Trace Label>
+
+<Lts Trace Label> ::= <Lts Simple Trace Label>
+                   | <Lts Trace Label> '.' <Lts Simple Trace Label>
+                   
+<Lts Simple Trace Label> ::= <Label> <Indexes>
+                          | <Index>
+
+<Composition Def> ::= <Composition Kind> <Composition> '.'
+                   
+<Composition Kind> ::= 'clousure'
+                    | 'abstract'
+                    | 'deterministic'
+                    | 'minimal'
+                    | 'compose'
+                    | 'property'
+                    | 'optimistic'
+                    | 'pessimistic'
+                    | 'component'
+                    | 'controller'
+                    | 'starenv'
+                    | 'plant'
+                    | 'checkCompatibility'
+                    | 'probabilistic'
+                    | 'mdp'
+                    |
+
+<Composition> ::= <Lts States>
+               | '||' UpperIdent '=' '(' <Composition Exp> ')' <Composition Suffix>
+
+<Composition Suffix> ::= '~' '{' UpperIdent '}'
+                      | '@' <Set>
+                      |
+
+<Composition Exp> ::= <Composition Exp2>
+                   | <Composition Exp> '||' <Composition Exp2>
+                   | <Composition Exp> '++' <Composition Exp2>
+                   | <Composition Exp> '+ca' <Composition Exp2>
+                   | <Composition Exp> '+cr' <Composition Exp2>
+
+<Composition Exp2> ::= UpperIdent
+                    | Ident <Indexes> ':' UpperIdent
+                    | <Index> <Indexes> ':' UpperIdent
+
+<Goal Def> ::= 'controllerSpec' UpperIdent '=' '{' <Goal Body> '}'
+
+<Goal Body> ::= <Goal Safety> <Goal Failure> <Goal Assumption> <Goal Liveness> <Goal Controllable>
+
+<Goal Safety> ::= 'safety' '=' <Goal Exp>
+               |
+
+<Goal Failure> ::= 'failure' '=' <Goal Exp>
+                |
+
+<Goal Assumption> ::= 'assumption' '=' <Goal Exp>
+                   |
+
+<Goal Liveness> ::= 'liveness' '=' <Goal Exp>
+                 |
+
+<Goal Controllable> ::= 'controllable' '=' <Goal Exp>
+
+<Goal Exp> ::= '{' <Goal Exp2> '}'
+            
+<Goal Exp2> ::= UpperIdent
+             | <Goal Exp2> ',' UpperIdent
+             |
+
+<Ltl Exp> ::= <Ltl Exp2>
+           | <Ltl Exp> '||' <Ltl Exp2>
+           | <Ltl Exp> '++' <Ltl Exp2>
+           | <Ltl Exp> '+ca' <Ltl Exp2>
+           | <Ltl Exp> '+cr' <Ltl Exp2>
+           | <Ltl Exp> 'U' <Ltl Exp2>
+           | <Ltl Exp> 'W' <Ltl Exp2>
+           | <Ltl Exp> '->' <Ltl Exp2>
+           | <Ltl Exp> '<->' <Ltl Exp2>
+           | <Ltl Exp> '&&' <Ltl Exp2>
+
+<Ltl Exp2> ::= <Label>
+           | '!' <Ltl Exp2>
+           | 'X' <Ltl Exp2>
+           | '<>' <Ltl Exp2>
+           | '[]' <Ltl Exp2>
+           | '(' <Ltl Exp> ')'
+
