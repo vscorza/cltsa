@@ -552,11 +552,9 @@ bool automaton_alphabet_add_signal_event(automaton_alphabet* alphabet, automaton
 		alphabet->list	= new_list;
 		alphabet->size	= new_size;
 	}else if(signal_ordered_index > -1){
-		for(i = (alphabet->count) - 1; i >= 0; i--){
-			if(signal_ordered_index >= i){
-				automaton_signal_event_copy(&(alphabet->list[i]), &(alphabet->list[i + 1]));
-				automaton_signal_event_destroy(&(alphabet->list[i]));
-			}
+		for(i = (alphabet->count) - 1; i > signal_ordered_index; i--){
+			automaton_signal_event_copy(&(alphabet->list[i]), &(alphabet->list[i + 1]));
+			automaton_signal_event_destroy(&(alphabet->list[i]));
 		}
 	}
 	if(signal_ordered_index == -1){
@@ -857,17 +855,33 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 		alphabet_size += automata[i]->local_alphabet_count;
 	}
 	alphabet	= malloc(sizeof(uint32_t) * alphabet_size);
+	int32_t new_index	= -1;
+	uint32_t current_entry;
 	for(i = 0; i < automata_count; i++){
 		for(j = 0; j < automata[i]->local_alphabet_count; j++){
+			new_index	= -1;
 			bool found	= false;
+			current_entry	= automata[i]->local_alphabet[j];
 			for(k = 0; k < alphabet_count; k++){
-				if(alphabet[k] == automata[i]->local_alphabet[j]){
+				if(alphabet[k] == current_entry){
 					found	= true;
 					break;
 				}
+				if(alphabet[k] > current_entry){
+					new_index	= k;
+					break;
+				}
+			}
+			//keep global alphabet ordered
+			if(new_index > -1){
+				for(k = (alphabet_count -1); k > (uint32_t)new_index; k--){
+					alphabet[k]	= alphabet[k - 1];
+				}
+			}else{
+				new_index	= alphabet_count;
 			}
 			if(!found){
-				alphabet[alphabet_count]	= automata[i]->local_alphabet[j];
+				alphabet[new_index]	= current_entry;
 				alphabet_count++;
 			}
 		}
@@ -908,6 +922,10 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 		}
 		frontier_count--;
 		from_state	= automaton_composite_tree_get_key(tree, current_state);
+		//check if frontier state was already decomposed
+		if(automaton_automaton_has_state(composition, from_state)){
+			continue;
+		}
 		//TODO: tengo que poder armar conjuntos de transiciones e ir sacando las que tienen que ir juntas
 		//o bien porque sincronizan o porque se bloquean
 		for(i = 0; i < automata_count; i++){
