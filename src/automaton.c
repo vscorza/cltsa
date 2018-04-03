@@ -108,6 +108,7 @@ void automaton_automaton_copy(automaton_automaton* source, automaton_automaton* 
 	target->transitions_count		= source->transitions_count;
 	target->transitions_size		= source->transitions_size;
 	target->in_degree				= malloc(sizeof(uint32_t) * target->transitions_size);
+	target->max_out_degree			= source->max_out_degree;
 	target->out_degree				= malloc(sizeof(uint32_t) * target->transitions_size);
 	target->transitions				= malloc(sizeof(automaton_transition*) * target->transitions_size);
 	target->inverted_transitions	= malloc(sizeof(automaton_transition*) * target->transitions_size);
@@ -407,6 +408,7 @@ void automaton_automaton_initialize(automaton_automaton* automaton, char* name, 
 	automaton->states_count				= 0;
 	automaton->transitions_size			= LIST_INITIAL_SIZE;
 	automaton->transitions_count		= 0;
+	automaton->max_out_degree			= 0;
 	automaton->out_degree				= malloc(sizeof(uint32_t) * automaton->transitions_size);
 	automaton->in_degree				= malloc(sizeof(uint32_t) * automaton->transitions_size);
 	automaton->transitions				= malloc(sizeof(automaton_transition*) * automaton->transitions_size);
@@ -505,6 +507,7 @@ void automaton_automaton_destroy(automaton_automaton* automaton){
 	automaton->states_count			= 0;
 	automaton->transitions_size		= 0;
 	automaton->transitions_count	= 0;
+	automaton->max_out_degree		= 0;
 	automaton->out_degree			= NULL;
 	automaton->transitions			= NULL;
 	automaton->in_degree			= NULL;
@@ -810,6 +813,8 @@ bool automaton_automaton_add_transition(automaton_automaton* current_automaton, 
 	current_automaton->transitions[from_state]			= new_out;
 	current_automaton->inverted_transitions[to_state]	= new_in;
 	current_automaton->out_degree[from_state]++;
+	if(current_automaton->max_out_degree < current_automaton->out_degree[from_state])
+		current_automaton->max_out_degree	= current_automaton->out_degree[from_state];
 	current_automaton->in_degree[to_state]++;
 	return true;
 }
@@ -842,7 +847,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 	uint32_t* alphabet;
 	alphabet_count	= 0;
 	alphabet_size	= 0;
-	//get union of alphabets
+	/** get union of alphabets **/
 	automaton_automata_context* ctx	= NULL;
 	for(i = 0; i < automata_count; i++){
 		if(automata[i]->initial_states_count != 1)
@@ -887,7 +892,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 		}
 	}
 	automaton_automaton* composition= automaton_automaton_create("Composition", ctx, alphabet_count, alphabet);
-	//get signal to automata list structure
+	/** get signal to automata list structure **/
 	bool** signal_to_automata	= malloc(sizeof(bool*) * alphabet_count);
 	for(i = 0; i < alphabet_count; i++){
 		bool* automata_having_signal	= malloc(sizeof(bool) * automata_count);
@@ -902,7 +907,17 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 		}
 		signal_to_automata[i]	= automata_having_signal;
 	}
-	//compose transition relation
+	/** get current state transitions list harness **/
+	uint32_t max_degree_sum	= 0;
+	for(i = 0; i < automata_count; i++){
+		max_degree_sum	+= automata[i]->max_out_degree;
+	}
+	int32_t* transitions_to_check		= malloc(sizeof(int32_t) * max_degree_sum);
+	uint32_t transitions_to_check_count	= 0;
+	uint32_t next_transition_to_check	= 0;
+	uint32_t current_out_degree		= 0;
+	automaton_transition* current_transition	= NULL;
+	/** compose transition relation **/
 	automaton_composite_tree* tree	= automaton_composite_tree_create(automata_count);
 	uint32_t frontier_size			= LIST_INITIAL_SIZE;
 	uint32_t frontier_count			= 1;
@@ -916,9 +931,16 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 	}
 	automaton_automaton_add_initial_state(composition, automaton_composite_tree_get_key(tree, frontier));
 	while(frontier_count > 0){
+		transitions_to_check_count	= 0;
+		next_transition_to_check	= 0;
 		//pop a state
 		for(i = 0; i < automata_count; i++){
+			current_out_degree		= automata[i]->out_degree[current_state[i]];
 			current_state[i] 		= frontier[(frontier_count - 1) * automata_count + i];
+			for(j = 0; j < current_out_degree; j++){
+				transitions_to_check[transitions_to_check_count]	= i;
+				transitions_to_check_count++;
+			}
 		}
 		frontier_count--;
 		from_state	= automaton_composite_tree_get_key(tree, current_state);
@@ -929,14 +951,15 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 		//TODO: tengo que poder armar conjuntos de transiciones e ir sacando las que tienen que ir juntas
 		//o bien porque sincronizan o porque se bloquean
 		for(i = 0; i < automata_count; i++){
-			uint32_t out_degree	= automata[i]->out_degree[current_state[i]];
-			for(j = 0; j < out_degree; j++){
+			current_out_degree		= automata[i]->out_degree[current_state[i]];
+			for(j = 0; j < current_out_degree; j++){
+				current_transition	= automata[i]->transitions[current_state[i]][j];
 
 			}
 		}
 	}
 	//free structures
-	automaton_composite_tree_destroy(tree);
+	free(transitions_to_check); transitions_to_check= NULL;
 	for(i = 0; i < alphabet_count; i++){ 
 		if(signal_to_automata != NULL){
 			free(signal_to_automata[i]);
@@ -944,6 +967,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 		}
 	}
 	free(signal_to_automata);	signal_to_automata	= NULL;
+	automaton_composite_tree_destroy(tree);
 	free(tree); tree = NULL;
 	free(frontier); frontier = NULL;
 	free(current_state); current_state = NULL;

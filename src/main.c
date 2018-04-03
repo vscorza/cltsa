@@ -92,7 +92,7 @@ void run_tests(){
 }
 
 int main (void){
-	run_tree_tests();
+	//run_tree_tests();
 	run_tests();
 	int save_out = dup(1);
 	remove(automataFile);
