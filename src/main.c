@@ -20,7 +20,6 @@ void run_tree_tests(){
 	printf("new key %d\n", automaton_composite_tree_get_key(tree, key4));
 	automaton_composite_tree_print(tree);
 	automaton_composite_tree_destroy(tree);
-	free(tree);
 }
 
 void run_tests(){
@@ -31,13 +30,13 @@ void run_tests(){
 	automaton_alphabet_add_signal_event(alphabet, in);
 	automaton_alphabet_add_signal_event(alphabet, out);
 	automaton_alphabet_add_signal_event(alphabet, tau);
-	automaton_fluent* fluents		= malloc(sizeof(automaton_fluent) * 2);
-	automaton_fluent_initialize(&fluents[0], "f_in", false);
-	automaton_fluent_initialize(&fluents[1], "f_out", false);
-	automaton_fluent_add_starting_signal(&fluents[0], alphabet, in);
-	automaton_fluent_add_ending_signal(&fluents[0], alphabet, tau);
-	automaton_fluent_add_starting_signal(&fluents[1], alphabet, out);
-	automaton_fluent_add_ending_signal(&fluents[1], alphabet, in);
+	automaton_fluent** fluents		= malloc(sizeof(automaton_fluent*) * 2);
+	fluents[0]	= automaton_fluent_create("f_in", false);
+	fluents[1]	= automaton_fluent_create("f_out", false);
+	automaton_fluent_add_starting_signal(fluents[0], alphabet, in);
+	automaton_fluent_add_ending_signal(fluents[0], alphabet, tau);
+	automaton_fluent_add_starting_signal(fluents[1], alphabet, out);
+	automaton_fluent_add_ending_signal(fluents[1], alphabet, in);
 
 	uint32_t fluents_count			= 2;
 	automaton_automata_context* ctx	= automaton_automata_context_create("Context 1", alphabet, fluents_count, fluents);
@@ -72,23 +71,23 @@ void run_tests(){
 	automaton_automaton* composition	= automaton_automata_compose(automata, 2, SYNCHRONOUS);
 	free(automata); automata = NULL;
 	automaton_automaton_print(composition, false, true, true, "\t", "\n");
-	automaton_automaton_destroy(composition); free(composition); composition = NULL;
-	automaton_automaton_destroy(automaton_1); free(automaton_1); automaton_1 = NULL;
-	automaton_automaton_destroy(automaton_2); free(automaton_2); automaton_2 = NULL;
+	automaton_automaton_destroy(composition); composition = NULL;
+	automaton_automaton_destroy(automaton_1); automaton_1 = NULL;
+	automaton_automaton_destroy(automaton_2); automaton_2 = NULL;
 	free(local_alphabet_1); local_alphabet_1 = NULL;
 	free(local_alphabet_2); local_alphabet_2 = NULL;
-	automaton_transition_destroy(t1_1_2); free(t1_1_2); t1_1_2 = NULL;
-	automaton_transition_destroy(t1_2_1); free(t1_2_1); t1_2_1 = NULL;
-	automaton_transition_destroy(t2_1_2); free(t2_1_2); t2_1_2 = NULL;
-	automaton_transition_destroy(t2_2_1); free(t2_2_1); t2_2_1 = NULL;
-	automaton_automata_context_destroy(ctx); free(ctx); ctx	= NULL;
+	automaton_transition_destroy(t1_1_2); t1_1_2 = NULL;
+	automaton_transition_destroy(t1_2_1); t1_2_1 = NULL;
+	automaton_transition_destroy(t2_1_2); t2_1_2 = NULL;
+	automaton_transition_destroy(t2_2_1); t2_2_1 = NULL;
+	automaton_automata_context_destroy(ctx); ctx	= NULL;
 	automaton_fluent_destroy(&fluents[0]);
 	automaton_fluent_destroy(&fluents[1]);
 	free(fluents);	fluents = NULL;
-	automaton_alphabet_destroy(alphabet); free(alphabet); alphabet = NULL;
-	automaton_signal_event_destroy(in); free(in); in = NULL;
-	automaton_signal_event_destroy(out); free(out); out = NULL;
-	automaton_signal_event_destroy(tau); free(tau); tau = NULL;
+	automaton_alphabet_destroy(alphabet); alphabet = NULL;
+	automaton_signal_event_destroy(in); in = NULL;
+	automaton_signal_event_destroy(out); out = NULL;
+	automaton_signal_event_destroy(tau); tau = NULL;
 }
 
 int main (void){

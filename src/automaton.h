@@ -161,7 +161,7 @@ automaton_alphabet* automaton_alphabet_create();
 automaton_transition* automaton_transition_create(uint32_t from_state, uint32_t to_state);
 automaton_fluent* automaton_fluent_create(char* name, bool initial_valuation);
 automaton_valuation* automaton_valuation_create(uint32_t state);
-automaton_automata_context* automaton_automata_context_create(char* name, automaton_alphabet* alphabet, uint32_t fluents_count, automaton_fluent* fluents);
+automaton_automata_context* automaton_automata_context_create(char* name, automaton_alphabet* alphabet, uint32_t fluents_count, automaton_fluent** fluents);
 automaton_automaton* automaton_automaton_create(char* name, automaton_automata_context* ctx, uint32_t local_alphabet_count, uint32_t* local_alphabet);
 /** INIT FUNCTIONS **/
 void automaton_signal_event_initialize(automaton_signal_event* signal_event, char* name, automaton_signal_type type);
@@ -169,7 +169,7 @@ void automaton_alphabet_initialize(automaton_alphabet* alphabet);
 void automaton_transition_initialize(automaton_transition* transition, uint32_t from_state, uint32_t to_state);
 void automaton_fluent_initialize(automaton_fluent* fluent, char* name, bool initial_valuation);
 void automaton_valuation_initialize(automaton_valuation* valuation, uint32_t state);
-void automaton_automata_context_initialize(automaton_automata_context* ctx, char* name, automaton_alphabet* alphabet, uint32_t fluents_count, automaton_fluent* fluents);
+void automaton_automata_context_initialize(automaton_automata_context* ctx, char* name, automaton_alphabet* alphabet, uint32_t fluents_count, automaton_fluent** fluents);
 void automaton_automaton_initialize(automaton_automaton* automaton, char* name, automaton_automata_context* ctx, uint32_t local_alphabet_count, uint32_t* local_alphabet);
 /** DESTROY FUNCTIONS **/
 void automaton_signal_event_destroy(automaton_signal_event* signal_event);
