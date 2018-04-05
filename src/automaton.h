@@ -172,10 +172,10 @@ void automaton_valuation_initialize(automaton_valuation* valuation, uint32_t sta
 void automaton_automata_context_initialize(automaton_automata_context* ctx, char* name, automaton_alphabet* alphabet, uint32_t fluents_count, automaton_fluent** fluents);
 void automaton_automaton_initialize(automaton_automaton* automaton, char* name, automaton_automata_context* ctx, uint32_t local_alphabet_count, uint32_t* local_alphabet);
 /** DESTROY FUNCTIONS **/
-void automaton_signal_event_destroy(automaton_signal_event* signal_event);
+void automaton_signal_event_destroy(automaton_signal_event* signal_event, bool freeBase);
 void automaton_alphabet_destroy(automaton_alphabet* alphabet);
 void automaton_transition_destroy(automaton_transition* transition);
-void automaton_fluent_destroy(automaton_fluent* fluent);
+void automaton_fluent_destroy(automaton_fluent* fluent, bool freeBase);
 void automaton_valuation_destroy(automaton_valuation* valuation);
 void automaton_automata_context_destroy(automaton_automata_context* ctx);
 void automaton_automaton_destroy(automaton_automaton* automaton);

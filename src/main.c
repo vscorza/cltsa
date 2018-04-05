@@ -81,13 +81,13 @@ void run_tests(){
 	automaton_transition_destroy(t2_1_2); t2_1_2 = NULL;
 	automaton_transition_destroy(t2_2_1); t2_2_1 = NULL;
 	automaton_automata_context_destroy(ctx); ctx	= NULL;
-	automaton_fluent_destroy(&fluents[0]);
-	automaton_fluent_destroy(&fluents[1]);
+	automaton_fluent_destroy(fluents[0], true);
+	automaton_fluent_destroy(fluents[1], true);
 	free(fluents);	fluents = NULL;
 	automaton_alphabet_destroy(alphabet); alphabet = NULL;
-	automaton_signal_event_destroy(in); in = NULL;
-	automaton_signal_event_destroy(out); out = NULL;
-	automaton_signal_event_destroy(tau); tau = NULL;
+	automaton_signal_event_destroy(in, true); in = NULL;
+	automaton_signal_event_destroy(out, true); out = NULL;
+	automaton_signal_event_destroy(tau, true); tau = NULL;
 }
 
 int main (void){
