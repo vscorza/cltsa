@@ -995,7 +995,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 	//consume frontier
 	while(frontier_count > 0){
 		//pop a state
-		printf("pop frontier:[");
+		printf("<POP frontier>[");
 		for(i = 0; i < automata_count; i++){
 			current_state[i] 		= frontier[(frontier_count - 1) * automata_count + i];
 			current_out_degree		= automata[i]->out_degree[current_state[i]];
@@ -1034,7 +1034,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 					current_to_state[m]			= partial_states[(pending_count-1) * automata_count + m];
 				}
 				current_transition				= pending[--pending_count];
-				printf("pop pending:[");
+				printf("\t<POP pending>[");
 				for(m = 0; m < automata_count; m++){
 						printf("%d,", current_state[m]);
 				}
@@ -1066,7 +1066,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 				//if does not overlap pass forward
 				if(!overlaps){
 					processed[processed_count]	= current_transition;
-					printf("push processed [");
+					printf("\t<PUSH processed>(no overlap) [");
 					for(n = 0; n < automata_count; n++){
 						processed_partial_states[processed_count * automata_count + n]	= current_to_state[n];
 						printf("%d,", processed_partial_states[processed_count * automata_count + n]);
@@ -1136,7 +1136,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 							automaton_transition_add_signal_event(new_transition, ctx, &(ctx->global_alphabet->list[signals_union[n]]));
 						}
 						processed[processed_count]	= new_transition;
-						printf("push processed [");
+						printf("\t<PUSH processed> [");
 						for(n = 0; n < automata_count; n++){
 							if(n == k){
 								processed_partial_states[processed_count * automata_count + n]	= current_other_transition->state_to;
@@ -1152,7 +1152,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 				automaton_transition_destroy(current_transition);
 			}
 			//move processed to pending to handle next automaton transitions
-			printf("processed -> pending{\n");
+			printf("<MOV processed>pending>");
 			for(i = 0; i < processed_count; i++){
 				pending[i]	= processed[i];
 				printf("->[");
@@ -1160,11 +1160,11 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 					partial_states[i * automata_count + n]	= processed_partial_states[i * automata_count + n];
 					printf("%d,",processed_partial_states[i * automata_count + n]);
 				}
-				printf("]\n");
+				printf("]");
 			}
 			pending_count	= processed_count;
 			processed_count	= 0;
-			printf("}\n");
+			printf("\n");
 		}
 		//add processed transitions
 		while(pending_count > 0){
@@ -1176,7 +1176,11 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 			current_transition				= pending[pending_count];
 			uint32_t composite_to			= automaton_composite_tree_get_key(tree, current_to_state);
 			current_transition->state_to	= composite_to;
-			printf("adding transition to [");
+			printf("<TRANS add>[%d]{", current_transition->state_from);
+			for(n = 0; n < current_transition->signals_count; n++){
+				printf("%d,", current_transition->signals[n]);
+			}
+			printf("}->[");
 			for(n = 0; n < automata_count; n++){
 				printf("%d,", current_to_state[n]);
 			}
@@ -1193,7 +1197,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 				}
 			}
 			if(!found){
-				printf("add frontier [");
+				printf("<PUSH frontier> [");
 				composite_frontier[frontier_count]	= composite_to;
 				for(n = 0; n < automata_count; n++){
 					printf("%d,", current_to_state[n]);
