@@ -966,6 +966,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 	automaton_transition* current_transition		= NULL;
 	automaton_transition* current_other_transition	= NULL;
 	uint32_t* current_to_state			= malloc(sizeof(int32_t) * automata_count);
+	uint32_t* current_from_state			= malloc(sizeof(int32_t) * automata_count);
 	/** compose transition relation **/
 	automaton_composite_tree* tree	= automaton_composite_tree_create(automata_count);
 	uint32_t frontier_size			= LIST_INITIAL_SIZE;
@@ -1000,6 +1001,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 			current_state[i] 		= frontier[(frontier_count - 1) * automata_count + i];
 			current_out_degree		= automata[i]->out_degree[current_state[i]];
 			printf("%d,", current_state[i]);
+			current_from_state[i]	= current_state[i];
 		}
 		printf("]\n");
 		from_state	= composite_frontier[frontier_count - 1];
@@ -1033,15 +1035,17 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 				for(m = 0; m < automata_count; m++){
 					current_to_state[m]			= partial_states[(pending_count-1) * automata_count + m];
 				}
-				current_transition				= pending[--pending_count];
+				current_transition				= pending[pending_count-1];
+				pending_count--;
+
 				printf("\t<POP pending>[");
 				for(m = 0; m < automata_count; m++){
-						printf("%d,", current_state[m]);
+						printf("%d,", current_from_state[m]);
 				}
 				printf("]");
 				printf("{");
 				for(m = 0; m < pending[pending_count]->signals_count; m++){
-						printf("%d,", pending[pending_count]->signals[m]);
+						printf("%s,", ctx->global_alphabet->list[pending[pending_count]->signals[m]].name);
 				}
 				printf("}->");
 				printf("[");
@@ -1049,6 +1053,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 					printf("%d,", partial_states[(pending_count) * automata_count + m]);
 				}
 				printf("]\n");
+
 
 				current_local_alphabet			= automata[k]->local_alphabet;
 				current_local_alphabet_count	= automata[k]->local_alphabet_count;
@@ -1138,12 +1143,22 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 						processed[processed_count]	= new_transition;
 						printf("\t<PUSH processed> [");
 						for(n = 0; n < automata_count; n++){
+								printf("%d,", current_from_state[n]);
+						}
+						printf("]{");
+						for(n = 0; n < signals_union_count; n++){
+								printf("%s,", ctx->global_alphabet->list[signals_union[n]].name);
+						}
+						printf("}->[");
+						for(n = 0; n < automata_count; n++){
 							if(n == k){
 								processed_partial_states[processed_count * automata_count + n]	= current_other_transition->state_to;
+								printf("%d*,", processed_partial_states[processed_count * automata_count + n]);
 							}else{
 								processed_partial_states[processed_count * automata_count + n]	= current_to_state[n];
+								printf("%d,", processed_partial_states[processed_count * automata_count + n]);
 							}
-							printf("%d,", processed_partial_states[processed_count * automata_count + n]);
+
 						}
 						printf("]\n");
 						processed_count++;
@@ -1170,7 +1185,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 		while(pending_count > 0){
 			pending_count--;
 			for(n = 0; n < automata_count; n++){
-				current_to_state[n]	= partial_states[processed_count * automata_count + n];
+				current_to_state[n]	= partial_states[pending_count * automata_count + n];
 			}
 
 			current_transition				= pending[pending_count];
@@ -1178,7 +1193,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 			current_transition->state_to	= composite_to;
 			printf("<TRANS add>[%d]{", current_transition->state_from);
 			for(n = 0; n < current_transition->signals_count; n++){
-				printf("%d,", current_transition->signals[n]);
+				printf("%s,", ctx->global_alphabet->list[current_transition->signals[n]].name);
 			}
 			printf("}->[");
 			for(n = 0; n < automata_count; n++){
@@ -1211,6 +1226,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 	//free structures
 	free(signals_union);  signals_union	= NULL;
 	free(current_to_state); current_to_state	= NULL;
+	free(current_from_state); current_from_state	= NULL;
 	free(current_overlapping_signals); current_overlapping_signals	= NULL;
 	free(current_other_overlapping_signals); current_other_overlapping_signals	= NULL;
 	for(i = 0; i < alphabet_count; i++){ 
