@@ -471,13 +471,14 @@ void automaton_alphabet_destroy(automaton_alphabet* alphabet){
 	alphabet->size	= 0;
 	free(alphabet);
 }
-void automaton_transition_destroy(automaton_transition* transition){
+void automaton_transition_destroy(automaton_transition* transition, bool freeBase){
 	free(transition->signals);
 	transition->signals			= NULL;
 	transition->state_from		= 0;
 	transition->state_to		= 0;
 	transition->signals_count	= 0;
-	free(transition);
+	if(freeBase)
+		free(transition);
 }
 void automaton_fluent_destroy(automaton_fluent* fluent, bool freeBase){
 	free(fluent->name);
@@ -519,11 +520,13 @@ void automaton_automaton_destroy(automaton_automaton* automaton){
 	uint32_t i,j;
 	for(i = 0; i < automaton->transitions_count; i++){
 		for(j = 0; j < automaton->out_degree[i]; j++){
-			automaton_transition_destroy(&(automaton->transitions[i][j]));
+			automaton_transition_destroy(&(automaton->transitions[i][j]), false);
 		}
 		for(j = 0; j < automaton->in_degree[i]; j++){
-			automaton_transition_destroy(&(automaton->inverted_transitions[i][j]));
+			automaton_transition_destroy(&(automaton->inverted_transitions[i][j]), false);
 		}
+		free(automaton->transitions[i]);
+		free(automaton->inverted_transitions[i]);
 	}
 	free(automaton->out_degree);
 	free(automaton->transitions);
@@ -791,12 +794,12 @@ void automaton_automaton_resize_to_state(automaton_automaton* current_automaton,
 		next_trans[i]					= malloc(sizeof(automaton_transition) * next_out_degree[i]);
 		for(j = 0; j < next_out_degree[i]; j++){ 
 			automaton_transition_copy(&(current_automaton->transitions[i][j]), &(next_trans[i][j]));
-			automaton_transition_destroy(&(current_automaton->transitions[i][j]));
+			automaton_transition_destroy(&(current_automaton->transitions[i][j]), false);
 		}
 		next_inv_trans[i]				= malloc(sizeof(automaton_transition) * next_in_degree[i]);
 		for(j = 0; j < next_in_degree[i]; j++){ 
 			automaton_transition_copy(&(current_automaton->inverted_transitions[i][j]), &(next_inv_trans[i][j]));
-			automaton_transition_destroy(&(current_automaton->inverted_transitions[i][j]));
+			automaton_transition_destroy(&(current_automaton->inverted_transitions[i][j]), false);
 		}
 	}
 	free(current_automaton->out_degree);
@@ -835,11 +838,11 @@ bool automaton_automaton_add_transition(automaton_automaton* current_automaton, 
 	automaton_transition* new_in	= malloc(sizeof(automaton_transition) * (old_in_degree + 1));
 	for(i = 0; i < old_out_degree; i++){
 		automaton_transition_copy(&(current_automaton->transitions[from_state][i]), &(new_out[i]));
-		automaton_transition_destroy(&(current_automaton->transitions[from_state][i]));
+		automaton_transition_destroy(&(current_automaton->transitions[from_state][i]), false);
 	}
 	for(i = 0; i < old_in_degree; i++){
 		automaton_transition_copy(&(current_automaton->inverted_transitions[to_state][i]), &(new_in[i]));
-		automaton_transition_destroy(&(current_automaton->inverted_transitions[to_state][i]));
+		automaton_transition_destroy(&(current_automaton->inverted_transitions[to_state][i]), false);
 	}
 	automaton_transition_copy(transition, &(new_in[old_in_degree]));
 	automaton_transition_copy(transition, &(new_out[old_out_degree]));
@@ -1164,7 +1167,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 						processed_count++;
 					}
 				}
-				automaton_transition_destroy(current_transition);
+				automaton_transition_destroy(current_transition, true);
 			}
 			//move processed to pending to handle next automaton transitions
 			printf("<MOV processed>pending>");
@@ -1202,7 +1205,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 			printf("](%d)\n", composite_to);
 
 			automaton_automaton_add_transition(composition, current_transition);
-			automaton_transition_destroy(current_transition);
+			automaton_transition_destroy(current_transition, true);
 			//expand frontier
 			bool found = false;
 			for(n = 0; n < frontier_count; n++){
@@ -1224,6 +1227,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 		}
 	}
 	//free structures
+	free(composite_frontier);	composite_frontier	= NULL;
 	free(signals_union);  signals_union	= NULL;
 	free(current_to_state); current_to_state	= NULL;
 	free(current_from_state); current_from_state	= NULL;
@@ -1235,10 +1239,11 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 			signal_to_automata[i]	= NULL;
 		}
 	}
+	free(processed_partial_states); processed_partial_states	= NULL;
 	free(partial_states); partial_states	= NULL;
-	for(i = 0; i < pending_count; i++) automaton_transition_destroy(pending[i]);
+	for(i = 0; i < pending_count; i++) automaton_transition_destroy(pending[i], true);
 	free(pending); pending	= NULL;
-	for(i = 0; i < processed_count; i++) automaton_transition_destroy(processed[i]);
+	for(i = 0; i < processed_count; i++) automaton_transition_destroy(processed[i], true);
 	free(processed); processed	= NULL;
 	free(signal_to_automata);	signal_to_automata	= NULL;
 	automaton_composite_tree_destroy(tree);tree = NULL;

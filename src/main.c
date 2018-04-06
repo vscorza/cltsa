@@ -76,10 +76,10 @@ void run_tests(){
 	automaton_automaton_destroy(automaton_2); automaton_2 = NULL;
 	free(local_alphabet_1); local_alphabet_1 = NULL;
 	free(local_alphabet_2); local_alphabet_2 = NULL;
-	automaton_transition_destroy(t1_1_2); t1_1_2 = NULL;
-	automaton_transition_destroy(t1_2_1); t1_2_1 = NULL;
-	automaton_transition_destroy(t2_1_2); t2_1_2 = NULL;
-	automaton_transition_destroy(t2_2_1); t2_2_1 = NULL;
+	automaton_transition_destroy(t1_1_2, true); t1_1_2 = NULL;
+	automaton_transition_destroy(t1_2_1, true); t1_2_1 = NULL;
+	automaton_transition_destroy(t2_1_2, true); t2_1_2 = NULL;
+	automaton_transition_destroy(t2_2_1, true); t2_2_1 = NULL;
 	automaton_automata_context_destroy(ctx); ctx	= NULL;
 	automaton_fluent_destroy(fluents[0], true);
 	automaton_fluent_destroy(fluents[1], true);
