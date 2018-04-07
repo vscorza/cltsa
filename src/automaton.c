@@ -758,11 +758,11 @@ bool automaton_automaton_has_transition(automaton_automaton* current_automaton, 
 	uint32_t i, j, k;
 	if(out_degree == 0)
 		return false;
+	bool found	= false;
 	for(i = 0; i < out_degree; i++){
 		if(current_transitions[i].signals_count != transition->signals_count)
 			continue;
 		if(current_transitions[i].state_to == to_state){
-			bool found	= false;
 			for(j = 0; j < transition->signals_count; j++){
 				for(k = 0; k < current_transitions[i].signals_count; k++){
 					if(transition->signals[j] == current_transitions[i].signals[k]){
@@ -776,7 +776,7 @@ bool automaton_automaton_has_transition(automaton_automaton* current_automaton, 
 				return false;
 		}
 	}
-	return true;
+	return found;
 }
 void automaton_automaton_resize_to_state(automaton_automaton* current_automaton, uint32_t state){
 	if(state < current_automaton->transitions_size) return;
@@ -958,10 +958,16 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 		if(automata[i]->local_alphabet_count > max_signals_count)
 			max_signals_count	= automata[i]->local_alphabet_count;
 	}
+	uint32_t* asynch_partial_states			= malloc(sizeof(uint32_t) * automata_count * max_degree_sum);
+	uint32_t* asynch_partial_set_states		= malloc(sizeof(bool) * automata_count * max_degree_sum);
+	automaton_transition** pending_asynch	= malloc(sizeof(automaton_transition*) * max_degree_sum);
+	uint32_t pending_asynch_count			= 0;
 	uint32_t*	partial_states			= malloc(sizeof(uint32_t) * automata_count * max_degree_sum);
+	uint32_t*	partial_set_states		= malloc(sizeof(bool) * automata_count * max_degree_sum);
 	automaton_transition** pending		= malloc(sizeof(automaton_transition*) * max_degree_sum);
 	uint32_t pending_count				= 0;
 	uint32_t*	processed_partial_states= malloc(sizeof(uint32_t) * automata_count * max_degree_sum);
+	uint32_t*	processed_partial_set_states= malloc(sizeof(bool) * automata_count * max_degree_sum);
 	automaton_transition** processed	= malloc(sizeof(automaton_transition*) * max_degree_sum);
 	uint32_t processed_count			= 0;
 	uint32_t current_out_degree			= 0;
@@ -969,7 +975,11 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 	automaton_transition* current_transition		= NULL;
 	automaton_transition* current_other_transition	= NULL;
 	uint32_t* current_to_state			= malloc(sizeof(int32_t) * automata_count);
+	uint32_t* current_to_set_state			= malloc(sizeof(bool) * automata_count);
+	uint32_t* current_merged_to_state		= malloc(sizeof(int32_t) * automata_count);
+	uint32_t* current_merged_to_set_state	= malloc(sizeof(bool) * automata_count);
 	uint32_t* current_from_state			= malloc(sizeof(int32_t) * automata_count);
+	uint32_t* current_from_set_state		= malloc(sizeof(bool) * automata_count);
 	/** compose transition relation **/
 	automaton_composite_tree* tree	= automaton_composite_tree_create(automata_count);
 	uint32_t frontier_size			= LIST_INITIAL_SIZE;
@@ -977,11 +987,12 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 	uint32_t* frontier				= malloc(sizeof(uint32_t) * automata_count * frontier_size);
 	uint32_t* composite_frontier	= malloc(sizeof(uint32_t) * frontier_size);
 	uint32_t* current_state			= malloc(sizeof(uint32_t) * automata_count);
+	uint32_t* current_set_state		= malloc(sizeof(bool) * automata_count);
 	uint32_t from_state;
 	uint32_t to_state;
 	bool overlaps;
 	bool shared_equals;
-	uint32_t* signals_union			= malloc(sizeof(uint32_t) * max_signals_count);
+	uint32_t* signals_union			= malloc(sizeof(uint32_t) * max_degree_sum);
 	uint32_t signals_union_count	= 0;
 	uint32_t* current_local_alphabet;
 	uint32_t current_local_alphabet_count;
@@ -989,6 +1000,9 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 	uint32_t current_overlapping_signals_count	= 0;
 	uint32_t* current_other_overlapping_signals		= malloc(sizeof(uint32_t) * max_signals_count);
 	uint32_t current_other_overlapping_signals_count	= 0;
+
+	int32_t last_char	= -1;
+	uint32_t current_signal, current_other_signal;
 	//set initial state
 	for(i = 0; i < automata_count; i++){
 		frontier[i]	= automata[i]->initial_states[0];
@@ -1025,8 +1039,10 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 				for(k = 0; k < automata_count; k++){
 					if(k == i){
 						partial_states[pending_count * automata_count + k]	= starting_transition->state_to;
+						partial_set_states[pending_count * automata_count + k]	= true;
 					}else{
 						partial_states[pending_count * automata_count + k]	= current_state[k];
+						partial_set_states[pending_count * automata_count + k]	= false;
 					}
 				}
 				pending[pending_count++]			= starting_transition;
@@ -1037,6 +1053,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 
 				for(m = 0; m < automata_count; m++){
 					current_to_state[m]			= partial_states[(pending_count-1) * automata_count + m];
+					current_to_set_state[m]		= partial_set_states[(pending_count-1) * automata_count + m];
 				}
 				current_transition				= pending[pending_count-1];
 				pending_count--;
@@ -1073,14 +1090,86 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 				}
 				//if does not overlap pass forward
 				if(!overlaps){
-					processed[processed_count]	= current_transition;
-					printf("\t<PUSH processed>(no overlap) [");
+					//for every other asynch transition add posible combination if applicable
+					if(type == SYNCHRONOUS){
+						if(pending_asynch_count > 0){
+							printf("\t<PUSH asynch>(no overlap*) [");
+							for(n = 0; n < automata_count; n++){
+									printf("%d,", current_from_state[n]);
+							}
+							printf("]{");
+
+							int32_t m;
+							for(m = (pending_asynch_count - 1); m >= 0; m--){
+								//merge to state and signals
+								for(n = 0; n < automata_count; n++){
+									if(current_to_set_state[n]){
+										current_merged_to_set_state[n]	= true;
+										current_merged_to_state[n]		= current_to_state[n];
+									}else{
+										current_merged_to_set_state[n]	= asynch_partial_set_states[m * automata_count + n];
+										current_merged_to_state[n]		= asynch_partial_states[m * automata_count + n];
+									}
+								}
+								automaton_transition* merged_other_transition	= pending_asynch[m];
+								automaton_transition* merged_transition	= automaton_transition_create(current_transition->state_from, automaton_composite_tree_get_key(tree, current_merged_to_state));
+								signals_union_count	= 0;
+								n = o = 0;
+								while(n < current_transition->signals_count && o < merged_other_transition->signals_count){
+									current_signal		= current_transition->signals[n];
+									current_other_signal= merged_other_transition->signals[o];
+									if(current_signal == current_other_signal){
+										signals_union[signals_union_count++]	= current_signal;
+										n++; o++;
+									}else if(current_signal < current_other_signal){
+										signals_union[signals_union_count++]	= current_signal;
+										n++;
+									}else{
+										signals_union[signals_union_count++]	= current_other_signal;
+										o++;
+									}
+								}
+								while(n < (current_transition->signals_count)){
+									signals_union[signals_union_count++]	= current_transition->signals[n++];
+								}
+								while(o < (merged_other_transition->signals_count)){
+									signals_union[signals_union_count++]	= merged_other_transition->signals[o++];
+								}
+								for(n = 0; n < signals_union_count; n++){
+									automaton_transition_add_signal_event(merged_transition, ctx, &(ctx->global_alphabet->list[signals_union[n]]));
+								}
+								for(n = 0; n < signals_union_count; n++){
+										printf("%s,", ctx->global_alphabet->list[signals_union[n]].name);
+								}
+								printf("}->[");
+								pending_asynch[pending_asynch_count]	= merged_transition;
+								for(n = 0; n < automata_count; n++){
+									asynch_partial_states[pending_asynch_count * automata_count + n]	= current_merged_to_state[n];
+									asynch_partial_set_states[pending_asynch_count * automata_count + n]	= current_merged_to_set_state[n];
+									printf("%d,", asynch_partial_states[pending_asynch_count * automata_count + n]);
+								}
+								printf("]\n");
+								pending_asynch_count++;
+							}
+						}
+					}
+					pending_asynch[pending_asynch_count]	= current_transition;
+					printf("\t<PUSH asynch>(no overlap) [");
 					for(n = 0; n < automata_count; n++){
-						processed_partial_states[processed_count * automata_count + n]	= current_to_state[n];
-						printf("%d,", processed_partial_states[processed_count * automata_count + n]);
+							printf("%d,", current_from_state[n]);
+					}
+					printf("]{");
+					for(n = 0; n < current_transition->signals_count; n++){
+							printf("%s,", ctx->global_alphabet->list[current_transition->signals[n]].name);
+					}
+					printf("}->[");
+					for(n = 0; n < automata_count; n++){
+						asynch_partial_states[pending_asynch_count * automata_count + n]	= current_to_state[n];
+						asynch_partial_set_states[pending_asynch_count * automata_count + n]	= current_to_set_state[n];
+						printf("%d,", asynch_partial_states[pending_asynch_count * automata_count + n]);
 					}
 					printf("]\n");
-					processed_count++;
+					pending_asynch_count++;
 					continue;
 				}
 				//if it synchronizes
@@ -1119,11 +1208,9 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 					}
 					if(shared_equals){
 						//create ordered union of signals
-						int32_t last_char	= -1;
-						uint32_t current_signal, current_other_signal;
 						signals_union_count	= 0;
 						n = o = 0;
-						while(n < current_transition->signals_count || o < current_other_transition->signals_count){
+						while(n < current_transition->signals_count && o < current_other_transition->signals_count){
 							current_signal		= current_transition->signals[n];
 							current_other_signal= current_other_transition->signals[o];
 							if(current_signal == current_other_signal){
@@ -1136,6 +1223,12 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 								signals_union[signals_union_count++]	= current_other_signal;
 								o++;
 							}
+						}
+						while(n < (current_transition->signals_count)){
+							signals_union[signals_union_count++]	= current_transition->signals[n++];
+						}
+						while(o < (current_other_transition->signals_count)){
+							signals_union[signals_union_count++]	= current_other_transition->signals[o++];
 						}
 						//should add
 						automaton_transition* new_transition	= automaton_transition_create(current_transition->state_from
@@ -1156,9 +1249,11 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 						for(n = 0; n < automata_count; n++){
 							if(n == k){
 								processed_partial_states[processed_count * automata_count + n]	= current_other_transition->state_to;
+								processed_partial_set_states[processed_count * automata_count + n]	= true;
 								printf("%d*,", processed_partial_states[processed_count * automata_count + n]);
 							}else{
 								processed_partial_states[processed_count * automata_count + n]	= current_to_state[n];
+								processed_partial_set_states[processed_count * automata_count + n]	= current_to_set_state[n];
 								printf("%d,", processed_partial_states[processed_count * automata_count + n]);
 							}
 
@@ -1176,6 +1271,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 				printf("->[");
 				for(n = 0; n < automata_count; n++){
 					partial_states[i * automata_count + n]	= processed_partial_states[i * automata_count + n];
+					partial_set_states[i * automata_count + n]	= processed_partial_set_states[i * automata_count + n];
 					printf("%d,",processed_partial_states[i * automata_count + n]);
 				}
 				printf("]");
@@ -1184,11 +1280,31 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 			processed_count	= 0;
 			printf("\n");
 		}
+		//move asynch to pending to handle next automaton transitions
+		printf("<MOV asynch>pending>");
+		uint32_t asynch_index;
+		for(i = 0; i < pending_asynch_count; i++){
+			asynch_index	= pending_count;
+			pending[asynch_index]	= pending_asynch[i];
+			printf("->[");
+			for(n = 0; n < automata_count; n++){
+				partial_states[asynch_index * automata_count + n]	= asynch_partial_states[i * automata_count + n];
+				partial_set_states[asynch_index * automata_count + n]	= asynch_partial_set_states[i * automata_count + n];
+				printf("%d,",asynch_partial_states[i * automata_count + n]);
+			}
+			printf("]");
+			pending_count++;
+		}
+		pending_asynch_count	= 0;
+		printf("\n");
+
+
 		//add processed transitions
 		while(pending_count > 0){
 			pending_count--;
 			for(n = 0; n < automata_count; n++){
 				current_to_state[n]	= partial_states[pending_count * automata_count + n];
+				current_to_set_state[n]	= partial_set_states[pending_count * automata_count + n];
 			}
 
 			current_transition				= pending[pending_count];
@@ -1197,6 +1313,8 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 			printf("<TRANS add>[%d]{", current_transition->state_from);
 			for(n = 0; n < current_transition->signals_count; n++){
 				printf("%s,", ctx->global_alphabet->list[current_transition->signals[n]].name);
+				if(n > 0)
+					printf(".");
 			}
 			printf("}->[");
 			for(n = 0; n < automata_count; n++){
@@ -1227,10 +1345,17 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 		}
 	}
 	//free structures
+	free(asynch_partial_states); asynch_partial_states = NULL;
+	free(asynch_partial_set_states); asynch_partial_set_states = NULL;
+	free(pending_asynch);	pending_asynch	= NULL;
 	free(composite_frontier);	composite_frontier	= NULL;
 	free(signals_union);  signals_union	= NULL;
 	free(current_to_state); current_to_state	= NULL;
+	free(current_to_set_state); current_to_set_state	= NULL;
+	free(current_merged_to_state); current_merged_to_state	= NULL;
+	free(current_merged_to_set_state); current_merged_to_set_state	= NULL;
 	free(current_from_state); current_from_state	= NULL;
+	free(current_from_set_state); current_from_set_state	= NULL;
 	free(current_overlapping_signals); current_overlapping_signals	= NULL;
 	free(current_other_overlapping_signals); current_other_overlapping_signals	= NULL;
 	for(i = 0; i < alphabet_count; i++){ 
@@ -1240,7 +1365,9 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 		}
 	}
 	free(processed_partial_states); processed_partial_states	= NULL;
+	free(processed_partial_set_states); processed_partial_set_states	= NULL;
 	free(partial_states); partial_states	= NULL;
+	free(partial_set_states); partial_set_states	= NULL;
 	for(i = 0; i < pending_count; i++) automaton_transition_destroy(pending[i], true);
 	free(pending); pending	= NULL;
 	for(i = 0; i < processed_count; i++) automaton_transition_destroy(processed[i], true);
@@ -1249,6 +1376,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 	automaton_composite_tree_destroy(tree);tree = NULL;
 	free(frontier); frontier = NULL;
 	free(current_state); current_state = NULL;
+	free(current_set_state); current_set_state = NULL;
 	free(alphabet);	alphabet	= NULL;
 	return composition;
 }
