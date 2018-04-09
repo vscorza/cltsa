@@ -1,3 +1,10 @@
+%{
+#include <stdlib.h>
+#include "y.tab.h"
+char *p;
+%}
+
+%x C_COMMENT
 digit		[0-9]
 alpha		[a-fA-F]
 hextail		({digit}|{alpha}){1,8}
@@ -7,7 +14,7 @@ upper 		[A-Z]
 octalDigit	[0-7]
 decDigit	[1-9]
 identChars	{lower}{upper}{digit}[_?]
-number 		0{octalDigit}* | {decDigit}+ | {hex}+
+number 		0{octalDigit}*|{decDigit}+|{hex}+
 ident 		{lower}{identChars}*
 upperIdent 	{upper}{identChars}*
 string 		\"(\\.|[^"\\])*\"
@@ -18,38 +25,33 @@ void yyerror(char*);
 #include "y.tab.h"
 %}
 %%
-
-%x C_COMMENT
-
 "/*"            { BEGIN(C_COMMENT); }
 <C_COMMENT>"*/" { BEGIN(INITIAL); }
 <C_COMMENT>\n   { }
 <C_COMMENT>.    { }
-\/\/[^\r\n]*
-
-{number}		{yylval	= atoi(yytext); return t_INTEGER;}
-
+\/\/[^\r\n]*	{ }
 {ident}			{
 					p=(char *)calloc(strlen(yytext)+1,sizeof(char));
 					strcpy(p,yytext);
 					yylval.text=p;
 					return(t_IDENT);
 				}
-
-{uppperIdent}	{
+{upperIdent}	{
 					p=(char *)calloc(strlen(yytext)+1,sizeof(char));
 					strcpy(p,yytext);
 					yylval.text=p;
 					return(t_UPPER_IDENT);
 				}
-
 {string}	{
 					p=(char *)calloc(strlen(yytext)+1,sizeof(char));
 					strcpy(p,yytext);
 					yylval.text=p;
 					return(t_STRING);
 				}
-
+{number}		{
+					yylval.integer = atoi(yytext);
+					return t_INTEGER;
+				}
 [-+()=/*\n]	return *yytext;
 [ \t]	; /*skip whitespace*/
 .		return *yytext;

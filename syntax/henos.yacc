@@ -4,9 +4,17 @@ int yylex(void);
 void yyerror(char *);
 int sym[26];
 %}
+%union{
+	char* text;
+	int integer;
+};
 %token	t_INTEGER t_IDENT t_UPPER_IDENT t_STRING
 %left '+' '-'
 %left '*' '/'
+
+%type<text> t_STRING t_IDENT t_UPPER_IDENT
+%type<integer> t_INTEGER exp4
+
 %%
 program:
 	statements
@@ -40,33 +48,33 @@ labels:
 	;
 
 import:
-	'import' t_UPPER_IDENT '=' t_STRING
+	"import" t_UPPER_IDENT '=' t_STRING
 	;
 
 menu:
-	'menu' t_UPPER_IDENT '=' t_STRING
+	"menu" t_UPPER_IDENT '=' t_STRING		{}
 	;
 
 rangeDef:
-	'range' t_UPPER_IDENT '=' range
+	"range" t_UPPER_IDENT '=' range			{}
 	;
 
 range:
-	exp '..' exp
+	exp ".." exp							{}
 	;
 
 constDef:
-	'const' t_UPPER_IDENT '=' exp
+	"const" t_UPPER_IDENT '=' exp			{}
 	;
 
 exp:
 	exp2
-	| exp '==' exp2
-	| exp '!=' exp2
-	| exp '>=' exp2
-	| exp '<=' exp2
-	| exp '>' exp2
-	| exp '<' exp2
+	| exp "==" exp2
+	| exp "!=" exp2
+	| exp ">=" exp2
+	| exp "<=" exp2
+	| exp ">" exp2
+	| exp "<" exp2
 	;
 
 exp2:
@@ -85,12 +93,12 @@ exp3:
 exp4:
 	t_IDENT
 	|t_UPPER_IDENT
-	|t_INTEGER
+	|t_INTEGER								{$$ = $1}
 	|'(' exp ')'
 	;
 
 fluentDef:
-	'fluent' t_UPPER_IDENT '=' '<' fluentSet ',' fluentSet '>'
+	"fluent" t_UPPER_IDENT '=' '<' fluentSet ',' fluentSet '>'
 	;
 
 fluentSet:
@@ -99,12 +107,12 @@ fluentSet:
 	;
 
 setDef:
-	'set' t_UPPER_IDENT '=' setExp
+	"set" t_UPPER_IDENT '=' setExp
 	;
 
 setExp:
 	set
-	|setExp '\' set
+	|setExp "\\" set
 	|setExp '+' set
 	;
 
@@ -118,9 +126,9 @@ assertionDef:
 	;
 
 assertionKind:
-	'assert'
-	| 'constraint'
-	| 'ltl_property'
+	"assert"
+	| "constraint"
+	| "ltl_property"
 	;
 
 assertion:
@@ -163,17 +171,22 @@ ltsTransitions:
 	;
 
 ltsTransition:
-	ltsTransitionPrefix ltsTrace '->' ltsStateLabel
+	ltsTransitionPrefix ltsTrace "->" ltsStateLabel
 	;
 
 ltsTransitionPrefix:
-	'when' '(' exp ')'
+	"when" '(' exp ')'
 	|
 	;
 
 ltsTrace:
 	ltsTraceLabel
-	| ltsTraceLabel '->' ltsTraceLabel
+	| ltsTraceLabel "->" ltsTraceLabel
+	;
+
+ltsTraceLabel:
+	ltsSimpleTraceLabel
+	|ltsTraceLabel '.' ltsSimpleTraceLabel
 	;
 
 ltsSimpleTraceLabel:
@@ -186,26 +199,26 @@ compositionDef:
 	;
 
 compositionKind:
-	'clousure'
-	|'abstract'
-	|'deterministic'
-	|'minimal'
-	|'compose'
-	|'property'
-	|'optimistic'
-	|'pessimistic'
-	|'component'
-	|'controller'
-	|'starenv'
-	|'plant'
-	|'checkCompatibility'
-	|'probabilistic'
-	|'mdp'
+	"clousure"
+	|"abstract"
+	|"deterministic"
+	|"minimal"
+	|"compose"
+	|"property"
+	|"optimistic"
+	|"pessimistic"
+	|"component"
+	|"controller"
+	|"starenv"
+	|"plant"
+	|"checkCompatibility"
+	|"probabilistic"
+	|"mdp"
 	|
 	;	
 composition:
 	ltsStates
-	| '||' t_UPPER_IDENT '=' '(' compositionExp ')' compositionSuffix
+	| "||" t_UPPER_IDENT '=' '(' compositionExp ')' compositionSuffix
 	;
 
 compositionSuffix:
@@ -216,10 +229,10 @@ compositionSuffix:
                       |
 compositionExp:
 	compositionExp2
-	|compositionExp '||' compositionExp2
-	|compositionExp '++' compositionExp2
-	|compositionExp '+ca' compositionExp2
-	|compositionExp '+cr' compositionExp2
+	|compositionExp "||" compositionExp2
+	|compositionExp "++" compositionExp2
+	|compositionExp "+ca" compositionExp2
+	|compositionExp "+cr" compositionExp2
 	;
 
 compositionExp2:
@@ -229,7 +242,7 @@ compositionExp2:
 	;
 
 goalDef:
-	'controllerSpec' t_UPPER_IDENT '=' '{' goalBody '}'
+	"controllerSpec" t_UPPER_IDENT '=' '{' goalBody '}'
 	;
 
 goalBody:
@@ -237,27 +250,27 @@ goalBody:
 	;
 
 goalSafety:
-	'safety' '=' goalExp
+	"safety" '=' goalExp
 	|
 	;
 
 goalFailure:
-	'failure' '=' goalExp
+	"failure" '=' goalExp
 	|
 	;
 
 goalAssumption:
-	'assumption' '=' goalExp
+	"assumption" '=' goalExp
 	|
 	;
 
 goalLiveness:
-	'liveness' '=' goalExp
+	"liveness" '=' goalExp
 	|
 	;
 
 goalControllable:
-	'controllable' '=' goalExp
+	"controllable" '=' goalExp
 	;
 
 goalExp:
@@ -272,23 +285,23 @@ goalExp2:
 
 ltlExp:
 	ltlExp
-	|ltlExp '||' ltlExp2
-	|ltlExp '++' ltlExp2
-	|ltlExp '+ca' ltlExp2
-	|ltlExp '+cr' ltlExp2
-	|ltlExp 'U' ltlExp2
-	|ltlExp 'W' ltlExp2
-	|ltlExp '->' ltlExp2
-	|ltlExp '<->' ltlExp2
-	|ltlExp '&&' ltlExp2
+	|ltlExp "||" ltlExp2
+	|ltlExp "++" ltlExp2
+	|ltlExp "+ca" ltlExp2
+	|ltlExp "+cr" ltlExp2
+	|ltlExp "U" ltlExp2
+	|ltlExp "W" ltlExp2
+	|ltlExp "->" ltlExp2
+	|ltlExp "<->" ltlExp2
+	|ltlExp "&&" ltlExp2
 	;
 
 ltlExp2:
 	label
 	|'!' ltlExp2
 	|'X' ltlExp2
-	|'<>' ltlExp2
-	|'[]' ltlExp2
+	|"<>" ltlExp2
+	|"[]" ltlExp2
 	|'(' ltlExp ')'
 	;
 %%
