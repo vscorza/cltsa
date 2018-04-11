@@ -2,8 +2,10 @@ CC=c99
 CFLAGS= -Wall -Wextra -pedantic -O0 -g -lm -Wno-unused-variable -Wno-unused-parameter
 NASM=nasm
 NASMFLAGS=-f elf64 -g -F DWARF
+LEX = lex
+YACC = yacc -d
 
-all: main
+all: main parser
 
 main: main.c automaton_c.o
 	$(CC) $(CFLAGS) $^ -o $@
@@ -11,6 +13,21 @@ main: main.c automaton_c.o
 automaton_c.o: automaton.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
+
+parser: y.tab.o lex.yy.o
+	$(CC) -o parser y.tab.o lex.yy.o -ll -lm
+
+
+lex.yy.o: lex.yy.c y.tab.h
+lex.yy.o y.tab.o: parser_utils.h
+
+y.tab.c y.tab.h: henos.yacc
+	$(YACC) -v henos.yacc
+
+lex.yy.c: henos.lex
+	$(LEX) henos.lex
+
 clean:
 	rm -f *.o
 	rm -f main 
+	rm -f *.o lex.yy.c *.tab.*  parser *.output
