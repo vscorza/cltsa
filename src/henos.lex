@@ -1,5 +1,6 @@
 %{
 #include <stdlib.h>
+#include "parser_utils.h"
 #include "y.tab.h"
 char *p;
 %}

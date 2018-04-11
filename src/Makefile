@@ -13,10 +13,11 @@ main: main.c automaton_c.o
 automaton_c.o: automaton.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
+parser: y.tab.o lex.yy.o parser_utils_c.o
+	$(CC)  $(CFLAGS) -c $< -o $@
 
-parser: y.tab.o lex.yy.o
-	$(CC) -o parser y.tab.o lex.yy.o -ll -lm
-
+parser_utils_c.o: parser_utils.c
+	$(CC) $(CFLAGS) -c $< -o $@
 
 lex.yy.o: lex.yy.c y.tab.h
 lex.yy.o y.tab.o: parser_utils.h

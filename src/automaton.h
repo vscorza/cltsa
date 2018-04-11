@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
+#include <stdbool.h>
 #include <assert.h>
 
 #define COMPOSE_SYNCH	1
@@ -19,7 +20,6 @@
 /****************
 ==== ENUMS ==== 
 ****************/
-typedef enum { false, true } bool;
 
 typedef enum aumaton_signal_type_enum{
 	INPUT_SIG 	= 0,
@@ -40,32 +40,32 @@ typedef struct automaton_composite_tree_entry_str{
 	uint32_t value;
 	struct automaton_composite_tree_entry_str* next;
 	struct automaton_composite_tree_entry_str* succ;
-}__attribute__((__packed__)) automaton_composite_tree_entry;
+} automaton_composite_tree_entry;
 
 typedef struct automaton_composite_tree_str{
 	uint32_t key_length;
 	uint32_t max_value;
 	automaton_composite_tree_entry* first_entry;
-}__attribute__((__packed__)) automaton_composite_tree;
+} automaton_composite_tree;
 /** AUTOMATON **/
 
 typedef struct automaton_signal_str {
 	char*					name;	//signal name
 	automaton_signal_type	type;	//signal type, input, output, internal
-}__attribute__((__packed__)) automaton_signal_event;
+} automaton_signal_event;
 
 typedef struct automaton_alphabet_str{
 	uint32_t				count;	//alphabet element count
 	uint32_t				size;
 	automaton_signal_event*	list;	//alphabet list
-}__attribute__((__packed__)) automaton_alphabet;
+} automaton_alphabet;
 
 typedef struct automaton_transition_str{
 	uint32_t	state_from;
 	uint32_t	state_to;
 	uint32_t	signals_count;
 	uint32_t*	signals; 
-}__attribute__((__packed__)) automaton_transition;
+} automaton_transition;
 
 typedef struct automaton_fluent_str{
 	char*		name;
@@ -74,20 +74,20 @@ typedef struct automaton_fluent_str{
 	uint32_t	ending_signals_count;
 	uint32_t*	ending_signals;
 	bool		initial_valuation;
-}__attribute__((__packed__)) automaton_fluent;
+} automaton_fluent;
 
 typedef struct automaton_valuation_str{
 	uint32_t	state;
 	uint32_t	active_fluents_count;
 	uint32_t*	active_fluents;
-}__attribute__((__packed__)) automaton_valuation;
+} automaton_valuation;
 
 typedef struct automata_context_str{
 	char*				name;
 	automaton_alphabet*	global_alphabet;
 	uint32_t			global_fluents_count;
 	automaton_fluent*	global_fluents;
-}__attribute__((__packed__)) automaton_automata_context;
+} automaton_automata_context;
 
 typedef struct automaton_str{
 	char*					name;
@@ -107,7 +107,7 @@ typedef struct automaton_str{
 	uint32_t				valuations_size;
 	uint32_t				valuations_count;
 	automaton_valuation*	valuations;
-}__attribute__((__packed__)) automaton_automaton;
+} automaton_automaton;
 
 /** AUTOMATA **/
 typedef struct automata_str{
@@ -119,20 +119,20 @@ typedef struct automata_str{
 	uint32_t**				states_explored;
 	bool*					states_decomposed;
 	automaton_valuation*	states_valuations;
-}__attribute__((__packed__)) automaton_automata;
+} automaton_automata;
 
 /** AUX **/
 
 typedef struct dictionary_entry_str {
     char *key;
     uint32_t value;
-} __attribute__((__packed__)) dictionary_entry;
+}  dictionary_entry;
 
 typedef struct dictionary_str{
 	uint32_t size;
 	uint32_t max_size;
 	dictionary_entry* entries;
-} __attribute__((__packed__)) dictionary;
+}  dictionary;
 
 /****************
 ==== FUNCTIONS ==== 
