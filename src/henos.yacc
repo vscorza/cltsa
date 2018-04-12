@@ -18,26 +18,32 @@ int sym[26];
 	automaton_trace_label_atom_syntax*	trace_label_atom;
 	automaton_trace_label_syntax*	trace_label;
 	automaton_transition_syntax*	transition;
+	automaton_transitions_syntax*	transitions;
 	automaton_state_syntax*			state;
+	automaton_state_label_syntax*	state_label;
+	automaton_states_syntax*		states;
 };
 %token	t_INTEGER t_IDENT t_UPPER_IDENT t_STRING
 %left '+' '-' ','
 %left '*' '/'
 
 
-%type<text> 	t_STRING t_IDENT t_UPPER_IDENT
-%type<integer>	t_INTEGER
-%type<expr>		exp exp2 exp3 exp4 constDef range rangeDef ltsTransitionPrefix
-%type<label>	label concurrentLabel 
-%type<set>		set setExp concurrentLabels  labels fluentSet
-%type<set_def>	setDef
-%type<fluent>	fluentDef
-%type<index>	index
-%type<indexes>	indexes
+%type<text> 				t_STRING t_IDENT t_UPPER_IDENT
+%type<integer>				t_INTEGER
+%type<expr>					exp exp2 exp3 exp4 constDef range rangeDef ltsTransitionPrefix
+%type<label>				label concurrentLabel 
+%type<set>					set setExp concurrentLabels  labels fluentSet
+%type<set_def>				setDef
+%type<fluent>				fluentDef
+%type<index>				index
+%type<indexes>				indexes
 %type<trace_label_atom>		ltsSimpleTraceLabel
 %type<trace_label>			ltsTraceLabel
 %type<transition>			ltsTrace ltsTransition
-%type<state>	ltsStateLabel
+%type<state>				ltsState
+%type<state_label>			ltsStateLabel
+%type<transitions>			ltsTransitions
+%type<states>				ltsStates
 %%
 program:
 	statements
@@ -144,19 +150,19 @@ exp4:
 	|'(' exp ')'							{$$ = automaton_expression_syntax_create(PARENTHESIS_TYPE_AUT, $2, NULL, NULL, 0, NOP_AUT);}
 	;
 ltsStates:
-	ltsStates ',' ltsState
-	| ltsState
+	ltsStates ',' ltsState					{$$ = automaton_states_syntax_add_state($1, $3);}
+	| ltsState								{$$ = automaton_states_syntax_create($1);}
 	;
 ltsStateLabel:
-	t_UPPER_IDENT indexes
+	t_UPPER_IDENT indexes					{$$ = automaton_state_label_syntax_create($1, $2);}
 	;
 ltsState:
-	ltsStateLabel '=' '(' ltsTransitions ')'
-	| ltsStateLabel '=' ltsStateLabel
+	ltsStateLabel '=' '(' ltsTransitions ')'{$$ = automaton_state_syntax_create(false, $1, NULL, $4);free($4);}
+	| ltsStateLabel '=' ltsStateLabel		{$$ = automaton_state_syntax_create(true, $1, $3, NULL);}
 	;
 ltsTransitions:
-	ltsTransition
-	| ltsTransitions '|' ltsTransition
+	ltsTransition							{$$ = automaton_transitions_syntax_create($1);}
+	| ltsTransitions '|' ltsTransition		{$$ = automaton_transitions_syntax_add_transition($1, $3);}
 	;
 ltsTransition:
 	ltsTransitionPrefix ltsTrace "->" ltsStateLabel {$$ = automaton_transition_syntax_finish($1, $2, $4);}
@@ -237,6 +243,8 @@ compositionExp2:
 	|index indexes ':' t_UPPER_IDENT
 	;	
 */	
+
+/*
 assertionDef:
 	assertionKind assertion
 	;
@@ -305,6 +313,7 @@ ltlExp2:
 	|"[]" ltlExp2
 	|'(' ltlExp ')'
 	;
+	*/
 %%
  int main (void) {return yyparse ( );}
 

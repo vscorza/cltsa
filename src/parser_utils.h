@@ -87,13 +87,21 @@ typedef struct automaton_indexes_syntax_str{
 	uint32_t count;
 	struct automaton_index_syntax_str** indexes;
 }automaton_indexes_syntax;
+typedef struct automaton_state_label_syntax_str{
+	char* name;
+	struct automaton_indexes_syntax_str* indexes;
+}automaton_state_label_syntax;
 typedef struct automaton_state_syntax_str{
 	bool is_ref;
-	char* name;
-	struct automaton_state_syntax_str* ref;
+	struct automaton_state_label_syntax_str* label;
+	struct automaton_state_label_syntax_str* ref;
 	uint32_t transitions_count;
 	struct automaton_transition_syntax_str** transitions;
 }automaton_state_syntax;
+typedef struct automaton_states_syntax_str{
+	uint32_t count;
+	struct automaton_state_syntax_str** states;
+}automaton_states_syntax;
 typedef struct automaton_transition_syntax_str{
 	uint32_t count;
 	struct automaton_expression_syntax_str* condition;
@@ -108,6 +116,10 @@ typedef struct automaton_trace_label_atom_syntax_str{
 	struct automaton_label_syntax_str* label;
 	struct automaton_indexes_syntax_str* indexes;
 }automaton_trace_label_atom_syntax;
+typedef struct automaton_transitions_syntax_str{
+	uint32_t count;
+	struct automaton_transition_syntax_str** transitions;
+}automaton_transitions_syntax;
 /****************
 ==== STRUCTS ====
 */
@@ -135,4 +147,11 @@ automaton_transition_syntax* automaton_transition_syntax_finish(automaton_expres
 		, automaton_state_syntax* state);
 automaton_transition_syntax* automaton_transition_syntax_create_from_trace(automaton_trace_label_syntax* trace);
 automaton_transition_syntax* automaton_transition_syntax_add_trace(automaton_transition_syntax* transition, automaton_trace_label_syntax* trace);
+automaton_transitions_syntax* automaton_transitions_syntax_create(automaton_transition_syntax* transition);
+automaton_transitions_syntax* automaton_transitions_syntax_add_transition(automaton_transitions_syntax* transitions, automaton_transition_syntax* transition);
+automaton_state_syntax* automaton_state_syntax_create(bool is_ref, automaton_state_label_syntax* label, automaton_state_label_syntax* ref
+		,automaton_transitions_syntax* transitions);
+automaton_state_label_syntax* automaton_state_label_syntax_create(char* name, automaton_indexes_syntax* indexes);
+automaton_states_syntax* automaton_states_syntax_create(automaton_state_syntax* state);
+automaton_states_syntax* automaton_states_syntax_add_state(automaton_states_syntax* states, automaton_state_syntax* state);
 #endif
