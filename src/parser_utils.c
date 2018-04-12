@@ -10,7 +10,7 @@ void aut_dupstr(char** dst, char* src){
 	}
 }
 
-automaton_expression_syntax* automaton_expression_create(automaton_expression_type_syntax type, automaton_expression_syntax* first
+automaton_expression_syntax* automaton_expression_syntax_create(automaton_expression_type_syntax type, automaton_expression_syntax* first
 		, automaton_expression_syntax* second, char* string_terminal, int32_t integer_terminal, automaton_expression_operator_syntax op){
 	automaton_expression_syntax* expr	= malloc(sizeof(automaton_expression_syntax));
 	expr->type	= type;

@@ -308,6 +308,4 @@ ltlExp2:
 %%
  int main (void) {return yyparse ( );}
 
- int yylex (void) {return getchar ( );}
-
  void yyerror (char *s) {fprintf (stderr, "%s\n", s);}
