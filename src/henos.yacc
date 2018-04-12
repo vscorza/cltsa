@@ -6,24 +6,38 @@ void yyerror(char *);
 int sym[26];
 %}
 %union{
-	char* text;
-	int32_t integer;
-	automaton_expression_syntax* expr;
-	automaton_label_syntax* label;
-	automaton_set_syntax* set;
-	automaton_set_def_syntax* set_def;
+	char* 							text;
+	int32_t 						integer;
+	automaton_expression_syntax* 	expr;
+	automaton_label_syntax* 		label;
+	automaton_set_syntax* 			set;
+	automaton_set_def_syntax* 		set_def;
+	automaton_fluent_syntax* 		fluent;
+	automaton_index_syntax* 		index;
+	automaton_indexes_syntax* 		indexes;
+	automaton_trace_label_atom_syntax*	trace_label_atom;
+	automaton_trace_label_syntax*	trace_label;
+	automaton_transition_syntax*	transition;
+	automaton_state_syntax*			state;
 };
 %token	t_INTEGER t_IDENT t_UPPER_IDENT t_STRING
 %left '+' '-' ','
 %left '*' '/'
 
 
-%type<text> t_STRING t_IDENT t_UPPER_IDENT
-%type<integer> t_INTEGER
-%type<expr> exp exp2 exp3 exp4 constDef range rangeDef
-%type<label> label concurrentLabel 
-%type<set> set setExp concurrentLabels  labels
-%type<set_def> setDef
+%type<text> 	t_STRING t_IDENT t_UPPER_IDENT
+%type<integer>	t_INTEGER
+%type<expr>		exp exp2 exp3 exp4 constDef range rangeDef ltsTransitionPrefix
+%type<label>	label concurrentLabel 
+%type<set>		set setExp concurrentLabels  labels fluentSet
+%type<set_def>	setDef
+%type<fluent>	fluentDef
+%type<index>	index
+%type<indexes>	indexes
+%type<trace_label_atom>		ltsSimpleTraceLabel
+%type<trace_label>			ltsTraceLabel
+%type<transition>			ltsTrace ltsTransition
+%type<state>	ltsStateLabel
 %%
 program:
 	statements
@@ -71,12 +85,29 @@ set:
 	t_UPPER_IDENT							{$$ = automaton_set_syntax_create_from_ident($1);}
 	| '{' labels '}'						{$$ = $2;}
 	;
+fluentDef:
+	"fluent" t_UPPER_IDENT '=' '<' fluentSet ',' fluentSet '>'	{$$ = automaton_fluent_syntax_create($2, $5, $7);}
+	;
+fluentSet:
+	t_IDENT									{$$ = automaton_set_syntax_create_concurrent($1);}
+	|setExp									{$$ = $1;}
+	;	
 import:
 	"import" t_UPPER_IDENT '=' t_STRING
 	;
 menu:
 	"menu" t_UPPER_IDENT '=' t_STRING	
 	;
+indexes:
+	index indexes							{$$ = automaton_indexes_syntax_add_index($2, $1);}
+	|index									{$$ = automaton_indexes_syntax_create($1);}
+	|										{}
+	;
+index:
+	'[' exp ']'								{$$ = automaton_index_syntax_create(true, false, $2, NULL, NULL);}
+	|'[' t_IDENT ':' t_UPPER_IDENT ']'		{$$ = automaton_index_syntax_create(false, false, NULL, $2, $4);}
+	|'[' t_IDENT ':' range ']'				{$$ = automaton_index_syntax_create(false, true, $4, $2, NULL);}
+	;	
 rangeDef:
 	"range" t_UPPER_IDENT '=' range			{$$ = automaton_expression_syntax_create(RANGE_DEF_TYPE_AUT, $4, NULL, $2, 0, NOP_AUT);}
 	;
@@ -112,43 +143,12 @@ exp4:
 	|t_INTEGER								{$$ = automaton_expression_syntax_create(INTEGER_TERMINAL_TYPE_AUT, NULL, NULL, NULL, $1, NOP_AUT);}
 	|'(' exp ')'							{$$ = automaton_expression_syntax_create(PARENTHESIS_TYPE_AUT, $2, NULL, NULL, 0, NOP_AUT);}
 	;
-fluentDef:
-	"fluent" t_UPPER_IDENT '=' '<' fluentSet ',' fluentSet '>'
-	;
-fluentSet:
-	t_IDENT
-	|setExp
-	;
-assertionDef:
-	assertionKind assertion
-	;
-assertionKind:
-	"assert"
-	| "constraint"
-	| "ltl_property"
-	;
-assertion:
-	t_UPPER_IDENT '=' ltlExp assertionSuffix
-	;
-assertionSuffix:
-	'+' set
-	|
-	;
 ltsStates:
 	ltsStates ',' ltsState
 	| ltsState
 	;
 ltsStateLabel:
 	t_UPPER_IDENT indexes
-	;
-indexes:
-	index indexes
-	|
-	;
-index:
-	'[' exp ']'
-	|'[' t_IDENT ':' t_UPPER_IDENT ']'
-	|'[' t_IDENT ':' range ']'
 	;
 ltsState:
 	ltsStateLabel '=' '(' ltsTransitions ')'
@@ -159,24 +159,41 @@ ltsTransitions:
 	| ltsTransitions '|' ltsTransition
 	;
 ltsTransition:
-	ltsTransitionPrefix ltsTrace "->" ltsStateLabel
+	ltsTransitionPrefix ltsTrace "->" ltsStateLabel {$$ = automaton_transition_syntax_finish($1, $2, $4);}
 	;
 ltsTransitionPrefix:
-	"when" '(' exp ')'
-	|
+	"when" '(' exp ')'						{$$ = $3;}
+	|										{}
 	;
 ltsTrace:
-	ltsTraceLabel
-	| ltsTraceLabel "->" ltsTraceLabel
+	ltsTraceLabel							{$$ = automaton_transition_syntax_create_from_trace($1);}
+	| ltsTrace "->" ltsTraceLabel			{$$ = automaton_transition_syntax_add_trace($1, $3);}
 	;
 ltsTraceLabel:
-	ltsSimpleTraceLabel
-	|ltsTraceLabel '.' ltsSimpleTraceLabel
+	ltsSimpleTraceLabel						{$$ = automaton_trace_label_syntax_create($1);}
+	|ltsTraceLabel '.' ltsSimpleTraceLabel	{$$ = automaton_trace_label_syntax_add_atom($1, $3);}
 	;
 ltsSimpleTraceLabel:
-	|label indexes
-	| index
+	|label indexes							{$$ = automaton_trace_label_atom_syntax_create($1, $2);}
+	| index									{$$ = automaton_trace_label_atom_syntax_create_from_index($1);}
 	;
+compositionDef:
+	composition '.'
+	;
+composition:
+	ltsStates
+	| "||" t_UPPER_IDENT '=' '(' compositionExp ')'
+	;
+compositionExp:
+	compositionExp2
+	|compositionExp "||" compositionExp2
+	;
+compositionExp2:
+	t_UPPER_IDENT
+	|t_IDENT indexes ':' t_UPPER_IDENT
+	|index indexes ':' t_UPPER_IDENT
+	;
+/*
 compositionDef:
 	compositionKind composition '.'
 	;
@@ -197,7 +214,7 @@ compositionKind:
 	|"probabilistic"
 	|"mdp"
 	|
-	;	
+	;
 composition:
 	ltsStates
 	| "||" t_UPPER_IDENT '=' '(' compositionExp ')' compositionSuffix
@@ -206,7 +223,7 @@ compositionSuffix:
 	'~' '{' t_UPPER_IDENT '}'
 	|'@' set
 	|
-	;                      |
+	;                      
 compositionExp:
 	compositionExp2
 	|compositionExp "||" compositionExp2
@@ -218,6 +235,22 @@ compositionExp2:
 	t_UPPER_IDENT
 	|t_IDENT indexes ':' t_UPPER_IDENT
 	|index indexes ':' t_UPPER_IDENT
+	;	
+*/	
+assertionDef:
+	assertionKind assertion
+	;
+assertionKind:
+	"assert"
+	| "constraint"
+	| "ltl_property"
+	;
+assertion:
+	t_UPPER_IDENT '=' ltlExp assertionSuffix
+	;
+assertionSuffix:
+	'+' set
+	|
 	;
 goalDef:
 	"controllerSpec" t_UPPER_IDENT '=' '{' goalBody '}'
