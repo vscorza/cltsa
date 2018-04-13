@@ -189,7 +189,7 @@ automaton_trace_label_syntax* automaton_trace_label_syntax_add_atom(automaton_tr
 	return trace_label;
 }
 automaton_transition_syntax* automaton_transition_syntax_finish(automaton_expression_syntax* condition, automaton_transition_syntax* trace
-		, automaton_state_syntax* state){
+		, automaton_state_label_syntax* state){
 	trace->condition	= condition;
 	trace->to_state		= state;
 	return trace;
@@ -268,4 +268,45 @@ automaton_states_syntax* automaton_states_syntax_add_state(automaton_states_synt
 	free(states->states);
 	states->states = new_states;
 	return states;
+}
+automaton_composition_syntax* automaton_composition_syntax_create_from_states(automaton_states_syntax* states){
+	automaton_composition_syntax* composition	= malloc(sizeof(automaton_composition_syntax));
+	composition->name	= NULL;
+	composition->components	= NULL;
+	composition->count	= states->count;
+	composition->states	= states->states;
+	return composition;
+}
+automaton_composition_syntax* automaton_composition_syntax_create_from_ref(char* name, automaton_components_syntax* components){
+	automaton_composition_syntax* composition	= malloc(sizeof(automaton_composition_syntax));
+	aut_dupstr(&(composition->name), name);
+	composition->components	= components->components;
+	composition->count	= components->count;
+	composition->states	= NULL;
+	return composition;
+}
+automaton_components_syntax* automaton_components_syntax_create(automaton_component_syntax* component){
+	automaton_components_syntax* components	= malloc(sizeof(automaton_components_syntax));
+	components->count	= 1;
+	components->components	= malloc(sizeof(automaton_component_syntax*) * components->count);
+	components->components[0]	= component;
+	return components;
+}
+automaton_components_syntax* automaton_components_syntax_add_component(automaton_components_syntax* components, automaton_component_syntax* component){
+	components->count++;
+	automaton_component_syntax** new_components	= malloc(sizeof(automaton_component_syntax*) * components->count);
+	uint32_t i;
+	for(i = 0; i < (components->count -1); i++)new_components[i] = components->components[i];
+	new_components[components->count -1]	= component;
+	free(components->components);
+	components->components	= new_components;
+	return components;
+}
+automaton_component_syntax* automaton_component_syntax_create(char* ident, char* prefix, automaton_index_syntax* index, automaton_indexes_syntax* indexes){
+	automaton_component_syntax* component	= malloc(sizeof(automaton_component_syntax));
+	aut_dupstr(&(component->ident), ident);
+	aut_dupstr(&(component->prefix), prefix);
+	component->index	= index;
+	component->indexes	= indexes;
+	return component;
 }

@@ -22,6 +22,9 @@ int sym[26];
 	automaton_state_syntax*			state;
 	automaton_state_label_syntax*	state_label;
 	automaton_states_syntax*		states;
+	automaton_composition_syntax*	composition;
+	automaton_components_syntax*	components;
+	automaton_component_syntax*		component;
 };
 %token	t_INTEGER t_IDENT t_UPPER_IDENT t_STRING
 %left '+' '-' ','
@@ -44,6 +47,9 @@ int sym[26];
 %type<state_label>			ltsStateLabel
 %type<transitions>			ltsTransitions
 %type<states>				ltsStates
+%type<composition>			compositionDef composition
+%type<components>			compositionExp
+%type<component>			compositionExp2		
 %%
 program:
 	statements
@@ -58,10 +64,10 @@ statement:
 	|constDef
 	|rangeDef
 	|fluentDef
-	|assertionDef
+	//|assertionDef
 	|setDef
 	|compositionDef
-	|goalDef
+	//|goalDef
 	;
 label:
 	concurrentLabel							{$$ = $1;}
@@ -180,24 +186,24 @@ ltsTraceLabel:
 	|ltsTraceLabel '.' ltsSimpleTraceLabel	{$$ = automaton_trace_label_syntax_add_atom($1, $3);}
 	;
 ltsSimpleTraceLabel:
-	|label indexes							{$$ = automaton_trace_label_atom_syntax_create($1, $2);}
+	label indexes							{$$ = automaton_trace_label_atom_syntax_create($1, $2);}
 	| index									{$$ = automaton_trace_label_atom_syntax_create_from_index($1);}
 	;
 compositionDef:
-	composition '.'
+	composition '.'							{$$ = $1;}
 	;
 composition:
-	ltsStates
-	| "||" t_UPPER_IDENT '=' '(' compositionExp ')'
+	ltsStates								{$$ = automaton_composition_syntax_create_from_states($1); free($1);}
+	| "||" t_UPPER_IDENT '=' '(' compositionExp ')'	{$$ = automaton_composition_syntax_create_from_ref($2, $5); free($5);}
 	;
 compositionExp:
-	compositionExp2
-	|compositionExp "||" compositionExp2
+	compositionExp2							{$$ = automaton_components_syntax_create($1);}
+	|compositionExp "||" compositionExp2	{$$ = automaton_components_syntax_add_component($1, $3);}
 	;
 compositionExp2:
-	t_UPPER_IDENT
-	|t_IDENT indexes ':' t_UPPER_IDENT
-	|index indexes ':' t_UPPER_IDENT
+	t_UPPER_IDENT							{$$ = automaton_component_syntax_create($1, NULL, NULL, NULL);}
+	|t_IDENT indexes ':' t_UPPER_IDENT		{$$ = automaton_component_syntax_create($4, $1, NULL, $2);}
+	|index indexes ':' t_UPPER_IDENT		{$$ = automaton_component_syntax_create($4, NULL, $1, $2);}
 	;
 /*
 compositionDef:

@@ -106,7 +106,7 @@ typedef struct automaton_transition_syntax_str{
 	uint32_t count;
 	struct automaton_expression_syntax_str* condition;
 	struct automaton_trace_label_syntax_str** labels;
-	struct automaton_state_syntax_str* to_state;
+	struct automaton_state_label_syntax_str* to_state;
 }automaton_transition_syntax;
 typedef struct automaton_trace_label_syntax_str{
 	uint32_t count;
@@ -120,6 +120,22 @@ typedef struct automaton_transitions_syntax_str{
 	uint32_t count;
 	struct automaton_transition_syntax_str** transitions;
 }automaton_transitions_syntax;
+typedef struct automaton_component_syntax_str{
+	char* ident;
+	char* prefix;
+	automaton_index_syntax* index;
+	automaton_indexes_syntax* indexes;
+}automaton_component_syntax;
+typedef struct automaton_components_syntax_str{
+	uint32_t count;
+	struct automaton_component_syntax_str** components;
+}automaton_components_syntax;
+typedef struct automaton_composition_syntax_str{
+	char* name;
+	uint32_t count;
+	struct automaton_state_syntax_str** states;
+	struct automaton_component_syntax_str** components;
+}automaton_composition_syntax;
 /****************
 ==== STRUCTS ====
 */
@@ -144,7 +160,7 @@ automaton_trace_label_atom_syntax* automaton_trace_label_atom_syntax_create(auto
 automaton_trace_label_syntax* automaton_trace_label_syntax_create(automaton_trace_label_atom_syntax* first_atom);
 automaton_trace_label_syntax* automaton_trace_label_syntax_add_atom(automaton_trace_label_syntax* trace_label, automaton_trace_label_atom_syntax* atom);
 automaton_transition_syntax* automaton_transition_syntax_finish(automaton_expression_syntax* condition, automaton_transition_syntax* trace
-		, automaton_state_syntax* state);
+		, automaton_state_label_syntax* state);
 automaton_transition_syntax* automaton_transition_syntax_create_from_trace(automaton_trace_label_syntax* trace);
 automaton_transition_syntax* automaton_transition_syntax_add_trace(automaton_transition_syntax* transition, automaton_trace_label_syntax* trace);
 automaton_transitions_syntax* automaton_transitions_syntax_create(automaton_transition_syntax* transition);
@@ -154,4 +170,9 @@ automaton_state_syntax* automaton_state_syntax_create(bool is_ref, automaton_sta
 automaton_state_label_syntax* automaton_state_label_syntax_create(char* name, automaton_indexes_syntax* indexes);
 automaton_states_syntax* automaton_states_syntax_create(automaton_state_syntax* state);
 automaton_states_syntax* automaton_states_syntax_add_state(automaton_states_syntax* states, automaton_state_syntax* state);
+automaton_composition_syntax* automaton_composition_syntax_create_from_states(automaton_states_syntax* states);
+automaton_composition_syntax* automaton_composition_syntax_create_from_ref(char* name, automaton_components_syntax* components);
+automaton_components_syntax* automaton_components_syntax_create(automaton_component_syntax* component);
+automaton_components_syntax* automaton_components_syntax_add_component(automaton_components_syntax* components, automaton_component_syntax* component);
+automaton_component_syntax* automaton_component_syntax_create(char* ident, char* prefix, automaton_index_syntax* index, automaton_indexes_syntax* indexes);
 #endif
