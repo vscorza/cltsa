@@ -87,7 +87,7 @@ concurrentLabel:
 	'<' concurrentLabels '>'			{$$ = automaton_label_syntax_create(true, $2, NULL);}
 	;
 concurrentLabels:
-	concurrentLabels '+' t_IDENT			{$$ = automaton_set_syntax_concat_concurrent($1, $3);}
+	concurrentLabels ',' t_IDENT			{$$ = automaton_set_syntax_concat_concurrent($1, $3);}
 	|t_IDENT								{$$ = automaton_set_syntax_create_concurrent($1);}
 	;
 setDef:

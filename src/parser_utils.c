@@ -48,6 +48,7 @@ automaton_set_syntax* automaton_set_syntax_create_concurrent(char* string_termin
 	set->labels_count	= malloc(sizeof(uint32_t) * set->count);
 	set->labels_count[0]= 1;
 	set->labels			= malloc(sizeof(automaton_label_syntax**) * set->count);
+	set->labels[0]		= malloc(sizeof(automaton_label_syntax*));
 	set->labels[0][0]	= automaton_label_syntax_create(false, NULL, string_terminal);
 	set->string_terminal= NULL;
 	return set;
