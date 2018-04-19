@@ -21,7 +21,6 @@ typedef enum {
 	INTEGER_TERMINAL_TYPE_AUT,
 	UPPER_IDENT_TERMINAL_TYPE_AUT
 } automaton_expression_type_syntax;
-
 typedef enum {
 	NOP_AUT = 0,		// nop
 	RANGE_OP_AUT,		// ..
@@ -44,6 +43,17 @@ typedef enum {
 	DIAMOND_OP_AUT,		// <>
 	SQUARE_OP_AUT		// []
 } automaton_expression_operator_syntax;
+typedef enum {
+	IMPORT_AUT,
+	MENU_AUT,
+	CONST_AUT,
+	RANGE_AUT,
+	FLUENT_AUT,
+	ASSERTION_AUT,
+	SET_AUT,
+	COMPOSITION_AUT,
+	GOAL_AUT
+} automaton_statement_type_syntax;
 /****************
 ==== STRUCTS ====
 */
@@ -136,6 +146,18 @@ typedef struct automaton_composition_syntax_str{
 	struct automaton_state_syntax_str** states;
 	struct automaton_component_syntax_str** components;
 }automaton_composition_syntax;
+typedef struct automaton_statement_syntax_str{
+	automaton_statement_type_syntax type;
+	struct automaton_composition_syntax_str* composition_def;
+	struct automaton_expression_syntax_str* range_def;
+	struct automaton_expression_syntax_str* const_def;
+	struct automaton_fluent_syntax_str* fluent_def;
+	struct automaton_set_def_syntax_str* set_def;
+}automaton_statement_syntax;
+typedef struct automaton_program_syntax_str{
+	uint32_t count;
+	struct automaton_statement_syntax_str** statements;
+}automaton_program_syntax;
 /****************
 ==== STRUCTS ====
 */
@@ -175,4 +197,9 @@ automaton_composition_syntax* automaton_composition_syntax_create_from_ref(char*
 automaton_components_syntax* automaton_components_syntax_create(automaton_component_syntax* component);
 automaton_components_syntax* automaton_components_syntax_add_component(automaton_components_syntax* components, automaton_component_syntax* component);
 automaton_component_syntax* automaton_component_syntax_create(char* ident, char* prefix, automaton_index_syntax* index, automaton_indexes_syntax* indexes);
+automaton_program_syntax* automaton_program_syntax_create(automaton_statement_syntax* first_statement);
+automaton_program_syntax* automaton_program_syntax_add_statement(automaton_program_syntax* program, automaton_statement_syntax* statement);
+automaton_statement_syntax* automaton_statement_syntax_create(automaton_statement_type_syntax type, automaton_composition_syntax* composition_def,
+		automaton_expression_syntax* range_def, automaton_expression_syntax* const_def, automaton_fluent_syntax* fluent_def,
+		automaton_set_def_syntax* set_def);
 #endif

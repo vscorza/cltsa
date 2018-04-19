@@ -310,3 +310,32 @@ automaton_component_syntax* automaton_component_syntax_create(char* ident, char*
 	component->indexes	= indexes;
 	return component;
 }
+automaton_program_syntax* automaton_program_syntax_create(automaton_statement_syntax* first_statement){
+	automaton_program_syntax* program	= malloc(sizeof(automaton_program_syntax));
+	program->count	= 1;
+	program->statements	= malloc(sizeof(automaton_statement_syntax) * program->count);
+	program->statements[0]	= first_statement;
+	return program;
+}
+automaton_program_syntax* automaton_program_syntax_add_statement(automaton_program_syntax* program, automaton_statement_syntax* statement){
+	program->count++;
+	automaton_statement_syntax** new_statements	= malloc(sizeof(automaton_statement_syntax*) * program->count);
+	uint32_t i;
+	for(i = 0; i < (program->count -1); i++)new_statements[i] = program->statements[i];
+	new_statements[program->count -1]	= statement;
+	free(program->statements);
+	program->statements	= new_statements;
+	return program;
+}
+automaton_statement_syntax* automaton_statement_syntax_create(automaton_statement_type_syntax type, automaton_composition_syntax* composition_def,
+		automaton_expression_syntax* range_def, automaton_expression_syntax* const_def, automaton_fluent_syntax* fluent_def,
+		automaton_set_def_syntax* set_def){
+	automaton_statement_syntax* statement	= malloc(sizeof(automaton_statement_syntax));
+	statement->type	= type;
+	statement->composition_def	= composition_def;
+	statement->range_def		= range_def;
+	statement->const_def		= const_def;
+	statement->fluent_def		= fluent_def;
+	statement->set_def			= set_def;
+	return statement;
+}

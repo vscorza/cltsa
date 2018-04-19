@@ -26,6 +26,8 @@ int yydebug=5;
 	automaton_composition_syntax*	composition;
 	automaton_components_syntax*	components;
 	automaton_component_syntax*		component;
+	automaton_statement_syntax*		statement;
+	automaton_program_syntax*		program;
 };
 %token	t_INTEGER t_IDENT t_UPPER_IDENT t_STRING
 %left '+' '-' ','
@@ -50,24 +52,26 @@ int yydebug=5;
 %type<states>				ltsStates
 %type<composition>			compositionDef composition
 %type<components>			compositionExp
-%type<component>			compositionExp2		
+%type<component>			compositionExp2
+%type<statement>			statement
+%type<program>				program statements		
 %%
 program:
-	statements
+	statements								{$$ = $1;}
 	;
 statements:
-	statement statements
-	|statement
+	statement statements					{$$ = automaton_program_syntax_add_statement($2, $1);}
+	|statement								{$$ = automaton_program_syntax_create($1);}
 	;
 statement:
-	import
-	|menu
-	|constDef
-	|rangeDef
-	|fluentDef
-	//|assertionDef
-	|setDef
-	|compositionDef
+	import									{$$ = automaton_statement_syntax_create(IMPORT_AUT, NULL, NULL, NULL, NULL, NULL);}
+	|menu									{$$ = automaton_statement_syntax_create(MENU_AUT, NULL, NULL, NULL, NULL, NULL);}
+	|constDef								{$$ = automaton_statement_syntax_create(CONST_AUT, NULL, NULL, $1, NULL, NULL);}
+	|rangeDef								{$$ = automaton_statement_syntax_create(RANGE_AUT, NULL, $1, NULL, NULL, NULL);}
+	|fluentDef								{$$ = automaton_statement_syntax_create(FLUENT_AUT, NULL, NULL, NULL, $1, NULL);}
+	//|assertionDef							
+	|setDef									{$$ = automaton_statement_syntax_create(SET_AUT, NULL, NULL, NULL, NULL, $1);}
+	|compositionDef							{$$ = automaton_statement_syntax_create(COMPOSITION_AUT, $1, NULL, NULL, NULL, NULL);}
 	//|goalDef
 	;
 label:
@@ -80,7 +84,7 @@ labels:
 	|label									{$$ = automaton_set_syntax_create_from_label($1);}
 	;
 concurrentLabel:
-	'<''*' concurrentLabels '*''>'			{$$ = automaton_label_syntax_create(true, $3, NULL);}
+	'<' concurrentLabels '>'			{$$ = automaton_label_syntax_create(true, $2, NULL);}
 	;
 concurrentLabels:
 	concurrentLabels '+' t_IDENT			{$$ = automaton_set_syntax_concat_concurrent($1, $3);}
@@ -117,7 +121,7 @@ menu:
 	"menu" t_UPPER_IDENT '=' t_STRING	
 	;
 indexes:
-	indexes index							{$$ = automaton_indexes_syntax_add_index($2, $1);}
+	indexes index							{$$ = automaton_indexes_syntax_add_index($1, $2);}
 	|index									{$$ = automaton_indexes_syntax_create($1);}
 	|										{}
 	;
