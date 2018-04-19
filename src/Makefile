@@ -4,7 +4,7 @@ NASM=nasm
 NASMFLAGS=-f elf64 -g -F DWARF
 LEX = lex
 YACC = yacc -d
-YACCFLAGS = -Wconflicts-sr -Wconflicts-rr
+YACCFLAGS = -Wconflicts-sr -Wconflicts-rr --debug --verbose
 
 all: main parser
 
@@ -24,7 +24,7 @@ lex.yy.o: lex.yy.c y.tab.h
 lex.yy.o y.tab.o: parser_utils.h
 
 y.tab.c y.tab.h: henos.yacc
-	$(YACC) $(YACCFLASGS) -v henos.yacc
+	$(YACC) $(YACCFLAGS) -v henos.yacc
 
 lex.yy.c: henos.lex
 	$(LEX) henos.lex

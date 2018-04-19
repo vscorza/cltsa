@@ -4,6 +4,7 @@
 int yylex(void);
 void yyerror(char *);
 int sym[26];
+int yydebug=5;
 %}
 %union{
 	char* 							text;
@@ -79,7 +80,7 @@ labels:
 	|label									{$$ = automaton_set_syntax_create_from_label($1);}
 	;
 concurrentLabel:
-	'{' concurrentLabels '}'				{$$ = automaton_label_syntax_create(true, $2, NULL);}
+	'<''*' concurrentLabels '*''>'			{$$ = automaton_label_syntax_create(true, $3, NULL);}
 	;
 concurrentLabels:
 	concurrentLabels '+' t_IDENT			{$$ = automaton_set_syntax_concat_concurrent($1, $3);}
@@ -94,9 +95,14 @@ setExp:
 	|setExp '+' set							{$$ = $1;/*TODO set add*/}
 	;
 set:
+	'{' labels '}'						{$$ = $2;}
+	;
+/*TODO: ref defs of set was removed because it introduced ambiguity as label in the state trace
+set:
 	t_UPPER_IDENT							{$$ = automaton_set_syntax_create_from_ident($1);}
 	| '{' labels '}'						{$$ = $2;}
 	;
+	*/
 fluentDef:
 	"fluent" t_UPPER_IDENT '=' '<' fluentSet ',' fluentSet '>'	{$$ = automaton_fluent_syntax_create($2, $5, $7);}
 	;
@@ -111,7 +117,7 @@ menu:
 	"menu" t_UPPER_IDENT '=' t_STRING	
 	;
 indexes:
-	index indexes							{$$ = automaton_indexes_syntax_add_index($2, $1);}
+	indexes index							{$$ = automaton_indexes_syntax_add_index($2, $1);}
 	|index									{$$ = automaton_indexes_syntax_create($1);}
 	|										{}
 	;
@@ -171,7 +177,7 @@ ltsTransitions:
 	| ltsTransitions '|' ltsTransition		{$$ = automaton_transitions_syntax_add_transition($1, $3);}
 	;
 ltsTransition:
-	ltsTransitionPrefix ltsTrace "->" ltsStateLabel {$$ = automaton_transition_syntax_finish($1, $2, $4);}
+	ltsTransitionPrefix ltsTrace '-''>' ltsStateLabel {$$ = automaton_transition_syntax_finish($1, $2, $5);}
 	;
 ltsTransitionPrefix:
 	"when" '(' exp ')'						{$$ = $3;}
@@ -179,7 +185,7 @@ ltsTransitionPrefix:
 	;
 ltsTrace:
 	ltsTraceLabel							{$$ = automaton_transition_syntax_create_from_trace($1);}
-	| ltsTrace "->" ltsTraceLabel			{$$ = automaton_transition_syntax_add_trace($1, $3);}
+	| ltsTrace '-''>' ltsTraceLabel			{$$ = automaton_transition_syntax_add_trace($1, $4);}
 	;
 ltsTraceLabel:
 	ltsSimpleTraceLabel						{$$ = automaton_trace_label_syntax_create($1);}
@@ -194,11 +200,11 @@ compositionDef:
 	;
 composition:
 	ltsStates								{$$ = automaton_composition_syntax_create_from_states($1); free($1);}
-	| "||" t_UPPER_IDENT '=' '(' compositionExp ')'	{$$ = automaton_composition_syntax_create_from_ref($2, $5); free($5);}
+	| '|' '|' t_UPPER_IDENT '=' '(' compositionExp ')'	{$$ = automaton_composition_syntax_create_from_ref($3, $6); free($6);}
 	;
 compositionExp:
 	compositionExp2							{$$ = automaton_components_syntax_create($1);}
-	|compositionExp "||" compositionExp2	{$$ = automaton_components_syntax_add_component($1, $3);}
+	|compositionExp '|''|' compositionExp2	{$$ = automaton_components_syntax_add_component($1, $4);}
 	;
 compositionExp2:
 	t_UPPER_IDENT							{$$ = automaton_component_syntax_create($1, NULL, NULL, NULL);}
@@ -238,7 +244,7 @@ compositionSuffix:
 	;                      
 compositionExp:
 	compositionExp2
-	|compositionExp "||" compositionExp2
+	|compositionExp '|''|' compositionExp2
 	|compositionExp "++" compositionExp2
 	|compositionExp "+ca" compositionExp2
 	|compositionExp "+cr" compositionExp2
@@ -301,22 +307,22 @@ goalExp2:
 	;
 ltlExp:
 	ltlExp
-	|ltlExp "||" ltlExp2
-	|ltlExp "++" ltlExp2
-	|ltlExp "+ca" ltlExp2
-	|ltlExp "+cr" ltlExp2
-	|ltlExp "U" ltlExp2
-	|ltlExp "W" ltlExp2
-	|ltlExp "->" ltlExp2
-	|ltlExp "<->" ltlExp2
-	|ltlExp "&&" ltlExp2
+	|ltlExp '|''|' ltlExp2
+	|ltlExp '+''+' ltlExp2
+	|ltlExp '+''c''a' ltlExp2
+	|ltlExp '+''c''r' ltlExp2
+	|ltlExp 'U' ltlExp2
+	|ltlExp 'W' ltlExp2
+	|ltlExp '-''>' ltlExp2
+	|ltlExp '<''-''>' ltlExp2
+	|ltlExp '&''&' ltlExp2
 	;
 ltlExp2:
 	label
 	|'!' ltlExp2
 	|'X' ltlExp2
-	|"<>" ltlExp2
-	|"[]" ltlExp2
+	|'<''>' ltlExp2
+	|'[]' ltlExp2
 	|'(' ltlExp ')'
 	;
 	*/
