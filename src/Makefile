@@ -8,20 +8,10 @@ YACCFLAGS = -Wconflicts-sr -Wconflicts-rr --debug --verbose
 
 all: main parser
 
-main: main.c automaton_c.o automaton_context_c.o
+parser: y.tab.o lex.yy.o parser_utils_c.o automaton_utils_c.o
 	$(CC) $(CFLAGS) $^ -o $@
 
-automaton_c.o: automaton.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
-automaton_context_c.o: automaton_context.c parser_utils_c.o
-	$(CC) $(CFLAGS) -c $< -o $@
-
-
-parser: y.tab.o lex.yy.o parser_utils_c.o
-	$(CC) $(CFLAGS) $^ -o $@
-
-parser_utils_c.o: parser_utils.c
+parser_utils_c.o: parser_utils.c automaton_utils_c.o
 	$(CC) $(CFLAGS) -c $< -o $@
 
 lex.yy.o: lex.yy.c y.tab.h
@@ -30,8 +20,24 @@ lex.yy.o y.tab.o: parser_utils.h
 y.tab.c y.tab.h: henos.yacc
 	$(YACC) $(YACCFLAGS) -v henos.yacc
 
+y.tab.o: y.tab.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
 lex.yy.c: henos.lex
 	$(LEX) henos.lex
+
+main: main.c automaton_c.o automaton_utils_c.o automaton_context_c.o
+	$(CC) $(CFLAGS) $^ -o $@
+
+automaton_utils_c.o: automaton_utils.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+automaton_c.o: automaton.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+automaton_context_c.o: automaton_context.c parser_utils_c.o
+	$(CC) $(CFLAGS) -c $< -o $@
+
 
 clean:
 	rm -f *.o

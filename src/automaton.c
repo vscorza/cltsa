@@ -1,5 +1,6 @@
 #include "automaton.h"
 #include "assert.h"
+
 /** CLONING AND COPYING FUNCTIONS **/
 automaton_signal_event* automaton_signal_event_clone(automaton_signal_event* source){
 	automaton_signal_event* copy	= malloc(sizeof(automaton_signal_event));

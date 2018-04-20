@@ -7,15 +7,10 @@
 #include <string.h>
 #include <stdbool.h>
 #include <assert.h>
+#include "automaton_utils.h"
 
 #define COMPOSE_SYNCH	1
 #define PARTIAL_SHARE	2
-
-#define LIST_INITIAL_SIZE		32
-#define LIST_INCREASE_FACTOR	2
-
-#define TRUE_VAR			"1"
-#define FALSE_VAR			"0"
 
 /****************
 ==== ENUMS ==== 

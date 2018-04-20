@@ -7,6 +7,8 @@
 #include <string.h>
 #include <assert.h>
 #include <stdbool.h>
+#include "automaton_utils.h"
+
 /****************
 ==== ENUMS ====
 ****************/
@@ -159,8 +161,28 @@ typedef struct automaton_program_syntax_str{
 	struct automaton_statement_syntax_str** statements;
 }automaton_program_syntax;
 /****************
-==== STRUCTS ====
+==== FUNCTIONS ====
 */
+void automaton_program_syntax_destroy(automaton_program_syntax* program);
+void automaton_statement_syntax_destroy(automaton_statement_syntax* statement);
+void automaton_components_syntax_destroy(automaton_components_syntax* components);
+void automaton_component_syntax_destroy(automaton_component_syntax* component);
+void automaton_composition_syntax_destroy(automaton_composition_syntax* composition);
+void automaton_states_syntax_destroy(automaton_states_syntax* states);
+void automaton_state_syntax_destroy(automaton_state_syntax* state);
+void automaton_state_label_syntax_destroy(automaton_state_label_syntax* state_label);
+void automaton_transitions_syntax_destroy(automaton_transitions_syntax* transitions);
+void automaton_transition_syntax_destroy(automaton_transition_syntax* transition);
+void automaton_trace_label_syntax_destroy(automaton_trace_label_syntax* trace_label);
+void automaton_trace_label_atom_syntax_destroy(automaton_trace_label_atom_syntax* trace_label_atom);
+void automaton_label_syntax_destroy(automaton_label_syntax* label);
+void automaton_indexes_syntax_destroy(automaton_indexes_syntax* indexes);
+void automaton_index_syntax_destroy(automaton_index_syntax* index);
+void automaton_fluent_syntax_destroy(automaton_fluent_syntax* fluent);
+void automaton_set_syntax_destroy(automaton_set_syntax* set);
+void automaton_set_def_syntax_destroy(automaton_set_def_syntax* set_def);
+void automaton_expression_syntax_destroy(automaton_expression_syntax* expr);
+
 automaton_expression_syntax* automaton_expression_syntax_create(automaton_expression_type_syntax type, automaton_expression_syntax* first
 		, automaton_expression_syntax* second, char* string_terminal, int32_t integer_terminal, automaton_expression_operator_syntax op);
 automaton_set_syntax* automaton_set_syntax_create(bool is_ident, uint32_t count, uint32_t* labels_count,

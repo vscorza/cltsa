@@ -1,11 +1,6 @@
 #include "parser_utils.h"
 #include "assert.h"
-void aut_dupstr(char** dst, char* src){
-	if(src != NULL){
-		*dst = malloc(strlen(src) + 1);
-		strcpy(*dst, src);
-	}else{*dst = NULL;}
-}
+
 automaton_expression_syntax* automaton_expression_syntax_create(automaton_expression_type_syntax type, automaton_expression_syntax* first
 		, automaton_expression_syntax* second, char* string_terminal, int32_t integer_terminal, automaton_expression_operator_syntax op){
 	automaton_expression_syntax* expr	= malloc(sizeof(automaton_expression_syntax));
@@ -339,4 +334,139 @@ automaton_statement_syntax* automaton_statement_syntax_create(automaton_statemen
 	statement->fluent_def		= fluent_def;
 	statement->set_def			= set_def;
 	return statement;
+}
+
+void automaton_program_syntax_destroy(automaton_program_syntax* program){
+	uint32_t i;
+	for(i = 0; i < program->count; i++)	automaton_statement_syntax_destroy(program->statements[i]);
+	free(program->statements);
+	free(program);
+}
+void automaton_statement_syntax_destroy(automaton_statement_syntax* statement){
+	switch (statement->type){
+	case IMPORT_AUT: break;
+	case MENU_AUT: break;
+	case CONST_AUT: automaton_expression_syntax_destroy(statement->const_def);break;
+	case RANGE_AUT: automaton_expression_syntax_destroy(statement->range_def);break;
+	case FLUENT_AUT: automaton_fluent_syntax_destroy(statement->fluent_def); break;
+	case ASSERTION_AUT: break;
+	case SET_AUT: automaton_set_def_syntax_destroy(statement->set_def);break;
+	case COMPOSITION_AUT: automaton_composition_syntax_destroy(statement->composition_def);break;
+	case GOAL_AUT: break;
+	}
+	free(statement);
+}
+void automaton_components_syntax_destroy(automaton_components_syntax* components){
+	uint32_t i;
+	for(i = 0; i < components->count; i++)automaton_component_syntax_destroy(components->components[i]);
+	free(components->components);
+	free(components);
+}
+void automaton_component_syntax_destroy(automaton_component_syntax* component){
+	if(component->ident != NULL)free(component->ident);
+	if(component->index != NULL)automaton_index_syntax_destroy(component->index);
+	if(component->indexes != NULL)automaton_indexes_syntax_destroy(component->indexes);
+	if(component->prefix != NULL)free(component->prefix);
+	free(component);
+}
+void automaton_composition_syntax_destroy(automaton_composition_syntax* composition){
+	uint32_t i;
+	if(composition->name != NULL) free(composition->name);
+	if(composition->components != NULL){
+		for(i = 0; i < composition->count; i++)	automaton_component_syntax_destroy(composition->components[i]);
+		free(composition->components);
+	}else if(composition->states != NULL){
+		for(i = 0; i < composition->count; i++)	automaton_state_syntax_destroy(composition->states[i]);
+		free(composition->states);
+	}
+	free(composition);
+}
+void automaton_states_syntax_destroy(automaton_states_syntax* states){
+	uint32_t i;
+	for(i = 0; i < states->count; i++)automaton_state_syntax_destroy(states->states[i]);
+	free(states->states);
+	free(states);
+}
+void automaton_state_syntax_destroy(automaton_state_syntax* state){
+	if(state->label != NULL)		automaton_state_label_syntax_destroy(state->label);
+	if(state->ref != NULL)		automaton_state_label_syntax_destroy(state->ref);
+	uint32_t i;
+	for(i = 0; i < state->transitions_count; i++)automaton_transition_syntax_destroy(state->transitions[i]);
+	if(state->transitions != NULL)		free(state->transitions);
+	free(state);
+}
+void automaton_state_label_syntax_destroy(automaton_state_label_syntax* state_label){
+	if(state_label->name != NULL) free(state_label->name);
+	if(state_label->indexes != NULL) automaton_indexes_syntax_destroy(state_label->indexes);
+	free(state_label);
+}
+void automaton_transitions_syntax_destroy(automaton_transitions_syntax* transitions){
+	uint32_t i;
+	for(i = 0; i < transitions->count; i++)automaton_transition_syntax_destroy(transitions->transitions[i]);
+	free(transitions->transitions);
+	free(transitions);
+}
+void automaton_transition_syntax_destroy(automaton_transition_syntax* transition){
+	uint32_t i;
+	if(transition->condition != NULL)automaton_expression_syntax_destroy(transition->condition);
+	for(i = 0; i < transition->count; i++)automaton_trace_label_syntax_destroy(transition->labels[i]);
+	free(transition->labels);
+	if(transition->to_state != NULL)automaton_state_label_syntax_destroy(transition->to_state);
+	free(transition);
+}
+void automaton_trace_label_syntax_destroy(automaton_trace_label_syntax* trace_label){
+	uint32_t i;
+	for(i = 0; i < trace_label->count;i++)automaton_trace_label_atom_syntax_destroy(trace_label->atoms[i]);
+	free(trace_label->atoms);
+	free(trace_label);
+}
+void automaton_trace_label_atom_syntax_destroy(automaton_trace_label_atom_syntax* trace_label_atom){
+	if(trace_label_atom->label != NULL)automaton_label_syntax_destroy(trace_label_atom->label);
+	if(trace_label_atom->indexes != NULL)automaton_indexes_syntax_destroy(trace_label_atom->indexes);
+	free(trace_label_atom);
+}
+void automaton_label_syntax_destroy(automaton_label_syntax* label){
+	if(label->string_terminal != NULL)free(label->string_terminal);
+	if(label->set != NULL)automaton_set_syntax_destroy(label->set);
+	free(label);
+}
+void automaton_indexes_syntax_destroy(automaton_indexes_syntax* indexes){
+	uint32_t i;
+	for(i = 0; i < indexes->count; i++) automaton_index_syntax_destroy(indexes->indexes[i]);
+	free(indexes->indexes);
+	free(indexes);
+}
+void automaton_index_syntax_destroy(automaton_index_syntax* index){
+	if(index->expr != NULL)automaton_expression_syntax_destroy(index->expr);
+	if(index->lower_ident != NULL)free(index->lower_ident);
+	if(index->upper_ident != NULL)free(index->upper_ident);
+	free(index);
+}
+void automaton_fluent_syntax_destroy(automaton_fluent_syntax* fluent){
+	if(fluent->name != NULL) free(fluent->name);
+	if(fluent->initiating_set != NULL)automaton_set_syntax_destroy(fluent->initiating_set);
+	if(fluent->finishing_set != NULL)automaton_set_syntax_destroy(fluent->finishing_set);
+	free(fluent);
+}
+void automaton_set_syntax_destroy(automaton_set_syntax* set){
+	if(set->string_terminal != NULL) free(set->string_terminal);
+	uint32_t i,j;
+	for(i = 0; i < set->count; i++){
+		for(j = 0; j < set->labels_count[i]; j++)automaton_label_syntax_destroy(set->labels[i][j]);
+		free(set->labels[i]);
+	}
+	free(set->labels);
+	free(set);
+}
+void automaton_set_def_syntax_destroy(automaton_set_def_syntax* set_def){
+	if(set_def->name != NULL)free(set_def->name);
+	if(set_def->set != NULL)automaton_set_syntax_destroy(set_def->set);
+	free(set_def);
+}
+void automaton_expression_syntax_destroy(automaton_expression_syntax* expr){
+	if(expr->first != NULL)automaton_expression_syntax_destroy(expr->first);
+	if(expr->second != NULL)automaton_expression_syntax_destroy(expr->second);
+	if(expr->string_terminal != NULL)free(expr->string_terminal);
+	free(expr);
+
 }
