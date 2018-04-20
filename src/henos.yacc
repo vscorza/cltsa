@@ -331,6 +331,6 @@ ltlExp2:
 	;
 	*/
 %%
- int main (void) {return yyparse ( );}
+ //int main (void) {return yyparse ( );}
 
  void yyerror (char *s) {fprintf (stderr, "%s\n", s);}
