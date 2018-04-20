@@ -5,7 +5,28 @@
 #include <unistd.h>
 #include "automaton.h"
 
+typedef struct yy_buffer_state * YY_BUFFER_STATE;
+extern int yyparse();
+extern YY_BUFFER_STATE yy_scan_string(char * str);
+extern void yy_delete_buffer(YY_BUFFER_STATE buffer);
+extern FILE* yyin;
+
 char* automataFile  =  "automata.txt";
+
+char* parse_test_file	= "test1.fsp";
+
+void run_parse_tests(){
+	FILE *fd;
+    if (!(yyin = fopen(parse_test_file, "r")))
+    {
+        perror("Error: ");
+    }
+	yyparse();
+	automaton_program_syntax* program	= yylval.program;
+    printf("\n\n%d\n\n\n", program->count);
+    automaton_program_syntax_destroy(program);
+    fclose(yyin);
+}
 
 void run_tree_tests(){
 	automaton_composite_tree* tree	= automaton_composite_tree_create(3);
@@ -92,7 +113,8 @@ void run_tests(){
 
 int main (void){
 	//run_tree_tests();
-	run_tests();
+	//run_tests();
+	run_parse_tests();
 	int save_out = dup(1);
 	remove(automataFile);
 	int pFile = open(automataFile, O_RDWR|O_CREAT|O_APPEND, 0600);

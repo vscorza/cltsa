@@ -57,7 +57,7 @@ int yydebug=5;
 %type<program>				program statements		
 %%
 program:
-	statements								{$$ = $1;exit(1);}
+	statements								{$$ = $1;}
 	;
 statements:
 	statement statements					{$$ = automaton_program_syntax_add_statement($2, $1);}
