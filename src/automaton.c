@@ -964,7 +964,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 	automaton_transition** pending_asynch	= malloc(sizeof(automaton_transition*) * max_degree_sum);
 	uint32_t pending_asynch_count			= 0;
 	uint32_t*	partial_states			= malloc(sizeof(uint32_t) * automata_count * max_degree_sum);
-	uint32_t*	partial_set_states		= malloc(sizeof(bool) * automata_count * max_degree_sum);
+	bool*	partial_set_states		= malloc(sizeof(bool) * automata_count * max_degree_sum);
 	automaton_transition** pending		= malloc(sizeof(automaton_transition*) * max_degree_sum);
 	uint32_t pending_count				= 0;
 	uint32_t*	processed_partial_states= malloc(sizeof(uint32_t) * automata_count * max_degree_sum);
