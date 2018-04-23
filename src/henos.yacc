@@ -5,6 +5,7 @@ int yylex(void);
 void yyerror(char *);
 int sym[26];
 int yydebug=5;
+automaton_program_syntax* parsed_program = NULL;
 %}
 %union{
 	char* 							text;
@@ -57,7 +58,7 @@ int yydebug=5;
 %type<program>				program statements		
 %%
 program:
-	statements								{$$ = $1;}
+	statements								{parsed_program = $1; $$ = $1;}
 	;
 statements:
 	statement statements					{$$ = automaton_program_syntax_add_statement($2, $1);}
@@ -123,7 +124,7 @@ menu:
 indexes:
 	indexes index							{$$ = automaton_indexes_syntax_add_index($1, $2);}
 	|index									{$$ = automaton_indexes_syntax_create($1);}
-	|										{}
+	|										{$$ = NULL;}
 	;
 index:
 	'[' exp ']'								{$$ = automaton_index_syntax_create(true, false, $2, NULL, NULL);}
@@ -185,7 +186,7 @@ ltsTransition:
 	;
 ltsTransitionPrefix:
 	"when" '(' exp ')'						{$$ = $3;}
-	|										{}
+	|										{$$ = NULL;}
 	;
 ltsTrace:
 	ltsTraceLabel							{$$ = automaton_transition_syntax_create_from_trace($1);}

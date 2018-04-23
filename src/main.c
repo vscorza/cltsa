@@ -10,6 +10,7 @@ extern int yyparse();
 extern YY_BUFFER_STATE yy_scan_string(char * str);
 extern void yy_delete_buffer(YY_BUFFER_STATE buffer);
 extern FILE* yyin;
+extern automaton_program_syntax* parsed_program;
 
 char* automataFile  =  "automata.txt";
 
@@ -22,9 +23,8 @@ void run_parse_tests(){
         perror("Error: ");
     }
 	yyparse();
-	automaton_program_syntax* program	= yylval.program;
-    printf("\n\n%d\n\n\n", program->count);
-    automaton_program_syntax_destroy(program);
+    printf("\n\n%d\n\n\n", parsed_program->count);
+    automaton_program_syntax_destroy(parsed_program);
     fclose(yyin);
 }
 
