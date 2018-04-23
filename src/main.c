@@ -115,6 +115,7 @@ int main (void){
 	//run_tree_tests();
 	//run_tests();
 	run_parse_tests();
+/*
 	int save_out = dup(1);
 	remove(automataFile);
 	int pFile = open(automataFile, O_RDWR|O_CREAT|O_APPEND, 0600);
@@ -123,6 +124,7 @@ int main (void){
 	fflush(stdout);
 	close( pFile );
 	dup2(save_out, 1);
+	*/
 	return 0;    
 }
 
