@@ -1,0 +1,1 @@
+A=(in->hidden->A).B=(hidden->out->B).||C=(A||B).
