@@ -243,16 +243,109 @@ int32_t automaton_expression_syntax_evaluate(automaton_parsing_tables* tables, a
 	return valuation;
 }
 
+char** automaton_set_syntax_evaluate(automaton_parsing_tables* tables, automaton_set_def_syntax* set_def, int32_t *size){
+	return NULL;
+}
+
+automaton_alphabet* automaton_parsing_tables_get_global_alphabet(automaton_parsing_tables* tables){
+	automaton_alphabet* global_alphabet	= automaton_alphabet_create();
+	int32_t global_index		= automaton_parsing_tables_get_entry_index(tables, SET_ENTRY_AUT, GLOBAL_ALPHABET_NAME_AUT);
+	int32_t controllable_index	= automaton_parsing_tables_get_entry_index(tables, SET_ENTRY_AUT, CONTROLLABLE_ALPHABET_NAME_AUT);
+	if(global_index < 0)
+		return NULL;
+	if(controllable_index < 0)
+		return NULL;
+	int32_t i, j;
+	int32_t global_count;
+	int32_t controllable_count;
+	char** global_values		= automaton_set_syntax_evaluate(tables, (automaton_set_def_syntax*)(tables->set_entries[global_index]->value)
+			, &global_count);
+	char** controllable_values	= automaton_set_syntax_evaluate(tables, (automaton_set_def_syntax*)(tables->set_entries[controllable_index]->value)
+			, &controllable_count);
+
+	bool is_controllable;
+
+	for(i = 0; i < global_count; i++){
+		is_controllable	= false;
+		for(j = 0; j < controllable_count; j++){
+			if(strcmp(global_values[i], controllable_values[j]) == 0){
+				is_controllable	= true;
+				break;
+			}
+		}
+		automaton_alphabet_add_signal_event(global_alphabet, automaton_signal_event_create(global_values[i], is_controllable? OUTPUT_SIG : INPUT_SIG));
+	}
+
+	for(i = 0; i < global_count; i++)
+		free(global_values[i]);
+	free(global_values);
+	for(i = 0; i < controllable_count; i++)
+			free(controllable_values[i]);
+		free(controllable_values);
+
+	return global_alphabet;
+}
+/*
+typedef struct automaton_component_syntax_str{
+	char* ident;	char* prefix;
+	automaton_index_syntax* index;	automaton_indexes_syntax* indexes;
+}automaton_component_syntax;
+typedef struct automaton_components_syntax_str{
+	uint32_t count;	struct automaton_component_syntax_str** components;
+}automaton_components_syntax;
+typedef struct automaton_composition_syntax_str{
+	char* name;	uint32_t count; 	struct automaton_state_syntax_str** states;
+	struct automaton_component_syntax_str** components;
+}automaton_composition_syntax;
+typedef struct automata_context_str{
+	char*				name;	automaton_alphabet*	global_alphabet;
+	uint32_t			global_fluents_count;	automaton_fluent*	global_fluents;
+} automaton_automata_context;
+typedef struct automaton_str{
+	char*					name;
+	automaton_automata_context*		context;	uint32_t				local_alphabet_count;
+	uint32_t*				local_alphabet;	uint32_t				states_count;
+	uint32_t				transitions_size;	uint32_t				transitions_count;
+	uint32_t				max_out_degree;	uint32_t*				out_degree;
+	automaton_transition**	transitions;			// S -> list of transitions (s,s')
+	uint32_t*				in_degree;	automaton_transition**	inverted_transitions;
+	uint32_t				initial_states_count;	uint32_t*				initial_states;
+	uint32_t				valuations_size;	uint32_t				valuations_count;
+	automaton_valuation*	valuations;
+} automaton_automaton;
+*/
+bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, automaton_composition_syntax* composition_syntax
+		, automaton_parsing_tables* tables){
+	//check whether composition syntax is a composition or a single automaton description
+	if(composition_syntax->components != NULL){
+
+	}else{
+		//automaton_automaton_create(name, ctx, local_alphabet_count, local_alphabet))
+	}
+	return true;
+}
+
 automaton_automata_context* automaton_automata_context_create_from_syntax(automaton_program_syntax* program, char* ctx_name){
 	automaton_parsing_tables* tables	= automaton_parsing_tables_create();
-	automaton_automata_context* ctx	= malloc(sizeof(automaton_automata_context));
+	automaton_automata_context* ctx		= malloc(sizeof(automaton_automata_context));
 	aut_dupstr(&(ctx->name), ctx_name);
-
+	//build look up tables
 	uint32_t i;
 	for(i = 0; i < program->count; i++){
 		automaton_statement_syntax_to_table(program->statements[i], tables);
 	}
-
+	//get global alphabet
+	ctx->global_alphabet	= automaton_parsing_tables_get_global_alphabet(tables);
+	//build automata
+	bool pending_automata	= true;
+	while(pending_automata){
+		pending_automata	= false;
+		for(i = 0; i < program->count; i++){
+			if(program->statements[i]->type == COMPOSITION_AUT)
+				pending_automata = pending_automata || automaton_statement_syntax_to_automaton(ctx, program->statements[i]->composition_def, tables);
+		}
+	}
+	automaton_alphabet* global_alphabet	= automaton_parsing_tables_get_global_alphabet(tables);
 	automaton_parsing_tables_destroy(tables);
 	return ctx;
 }
