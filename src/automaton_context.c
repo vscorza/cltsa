@@ -33,7 +33,7 @@ automaton_parsing_table_entry* automaton_parsing_table_entry_create(automaton_pa
 	entry->value	= value;
 	entry->index	= index;
 	entry->solved	= false;
-	entry->valuation= 0;
+	entry->valuation.int_value = 0;
 	return entry;
 }
 void automaton_parsing_table_entry_destroy(automaton_parsing_table_entry* entry){
@@ -230,21 +230,81 @@ int32_t automaton_expression_syntax_evaluate(automaton_parsing_tables* tables, a
 		if(!ref_entry->solved){
 			automaton_expression_syntax_evaluate(tables, (automaton_expression_syntax*)ref_entry->value);
 		}
-		valuation = ref_entry->valuation;
+		valuation = ref_entry->valuation.int_value;
 		break;
 	default:exit(-1);break;
 	}
 	if(expr->type == CONST_TYPE_AUT){
 		if(index >= 0){
 			tables->const_entries[index]->solved = true;
-			tables->const_entries[index]->valuation = valuation;
+			tables->const_entries[index]->valuation.int_value	= valuation;
+			tables->const_entries[index]->valuation_count	 	= 0;
 		}
 	}
 	return valuation;
 }
-
-char** automaton_set_syntax_evaluate(automaton_parsing_tables* tables, automaton_set_def_syntax* set_def, int32_t *size){
-	return NULL;
+/*
+typedef struct automaton_label_syntax_str{
+	bool	is_set;
+	struct automaton_set_syntax_str* set;
+	char* string_terminal;
+}automaton_label_syntax;
+typedef struct automaton_set_syntax_str{
+	bool is_ident;
+	uint32_t count;
+	uint32_t* labels_count;
+	struct automaton_label_syntax_str*** labels;
+	char* string_terminal;
+}automaton_set_syntax;
+typedef struct automaton_set_def_syntax_str{
+	struct automaton_set_syntax_str* set;
+	char* name;
+}automaton_set_def_syntax;
+*/
+char** automaton_set_syntax_evaluate(automaton_parsing_tables* tables, automaton_set_syntax* set, int32_t *count){
+	int32_t index;
+	uint32_t i, j;
+	char* current_entry;
+	char** ret_value			= NULL;
+	int32_t inner_count			= 0;
+	char** inner_value			= NULL;
+	bool is_set;
+	index						= automaton_parsing_tables_get_entry_index(tables, SET_ENTRY_AUT, set->string_terminal);
+	if(tables->set_entries[index]->solved)
+		return tables->set_entries[index]->valuation.labels_value;
+	//search until proper set def is found
+	while(set->is_ident){
+		index	= automaton_parsing_tables_get_entry_index(tables, SET_ENTRY_AUT, set->string_terminal);
+		set		= ((automaton_set_def_syntax*)tables->set_entries[index]->value)->set;
+	}
+	if(tables->set_entries[index]->solved)
+		return tables->set_entries[index]->valuation.labels_value;
+	//if proper set was not solved try to solve it
+	for(i = 0; i < set->count; i++)for(j = 0; j < set->labels_count[i]; j++){
+		is_set		= set->labels[i][j]->is_set;
+		if(!is_set){
+			current_entry	= set->labels[i][j]->string_terminal;
+			while(set->is_ident){
+				index	= automaton_parsing_tables_get_entry_index(tables, SET_ENTRY_AUT, set->string_terminal);
+				set		= ((automaton_set_def_syntax*)tables->set_entries[index]->value)->set;
+			}
+			if(!tables->set_entries[index]->solved){
+				inner_value	= automaton_set_syntax_evaluate(tables, set, &inner_count);
+			}else{
+				inner_count	= tables->set_entries[index]->valuation_count;
+				inner_value	= tables->set_entries[index]->valuation.labels_value;
+			}
+			aut_merge_string_lists(&ret_value, count, inner_value, inner_count, true, false);
+		}else{
+			//TODO:parse current set and merge
+			aut_merge_string_lists(&ret_value, count, &(set->labels[i][j]->string_terminal), 1, true, false);
+		}
+	}
+	//once solved, update set_def_entry
+	tables->set_entries[index]->solved	= true;
+	tables->const_entries[index]->valuation_count	 	= *count;
+	tables->set_entries[index]->valuation.labels_value	= ret_value;
+	return ret_value;
 }
 
 automaton_alphabet* automaton_parsing_tables_get_global_alphabet(automaton_parsing_tables* tables){
@@ -258,9 +318,9 @@ automaton_alphabet* automaton_parsing_tables_get_global_alphabet(automaton_parsi
 	int32_t i, j;
 	int32_t global_count;
 	int32_t controllable_count;
-	char** global_values		= automaton_set_syntax_evaluate(tables, (automaton_set_def_syntax*)(tables->set_entries[global_index]->value)
+	char** global_values		= automaton_set_syntax_evaluate(tables, ((automaton_set_def_syntax*)tables->set_entries[global_index]->value)->set
 			, &global_count);
-	char** controllable_values	= automaton_set_syntax_evaluate(tables, (automaton_set_def_syntax*)(tables->set_entries[controllable_index]->value)
+	char** controllable_values	= automaton_set_syntax_evaluate(tables, ((automaton_set_def_syntax*)tables->set_entries[controllable_index]->value)->set
 			, &controllable_count);
 
 	bool is_controllable;
