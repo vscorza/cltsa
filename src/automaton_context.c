@@ -243,24 +243,6 @@ int32_t automaton_expression_syntax_evaluate(automaton_parsing_tables* tables, a
 	}
 	return valuation;
 }
-/*
-typedef struct automaton_label_syntax_str{
-	bool	is_set;
-	struct automaton_set_syntax_str* set;
-	char* string_terminal;
-}automaton_label_syntax;
-typedef struct automaton_set_syntax_str{
-	bool is_ident;
-	uint32_t count;
-	uint32_t* labels_count;
-	struct automaton_label_syntax_str*** labels;
-	char* string_terminal;
-}automaton_set_syntax;
-typedef struct automaton_set_def_syntax_str{
-	struct automaton_set_syntax_str* set;
-	char* name;
-}automaton_set_def_syntax;
-*/
 char** automaton_set_syntax_evaluate(automaton_parsing_tables* tables, automaton_set_syntax* set, int32_t *count){
 	int32_t index;
 	uint32_t i, j;
@@ -270,8 +252,7 @@ char** automaton_set_syntax_evaluate(automaton_parsing_tables* tables, automaton
 	char** inner_value			= NULL;
 	bool is_set;
 	index						= automaton_parsing_tables_get_entry_index(tables, SET_ENTRY_AUT, set->string_terminal);
-	if(tables->set_entries[index]->solved)
-		return tables->set_entries[index]->valuation.labels_value;
+	if(index > 0)if(tables->set_entries[index]->solved)	return tables->set_entries[index]->valuation.labels_value;
 	//search until proper set def is found
 	while(set->is_ident){
 		index	= automaton_parsing_tables_get_entry_index(tables, SET_ENTRY_AUT, set->string_terminal);
@@ -296,7 +277,6 @@ char** automaton_set_syntax_evaluate(automaton_parsing_tables* tables, automaton
 			}
 			aut_merge_string_lists(&ret_value, count, inner_value, inner_count, true, false);
 		}else{
-			//TODO:parse current set and merge
 			aut_merge_string_lists(&ret_value, count, &(set->labels[i][j]->string_terminal), 1, true, false);
 		}
 	}
@@ -345,42 +325,142 @@ automaton_alphabet* automaton_parsing_tables_get_global_alphabet(automaton_parsi
 
 	return global_alphabet;
 }
-/*
-typedef struct automaton_component_syntax_str{
-	char* ident;	char* prefix;
-	automaton_index_syntax* index;	automaton_indexes_syntax* indexes;
-}automaton_component_syntax;
-typedef struct automaton_components_syntax_str{
-	uint32_t count;	struct automaton_component_syntax_str** components;
-}automaton_components_syntax;
-typedef struct automaton_composition_syntax_str{
-	char* name;	uint32_t count; 	struct automaton_state_syntax_str** states;
-	struct automaton_component_syntax_str** components;
-}automaton_composition_syntax;
-typedef struct automata_context_str{
-	char*				name;	automaton_alphabet*	global_alphabet;
-	uint32_t			global_fluents_count;	automaton_fluent*	global_fluents;
-} automaton_automata_context;
-typedef struct automaton_str{
-	char*					name;
-	automaton_automata_context*		context;	uint32_t				local_alphabet_count;
-	uint32_t*				local_alphabet;	uint32_t				states_count;
-	uint32_t				transitions_size;	uint32_t				transitions_count;
-	uint32_t				max_out_degree;	uint32_t*				out_degree;
-	automaton_transition**	transitions;			// S -> list of transitions (s,s')
-	uint32_t*				in_degree;	automaton_transition**	inverted_transitions;
-	uint32_t				initial_states_count;	uint32_t*				initial_states;
-	uint32_t				valuations_size;	uint32_t				valuations_count;
-	automaton_valuation*	valuations;
-} automaton_automaton;
-*/
 bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, automaton_composition_syntax* composition_syntax
 		, automaton_parsing_tables* tables){
+	int32_t main_index, index, i, j, k, l, m, n;
+	main_index						= automaton_parsing_tables_get_entry_index(tables, COMPOSITION_ENTRY_AUT, composition_syntax->name);
+	if(main_index > 0)if(tables->composition_entries[main_index]->solved)	return false;	
 	//check whether composition syntax is a composition or a single automaton description
-	if(composition_syntax->components != NULL){
-
-	}else{
-		//automaton_automaton_create(name, ctx, local_alphabet_count, local_alphabet))
+	if(composition_syntax->components != NULL){//MULTIPLE COMPONENTS (AUTOMATA)
+		//if one component has not been solved then report pending automata
+		for(i = 0; i < (int32_t)composition_syntax->count; i++){
+			index						= automaton_parsing_tables_get_entry_index(tables, COMPOSITION_ENTRY_AUT, composition_syntax->components[i]->ident);
+			if(index < 0) return true; if(!tables->composition_entries[index]->solved) return true;
+		}
+		//build composition and add to table
+		automaton_automaton** automata	= malloc(sizeof(automaton_automaton*) * composition_syntax->count);
+		for(i = 0; i < (int32_t)composition_syntax->count; i++){
+			//TODO: update transitions with prefixes/indexes
+			index						= automaton_parsing_tables_get_entry_index(tables, COMPOSITION_ENTRY_AUT, composition_syntax->components[i]->ident);
+			automata[i]					= tables->composition_entries[index]->valuation.automaton_value;
+		}
+		automaton_automaton* automaton	= automaton_automata_compose(automata, composition_syntax->count, SYNCHRONOUS);
+		tables->composition_entries[main_index]->solved	= true;
+		tables->composition_entries[main_index]->valuation_count			= 1;
+		tables->composition_entries[main_index]->valuation.automaton_value	= automaton;
+		free(automata);
+		return false;
+	}else{//SINGLE COMPONENT (AUTOMATON)
+		//build local alphabet
+		uint32_t	local_alphabet_count	= 0;
+		int32_t		element_global_index;
+		int32_t		element_position;
+		uint32_t*	local_alphabet		= NULL;
+		automaton_state_syntax* state;
+		automaton_transition_syntax* transition;
+		automaton_trace_label_syntax* trace_label;
+		automaton_trace_label_atom_syntax* trace_label_atom;
+		automaton_label_syntax* atom_label;
+		for(i = 0; i < (int32_t)composition_syntax->count; i++){
+			state	= composition_syntax->states[i];
+			for(j = 0; j < (int32_t)state->transitions_count; j++){
+				transition	= state->transitions[j];
+				//TODO: take indexes and guard into consideration
+				for(k = 0; k < (int32_t)transition->count; k++){
+					trace_label	= transition->labels[k];
+					for(l = 0; l < (int32_t)trace_label->count; l++){
+						trace_label_atom	= trace_label->atoms[l];
+						//TODO: take indexes into computation
+						atom_label			= trace_label_atom->label;
+						element_global_index= -1;
+						element_position	= 0;
+						for(m = 0; m < (int32_t)ctx->global_alphabet->count; m++){
+							if(strcmp(ctx->global_alphabet->list[m].name, atom_label->string_terminal) == 0){
+								element_global_index = m;
+								break;
+							}
+						}
+						if(element_global_index == -1){
+							//TODO: report local element not found
+							exit(-1);
+						}
+						for(m = 0; m < (int32_t)local_alphabet_count; m++){
+							if(local_alphabet[m] == (uint32_t)element_global_index){
+								element_position	= -1;
+								break;
+							}
+							if(local_alphabet[m] > (uint32_t)element_global_index){
+								element_position	= m;
+								break;
+							}
+						}
+						if(element_position >= 0){
+							uint32_t* new_alphabet	= malloc(sizeof(uint32_t) * (local_alphabet_count + 1));
+							for(m = 0; m < (int32_t)local_alphabet_count; m++){
+								if(m < element_position)
+									new_alphabet[m]	= local_alphabet[m];
+								else
+									new_alphabet[m+1]	= local_alphabet[m];
+							}
+							new_alphabet[element_position]	= (uint32_t)element_global_index; 
+							local_alphabet_count++;
+							if(local_alphabet != NULL) free(local_alphabet);
+							local_alphabet	= new_alphabet;
+						}
+					}
+				}
+			}
+		}
+		automaton_automaton* automaton	= automaton_automaton_create(composition_syntax->name, ctx, local_alphabet_count, local_alphabet);
+		//add transitions
+		//map state label to int
+		char** labels_list	= NULL;
+		int32_t labels_list_count	= 0;
+		int32_t label_position;
+		uint32_t from_state, to_state;
+		//bool aut_push_string_to_list(char*** list, int32_t* list_count, char* element, int32_t* position, bool repeat_values);
+		//int32_t aut_string_list_index_of(char** list, int32_t list_count, char* element);
+		automaton_transition* automaton_transition;
+		for(i = 0; i < (int32_t)composition_syntax->count; i++){
+			state	= composition_syntax->states[i];
+			if(state->ref != NULL){
+				//TODO: solve state refs in automaton				
+				continue;
+			}
+			aut_push_string_to_list(&labels_list, &labels_list_count, state->label->name, &label_position, false);
+			from_state	= (uint32_t) label_position;
+			for(j = 0; j < (int32_t)state->transitions_count; j++){
+				transition	= state->transitions[j];
+				aut_push_string_to_list(&labels_list, &labels_list_count, transition->to_state->name, &label_position, false);
+				to_state	= (uint32_t)label_position;
+				automaton_transition	= automaton_transition_create(from_state, to_state);
+				//TODO: take indexes and guard into consideration
+				for(k = 0; k < (int32_t)transition->count; k++){
+					trace_label	= transition->labels[k];
+					for(l = 0; l < (int32_t)trace_label->count; l++){
+						trace_label_atom	= trace_label->atoms[l];
+						//TODO: take indexes into computation
+						atom_label			= trace_label_atom->label;
+						element_global_index= -1;
+						element_position	= 0;
+						for(m = 0; m < (int32_t)ctx->global_alphabet->count; m++){
+							if(strcmp(ctx->global_alphabet->list[m].name, atom_label->string_terminal) == 0){
+								element_global_index = m;
+								break;
+							}
+						}
+						if(element_global_index >= 0)
+							automaton_transition_add_signal_event(automaton_transition, ctx, &(ctx->global_alphabet->list[element_global_index]));
+					}
+				}
+				automaton_automaton_add_transition(automaton, automaton_transition);
+			}
+		}
+		//set entry in table
+		tables->composition_entries[main_index]->solved	= true;
+		tables->composition_entries[main_index]->valuation_count			= 1;
+		tables->composition_entries[main_index]->valuation.automaton_value	= automaton;
+		return false;
 	}
 	return true;
 }

@@ -35,6 +35,7 @@ typedef struct automaton_parsing_table_entry_str{
 	union{
 		char** labels_value;
 		int32_t int_value;
+		automaton_automaton* automaton_value;
 	}valuation;
 }automaton_parsing_table_entry;
 typedef struct automaton_parsing_tables_str{

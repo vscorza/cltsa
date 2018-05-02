@@ -1,0 +1,13 @@
+TODO:
+
+- prefixes, indexes on sets, states, transitions
+	automaton_context.c -> automaton_statement_syntax_to_automaton -> update transitions with indexes, prefixes when composing (several components)
+						-> automaton_statement_syntax_to_automaton -> ... (single component)
+						-> automaton_set_syntax_evaluate -> (along with yacc file) allow prefixed, indexed elements
+						-> automaton_statement_syntax_to_automaton -> solve state refs in automaton
+- evaluation of expressions with free variables (needs a valuation context)
+- parse assertions, goals
+- parse safety ltl
+- check compatibility with fluents when composing
+- add feedback for errors
+- keep indexes and other information in the automaton structure (concolyc style)

@@ -94,8 +94,52 @@ void aut_merge_string_lists(char*** a, int32_t* a_count, char** b, int32_t b_cou
 		}
 	}
 	for(i = 0; i < *a_count; i++) free((*a)[i]);
-	free(*a);
+	if(*a != NULL)
+		free(*a);
 	*a					= new_list;
 	*a_count			= new_count;
 }
 
+bool aut_push_string_to_list(char*** list, int32_t* list_count, char* element, int32_t* position, bool repeat_values){
+	int32_t i;
+	int32_t a_b_cmp;
+	*position	= -1;
+	for(i = 0; i < list_count; i++){
+		a_b_cmp	= strcmp(*list[i], element);
+		if(a_b_cmp == 0){
+			*position = i;
+			if(!repeat_values){
+				return false;
+			}
+		}else if(a_b_cmp > 0){
+			*position		= i;
+			break;
+		}
+	}
+	if(*position = -1){
+		*position	= *list_count;
+	}
+	int32_t new_count	= *list_count + 1;
+	char** new_list		= malloc(sizeof(char*) * new_count);
+	for(i = 0; i < *list_count; i++){
+		if(i < *position){
+			aut_dupstr(&(new_list[i]), *list[i]);
+		}else{
+			aut_dupstr(&(new_list[i+1]), *list[i]);
+		}
+	}
+	aut_dupstr(&(new_list[*position]), element);
+	for(i = 0; i < *list_count; i++) free((*list)[i]);
+	if(*list != NULL)
+		free(*list);
+	*list					= new_list;
+	*list_count			= new_count;
+	return true;
+}
+
+int32_t aut_string_list_index_of(char** list, int32_t list_count, char* element){
+	int32_t i;
+	for(i = 0; i < list_count; i++)
+		if(strcmp(list[i], element) == 0) return i;
+	return -1;
+}
