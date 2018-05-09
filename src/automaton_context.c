@@ -12,6 +12,7 @@ automaton_parsing_tables* automaton_parsing_tables_create(){
 	tables->set_count	= 0;
 	tables->fluent_count= 0;
 	tables->range_count	= 0;
+	tables->const_count	= 0;
 	tables->automaton_count		= 0;
 	tables->composition_count	= 0;
 	return tables;
@@ -483,7 +484,8 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 		automaton_statement_syntax_to_table(program->statements[i], tables);
 	}
 	//get global alphabet
-	ctx->global_alphabet	= automaton_parsing_tables_get_global_alphabet(tables);
+	ctx->global_alphabet		= automaton_parsing_tables_get_global_alphabet(tables);
+	ctx->global_fluents_count	= 0;
 	//build automata
 	bool pending_automata	= true;
 	while(pending_automata){

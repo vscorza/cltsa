@@ -271,7 +271,7 @@ automaton_states_syntax* automaton_states_syntax_add_state(automaton_states_synt
 }
 automaton_composition_syntax* automaton_composition_syntax_create_from_states(automaton_states_syntax* states){
 	automaton_composition_syntax* composition	= malloc(sizeof(automaton_composition_syntax));
-	composition->name	= NULL;
+	aut_dupstr(&(composition->name), states->states[0]->label->name);
 	composition->components	= NULL;
 	composition->count	= states->count;
 	composition->states	= states->states;

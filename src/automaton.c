@@ -404,6 +404,7 @@ void automaton_automaton_initialize(automaton_automaton* automaton, char* name, 
 	strcpy(automaton->name, name);
 	automaton->context					= ctx;
 	automaton->local_alphabet			= malloc(sizeof(uint32_t) * local_alphabet_count);
+	automaton->local_alphabet_count		= 0;
 	uint32_t i, j, current_entry;
 	int32_t new_index;
 	bool found;

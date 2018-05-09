@@ -35,10 +35,12 @@ void aut_add_incr_ptr_list(void*** list, void* element, uint32_t* size, uint32_t
 void aut_free_ptr_list(void*** list, uint32_t* count){
 	uint32_t i;
 	for(i = 0; i < *count; i++){
-		if(*list[i] != NULL){free(*list[i]); *list[i] = NULL;}
+		if((*list)[i] != NULL){free((*list)[i]); (*list)[i] = NULL;}
 	}
 	*count = 0;
-	free(*list);list = NULL;
+	if(*list != NULL)
+		free(*list);
+	list = NULL;
 }
 void aut_dupstr(char** dst, char* src){
 	if(src != NULL){
@@ -48,12 +50,18 @@ void aut_dupstr(char** dst, char* src){
 }
 
 void aut_merge_string_lists(char*** a, int32_t* a_count, char** b, int32_t b_count, bool ordered, bool repeat_values){
+	if(*a_count == 0 && b_count == 0) return;
 	//a = a+b
 	int32_t diff_count	= 0;
 	int32_t i, j, a_index, b_index, a_b_cmp;
+	bool diff	= true;
 	if(!repeat_values){
-		for(i = 0; i < b_count; i++)for(j = 0; j < *a_count; j++){
-			if(strcmp(*a[j], b[i]) == 0) diff_count++;
+		for(i = 0; i < b_count; i++){
+			diff	= true;
+			for(j = 0; j < *a_count; j++){
+				if(strcmp(*a[j], b[i]) == 0) diff= false;
+			}
+			if(diff)diff_count++;
 		}
 	}else{
 		diff_count		= b_count;
@@ -61,34 +69,40 @@ void aut_merge_string_lists(char*** a, int32_t* a_count, char** b, int32_t b_cou
 	int32_t new_count	= *a_count + diff_count;
 	char** new_list		= malloc(sizeof(char*) * new_count);
 	a_index	= b_index	= 0;
-	if(ordered){
+	if(*a_count == 0){
 		for(i = 0; i < new_count; i++){
-			a_b_cmp		= strcmp(*a[a_index], b[b_index]);
-			if(a_b_cmp < 0){
-				aut_dupstr(&(new_list[i]), *a[a_index++]);
-			}else if(a_b_cmp == 0){
-				aut_dupstr(&(new_list[i]), *a[a_index++]);
-				if(!repeat_values){		
-					b_index++;
-				}
-			}else{
-				aut_dupstr(&(new_list[i]), b[b_index++]);
-			}
+			aut_dupstr(&(new_list[i]), b[b_index++]);
 		}
 	}else{
-		a_index	= 0;
-		for(i = 0; i < *a_count; i++){
-			for(j = 0; j < b_count; j++){
-				a_b_cmp		= strcmp(*a[i], b[j]);
+		if(ordered){
+			for(i = 0; i < new_count; i++){
+				a_b_cmp		= strcmp(*a[a_index], b[b_index]);
 				if(a_b_cmp < 0){
-					aut_dupstr(&(new_list[a_index++]), *a[i]);
+					aut_dupstr(&(new_list[i]), *a[a_index++]);
 				}else if(a_b_cmp == 0){
-					aut_dupstr(&(new_list[a_index++]), *a[i]);
-					if(repeat_values){		
-						aut_dupstr(&(new_list[a_index++]), *a[i]);
+					aut_dupstr(&(new_list[i]), *a[a_index++]);
+					if(!repeat_values){		
+						b_index++;
 					}
 				}else{
-					aut_dupstr(&(new_list[a_index++]), b[j]);
+					aut_dupstr(&(new_list[i]), b[b_index++]);
+				}
+			}
+		}else{
+			a_index	= 0;
+			for(i = 0; i < *a_count; i++){
+				for(j = 0; j < b_count; j++){
+					a_b_cmp		= strcmp(*a[i], b[j]);
+					if(a_b_cmp < 0){
+						aut_dupstr(&(new_list[a_index++]), *a[i]);
+					}else if(a_b_cmp == 0){
+						aut_dupstr(&(new_list[a_index++]), *a[i]);
+						if(repeat_values){		
+							aut_dupstr(&(new_list[a_index++]), *a[i]);
+						}
+					}else{
+						aut_dupstr(&(new_list[a_index++]), b[j]);
+					}
 				}
 			}
 		}
