@@ -1,1 +1,3 @@
+set Global_Alphabet = {a}
+set Controllable_Alphabet = {a}
 A=(a->A).

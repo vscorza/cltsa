@@ -11,8 +11,8 @@
 #include "automaton.h"
 #include "parser_utils.h"
 
-#define GLOBAL_ALPHABET_NAME_AUT		"Global_alphabet"
-#define CONTROLLABLE_ALPHABET_NAME_AUT	"Controllable_alphabet"
+#define GLOBAL_ALPHABET_NAME_AUT		"Global_Alphabet"
+#define CONTROLLABLE_ALPHABET_NAME_AUT	"Controllable_Alphabet"
 /****************
 ==== STRUCTS ====
 */

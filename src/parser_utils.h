@@ -223,4 +223,5 @@ automaton_program_syntax* automaton_program_syntax_add_statement(automaton_progr
 automaton_statement_syntax* automaton_statement_syntax_create(automaton_statement_type_syntax type, automaton_composition_syntax* composition_def,
 		automaton_expression_syntax* range_def, automaton_expression_syntax* const_def, automaton_fluent_syntax* fluent_def,
 		automaton_set_def_syntax* set_def);
+bool automaton_syntax_is_reserved(char* token);
 #endif

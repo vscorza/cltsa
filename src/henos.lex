@@ -19,7 +19,7 @@ number 		0{octalDigit}*|{decDigit}+|{hex}+
 ident 		{lower}{identChars}*
 upperIdent 	{upper}{identChars}*
 string 		\"(\\.|[^"\\])*\"
-
+keyword		set|range|const
 %{
 #include <stdlib.h>
 void yyerror(char*);
@@ -31,6 +31,34 @@ void yyerror(char*);
 <C_COMMENT>\n   { }
 <C_COMMENT>.    { }
 \/\/[^\r\n]*	{ }
+set				{
+					p=(char *)calloc(strlen(yytext)+1,sizeof(char));
+					strcpy(p,yytext);
+					printf("[keyword: <%s>]", yytext);
+					yylval.text=p;
+					return(t_SET);
+				}
+range				{
+					p=(char *)calloc(strlen(yytext)+1,sizeof(char));
+					strcpy(p,yytext);
+					printf("[keyword: <%s>]", yytext);
+					yylval.text=p;
+					return(t_RANGE);
+				}
+const				{
+					p=(char *)calloc(strlen(yytext)+1,sizeof(char));
+					strcpy(p,yytext);
+					printf("[keyword: <%s>]", yytext);
+					yylval.text=p;
+					return(t_CONST);
+				}				
+fluent				{
+					p=(char *)calloc(strlen(yytext)+1,sizeof(char));
+					strcpy(p,yytext);
+					printf("[keyword: <%s>]", yytext);
+					yylval.text=p;
+					return(t_FLUENT);
+				}
 {ident}			{
 					p=(char *)calloc(strlen(yytext)+1,sizeof(char));
 					strcpy(p,yytext);
@@ -57,9 +85,9 @@ void yyerror(char*);
 					yylval.integer = atoi(yytext);
 					return t_INTEGER;
 				}
-[-+()=/*\n]	return *yytext;
-[ \t]	; /*skip whitespace*/
-.		return *yytext;
+[-+()=/*]	{return *yytext;}
+[ \t\n]	; /*skip whitespace*/
+.		{return *yytext;}
 %%
 int yywrap(void){
 	return 1;

@@ -76,11 +76,12 @@ automaton_label_syntax* automaton_label_syntax_create(bool is_set, automaton_set
 }
 automaton_set_syntax* automaton_set_syntax_create_from_label(automaton_label_syntax* label){
 	automaton_set_syntax* set	= malloc(sizeof(automaton_set_syntax));
-	set->is_ident	= false;
+	set->is_ident		= false;
 	set->count			= 1;
 	set->labels_count	= malloc(sizeof(uint32_t) * set->count);
 	set->labels_count[0]= 1;
-	set->labels			= malloc(sizeof(automaton_label_syntax*) * set->count);
+	set->labels			= malloc(sizeof(automaton_label_syntax**) * set->count);
+	set->labels[0]		= malloc(sizeof(automaton_label_syntax*) * set->labels_count[0]);
 	set->labels[0][0]	= label;
 	set->string_terminal= NULL;
 	return set;
@@ -471,5 +472,17 @@ void automaton_expression_syntax_destroy(automaton_expression_syntax* expr){
 	if(expr->second != NULL)automaton_expression_syntax_destroy(expr->second);
 	if(expr->string_terminal != NULL)free(expr->string_terminal);
 	free(expr);
-
+}
+bool automaton_syntax_is_reserved(char* token){
+	uint32_t KEYWORDS_LENGTH	= 3;
+	const char *keywords[KEYWORDS_LENGTH];
+	keywords[0] = "set";
+	keywords[1] = "const";
+	keywords[2] = "range";
+	uint32_t i;
+	for(i = 0; i < KEYWORDS_LENGTH; i++){
+		if(strcmp(keywords[i], token) == 0)
+			return true;
+	}
+	return false;
 }

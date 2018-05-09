@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include "automaton.h"
+#include "automaton_context.h"
 
 typedef struct yy_buffer_state * YY_BUFFER_STATE;
 extern int yyparse();
@@ -24,6 +24,8 @@ void run_parse_tests(){
     }
 	yyparse();
     printf("\n\n%d\n\n\n", parsed_program->count);
+    automaton_automata_context* ctx		= automaton_automata_context_create_from_syntax(parsed_program, "test context");
+    automaton_automata_context_destroy(ctx);
     automaton_program_syntax_destroy(parsed_program);
     fclose(yyin);
 }

@@ -14,7 +14,7 @@ void aut_add_ptr_list(void*** list, void* element, uint32_t* count){
 	if(*count > 0)
 		free(*list);
 	*count	= *count + 1;
-	list	= &new_list;
+	*list	= new_list;
 }
 void aut_add_incr_ptr_list(void*** list, void* element, uint32_t* size, uint32_t* count){
 	if(*count < *size){
@@ -29,7 +29,7 @@ void aut_add_incr_ptr_list(void*** list, void* element, uint32_t* size, uint32_t
 		*count	= *count + 1;
 		*size	= new_size;
 		free(*list);
-		list	= &new_list;
+		*list	= new_list;
 	}
 }
 void aut_free_ptr_list(void*** list, uint32_t* count){
@@ -104,7 +104,7 @@ bool aut_push_string_to_list(char*** list, int32_t* list_count, char* element, i
 	int32_t i;
 	int32_t a_b_cmp;
 	*position	= -1;
-	for(i = 0; i < list_count; i++){
+	for(i = 0; i < *list_count; i++){
 		a_b_cmp	= strcmp(*list[i], element);
 		if(a_b_cmp == 0){
 			*position = i;
@@ -116,7 +116,7 @@ bool aut_push_string_to_list(char*** list, int32_t* list_count, char* element, i
 			break;
 		}
 	}
-	if(*position = -1){
+	if(*position == -1){
 		*position	= *list_count;
 	}
 	int32_t new_count	= *list_count + 1;

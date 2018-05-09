@@ -30,12 +30,12 @@ automaton_program_syntax* parsed_program = NULL;
 	automaton_statement_syntax*		statement;
 	automaton_program_syntax*		program;
 };
-%token	t_INTEGER t_IDENT t_UPPER_IDENT t_STRING
+%token	t_INTEGER t_IDENT t_UPPER_IDENT t_STRING t_CONST t_RANGE t_SET t_FLUENT
 %left '+' '-' ','
 %left '*' '/'
 
 
-%type<text> 				t_STRING t_IDENT t_UPPER_IDENT
+%type<text> 				t_STRING t_IDENT t_UPPER_IDENT t_CONST t_RANGE t_SET t_FLUENT
 %type<integer>				t_INTEGER
 %type<expr>					exp exp2 exp3 exp4 constDef range rangeDef ltsTransitionPrefix
 %type<label>				label concurrentLabel 
@@ -92,7 +92,7 @@ concurrentLabels:
 	|t_IDENT								{$$ = automaton_set_syntax_create_concurrent($1);}
 	;
 setDef:
-	"set" t_UPPER_IDENT '=' setExp			{$$ = automaton_set_def_syntax_create($4, $2);}
+	t_SET t_UPPER_IDENT '=' setExp			{$$ = automaton_set_def_syntax_create($4, $2);}
 	;
 setExp:
 	set										{$$ = $1;}
@@ -109,7 +109,7 @@ set:
 	;
 	*/
 fluentDef:
-	"fluent" t_UPPER_IDENT '=' '<' fluentSet ',' fluentSet '>'	{$$ = automaton_fluent_syntax_create($2, $5, $7);}
+	t_FLUENT t_UPPER_IDENT '=' '<' fluentSet ',' fluentSet '>'	{$$ = automaton_fluent_syntax_create($2, $5, $7);}
 	;
 fluentSet:
 	t_IDENT									{$$ = automaton_set_syntax_create_concurrent($1);}
@@ -132,13 +132,13 @@ index:
 	|'[' t_IDENT ':' range ']'				{$$ = automaton_index_syntax_create(false, true, $4, $2, NULL);}
 	;	
 rangeDef:
-	"range" t_UPPER_IDENT '=' range			{$$ = automaton_expression_syntax_create(RANGE_DEF_TYPE_AUT, $4, NULL, $2, 0, NOP_AUT);}
+	t_RANGE t_UPPER_IDENT '=' range			{$$ = automaton_expression_syntax_create(RANGE_DEF_TYPE_AUT, $4, NULL, $2, 0, NOP_AUT);}
 	;
 range:
 	exp ".." exp							{$$ = automaton_expression_syntax_create(RANGE_TYPE_AUT, $1, $3, NULL, 0, RANGE_OP_AUT);}
 	;
 constDef:
-	"const" t_UPPER_IDENT '=' exp			{$$ = automaton_expression_syntax_create(CONST_TYPE_AUT, $4, NULL, $2, 0, NOP_AUT);}
+	t_CONST t_UPPER_IDENT '=' exp			{$$ = automaton_expression_syntax_create(CONST_TYPE_AUT, $4, NULL, $2, 0, NOP_AUT);}
 	;
 exp:
 	exp2									{$$ = $1;}
