@@ -14,7 +14,7 @@ extern automaton_program_syntax* parsed_program;
 
 char* automataFile  =  "automata.txt";
 
-char* parse_test_file	= "test1.fsp";
+char* parse_test_file	= "test2.fsp";
 
 void run_parse_tests(){
 	FILE *fd;
@@ -25,6 +25,7 @@ void run_parse_tests(){
 	yyparse();
     printf("\n\n%d\n\n\n", parsed_program->count);
     automaton_automata_context* ctx		= automaton_automata_context_create_from_syntax(parsed_program, "test context");
+
     automaton_automata_context_destroy(ctx);
     automaton_program_syntax_destroy(parsed_program);
     fclose(yyin);

@@ -1,1 +1,3 @@
+set Global_Alphabet = {in,hidden,out}
+set Controllable_Alphabet = {out}
 A=(in->hidden->A).B=(hidden->out->B).||C=(A||B).

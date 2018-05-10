@@ -244,7 +244,7 @@ int32_t automaton_expression_syntax_evaluate(automaton_parsing_tables* tables, a
 	}
 	return valuation;
 }
-char** automaton_set_syntax_evaluate(automaton_parsing_tables* tables, automaton_set_syntax* set, int32_t *count){
+char** automaton_set_syntax_evaluate(automaton_parsing_tables* tables, automaton_set_syntax* set, int32_t *count, char* set_def_key){
 	int32_t index = -1;
 	uint32_t i, j;
 	char* current_entry;
@@ -266,6 +266,7 @@ char** automaton_set_syntax_evaluate(automaton_parsing_tables* tables, automaton
 			return tables->set_entries[index]->valuation.labels_value;
 	}
 	//if proper set was not solved try to solve it
+	index						= automaton_parsing_tables_get_entry_index(tables, SET_ENTRY_AUT, set_def_key);
 	for(i = 0; i < set->count; i++)for(j = 0; j < set->labels_count[i]; j++){
 		automaton_label_syntax* label_syntax	= set->labels[i][j];
 		is_set		= set->labels[i][j]->is_set;
@@ -279,7 +280,7 @@ char** automaton_set_syntax_evaluate(automaton_parsing_tables* tables, automaton
 				set		= ((automaton_set_def_syntax*)tables->set_entries[index]->value)->set;
 			}
 			if(!tables->set_entries[index]->solved){
-				inner_value	= automaton_set_syntax_evaluate(tables, set, &inner_count);
+				inner_value	= automaton_set_syntax_evaluate(tables, set, &inner_count, ((automaton_set_def_syntax*)tables->set_entries[index]->value)->name);
 			}else{
 				inner_count	= tables->set_entries[index]->valuation_count;
 				inner_value	= tables->set_entries[index]->valuation.labels_value;
@@ -290,7 +291,7 @@ char** automaton_set_syntax_evaluate(automaton_parsing_tables* tables, automaton
 	//once solved, update set_def_entry
 	if(index >= 0){
 		tables->set_entries[index]->solved	= true;
-		tables->const_entries[index]->valuation_count	 	= *count;
+		tables->set_entries[index]->valuation_count	 	= *count;
 		tables->set_entries[index]->valuation.labels_value	= ret_value;
 	}
 	return ret_value;
@@ -308,9 +309,9 @@ automaton_alphabet* automaton_parsing_tables_get_global_alphabet(automaton_parsi
 	int32_t global_count = 0;
 	int32_t controllable_count = 0;
 	char** global_values		= automaton_set_syntax_evaluate(tables, ((automaton_set_def_syntax*)tables->set_entries[global_index]->value)->set
-			, &global_count);
+			, &global_count, ((automaton_set_def_syntax*)tables->set_entries[global_index]->value)->name);
 	char** controllable_values	= automaton_set_syntax_evaluate(tables, ((automaton_set_def_syntax*)tables->set_entries[controllable_index]->value)->set
-			, &controllable_count);
+			, &controllable_count, ((automaton_set_def_syntax*)tables->set_entries[controllable_index]->value)->name);
 
 	bool is_controllable;
 
@@ -426,10 +427,13 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 		char** labels_list	= NULL;
 		int32_t labels_list_count	= 0;
 		int32_t label_position;
-		uint32_t from_state, to_state;
+		uint32_t from_state, to_state, current_from_state;
 		//bool aut_push_string_to_list(char*** list, int32_t* list_count, char* element, int32_t* position, bool repeat_values);
 		//int32_t aut_string_list_index_of(char** list, int32_t list_count, char* element);
 		automaton_transition* automaton_transition;
+		uint32_t first_state;
+		bool first_state_set	= false;
+		uint32_t added_state	= composition_syntax->count + 1;
 		for(i = 0; i < (int32_t)composition_syntax->count; i++){
 			state	= composition_syntax->states[i];
 			if(state->ref != NULL){
@@ -437,14 +441,25 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 				continue;
 			}
 			aut_push_string_to_list(&labels_list, &labels_list_count, state->label->name, &label_position, false);
-			from_state	= (uint32_t) label_position;
+			current_from_state	= from_state	= (uint32_t) label_position;
+			if(!first_state_set){
+				automaton_automaton_add_initial_state(automaton, from_state);
+				first_state_set	= true;
+			}
 			for(j = 0; j < (int32_t)state->transitions_count; j++){
+				current_from_state	= from_state;
 				transition	= state->transitions[j];
 				aut_push_string_to_list(&labels_list, &labels_list_count, transition->to_state->name, &label_position, false);
 				to_state	= (uint32_t)label_position;
-				automaton_transition	= automaton_transition_create(from_state, to_state);
 				//TODO: take indexes and guard into consideration
 				for(k = 0; k < (int32_t)transition->count; k++){
+					if(k < (((int32_t)transition->count) - 1)){
+						to_state	= added_state++;
+					}else{
+						to_state	= (uint32_t)label_position;
+					}
+					automaton_transition	= automaton_transition_create(current_from_state, to_state);
+					current_from_state	= to_state;
 					trace_label	= transition->labels[k];
 					for(l = 0; l < (int32_t)trace_label->count; l++){
 						trace_label_atom	= trace_label->atoms[l];
@@ -461,10 +476,12 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 						if(element_global_index >= 0)
 							automaton_transition_add_signal_event(automaton_transition, ctx, &(ctx->global_alphabet->list[element_global_index]));
 					}
+					automaton_automaton_add_transition(automaton, automaton_transition);
 				}
-				automaton_automaton_add_transition(automaton, automaton_transition);
+
 			}
 		}
+		free(labels_list);
 		//set entry in table
 		tables->composition_entries[main_index]->solved	= true;
 		tables->composition_entries[main_index]->valuation_count			= 1;
@@ -492,7 +509,12 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 		pending_automata	= false;
 		for(i = 0; i < program->count; i++){
 			if(program->statements[i]->type == COMPOSITION_AUT)
-				pending_automata = pending_automata || automaton_statement_syntax_to_automaton(ctx, program->statements[i]->composition_def, tables);
+				pending_automata = automaton_statement_syntax_to_automaton(ctx, program->statements[i]->composition_def, tables) || pending_automata;
+		}
+	}
+	for(i = 0; i < tables->composition_count; i++){
+		if(tables->composition_entries[i]->solved){
+			automaton_automaton_print(tables->composition_entries[i]->valuation.automaton_value, true, true, true, "*\t", "*\t");
 		}
 	}
 	automaton_alphabet* global_alphabet	= automaton_parsing_tables_get_global_alphabet(tables);

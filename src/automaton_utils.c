@@ -9,7 +9,7 @@
 void aut_add_ptr_list(void*** list, void* element, uint32_t* count){
 	void** new_list	= malloc(sizeof(void*) * (*count+1));
 	uint32_t i;
-	for(i = 0; i < *count; i++) new_list[i]	= *list[i];
+	for(i = 0; i < *count; i++) new_list[i]	= (*list)[i];
 	new_list[*count]	= element;
 	if(*count > 0)
 		free(*list);
@@ -59,7 +59,8 @@ void aut_merge_string_lists(char*** a, int32_t* a_count, char** b, int32_t b_cou
 		for(i = 0; i < b_count; i++){
 			diff	= true;
 			for(j = 0; j < *a_count; j++){
-				if(strcmp(*a[j], b[i]) == 0) diff= false;
+				if(strcmp((*a)[j], b[i]) == 0)
+					diff= false;
 			}
 			if(diff)diff_count++;
 		}
@@ -76,29 +77,35 @@ void aut_merge_string_lists(char*** a, int32_t* a_count, char** b, int32_t b_cou
 	}else{
 		if(ordered){
 			for(i = 0; i < new_count; i++){
-				a_b_cmp		= strcmp(*a[a_index], b[b_index]);
-				if(a_b_cmp < 0){
-					aut_dupstr(&(new_list[i]), *a[a_index++]);
-				}else if(a_b_cmp == 0){
-					aut_dupstr(&(new_list[i]), *a[a_index++]);
-					if(!repeat_values){		
-						b_index++;
-					}
-				}else{
+				if(b_index >= b_count){
+					aut_dupstr(&(new_list[i]), (*a)[a_index++]);
+				}else if(a_index >= *a_count){
 					aut_dupstr(&(new_list[i]), b[b_index++]);
+				}else{
+					a_b_cmp		= strcmp((*a)[a_index], b[b_index]);
+					if(a_b_cmp < 0){
+						aut_dupstr(&(new_list[i]), (*a)[a_index++]);
+					}else if(a_b_cmp == 0){
+						aut_dupstr(&(new_list[i]), (*a)[a_index++]);
+						if(!repeat_values){
+							b_index++;
+						}
+					}else{
+						aut_dupstr(&(new_list[i]), b[b_index++]);
+					}
 				}
 			}
 		}else{
 			a_index	= 0;
 			for(i = 0; i < *a_count; i++){
 				for(j = 0; j < b_count; j++){
-					a_b_cmp		= strcmp(*a[i], b[j]);
+					a_b_cmp		= strcmp((*a)[i], b[j]);
 					if(a_b_cmp < 0){
-						aut_dupstr(&(new_list[a_index++]), *a[i]);
+						aut_dupstr(&(new_list[a_index++]), (*a)[i]);
 					}else if(a_b_cmp == 0){
-						aut_dupstr(&(new_list[a_index++]), *a[i]);
+						aut_dupstr(&(new_list[a_index++]), (*a)[i]);
 						if(repeat_values){		
-							aut_dupstr(&(new_list[a_index++]), *a[i]);
+							aut_dupstr(&(new_list[a_index++]), (*a)[i]);
 						}
 					}else{
 						aut_dupstr(&(new_list[a_index++]), b[j]);
@@ -119,7 +126,7 @@ bool aut_push_string_to_list(char*** list, int32_t* list_count, char* element, i
 	int32_t a_b_cmp;
 	*position	= -1;
 	for(i = 0; i < *list_count; i++){
-		a_b_cmp	= strcmp(*list[i], element);
+		a_b_cmp	= strcmp((*list)[i], element);
 		if(a_b_cmp == 0){
 			*position = i;
 			if(!repeat_values){
@@ -137,7 +144,7 @@ bool aut_push_string_to_list(char*** list, int32_t* list_count, char* element, i
 	char** new_list		= malloc(sizeof(char*) * new_count);
 	for(i = 0; i < *list_count; i++){
 		if(i < *position){
-			aut_dupstr(&(new_list[i]), *list[i]);
+			aut_dupstr(&(new_list[i]), (*list)[i]);
 		}else{
 			aut_dupstr(&(new_list[i+1]), *list[i]);
 		}
