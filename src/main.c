@@ -14,16 +14,16 @@ extern automaton_program_syntax* parsed_program;
 
 char* automataFile  =  "automata.txt";
 
-char* parse_test_file	= "test2.fsp";
+char* parse_test_file	= "test3.fsp";
 
-void run_parse_tests(){
+void run_parse_test(test_file){
 	FILE *fd;
-    if (!(yyin = fopen(parse_test_file, "r")))
+    if (!(yyin = fopen(test_file, "r")))
     {
         perror("Error: ");
     }
 	yyparse();
-    printf("\n\n%d\n\n\n", parsed_program->count);
+    //printf("\n\n%d\n\n\n", parsed_program->count);
     automaton_automata_context* ctx		= automaton_automata_context_create_from_syntax(parsed_program, "test context");
 
     automaton_automata_context_destroy(ctx);
@@ -117,7 +117,9 @@ void run_tests(){
 int main (void){
 	//run_tree_tests();
 	//run_tests();
-	run_parse_tests();
+	run_parse_test("test1.fsp");
+	run_parse_test("test2.fsp");
+	//run_parse_test("test3.fsp");
 /*
 	int save_out = dup(1);
 	remove(automataFile);

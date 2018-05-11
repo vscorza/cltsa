@@ -8,23 +8,37 @@
 
 automaton_parsing_tables* automaton_parsing_tables_create(){
 	automaton_parsing_tables* tables	= malloc(sizeof(automaton_parsing_tables));
-	tables->label_count	= 0;
-	tables->set_count	= 0;
-	tables->fluent_count= 0;
-	tables->range_count	= 0;
-	tables->const_count	= 0;
+	tables->label_count			= 0;
+	tables->label_entries		= NULL;
+	tables->set_count			= 0;
+	tables->set_entries			= NULL;
+	tables->fluent_count		= 0;
+	tables->fluent_entries		= NULL;
+	tables->range_count			= 0;
+	tables->range_entries		= NULL;
+	tables->const_count			= 0;
+	tables->const_entries		= NULL;
 	tables->automaton_count		= 0;
+	tables->automaton_entries	= NULL;
 	tables->composition_count	= 0;
+	tables->composition_entries	= NULL;
 	return tables;
 }
+void automaton_parsing_tables_destroy_entry(automaton_parsing_table_entry** entries, uint32_t count){
+	uint32_t i;
+	for(i = 0; i < count; i++)
+		automaton_parsing_table_entry_destroy(entries[i]);
+	free(entries);
+}
+
 void automaton_parsing_tables_destroy(automaton_parsing_tables* tables){
-	aut_free_ptr_list((void***)&(tables->label_entries), &(tables->label_count));
-	aut_free_ptr_list((void***)&(tables->set_entries), &(tables->set_count));
-	aut_free_ptr_list((void***)&(tables->fluent_entries), &(tables->fluent_count));
-	aut_free_ptr_list((void***)&(tables->range_entries), &(tables->range_count));
-	aut_free_ptr_list((void***)&(tables->const_entries), &(tables->const_count));
-	aut_free_ptr_list((void***)&(tables->automaton_entries), &(tables->automaton_count));
-	aut_free_ptr_list((void***)&(tables->composition_entries), &(tables->composition_count));
+	automaton_parsing_tables_destroy_entry(tables->label_entries,tables->label_count);
+	automaton_parsing_tables_destroy_entry(tables->set_entries, tables->set_count);
+	automaton_parsing_tables_destroy_entry(tables->fluent_entries, tables->fluent_count);
+	automaton_parsing_tables_destroy_entry(tables->range_entries, tables->range_count);
+	automaton_parsing_tables_destroy_entry(tables->const_entries, tables->const_count);
+	automaton_parsing_tables_destroy_entry(tables->automaton_entries, tables->automaton_count);
+	automaton_parsing_tables_destroy_entry(tables->composition_entries, tables->composition_count);
 	free(tables);
 }
 automaton_parsing_table_entry* automaton_parsing_table_entry_create(automaton_parsing_table_entry_type type, char* key, void* value, int32_t index){
@@ -38,8 +52,49 @@ automaton_parsing_table_entry* automaton_parsing_table_entry_create(automaton_pa
 	return entry;
 }
 void automaton_parsing_table_entry_destroy(automaton_parsing_table_entry* entry){
-	if(entry->value != NULL)
-		free(entry->value);
+	if(entry->key != NULL)
+		free(entry->key);
+	if(entry->value != NULL){
+		switch(entry->type){
+		case LABEL_ENTRY_AUT:
+			automaton_label_syntax_destroy((automaton_label_syntax*)entry->value);
+			break;
+		case SET_ENTRY_AUT:
+			automaton_set_def_syntax_destroy((automaton_set_def_syntax*)entry->value);
+			break;
+		case FLUENT_ENTRY_AUT:
+			automaton_fluent_syntax_destroy((automaton_fluent_syntax*)entry->value);
+			for(i = 0; i < (int32_t)tables->fluent_count; i++){
+				if(strcmp(tables->fluent_entries[i]->key, key) == 0)
+					return i;
+			}
+			break;
+		case RANGE_ENTRY_AUT:
+			for(i = 0; i < (int32_t)tables->range_count; i++){
+				if(strcmp(tables->range_entries[i]->key, key) == 0)
+					return i;
+			}
+			break;
+		case CONST_ENTRY_AUT:
+			for(i = 0; i < (int32_t)tables->const_count; i++){
+				if(strcmp(tables->const_entries[i]->key, key) == 0)
+					return i;
+			}
+			break;
+		case AUTOMATON_ENTRY_AUT:
+			for(i = 0; i < (int32_t)tables->automaton_count; i++){
+				if(strcmp(tables->automaton_entries[i]->key, key) == 0)
+					return i;
+			}
+			break;
+		case COMPOSITION_ENTRY_AUT:
+			for(i = 0; i < (int32_t)tables->composition_count; i++){
+				if(strcmp(tables->composition_entries[i]->key, key) == 0)
+					return i;
+			}
+			break;
+		}
+	}
 	free(entry);
 }
 int32_t automaton_parsing_tables_get_entry_index(automaton_parsing_tables* tables, automaton_parsing_table_entry_type type, char* key){
@@ -337,7 +392,7 @@ automaton_alphabet* automaton_parsing_tables_get_global_alphabet(automaton_parsi
 }
 bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, automaton_composition_syntax* composition_syntax
 		, automaton_parsing_tables* tables){
-	int32_t main_index, index, i, j, k, l, m, n;
+	int32_t main_index, index, i, j, k, l, m, n, o;
 	main_index						= automaton_parsing_tables_get_entry_index(tables, COMPOSITION_ENTRY_AUT, composition_syntax->name);
 	if(main_index > 0)if(tables->composition_entries[main_index]->solved)	return false;	
 	//check whether composition syntax is a composition or a single automaton description
@@ -371,6 +426,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 		automaton_trace_label_syntax* trace_label;
 		automaton_trace_label_atom_syntax* trace_label_atom;
 		automaton_label_syntax* atom_label;
+		char* element_to_find;
 		for(i = 0; i < (int32_t)composition_syntax->count; i++){
 			state	= composition_syntax->states[i];
 			for(j = 0; j < (int32_t)state->transitions_count; j++){
@@ -382,40 +438,84 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 						trace_label_atom	= trace_label->atoms[l];
 						//TODO: take indexes into computation
 						atom_label			= trace_label_atom->label;
-						element_global_index= -1;
-						element_position	= 0;
-						for(m = 0; m < (int32_t)ctx->global_alphabet->count; m++){
-							if(strcmp(ctx->global_alphabet->list[m].name, atom_label->string_terminal) == 0){
-								element_global_index = m;
-								break;
+						if(!atom_label->is_set){//TODO: reemplazar atom_label->string_terminal por current string, hacerlo por todos los elementos en el set si es is_set
+							element_to_find		= atom_label->string_terminal;
+							element_global_index= -1;
+							element_position	= 0;
+							for(m = 0; m < (int32_t)ctx->global_alphabet->count; m++){
+								if(strcmp(ctx->global_alphabet->list[m].name, element_to_find) == 0){
+									element_global_index = m;
+									break;
+								}
 							}
-						}
-						if(element_global_index == -1){
-							//TODO: report local element not found
-							exit(-1);
-						}
-						for(m = 0; m < (int32_t)local_alphabet_count; m++){
-							if(local_alphabet[m] == (uint32_t)element_global_index){
-								element_position	= -1;
-								break;
+							if(element_global_index == -1){
+								//TODO: report local element not found
+								exit(-1);
 							}
-							if(local_alphabet[m] > (uint32_t)element_global_index){
-								element_position	= m;
-								break;
-							}
-						}
-						if(element_position >= 0){
-							uint32_t* new_alphabet	= malloc(sizeof(uint32_t) * (local_alphabet_count + 1));
 							for(m = 0; m < (int32_t)local_alphabet_count; m++){
-								if(m < element_position)
-									new_alphabet[m]	= local_alphabet[m];
-								else
-									new_alphabet[m+1]	= local_alphabet[m];
+								if(local_alphabet[m] == (uint32_t)element_global_index){
+									element_position	= -1;
+									break;
+								}
+								if(local_alphabet[m] > (uint32_t)element_global_index){
+									element_position	= m;
+									break;
+								}
 							}
-							new_alphabet[element_position]	= (uint32_t)element_global_index; 
-							local_alphabet_count++;
-							if(local_alphabet != NULL) free(local_alphabet);
-							local_alphabet	= new_alphabet;
+							if(element_position >= 0){
+								uint32_t* new_alphabet	= malloc(sizeof(uint32_t) * (local_alphabet_count + 1));
+								for(m = 0; m < (int32_t)local_alphabet_count; m++){
+									if(m < element_position)
+										new_alphabet[m]	= local_alphabet[m];
+									else
+										new_alphabet[m+1]	= local_alphabet[m];
+								}
+								new_alphabet[element_position]	= (uint32_t)element_global_index;
+								local_alphabet_count++;
+								if(local_alphabet != NULL) free(local_alphabet);
+								local_alphabet	= new_alphabet;
+							}
+						}else{
+							for(n = 0; n < (int32_t)(atom_label->set->count); n++){
+								for(o = 0; o < (int32_t)(atom_label->set->labels_count[n]); o++){
+									element_to_find		= atom_label->set->labels[n][o]->string_terminal;
+									element_global_index= -1;
+									element_position	= 0;
+									for(m = 0; m < (int32_t)ctx->global_alphabet->count; m++){
+										if(strcmp(ctx->global_alphabet->list[m].name, element_to_find) == 0){
+											element_global_index = m;
+											break;
+										}
+									}
+									if(element_global_index == -1){
+										//TODO: report local element not found
+										exit(-1);
+									}
+									for(m = 0; m < (int32_t)local_alphabet_count; m++){
+										if(local_alphabet[m] == (uint32_t)element_global_index){
+											element_position	= -1;
+											break;
+										}
+										if(local_alphabet[m] > (uint32_t)element_global_index){
+											element_position	= m;
+											break;
+										}
+									}
+									if(element_position >= 0){
+										uint32_t* new_alphabet	= malloc(sizeof(uint32_t) * (local_alphabet_count + 1));
+										for(m = 0; m < (int32_t)local_alphabet_count; m++){
+											if(m < element_position)
+												new_alphabet[m]	= local_alphabet[m];
+											else
+												new_alphabet[m+1]	= local_alphabet[m];
+										}
+										new_alphabet[element_position]	= (uint32_t)element_global_index;
+										local_alphabet_count++;
+										if(local_alphabet != NULL) free(local_alphabet);
+										local_alphabet	= new_alphabet;
+									}
+								}
+							}
 						}
 					}
 				}
@@ -465,16 +565,35 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 						trace_label_atom	= trace_label->atoms[l];
 						//TODO: take indexes into computation
 						atom_label			= trace_label_atom->label;
-						element_global_index= -1;
-						element_position	= 0;
-						for(m = 0; m < (int32_t)ctx->global_alphabet->count; m++){
-							if(strcmp(ctx->global_alphabet->list[m].name, atom_label->string_terminal) == 0){
-								element_global_index = m;
-								break;
+						if(!atom_label->is_set){
+							element_global_index= -1;
+							element_position	= 0;
+							for(m = 0; m < (int32_t)ctx->global_alphabet->count; m++){
+								if(strcmp(ctx->global_alphabet->list[m].name, atom_label->string_terminal) == 0){
+									element_global_index = m;
+									break;
+								}
+							}
+							if(element_global_index >= 0)
+								automaton_transition_add_signal_event(automaton_transition, ctx, &(ctx->global_alphabet->list[element_global_index]));
+						}else{
+							for(n = 0; n < (int32_t)(atom_label->set->count); n++){
+								for(o = 0; o < (int32_t)(atom_label->set->labels_count[n]); o++){
+									element_to_find		= atom_label->set->labels[n][o]->string_terminal;
+									element_global_index= -1;
+									element_position	= 0;
+									for(m = 0; m < (int32_t)ctx->global_alphabet->count; m++){
+										if(strcmp(ctx->global_alphabet->list[m].name, element_to_find) == 0){
+											element_global_index = m;
+											break;
+										}
+									}
+									if(element_global_index >= 0)
+										automaton_transition_add_signal_event(automaton_transition, ctx, &(ctx->global_alphabet->list[element_global_index]));
+
+								}
 							}
 						}
-						if(element_global_index >= 0)
-							automaton_transition_add_signal_event(automaton_transition, ctx, &(ctx->global_alphabet->list[element_global_index]));
 					}
 					automaton_automaton_add_transition(automaton, automaton_transition);
 				}
@@ -494,15 +613,15 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 automaton_automata_context* automaton_automata_context_create_from_syntax(automaton_program_syntax* program, char* ctx_name){
 	automaton_parsing_tables* tables	= automaton_parsing_tables_create();
 	automaton_automata_context* ctx		= malloc(sizeof(automaton_automata_context));
-	aut_dupstr(&(ctx->name), ctx_name);
+
 	//build look up tables
 	uint32_t i;
 	for(i = 0; i < program->count; i++){
 		automaton_statement_syntax_to_table(program->statements[i], tables);
 	}
 	//get global alphabet
-	ctx->global_alphabet		= automaton_parsing_tables_get_global_alphabet(tables);
-	ctx->global_fluents_count	= 0;
+	automaton_alphabet* global_alphabet		= automaton_parsing_tables_get_global_alphabet(tables);
+	automaton_automata_context_initialize(ctx, ctx_name, global_alphabet, 0, NULL);
 	//build automata
 	bool pending_automata	= true;
 	while(pending_automata){
@@ -512,12 +631,13 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 				pending_automata = automaton_statement_syntax_to_automaton(ctx, program->statements[i]->composition_def, tables) || pending_automata;
 		}
 	}
+	/*
 	for(i = 0; i < tables->composition_count; i++){
 		if(tables->composition_entries[i]->solved){
 			automaton_automaton_print(tables->composition_entries[i]->valuation.automaton_value, true, true, true, "*\t", "*\t");
 		}
 	}
-	automaton_alphabet* global_alphabet	= automaton_parsing_tables_get_global_alphabet(tables);
+	*/
 	automaton_parsing_tables_destroy(tables);
 	return ctx;
 }
