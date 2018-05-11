@@ -119,7 +119,7 @@ int main (void){
 	//run_tests();
 	run_parse_test("test1.fsp");
 	run_parse_test("test2.fsp");
-	//run_parse_test("test3.fsp");
+	run_parse_test("test3.fsp");
 /*
 	int save_out = dup(1);
 	remove(automataFile);
