@@ -16,7 +16,7 @@ char* automataFile  =  "automata.txt";
 
 char* parse_test_file	= "test3.fsp";
 
-void run_parse_test(test_file){
+void run_parse_test(char* test_file){
 	FILE *fd;
     if (!(yyin = fopen(test_file, "r")))
     {

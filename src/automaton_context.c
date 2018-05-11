@@ -54,6 +54,29 @@ automaton_parsing_table_entry* automaton_parsing_table_entry_create(automaton_pa
 void automaton_parsing_table_entry_destroy(automaton_parsing_table_entry* entry){
 	if(entry->key != NULL)
 		free(entry->key);
+	int32_t i;
+	switch(entry->type){
+	case SET_ENTRY_AUT:
+		if(entry->valuation.labels_value != NULL){
+			char** labels	= entry->valuation.labels_value;
+			for(i = 0; i < entry->valuation_count; i++){
+				free(labels[i]);
+			}
+			free(entry->valuation.labels_value);
+		}
+		break;
+	case COMPOSITION_ENTRY_AUT:
+		if(entry->valuation.automaton_value != NULL)
+				automaton_automaton_destroy(entry->valuation.automaton_value);
+		break;
+	case AUTOMATON_ENTRY_AUT:
+		if(entry->valuation.automaton_value != NULL)
+						automaton_automaton_destroy(entry->valuation.automaton_value);
+		break;
+	default:
+		break;
+	}
+	/*
 	if(entry->value != NULL){
 		switch(entry->type){
 		case LABEL_ENTRY_AUT:
@@ -95,6 +118,7 @@ void automaton_parsing_table_entry_destroy(automaton_parsing_table_entry* entry)
 			break;
 		}
 	}
+	*/
 	free(entry);
 }
 int32_t automaton_parsing_tables_get_entry_index(automaton_parsing_tables* tables, automaton_parsing_table_entry_type type, char* key){
@@ -378,23 +402,25 @@ automaton_alphabet* automaton_parsing_tables_get_global_alphabet(automaton_parsi
 				break;
 			}
 		}
-		automaton_alphabet_add_signal_event(global_alphabet, automaton_signal_event_create(global_values[i], is_controllable? OUTPUT_SIG : INPUT_SIG));
+		automaton_signal_event* sig_event = automaton_signal_event_create(global_values[i], is_controllable? OUTPUT_SIG : INPUT_SIG);
+		automaton_alphabet_add_signal_event(global_alphabet, sig_event);
+		automaton_signal_event_destroy(sig_event, true);
 	}
-
+/*
 	for(i = 0; i < global_count; i++)
 		free(global_values[i]);
 	free(global_values);
 	for(i = 0; i < controllable_count; i++)
 			free(controllable_values[i]);
 		free(controllable_values);
-
+*/
 	return global_alphabet;
 }
 bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, automaton_composition_syntax* composition_syntax
 		, automaton_parsing_tables* tables){
 	int32_t main_index, index, i, j, k, l, m, n, o;
 	main_index						= automaton_parsing_tables_get_entry_index(tables, COMPOSITION_ENTRY_AUT, composition_syntax->name);
-	if(main_index > 0)if(tables->composition_entries[main_index]->solved)	return false;	
+	if(main_index >= 0)if(tables->composition_entries[main_index]->solved)	return false;
 	//check whether composition syntax is a composition or a single automaton description
 	if(composition_syntax->components != NULL){//MULTIPLE COMPONENTS (AUTOMATA)
 		//if one component has not been solved then report pending automata
@@ -522,6 +548,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 			}
 		}
 		automaton_automaton* automaton	= automaton_automaton_create(composition_syntax->name, ctx, local_alphabet_count, local_alphabet);
+		free(local_alphabet);
 		//add transitions
 		//map state label to int
 		char** labels_list	= NULL;
@@ -596,10 +623,13 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 						}
 					}
 					automaton_automaton_add_transition(automaton, automaton_transition);
+					automaton_transition_destroy(automaton_transition, true);
 				}
 
 			}
 		}
+		for(i = 0; i < labels_list_count; i++)
+			free(labels_list[i]);
 		free(labels_list);
 		//set entry in table
 		tables->composition_entries[main_index]->solved	= true;
@@ -622,6 +652,7 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 	//get global alphabet
 	automaton_alphabet* global_alphabet		= automaton_parsing_tables_get_global_alphabet(tables);
 	automaton_automata_context_initialize(ctx, ctx_name, global_alphabet, 0, NULL);
+	automaton_alphabet_destroy(global_alphabet);
 	//build automata
 	bool pending_automata	= true;
 	while(pending_automata){

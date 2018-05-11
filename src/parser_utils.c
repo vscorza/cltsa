@@ -459,6 +459,7 @@ void automaton_set_syntax_destroy(automaton_set_syntax* set){
 		for(j = 0; j < set->labels_count[i]; j++)automaton_label_syntax_destroy(set->labels[i][j]);
 		free(set->labels[i]);
 	}
+	free(set->labels_count);
 	free(set->labels);
 	free(set);
 }

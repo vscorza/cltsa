@@ -78,7 +78,7 @@ statement:
 label:
 	concurrentLabel							{$$ = $1;}
 	|set									{$$ = automaton_label_syntax_create(true, $1, NULL);}
-	|t_IDENT								{$$ = automaton_label_syntax_create(false, NULL, $1);}
+	|t_IDENT								{$$ = automaton_label_syntax_create(false, NULL, $1);free($1);}
 	;
 labels:
 	labels ',' label						{$$ = automaton_set_syntax_concat_labels($1,$3);}
@@ -88,11 +88,11 @@ concurrentLabel:
 	'<' concurrentLabels '>'			{$$ = automaton_label_syntax_create(true, $2, NULL);}
 	;
 concurrentLabels:
-	concurrentLabels ',' t_IDENT			{$$ = automaton_set_syntax_concat_concurrent($1, $3);}
-	|t_IDENT								{$$ = automaton_set_syntax_create_concurrent($1);}
+	concurrentLabels ',' t_IDENT			{$$ = automaton_set_syntax_concat_concurrent($1, $3);free($3);}
+	|t_IDENT								{$$ = automaton_set_syntax_create_concurrent($1);free($1);}
 	;
 setDef:
-	t_SET t_UPPER_IDENT '=' setExp			{$$ = automaton_set_def_syntax_create($4, $2);}
+	t_SET t_UPPER_IDENT '=' setExp			{$$ = automaton_set_def_syntax_create($4, $2);free($1); free($2);}
 	;
 setExp:
 	set										{$$ = $1;}
@@ -104,15 +104,15 @@ set:
 	;
 /*TODO: ref defs of set was removed because it introduced ambiguity as label in the state trace
 set:
-	t_UPPER_IDENT							{$$ = automaton_set_syntax_create_from_ident($1);}
+	t_UPPER_IDENT							{$$ = automaton_set_syntax_create_from_ident($1);free($1);}
 	| '{' labels '}'						{$$ = $2;}
 	;
 	*/
 fluentDef:
-	t_FLUENT t_UPPER_IDENT '=' '<' fluentSet ',' fluentSet '>'	{$$ = automaton_fluent_syntax_create($2, $5, $7);}
+	t_FLUENT t_UPPER_IDENT '=' '<' fluentSet ',' fluentSet '>'	{$$ = automaton_fluent_syntax_create($2, $5, $7);free($1); free($2);}
 	;
 fluentSet:
-	t_IDENT									{$$ = automaton_set_syntax_create_concurrent($1);}
+	t_IDENT									{$$ = automaton_set_syntax_create_concurrent($1);free($1);}
 	|setExp									{$$ = $1;}
 	;	
 import:
@@ -128,17 +128,17 @@ indexes:
 	;
 index:
 	'[' exp ']'								{$$ = automaton_index_syntax_create(true, false, $2, NULL, NULL);}
-	|'[' t_IDENT ':' t_UPPER_IDENT ']'		{$$ = automaton_index_syntax_create(false, false, NULL, $2, $4);}
-	|'[' t_IDENT ':' range ']'				{$$ = automaton_index_syntax_create(false, true, $4, $2, NULL);}
+	|'[' t_IDENT ':' t_UPPER_IDENT ']'		{$$ = automaton_index_syntax_create(false, false, NULL, $2, $4);free($2);free($4);}
+	|'[' t_IDENT ':' range ']'				{$$ = automaton_index_syntax_create(false, true, $4, $2, NULL);free($2);}
 	;	
 rangeDef:
-	t_RANGE t_UPPER_IDENT '=' range			{$$ = automaton_expression_syntax_create(RANGE_DEF_TYPE_AUT, $4, NULL, $2, 0, NOP_AUT);}
+	t_RANGE t_UPPER_IDENT '=' range			{$$ = automaton_expression_syntax_create(RANGE_DEF_TYPE_AUT, $4, NULL, $2, 0, NOP_AUT);free($1); free($2);}
 	;
 range:
 	exp ".." exp							{$$ = automaton_expression_syntax_create(RANGE_TYPE_AUT, $1, $3, NULL, 0, RANGE_OP_AUT);}
 	;
 constDef:
-	t_CONST t_UPPER_IDENT '=' exp			{$$ = automaton_expression_syntax_create(CONST_TYPE_AUT, $4, NULL, $2, 0, NOP_AUT);}
+	t_CONST t_UPPER_IDENT '=' exp			{$$ = automaton_expression_syntax_create(CONST_TYPE_AUT, $4, NULL, $2, 0, NOP_AUT);free($1); free($2);}
 	;
 exp:
 	exp2									{$$ = $1;}
@@ -161,7 +161,7 @@ exp3:
 	|exp3 '%' exp4							{$$ = automaton_expression_syntax_create(BINARY_TYPE_AUT, $1, $3, NULL, 0, MOD_OP_AUT);}
 	;
 exp4:
-	t_UPPER_IDENT							{$$ = automaton_expression_syntax_create(UPPER_IDENT_TERMINAL_TYPE_AUT, NULL, NULL, $1, 0, NOP_AUT);}
+	t_UPPER_IDENT							{$$ = automaton_expression_syntax_create(UPPER_IDENT_TERMINAL_TYPE_AUT, NULL, NULL, $1, 0, NOP_AUT);free($1);}
 	|t_INTEGER								{$$ = automaton_expression_syntax_create(INTEGER_TERMINAL_TYPE_AUT, NULL, NULL, NULL, $1, NOP_AUT);}
 	|'(' exp ')'							{$$ = automaton_expression_syntax_create(PARENTHESIS_TYPE_AUT, $2, NULL, NULL, 0, NOP_AUT);}
 	;
@@ -170,7 +170,7 @@ ltsStates:
 	| ltsState								{$$ = automaton_states_syntax_create($1);}
 	;
 ltsStateLabel:
-	t_UPPER_IDENT indexes					{$$ = automaton_state_label_syntax_create($1, $2);}
+	t_UPPER_IDENT indexes					{$$ = automaton_state_label_syntax_create($1, $2);free($1);}
 	;
 ltsState:
 	ltsStateLabel '=' '(' ltsTransitions ')'{$$ = automaton_state_syntax_create(false, $1, NULL, $4);free($4);}
@@ -204,16 +204,16 @@ compositionDef:
 	;
 composition:
 	ltsStates								{$$ = automaton_composition_syntax_create_from_states($1); free($1);}
-	| '|' '|' t_UPPER_IDENT '=' '(' compositionExp ')'	{$$ = automaton_composition_syntax_create_from_ref($3, $6); free($6);}
+	| '|' '|' t_UPPER_IDENT '=' '(' compositionExp ')'	{$$ = automaton_composition_syntax_create_from_ref($3, $6); free($6);free($3);}
 	;
 compositionExp:
 	compositionExp2							{$$ = automaton_components_syntax_create($1);}
 	|compositionExp '|''|' compositionExp2	{$$ = automaton_components_syntax_add_component($1, $4);}
 	;
 compositionExp2:
-	t_UPPER_IDENT							{$$ = automaton_component_syntax_create($1, NULL, NULL, NULL);}
-	|t_IDENT indexes ':' t_UPPER_IDENT		{$$ = automaton_component_syntax_create($4, $1, NULL, $2);}
-	|index indexes ':' t_UPPER_IDENT		{$$ = automaton_component_syntax_create($4, NULL, $1, $2);}
+	t_UPPER_IDENT							{$$ = automaton_component_syntax_create($1, NULL, NULL, NULL);free($1);}
+	|t_IDENT indexes ':' t_UPPER_IDENT		{$$ = automaton_component_syntax_create($4, $1, NULL, $2);free($1); free($4);}
+	|index indexes ':' t_UPPER_IDENT		{$$ = automaton_component_syntax_create($4, NULL, $1, $2);free($4);}
 	;
 /*
 compositionDef:
