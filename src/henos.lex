@@ -19,7 +19,7 @@ number 		0{octalDigit}*|{decDigit}+|{hex}+
 ident 		{lower}{identChars}*
 upperIdent 	{upper}{identChars}*
 string 		\"(\\.|[^"\\])*\"
-keyword		set|range|const
+keyword		set|range|const|\.\.
 %{
 #include <stdlib.h>
 void yyerror(char*);
@@ -51,7 +51,14 @@ const				{
 					printf("[keyword: <%s>]", yytext);
 					yylval.text=p;
 					return(t_CONST);
-				}				
+				}
+\.\.				{
+					p=(char *)calloc(strlen(yytext)+1,sizeof(char));
+					strcpy(p,yytext);
+					printf("[keyword: <%s>]", yytext);
+					yylval.text=p;
+					return(t_DOTS);
+				}	
 fluent				{
 					p=(char *)calloc(strlen(yytext)+1,sizeof(char));
 					strcpy(p,yytext);

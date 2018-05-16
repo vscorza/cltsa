@@ -115,21 +115,14 @@ void run_tests(){
 }
 
 int main (void){
-	//run_tree_tests();
-	//run_tests();
+	/*
+	run_tree_tests();
+	run_tests();
 	run_parse_test("test1.fsp");
 	run_parse_test("test2.fsp");
 	run_parse_test("test3.fsp");
-/*
-	int save_out = dup(1);
-	remove(automataFile);
-	int pFile = open(automataFile, O_RDWR|O_CREAT|O_APPEND, 0600);
-	if (-1 == dup2(pFile, 1)) { perror("cannot redirect stdout"); return 255; }
-	run_tests();
-	fflush(stdout);
-	close( pFile );
-	dup2(save_out, 1);
 	*/
+	run_parse_test("test4.fsp");
 	return 0;    
 }
 

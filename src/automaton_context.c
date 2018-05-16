@@ -323,6 +323,97 @@ int32_t automaton_expression_syntax_evaluate(automaton_parsing_tables* tables, a
 	}
 	return valuation;
 }
+
+void automaton_index_syntax_get_range(automaton_parsing_tables* tables, automaton_index_syntax* index, int32_t *lower_index, int32_t *upper_index){
+	int32_t i;
+	if(!index->is_expr){
+		if(index->is_range){
+			i			 	= automaton_parsing_tables_get_entry_index(tables, CONST_ENTRY_AUT, index->lower_ident);
+			*lower_index	=tables->const_entries[i]->valuation.int_value;
+			i	 			= automaton_parsing_tables_get_entry_index(tables, CONST_ENTRY_AUT, index->upper_ident);
+			*upper_index	=tables->const_entries[i]->valuation.int_value;
+		}else{
+			//TODO: no está guardando el valuation del range en el range_def
+			i	 			= automaton_parsing_tables_get_entry_index(tables, RANGE_ENTRY_AUT, index->lower_ident);
+
+			automaton_index_syntax_get_range(tables, automaton_index_syntax* index, int32_t *lower_index, int32_t *upper_index);
+		}
+	}
+}
+
+void automaton_indexes_syntax_eval_strings(automaton_parsing_tables* tables, char*** a, int32_t* a_count, automaton_indexes_syntax* indexes){
+	uint32_t i, j, k;
+	int32_t *lower_index, *upper_index, *current_index, position;
+	uint32_t total_combinations = 1;
+
+	char buffer[400], buffer2[400];
+
+	char** ret_value			= NULL;
+	int32_t inner_count			= 0;
+
+	int32_t effective_count	= 0;
+
+	for(i = 0; i < indexes->count; i++){
+		if(!(indexes->indexes[i]->is_expr)){
+			effective_count++;
+		}
+	}
+
+	if(effective_count == 0)return;
+
+	lower_index	= malloc(sizeof(int32_t) * effective_count);
+	upper_index	= malloc(sizeof(int32_t) * effective_count);
+	current_index	= malloc(sizeof(int32_t) * effective_count);
+
+	j = 0;
+	for(i = 0; indexes->count; i++){
+		if(indexes->indexes[i]->is_range){
+			automaton_index_syntax_get_range(tables, indexes->indexes[i], &(lower_index[j]), &(upper_index[j]));
+			if(lower_index[j] >= upper_index[j]){//TODO: report bad index
+				lower_index[j]	= 	upper_index[j]	= 	current_index[j]	= -1;
+			}else{
+				total_combinations *= (uint32_t)(upper_index[j] - lower_index[j]);
+				current_index[j]	= lower_index[j];
+			}
+			j++;
+		}
+	}
+
+	for(i = 0; i < total_combinations; i++){
+		sprintf(buffer, "");
+		for(j = 0; j < effective_count; j++){
+			sprintf(buffer, "%s.%d", buffer, current_index[j]);
+		}
+
+		for(k = 0; k < *a_count; k++){
+			sprintf(buffer2, "%s.%s", (*a)[k], buffer);
+
+			aut_push_string_to_list(&ret_value, &inner_count, buffer2, &position, false);
+		}
+
+
+		j	= effective_count -1;
+		current_index[j]++;
+		while(current_index[j] > upper_index[j]){
+			current_index[j]	= lower_index[j];
+			j--;
+			current_index[j]++;
+		}
+	}
+
+	for(i = 0; i < *a_count; i++){
+		free((*a)[i]);
+	}
+	free(*a);
+
+	*a_count	= inner_count;
+	(*a)		= ret_value;
+
+	free(lower_index);
+	free(upper_index);
+	free(current_index);
+}
+
 char** automaton_set_syntax_evaluate(automaton_parsing_tables* tables, automaton_set_syntax* set, int32_t *count, char* set_def_key){
 	int32_t index = -1;
 	uint32_t i, j;
@@ -331,6 +422,7 @@ char** automaton_set_syntax_evaluate(automaton_parsing_tables* tables, automaton
 	int32_t inner_count			= 0;
 	char** inner_value			= NULL;
 	bool is_set;
+	automaton_indexes_syntax* indexes	= NULL;
 	if(set->is_ident){
 		index						= automaton_parsing_tables_get_entry_index(tables, SET_ENTRY_AUT, set->string_terminal);
 		if(index >= 0)if(tables->set_entries[index]->solved)	return tables->set_entries[index]->valuation.labels_value;
@@ -349,7 +441,8 @@ char** automaton_set_syntax_evaluate(automaton_parsing_tables* tables, automaton
 	for(i = 0; i < set->count; i++)for(j = 0; j < set->labels_count[i]; j++){
 		automaton_label_syntax* label_syntax	= set->labels[i][j];
 		is_set		= set->labels[i][j]->is_set;
-		if(!is_set){
+		indexes		= set->labels[i][j]->indexes;
+		if(!is_set){//todo:solve indexes
 			inner_value		= &(set->labels[i][j]->string_terminal);
 			inner_count		= 1;
 			aut_merge_string_lists(&ret_value, count, inner_value, inner_count, true, false);
@@ -365,6 +458,9 @@ char** automaton_set_syntax_evaluate(automaton_parsing_tables* tables, automaton
 				inner_value	= tables->set_entries[index]->valuation.labels_value;
 			}
 			aut_merge_string_lists(&ret_value, count, inner_value, inner_count, true, false);
+		}
+		if(indexes != NULL){
+			automaton_indexes_syntax_eval_strings(tables, &inner_value, &inner_count, indexes);
 		}
 	}
 	//once solved, update set_def_entry

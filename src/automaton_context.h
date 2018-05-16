@@ -71,4 +71,6 @@ char** automaton_set_syntax_evaluate(automaton_parsing_tables* tables, automaton
 automaton_alphabet* automaton_parsing_tables_get_global_alphabet(automaton_parsing_tables* tables);
 bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, automaton_composition_syntax* composition_syntax
 		, automaton_parsing_tables* tables);
+void automaton_index_syntax_get_range(automaton_parsing_tables* tables, automaton_index_syntax* index, int32_t *lower_index, int32_t *upper_index);
+void automaton_indexes_syntax_eval_strings(automaton_parsing_tables* tables, char*** a, int32_t* a_count, automaton_indexes_syntax* indexes);
 #endif /* AUTOMATON_CONTEXT_H_ */
