@@ -68,6 +68,7 @@ typedef struct automaton_expression_syntax_str{
 }automaton_expression_syntax;
 typedef struct automaton_label_syntax_str{
 	bool	is_set;
+	struct automaton_indexes_syntax_str* indexes;
 	struct automaton_set_syntax_str* set;
 	char* string_terminal;
 }automaton_label_syntax;
@@ -191,7 +192,7 @@ automaton_set_syntax* automaton_set_syntax_concat_concurrent(automaton_set_synta
 automaton_set_syntax* automaton_set_syntax_create_from_label(automaton_label_syntax* label);
 automaton_set_syntax* automaton_set_syntax_create_from_ident(char* ident);
 automaton_set_syntax* automaton_set_syntax_concat_labels(automaton_set_syntax* set, automaton_label_syntax* label);
-automaton_label_syntax* automaton_label_syntax_create(bool is_set, automaton_set_syntax* set, char* string_terminal);
+automaton_label_syntax* automaton_label_syntax_create(bool is_set, automaton_set_syntax* set, char* string_terminal, automaton_indexes_syntax* indexes);
 automaton_set_def_syntax* automaton_set_def_syntax_create(automaton_set_syntax* set, char* name);
 automaton_fluent_syntax* automaton_fluent_syntax_create(char* name, automaton_set_syntax* initiating_set, automaton_set_syntax* finishing_set);
 automaton_index_syntax* automaton_index_syntax_create(bool is_expr, bool is_range, automaton_expression_syntax* expr, char* lower_ident
