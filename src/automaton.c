@@ -180,6 +180,23 @@ void automaton_range_copy(automaton_range* source, automaton_range* target){
 	target->lower_value				= source->lower_value;
 	target->upper_value				= source->upper_value;
 }
+automaton_indexes_valuation* automaton_indexes_valuation_clone(automaton_indexes_valuation* source){
+	automaton_indexes_valuation* copy	= malloc(sizeof(automaton_indexes_valuation));
+	automaton_indexes_valuation_copy(source, copy);
+	return copy;
+}
+void automaton_indexes_valuation_copy(automaton_indexes_valuation* source, automaton_indexes_valuation* target){
+	target->count					= source->count;
+	uint32_t i;
+	target->current_values			= malloc(sizeof(int32_t) * target->count);
+	for(i = 0; i < target->count; i++){
+		target->current_values[i]	= source->current_values[i];
+	}
+	target->ranges					= malloc(sizeof(automaton_range*) * target->count);
+	for(i = 0; i < target->count; i++){
+		target->ranges[i]			= source->ranges[i];
+	}
+}
 /** PRINTING FUNCTIONS **/
 void automaton_signal_type_print(automaton_signal_type type, char* prefix, char* suffix){
 	if(prefix != NULL)
@@ -346,6 +363,25 @@ void automaton_range_print(automaton_range* range, char* prefix, char* suffix){
 	if(suffix != NULL)
 		printf("%s", suffix);
 }
+void automaton_indexes_valuation_print(automaton_indexes_valuation* valuation, char* prefix, char* suffix){
+	if(prefix != NULL)
+		printf("%s", prefix);
+	uint32_t i;
+	if(prefix == NULL)
+		prefix = "\t";
+	if(suffix == NULL)
+		suffix = "";
+	char	prefix2[255];
+	strcpy(prefix2, prefix);
+	strcat(prefix2,  "\t");
+	printf("Indexes valuation:{[");
+	for(i = 0; i < valuation->count; i++){
+		printf("%d:%s%s", valuation->current_values[i], valuation->ranges[i]->name, i < (valuation->count - 1) ? "," : "");
+	}
+	printf(")]}\n");
+	if(suffix != NULL)
+		printf("%s", suffix);
+}
 /** CREATE FUNCTIONS **/
 automaton_signal_event* automaton_signal_event_create(char* name, automaton_signal_type type){ 
 	automaton_signal_event* signal_event	= malloc(sizeof(automaton_signal_event));
@@ -386,6 +422,13 @@ automaton_range* automaton_range_create(char* name, uint32_t lower_value, uint32
 	automaton_range* range	= malloc(sizeof(automaton_range));
 	automaton_range_initialize(range, name, lower_value, upper_value);
 	return range;
+}
+automaton_indexes_valuation* automaton_indexes_valuation_create(){
+	automaton_indexes_valuation* valuation	= malloc(sizeof(automaton_indexes_valuation));
+	valuation->count			= 0;
+	valuation->current_values	= NULL;
+	valuation->ranges			= NULL;
+	return valuation;
 }
 /** INIT FUNCTIONS **/
 void automaton_signal_event_initialize(automaton_signal_event* signal_event, char* name, automaton_signal_type type){
@@ -603,6 +646,53 @@ void automaton_range_destroy(automaton_range* range){
 	range->lower_value	= 0;
 	range->upper_value	= 0;
 	free(range);
+}
+void automaton_indexes_valuation_destroy(automaton_indexes_valuation* valuation){
+	free(valuation->current_values);
+	free(valuation->ranges);
+	free(valuation);
+}
+/** INDEXES VALUATION **/
+bool automaton_indexes_valuation_has_range(automaton_indexes_valuation* valuation, automaton_range* range){
+	uint32_t i;
+	for(i = 0; i < valuation->count; i++){
+		if(strcmp(valuation->ranges[i]->name, range->name))
+			return true;
+	}
+	return false;
+}
+bool automaton_indexes_valuation_add_range(automaton_indexes_valuation* valuation, automaton_range* range){
+	if(automaton_indexes_valuation_has_range(valuation, range)){ return false;}
+	uint32_t new_count	= valuation->count + 1;
+	int32_t* new_values	= malloc(sizeof(int32_t) * new_count);
+	automaton_range** new_ranges	= malloc(sizeof(automaton_range*) * new_count);
+	uint32_t i;
+	for(i = 0; i < valuation->count; i++){
+		new_values[i]	= valuation->current_values[i];
+		new_ranges[i]	= valuation->ranges[i];
+	}
+	new_values[valuation->count]	= range->lower_value;
+	new_ranges[valuation->count]	= range;
+	free(valuation->current_values);
+	free(valuation->ranges);
+	valuation->current_values	= new_values;
+	valuation->ranges			= new_ranges;
+	return true;
+}
+int32_t automaton_indexes_valuation_get_value(automaton_indexes_valuation* valuation, char* range_name){
+	uint32_t i;
+	for(i = 0; i < valuation->count; i++){
+		if(strcmp(valuation->ranges[i]->name, range_name))
+			return valuation->current_values[i];
+	}
+	return 0;
+}
+void automaton_indexes_valuation_set_value(automaton_indexes_valuation* valuation, char* range_name, int32_t value){
+	uint32_t i;
+		for(i = 0; i < valuation->count; i++){
+			if(strcmp(valuation->ranges[i]->name, range_name))
+				valuation->current_values[i]	= value;
+		}
 }
 /** ALPHABET **/
 bool automaton_alphabet_has_signal_event(automaton_alphabet* alphabet, automaton_signal_event* signal_event){ 
@@ -1435,10 +1525,14 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 				composite_frontier[frontier_count]	= composite_to;
 #if DEBUG_COMPOSITION
 				printf("<PUSH frontier> [");
+#endif
 				for(n = 0; n < automata_count; n++){
+#if DEBUG_COMPOSITION
 					printf("%d,", current_to_state[n]);
+#endif
 					frontier[frontier_count * automata_count + n]	= current_to_state[n];
 				}
+#if DEBUG_COMPOSITION
 				printf("]\n");
 #endif
 				frontier_count++;

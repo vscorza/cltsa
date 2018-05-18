@@ -40,17 +40,21 @@ typedef struct automaton_composite_tree_entry_str{
 	struct automaton_composite_tree_entry_str* next;
 	struct automaton_composite_tree_entry_str* succ;
 } automaton_composite_tree_entry;
-
 typedef struct automaton_composite_tree_str{
 	uint32_t key_length;
 	uint32_t max_value;
 	automaton_composite_tree_entry* first_entry;
 } automaton_composite_tree;
 /** AUTOMATON **/
+typedef struct automaton_indexes_valuation_str{
+	uint32_t count;
+	int32_t	*current_values;
+	struct automaton_range_str **ranges;
+}automaton_indexes_valuation;
 typedef struct automaton_range_str{
 	char*		name;
-	uint32_t 	lower_value;
-	uint32_t 	upper_value;
+	int32_t 	lower_value;
+	int32_t 	upper_value;
 } automaton_range;
 typedef struct automaton_signal_str {
 	char*					name;	//signal name
@@ -149,7 +153,8 @@ automaton_valuation* automaton_valuation_clone(automaton_valuation* source);
 automaton_automata_context* automaton_automata_context_clone(automaton_automata_context* source);
 automaton_automaton* automaton_automaton_clone(automaton_automaton* source);
 automaton_automata* automaton_automata_clone(automaton_automata* source);
-automaton_range* automaton_range_clone(automaton_range* range);
+automaton_range* automaton_range_clone(automaton_range* source);
+automaton_indexes_valuation* automaton_indexes_valuation_clone(automaton_indexes_valuation* source);
 /** COPYING FUNCTIONS **/
 void automaton_signal_event_copy(automaton_signal_event* source,automaton_signal_event* target);
 void automaton_alphabet_copy(automaton_alphabet* source,automaton_alphabet* target);
@@ -160,6 +165,7 @@ void automaton_automata_context_copy(automaton_automata_context* source,automato
 void automaton_automaton_copy(automaton_automaton* source,automaton_automaton* target);
 void automaton_automata_copy(automaton_automata* source,automaton_automata* target);
 void automaton_range_copy(automaton_range* source, automaton_range* target);
+void automaton_indexes_valuation_copy(automaton_indexes_valuation* source, automaton_indexes_valuation* target);
 /** CREATE FUNCTIONS **/
 automaton_signal_event* automaton_signal_event_create(char* name, automaton_signal_type type);
 automaton_alphabet* automaton_alphabet_create();
@@ -169,6 +175,7 @@ automaton_valuation* automaton_valuation_create(uint32_t state);
 automaton_automata_context* automaton_automata_context_create(char* name, automaton_alphabet* alphabet, uint32_t fluents_count, automaton_fluent** fluents);
 automaton_automaton* automaton_automaton_create(char* name, automaton_automata_context* ctx, uint32_t local_alphabet_count, uint32_t* local_alphabet);
 automaton_range* automaton_range_create(char* name, uint32_t lower_value, uint32_t upper_value);
+automaton_indexes_valuation* automaton_indexes_valuation_create();
 /** INIT FUNCTIONS **/
 void automaton_signal_event_initialize(automaton_signal_event* signal_event, char* name, automaton_signal_type type);
 void automaton_alphabet_initialize(automaton_alphabet* alphabet);
@@ -187,6 +194,7 @@ void automaton_valuation_destroy(automaton_valuation* valuation);
 void automaton_automata_context_destroy(automaton_automata_context* ctx);
 void automaton_automaton_destroy(automaton_automaton* automaton);
 void automaton_range_destroy(automaton_range* range);
+void automaton_indexes_valuation_destroy(automaton_indexes_valuation* valuation);
 /** PRINTING FUNCTIONS **/
 void automaton_signal_type_print(automaton_signal_type type, char* prefix, char* suffix);
 void automaton_signal_event_print(automaton_signal_event* signal_event, char* prefix, char* suffix);
@@ -197,6 +205,12 @@ void automaton_valuation_print(automaton_valuation* valuation, automaton_automat
 void automaton_automata_context_print(automaton_automata_context* ctx, char* prefix, char* suffix);
 void automaton_automaton_print(automaton_automaton* current_automaton, bool print_ctx, bool print_alphabet, bool print_valuations, char* prefix, char* suffix);
 void automaton_range_print(automaton_range* range, char* prefix, char* suffix);
+void automaton_indexes_valuation_print(automaton_indexes_valuation* valuation, char* prefix, char* suffix);
+/** INDEXES VALUATION **/
+bool automaton_indexes_valuation_has_range(automaton_indexes_valuation* valuation, automaton_range* range);
+bool automaton_indexes_valuation_add_range(automaton_indexes_valuation* valuation, automaton_range* range);
+int32_t automaton_indexes_valuation_get_value(automaton_indexes_valuation* valuation, char* range_name);
+void automaton_indexes_valuation_set_value(automaton_indexes_valuation* valuation, char* range_name, int32_t value);
 /** ALPHABET **/
 bool automaton_alphabet_has_signal_event(automaton_alphabet* alphabet, automaton_signal_event* signal_event);
 bool automaton_alphabet_add_signal_event(automaton_alphabet* alphabet, automaton_signal_event* signal_event);

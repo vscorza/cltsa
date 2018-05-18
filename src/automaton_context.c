@@ -693,6 +693,20 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 		uint32_t first_state;
 		bool first_state_set	= false;
 		uint32_t added_state	= composition_syntax->count + 1;
+/*
+ typedef struct automaton_state_label_syntax_str{
+	char* name;
+	struct automaton_indexes_syntax_str* indexes;
+}automaton_state_label_syntax;
+typedef struct automaton_state_syntax_str{
+	bool is_ref;
+	struct automaton_state_label_syntax_str* label;
+	struct automaton_state_label_syntax_str* ref;
+	uint32_t transitions_count;
+	struct automaton_transition_syntax_str** transitions;
+}automaton_state_syntax;
+ * */
+
 		for(i = 0; i < (int32_t)composition_syntax->count; i++){
 			state	= composition_syntax->states[i];
 			if(state->ref != NULL){
@@ -883,12 +897,12 @@ void automaton_indexes_syntax_eval_strings(automaton_parsing_tables* tables, cha
 	}
 
 	for(i = 0; i < total_combinations; i++){
-		sprintf(buffer, "");
-		for(j = 0; j < effective_count; j++){
+		buffer[0] = '\0';
+		for(j = 0; j < (uint32_t)effective_count; j++){
 			sprintf(buffer, "%s.%d", buffer, current_index[j]);
 		}
 
-		for(k = 0; k < *a_count; k++){
+		for(k = 0; k < (uint32_t)*a_count; k++){
 			sprintf(buffer2, "%s%s", (*a)[k], buffer);
 
 			aut_push_string_to_list(&ret_value, &inner_count, buffer2, &position, false);
@@ -905,7 +919,7 @@ void automaton_indexes_syntax_eval_strings(automaton_parsing_tables* tables, cha
 		}
 	}
 
-	for(i = 0; i < *a_count; i++){
+	for(i = 0; i < (uint32_t)*a_count; i++){
 		free((*a)[i]);
 	}
 	if(*a != NULL)

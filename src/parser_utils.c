@@ -433,6 +433,7 @@ void automaton_trace_label_atom_syntax_destroy(automaton_trace_label_atom_syntax
 void automaton_label_syntax_destroy(automaton_label_syntax* label){
 	if(label->string_terminal != NULL)free(label->string_terminal);
 	if(label->set != NULL)automaton_set_syntax_destroy(label->set);
+	if(label->indexes != NULL)automaton_indexes_syntax_destroy(label->indexes);
 	free(label);
 }
 void automaton_indexes_syntax_destroy(automaton_indexes_syntax* indexes){
