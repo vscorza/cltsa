@@ -10,10 +10,13 @@ TODO:
 range R = 1..2
 A = ( <a, b[i:R], c[j:R]> -> A). should translate to A = ( {<a,b.1,c.1>, <a,b.2,c.1>, <a,b.1,c.2>, <a,b.2,c.2>}->A).
 A = ( <a, b[i], c[i]>[i:R] -> A). should translate to A = ( {<a,b.1,c.1>, <a,b.2,c.2>}->A).
-
 - evaluation of expressions with free variables (needs a valuation context)
+
+- review and document code
 - parse assertions, goals
 - parse safety ltl
 - check compatibility with fluents when composing
+- implement reachability
+- implement gr1
 - add feedback for errors
 - keep indexes and other information in the automaton structure (concolyc style)
