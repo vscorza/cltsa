@@ -1,0 +1,4 @@
+range R = 1..4
+set Global_Alphabet = {in[i:R],hidden,internal,out}
+set Controllable_Alphabet = {out}
+A=(in[i:R]-><hidden,internal>->A).B=(hidden->out->B).||C=(A||B).

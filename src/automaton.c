@@ -169,6 +169,17 @@ void automaton_automata_copy(automaton_automata* source, automaton_automata* tar
 		automaton_valuation_copy(&(source->states_valuations[i]),&(target->states_valuations[i]));
 	}
 }
+automaton_range* automaton_range_clone(automaton_range* source){
+	automaton_range* copy	= malloc(sizeof(automaton_range));
+	automaton_range_copy(source, copy);
+	return copy;
+}
+void automaton_range_copy(automaton_range* source, automaton_range* target){
+	target->name					= malloc(sizeof(char) * (strlen(source->name) + 1));
+	strcpy(target->name, source->name);
+	target->lower_value				= source->lower_value;
+	target->upper_value				= source->upper_value;
+}
 /** PRINTING FUNCTIONS **/
 void automaton_signal_type_print(automaton_signal_type type, char* prefix, char* suffix){
 	if(prefix != NULL)
@@ -320,6 +331,21 @@ void automaton_automaton_print(automaton_automaton* current_automaton, bool prin
 	if(suffix != NULL)
 		printf("%s", suffix);		
 }
+void automaton_range_print(automaton_range* range, char* prefix, char* suffix){
+	if(prefix != NULL)
+		printf("%s", prefix);
+	uint32_t i, j;
+	if(prefix == NULL)
+		prefix = "\t";
+	if(suffix == NULL)
+		suffix = "";
+	char	prefix2[255];
+	strcpy(prefix2, prefix);
+	strcat(prefix2,  "\t");
+	printf("Range.%s:{lower:%d,upper:%d}\n", range->name, range->lower_value, range->upper_value);
+	if(suffix != NULL)
+		printf("%s", suffix);
+}
 /** CREATE FUNCTIONS **/
 automaton_signal_event* automaton_signal_event_create(char* name, automaton_signal_type type){ 
 	automaton_signal_event* signal_event	= malloc(sizeof(automaton_signal_event));
@@ -356,7 +382,11 @@ automaton_automaton* automaton_automaton_create(char* name, automaton_automata_c
 	automaton_automaton_initialize(automaton, name, ctx, local_alphabet_count, local_alphabet);
 	return automaton;
 }
-
+automaton_range* automaton_range_create(char* name, uint32_t lower_value, uint32_t upper_value){
+	automaton_range* range	= malloc(sizeof(automaton_range));
+	automaton_range_initialize(range, name, lower_value, upper_value);
+	return range;
+}
 /** INIT FUNCTIONS **/
 void automaton_signal_event_initialize(automaton_signal_event* signal_event, char* name, automaton_signal_type type){
 	signal_event->name		= malloc(sizeof(char) * (strlen(name) + 1));
@@ -454,6 +484,14 @@ void automaton_automaton_initialize(automaton_automaton* automaton, char* name, 
 	automaton->valuations_size			= LIST_INITIAL_SIZE;
 	automaton->valuations_count			= 0;
 	automaton->valuations 				= malloc(sizeof(automaton_valuation) * automaton->valuations_count);
+}
+void automaton_range_initialize(automaton_range* range, char* name, uint32_t lower_value, uint32_t upper_value){
+	if(name != NULL){
+		range->name			= malloc(sizeof(char) * (strlen(name) + 1));
+		strcpy(range->name, name);
+	}
+	range->lower_value	= lower_value;
+	range->upper_value	= upper_value;
 }
 /** DESTROY FUNCTIONS **/
 void automaton_signal_event_destroy(automaton_signal_event* signal_event, bool freeBase){
@@ -558,6 +596,13 @@ void automaton_automaton_destroy(automaton_automaton* automaton){
 	automaton->valuations_count		= 0;
 	automaton->valuations			= NULL;
 	free(automaton);
+}
+void automaton_range_destroy(automaton_range* range){
+	if(range->name != NULL)
+		free(range->name);
+	range->lower_value	= 0;
+	range->upper_value	= 0;
+	free(range);
 }
 /** ALPHABET **/
 bool automaton_alphabet_has_signal_event(automaton_alphabet* alphabet, automaton_signal_event* signal_event){ 
@@ -934,7 +979,9 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 				alphabet_count++;
 			}
 			//test for alphabet ordering
-			//for(k = 0; k < alphabet_count; k++){printf("%d.", alphabet[k]);	}printf("\n");
+#if DEBUG_COMPOSITION
+			for(k = 0; k < alphabet_count; k++){printf("%d.", alphabet[k]);	}printf("\n");
+#endif
 		}
 	}
 	automaton_automaton* composition= automaton_automaton_create("Composition", ctx, alphabet_count, alphabet);
@@ -1016,14 +1063,20 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 	//consume frontier
 	while(frontier_count > 0){
 		//pop a state
-		//printf("<POP frontier>[");
+#if DEBUG_COMPOSITION
+		printf("<POP frontier>[");
+#endif
 		for(i = 0; i < automata_count; i++){
 			current_state[i] 		= frontier[(frontier_count - 1) * automata_count + i];
 			current_out_degree		= automata[i]->out_degree[current_state[i]];
-			//printf("%d,", current_state[i]);
+#if DEBUG_COMPOSITION
+			printf("%d,", current_state[i]);
+#endif
 			current_from_state[i]	= current_state[i];
 		}
-		//printf("]\n");
+#if DEBUG_COMPOSITION
+		printf("]\n");
+#endif
 		from_state	= composite_frontier[frontier_count - 1];
 		frontier_count--;
 		//check if frontier state was already decomposed
@@ -1060,7 +1113,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 				}
 				current_transition				= pending[pending_count-1];
 				pending_count--;
-				/*
+#if DEBUG_COMPOSITION
 				printf("\t<POP pending>[");
 				for(m = 0; m < automata_count; m++){
 						printf("%d,", current_from_state[m]);
@@ -1076,7 +1129,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 					printf("%d,", partial_states[(pending_count) * automata_count + m]);
 				}
 				printf("]\n");
-				*/
+#endif
 
 				current_local_alphabet			= automata[k]->local_alphabet;
 				current_local_alphabet_count	= automata[k]->local_alphabet_count;
@@ -1096,13 +1149,13 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 					//for every other asynch transition add posible combination if applicable
 					if(type == SYNCHRONOUS){
 						if(pending_asynch_count > 0){
-							/*
+#if DEBUG_COMPOSITION
 							printf("\t<PUSH asynch>(no overlap*) [");
 							for(n = 0; n < automata_count; n++){
 									printf("%d,", current_from_state[n]);
 							}
 							printf("]{");
-							*/
+#endif
 							int32_t m;
 							for(m = (pending_asynch_count - 1); m >= 0; m--){
 								//merge to state and signals
@@ -1142,24 +1195,29 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 								for(n = 0; n < signals_union_count; n++){
 									automaton_transition_add_signal_event(merged_transition, ctx, &(ctx->global_alphabet->list[signals_union[n]]));
 								}
-								/*
+#if DEBUG_COMPOSITION
 								for(n = 0; n < signals_union_count; n++){
 										printf("%s,", ctx->global_alphabet->list[signals_union[n]].name);
 								}
-								printf("}->[");*/
+								printf("}->[");
+#endif
 								pending_asynch[pending_asynch_count]	= merged_transition;
 								for(n = 0; n < automata_count; n++){
 									asynch_partial_states[pending_asynch_count * automata_count + n]	= current_merged_to_state[n];
 									asynch_partial_set_states[pending_asynch_count * automata_count + n]	= current_merged_to_set_state[n];
-									//printf("%d,", asynch_partial_states[pending_asynch_count * automata_count + n]);
+#if DEBUG_COMPOSITION
+									printf("%d,", asynch_partial_states[pending_asynch_count * automata_count + n]);
+#endif
 								}
-								//printf("]\n");
+#if DEBUG_COMPOSITION
+								printf("]\n");
+#endif
 								pending_asynch_count++;
 							}
 						}
 					}
 					pending_asynch[pending_asynch_count]	= current_transition;
-					/*
+#if DEBUG_COMPOSITION
 					printf("\t<PUSH asynch>(no overlap) [");
 					for(n = 0; n < automata_count; n++){
 							printf("%d,", current_from_state[n]);
@@ -1168,13 +1226,18 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 					for(n = 0; n < current_transition->signals_count; n++){
 							printf("%s,", ctx->global_alphabet->list[current_transition->signals[n]].name);
 					}
-					printf("}->[");*/
+					printf("}->[");
+#endif
 					for(n = 0; n < automata_count; n++){
 						asynch_partial_states[pending_asynch_count * automata_count + n]	= current_to_state[n];
 						asynch_partial_set_states[pending_asynch_count * automata_count + n]	= current_to_set_state[n];
-						//printf("%d,", asynch_partial_states[pending_asynch_count * automata_count + n]);
+#if DEBUG_COMPOSITION
+						printf("%d,", asynch_partial_states[pending_asynch_count * automata_count + n]);
+#endif
 					}
-					//printf("]\n");
+#if DEBUG_COMPOSITION
+					printf("]\n");
+#endif
 					pending_asynch_count++;
 					continue;
 				}
@@ -1243,7 +1306,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 							automaton_transition_add_signal_event(new_transition, ctx, &(ctx->global_alphabet->list[signals_union[n]]));
 						}
 						processed[processed_count]	= new_transition;
-						/*
+#if DEBUG_COMPOSITION
 						printf("\t<PUSH processed> [");
 						for(n = 0; n < automata_count; n++){
 								printf("%d,", current_from_state[n]);
@@ -1253,58 +1316,84 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 								printf("%s,", ctx->global_alphabet->list[signals_union[n]].name);
 						}
 						printf("}->[");
-						*/
+#endif
 						for(n = 0; n < automata_count; n++){
 							if(n == k){
 								processed_partial_states[processed_count * automata_count + n]	= current_other_transition->state_to;
 								processed_partial_set_states[processed_count * automata_count + n]	= true;
-								//printf("%d*,", processed_partial_states[processed_count * automata_count + n]);
+#if DEBUG_COMPOSITION
+								printf("%d*,", processed_partial_states[processed_count * automata_count + n]);
+#endif
 							}else{
 								processed_partial_states[processed_count * automata_count + n]	= current_to_state[n];
 								processed_partial_set_states[processed_count * automata_count + n]	= current_to_set_state[n];
-								//printf("%d,", processed_partial_states[processed_count * automata_count + n]);
+#if DEBUG_COMPOSITION
+								printf("%d,", processed_partial_states[processed_count * automata_count + n]);
+#endif
 							}
 
 						}
-						//printf("]\n");
+#if DEBUG_COMPOSITION
+						printf("]\n");
+#endif
 						processed_count++;
 					}
 				}
 				automaton_transition_destroy(current_transition, true);
 			}
 			//move processed to pending to handle next automaton transitions
-			//printf("<MOV processed>pending>");
+#if DEBUG_COMPOSITION
+			printf("<MOV processed>pending>");
+#endif
 			for(i = 0; i < processed_count; i++){
 				pending[i]	= processed[i];
-				//printf("->[");
+#if DEBUG_COMPOSITION
+				printf("->[");
+#endif
 				for(n = 0; n < automata_count; n++){
 					partial_states[i * automata_count + n]	= processed_partial_states[i * automata_count + n];
 					partial_set_states[i * automata_count + n]	= processed_partial_set_states[i * automata_count + n];
-					//printf("%d,",processed_partial_states[i * automata_count + n]);
+#if DEBUG_COMPOSITION
+					printf("%d,",processed_partial_states[i * automata_count + n]);
+#endif
 				}
-				//printf("]");
+#if DEBUG_COMPOSITION
+				printf("]");
+#endif
 			}
 			pending_count	= processed_count;
 			processed_count	= 0;
-			//printf("\n");
+#if DEBUG_COMPOSITION
+			printf("\n");
+#endif
 		}
 		//move asynch to pending to handle next automaton transitions
-		//printf("<MOV asynch>pending>");
+#if DEBUG_COMPOSITION
+		printf("<MOV asynch>pending>");
+#endif
 		uint32_t asynch_index;
 		for(i = 0; i < pending_asynch_count; i++){
 			asynch_index	= pending_count;
 			pending[asynch_index]	= pending_asynch[i];
-			//printf("->[");
+#if DEBUG_COMPOSITION
+			printf("->[");
+#endif
 			for(n = 0; n < automata_count; n++){
 				partial_states[asynch_index * automata_count + n]	= asynch_partial_states[i * automata_count + n];
 				partial_set_states[asynch_index * automata_count + n]	= asynch_partial_set_states[i * automata_count + n];
-				//printf("%d,",asynch_partial_states[i * automata_count + n]);
+#if DEBUG_COMPOSITION
+				printf("%d,",asynch_partial_states[i * automata_count + n]);
+#endif
 			}
-			//printf("]");
+#if DEBUG_COMPOSITION
+			printf("]");
+#endif
 			pending_count++;
 		}
 		pending_asynch_count	= 0;
-		//printf("\n");
+#if DEBUG_COMPOSITION
+		printf("\n");
+#endif
 
 
 		//add processed transitions
@@ -1318,7 +1407,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 			current_transition				= pending[pending_count];
 			uint32_t composite_to			= automaton_composite_tree_get_key(tree, current_to_state);
 			current_transition->state_to	= composite_to;
-			/*
+#if DEBUG_COMPOSITION
 			printf("<TRANS add>[%d]{", current_transition->state_from);
 			for(n = 0; n < current_transition->signals_count; n++){
 				printf("%s,", ctx->global_alphabet->list[current_transition->signals[n]].name);
@@ -1330,7 +1419,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 				printf("%d,", current_to_state[n]);
 			}
 			printf("](%d)\n", composite_to);
-			*/
+#endif
 			automaton_automaton_add_transition(composition, current_transition);
 			automaton_transition_destroy(current_transition, true);
 			//expand frontier
@@ -1342,15 +1431,16 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 				}
 			}
 			if(!found){
-				//printf("<PUSH frontier> [");
 				composite_frontier[frontier_count]	= composite_to;
-				/*
+				composite_frontier[frontier_count]	= composite_to;
+#if DEBUG_COMPOSITION
+				printf("<PUSH frontier> [");
 				for(n = 0; n < automata_count; n++){
 					printf("%d,", current_to_state[n]);
 					frontier[frontier_count * automata_count + n]	= current_to_state[n];
 				}
 				printf("]\n");
-				*/
+#endif
 				frontier_count++;
 			}
 		}

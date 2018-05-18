@@ -25,7 +25,6 @@ void run_parse_test(char* test_file){
 	yyparse();
     //printf("\n\n%d\n\n\n", parsed_program->count);
     automaton_automata_context* ctx		= automaton_automata_context_create_from_syntax(parsed_program, "test context");
-
     automaton_automata_context_destroy(ctx);
     automaton_program_syntax_destroy(parsed_program);
     fclose(yyin);
@@ -121,8 +120,10 @@ int main (void){
 	run_parse_test("test1.fsp");
 	run_parse_test("test2.fsp");
 	run_parse_test("test3.fsp");
-	*/
 	run_parse_test("test4.fsp");
+	run_parse_test("test5.fsp");
+	*/
+	run_parse_test("test5.fsp");
 	return 0;    
 }
 

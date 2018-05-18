@@ -36,6 +36,7 @@ typedef struct automaton_parsing_table_entry_str{
 		char** labels_value;
 		int32_t int_value;
 		automaton_automaton* automaton_value;
+		automaton_range* range_value;
 	}valuation;
 }automaton_parsing_table_entry;
 typedef struct automaton_parsing_tables_str{
@@ -70,6 +71,11 @@ int32_t automaton_expression_syntax_evaluate(automaton_parsing_tables* tables, a
 char** automaton_set_syntax_evaluate(automaton_parsing_tables* tables, automaton_set_syntax* set, int32_t *count, char* set_def_key);
 automaton_alphabet* automaton_parsing_tables_get_global_alphabet(automaton_parsing_tables* tables);
 bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, automaton_composition_syntax* composition_syntax
+		, automaton_parsing_tables* tables);
+automaton_range* automaton_range_syntax_evaluate(automaton_parsing_tables *tables, automaton_expression_syntax *range_def_syntax);
+bool automaton_statement_syntax_to_constant(automaton_automata_context* ctx, automaton_expression_syntax* const_def_syntax
+		, automaton_parsing_tables* tables);
+bool automaton_statement_syntax_to_range(automaton_automata_context* ctx, automaton_expression_syntax* range_def_syntax
 		, automaton_parsing_tables* tables);
 void automaton_index_syntax_get_range(automaton_parsing_tables* tables, automaton_index_syntax* index, int32_t *lower_index, int32_t *upper_index);
 void automaton_indexes_syntax_eval_strings(automaton_parsing_tables* tables, char*** a, int32_t* a_count, automaton_indexes_syntax* indexes);

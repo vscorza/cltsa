@@ -67,11 +67,15 @@ void automaton_parsing_table_entry_destroy(automaton_parsing_table_entry* entry)
 		break;
 	case COMPOSITION_ENTRY_AUT:
 		if(entry->valuation.automaton_value != NULL)
-				automaton_automaton_destroy(entry->valuation.automaton_value);
+			automaton_automaton_destroy(entry->valuation.automaton_value);
 		break;
 	case AUTOMATON_ENTRY_AUT:
 		if(entry->valuation.automaton_value != NULL)
-						automaton_automaton_destroy(entry->valuation.automaton_value);
+			automaton_automaton_destroy(entry->valuation.automaton_value);
+		break;
+	case RANGE_ENTRY_AUT:
+		if(entry->valuation.range_value != NULL)
+			automaton_range_destroy(entry->valuation.range_value);
 		break;
 	default:
 		break;
@@ -268,6 +272,8 @@ int32_t automaton_expression_syntax_evaluate(automaton_parsing_tables* tables, a
 	if(expr->type == CONST_TYPE_AUT){
 		if(expr->string_terminal != NULL){
 			index = automaton_parsing_tables_get_entry_index(tables, CONST_ENTRY_AUT, expr->string_terminal);
+			if(tables->const_entries[index]->solved)
+				return tables->const_entries[index]->valuation.int_value;
 		}
 	}
 	switch(expr->type){
@@ -302,7 +308,7 @@ int32_t automaton_expression_syntax_evaluate(automaton_parsing_tables* tables, a
 		break;
 
 	case INTEGER_TERMINAL_TYPE_AUT:
-		valuation = atoi(expr->string_terminal);
+		valuation = expr->integer_terminal;
 		break;
 	case UPPER_IDENT_TERMINAL_TYPE_AUT:
 		ref_index 	= automaton_parsing_tables_get_entry_index(tables, CONST_ENTRY_AUT, expr->string_terminal);
@@ -324,95 +330,7 @@ int32_t automaton_expression_syntax_evaluate(automaton_parsing_tables* tables, a
 	return valuation;
 }
 
-void automaton_index_syntax_get_range(automaton_parsing_tables* tables, automaton_index_syntax* index, int32_t *lower_index, int32_t *upper_index){
-	int32_t i;
-	if(!index->is_expr){
-		if(index->is_range){
-			i			 	= automaton_parsing_tables_get_entry_index(tables, CONST_ENTRY_AUT, index->lower_ident);
-			*lower_index	=tables->const_entries[i]->valuation.int_value;
-			i	 			= automaton_parsing_tables_get_entry_index(tables, CONST_ENTRY_AUT, index->upper_ident);
-			*upper_index	=tables->const_entries[i]->valuation.int_value;
-		}else{
-			//TODO: no está guardando el valuation del range en el range_def
-			i	 			= automaton_parsing_tables_get_entry_index(tables, RANGE_ENTRY_AUT, index->lower_ident);
 
-			automaton_index_syntax_get_range(tables, automaton_index_syntax* index, int32_t *lower_index, int32_t *upper_index);
-		}
-	}
-}
-
-void automaton_indexes_syntax_eval_strings(automaton_parsing_tables* tables, char*** a, int32_t* a_count, automaton_indexes_syntax* indexes){
-	uint32_t i, j, k;
-	int32_t *lower_index, *upper_index, *current_index, position;
-	uint32_t total_combinations = 1;
-
-	char buffer[400], buffer2[400];
-
-	char** ret_value			= NULL;
-	int32_t inner_count			= 0;
-
-	int32_t effective_count	= 0;
-
-	for(i = 0; i < indexes->count; i++){
-		if(!(indexes->indexes[i]->is_expr)){
-			effective_count++;
-		}
-	}
-
-	if(effective_count == 0)return;
-
-	lower_index	= malloc(sizeof(int32_t) * effective_count);
-	upper_index	= malloc(sizeof(int32_t) * effective_count);
-	current_index	= malloc(sizeof(int32_t) * effective_count);
-
-	j = 0;
-	for(i = 0; indexes->count; i++){
-		if(indexes->indexes[i]->is_range){
-			automaton_index_syntax_get_range(tables, indexes->indexes[i], &(lower_index[j]), &(upper_index[j]));
-			if(lower_index[j] >= upper_index[j]){//TODO: report bad index
-				lower_index[j]	= 	upper_index[j]	= 	current_index[j]	= -1;
-			}else{
-				total_combinations *= (uint32_t)(upper_index[j] - lower_index[j]);
-				current_index[j]	= lower_index[j];
-			}
-			j++;
-		}
-	}
-
-	for(i = 0; i < total_combinations; i++){
-		sprintf(buffer, "");
-		for(j = 0; j < effective_count; j++){
-			sprintf(buffer, "%s.%d", buffer, current_index[j]);
-		}
-
-		for(k = 0; k < *a_count; k++){
-			sprintf(buffer2, "%s.%s", (*a)[k], buffer);
-
-			aut_push_string_to_list(&ret_value, &inner_count, buffer2, &position, false);
-		}
-
-
-		j	= effective_count -1;
-		current_index[j]++;
-		while(current_index[j] > upper_index[j]){
-			current_index[j]	= lower_index[j];
-			j--;
-			current_index[j]++;
-		}
-	}
-
-	for(i = 0; i < *a_count; i++){
-		free((*a)[i]);
-	}
-	free(*a);
-
-	*a_count	= inner_count;
-	(*a)		= ret_value;
-
-	free(lower_index);
-	free(upper_index);
-	free(current_index);
-}
 
 char** automaton_set_syntax_evaluate(automaton_parsing_tables* tables, automaton_set_syntax* set, int32_t *count, char* set_def_key){
 	int32_t index = -1;
@@ -460,7 +378,7 @@ char** automaton_set_syntax_evaluate(automaton_parsing_tables* tables, automaton
 			aut_merge_string_lists(&ret_value, count, inner_value, inner_count, true, false);
 		}
 		if(indexes != NULL){
-			automaton_indexes_syntax_eval_strings(tables, &inner_value, &inner_count, indexes);
+			automaton_indexes_syntax_eval_strings(tables, &ret_value, count, indexes);
 		}
 	}
 	//once solved, update set_def_entry
@@ -514,7 +432,7 @@ automaton_alphabet* automaton_parsing_tables_get_global_alphabet(automaton_parsi
 }
 bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, automaton_composition_syntax* composition_syntax
 		, automaton_parsing_tables* tables){
-	int32_t main_index, index, i, j, k, l, m, n, o;
+	int32_t main_index, index, i, j, k, l, m, n, o, p;
 	main_index						= automaton_parsing_tables_get_entry_index(tables, COMPOSITION_ENTRY_AUT, composition_syntax->name);
 	if(main_index >= 0)if(tables->composition_entries[main_index]->solved)	return false;
 	//check whether composition syntax is a composition or a single automaton description
@@ -543,6 +461,8 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 		int32_t		element_global_index;
 		int32_t		element_position;
 		uint32_t*	local_alphabet		= NULL;
+		char** ret_value				= NULL;
+		int32_t count					= 0;
 		automaton_state_syntax* state;
 		automaton_transition_syntax* transition;
 		automaton_trace_label_syntax* trace_label;
@@ -560,47 +480,23 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 						trace_label_atom	= trace_label->atoms[l];
 						//TODO: take indexes into computation
 						atom_label			= trace_label_atom->label;
-						if(!atom_label->is_set){//TODO: reemplazar atom_label->string_terminal por current string, hacerlo por todos los elementos en el set si es is_set
-							element_to_find		= atom_label->string_terminal;
-							element_global_index= -1;
-							element_position	= 0;
-							for(m = 0; m < (int32_t)ctx->global_alphabet->count; m++){
-								if(strcmp(ctx->global_alphabet->list[m].name, element_to_find) == 0){
-									element_global_index = m;
-									break;
+						if(!atom_label->is_set){
+
+							if(atom_label->indexes != NULL){
+								if(ret_value != NULL){
+									for(n = 0; n < count; n++){
+										free(ret_value[n]);
+									}
+									free(ret_value);
+									ret_value = NULL;
+									count = 0;
 								}
-							}
-							if(element_global_index == -1){
-								//TODO: report local element not found
-								exit(-1);
-							}
-							for(m = 0; m < (int32_t)local_alphabet_count; m++){
-								if(local_alphabet[m] == (uint32_t)element_global_index){
-									element_position	= -1;
-									break;
-								}
-								if(local_alphabet[m] > (uint32_t)element_global_index){
-									element_position	= m;
-									break;
-								}
-							}
-							if(element_position >= 0){
-								uint32_t* new_alphabet	= malloc(sizeof(uint32_t) * (local_alphabet_count + 1));
-								for(m = 0; m < (int32_t)local_alphabet_count; m++){
-									if(m < element_position)
-										new_alphabet[m]	= local_alphabet[m];
-									else
-										new_alphabet[m+1]	= local_alphabet[m];
-								}
-								new_alphabet[element_position]	= (uint32_t)element_global_index;
-								local_alphabet_count++;
-								if(local_alphabet != NULL) free(local_alphabet);
-								local_alphabet	= new_alphabet;
-							}
-						}else{
-							for(n = 0; n < (int32_t)(atom_label->set->count); n++){
-								for(o = 0; o < (int32_t)(atom_label->set->labels_count[n]); o++){
-									element_to_find		= atom_label->set->labels[n][o]->string_terminal;
+								ret_value	= malloc(sizeof(char*));
+								aut_dupstr(&(ret_value[0]),  atom_label->string_terminal);
+								count 		= 1;
+								automaton_indexes_syntax_eval_strings(tables, &ret_value, &count, atom_label->indexes);
+								for(n = 0; n < count; n++){
+									element_to_find		= ret_value[n];
 									element_global_index= -1;
 									element_position	= 0;
 									for(m = 0; m < (int32_t)ctx->global_alphabet->count; m++){
@@ -636,12 +532,152 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 										if(local_alphabet != NULL) free(local_alphabet);
 										local_alphabet	= new_alphabet;
 									}
+
+								}
+							}else{
+								element_to_find		= atom_label->string_terminal;
+								element_global_index= -1;
+								element_position	= 0;
+								for(m = 0; m < (int32_t)ctx->global_alphabet->count; m++){
+									if(strcmp(ctx->global_alphabet->list[m].name, element_to_find) == 0){
+										element_global_index = m;
+										break;
+									}
+								}
+								if(element_global_index == -1){
+									//TODO: report local element not found
+									exit(-1);
+								}
+								for(m = 0; m < (int32_t)local_alphabet_count; m++){
+									if(local_alphabet[m] == (uint32_t)element_global_index){
+										element_position	= -1;
+										break;
+									}
+									if(local_alphabet[m] > (uint32_t)element_global_index){
+										element_position	= m;
+										break;
+									}
+								}
+								if(element_position >= 0){
+									uint32_t* new_alphabet	= malloc(sizeof(uint32_t) * (local_alphabet_count + 1));
+									for(m = 0; m < (int32_t)local_alphabet_count; m++){
+										if(m < element_position)
+											new_alphabet[m]	= local_alphabet[m];
+										else
+											new_alphabet[m+1]	= local_alphabet[m];
+									}
+									new_alphabet[element_position]	= (uint32_t)element_global_index;
+									local_alphabet_count++;
+									if(local_alphabet != NULL) free(local_alphabet);
+									local_alphabet	= new_alphabet;
+								}
+							}
+						}else{
+							for(n = 0; n < (int32_t)(atom_label->set->count); n++){
+								for(o = 0; o < (int32_t)(atom_label->set->labels_count[n]); o++){
+									if (atom_label->set->labels[n][o]->indexes != NULL){
+										if(ret_value != NULL){
+											for(n = 0; n < count; n++){
+												free(ret_value[n]);
+											}
+											free(ret_value);
+											ret_value = NULL;
+											count = 0;
+										}
+										ret_value	= malloc(sizeof(char*));
+										aut_dupstr(&(ret_value[0]),  atom_label->set->labels[n][o]->string_terminal);
+										count 		= 1;
+										automaton_indexes_syntax_eval_strings(tables, &ret_value, &count, atom_label->set->labels[n][o]->indexes);
+										for(n = 0; n < count; n++){
+											element_to_find		= ret_value[n];
+											element_global_index= -1;
+											element_position	= 0;
+											for(m = 0; m < (int32_t)ctx->global_alphabet->count; m++){
+												if(strcmp(ctx->global_alphabet->list[m].name, element_to_find) == 0){
+													element_global_index = m;
+													break;
+												}
+											}
+											if(element_global_index == -1){
+												//TODO: report local element not found
+												exit(-1);
+											}
+											for(m = 0; m < (int32_t)local_alphabet_count; m++){
+												if(local_alphabet[m] == (uint32_t)element_global_index){
+													element_position	= -1;
+													break;
+												}
+												if(local_alphabet[m] > (uint32_t)element_global_index){
+													element_position	= m;
+													break;
+												}
+											}
+											if(element_position >= 0){
+												uint32_t* new_alphabet	= malloc(sizeof(uint32_t) * (local_alphabet_count + 1));
+												for(m = 0; m < (int32_t)local_alphabet_count; m++){
+													if(m < element_position)
+														new_alphabet[m]	= local_alphabet[m];
+													else
+														new_alphabet[m+1]	= local_alphabet[m];
+												}
+												new_alphabet[element_position]	= (uint32_t)element_global_index;
+												local_alphabet_count++;
+												if(local_alphabet != NULL) free(local_alphabet);
+												local_alphabet	= new_alphabet;
+											}
+										}
+									}else{
+										element_to_find		= atom_label->set->labels[n][o]->string_terminal;
+										element_global_index= -1;
+										element_position	= 0;
+										for(m = 0; m < (int32_t)ctx->global_alphabet->count; m++){
+											if(strcmp(ctx->global_alphabet->list[m].name, element_to_find) == 0){
+												element_global_index = m;
+												break;
+											}
+										}
+										if(element_global_index == -1){
+											//TODO: report local element not found
+											exit(-1);
+										}
+										for(m = 0; m < (int32_t)local_alphabet_count; m++){
+											if(local_alphabet[m] == (uint32_t)element_global_index){
+												element_position	= -1;
+												break;
+											}
+											if(local_alphabet[m] > (uint32_t)element_global_index){
+												element_position	= m;
+												break;
+											}
+										}
+										if(element_position >= 0){
+											uint32_t* new_alphabet	= malloc(sizeof(uint32_t) * (local_alphabet_count + 1));
+											for(m = 0; m < (int32_t)local_alphabet_count; m++){
+												if(m < element_position)
+													new_alphabet[m]	= local_alphabet[m];
+												else
+													new_alphabet[m+1]	= local_alphabet[m];
+											}
+											new_alphabet[element_position]	= (uint32_t)element_global_index;
+											local_alphabet_count++;
+											if(local_alphabet != NULL) free(local_alphabet);
+											local_alphabet	= new_alphabet;
+										}
+									}
 								}
 							}
 						}
 					}
 				}
 			}
+		}
+		if(ret_value != NULL){
+			for(n = 0; n < count; n++){
+				free(ret_value[n]);
+			}
+			free(ret_value);
+			ret_value = NULL;
+			count = 0;
 		}
 		automaton_automaton* automaton	= automaton_automaton_create(composition_syntax->name, ctx, local_alphabet_count, local_alphabet);
 		free(local_alphabet);
@@ -689,20 +725,21 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 						//TODO: take indexes into computation
 						atom_label			= trace_label_atom->label;
 						if(!atom_label->is_set){
-							element_global_index= -1;
-							element_position	= 0;
-							for(m = 0; m < (int32_t)ctx->global_alphabet->count; m++){
-								if(strcmp(ctx->global_alphabet->list[m].name, atom_label->string_terminal) == 0){
-									element_global_index = m;
-									break;
+							if(atom_label->indexes != NULL){
+								if(ret_value != NULL){
+									for(n = 0; n < count; n++){
+										free(ret_value[n]);
+									}
+									free(ret_value);
+									ret_value = NULL;
+									count = 0;
 								}
-							}
-							if(element_global_index >= 0)
-								automaton_transition_add_signal_event(automaton_transition, ctx, &(ctx->global_alphabet->list[element_global_index]));
-						}else{
-							for(n = 0; n < (int32_t)(atom_label->set->count); n++){
-								for(o = 0; o < (int32_t)(atom_label->set->labels_count[n]); o++){
-									element_to_find		= atom_label->set->labels[n][o]->string_terminal;
+								ret_value	= malloc(sizeof(char*));
+								aut_dupstr(&(ret_value[0]),  atom_label->string_terminal);
+								count 		= 1;
+								automaton_indexes_syntax_eval_strings(tables, &ret_value, &count, atom_label->indexes);
+								for(n = 0; n < count; n++){
+									element_to_find		= ret_value[n];
 									element_global_index= -1;
 									element_position	= 0;
 									for(m = 0; m < (int32_t)ctx->global_alphabet->count; m++){
@@ -713,7 +750,61 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 									}
 									if(element_global_index >= 0)
 										automaton_transition_add_signal_event(automaton_transition, ctx, &(ctx->global_alphabet->list[element_global_index]));
-
+								}
+							}else{
+								element_global_index= -1;
+								element_position	= 0;
+								for(m = 0; m < (int32_t)ctx->global_alphabet->count; m++){
+									if(strcmp(ctx->global_alphabet->list[m].name, atom_label->string_terminal) == 0){
+										element_global_index = m;
+										break;
+									}
+								}
+								if(element_global_index >= 0)
+									automaton_transition_add_signal_event(automaton_transition, ctx, &(ctx->global_alphabet->list[element_global_index]));
+							}
+						}else{
+							for(n = 0; n < (int32_t)(atom_label->set->count); n++){
+								for(o = 0; o < (int32_t)(atom_label->set->labels_count[n]); o++){
+									if (atom_label->set->labels[n][o]->indexes != NULL){
+										if(ret_value != NULL){
+											for(n = 0; n < count; n++){
+												free(ret_value[n]);
+											}
+											free(ret_value);
+											ret_value = NULL;
+											count = 0;
+										}
+										ret_value	= malloc(sizeof(char*));
+										aut_dupstr(&(ret_value[0]),  atom_label->set->labels[n][o]->string_terminal);
+										count 		= 1;
+										automaton_indexes_syntax_eval_strings(tables, &ret_value, &count, atom_label->set->labels[n][o]->indexes);
+										for(p = 0; p < count; p++){
+											element_to_find		= ret_value[p];
+											element_global_index= -1;
+											element_position	= 0;
+											for(m = 0; m < (int32_t)ctx->global_alphabet->count; m++){
+												if(strcmp(ctx->global_alphabet->list[m].name, element_to_find) == 0){
+													element_global_index = m;
+													break;
+												}
+											}
+											if(element_global_index >= 0)
+												automaton_transition_add_signal_event(automaton_transition, ctx, &(ctx->global_alphabet->list[element_global_index]));
+										}
+									}else{
+										element_to_find		= atom_label->set->labels[n][o]->string_terminal;
+										element_global_index= -1;
+										element_position	= 0;
+										for(m = 0; m < (int32_t)ctx->global_alphabet->count; m++){
+											if(strcmp(ctx->global_alphabet->list[m].name, element_to_find) == 0){
+												element_global_index = m;
+												break;
+											}
+										}
+										if(element_global_index >= 0)
+											automaton_transition_add_signal_event(automaton_transition, ctx, &(ctx->global_alphabet->list[element_global_index]));
+									}
 								}
 							}
 						}
@@ -723,6 +814,14 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 				}
 
 			}
+		}
+		if(ret_value != NULL){
+			for(n = 0; n < count; n++){
+				free(ret_value[n]);
+			}
+			free(ret_value);
+			ret_value = NULL;
+			count = 0;
 		}
 		for(i = 0; i < labels_list_count; i++)
 			free(labels_list[i]);
@@ -736,6 +835,122 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 	return true;
 }
 
+bool automaton_statement_syntax_to_constant(automaton_automata_context* ctx, automaton_expression_syntax* const_def_syntax
+		, automaton_parsing_tables* tables){
+	uint32_t main_index	= automaton_parsing_tables_get_entry_index(tables, CONST_ENTRY_AUT, const_def_syntax->string_terminal);
+	tables->composition_entries[main_index]->solved					= true;
+	tables->composition_entries[main_index]->valuation_count		= 1;
+	tables->composition_entries[main_index]->valuation.int_value	= automaton_expression_syntax_evaluate(tables, const_def_syntax);
+	return false;
+}
+
+void automaton_indexes_syntax_eval_strings(automaton_parsing_tables* tables, char*** a, int32_t* a_count, automaton_indexes_syntax* indexes){
+	uint32_t i, j, k;
+	int32_t *lower_index, *upper_index, *current_index, position;
+	uint32_t total_combinations = 1;
+
+	char buffer[400], buffer2[400];
+
+	char** ret_value			= NULL;
+	int32_t inner_count			= 0;
+
+	int32_t effective_count	= 0;
+
+	for(i = 0; i < indexes->count; i++){
+		if(!(indexes->indexes[i]->is_expr)){
+			effective_count++;
+		}
+	}
+
+	if(effective_count == 0)return;
+
+	lower_index	= malloc(sizeof(int32_t) * effective_count);
+	upper_index	= malloc(sizeof(int32_t) * effective_count);
+	current_index	= malloc(sizeof(int32_t) * effective_count);
+
+	j = 0;
+	for(i = 0; i < indexes->count; i++){
+		if(!(indexes->indexes[i]->is_expr)){
+			automaton_index_syntax_get_range(tables, indexes->indexes[i], &(lower_index[j]), &(upper_index[j]));
+			if(lower_index[j] >= upper_index[j]){//TODO: report bad index
+				lower_index[j]	= 	upper_index[j]	= 	current_index[j]	= -1;
+			}else{
+				total_combinations *= (uint32_t)(upper_index[j] - lower_index[j]);
+				current_index[j]	= lower_index[j];
+			}
+			j++;
+		}
+	}
+
+	for(i = 0; i < total_combinations; i++){
+		sprintf(buffer, "");
+		for(j = 0; j < effective_count; j++){
+			sprintf(buffer, "%s.%d", buffer, current_index[j]);
+		}
+
+		for(k = 0; k < *a_count; k++){
+			sprintf(buffer2, "%s%s", (*a)[k], buffer);
+
+			aut_push_string_to_list(&ret_value, &inner_count, buffer2, &position, false);
+		}
+
+
+		j	= effective_count -1;
+		current_index[j]++;
+		while(current_index[j] > upper_index[j]){
+			current_index[j]	= lower_index[j];
+			if(j == 0)break;
+			j--;
+			current_index[j]++;
+		}
+	}
+
+	for(i = 0; i < *a_count; i++){
+		free((*a)[i]);
+	}
+	if(*a != NULL)
+		free(*a);
+
+	*a_count	= inner_count;
+	(*a)		= ret_value;
+
+	free(lower_index);
+	free(upper_index);
+	free(current_index);
+}
+
+void automaton_index_syntax_get_range(automaton_parsing_tables* tables, automaton_index_syntax* index, int32_t *lower_index, int32_t *upper_index){
+	int32_t i;
+	if(!index->is_expr){
+		if(index->is_range){
+			i			 	= automaton_parsing_tables_get_entry_index(tables, CONST_ENTRY_AUT, index->lower_ident);
+			*lower_index	=tables->const_entries[i]->valuation.int_value;
+			i	 			= automaton_parsing_tables_get_entry_index(tables, CONST_ENTRY_AUT, index->upper_ident);
+			*upper_index	=tables->const_entries[i]->valuation.int_value;
+		}else{
+			//TODO: no está guardando el valuation del range en el range_def
+			i	 			= automaton_parsing_tables_get_entry_index(tables, RANGE_ENTRY_AUT, index->upper_ident);
+			*lower_index	=tables->range_entries[i]->valuation.range_value->lower_value;
+			*upper_index	=tables->range_entries[i]->valuation.range_value->upper_value;
+		}
+	}
+}
+
+automaton_range* automaton_range_syntax_evaluate(automaton_parsing_tables *tables, automaton_expression_syntax *range_def_syntax){
+	int32_t lower_value	= automaton_expression_syntax_evaluate(tables, range_def_syntax->first);
+	int32_t upper_value	= automaton_expression_syntax_evaluate(tables, range_def_syntax->second);
+	return automaton_range_create(range_def_syntax->string_terminal, lower_value, upper_value);
+}
+
+bool automaton_statement_syntax_to_range(automaton_automata_context* ctx, automaton_expression_syntax* range_def_syntax
+		, automaton_parsing_tables* tables){
+	uint32_t main_index	= automaton_parsing_tables_get_entry_index(tables, RANGE_ENTRY_AUT, range_def_syntax->string_terminal);
+	tables->range_entries[main_index]->solved					= true;
+	tables->range_entries[main_index]->valuation_count		= 1;
+	tables->range_entries[main_index]->valuation.range_value	= automaton_range_syntax_evaluate(tables, range_def_syntax->first);
+	return false;
+}
+
 automaton_automata_context* automaton_automata_context_create_from_syntax(automaton_program_syntax* program, char* ctx_name){
 	automaton_parsing_tables* tables	= automaton_parsing_tables_create();
 	automaton_automata_context* ctx		= malloc(sizeof(automaton_automata_context));
@@ -745,26 +960,33 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 	for(i = 0; i < program->count; i++){
 		automaton_statement_syntax_to_table(program->statements[i], tables);
 	}
+	//build constants and ranges
+	for(i = 0; i < program->count; i++){
+		if(program->statements[i]->type == CONST_AUT)
+			automaton_statement_syntax_to_constant(ctx, program->statements[i]->const_def, tables);
+		if(program->statements[i]->type == RANGE_AUT)
+			automaton_statement_syntax_to_range(ctx, program->statements[i]->range_def, tables);
+	}
 	//get global alphabet
 	automaton_alphabet* global_alphabet		= automaton_parsing_tables_get_global_alphabet(tables);
 	automaton_automata_context_initialize(ctx, ctx_name, global_alphabet, 0, NULL);
 	automaton_alphabet_destroy(global_alphabet);
 	//build automata
-	bool pending_automata	= true;
-	while(pending_automata){
-		pending_automata	= false;
+	bool pending_statements	= true;
+	while(pending_statements){
+		pending_statements	= false;
 		for(i = 0; i < program->count; i++){
 			if(program->statements[i]->type == COMPOSITION_AUT)
-				pending_automata = automaton_statement_syntax_to_automaton(ctx, program->statements[i]->composition_def, tables) || pending_automata;
+				pending_statements = automaton_statement_syntax_to_automaton(ctx, program->statements[i]->composition_def, tables) || pending_statements;
 		}
 	}
-	/*
+
 	for(i = 0; i < tables->composition_count; i++){
 		if(tables->composition_entries[i]->solved){
 			automaton_automaton_print(tables->composition_entries[i]->valuation.automaton_value, true, true, true, "*\t", "*\t");
 		}
 	}
-	*/
+
 	automaton_parsing_tables_destroy(tables);
 	return ctx;
 }
