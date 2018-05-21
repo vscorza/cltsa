@@ -14,8 +14,6 @@ extern automaton_program_syntax* parsed_program;
 
 char* automataFile  =  "automata.txt";
 
-char* parse_test_file	= "test3.fsp";
-
 void run_parse_test(char* test_file){
 	FILE *fd;
     if (!(yyin = fopen(test_file, "r")))
@@ -28,6 +26,16 @@ void run_parse_test(char* test_file){
     automaton_automata_context_destroy(ctx);
     automaton_program_syntax_destroy(parsed_program);
     fclose(yyin);
+}
+
+void run_fsp_tests(uint32_t test_count){
+	uint32_t i;
+	char *buf[255];
+	for(i = 1; i <= test_count; i++){
+		printf("\n\n==============\nRunning fsp test %d\n==============\n", i);
+		sprintf(buf, "test%d.fsp", i);
+		run_parse_test(buf);
+	}
 }
 
 void run_tree_tests(){
@@ -43,9 +51,38 @@ void run_tree_tests(){
 	printf("new key %d\n", automaton_composite_tree_get_key(tree, key4));
 	automaton_composite_tree_print(tree);
 	automaton_composite_tree_destroy(tree);
+	automaton_composite_tree* tree2	= automaton_composite_tree_create(5);
+	uint32_t key0_2[5]				= {0,0,0,0,0};
+	uint32_t key1_2[5]				= {1,2,3,6,8};
+	uint32_t key2_2[5]				= {1,3,4,6,9};
+	uint32_t key3_2[5]				= {1,3,5,8,8};
+	uint32_t key4_2[5]				= {2,3,5,8,8};
+	uint32_t key5_2[5]				= {5,5,5,5,5};
+	printf("new key %d\n", automaton_composite_tree_get_key(tree2, key0_2));
+	printf("new key %d\n", automaton_composite_tree_get_key(tree2, key1_2));
+	printf("new key %d\n", automaton_composite_tree_get_key(tree2, key2_2));
+	printf("new key %d\n", automaton_composite_tree_get_key(tree2, key3_2));
+	printf("new key %d\n", automaton_composite_tree_get_key(tree2, key2_2));
+	printf("new key %d\n", automaton_composite_tree_get_key(tree2, key4_2));
+	printf("new key %d\n", automaton_composite_tree_get_key(tree2, key5_2));
+	uint32_t i, j, limit = 1, values = 10;
+
+	for(i = 0; i < 5; i++){key0_2[i]	= 0; limit *= values;}
+	for(i = 0; i < limit; i++){
+		j = 4;
+		while(key0_2[j] == values && j >= 0){
+			key0_2[j]	= 0;
+			j--;
+		}
+		key0_2[j]++;
+		automaton_composite_tree_get_key(tree2, key0_2);
+	}
+	automaton_composite_tree_print(tree2);
+	automaton_composite_tree_destroy(tree2);
+
 }
 
-void run_tests(){
+void run_automaton_tests(){
 	automaton_signal_event* in		= automaton_signal_event_create("in", INPUT_SIG);
 	automaton_signal_event* out		= automaton_signal_event_create("out", OUTPUT_SIG);
 	automaton_signal_event* tau		= automaton_signal_event_create("tau", INTERNAL_SIG);
@@ -113,17 +150,19 @@ void run_tests(){
 	automaton_signal_event_destroy(tau, true); tau = NULL;
 }
 
+void run_all_tests(){
+	run_tree_tests();
+	run_automaton_tests();
+	run_fsp_tests(5);
+}
+
 int main (void){
 	/*
-	run_tree_tests();
-	run_tests();
-	run_parse_test("test1.fsp");
-	run_parse_test("test2.fsp");
-	run_parse_test("test3.fsp");
-	run_parse_test("test4.fsp");
-	run_parse_test("test5.fsp");
+	run_all_tests();
 	*/
-	run_parse_test("test5.fsp");
+	//run_parse_test("test5.fsp");
+	//run_fsp_tests(5);
+	run_parse_test("test6.fsp");
 	return 0;    
 }
 

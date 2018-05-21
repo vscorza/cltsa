@@ -110,6 +110,7 @@ void automaton_automaton_copy(automaton_automaton* source, automaton_automaton* 
 	target->transitions_size		= source->transitions_size;
 	target->in_degree				= malloc(sizeof(uint32_t) * target->transitions_size);
 	target->max_out_degree			= source->max_out_degree;
+	target->max_concurrent_degree	= source->max_concurrent_degree;
 	target->out_degree				= malloc(sizeof(uint32_t) * target->transitions_size);
 	target->transitions				= malloc(sizeof(automaton_transition*) * target->transitions_size);
 	target->inverted_transitions	= malloc(sizeof(automaton_transition*) * target->transitions_size);
@@ -513,6 +514,7 @@ void automaton_automaton_initialize(automaton_automaton* automaton, char* name, 
 	automaton->transitions_size			= LIST_INITIAL_SIZE;
 	automaton->transitions_count		= 0;
 	automaton->max_out_degree			= 0;
+	automaton->max_concurrent_degree	= 0;
 	automaton->out_degree				= malloc(sizeof(uint32_t) * automaton->transitions_size);
 	automaton->in_degree				= malloc(sizeof(uint32_t) * automaton->transitions_size);
 	automaton->transitions				= malloc(sizeof(automaton_transition*) * automaton->transitions_size);
@@ -629,6 +631,7 @@ void automaton_automaton_destroy(automaton_automaton* automaton){
 	automaton->transitions_size		= 0;
 	automaton->transitions_count	= 0;
 	automaton->max_out_degree		= 0;
+	automaton->max_concurrent_degree= 0;
 	automaton->out_degree			= NULL;
 	automaton->transitions			= NULL;
 	automaton->in_degree			= NULL;
@@ -993,6 +996,8 @@ bool automaton_automaton_add_transition(automaton_automaton* current_automaton, 
 	current_automaton->out_degree[from_state]++;
 	if(current_automaton->max_out_degree < current_automaton->out_degree[from_state])
 		current_automaton->max_out_degree	= current_automaton->out_degree[from_state];
+	if(current_automaton->max_concurrent_degree < transition->signals_count)
+		current_automaton->max_concurrent_degree	= transition->signals_count;
 	current_automaton->in_degree[to_state]++;
 	return true;
 }
@@ -1090,11 +1095,13 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 		}
 		signal_to_automata[i]	= automata_having_signal;
 	}
+	/** create key tree **/
+	automaton_composite_tree* tree	= automaton_composite_tree_create(automata_count);
 	/** get current state transitions list harness **/
 	uint32_t max_degree_sum		= 0;
 	uint32_t max_signals_count	= 0;
 	for(i = 0; i < automata_count; i++){
-		max_degree_sum	+= automata[i]->max_out_degree;
+		max_degree_sum	+= (automata[i]->max_out_degree) * (automata[i]->max_concurrent_degree);//TODO:review here
 		if(automata[i]->local_alphabet_count > max_signals_count)
 			max_signals_count	= automata[i]->local_alphabet_count;
 	}
@@ -1121,8 +1128,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 	uint32_t* current_from_state			= malloc(sizeof(int32_t) * automata_count);
 	bool* current_from_set_state		= malloc(sizeof(bool) * automata_count);
 	/** compose transition relation **/
-	automaton_composite_tree* tree	= automaton_composite_tree_create(automata_count);
-	uint32_t frontier_size			= LIST_INITIAL_SIZE;
+	uint32_t frontier_size			= LIST_INITIAL_SIZE;//TODO: check this number is fixed
 	uint32_t frontier_count			= 1;
 	uint32_t* frontier				= malloc(sizeof(uint32_t) * automata_count * frontier_size);
 	uint32_t* composite_frontier	= malloc(sizeof(uint32_t) * frontier_size);
@@ -1522,7 +1528,6 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 			}
 			if(!found){
 				composite_frontier[frontier_count]	= composite_to;
-				composite_frontier[frontier_count]	= composite_to;
 #if DEBUG_COMPOSITION
 				printf("<PUSH frontier> [");
 #endif
@@ -1530,6 +1535,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 #if DEBUG_COMPOSITION
 					printf("%d,", current_to_state[n]);
 #endif
+
 					frontier[frontier_count * automata_count + n]	= current_to_state[n];
 				}
 #if DEBUG_COMPOSITION
@@ -1626,6 +1632,14 @@ uint32_t automaton_composite_tree_get_key(automaton_composite_tree* tree, uint32
 	automaton_composite_tree_entry* last_entry		= NULL;
 	automaton_composite_tree_entry* terminal_entry	= NULL;
 	//if first entry then add whole strip and return first value
+#if DEBUG_COMPOSITE_TREE
+	printf("(");
+	for(i = 0; i < tree->key_length; i++){
+		printf("%d%s", composite_key[i], (i == (tree->key_length - 1)) ? "": ",");
+	}
+	printf("):");
+	fflush(stdout);
+#endif
 	if(tree->first_entry == NULL){
 		for(i = 0; i < tree->key_length; i++){
 			current_entry			= malloc(sizeof(automaton_composite_tree_entry));
@@ -1645,6 +1659,9 @@ uint32_t automaton_composite_tree_get_key(automaton_composite_tree* tree, uint32
 				terminal_entry->succ	= NULL;
 				terminal_entry->next	= NULL;
 				last_entry->succ		= terminal_entry;
+#if DEBUG_COMPOSITE_TREE
+				printf("FIRST\n");
+#endif
 				return terminal_entry->value;
 			}
 		}
@@ -1655,7 +1672,13 @@ uint32_t automaton_composite_tree_get_key(automaton_composite_tree* tree, uint32
 			found	= false;
 			while(!found && current_entry != NULL){
 				if(current_entry->value == composite_key[i]){
+#if DEBUG_COMPOSITE_TREE
+					printf("[%d]", composite_key[i]);
+#endif
 					if(i == (tree->key_length -1)){
+#if DEBUG_COMPOSITE_TREE
+						printf("<%d>\n",current_entry->succ->value);
+#endif
 						return current_entry->succ->value;
 					}
 					current_entry	= current_entry->succ;
@@ -1664,16 +1687,23 @@ uint32_t automaton_composite_tree_get_key(automaton_composite_tree* tree, uint32
 					last_entry		= current_entry;
 					current_entry	= current_entry->next;
 				}
+				fflush(stdout);
 			}
 			//if not found add whole strip from this point on
 			if(!found){
+#if DEBUG_COMPOSITE_TREE
+				printf("X.");
+#endif
 				break;
 			}
 		}
-		
+		//last_entry	= NULL;
 		for(j = i; j < tree->key_length; j++){
 			current_entry			= malloc(sizeof(automaton_composite_tree_entry));
 			current_entry->value	= composite_key[j];
+#if DEBUG_COMPOSITE_TREE
+			printf("%d.", composite_key[j]);
+#endif
 			current_entry->next	= NULL;
 			current_entry->succ = NULL;
 			if(j == i && last_entry != NULL){
@@ -1688,6 +1718,9 @@ uint32_t automaton_composite_tree_get_key(automaton_composite_tree* tree, uint32
 				terminal_entry->succ	= NULL;
 				terminal_entry->next	= NULL;
 				last_entry->succ		= terminal_entry;
+#if DEBUG_COMPOSITE_TREE
+				printf("<%d>\n",terminal_entry->value);
+#endif
 				return terminal_entry->value;
 			}
 		}

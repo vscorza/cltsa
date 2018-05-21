@@ -14,7 +14,8 @@
 #define COMPOSE_SYNCH	1
 #define PARTIAL_SHARE	2
 
-#define DEBUG_COMPOSITION 1
+#define DEBUG_COMPOSITION 0
+#define DEBUG_COMPOSITE_TREE 0
 
 /****************
 ==== ENUMS ==== 
@@ -105,6 +106,7 @@ typedef struct automaton_str{
 	uint32_t				transitions_size;
 	uint32_t				transitions_count;
 	uint32_t				max_out_degree;
+	uint32_t				max_concurrent_degree;
 	uint32_t*				out_degree;
 	automaton_transition**	transitions;			// S -> list of transitions (s,s')
 	uint32_t*				in_degree;

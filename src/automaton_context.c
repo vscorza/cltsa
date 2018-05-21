@@ -70,12 +70,16 @@ void automaton_parsing_table_entry_destroy(automaton_parsing_table_entry* entry)
 			automaton_automaton_destroy(entry->valuation.automaton_value);
 		break;
 	case AUTOMATON_ENTRY_AUT:
-		if(entry->valuation.automaton_value != NULL)
+		if(entry->valuation.automaton_value != NULL){
 			automaton_automaton_destroy(entry->valuation.automaton_value);
+			entry->valuation.automaton_value	= NULL;
+		}
 		break;
 	case RANGE_ENTRY_AUT:
-		if(entry->valuation.range_value != NULL)
+		if(entry->valuation.range_value != NULL){
 			automaton_range_destroy(entry->valuation.range_value);
+			entry->valuation.range_value	= NULL;
+		}
 		break;
 	default:
 		break;
@@ -950,10 +954,10 @@ void automaton_index_syntax_get_range(automaton_parsing_tables* tables, automato
 	}
 }
 
-automaton_range* automaton_range_syntax_evaluate(automaton_parsing_tables *tables, automaton_expression_syntax *range_def_syntax){
+automaton_range* automaton_range_syntax_evaluate(automaton_parsing_tables *tables, char* name, automaton_expression_syntax *range_def_syntax){
 	int32_t lower_value	= automaton_expression_syntax_evaluate(tables, range_def_syntax->first);
 	int32_t upper_value	= automaton_expression_syntax_evaluate(tables, range_def_syntax->second);
-	return automaton_range_create(range_def_syntax->string_terminal, lower_value, upper_value);
+	return automaton_range_create(name, lower_value, upper_value);
 }
 
 bool automaton_statement_syntax_to_range(automaton_automata_context* ctx, automaton_expression_syntax* range_def_syntax
@@ -961,7 +965,7 @@ bool automaton_statement_syntax_to_range(automaton_automata_context* ctx, automa
 	uint32_t main_index	= automaton_parsing_tables_get_entry_index(tables, RANGE_ENTRY_AUT, range_def_syntax->string_terminal);
 	tables->range_entries[main_index]->solved					= true;
 	tables->range_entries[main_index]->valuation_count		= 1;
-	tables->range_entries[main_index]->valuation.range_value	= automaton_range_syntax_evaluate(tables, range_def_syntax->first);
+	tables->range_entries[main_index]->valuation.range_value	= automaton_range_syntax_evaluate(tables,range_def_syntax->string_terminal,  range_def_syntax->first);
 	return false;
 }
 

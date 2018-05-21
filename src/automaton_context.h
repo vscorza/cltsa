@@ -72,7 +72,7 @@ char** automaton_set_syntax_evaluate(automaton_parsing_tables* tables, automaton
 automaton_alphabet* automaton_parsing_tables_get_global_alphabet(automaton_parsing_tables* tables);
 bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, automaton_composition_syntax* composition_syntax
 		, automaton_parsing_tables* tables);
-automaton_range* automaton_range_syntax_evaluate(automaton_parsing_tables *tables, automaton_expression_syntax *range_def_syntax);
+automaton_range* automaton_range_syntax_evaluate(automaton_parsing_tables *tables, char* name, automaton_expression_syntax *range_def_syntax);
 bool automaton_statement_syntax_to_constant(automaton_automata_context* ctx, automaton_expression_syntax* const_def_syntax
 		, automaton_parsing_tables* tables);
 bool automaton_statement_syntax_to_range(automaton_automata_context* ctx, automaton_expression_syntax* range_def_syntax
