@@ -7,6 +7,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <assert.h>
+#include <time.h>
 #include "automaton_utils.h"
 #include "parser_utils.h"
 #include "y.tab.h"

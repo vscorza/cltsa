@@ -1026,6 +1026,8 @@ uint32_t automaton_automata_get_composite_state(uint32_t states_count, uint32_t*
 	return 0;
 }
 automaton_automaton* automaton_automata_compose(automaton_automaton** automata, uint32_t automata_count, automaton_synchronization_type type){
+	clock_t begin = clock();
+
 	uint32_t transitions_added_count	= 0;
 	uint32_t i, j, k, l, m, n, o;
 	uint32_t alphabet_count, fluents_count, alphabet_size;
@@ -1544,8 +1546,11 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 #endif
 			automaton_automaton_add_transition(composition, current_transition);
 			transitions_added_count++;
-			if((transitions_added_count % 10000) == 0)
-				printf("Partial Composition has %d states\n", tree->max_value);
+			if((transitions_added_count % 100000) == 0){
+				/* here, do your time-consuming job */
+				printf("Partial Composition has [%09d] states and [%09d] transitions, frontier is of size [%09d] running for [%08f]s\n", tree->max_value, composition->transitions_count, frontier_count, (double)(clock() - begin) / CLOCKS_PER_SEC);
+
+			}
 			automaton_transition_destroy(current_transition, true);
 			//expand frontier
 			bool found = false;
