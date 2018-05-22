@@ -1026,6 +1026,7 @@ uint32_t automaton_automata_get_composite_state(uint32_t states_count, uint32_t*
 	return 0;
 }
 automaton_automaton* automaton_automata_compose(automaton_automaton** automata, uint32_t automata_count, automaton_synchronization_type type){
+	uint32_t transitions_added_count	= 0;
 	uint32_t i, j, k, l, m, n, o;
 	uint32_t alphabet_count, fluents_count, alphabet_size;
 	uint32_t* alphabet;
@@ -1101,10 +1102,11 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 	uint32_t max_degree_sum		= 0;
 	uint32_t max_signals_count	= 0;
 	for(i = 0; i < automata_count; i++){
-		max_degree_sum	+= (automata[i]->max_out_degree) * (automata[i]->max_concurrent_degree);//TODO:review here
+		max_degree_sum	+= (automata[i]->max_out_degree) * (automata[i]->max_concurrent_degree);
 		if(automata[i]->local_alphabet_count > max_signals_count)
 			max_signals_count	= automata[i]->local_alphabet_count;
 	}
+	max_degree_sum							*= max_degree_sum; //check this boundary
 	uint32_t* asynch_partial_states			= malloc(sizeof(uint32_t) * automata_count * max_degree_sum);
 	bool* asynch_partial_set_states			= malloc(sizeof(bool) * automata_count * max_degree_sum);
 	automaton_transition** pending_asynch	= malloc(sizeof(automaton_transition*) * max_degree_sum);
@@ -1198,6 +1200,10 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 					}
 				}
 				pending[pending_count++]			= starting_transition;
+				if(pending_count >= max_degree_sum){
+					printf("[FATAL ERROR] WRONG BOUNDARY AT PENDING COUNT\n");
+					exit(-1);
+				}
 			}
 		}
 		for(k = 0; k < automata_count; k++){
@@ -1309,6 +1315,10 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 								printf("]\n");
 #endif
 								pending_asynch_count++;
+								if(pending_asynch_count >= max_degree_sum){
+									printf("[FATAL ERROR] WRONG BOUNDARY AT PENDING ASYNCH COUNT\n");
+									exit(-1);
+								}
 							}
 						}
 					}
@@ -1335,6 +1345,10 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 					printf("]\n");
 #endif
 					pending_asynch_count++;
+					if(pending_asynch_count >= max_degree_sum){
+						printf("[FATAL ERROR] WRONG BOUNDARY AT PENDING ASYNCH COUNT\n");
+						exit(-1);
+					}
 					continue;
 				}
 				//if it synchronizes
@@ -1433,6 +1447,10 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 						printf("]\n");
 #endif
 						processed_count++;
+						if(pending_count >= max_degree_sum){
+							printf("[FATAL ERROR] WRONG BOUNDARY AT PENDING COUNT\n");
+							exit(-1);
+						}
 					}
 				}
 				automaton_transition_destroy(current_transition, true);
@@ -1459,6 +1477,10 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 			}
 			pending_count	= processed_count;
 			processed_count	= 0;
+			if(pending_count >= max_degree_sum){
+				printf("[FATAL ERROR] WRONG BOUNDARY AT PENDING COUNT\n");
+				exit(-1);
+			}
 #if DEBUG_COMPOSITION
 			printf("\n");
 #endif
@@ -1485,6 +1507,10 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 			printf("]");
 #endif
 			pending_count++;
+			if(pending_count >= max_degree_sum){
+				printf("[FATAL ERROR] WRONG BOUNDARY AT PENDING COUNT\n");
+				exit(-1);
+			}
 		}
 		pending_asynch_count	= 0;
 #if DEBUG_COMPOSITION
@@ -1517,6 +1543,9 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 			printf("](%d)\n", composite_to);
 #endif
 			automaton_automaton_add_transition(composition, current_transition);
+			transitions_added_count++;
+			if((transitions_added_count % 10000) == 0)
+				printf("Partial Composition has %d states\n", tree->max_value);
 			automaton_transition_destroy(current_transition, true);
 			//expand frontier
 			bool found = false;
@@ -1542,6 +1571,23 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 				printf("]\n");
 #endif
 				frontier_count++;
+				if(frontier_count >= (frontier_size - 1)){
+					uint32_t new_size	= frontier_size * LIST_INCREASE_FACTOR;
+					uint32_t i;
+					uint32_t* new_frontier				= malloc(sizeof(uint32_t) * new_size * automata_count);
+					uint32_t* new_composite_frontier	= malloc(sizeof(uint32_t) * new_size);
+					for(i = 0; i < frontier_size * automata_count; i++){
+						new_frontier[i]					= frontier[i];
+					}
+					for(i = 0; i < frontier_size; i++){
+						new_composite_frontier[i]			= composite_frontier[i];
+					}
+					free(frontier);
+					free(composite_frontier);
+					frontier_size						= new_size;
+					frontier							= new_frontier;
+					composite_frontier					= new_composite_frontier;
+				}
 			}
 		}
 	}

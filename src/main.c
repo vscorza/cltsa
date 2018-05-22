@@ -162,7 +162,7 @@ int main (void){
 	*/
 	//run_parse_test("test5.fsp");
 	//run_fsp_tests(5);
-	run_parse_test("test6.fsp");
+	run_parse_test("test8.fsp");
 	return 0;    
 }
 
