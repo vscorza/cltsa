@@ -1062,7 +1062,7 @@ uint32_t automaton_automata_get_composite_state(uint32_t states_count, uint32_t*
 }
 automaton_automaton* automaton_automata_compose(automaton_automaton** automata, uint32_t automata_count, automaton_synchronization_type type){
 	clock_t begin = clock();
-
+	uint32_t max_frontier = 0;
 	uint32_t transitions_added_count	= 0;
 	uint32_t i, j, k, l, m, n, o;
 	uint32_t alphabet_count, fluents_count, alphabet_size;
@@ -1135,6 +1135,8 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 	}
 	/** create key tree **/
 	automaton_composite_tree* tree	= automaton_composite_tree_create(automata_count);
+	/** frontier bucket list **/
+	automaton_bucket_list* bucket_list	= automaton_bucket_list_create(BUCKET_SIZE);
 	/** get current state transitions list harness **/
 	uint32_t max_degree_sum		= 0;
 	uint32_t max_signals_count	= 0;
@@ -1188,15 +1190,26 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 
 	int32_t last_char	= -1;
 	uint32_t current_signal, current_other_signal;
+	long int found_hits	= 0;
+	long int found_misses	= 0;
 	//set initial state
 	for(i = 0; i < automata_count; i++){
 		frontier[i]	= automata[i]->initial_states[0];
 	}
 	uint32_t composite_initial_state	= automaton_composite_tree_get_key(tree, frontier);
 	composite_frontier[0]				= composite_initial_state;
+	automaton_bucket_add_entry(bucket_list, composite_initial_state);
+	max_frontier						= composite_initial_state;
 	automaton_automaton_add_initial_state(composition, composite_initial_state);
 	//consume frontier
 	while(frontier_count > 0){
+		from_state	= composite_frontier[frontier_count - 1];
+		automaton_bucket_remove_entry(bucket_list, from_state);
+		//check if frontier state was already decomposed
+		if(composition->out_degree[from_state] > 0){
+			frontier_count--;
+			continue;
+		}
 		//pop a state
 #if DEBUG_COMPOSITION
 		printf("<POP frontier>[");
@@ -1212,10 +1225,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 #if DEBUG_COMPOSITION
 		printf("]\n");
 #endif
-		from_state	= composite_frontier[frontier_count - 1];
 		frontier_count--;
-		//check if frontier state was already decomposed
-		if(composition->out_degree[from_state] > 0)continue;
 		/*if(automaton_automaton_has_state(composition, from_state)){
 			continue;
 		}*/
@@ -1484,10 +1494,6 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 						printf("]\n");
 #endif
 						processed_count++;
-						if(pending_count >= max_degree_sum){
-							printf("[FATAL ERROR] WRONG BOUNDARY AT PENDING COUNT\n");
-							exit(-1);
-						}
 					}
 				}
 				automaton_transition_destroy(current_transition, true);
@@ -1514,10 +1520,6 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 			}
 			pending_count	= processed_count;
 			processed_count	= 0;
-			if(pending_count >= max_degree_sum){
-				printf("[FATAL ERROR] WRONG BOUNDARY AT PENDING COUNT\n");
-				exit(-1);
-			}
 #if DEBUG_COMPOSITION
 			printf("\n");
 #endif
@@ -1544,10 +1546,6 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 			printf("]");
 #endif
 			pending_count++;
-			if(pending_count >= max_degree_sum){
-				printf("[FATAL ERROR] WRONG BOUNDARY AT PENDING COUNT\n");
-				exit(-1);
-			}
 		}
 		pending_asynch_count	= 0;
 #if DEBUG_COMPOSITION
@@ -1581,26 +1579,39 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 #endif
 			automaton_automaton_add_transition(composition, current_transition);
 			transitions_added_count++;
-			if((transitions_added_count % 100000) == 0){
+#if PRINT_PARTIAL_COMPOSITION
+			if((transitions_added_count % 300000) == 0){
 				/* here, do your time-consuming job */
 				printf("Partial Composition has [%09d] states and [%09d] transitions, frontier is of size [%09d] running for [%08f]s\n", tree->max_value, composition->transitions_count, frontier_count, (double)(clock() - begin) / CLOCKS_PER_SEC);
 
 			}
+#endif
 			automaton_transition_destroy(current_transition, true);
 			//expand frontier
 			bool found = false;
 			if(composition->out_degree[composite_to] > 0){
 				found = true;
+			}else if((max_frontier < composite_to) || automaton_bucket_has_entry(bucket_list, composite_to)){
+				found	= false;
 			}else{
-				for(n = 0; n < frontier_count; n++){
-					if(composite_frontier[n] == composite_to){
+				int32_t n2;
+				uint32_t max_frontier2	= composite_to;
+				for(n2 = frontier_count - 1; n2 >= 0 ; n2--){
+					if(composite_frontier[n2] > max_frontier2)
+						max_frontier2	= composite_frontier[n2];
+					if(composite_frontier[n2] == composite_to){
 						found	= true;
 						break;
 					}
 				}
+				if(!found)
+					max_frontier	= max_frontier2;
 			}
+			if(found){found_hits++;}else{found_misses++;}
 			if(!found){
 				composite_frontier[frontier_count]	= composite_to;
+				automaton_bucket_add_entry(bucket_list, composite_to);
+				if(max_frontier < composite_to)max_frontier	= composite_to;
 #if DEBUG_COMPOSITION
 				printf("<PUSH frontier> [");
 #endif
@@ -1635,7 +1646,10 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 			}
 		}
 	}
+	printf("TOTAL Composition has [%09d] states and [%09d] transitions, frontier is of size [%09d] running for [%08f]s\n", tree->max_value, composition->transitions_count, frontier_count, (double)(clock() - begin) / CLOCKS_PER_SEC);
+	printf("FOUND: [Misses:\t%li, \t hits:\t%li]\n", found_misses, found_hits);
 	//free structures
+	automaton_bucket_destroy(bucket_list); bucket_list	= NULL;
 	free(asynch_partial_states); asynch_partial_states = NULL;
 	free(asynch_partial_set_states); asynch_partial_set_states = NULL;
 	free(pending_asynch);	pending_asynch	= NULL;

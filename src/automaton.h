@@ -10,6 +10,7 @@
 #include <time.h>
 #include "automaton_utils.h"
 #include "parser_utils.h"
+#include "bucket_list.h"
 #include "y.tab.h"
 
 #define COMPOSE_SYNCH	1
@@ -18,6 +19,8 @@
 #define DEBUG_COMPOSITION 0
 #define DEBUG_COMPOSITE_TREE 0
 
+#define BUCKET_SIZE		10000139
+#define PRINT_PARTIAL_COMPOSITION 1
 /****************
 ==== ENUMS ==== 
 ****************/
