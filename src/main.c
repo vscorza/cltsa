@@ -25,9 +25,9 @@ void run_parse_test(char* test_file, char* test_name){
 	char buf[255];
 	sprintf(buf, "results/%s", test_name);
 
-	automaton_automata_context* ctx		= automaton_automata_context_create_from_syntax(parsed_program, buf, false);
+	automaton_automata_context* ctx		= automaton_automata_context_create_from_syntax(parsed_program, buf, true);
     automaton_automata_context_destroy(ctx);
-    ctx		= automaton_automata_context_create_from_syntax(parsed_program, buf, true);
+    ctx		= automaton_automata_context_create_from_syntax(parsed_program, buf, false);
     automaton_automata_context_destroy(ctx);
     automaton_program_syntax_destroy(parsed_program);
     fclose(yyin);
@@ -167,7 +167,7 @@ int main (void){
 	run_all_tests();
 	*/
 	//run_parse_test("test5.fsp");
-	//run_fsp_tests(5);
+	//run_fsp_tests(6);
 	run_parse_test("tests/test8.fsp", "test8");
 	return 0;    
 }

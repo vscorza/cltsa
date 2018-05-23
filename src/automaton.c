@@ -1062,7 +1062,6 @@ uint32_t automaton_automata_get_composite_state(uint32_t states_count, uint32_t*
 }
 automaton_automaton* automaton_automata_compose(automaton_automaton** automata, uint32_t automata_count, automaton_synchronization_type type){
 	clock_t begin = clock();
-	uint32_t max_frontier = 0;
 	uint32_t transitions_added_count	= 0;
 	uint32_t i, j, k, l, m, n, o;
 	uint32_t alphabet_count, fluents_count, alphabet_size;
@@ -1199,7 +1198,6 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 	uint32_t composite_initial_state	= automaton_composite_tree_get_key(tree, frontier);
 	composite_frontier[0]				= composite_initial_state;
 	automaton_bucket_add_entry(bucket_list, composite_initial_state);
-	max_frontier						= composite_initial_state;
 	automaton_automaton_add_initial_state(composition, composite_initial_state);
 	//consume frontier
 	while(frontier_count > 0){
@@ -1588,30 +1586,11 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 #endif
 			automaton_transition_destroy(current_transition, true);
 			//expand frontier
-			bool found = false;
-			if(composition->out_degree[composite_to] > 0){
-				found = true;
-			}else if((max_frontier < composite_to) || automaton_bucket_has_entry(bucket_list, composite_to)){
-				found	= false;
-			}else{
-				int32_t n2;
-				uint32_t max_frontier2	= composite_to;
-				for(n2 = frontier_count - 1; n2 >= 0 ; n2--){
-					if(composite_frontier[n2] > max_frontier2)
-						max_frontier2	= composite_frontier[n2];
-					if(composite_frontier[n2] == composite_to){
-						found	= true;
-						break;
-					}
-				}
-				if(!found)
-					max_frontier	= max_frontier2;
-			}
+			bool found = automaton_bucket_has_entry(bucket_list, composite_to);
 			if(found){found_hits++;}else{found_misses++;}
 			if(!found){
 				composite_frontier[frontier_count]	= composite_to;
 				automaton_bucket_add_entry(bucket_list, composite_to);
-				if(max_frontier < composite_to)max_frontier	= composite_to;
 #if DEBUG_COMPOSITION
 				printf("<PUSH frontier> [");
 #endif

@@ -19,7 +19,7 @@
 #define DEBUG_COMPOSITION 0
 #define DEBUG_COMPOSITE_TREE 0
 
-#define BUCKET_SIZE		10000139
+#define BUCKET_SIZE		1000000
 #define PRINT_PARTIAL_COMPOSITION 1
 /****************
 ==== ENUMS ==== 

@@ -39,7 +39,7 @@ bool automaton_bucket_add_entry(automaton_bucket_list* list, uint32_t entry){
 	uint32_t i;
 
 	if(bucket == NULL){
-		list->bucket_size[index]	= LIST_INITIAL_SIZE;
+		list->bucket_size[index]	= 2;
 		list->buckets[index]		= malloc(sizeof(uint32_t) * list->bucket_size[index]);
 		bucket						= list->buckets[index];
 	}
