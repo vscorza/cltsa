@@ -1,4 +1,0 @@
-/* AUTO-GENERATED_FILE
-	Automaton A */
-A = S_0,
-S_0 = (in-> S_2),,S_2 = (hidden-> S_0).

@@ -1,4 +1,0 @@
-/* AUTO-GENERATED_FILE
-	Automaton Composition */
-A = S_0,
-S_0 = (in-> S_1),S_1 = (<hidden,internal>-> S_2),S_2 = (in-> S_3|out-> S_0),S_3 = (out-> S_1).
