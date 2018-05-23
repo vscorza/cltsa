@@ -453,7 +453,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 			index						= automaton_parsing_tables_get_entry_index(tables, COMPOSITION_ENTRY_AUT, composition_syntax->components[i]->ident);
 			automata[i]					= tables->composition_entries[index]->valuation.automaton_value;
 		}
-		automaton_automaton* automaton	= automaton_automata_compose(automata, composition_syntax->count, SYNCHRONOUS);
+		automaton_automaton* automaton	= automaton_automata_compose(automata, composition_syntax->count, ASYNCHRONOUS);//SYNCHRONOUS);
 		tables->composition_entries[main_index]->solved	= true;
 		tables->composition_entries[main_index]->valuation_count			= 1;
 		tables->composition_entries[main_index]->valuation.automaton_value	= automaton;
