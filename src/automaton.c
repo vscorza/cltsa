@@ -1554,10 +1554,14 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 			automaton_transition_destroy(current_transition, true);
 			//expand frontier
 			bool found = false;
-			for(n = 0; n < frontier_count; n++){
-				if(composite_frontier[n] == composite_to){
-					found	= true;
-					break;
+			if(composition->out_degree[composite_to] > 0){
+				found = true;
+			}else{
+				for(n = 0; n < frontier_count; n++){
+					if(composite_frontier[n] == composite_to){
+						found	= true;
+						break;
+					}
 				}
 			}
 			if(!found){
