@@ -1,0 +1,4 @@
+/* AUTO-GENERATED_FILE
+	Automaton B */
+A = S_0,
+S_0 = (hidden-> S_2),,S_2 = (out-> S_0).

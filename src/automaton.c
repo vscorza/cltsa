@@ -349,6 +349,41 @@ void automaton_automaton_print(automaton_automaton* current_automaton, bool prin
 	if(suffix != NULL)
 		printf("%s", suffix);		
 }
+
+bool automaton_automaton_print_fsp(automaton_automaton* current_automaton, char* filename){
+	FILE *f = fopen(filename, "w");
+	if (f == NULL)
+	{
+	    printf("Error opening file!\n");
+	    return false;
+	}
+
+	fprintf(f, "/* AUTO-GENERATED_FILE\n\tAutomaton %s */\n", current_automaton->name);
+	automaton_automata_context* ctx		= current_automaton->context;
+	uint32_t i,j,k;
+	for(i = 0; i < current_automaton->initial_states_count; i++){
+		fprintf(f, "A = S_%d,\n", current_automaton->initial_states[i]);
+	}
+	automaton_transition* current_transition;
+	for(i = 0; i < current_automaton->transitions_count; i++){
+		for(j = 0; j < current_automaton->out_degree[i]; j++){
+			current_transition	= &(current_automaton->transitions[i][j]);
+			if(j == 0){fprintf(f, "S_%d = (", current_transition->state_from);}
+			if(current_transition->signals_count > 1)fprintf(f, "<");
+			for(k = 0; k < current_transition->signals_count; k++){
+				fprintf(f,"%s%s", ctx->global_alphabet->list[current_transition->signals[k]].name, (k < (current_transition->signals_count -1)? "," : ""));
+			}
+			if(current_transition->signals_count > 1)fprintf(f, ">");
+			fprintf(f,"-> S_%d", current_transition->state_to);
+			if(j < (current_automaton->out_degree[i] - 1))fprintf(f, "|");
+			if(j == (current_automaton->out_degree[i] - 1))fprintf(f, ")");
+		}
+		if(i == (current_automaton->transitions_count - 1)){fprintf(f, ".");}else{fprintf(f, ",");}
+	}
+	fclose(f);
+	return true;
+}
+
 void automaton_range_print(automaton_range* range, char* prefix, char* suffix){
 	if(prefix != NULL)
 		printf("%s", prefix);

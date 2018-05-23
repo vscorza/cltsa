@@ -207,6 +207,7 @@ void automaton_fluent_print(automaton_fluent* fluent, automaton_automata_context
 void automaton_valuation_print(automaton_valuation* valuation, automaton_automata_context* ctx, char* prefix, char* suffix);
 void automaton_automata_context_print(automaton_automata_context* ctx, char* prefix, char* suffix);
 void automaton_automaton_print(automaton_automaton* current_automaton, bool print_ctx, bool print_alphabet, bool print_valuations, char* prefix, char* suffix);
+bool automaton_automaton_print_fsp(automaton_automaton* current_automaton, char* filename);
 void automaton_range_print(automaton_range* range, char* prefix, char* suffix);
 void automaton_indexes_valuation_print(automaton_indexes_valuation* valuation, char* prefix, char* suffix);
 /** INDEXES VALUATION **/

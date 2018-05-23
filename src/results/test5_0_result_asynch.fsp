@@ -1,0 +1,4 @@
+/* AUTO-GENERATED_FILE
+	Automaton Composition */
+A = S_0,
+S_0 = (<in_1,in_2,in_3>-> S_1),S_1 = (<hidden,internal>-> S_2),S_2 = (<in_1,in_2,in_3>-> S_3|out-> S_0),S_3 = (out-> S_1).

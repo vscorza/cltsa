@@ -14,7 +14,7 @@ extern automaton_program_syntax* parsed_program;
 
 char* automataFile  =  "automata.txt";
 
-void run_parse_test(char* test_file){
+void run_parse_test(char* test_file, char* test_name){
 	FILE *fd;
     if (!(yyin = fopen(test_file, "r")))
     {
@@ -22,7 +22,11 @@ void run_parse_test(char* test_file){
     }
 	yyparse();
     //printf("\n\n%d\n\n\n", parsed_program->count);
-    automaton_automata_context* ctx		= automaton_automata_context_create_from_syntax(parsed_program, "test context");
+	char buf[255];
+	sprintf(buf, "results/%s", test_name);
+    automaton_automata_context* ctx		= automaton_automata_context_create_from_syntax(parsed_program, buf, true);
+    automaton_automata_context_destroy(ctx);
+    ctx		= automaton_automata_context_create_from_syntax(parsed_program, buf, false);
     automaton_automata_context_destroy(ctx);
     automaton_program_syntax_destroy(parsed_program);
     fclose(yyin);
@@ -30,11 +34,12 @@ void run_parse_test(char* test_file){
 
 void run_fsp_tests(uint32_t test_count){
 	uint32_t i;
-	char *buf[255];
+	char buf[255], buf2[255];
 	for(i = 1; i <= test_count; i++){
 		printf("\n\n==============\nRunning fsp test %d\n==============\n", i);
-		sprintf(buf, "test%d.fsp", i);
-		run_parse_test(buf);
+		sprintf(buf, "tests/test%d.fsp", i);
+		sprintf(buf2, "test%d", i);
+		run_parse_test(buf, buf2);
 	}
 }
 
@@ -161,8 +166,8 @@ int main (void){
 	run_all_tests();
 	*/
 	//run_parse_test("test5.fsp");
-	//run_fsp_tests(5);
-	run_parse_test("test8.fsp");
+	run_fsp_tests(5);
+	//run_parse_test("tests/test8.fsp", "test8");
 	return 0;    
 }
 
