@@ -1770,7 +1770,9 @@ uint32_t automaton_composite_tree_get_key(automaton_composite_tree* tree, uint32
 					last_entry		= current_entry;
 					current_entry	= current_entry->next;
 				}
+#if DEBUG_COMPOSITE_TREE
 				fflush(stdout);
+#endif
 			}
 			//if not found add whole strip from this point on
 			if(!found){
