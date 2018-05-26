@@ -1,0 +1,4 @@
+set Global_Alphabet = {in,hidden,internal,out,mute,jack,built}
+set Controllable_Alphabet = {out}
+A=(in->hidden->internal->A).B=(hidden->out->B).C=(mute->mute->mute->mute->mute->C).D=(jack->jack->jack->jack->jack->jack->jack->D).
+||F=(A||B||C||D).

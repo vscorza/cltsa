@@ -46,6 +46,12 @@ typedef struct automaton_composite_tree_entry_str{
 	struct automaton_composite_tree_entry_str* succ;
 } automaton_composite_tree_entry;
 typedef struct automaton_composite_tree_str{
+	uint32_t entries_size_count;
+	uint32_t entries_composite_size;
+	uint32_t* entries_size;
+	uint32_t* entries_count;
+	uint32_t entries_composite_count;
+	automaton_composite_tree_entry** entries_pool;
 	uint32_t key_length;
 	uint32_t max_value;
 	automaton_composite_tree_entry* first_entry;
@@ -109,6 +115,7 @@ typedef struct automaton_str{
 	uint32_t				states_count;
 	uint32_t				transitions_size;
 	uint32_t				transitions_count;
+	uint32_t				transitions_composite_count;
 	uint32_t				max_out_degree;
 	uint32_t				max_concurrent_degree;
 	uint32_t*				out_degree;
@@ -255,6 +262,7 @@ bool automaton_automaton_check_reachability(automaton_automaton* current_automat
 bool automaton_automaton_check_liveness(automaton_automaton* current_automaton, automaton_valuation target);
 /** COMPOSITE TREE **/
 automaton_composite_tree* automaton_composite_tree_create(uint32_t key_length);
+automaton_composite_tree_entry* automaton_composite_tree_entry_get_from_pool(automaton_composite_tree* tree);
 uint32_t automaton_composite_tree_get_key(automaton_composite_tree* tree, uint32_t* composite_key);
 void automaton_composite_tree_destroy(automaton_composite_tree* tree);
 void automaton_composite_tree_entry_print(automaton_composite_tree_entry* entry, bool comes_from_next, uint32_t* tabs);

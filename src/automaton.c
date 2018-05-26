@@ -106,6 +106,7 @@ void automaton_automaton_copy(automaton_automaton* source, automaton_automaton* 
 	target->local_alphabet			= malloc(sizeof(uint32_t) * target->local_alphabet_count);
 	for(i = 0; i < target->local_alphabet_count; i++){ target->local_alphabet[i]	= source->local_alphabet[i]; }
 	target->states_count			= source->states_count;
+	target->transitions_composite_count	= source->transitions_composite_count;
 	target->transitions_count		= source->transitions_count;
 	target->transitions_size		= source->transitions_size;
 	target->in_degree				= malloc(sizeof(uint32_t) * target->transitions_size);
@@ -548,6 +549,7 @@ void automaton_automaton_initialize(automaton_automaton* automaton, char* name, 
 	automaton->states_count				= 0;
 	automaton->transitions_size			= LIST_INITIAL_SIZE;
 	automaton->transitions_count		= 0;
+	automaton->transitions_composite_count	= 0;
 	automaton->max_out_degree			= 0;
 	automaton->max_concurrent_degree	= 0;
 	automaton->out_degree				= malloc(sizeof(uint32_t) * automaton->transitions_size);
@@ -972,11 +974,13 @@ void automaton_automaton_resize_to_state(automaton_automaton* current_automaton,
 			automaton_transition_copy(&(current_automaton->transitions[i][j]), &(next_trans[i][j]));
 			automaton_transition_destroy(&(current_automaton->transitions[i][j]), false);
 		}
+		free(current_automaton->transitions[i]);
 		next_inv_trans[i]				= malloc(sizeof(automaton_transition) * next_in_degree[i]);
 		for(j = 0; j < next_in_degree[i]; j++){ 
 			automaton_transition_copy(&(current_automaton->inverted_transitions[i][j]), &(next_inv_trans[i][j]));
 			automaton_transition_destroy(&(current_automaton->inverted_transitions[i][j]), false);
 		}
+		free(current_automaton->inverted_transitions[i]);
 	}
 	free(current_automaton->out_degree);
 	free(current_automaton->in_degree);
@@ -1034,9 +1038,12 @@ bool automaton_automaton_add_transition(automaton_automaton* current_automaton, 
 	if(current_automaton->max_concurrent_degree < transition->signals_count)
 		current_automaton->max_concurrent_degree	= transition->signals_count;
 	current_automaton->in_degree[to_state]++;
+	current_automaton->transitions_composite_count++;
 	return true;
 }
-bool automaton_automaton_remove_transition(automaton_automaton* current_automaton, automaton_transition* transition){ return false; }
+bool automaton_automaton_remove_transition(automaton_automaton* current_automaton, automaton_transition* transition){
+	exit(-1);
+}
 
 bool automaton_automaton_add_initial_state(automaton_automaton* current_automaton, uint32_t state){
 	//if(!automaton_automaton_has_state(current_automaton, state))return true;
@@ -1580,7 +1587,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 #if PRINT_PARTIAL_COMPOSITION
 			if((transitions_added_count % 300000) == 0){
 				/* here, do your time-consuming job */
-				printf("Partial Composition has [%09d] states and [%09d] transitions, frontier is of size [%09d] running for [%08f]s\n", tree->max_value, composition->transitions_count, frontier_count, (double)(clock() - begin) / CLOCKS_PER_SEC);
+				printf("Partial Composition has [%09d] states and [%09d] transitions, frontier is of size [%09d] running for [%08f]s\n", tree->max_value, composition->transitions_composite_count, frontier_count, (double)(clock() - begin) / CLOCKS_PER_SEC);
 
 			}
 #endif
@@ -1706,7 +1713,48 @@ automaton_composite_tree* automaton_composite_tree_create(uint32_t key_length){
 	tree->key_length	= key_length;
 	tree->max_value		= 0;
 	tree->first_entry	= NULL;
+	tree->entries_size_count		= 1;
+	tree->entries_composite_count	= 0;
+	tree->entries_size				= malloc(sizeof(uint32_t) * tree->entries_size_count);
+	tree->entries_count				= malloc(sizeof(uint32_t) * tree->entries_size_count);
+	tree->entries_size[0]			= LIST_INITIAL_SIZE;
+	tree->entries_count[0]			= 0;
+	tree->entries_composite_size	= tree->entries_size[0];
+	tree->entries_pool				= malloc(sizeof(automaton_composite_tree_entry*) * tree->entries_size_count);
+	tree->entries_pool[0]			= malloc(sizeof(automaton_composite_tree_entry) * tree->entries_size[0]);
 	return tree;
+}
+
+automaton_composite_tree_entry* automaton_composite_tree_entry_get_from_pool(automaton_composite_tree* tree){
+	uint32_t current_pool					= tree->entries_size_count - 1;
+	uint32_t i;
+	if(tree->entries_composite_count >= tree->entries_composite_size){
+		uint32_t new_size					= tree->entries_size[current_pool] * LIST_INCREASE_FACTOR;
+		tree->entries_composite_size		+= new_size;
+		tree->entries_size_count++;
+		current_pool						= tree->entries_size_count - 1;
+		uint32_t* new_entries_size		= malloc(sizeof(uint32_t) * tree->entries_size_count);
+		uint32_t* new_entries_count		= malloc(sizeof(uint32_t) * tree->entries_size_count);
+		automaton_composite_tree_entry** new_entries_pool	= malloc(sizeof(automaton_composite_tree_entry*) * tree->entries_size_count);
+		for(i = 0; i < (tree->entries_size_count - 1); i++){
+			new_entries_size[i]			= tree->entries_size[i];
+			new_entries_count[i]		= tree->entries_count[i];
+			new_entries_pool[i]					= tree->entries_pool[i];
+		}
+		new_entries_size[current_pool]	= new_size;
+		new_entries_count[current_pool]	= 0;
+		new_entries_pool[current_pool]			= malloc(sizeof(automaton_composite_tree_entry) * new_size);
+		free(tree->entries_size);
+		free(tree->entries_count);
+		free(tree->entries_pool);
+		tree->entries_size				= new_entries_size;
+		tree->entries_count				= new_entries_count;
+		tree->entries_pool				= new_entries_pool;
+	}
+
+	automaton_composite_tree_entry* entry	= &(tree->entries_pool[current_pool][tree->entries_count[current_pool]++]);
+	tree->entries_composite_count++;
+	return entry;
 }
 
 uint32_t automaton_composite_tree_get_key(automaton_composite_tree* tree, uint32_t* composite_key){
@@ -1725,7 +1773,7 @@ uint32_t automaton_composite_tree_get_key(automaton_composite_tree* tree, uint32
 #endif
 	if(tree->first_entry == NULL){
 		for(i = 0; i < tree->key_length; i++){
-			current_entry			= malloc(sizeof(automaton_composite_tree_entry));
+			current_entry			= automaton_composite_tree_entry_get_from_pool(tree);
 			current_entry->value	= composite_key[i];
 			current_entry->next		= NULL;
 			current_entry->succ 	= NULL;
@@ -1737,7 +1785,7 @@ uint32_t automaton_composite_tree_get_key(automaton_composite_tree* tree, uint32
 			}
 			last_entry = current_entry;
 			if(i == (tree->key_length -1)){
-				terminal_entry			= malloc(sizeof(automaton_composite_tree_entry));
+				terminal_entry			= automaton_composite_tree_entry_get_from_pool(tree);
 				terminal_entry->value	= tree->max_value++;
 				terminal_entry->succ	= NULL;
 				terminal_entry->next	= NULL;
@@ -1784,7 +1832,7 @@ uint32_t automaton_composite_tree_get_key(automaton_composite_tree* tree, uint32
 		}
 		//last_entry	= NULL;
 		for(j = i; j < tree->key_length; j++){
-			current_entry			= malloc(sizeof(automaton_composite_tree_entry));
+			current_entry			= automaton_composite_tree_entry_get_from_pool(tree);
 			current_entry->value	= composite_key[j];
 #if DEBUG_COMPOSITE_TREE
 			printf("%d.", composite_key[j]);
@@ -1798,7 +1846,7 @@ uint32_t automaton_composite_tree_get_key(automaton_composite_tree* tree, uint32
 			}
 			last_entry = current_entry;
 			if(j == (tree->key_length -1)){
-				terminal_entry			= malloc(sizeof(automaton_composite_tree_entry));
+				terminal_entry			= automaton_composite_tree_entry_get_from_pool(tree);
 				terminal_entry->value	= tree->max_value++;
 				terminal_entry->succ	= NULL;
 				terminal_entry->next	= NULL;
@@ -1822,7 +1870,7 @@ void automaton_composite_tree_destroy_entry(automaton_composite_tree* tree, auto
 		tree_entry->next = NULL;
 	}
 	tree_entry->value = 0;
-	free(tree_entry);
+	//free(tree_entry);
 }
 
 void automaton_composite_tree_destroy(automaton_composite_tree* tree){
@@ -1832,5 +1880,14 @@ void automaton_composite_tree_destroy(automaton_composite_tree* tree){
 	}
 	tree->max_value 	= 0;
 	tree->key_length	= 0;
+	uint32_t i;
+	for(i = 0; i < tree->entries_size_count; i++)free(tree->entries_pool[i]);free(tree->entries_pool);
+	free(tree->entries_size);free(tree->entries_count);
+	tree->entries_size_count		= 0;
+	tree->entries_composite_count	= 0;
+	tree->entries_composite_size	= 0;
+	tree->entries_pool				= NULL;
+	tree->entries_size				= NULL;
+	tree->entries_count				= NULL;
 	free(tree);
 }
