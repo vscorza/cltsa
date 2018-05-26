@@ -3,6 +3,7 @@ TODO:
 SPRINT1
 - do indexed states first to test composition performance
 - evaluation of expressions with free variables (needs a valuation context) (should be able to evaluate fluent valuations and constants, maybe even a random value generator with constant seed)
+- apply valuations to states
 - review and document code (particualarly compose)
 SPRINT2
 - parse assertions, goals
