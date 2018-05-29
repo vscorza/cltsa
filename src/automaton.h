@@ -15,12 +15,17 @@
 
 #define COMPOSE_SYNCH	1
 #define PARTIAL_SHARE	2
+#define FIXED_SIGNALS_COUNT	4
+#define SIGNALS_INCREASE_FACTOR 2
+#define TRANSITIONS_INITIAL_SIZE 2
 
 #define DEBUG_COMPOSITION 0
 #define DEBUG_COMPOSITE_TREE 0
 
 #define BUCKET_SIZE		1000000
 #define PRINT_PARTIAL_COMPOSITION 1
+
+typedef uint16_t signal_t;
 /****************
 ==== ENUMS ==== 
 ****************/
@@ -82,15 +87,17 @@ typedef struct automaton_transition_str{
 	uint32_t	state_from;
 	uint32_t	state_to;
 	uint32_t	signals_count;
-	uint32_t*	signals; 
+	uint32_t	signals_size;
+	signal_t	signals[FIXED_SIGNALS_COUNT];
+	signal_t*	other_signals;
 } automaton_transition;
 
 typedef struct automaton_fluent_str{
 	char*		name;
 	uint32_t	starting_signals_count;
-	uint32_t*	starting_signals;
+	signal_t*	starting_signals;
 	uint32_t	ending_signals_count;
-	uint32_t*	ending_signals;
+	signal_t*	ending_signals;
 	bool		initial_valuation;
 } automaton_fluent;
 
@@ -106,7 +113,14 @@ typedef struct automata_context_str{
 	uint32_t			global_fluents_count;
 	automaton_fluent*	global_fluents;
 } automaton_automata_context;
-
+typedef struct automaton_transitions_pool_str{
+	uint32_t entries_size_count;
+	uint32_t entries_composite_size;
+	uint32_t* entries_size;
+	uint32_t* entries_count;
+	uint32_t entries_composite_count;
+	automaton_transition** entries_pool;
+}automaton_transitions_pool;
 typedef struct automaton_str{
 	char*					name;
 	automaton_automata_context*		context;
@@ -119,14 +133,17 @@ typedef struct automaton_str{
 	uint32_t				max_out_degree;
 	uint32_t				max_concurrent_degree;
 	uint32_t*				out_degree;
+	uint32_t*				out_size;
 	automaton_transition**	transitions;			// S -> list of transitions (s,s')
 	uint32_t*				in_degree;
+	uint32_t*				in_size;
 	automaton_transition**	inverted_transitions;
 	uint32_t				initial_states_count;
 	uint32_t*				initial_states;
 	uint32_t				valuations_size;
 	uint32_t				valuations_count;
 	automaton_valuation*	valuations;
+	automaton_transitions_pool*	transitions_pool;
 } automaton_automaton;
 
 /** AUTOMATA **/
@@ -168,6 +185,7 @@ automaton_automaton* automaton_automaton_clone(automaton_automaton* source);
 automaton_automata* automaton_automata_clone(automaton_automata* source);
 automaton_range* automaton_range_clone(automaton_range* source);
 automaton_indexes_valuation* automaton_indexes_valuation_clone(automaton_indexes_valuation* source);
+automaton_transitions_pool* automaton_transitions_pool_clone(automaton_transitions_pool* source);
 /** COPYING FUNCTIONS **/
 void automaton_signal_event_copy(automaton_signal_event* source,automaton_signal_event* target);
 void automaton_alphabet_copy(automaton_alphabet* source,automaton_alphabet* target);
@@ -228,7 +246,7 @@ void automaton_indexes_valuation_set_value(automaton_indexes_valuation* valuatio
 /** ALPHABET **/
 bool automaton_alphabet_has_signal_event(automaton_alphabet* alphabet, automaton_signal_event* signal_event);
 bool automaton_alphabet_add_signal_event(automaton_alphabet* alphabet, automaton_signal_event* signal_event);
-uint32_t automaton_alphabet_get_signal_index(automaton_alphabet* alphabet, automaton_signal_event* signal_event);
+signal_t automaton_alphabet_get_signal_index(automaton_alphabet* alphabet, automaton_signal_event* signal_event);
 /** TRANSITION **/
 bool automaton_transition_has_signal_event(automaton_transition* transition, automaton_automata_context* ctx, automaton_signal_event* signal_event);
 bool automaton_transition_add_signal_event(automaton_transition* transition, automaton_automata_context* ctx, automaton_signal_event* signal_event);
