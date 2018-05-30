@@ -1,3 +1,4 @@
 src/results/*.fsp
 *~
 *.o
+callgrind.out.*
