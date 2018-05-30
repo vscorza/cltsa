@@ -434,6 +434,27 @@ automaton_alphabet* automaton_parsing_tables_get_global_alphabet(automaton_parsi
 */
 	return global_alphabet;
 }
+automaton_indexes_valuation* automaton_indexes_valuation_create_from_indexes(automaton_parsing_tables* tables, automaton_indexes_syntax* indexes){
+	automaton_indexes_valuation* valuation	= automaton_indexes_valuation_create();
+	valuation->count	= indexes->count;
+	valuation->current_values	= malloc(sizeof(int32_t) * valuation->count);
+	valuation->ranges			= malloc(sizeof(automaton_range*) * valuation->count);
+	uint32_t i;
+	int32_t lower_index, upper_index;
+	char name[40];
+	automaton_range* range;
+	valuation->total_combinations	= 1;
+	for(i = 0; i < valuation->count; i++){
+		automaton_index_syntax_get_range(tables, indexes->indexes[i], &(lower_index), &(upper_index));
+		sprintf(name, "range_%i", i);
+		range	= automaton_range_create(name, lower_index, upper_index);
+		valuation->current_values[i]	= lower_index;
+		valuation->ranges[i]			= range;
+		valuation->total_combinations	*= (upper_index - lower_index);
+	}
+	return valuation;
+}
+
 bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, automaton_composition_syntax* composition_syntax
 		, automaton_parsing_tables* tables, bool is_synchronous){
 	int32_t main_index, index, i, j, k, l, m, n, o, p;
@@ -453,14 +474,14 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 			index						= automaton_parsing_tables_get_entry_index(tables, COMPOSITION_ENTRY_AUT, composition_syntax->components[i]->ident);
 			automata[i]					= tables->composition_entries[index]->valuation.automaton_value;
 		}
-		automaton_automaton* automaton	= automaton_automata_compose(automata, composition_syntax->count, is_synchronous? SYNCHRONOUS : ASYNCHRONOUS);//SYNCHRONOUS);
+		automaton_automaton* automaton	= automaton_automata_compose(automata, composition_syntax->count, is_synchronous? CONCURRENT : INTERLEAVED);//SYNCHRONOUS);
 		tables->composition_entries[main_index]->solved	= true;
 		tables->composition_entries[main_index]->valuation_count			= 1;
 		tables->composition_entries[main_index]->valuation.automaton_value	= automaton;
 		free(automata);
 		return false;
 	}else{//SINGLE COMPONENT (AUTOMATON)
-		//build local alphabet
+		/** BUILD LOCAL ALPHABET **/
 		uint32_t	local_alphabet_count	= 0;
 		int32_t		element_global_index;
 		int32_t		element_position;
@@ -473,16 +494,17 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 		automaton_trace_label_atom_syntax* trace_label_atom;
 		automaton_label_syntax* atom_label;
 		char* element_to_find;
+		automaton_indexes_valuation* current_valuation;
 		for(i = 0; i < (int32_t)composition_syntax->count; i++){
 			state	= composition_syntax->states[i];
+
 			for(j = 0; j < (int32_t)state->transitions_count; j++){
 				transition	= state->transitions[j];
-				//TODO: take indexes and guard into consideration
+				//TODO: take guards into consideration
 				for(k = 0; k < (int32_t)transition->count; k++){
 					trace_label	= transition->labels[k];
 					for(l = 0; l < (int32_t)trace_label->count; l++){
 						trace_label_atom	= trace_label->atoms[l];
-						//TODO: take indexes into computation
 						atom_label			= trace_label_atom->label;
 						if(!atom_label->is_set){
 
@@ -683,6 +705,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 			ret_value = NULL;
 			count = 0;
 		}
+		/** CREATE AUTOMATON **/
 		automaton_automaton* automaton	= automaton_automaton_create(composition_syntax->name, ctx, local_alphabet_count, local_alphabet);
 		free(local_alphabet);
 		//add transitions
@@ -691,127 +714,70 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 		int32_t labels_list_count	= 0;
 		int32_t label_position;
 		uint32_t from_state, to_state, current_from_state;
-		//bool aut_push_string_to_list(char*** list, int32_t* list_count, char* element, int32_t* position, bool repeat_values);
-		//int32_t aut_string_list_index_of(char** list, int32_t list_count, char* element);
 		automaton_transition* automaton_transition;
 		uint32_t first_state;
 		bool first_state_set	= false;
 		uint32_t added_state	= composition_syntax->count + 1;
-/*
- typedef struct automaton_state_label_syntax_str{
-	char* name;
-	struct automaton_indexes_syntax_str* indexes;
-}automaton_state_label_syntax;
-typedef struct automaton_state_syntax_str{
-	bool is_ref;
-	struct automaton_state_label_syntax_str* label;
-	struct automaton_state_label_syntax_str* ref;
-	uint32_t transitions_count;
-	struct automaton_transition_syntax_str** transitions;
-}automaton_state_syntax;
- * */
+		char label_indexes[255];
 
 		for(i = 0; i < (int32_t)composition_syntax->count; i++){
 			state	= composition_syntax->states[i];
 			if(state->ref != NULL){
 				//TODO: solve state refs in automaton				
-				continue;
+				printf("ERROR: state refs not yet supported\n");exit(-1);
 			}
-			aut_push_string_to_list(&labels_list, &labels_list_count, state->label->name, &label_position, false);
-			current_from_state	= from_state	= (uint32_t) label_position;
-			if(!first_state_set){
-				automaton_automaton_add_initial_state(automaton, from_state);
-				first_state_set	= true;
-			}
-			for(j = 0; j < (int32_t)state->transitions_count; j++){
-				current_from_state	= from_state;
-				transition	= state->transitions[j];
-				aut_push_string_to_list(&labels_list, &labels_list_count, transition->to_state->name, &label_position, false);
-				to_state	= (uint32_t)label_position;
-				//TODO: take indexes and guard into consideration
-				for(k = 0; k < (int32_t)transition->count; k++){
-					if(k < (((int32_t)transition->count) - 1)){
-						to_state	= added_state++;
-					}else{
-						to_state	= (uint32_t)label_position;
-					}
-					automaton_transition	= automaton_transition_create(current_from_state, to_state);
-					current_from_state	= to_state;
-					trace_label	= transition->labels[k];
-					for(l = 0; l < (int32_t)trace_label->count; l++){
-						trace_label_atom	= trace_label->atoms[l];
-						//TODO: take indexes into computation
-						atom_label			= trace_label_atom->label;
-						if(!atom_label->is_set){
-							if(atom_label->indexes != NULL){
-								if(ret_value != NULL){
-									for(n = 0; n < count; n++){
-										free(ret_value[n]);
-									}
-									free(ret_value);
-									ret_value = NULL;
-									count = 0;
-								}
-								ret_value	= malloc(sizeof(char*));
-								aut_dupstr(&(ret_value[0]),  atom_label->string_terminal);
-								count 		= 1;
-								automaton_indexes_syntax_eval_strings(tables, &ret_value, &count, atom_label->indexes);
-								for(n = 0; n < count; n++){
-									element_to_find		= ret_value[n];
-									element_global_index= -1;
-									element_position	= 0;
-									for(m = 0; m < (int32_t)ctx->global_alphabet->count; m++){
-										if(strcmp(ctx->global_alphabet->list[m].name, element_to_find) == 0){
-											element_global_index = m;
-											break;
-										}
-									}
-									if(element_global_index >= 0)
-										automaton_transition_add_signal_event(automaton_transition, ctx, &(ctx->global_alphabet->list[element_global_index]));
-								}
-							}else{
-								element_global_index= -1;
-								element_position	= 0;
-								for(m = 0; m < (int32_t)ctx->global_alphabet->count; m++){
-									if(strcmp(ctx->global_alphabet->list[m].name, atom_label->string_terminal) == 0){
-										element_global_index = m;
-										break;
-									}
-								}
-								if(element_global_index >= 0)
-									automaton_transition_add_signal_event(automaton_transition, ctx, &(ctx->global_alphabet->list[element_global_index]));
-							}
+			if(state->label->indexes != NULL)
+				current_valuation 	= automaton_indexes_valuation_create_from_indexes(tables, state->label->indexes);
+			else
+				current_valuation	= NULL;
+			bool first_run_from	= true;
+			while(first_run_from || (current_valuation != NULL && automaton_indexes_valuation_has_next(current_valuation))){
+				first_run_from = false;
+
+				automaton_indexes_valuation_set_label(current_valuation, state->label->name, label_indexes);
+				aut_push_string_to_list(&labels_list, &labels_list_count, label_indexes, &label_position, false);
+				current_from_state	= from_state	= (uint32_t) label_position;
+				if(!first_state_set){
+					automaton_automaton_add_initial_state(automaton, from_state);
+					first_state_set	= true;
+				}
+				for(j = 0; j < (int32_t)state->transitions_count; j++){
+
+					current_from_state	= from_state;
+					transition	= state->transitions[j];
+					automaton_indexes_valuation_set_to_label(current_valuation, state->label->indexes, transition->to_state->indexes,transition->to_state->name, label_indexes);
+					aut_push_string_to_list(&labels_list, &labels_list_count, label_indexes, &label_position, false);
+					to_state	= (uint32_t)label_position;
+					//TODO: take indexes and guard into consideration
+					for(k = 0; k < (int32_t)transition->count; k++){
+						if(k < (((int32_t)transition->count) - 1)){
+							to_state	= added_state++;
 						}else{
-							for(n = 0; n < (int32_t)(atom_label->set->count); n++){
-								for(o = 0; o < (int32_t)(atom_label->set->labels_count[n]); o++){
-									if (atom_label->set->labels[n][o]->indexes != NULL){
-										if(ret_value != NULL){
-											for(n = 0; n < count; n++){
-												free(ret_value[n]);
-											}
-											free(ret_value);
-											ret_value = NULL;
-											count = 0;
+							to_state	= (uint32_t)label_position;
+						}
+						automaton_transition	= automaton_transition_create(current_from_state, to_state);
+						current_from_state	= to_state;
+						trace_label	= transition->labels[k];
+						for(l = 0; l < (int32_t)trace_label->count; l++){
+							trace_label_atom	= trace_label->atoms[l];
+							//TODO: take indexes into computation
+							atom_label			= trace_label_atom->label;
+							if(!atom_label->is_set){
+								if(atom_label->indexes != NULL){
+									if(ret_value != NULL){
+										for(n = 0; n < count; n++){
+											free(ret_value[n]);
 										}
-										ret_value	= malloc(sizeof(char*));
-										aut_dupstr(&(ret_value[0]),  atom_label->set->labels[n][o]->string_terminal);
-										count 		= 1;
-										automaton_indexes_syntax_eval_strings(tables, &ret_value, &count, atom_label->set->labels[n][o]->indexes);
-										for(p = 0; p < count; p++){
-											element_to_find		= ret_value[p];
-											element_global_index= -1;
-											element_position	= 0;
-											for(m = 0; m < (int32_t)ctx->global_alphabet->count; m++){
-												if(strcmp(ctx->global_alphabet->list[m].name, element_to_find) == 0){
-													element_global_index = m;
-													break;
-												}
-											}
-											if(element_global_index >= 0)
-												automaton_transition_add_signal_event(automaton_transition, ctx, &(ctx->global_alphabet->list[element_global_index]));
-										}
-									}else{
-										element_to_find		= atom_label->set->labels[n][o]->string_terminal;
+										free(ret_value);
+										ret_value = NULL;
+										count = 0;
+									}
+									ret_value	= malloc(sizeof(char*));
+									aut_dupstr(&(ret_value[0]),  atom_label->string_terminal);
+									count 		= 1;
+									automaton_indexes_syntax_eval_strings(tables, &ret_value, &count, atom_label->indexes);
+									for(n = 0; n < count; n++){
+										element_to_find		= ret_value[n];
 										element_global_index= -1;
 										element_position	= 0;
 										for(m = 0; m < (int32_t)ctx->global_alphabet->count; m++){
@@ -823,14 +789,71 @@ typedef struct automaton_state_syntax_str{
 										if(element_global_index >= 0)
 											automaton_transition_add_signal_event(automaton_transition, ctx, &(ctx->global_alphabet->list[element_global_index]));
 									}
+								}else{
+									element_global_index= -1;
+									element_position	= 0;
+									for(m = 0; m < (int32_t)ctx->global_alphabet->count; m++){
+										if(strcmp(ctx->global_alphabet->list[m].name, atom_label->string_terminal) == 0){
+											element_global_index = m;
+											break;
+										}
+									}
+									if(element_global_index >= 0)
+										automaton_transition_add_signal_event(automaton_transition, ctx, &(ctx->global_alphabet->list[element_global_index]));
+								}
+							}else{
+								for(n = 0; n < (int32_t)(atom_label->set->count); n++){
+									for(o = 0; o < (int32_t)(atom_label->set->labels_count[n]); o++){
+										if (atom_label->set->labels[n][o]->indexes != NULL){
+											if(ret_value != NULL){
+												for(n = 0; n < count; n++){
+													free(ret_value[n]);
+												}
+												free(ret_value);
+												ret_value = NULL;
+												count = 0;
+											}
+											ret_value	= malloc(sizeof(char*));
+											aut_dupstr(&(ret_value[0]),  atom_label->set->labels[n][o]->string_terminal);
+											count 		= 1;
+											automaton_indexes_syntax_eval_strings(tables, &ret_value, &count, atom_label->set->labels[n][o]->indexes);
+											for(p = 0; p < count; p++){
+												element_to_find		= ret_value[p];
+												element_global_index= -1;
+												element_position	= 0;
+												for(m = 0; m < (int32_t)ctx->global_alphabet->count; m++){
+													if(strcmp(ctx->global_alphabet->list[m].name, element_to_find) == 0){
+														element_global_index = m;
+														break;
+													}
+												}
+												if(element_global_index >= 0)
+													automaton_transition_add_signal_event(automaton_transition, ctx, &(ctx->global_alphabet->list[element_global_index]));
+											}
+										}else{
+											element_to_find		= atom_label->set->labels[n][o]->string_terminal;
+											element_global_index= -1;
+											element_position	= 0;
+											for(m = 0; m < (int32_t)ctx->global_alphabet->count; m++){
+												if(strcmp(ctx->global_alphabet->list[m].name, element_to_find) == 0){
+													element_global_index = m;
+													break;
+												}
+											}
+											if(element_global_index >= 0)
+												automaton_transition_add_signal_event(automaton_transition, ctx, &(ctx->global_alphabet->list[element_global_index]));
+										}
+									}
 								}
 							}
 						}
+						automaton_automaton_add_transition(automaton, automaton_transition);
+						automaton_transition_destroy(automaton_transition, true);
 					}
-					automaton_automaton_add_transition(automaton, automaton_transition);
-					automaton_transition_destroy(automaton_transition, true);
 				}
-
+			}
+			if(current_valuation != NULL){
+				automaton_indexes_valuation_destroy(current_valuation);current_valuation = NULL;
 			}
 		}
 		if(ret_value != NULL){
@@ -862,6 +885,52 @@ bool automaton_statement_syntax_to_constant(automaton_automata_context* ctx, aut
 	return false;
 }
 
+void automaton_indexes_valuation_increase(automaton_indexes_valuation* valuation){
+	if(!automaton_indexes_valuation_has_next(valuation))return;
+	uint32_t i, j, k;
+	int32_t *lower_index, *upper_index, *current_index, position;
+
+	j	= valuation->count -1;
+	valuation->current_values[j]++;
+	while(valuation->current_values[j] > valuation->ranges[j]->upper_value){
+		valuation->current_values[j] 	= valuation->ranges[j]->lower_value;
+		if(j == 0)break;
+		j--;
+		valuation->current_values[j]++;
+	}
+	valuation->current_combination++;
+}
+bool automaton_indexes_valuation_has_next(automaton_indexes_valuation* valuation){
+	return valuation->current_combination < (valuation->total_combinations - 1);
+}
+void automaton_indexes_valuation_set_to_label(automaton_indexes_valuation* valuation, automaton_indexes_syntax* from_indexes, automaton_indexes_syntax* to_indexes, char* label, char* target){
+	if(valuation == NULL || from_indexes == NULL || to_indexes == NULL){
+		strcpy(target, label);
+		return;
+	}
+	uint32_t i, j;
+
+	sprintf(target, "%s", label);
+	char name[40];
+	for(i = 0; i < from_indexes->count; i++){
+		for(j = 0; j < to_indexes->count; j++){
+			if(strcmp(from_indexes->indexes[i]->lower_ident, to_indexes->indexes[j]->lower_ident) == 0){
+				sprintf(target, "%s_%d", target, valuation->current_values[i]);
+			}
+		}
+	}
+}
+void automaton_indexes_valuation_set_label(automaton_indexes_valuation* valuation, char* label, char* target){
+	if(valuation == NULL){
+		strcpy(target, label);
+		return;
+	}
+	sprintf(target, "%s", label);
+	uint32_t i;
+	for(i = 0; i < valuation->count; i++){
+		sprintf(target, "%s_%d", target, valuation->current_values[i]);
+	}
+}
 void automaton_indexes_syntax_eval_strings(automaton_parsing_tables* tables, char*** a, int32_t* a_count, automaton_indexes_syntax* indexes){
 	uint32_t i, j, k;
 	int32_t *lower_index, *upper_index, *current_index, position;
@@ -953,6 +1022,7 @@ void automaton_index_syntax_get_range(automaton_parsing_tables* tables, automato
 		}
 	}
 }
+
 
 automaton_range* automaton_range_syntax_evaluate(automaton_parsing_tables *tables, char* name, automaton_expression_syntax *range_def_syntax){
 	int32_t lower_value	= automaton_expression_syntax_evaluate(tables, range_def_syntax->first);

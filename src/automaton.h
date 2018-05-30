@@ -37,8 +37,9 @@ typedef enum aumaton_signal_type_enum{
 } automaton_signal_type;
 
 typedef enum aumaton_synchronization_type_enum{
-	SYNCHRONOUS 	= 0,
-	ASYNCHRONOUS	= 1
+	CONCURRENT 	= 0,
+	INTERLEAVED	= 1,
+	SYNCHRONOUS = 2
 } automaton_synchronization_type;
 
 /****************
@@ -66,6 +67,8 @@ typedef struct automaton_indexes_valuation_str{
 	uint32_t count;
 	int32_t	*current_values;
 	struct automaton_range_str **ranges;
+	int32_t total_combinations;
+	int32_t current_combination;
 }automaton_indexes_valuation;
 typedef struct automaton_range_str{
 	char*		name;
@@ -185,7 +188,6 @@ automaton_automaton* automaton_automaton_clone(automaton_automaton* source);
 automaton_automata* automaton_automata_clone(automaton_automata* source);
 automaton_range* automaton_range_clone(automaton_range* source);
 automaton_indexes_valuation* automaton_indexes_valuation_clone(automaton_indexes_valuation* source);
-automaton_transitions_pool* automaton_transitions_pool_clone(automaton_transitions_pool* source);
 /** COPYING FUNCTIONS **/
 void automaton_signal_event_copy(automaton_signal_event* source,automaton_signal_event* target);
 void automaton_alphabet_copy(automaton_alphabet* source,automaton_alphabet* target);

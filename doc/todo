@@ -1,8 +1,7 @@
 TODO:
-- revisar los mallocs de transition, a ver si no se puede hacer un pool de arrays para eso
 SPRINT1
+- evaluation of expressions with free variables (needs a valuation context)
 - do indexed states first to test composition performance
-- evaluation of expressions with free variables (needs a valuation context) (should be able to evaluate fluent valuations and constants, maybe even a random value generator with constant seed)
 - apply valuations to states
 - review and document code (particualarly compose)
 SPRINT2
@@ -12,8 +11,9 @@ SPRINT2
 - implement reachability
 - implement gr1
 SPRINT3
-	yacc and automaton_context -> define a way to index concurrent labels, it is not the same to index particular labels (thus adding new transitions
+- yacc and automaton_context -> define a way to index concurrent labels, it is not the same to index particular labels (thus adding new transitions
 		for each index) than to add index to concurrent labels (adding new transitions on the whole concurrent set)
+- evaluation of expressions with free variables should be able to evaluate fluent valuations and constants, maybe even a random value generator with constant seed
 range R = 1..2
 A = ( <a, b[i:R], c[j:R]> -> A). should translate to A = ( {<a,b.1,c.1>, <a,b.2,c.1>, <a,b.1,c.2>, <a,b.2,c.2>}->A).
 A = ( <a, b[i], c[i]>[i:R] -> A). should translate to A = ( {<a,b.1,c.1>, <a,b.2,c.2>}->A).

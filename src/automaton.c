@@ -480,6 +480,8 @@ automaton_indexes_valuation* automaton_indexes_valuation_create(){
 	valuation->count			= 0;
 	valuation->current_values	= NULL;
 	valuation->ranges			= NULL;
+	valuation->current_combination	= 0;
+	valuation->total_combinations	= 0;
 	return valuation;
 }
 /** INIT FUNCTIONS **/
@@ -1391,7 +1393,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 				//if does not overlap pass forward
 				if(!overlaps){
 					//for every other asynch transition add posible combination if applicable
-					if(type == SYNCHRONOUS){
+					if(type == CONCURRENT){
 						if(pending_asynch_count > 0){
 #if DEBUG_COMPOSITION
 							printf("\t<PUSH asynch>(no overlap*) [");
@@ -1727,8 +1729,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 			}
 		}
 	}
-	printf("TOTAL Composition has [%09d] states and [%09d] transitions, frontier is of size [%09d] running for [%08f]s\n", tree->max_value, composition->transitions_count, frontier_count, (double)(clock() - begin) / CLOCKS_PER_SEC);
-	printf("FOUND: [Misses:\t%li, \t hits:\t%li]\n", found_misses, found_hits);
+	printf("TOTAL Composition has [%09d] states and [%09d] transitions run for [%08f] KEY ACCESS.: [Misses:%li,hits:%li]\n", tree->max_value, composition->transitions_composite_count, (double)(clock() - begin) / CLOCKS_PER_SEC, found_misses, found_hits);
 	//free structures
 	automaton_bucket_destroy(bucket_list); bucket_list	= NULL;
 	free(asynch_partial_states); asynch_partial_states = NULL;

@@ -24,8 +24,8 @@ void run_parse_test(char* test_file, char* test_name){
     //printf("\n\n%d\n\n\n", parsed_program->count);
 	char buf[255];
 	sprintf(buf, "results/%s", test_name);
-	bool FIRST_IS_SYNCH	= false;
-	automaton_automata_context* ctx		= automaton_automata_context_create_from_syntax(parsed_program, buf, FIRST_IS_SYNCH);
+	bool FIRST_IS_CONCURRENT	= false;
+	automaton_automata_context* ctx		= automaton_automata_context_create_from_syntax(parsed_program, buf, FIRST_IS_CONCURRENT);
     automaton_automata_context_destroy(ctx);
     /*
     ctx		= automaton_automata_context_create_from_syntax(parsed_program, buf, !FIRST_IS_SYNCH);
@@ -136,7 +136,7 @@ void run_automaton_tests(){
 	automaton_automaton** automata		= malloc(sizeof(automaton_automaton*) * 2);
 	automata[0]							= automaton_1;
 	automata[1]							= automaton_2;
-	automaton_automaton* composition	= automaton_automata_compose(automata, 2, SYNCHRONOUS);
+	automaton_automaton* composition	= automaton_automata_compose(automata, 2, CONCURRENT);
 	free(automata); automata = NULL;
 	automaton_automaton_print(composition, false, true, true, "\t", "\n");
 	automaton_automaton_destroy(composition); composition = NULL;
@@ -169,8 +169,8 @@ int main (void){
 	run_all_tests();
 	*/
 	//run_parse_test("test5.fsp");
-	//run_fsp_tests(10);
-	run_parse_test("tests/test8.fsp", "test8");
+	run_fsp_tests(10);
+	//run_parse_test("tests/test8.fsp", "test8");
 	return 0;    
 }
 
