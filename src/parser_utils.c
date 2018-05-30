@@ -122,6 +122,7 @@ automaton_index_syntax* automaton_index_syntax_create(bool is_expr, bool is_rang
 	automaton_index_syntax* index	= malloc(sizeof(automaton_index_syntax));
 
 	if(is_expr){
+		index->is_expr		= true;
 		index->expr			= expr;
 		index->is_range		= false;
 		index->lower_ident	= NULL;

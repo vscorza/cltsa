@@ -719,12 +719,74 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 		bool first_state_set	= false;
 		uint32_t added_state	= composition_syntax->count + 1;
 		char label_indexes[255];
+		label_indexes[0] = '\0';
+
+		//HANDLE REF STATES
+		//initialize states list
+		for(i = 0; i < (int32_t)composition_syntax->count; i++){
+			state	= composition_syntax->states[i];
+			if(state->label->indexes != NULL)
+				current_valuation 	= automaton_indexes_valuation_create_from_indexes(tables, state->label->indexes);
+			else
+				current_valuation	= NULL;
+			bool first_run_from	= true;
+
+			automaton_indexes_valuation_set_label(current_valuation, state->label->name, label_indexes);
+			aut_push_string_to_list(&labels_list, &labels_list_count, label_indexes, &label_position, false);
+
+			if(current_valuation != NULL){
+				automaton_indexes_valuation_destroy(current_valuation);
+				current_valuation	= NULL;
+			}
+		}
+
+		//update ref states
+		for(i = 0; i < (int32_t)composition_syntax->count; i++){
+			state	= composition_syntax->states[i];
+			if(state->ref != NULL){
+				if(state->label->indexes != NULL)
+					current_valuation 	= automaton_indexes_valuation_create_from_indexes(tables, state->label->indexes);
+				else
+					current_valuation	= NULL;
+				label_indexes[0] = '\0';
+				automaton_indexes_valuation_set_label(current_valuation, state->label->name, label_indexes);
+				aut_push_string_to_list(&labels_list, &labels_list_count, label_indexes, &label_position, false);
+				current_from_state	= from_state	= (uint32_t) label_position;
+				if(current_valuation != NULL){
+					automaton_indexes_valuation_destroy(current_valuation);
+					current_valuation	= NULL;
+				}
+				if(state->ref->indexes != NULL)
+					current_valuation 	= automaton_indexes_valuation_create_from_indexes(tables, state->ref->indexes);
+				else
+					current_valuation	= NULL;
+				automaton_indexes_valuation_set_label(current_valuation, state->ref->name, label_indexes);
+				aut_push_string_to_list(&labels_list, &labels_list_count, label_indexes, &label_position, false);
+				to_state	= (uint32_t) label_position;
+				if(current_valuation != NULL){
+					automaton_indexes_valuation_destroy(current_valuation);
+					current_valuation	= NULL;
+				}
+
+				if(!first_state_set){
+					automaton_automaton_add_initial_state(automaton, to_state);
+					first_state_set	= true;
+				}else{
+					//create empty transitions
+					automaton_transition	= automaton_transition_create(current_from_state, to_state);
+					automaton_automaton_add_transition(automaton, automaton_transition);
+					automaton_transition_destroy(automaton_transition, true);
+				}
+				continue;
+			}
+		}
+
 
 		for(i = 0; i < (int32_t)composition_syntax->count; i++){
 			state	= composition_syntax->states[i];
 			if(state->ref != NULL){
-				//TODO: solve state refs in automaton				
-				printf("ERROR: state refs not yet supported\n");exit(-1);
+
+				continue;
 			}
 			if(state->label->indexes != NULL)
 				current_valuation 	= automaton_indexes_valuation_create_from_indexes(tables, state->label->indexes);
@@ -733,9 +795,10 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 			bool first_run_from	= true;
 			while(first_run_from || (current_valuation != NULL && automaton_indexes_valuation_has_next(current_valuation))){
 				first_run_from = false;
-
+				label_indexes[0] = '\0';
 				automaton_indexes_valuation_set_label(current_valuation, state->label->name, label_indexes);
 				aut_push_string_to_list(&labels_list, &labels_list_count, label_indexes, &label_position, false);
+				automaton_indexes_valuation_increase(current_valuation);
 				current_from_state	= from_state	= (uint32_t) label_position;
 				if(!first_state_set){
 					automaton_automaton_add_initial_state(automaton, from_state);
@@ -914,6 +977,8 @@ void automaton_indexes_valuation_set_to_label(automaton_indexes_valuation* valua
 	char name[40];
 	for(i = 0; i < from_indexes->count; i++){
 		for(j = 0; j < to_indexes->count; j++){
+			if(from_indexes->indexes[i]->is_expr || to_indexes->indexes[j]->is_expr)
+				continue;
 			if(strcmp(from_indexes->indexes[i]->lower_ident, to_indexes->indexes[j]->lower_ident) == 0){
 				sprintf(target, "%s_%d", target, valuation->current_values[i]);
 			}
@@ -1020,6 +1085,10 @@ void automaton_index_syntax_get_range(automaton_parsing_tables* tables, automato
 			*lower_index	=tables->range_entries[i]->valuation.range_value->lower_value;
 			*upper_index	=tables->range_entries[i]->valuation.range_value->upper_value;
 		}
+	}else{
+		//TODO: only considering integer expressions
+		*lower_index	= index->expr->integer_terminal;
+		*upper_index	= index->expr->integer_terminal;
 	}
 }
 

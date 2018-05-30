@@ -169,8 +169,8 @@ int main (void){
 	run_all_tests();
 	*/
 	//run_parse_test("test5.fsp");
-	run_fsp_tests(10);
-	//run_parse_test("tests/test8.fsp", "test8");
+	//run_fsp_tests(10);
+	run_parse_test("tests/test11.fsp", "test11");
 	return 0;    
 }
 

@@ -383,14 +383,19 @@ bool automaton_automaton_print_fsp(automaton_automaton* current_automaton, char*
 	for(i = 0; i < current_automaton->transitions_count; i++){
 		for(j = 0; j < current_automaton->out_degree[i]; j++){
 			current_transition	= &(current_automaton->transitions[i][j]);
-			if(j == 0){fprintf(f, "S_%d = (", current_transition->state_from);}
-			if(current_transition->signals_count > 1)fprintf(f, "<");
-			for(k = 0; k < current_transition->signals_count; k++){
-				signal_t sig	= k < FIXED_SIGNALS_COUNT ? current_transition->signals[k] : current_transition->other_signals[k - FIXED_SIGNALS_COUNT];
-				fprintf(f,"%s%s", ctx->global_alphabet->list[sig].name, (k < (current_transition->signals_count -1)? "," : ""));
+			if(current_transition->signals_count <= 0){
+				fprintf(f, "S_%d = S_%d", current_transition->state_from, current_transition->state_to);
+				continue;
+			}else{
+				if(j == 0){fprintf(f, "S_%d = (", current_transition->state_from);}
+				if(current_transition->signals_count > 1)fprintf(f, "<");
+				for(k = 0; k < current_transition->signals_count; k++){
+					signal_t sig	= k < FIXED_SIGNALS_COUNT ? current_transition->signals[k] : current_transition->other_signals[k - FIXED_SIGNALS_COUNT];
+					fprintf(f,"%s%s", ctx->global_alphabet->list[sig].name, (k < (current_transition->signals_count -1)? "," : ""));
+				}
+				if(current_transition->signals_count > 1)fprintf(f, ">");
+				fprintf(f,"-> S_%d", current_transition->state_to);
 			}
-			if(current_transition->signals_count > 1)fprintf(f, ">");
-			fprintf(f,"-> S_%d", current_transition->state_to);
 			if(j < (current_automaton->out_degree[i] - 1))fprintf(f, "|");
 			if(j == (current_automaton->out_degree[i] - 1))fprintf(f, ")");
 		}
@@ -720,6 +725,10 @@ void automaton_range_destroy(automaton_range* range){
 }
 void automaton_indexes_valuation_destroy(automaton_indexes_valuation* valuation){
 	free(valuation->current_values);
+	uint32_t i;
+	for(i = 0; i < valuation->count; i++){
+		automaton_range_destroy(valuation->ranges[i]);
+	}
 	free(valuation->ranges);
 	free(valuation);
 }

@@ -146,7 +146,7 @@ bool aut_push_string_to_list(char*** list, int32_t* list_count, char* element, i
 		if(i < *position){
 			aut_dupstr(&(new_list[i]), (*list)[i]);
 		}else{
-			aut_dupstr(&(new_list[i+1]), *list[i]);
+			aut_dupstr(&(new_list[i+1]), (*list)[i]);
 		}
 	}
 	aut_dupstr(&(new_list[*position]), element);
