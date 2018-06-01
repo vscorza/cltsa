@@ -14,7 +14,7 @@ hex			0[xX]{hextail}
 lower 		[a-z]
 upper 		[A-Z]
 octalDigit	[0-7]
-decDigit	[1-9]
+decDigit	[0-9]
 identChars	{lower}|{upper}|{digit}|[_?]
 number 		0{octalDigit}*|{decDigit}+|{hex}+
 ident 		{lower}{identChars}*

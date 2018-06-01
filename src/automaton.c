@@ -381,21 +381,18 @@ bool automaton_automaton_print_fsp(automaton_automaton* current_automaton, char*
 	}
 	automaton_transition* current_transition;
 	for(i = 0; i < current_automaton->transitions_count; i++){
+
 		for(j = 0; j < current_automaton->out_degree[i]; j++){
 			current_transition	= &(current_automaton->transitions[i][j]);
-			if(current_transition->signals_count <= 0){
-				fprintf(f, "S_%d = S_%d", current_transition->state_from, current_transition->state_to);
-				continue;
-			}else{
-				if(j == 0){fprintf(f, "S_%d = (", current_transition->state_from);}
-				if(current_transition->signals_count > 1)fprintf(f, "<");
-				for(k = 0; k < current_transition->signals_count; k++){
-					signal_t sig	= k < FIXED_SIGNALS_COUNT ? current_transition->signals[k] : current_transition->other_signals[k - FIXED_SIGNALS_COUNT];
-					fprintf(f,"%s%s", ctx->global_alphabet->list[sig].name, (k < (current_transition->signals_count -1)? "," : ""));
-				}
-				if(current_transition->signals_count > 1)fprintf(f, ">");
-				fprintf(f,"-> S_%d", current_transition->state_to);
+			if(j == 0){fprintf(f, "S_%d = (", current_transition->state_from);}
+			if(current_transition->signals_count == 0)fprintf(f, AUT_TAU_CONSTANT);
+			if(current_transition->signals_count > 1)fprintf(f, "<");
+			for(k = 0; k < current_transition->signals_count; k++){
+				signal_t sig	= k < FIXED_SIGNALS_COUNT ? current_transition->signals[k] : current_transition->other_signals[k - FIXED_SIGNALS_COUNT];
+				fprintf(f,"%s%s", ctx->global_alphabet->list[sig].name, (k < (current_transition->signals_count -1)? "," : ""));
 			}
+			if(current_transition->signals_count > 1)fprintf(f, ">");
+			fprintf(f,"-> S_%d", current_transition->state_to);
 			if(j < (current_automaton->out_degree[i] - 1))fprintf(f, "|");
 			if(j == (current_automaton->out_degree[i] - 1))fprintf(f, ")");
 		}

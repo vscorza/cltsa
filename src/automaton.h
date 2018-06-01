@@ -23,7 +23,9 @@
 #define DEBUG_COMPOSITE_TREE 0
 
 #define BUCKET_SIZE		1000000
-#define PRINT_PARTIAL_COMPOSITION 1
+#define PRINT_PARTIAL_COMPOSITION 0
+
+#define AUT_TAU_CONSTANT	"__tau__"
 
 typedef uint16_t signal_t;
 /****************

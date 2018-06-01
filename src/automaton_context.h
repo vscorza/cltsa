@@ -13,6 +13,14 @@
 
 #define GLOBAL_ALPHABET_NAME_AUT		"Global_Alphabet"
 #define CONTROLLABLE_ALPHABET_NAME_AUT	"Controllable_Alphabet"
+
+#define DEBUG_PARSE_STATES 0
+
+#if DEBUG_PARSE_STATES
+#define aut_context_log(format, ...) printf(format, ##__VA_ARGS__ )
+#else
+#define aut_context_log(format, ...)
+#endif
 /****************
 ==== STRUCTS ====
 */
@@ -82,5 +90,5 @@ bool automaton_statement_syntax_to_constant(automaton_automata_context* ctx, aut
 bool automaton_statement_syntax_to_range(automaton_automata_context* ctx, automaton_expression_syntax* range_def_syntax
 		, automaton_parsing_tables* tables);
 void automaton_index_syntax_get_range(automaton_parsing_tables* tables, automaton_index_syntax* index, int32_t *lower_index, int32_t *upper_index);
-void automaton_indexes_syntax_eval_strings(automaton_parsing_tables* tables, char*** a, int32_t* a_count, automaton_indexes_syntax* indexes);
+void automaton_indexes_syntax_eval_strings(automaton_parsing_tables* tables, automaton_indexes_valuation* valuation, char*** a, int32_t* a_count, automaton_indexes_syntax* indexes);
 #endif /* AUTOMATON_CONTEXT_H_ */

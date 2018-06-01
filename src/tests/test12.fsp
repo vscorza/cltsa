@@ -1,0 +1,4 @@
+range R = 1 .. 1000
+set Global_Alphabet = {a[i:R]}
+set Controllable_Alphabet = {a[i:R]}
+A=A[1],A[i:R]=(a[i]->A[i]).

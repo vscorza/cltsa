@@ -1,0 +1,6 @@
+range R = 1 .. 100
+set Global_Alphabet = {a[i:R],b[j:R],c}
+set Controllable_Alphabet = {a[i:R],b[j:R],c}
+A=A[1],A[i:R]=(a[i]->A[i]).B=B[1],B[i:R]=(b[i]->B[i]).
+C=(c->c->c->c->c->c->c->c->c->c->c->c->c->c->c->C).
+||D=(A||B||C).
