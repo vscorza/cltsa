@@ -1,8 +1,8 @@
 TODO:
 SPRINT1
 - evaluation of expressions with free variables (needs a valuation context)
-- do indexed states first to test composition performance
-- apply valuations to states
+- parse fluents
+- apply valuations to states (<<>> directive to parse compose with valuations, i.e. get game)
 - review and document code (particualarly compose)
 SPRINT2
 - parse assertions, goals
