@@ -121,7 +121,7 @@ void aut_merge_string_lists(char*** a, int32_t* a_count, char** b, int32_t b_cou
 	*a_count			= new_count;
 }
 
-bool aut_push_string_to_list(char*** list, int32_t* list_count, char* element, int32_t* position, bool repeat_values){
+bool aut_push_string_to_list(char*** list, int32_t* list_count, char* element, int32_t* position, bool ordered, bool repeat_values){
 	int32_t i;
 	int32_t a_b_cmp;
 	*position	= -1;
@@ -137,6 +137,8 @@ bool aut_push_string_to_list(char*** list, int32_t* list_count, char* element, i
 			break;
 		}
 	}
+	if(!ordered)*position = -1;
+
 	if(*position == -1){
 		*position	= *list_count;
 	}
@@ -157,6 +159,7 @@ bool aut_push_string_to_list(char*** list, int32_t* list_count, char* element, i
 	*list_count			= new_count;
 	return true;
 }
+
 
 int32_t aut_string_list_index_of(char** list, int32_t list_count, char* element){
 	int32_t i;

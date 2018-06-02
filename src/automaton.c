@@ -381,7 +381,9 @@ bool automaton_automaton_print_fsp(automaton_automaton* current_automaton, char*
 	}
 	automaton_transition* current_transition;
 	for(i = 0; i < current_automaton->transitions_count; i++){
-
+		if(current_automaton->out_degree[i] <= 0){
+			fprintf(f, "S_%d = STOP", i);
+		}
 		for(j = 0; j < current_automaton->out_degree[i]; j++){
 			current_transition	= &(current_automaton->transitions[i][j]);
 			if(j == 0){fprintf(f, "S_%d = (", current_transition->state_from);}

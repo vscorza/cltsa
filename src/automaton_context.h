@@ -14,7 +14,7 @@
 #define GLOBAL_ALPHABET_NAME_AUT		"Global_Alphabet"
 #define CONTROLLABLE_ALPHABET_NAME_AUT	"Controllable_Alphabet"
 
-#define DEBUG_PARSE_STATES 0
+#define DEBUG_PARSE_STATES 1
 
 #if DEBUG_PARSE_STATES
 #define aut_context_log(format, ...) printf(format, ##__VA_ARGS__ )
@@ -77,9 +77,9 @@ automaton_indexes_valuation* automaton_indexes_valuation_create_from_indexes(aut
 void automaton_indexes_valuation_increase(automaton_indexes_valuation* valuation);
 bool automaton_indexes_valuation_has_next(automaton_indexes_valuation* valuation);
 void automaton_indexes_valuation_set_label(automaton_indexes_valuation* valuation, char* label, char* target);
-void automaton_indexes_valuation_set_to_label(automaton_indexes_valuation* valuation, automaton_indexes_syntax* from_indexes, automaton_indexes_syntax* to_indexes, char* label, char* target);
+void automaton_indexes_valuation_set_to_label(automaton_parsing_tables* tables,automaton_indexes_valuation* valuation, automaton_indexes_syntax* from_indexes, automaton_indexes_syntax* to_indexes, char* label, char* target);
 void automaton_statement_syntax_to_table(automaton_statement_syntax* statement, automaton_parsing_tables* tables);
-int32_t automaton_expression_syntax_evaluate(automaton_parsing_tables* tables, automaton_expression_syntax* expr);
+int32_t automaton_expression_syntax_evaluate(automaton_parsing_tables* tables, automaton_expression_syntax* expr, automaton_indexes_valuation* indexes_valuation);
 char** automaton_set_syntax_evaluate(automaton_parsing_tables* tables, automaton_set_syntax* set, int32_t *count, char* set_def_key);
 automaton_alphabet* automaton_parsing_tables_get_global_alphabet(automaton_parsing_tables* tables);
 bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, automaton_composition_syntax* composition_syntax

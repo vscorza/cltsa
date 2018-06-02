@@ -266,7 +266,7 @@ void automaton_statement_syntax_to_table(automaton_statement_syntax* statement, 
 	}
 }
 
-int32_t automaton_expression_syntax_evaluate(automaton_parsing_tables* tables, automaton_expression_syntax* expr){
+int32_t automaton_expression_syntax_evaluate(automaton_parsing_tables* tables, automaton_expression_syntax* expr, automaton_indexes_valuation* indexes_valuation){
 	int32_t index	= -1;
 	int32_t valuation	= -1;
 	int32_t left_valuation	= -1;
@@ -287,11 +287,11 @@ int32_t automaton_expression_syntax_evaluate(automaton_parsing_tables* tables, a
 		break;
 	case PARENTHESIS_TYPE_AUT:
 	case CONST_TYPE_AUT:
-		valuation = automaton_expression_syntax_evaluate(tables, expr->first);
+		valuation = automaton_expression_syntax_evaluate(tables, expr->first, indexes_valuation);
 		break;
 	case BINARY_TYPE_AUT:
-		left_valuation = automaton_expression_syntax_evaluate(tables, expr->first);
-		right_valuation = automaton_expression_syntax_evaluate(tables, expr->second);
+		left_valuation = automaton_expression_syntax_evaluate(tables, expr->first, indexes_valuation);
+		right_valuation = automaton_expression_syntax_evaluate(tables, expr->second, indexes_valuation);
 		switch(expr->op){
 		case EQ_OP_AUT: valuation = left_valuation == right_valuation; break;			// ==
 		case NEQ_OP_AUT: valuation = left_valuation != right_valuation; break;			// !=
@@ -315,12 +315,27 @@ int32_t automaton_expression_syntax_evaluate(automaton_parsing_tables* tables, a
 		valuation = expr->integer_terminal;
 		break;
 	case UPPER_IDENT_TERMINAL_TYPE_AUT:
-		ref_index 	= automaton_parsing_tables_get_entry_index(tables, CONST_ENTRY_AUT, expr->string_terminal);
-		ref_entry	= tables->const_entries[ref_index];
-		if(!ref_entry->solved){
-			automaton_expression_syntax_evaluate(tables, (automaton_expression_syntax*)ref_entry->value);
+		;bool found = false;
+		if(indexes_valuation != NULL){
+			uint32_t i;
+			for(i = 0; i < indexes_valuation->count; i++){
+				if(strcmp(expr->string_terminal, indexes_valuation->ranges[i]->name) == 0){
+					valuation	= indexes_valuation->current_values[i];
+					found	= true;
+				}
+				if(found){
+					break;
+				}
+			}
 		}
-		valuation = ref_entry->valuation.int_value;
+		if(!found){
+			ref_index 	= automaton_parsing_tables_get_entry_index(tables, CONST_ENTRY_AUT, expr->string_terminal);
+			ref_entry	= tables->const_entries[ref_index];
+			if(!ref_entry->solved){
+				automaton_expression_syntax_evaluate(tables, (automaton_expression_syntax*)ref_entry->value, indexes_valuation);
+			}
+			valuation = ref_entry->valuation.int_value;
+		}
 		break;
 	default:exit(-1);break;
 	}
@@ -338,7 +353,7 @@ int32_t automaton_expression_syntax_evaluate(automaton_parsing_tables* tables, a
 
 char** automaton_set_syntax_evaluate(automaton_parsing_tables* tables, automaton_set_syntax* set, int32_t *count, char* set_def_key){
 	int32_t index = -1;
-	uint32_t i, j;
+	uint32_t i, j,k;
 	char* current_entry;
 	char** ret_value			= NULL;
 	int32_t inner_count			= 0;
@@ -367,7 +382,6 @@ char** automaton_set_syntax_evaluate(automaton_parsing_tables* tables, automaton
 		if(!is_set){//todo:solve indexes
 			inner_value		= &(set->labels[i][j]->string_terminal);
 			inner_count		= 1;
-			aut_merge_string_lists(&ret_value, count, inner_value, inner_count, true, false);
 		}else{
 			while(set->is_ident){
 				index	= automaton_parsing_tables_get_entry_index(tables, SET_ENTRY_AUT, set->string_terminal);
@@ -379,10 +393,16 @@ char** automaton_set_syntax_evaluate(automaton_parsing_tables* tables, automaton
 				inner_count	= tables->set_entries[index]->valuation_count;
 				inner_value	= tables->set_entries[index]->valuation.labels_value;
 			}
-			aut_merge_string_lists(&ret_value, count, inner_value, inner_count, true, false);
 		}
 		if(indexes != NULL){
-			automaton_indexes_syntax_eval_strings(tables, NULL, &ret_value, count, indexes);
+			char** tmp_value	= malloc(sizeof(char*) * inner_count);
+			for(k = 0; k < inner_count;k++)aut_dupstr(&(tmp_value[k]), inner_value[k]);
+			automaton_indexes_syntax_eval_strings(tables, NULL, &tmp_value, &inner_count, indexes);
+			aut_merge_string_lists(&ret_value, count, tmp_value, inner_count, true, false);
+			for(k = 0; k < inner_count;k++)free(tmp_value[k]);
+			free(tmp_value);
+		}else{
+			aut_merge_string_lists(&ret_value, count, inner_value, inner_count, true, false);
 		}
 	}
 	//once solved, update set_def_entry
@@ -549,6 +569,11 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 									}
 									if(element_global_index == -1){
 										//TODO: report local element not found
+										printf("Looking for: %s [NOT FOUND]\nGlobal Alphabet:\n(", element_to_find);
+										for(m = 0; m < (int32_t)ctx->global_alphabet->count; m++){
+											printf("%s%s", ctx->global_alphabet->list[m].name, m < ((int32_t)ctx->global_alphabet->count - 1)? ",":"");
+										}
+										printf(")\n");
 										exit(-1);
 									}
 									for(m = 0; m < (int32_t)local_alphabet_count; m++){
@@ -588,6 +613,11 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 								}
 								if(element_global_index == -1){
 									//TODO: report local element not found
+									printf("Looking for: %s [NOT FOUND]\nGlobal Alphabet:\n(", element_to_find);
+									for(m = 0; m < (int32_t)ctx->global_alphabet->count; m++){
+										printf("%s%s", ctx->global_alphabet->list[m].name, m < ((int32_t)ctx->global_alphabet->count - 1)? ",":"");
+									}
+									printf(")\n");
 									exit(-1);
 								}
 								for(m = 0; m < (int32_t)local_alphabet_count; m++){
@@ -758,7 +788,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 			bool first_run_from	= true;
 
 			automaton_indexes_valuation_set_label(current_valuation, state->label->name, label_indexes);
-			aut_push_string_to_list(&labels_list, &labels_list_count, label_indexes, &label_position, false);
+			aut_push_string_to_list(&labels_list, &labels_list_count, label_indexes, &label_position, true, false);
 
 			if(current_valuation != NULL){
 				automaton_indexes_valuation_destroy(current_valuation);
@@ -776,7 +806,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 					current_valuation	= NULL;
 				label_indexes[0] = '\0';
 				automaton_indexes_valuation_set_label(current_valuation, state->label->name, label_indexes);
-				aut_push_string_to_list(&labels_list, &labels_list_count, label_indexes, &label_position, false);
+				aut_push_string_to_list(&labels_list, &labels_list_count, label_indexes, &label_position, true, false);
 				current_from_state[0]	= from_state	= (uint32_t) label_position;
 				current_from_state_count= 1;
 				if(current_valuation != NULL){
@@ -788,7 +818,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 				else
 					current_valuation	= NULL;
 				automaton_indexes_valuation_set_label(current_valuation, state->ref->name, label_indexes);
-				aut_push_string_to_list(&labels_list, &labels_list_count, label_indexes, &label_position, false);
+				aut_push_string_to_list(&labels_list, &labels_list_count, label_indexes, &label_position, true, false);
 				to_state	= (uint32_t) label_position;
 				if(current_valuation != NULL){
 					automaton_indexes_valuation_destroy(current_valuation);
@@ -827,7 +857,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 				label_indexes[0] = '\0';
 				//get incremental valuation on from state indexes
 				automaton_indexes_valuation_set_label(current_valuation, state->label->name, label_indexes);
-				aut_push_string_to_list(&labels_list, &labels_list_count, label_indexes, &label_position, false);
+				aut_push_string_to_list(&labels_list, &labels_list_count, label_indexes, &label_position, false, false);
 				automaton_indexes_valuation_increase(current_valuation);
 				current_from_state[0]	= from_state	= (uint32_t) label_position;
 				current_from_state_count= 1;
@@ -842,8 +872,8 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 				//FROM STATE TRANSITIONS ITERATION
 				for(j = 0; j < (int32_t)state->transitions_count; j++){
 					transition	= state->transitions[j];
-					automaton_indexes_valuation_set_to_label(current_valuation, state->label->indexes, transition->to_state->indexes,transition->to_state->name, label_indexes);
-					aut_push_string_to_list(&labels_list, &labels_list_count, label_indexes, &label_position, false);
+					automaton_indexes_valuation_set_to_label(tables, current_valuation, state->label->indexes, transition->to_state->indexes,transition->to_state->name, label_indexes);
+					aut_push_string_to_list(&labels_list, &labels_list_count, label_indexes, &label_position, false, false);
 					to_state	= (uint32_t)label_position;
 					//TODO: take indexes and guard into consideration
 					for(k = 0; k < (int32_t)transition->count; k++){
@@ -889,6 +919,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 									if(atom_label->indexes != NULL){
 										if(!first_index_set){
 											automaton_transition_destroy(current_automaton_transition[--automaton_transition_count], true);
+											next_from_state_count--;
 											first_index_set	= true;
 										}
 										if(ret_value != NULL){
@@ -915,6 +946,9 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 												}
 											}
 											if(element_global_index >= 0){
+												automaton_indexes_valuation_set_to_label(tables, current_valuation, state->label->indexes, transition->to_state->indexes,transition->to_state->name, label_indexes);
+												aut_push_string_to_list(&labels_list, &labels_list_count, label_indexes, &label_position, false, false);
+												to_state	= (uint32_t)label_position;
 												if(automaton_transition_count <= (automaton_transition_size - 1)){
 													uint32_t new_size	= automaton_transition_size * LIST_INCREASE_FACTOR;
 													automaton_transition** new_transitions	= malloc(sizeof(automaton_transition*) * new_size);
@@ -938,9 +972,6 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 													next_from_state			= new_next_from;
 												}
 												next_from_state[next_from_state_count++]	= to_state;
-												automaton_indexes_valuation_set_to_label(current_valuation, state->label->indexes, transition->to_state->indexes,transition->to_state->name, label_indexes);
-												aut_push_string_to_list(&labels_list, &labels_list_count, label_indexes, &label_position, false);
-												to_state	= (uint32_t)label_position;
 												automaton_transition_add_signal_event(current_automaton_transition[automaton_transition_count - 1], ctx, &(ctx->global_alphabet->list[element_global_index]));
 												aut_context_log(".%s", ctx->global_alphabet->list[element_global_index].name);
 												//automaton_automaton_add_transition(automaton, automaton_transition[automaton_transition_count - 1]);
@@ -969,8 +1000,8 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 											}
 											current_automaton_transition[automaton_transition_count++]	= automaton_transition_create(current_from_state[r], to_state);
 											aut_context_log("(%d->%d)[!SET]<%d>", current_from_state[r], to_state,automaton_transition_count);
-											automaton_indexes_valuation_set_to_label(current_valuation, state->label->indexes, transition->to_state->indexes,transition->to_state->name, label_indexes);
-											aut_push_string_to_list(&labels_list, &labels_list_count, label_indexes, &label_position, false);
+											automaton_indexes_valuation_set_to_label(tables, current_valuation, state->label->indexes, transition->to_state->indexes,transition->to_state->name, label_indexes);
+											aut_push_string_to_list(&labels_list, &labels_list_count, label_indexes, &label_position, false, false);
 											to_state	= (uint32_t)label_position;
 											automaton_transition_add_signal_event(current_automaton_transition[automaton_transition_count - 1], ctx, &(ctx->global_alphabet->list[element_global_index]));
 											aut_context_log(".%s", ctx->global_alphabet->list[element_global_index].name);
@@ -1090,7 +1121,7 @@ bool automaton_statement_syntax_to_constant(automaton_automata_context* ctx, aut
 	uint32_t main_index	= automaton_parsing_tables_get_entry_index(tables, CONST_ENTRY_AUT, const_def_syntax->string_terminal);
 	tables->composition_entries[main_index]->solved					= true;
 	tables->composition_entries[main_index]->valuation_count		= 1;
-	tables->composition_entries[main_index]->valuation.int_value	= automaton_expression_syntax_evaluate(tables, const_def_syntax);
+	tables->composition_entries[main_index]->valuation.int_value	= automaton_expression_syntax_evaluate(tables, const_def_syntax, NULL);
 	return false;
 }
 
@@ -1113,7 +1144,7 @@ void automaton_indexes_valuation_increase(automaton_indexes_valuation* valuation
 bool automaton_indexes_valuation_has_next(automaton_indexes_valuation* valuation){
 	return valuation->current_combination < (valuation->total_combinations - 1);
 }
-void automaton_indexes_valuation_set_to_label(automaton_indexes_valuation* valuation, automaton_indexes_syntax* from_indexes, automaton_indexes_syntax* to_indexes, char* label, char* target){
+void automaton_indexes_valuation_set_to_label(automaton_parsing_tables* tables, automaton_indexes_valuation* valuation, automaton_indexes_syntax* from_indexes, automaton_indexes_syntax* to_indexes, char* label, char* target){
 	if(valuation == NULL || from_indexes == NULL || to_indexes == NULL){
 		strcpy(target, label);
 		return;
@@ -1128,12 +1159,14 @@ void automaton_indexes_valuation_set_to_label(automaton_indexes_valuation* valua
 			if(from_indexes->indexes[i]->is_expr && (from_indexes->indexes[i]->expr->type == UPPER_IDENT_TERMINAL_TYPE_AUT ||
 					from_indexes->indexes[i]->expr->type == IDENT_TERMINAL_TYPE_AUT)){
 				from_ident	= from_indexes->indexes[i]->expr->string_terminal;
-			}else if(from_indexes->indexes[i]->is_expr){continue;
+			}else if(from_indexes->indexes[i]->is_expr){
+				sprintf(target, "%s_%d", target, automaton_expression_syntax_evaluate(tables, from_indexes->indexes[i]->expr, valuation));
 			}else{from_ident	= from_indexes->indexes[i]->lower_ident;}
 			if(to_indexes->indexes[j]->is_expr && (to_indexes->indexes[j]->expr->type == UPPER_IDENT_TERMINAL_TYPE_AUT ||
 					to_indexes->indexes[j]->expr->type == IDENT_TERMINAL_TYPE_AUT)){
 				to_ident	= to_indexes->indexes[j]->expr->string_terminal;
-			}else if(to_indexes->indexes[j]->is_expr){continue;
+			}else if(to_indexes->indexes[j]->is_expr){
+				sprintf(target, "%s_%d", target, automaton_expression_syntax_evaluate(tables, to_indexes->indexes[j]->expr, valuation));
 			}else{to_ident	= to_indexes->indexes[j]->lower_ident;}
 			if(strcmp(from_ident, to_ident) == 0){
 				sprintf(target, "%s_%d", target, valuation->current_values[i]);
@@ -1211,7 +1244,7 @@ void automaton_indexes_syntax_eval_strings(automaton_parsing_tables* tables, aut
 		for(k = 0; k < (uint32_t)*a_count; k++){
 			sprintf(buffer2, "%s%s", (*a)[k], buffer);
 
-			aut_push_string_to_list(&ret_value, &inner_count, buffer2, &position, false);
+			aut_push_string_to_list(&ret_value, &inner_count, buffer2, &position, true, false);
 		}
 
 
@@ -1262,8 +1295,8 @@ void automaton_index_syntax_get_range(automaton_parsing_tables* tables, automato
 
 
 automaton_range* automaton_range_syntax_evaluate(automaton_parsing_tables *tables, char* name, automaton_expression_syntax *range_def_syntax){
-	int32_t lower_value	= automaton_expression_syntax_evaluate(tables, range_def_syntax->first);
-	int32_t upper_value	= automaton_expression_syntax_evaluate(tables, range_def_syntax->second);
+	int32_t lower_value	= automaton_expression_syntax_evaluate(tables, range_def_syntax->first, NULL);
+	int32_t upper_value	= automaton_expression_syntax_evaluate(tables, range_def_syntax->second, NULL);
 	return automaton_range_create(name, lower_value, upper_value);
 }
 
