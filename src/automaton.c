@@ -152,10 +152,8 @@ void automaton_automaton_copy(automaton_automaton* source, automaton_automaton* 
 	for(i = 0; i < target->initial_states_count; i++){
 		target->initial_states[i]	= source->initial_states[i];
 	}
-	target->valuations_count		= source->valuations_count;
-	target->valuations_size			= source->valuations_size;
-	target->valuations				= malloc(sizeof(automaton_valuation) * target->valuations_size);
-	for(i = 0; i < target->valuations_count; i++){
+	target->valuations				= malloc(sizeof(automaton_valuation) * target->transitions_size);
+	for(i = 0; i < target->transitions_count; i++){
 		automaton_valuation_copy(&(source->valuations[i]), &(target->valuations[i]));
 	}
 }
@@ -347,7 +345,7 @@ void automaton_automaton_print(automaton_automaton* current_automaton, bool prin
 	}
 	if(print_valuations){
 		printf("%sValuations:\n", prefix2);
-		for(i = 0; i < current_automaton->valuations_count; i ++){
+		for(i = 0; i < current_automaton->transitions_count; i ++){
 			automaton_valuation_print(&(current_automaton->valuations[i]), ctx, prefix2, "\n");
 		}
 	}
@@ -593,9 +591,7 @@ void automaton_automaton_initialize(automaton_automaton* automaton, char* name, 
 			automaton_transition_initialize(&(automaton->inverted_transitions[i][j]), 0, 0);
 	}
 	automaton->initial_states_count		= 0;
-	automaton->valuations_size			= LIST_INITIAL_SIZE;
-	automaton->valuations_count			= 0;
-	automaton->valuations 				= malloc(sizeof(automaton_valuation) * automaton->valuations_count);
+	automaton->valuations 				= malloc(sizeof(automaton_valuation) * automaton->transitions_size);
 }
 void automaton_range_initialize(automaton_range* range, char* name, uint32_t lower_value, uint32_t upper_value){
 	if(name != NULL){
@@ -691,7 +687,7 @@ void automaton_automaton_destroy(automaton_automaton* automaton){
 	free(automaton->in_size);
 	free(automaton->out_size);
 	free(automaton->initial_states);
-	for(i = 0; i < automaton->valuations_count; i++){
+	for(i = 0; i < automaton->transitions_count; i++){
 		automaton_valuation_destroy(&(automaton->valuations[i]));
 	}
 	free(automaton->valuations);
@@ -710,8 +706,6 @@ void automaton_automaton_destroy(automaton_automaton* automaton){
 	automaton->inverted_transitions	= NULL;
 	automaton->initial_states_count	= 0;
 	automaton->initial_states		= NULL;
-	automaton->valuations_size		= 0;
-	automaton->valuations_count		= 0;
 	automaton->valuations			= NULL;
 	free(automaton);
 }
@@ -981,24 +975,38 @@ automaton_automaton* automaton_fluent_build_automaton(automaton_automata_context
 			local_alphabet[alphabet_count++]	= current_fluent->ending_signals[i];
 	}
 
-	automaton_transition *ending_transition		= automaton_transition_create(1, 0);
-	automaton_transition *starting_transition	= automaton_transition_create(0, 1);
 
+	automaton_transition *starting_transition	= automaton_transition_create(0, 1);
+	automaton_transition *starting_loop			= automaton_transition_create(0, 0);
+	automaton_transition *ending_transition		= automaton_transition_create(1, 0);
+	automaton_transition *ending_loop			= automaton_transition_create(1, 1);
+
+	//TODO:should be superset both on transition and loop
 	automaton_automaton* current_automaton	= automaton_automaton_create(current_fluent->name, ctx, alphabet_count, local_alphabet);
 	for(i = 0; i < current_fluent->starting_signals_count; i++){
 		automaton_transition_initialize(starting_transition, 0, 1);
+		automaton_transition_initialize(starting_loop, 0, 0);
 		automaton_transition_add_signal_event(starting_transition, ctx, &(ctx->global_alphabet->list[current_fluent->starting_signals[i]]));
+		automaton_transition_add_signal_event(starting_loop, ctx, &(ctx->global_alphabet->list[current_fluent->starting_signals[i]]));
 		automaton_automaton_add_transition(current_automaton, starting_transition);
+		automaton_automaton_add_transition(current_automaton, starting_loop);
 		automaton_transition_destroy(starting_transition, false);
+		automaton_transition_destroy(starting_loop, false);
 	}
 	automaton_transition_destroy(starting_transition, true);
+	automaton_transition_destroy(starting_loop, true);
 	for(i = 0; i < current_fluent->ending_signals_count; i++){
 		automaton_transition_initialize(ending_transition, 1, 0);
+		automaton_transition_initialize(ending_loop, 1, 1);
 		automaton_transition_add_signal_event(ending_transition, ctx, &(ctx->global_alphabet->list[current_fluent->ending_signals[i]]));
+		automaton_transition_add_signal_event(ending_loop, ctx, &(ctx->global_alphabet->list[current_fluent->ending_signals[i]]));
 		automaton_automaton_add_transition(current_automaton, ending_transition);
+		automaton_automaton_add_transition(current_automaton, ending_loop);
 		automaton_transition_destroy(ending_transition, false);
+		automaton_transition_destroy(ending_loop, false);
 	}
 	automaton_transition_destroy(ending_transition, true);
+	automaton_transition_destroy(ending_loop, true);
 	automaton_automaton_add_initial_state(current_automaton, 0);
 	return current_automaton;
 }
@@ -1270,7 +1278,12 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 #endif
 		}
 	}
-	automaton_automaton* composition= automaton_automaton_create("Composition", ctx, alphabet_count, alphabet);
+	automaton_automaton* composition;
+	if(is_game){
+		composition = automaton_automaton_create("Game", ctx, alphabet_count, alphabet);
+	}else{
+		composition = automaton_automaton_create("Composition", ctx, alphabet_count, alphabet);
+	}
 	/** get signal to automata list structure **/
 	bool** signal_to_automata	= malloc(sizeof(bool*) * alphabet_count);
 	for(i = 0; i < alphabet_count; i++){

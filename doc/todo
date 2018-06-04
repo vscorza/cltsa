@@ -1,15 +1,14 @@
 TODO:
 SPRINT1
-- evaluation of expressions with free variables (needs a valuation context)
-- parse fluents
-- apply valuations to states (<<>> directive to parse compose with valuations, i.e. get game)
+- convetir valuations en un array plano de tamaño (transitions_size * ctx->fluents_count) y luego resolver aritmetica de indice, apply valuations to states (|f| directive to parse compose with valuations, i.e. get game)
+- implement gr1
 - review and document code (particualarly compose)
+- fluents transitions should be applied to superset of alphabet
 SPRINT2
 - parse assertions, goals
 - parse safety ltl
 - check compatibility with fluents when composing
 - implement reachability
-- implement gr1
 SPRINT3
 - yacc and automaton_context -> define a way to index concurrent labels, it is not the same to index particular labels (thus adding new transitions
 		for each index) than to add index to concurrent labels (adding new transitions on the whole concurrent set)

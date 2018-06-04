@@ -145,8 +145,6 @@ typedef struct automaton_str{
 	automaton_transition**	inverted_transitions;
 	uint32_t				initial_states_count;
 	uint32_t*				initial_states;
-	uint32_t				valuations_size;
-	uint32_t				valuations_count;
 	automaton_valuation*	valuations;
 	automaton_transitions_pool*	transitions_pool;
 } automaton_automaton;
