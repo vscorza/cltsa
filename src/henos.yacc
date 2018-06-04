@@ -112,7 +112,7 @@ fluentDef:
 	t_FLUENT t_UPPER_IDENT '=' '<' fluentSet ',' fluentSet '>'	{$$ = automaton_fluent_syntax_create($2, $5, $7);free($1); free($2);}
 	;
 fluentSet:
-	t_IDENT									{$$ = automaton_set_syntax_create_concurrent($1);free($1);}
+	label									{$$ = automaton_set_syntax_create_from_label($1);}
 	|setExp									{$$ = $1;}
 	;	
 import:
