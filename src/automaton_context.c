@@ -858,7 +858,14 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 				//get incremental valuation on from state indexes
 				automaton_indexes_valuation_set_label(current_valuation, state->label->name, label_indexes);
 				aut_push_string_to_list(&labels_list, &labels_list_count, label_indexes, &label_position, false, false);
-				automaton_indexes_valuation_increase(current_valuation);
+#if DEBUG_PARSE_STATES
+				aut_context_log("LAB.LIST(state):");
+				for(k = 0; k < labels_list_count; k++){
+					aut_context_log("%s%s", labels_list[k], k == labels_list_count - 1 ? "" : ",");
+				}
+				aut_context_log("\n");
+#endif
+
 				current_from_state[0]	= from_state	= (uint32_t) label_position;
 				current_from_state_count= 1;
 
@@ -874,6 +881,13 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 					transition	= state->transitions[j];
 					automaton_indexes_valuation_set_to_label(tables, current_valuation, state->label->indexes, transition->to_state->indexes,transition->to_state->name, label_indexes);
 					aut_push_string_to_list(&labels_list, &labels_list_count, label_indexes, &label_position, false, false);
+#if DEBUG_PARSE_STATES
+					aut_context_log("LAB.LIST(trans):");
+					for(k = 0; k < labels_list_count; k++){
+						aut_context_log("%s%s", labels_list[k], k == labels_list_count - 1 ? "" : ",");
+					}
+					aut_context_log("\n");
+#endif
 					to_state	= (uint32_t)label_position;
 					//TODO: take indexes and guard into consideration
 					for(k = 0; k < (int32_t)transition->count; k++){
@@ -948,6 +962,13 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 											if(element_global_index >= 0){
 												automaton_indexes_valuation_set_to_label(tables, current_valuation, state->label->indexes, transition->to_state->indexes,transition->to_state->name, label_indexes);
 												aut_push_string_to_list(&labels_list, &labels_list_count, label_indexes, &label_position, false, false);
+#if DEBUG_PARSE_STATES
+												aut_context_log("LAB.LIST(set):");
+												for(l = 0; l < labels_list_count; l++){
+													aut_context_log("%s%s", labels_list[l], l == labels_list_count - 1 ? "" : ",");
+												}
+												aut_context_log("\n");
+#endif
 												to_state	= (uint32_t)label_position;
 												if(automaton_transition_count <= (automaton_transition_size - 1)){
 													uint32_t new_size	= automaton_transition_size * LIST_INCREASE_FACTOR;
@@ -1002,6 +1023,13 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 											aut_context_log("(%d->%d)[!SET]<%d>", current_from_state[r], to_state,automaton_transition_count);
 											automaton_indexes_valuation_set_to_label(tables, current_valuation, state->label->indexes, transition->to_state->indexes,transition->to_state->name, label_indexes);
 											aut_push_string_to_list(&labels_list, &labels_list_count, label_indexes, &label_position, false, false);
+#if DEBUG_PARSE_STATES
+											aut_context_log("LAB.LIST(!set):");
+											for(l = 0; l < labels_list_count; l++){
+												aut_context_log("%s%s", labels_list[l], l == labels_list_count - 1 ? "" : ",");
+											}
+											aut_context_log("\n");
+#endif
 											to_state	= (uint32_t)label_position;
 											automaton_transition_add_signal_event(current_automaton_transition[automaton_transition_count - 1], ctx, &(ctx->global_alphabet->list[element_global_index]));
 											aut_context_log(".%s", ctx->global_alphabet->list[element_global_index].name);
@@ -1088,6 +1116,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 					}
 				}
 				aut_context_log("\n");
+				automaton_indexes_valuation_increase(current_valuation);
 			}
 			if(current_valuation != NULL){
 				automaton_indexes_valuation_destroy(current_valuation);current_valuation = NULL;
