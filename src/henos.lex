@@ -20,7 +20,7 @@ number 		0{octalDigit}*|{decDigit}+|{hex}+
 ident 		{lower}{identChars}*
 upperIdent 	{upper}{identChars}*
 string 		\"(\\.|[^"\\])*\"
-keyword		set|range|const|\.\.|when
+keyword		set|range|const|\.\.|when|\|f\||\|\|
 %{
 #include <stdlib.h>
 void yyerror(char*);
@@ -59,6 +59,15 @@ const				{
 					yylval.text=p;
 					return(t_CONST);
 				}
+\|\|				{
+					p=(char *)calloc(strlen(yytext)+1,sizeof(char));
+					strcpy(p,yytext);
+					#if DEBUG_LEX
+					printf("[keyword: <%s>]", yytext);
+					#endif
+					yylval.text=p;
+					return(t_PARALLEL);
+				}
 \.\.				{
 					p=(char *)calloc(strlen(yytext)+1,sizeof(char));
 					strcpy(p,yytext);
@@ -67,6 +76,15 @@ const				{
 					#endif
 					yylval.text=p;
 					return(t_DOTS);
+				}
+\|f\|			{
+					p=(char *)calloc(strlen(yytext)+1,sizeof(char));
+					strcpy(p,yytext);
+					#if DEBUG_LEX
+					printf("[keyword: <%s>]", yytext);
+					#endif
+					yylval.text=p;
+					return(t_GAME_COMPOSE);
 				}	
 fluent				{
 					p=(char *)calloc(strlen(yytext)+1,sizeof(char));

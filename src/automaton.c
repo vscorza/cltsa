@@ -954,6 +954,54 @@ bool automaton_fluent_add_ending_signal(automaton_fluent* fluent, automaton_alph
 	fluent->ending_signals_count++;
 	return false;
 }
+automaton_automaton* automaton_fluent_build_automaton(automaton_automata_context* ctx, uint32_t fluent_index){
+	automaton_fluent* current_fluent	= &(ctx->global_fluents[fluent_index]);
+	uint32_t i, j;
+	uint32_t* local_alphabet			= malloc(sizeof(uint32_t) * (current_fluent->ending_signals_count + current_fluent->starting_signals_count));
+	uint32_t alphabet_count				= 0;
+	bool found							= false;
+	for(i = 0; i < current_fluent->starting_signals_count; i++){
+		found	= false;
+		for(j = 0; j < alphabet_count; j++)
+			if(local_alphabet[j] == current_fluent->starting_signals[i]){
+				found	= true;
+				break;
+			}
+		if(!found)
+			local_alphabet[alphabet_count++]	= current_fluent->starting_signals[i];
+	}
+	for(i = 0; i < current_fluent->ending_signals_count; i++){
+		found	= false;
+		for(j = 0; j < alphabet_count; j++)
+			if(local_alphabet[j] == current_fluent->ending_signals[i]){
+				found	= true;
+				break;
+			}
+		if(!found)
+			local_alphabet[alphabet_count++]	= current_fluent->ending_signals[i];
+	}
+
+	automaton_transition *ending_transition		= automaton_transition_create(1, 0);
+	automaton_transition *starting_transition	= automaton_transition_create(0, 1);
+
+	automaton_automaton* current_automaton	= automaton_automaton_create(current_fluent->name, ctx, alphabet_count, local_alphabet);
+	for(i = 0; i < current_fluent->starting_signals_count; i++){
+		automaton_transition_initialize(starting_transition, 0, 1);
+		automaton_transition_add_signal_event(starting_transition, ctx, &(ctx->global_alphabet->list[current_fluent->starting_signals[i]]));
+		automaton_automaton_add_transition(current_automaton, starting_transition);
+		automaton_transition_destroy(starting_transition, false);
+	}
+	automaton_transition_destroy(starting_transition, true);
+	for(i = 0; i < current_fluent->ending_signals_count; i++){
+		automaton_transition_initialize(ending_transition, 1, 0);
+		automaton_transition_add_signal_event(ending_transition, ctx, &(ctx->global_alphabet->list[current_fluent->ending_signals[i]]));
+		automaton_automaton_add_transition(current_automaton, ending_transition);
+		automaton_transition_destroy(ending_transition, false);
+	}
+	automaton_transition_destroy(ending_transition, true);
+	automaton_automaton_add_initial_state(current_automaton, 0);
+	return current_automaton;
+}
 /** VALUATION **/
 bool automaton_valuation_has_fluent(automaton_valuation* valuation, automaton_automata_context* ctx, automaton_fluent* fluent){
 	uint32_t i;
@@ -1166,7 +1214,7 @@ bool automaton_automaton_add_initial_state(automaton_automaton* current_automato
 uint32_t automaton_automata_get_composite_state(uint32_t states_count, uint32_t* states){
 	return 0;
 }
-automaton_automaton* automaton_automata_compose(automaton_automaton** automata, uint32_t automata_count, automaton_synchronization_type type){
+automaton_automaton* automaton_automata_compose(automaton_automaton** automata, uint32_t automata_count, automaton_synchronization_type type, bool is_game){
 	clock_t begin = clock();
 	uint32_t transitions_added_count	= 0;
 	uint32_t i, j, k, l, m, n, o;

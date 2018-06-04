@@ -503,8 +503,24 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 			index						= automaton_parsing_tables_get_entry_index(tables, COMPOSITION_ENTRY_AUT, composition_syntax->components[i]->ident);
 			automata[i]					= tables->composition_entries[index]->valuation.automaton_value;
 		}
+		//if is game build fluents and add to automata
+		uint32_t composition_count	= composition_syntax->count;
+		if(composition_syntax->is_game){
+			uint32_t new_composition_count		= composition_count + ctx->global_fluents_count;
+			automaton_automaton** new_automata	= malloc(sizeof(automaton_automaton*) * new_composition_count);
+			for(i = 0; i < composition_count; i++){
+				new_automata[i]	= automata[i];
+			}
+			//build fluent automata
+			for(i = 0; i < ctx->global_fluents_count; i++){
+				new_automata[i + composition_count]	= automaton_fluent_build_automaton(ctx, i);
+			}
+			free(automata);
+			automata							= new_automata;
+			composition_count					= new_composition_count;
+		}
 		aut_context_log("composing.\n");
-		automaton_automaton* automaton	= automaton_automata_compose(automata, composition_syntax->count, is_synchronous? CONCURRENT : INTERLEAVED);//SYNCHRONOUS);
+		automaton_automaton* automaton	= automaton_automata_compose(automata, composition_count, is_synchronous? CONCURRENT : INTERLEAVED, composition_syntax->is_game);//SYNCHRONOUS);
 		tables->composition_entries[main_index]->solved	= true;
 		tables->composition_entries[main_index]->valuation_count			= 1;
 		tables->composition_entries[main_index]->valuation.automaton_value	= automaton;

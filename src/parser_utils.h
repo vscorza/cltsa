@@ -147,6 +147,7 @@ typedef struct automaton_composition_syntax_str{
 	uint32_t count;
 	struct automaton_state_syntax_str** states;
 	struct automaton_component_syntax_str** components;
+	bool is_game;
 }automaton_composition_syntax;
 typedef struct automaton_statement_syntax_str{
 	automaton_statement_type_syntax type;
@@ -215,7 +216,7 @@ automaton_state_label_syntax* automaton_state_label_syntax_create(char* name, au
 automaton_states_syntax* automaton_states_syntax_create(automaton_state_syntax* state);
 automaton_states_syntax* automaton_states_syntax_add_state(automaton_states_syntax* states, automaton_state_syntax* state);
 automaton_composition_syntax* automaton_composition_syntax_create_from_states(automaton_states_syntax* states);
-automaton_composition_syntax* automaton_composition_syntax_create_from_ref(char* name, automaton_components_syntax* components);
+automaton_composition_syntax* automaton_composition_syntax_create_from_ref(char* name, automaton_components_syntax* components, bool is_game);
 automaton_components_syntax* automaton_components_syntax_create(automaton_component_syntax* component);
 automaton_components_syntax* automaton_components_syntax_add_component(automaton_components_syntax* components, automaton_component_syntax* component);
 automaton_component_syntax* automaton_component_syntax_create(char* ident, char* prefix, automaton_index_syntax* index, automaton_indexes_syntax* indexes);

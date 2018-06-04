@@ -259,6 +259,7 @@ bool automaton_fluent_has_starting_signal(automaton_fluent* fluent, automaton_al
 bool automaton_fluent_add_starting_signal(automaton_fluent* fluent, automaton_alphabet* alphabet, automaton_signal_event* signal_event);
 bool automaton_fluent_has_ending_signal(automaton_fluent* fluent, automaton_alphabet* alphabet, automaton_signal_event* signal_event);
 bool automaton_fluent_add_ending_signal(automaton_fluent* fluent, automaton_alphabet* alphabet, automaton_signal_event* signal_event);
+automaton_automaton* automaton_fluent_build_automaton(automaton_automata_context* ctx, uint32_t fluent_index);
 /** VALUATION **/
 bool automaton_valuation_has_fluent(automaton_valuation* valuation, automaton_automata_context* ctx, automaton_fluent* fluent);
 bool automaton_valuation_add_fluent(automaton_valuation* valuation, automaton_automata_context* ctx, automaton_fluent* fluent);
@@ -276,7 +277,7 @@ bool automaton_automaton_has_state(automaton_automaton* current_automaton, uint3
 bool automaton_automaton_add_initial_state(automaton_automaton* current_automaton, uint32_t state);
 /** AUTOMATA OPERATIONS **/
 uint32_t automaton_automata_get_composite_state(uint32_t states_count, uint32_t* states);
-automaton_automaton* automaton_automata_compose(automaton_automaton** automata, uint32_t automata_count, automaton_synchronization_type type);
+automaton_automaton* automaton_automata_compose(automaton_automaton** automata, uint32_t automata_count, automaton_synchronization_type type, bool is_game);
 bool automaton_automaton_check_invariant(automaton_automaton* current_automaton);
 bool automaton_automaton_update_valuation(automaton_automaton* current_automaton);
 void automaton_automaton_minimize(automaton_automaton* current_automaton);

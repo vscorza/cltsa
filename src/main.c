@@ -136,7 +136,7 @@ void run_automaton_tests(){
 	automaton_automaton** automata		= malloc(sizeof(automaton_automaton*) * 2);
 	automata[0]							= automaton_1;
 	automata[1]							= automaton_2;
-	automaton_automaton* composition	= automaton_automata_compose(automata, 2, CONCURRENT);
+	automaton_automaton* composition	= automaton_automata_compose(automata, 2, CONCURRENT, false);
 	free(automata); automata = NULL;
 	automaton_automaton_print(composition, false, true, true, "\t", "\n");
 	automaton_automaton_destroy(composition); composition = NULL;
@@ -170,7 +170,7 @@ int main (void){
 	*/
 	//run_parse_test("test5.fsp");
 	//run_fsp_tests(10);
-	run_parse_test("tests/test17.fsp",  "test17");
+	run_parse_test("tests/test18.fsp",  "test18");
 	//run_parse_test("tests/test8.fsp", "test8");
 	return 0;    
 }

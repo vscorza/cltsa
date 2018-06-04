@@ -277,14 +277,17 @@ automaton_composition_syntax* automaton_composition_syntax_create_from_states(au
 	composition->components	= NULL;
 	composition->count	= states->count;
 	composition->states	= states->states;
+	composition->is_game	= false;
 	return composition;
 }
-automaton_composition_syntax* automaton_composition_syntax_create_from_ref(char* name, automaton_components_syntax* components){
+automaton_composition_syntax* automaton_composition_syntax_create_from_ref(char* name, automaton_components_syntax* components, bool is_game){
 	automaton_composition_syntax* composition	= malloc(sizeof(automaton_composition_syntax));
 	aut_dupstr(&(composition->name), name);
 	composition->components	= components->components;
 	composition->count	= components->count;
 	composition->states	= NULL;
+	composition->is_game= is_game;
+
 	return composition;
 }
 automaton_components_syntax* automaton_components_syntax_create(automaton_component_syntax* component){

@@ -30,12 +30,12 @@ automaton_program_syntax* parsed_program = NULL;
 	automaton_statement_syntax*		statement;
 	automaton_program_syntax*		program;
 };
-%token	t_INTEGER t_IDENT t_UPPER_IDENT t_STRING t_CONST t_RANGE t_SET t_FLUENT t_DOTS t_WHEN
+%token	t_INTEGER t_IDENT t_UPPER_IDENT t_STRING t_CONST t_RANGE t_SET t_FLUENT t_DOTS t_WHEN t_GAME_COMPOSE t_PARALLEL
 %left '+' '-' ','
 %left '*' '/'
 
 
-%type<text> 				t_STRING t_IDENT t_UPPER_IDENT t_CONST t_RANGE t_SET t_FLUENT t_DOTS t_WHEN
+%type<text> 				t_STRING t_IDENT t_UPPER_IDENT t_CONST t_RANGE t_SET t_FLUENT t_DOTS t_WHEN t_GAME_COMPOSE t_PARALLEL
 %type<integer>				t_INTEGER
 %type<expr>					exp exp2 exp3 exp4 constDef range rangeDef ltsTransitionPrefix
 %type<label>				label concurrentLabel 
@@ -205,11 +205,12 @@ compositionDef:
 	;
 composition:
 	ltsStates								{$$ = automaton_composition_syntax_create_from_states($1); free($1);}
-	| '|' '|' t_UPPER_IDENT '=' '(' compositionExp ')'	{$$ = automaton_composition_syntax_create_from_ref($3, $6); free($6);free($3);}
+	| t_PARALLEL t_UPPER_IDENT '=' '(' compositionExp ')'	{$$ = automaton_composition_syntax_create_from_ref($2, $5, false); free($1);free($2);free($5);}
+	| t_GAME_COMPOSE t_UPPER_IDENT '=' '(' compositionExp ')'	{$$ = automaton_composition_syntax_create_from_ref($2, $5, true); free($1);free($2);free($5);}	
 	;
 compositionExp:
 	compositionExp2							{$$ = automaton_components_syntax_create($1);}
-	|compositionExp '|''|' compositionExp2	{$$ = automaton_components_syntax_add_component($1, $4);}
+	|compositionExp t_PARALLEL compositionExp2	{$$ = automaton_components_syntax_add_component($1, $3);free($2);}
 	;
 compositionExp2:
 	t_UPPER_IDENT							{$$ = automaton_component_syntax_create($1, NULL, NULL, NULL);free($1);}
