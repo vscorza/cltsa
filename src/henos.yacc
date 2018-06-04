@@ -30,12 +30,12 @@ automaton_program_syntax* parsed_program = NULL;
 	automaton_statement_syntax*		statement;
 	automaton_program_syntax*		program;
 };
-%token	t_INTEGER t_IDENT t_UPPER_IDENT t_STRING t_CONST t_RANGE t_SET t_FLUENT t_DOTS
+%token	t_INTEGER t_IDENT t_UPPER_IDENT t_STRING t_CONST t_RANGE t_SET t_FLUENT t_DOTS t_WHEN
 %left '+' '-' ','
 %left '*' '/'
 
 
-%type<text> 				t_STRING t_IDENT t_UPPER_IDENT t_CONST t_RANGE t_SET t_FLUENT t_DOTS
+%type<text> 				t_STRING t_IDENT t_UPPER_IDENT t_CONST t_RANGE t_SET t_FLUENT t_DOTS t_WHEN
 %type<integer>				t_INTEGER
 %type<expr>					exp exp2 exp3 exp4 constDef range rangeDef ltsTransitionPrefix
 %type<label>				label concurrentLabel 
@@ -142,12 +142,12 @@ constDef:
 	;
 exp:
 	exp2									{$$ = $1;}
-	| exp "==" exp2							{$$ = automaton_expression_syntax_create(BINARY_TYPE_AUT, $1, $3, NULL, 0, EQ_OP_AUT);}
-	| exp "!=" exp2							{$$ = automaton_expression_syntax_create(BINARY_TYPE_AUT, $1, $3, NULL, 0, NEQ_OP_AUT);}
-	| exp ">=" exp2							{$$ = automaton_expression_syntax_create(BINARY_TYPE_AUT, $1, $3, NULL, 0, GE_OP_AUT);}
-	| exp "<=" exp2							{$$ = automaton_expression_syntax_create(BINARY_TYPE_AUT, $1, $3, NULL, 0, LE_OP_AUT);}
-	| exp ">" exp2							{$$ = automaton_expression_syntax_create(BINARY_TYPE_AUT, $1, $3, NULL, 0, GT_OP_AUT);}
-	| exp "<" exp2							{$$ = automaton_expression_syntax_create(BINARY_TYPE_AUT, $1, $3, NULL, 0, LT_OP_AUT);}
+	| exp '=''=' exp2							{$$ = automaton_expression_syntax_create(BINARY_TYPE_AUT, $1, $4, NULL, 0, EQ_OP_AUT);}
+	| exp '!''=' exp2							{$$ = automaton_expression_syntax_create(BINARY_TYPE_AUT, $1, $4, NULL, 0, NEQ_OP_AUT);}
+	| exp '>''=' exp2							{$$ = automaton_expression_syntax_create(BINARY_TYPE_AUT, $1, $4, NULL, 0, GE_OP_AUT);}
+	| exp '<''=' exp2							{$$ = automaton_expression_syntax_create(BINARY_TYPE_AUT, $1, $4, NULL, 0, LE_OP_AUT);}
+	| exp '>' exp2							{$$ = automaton_expression_syntax_create(BINARY_TYPE_AUT, $1, $3, NULL, 0, GT_OP_AUT);}
+	| exp '<' exp2							{$$ = automaton_expression_syntax_create(BINARY_TYPE_AUT, $1, $3, NULL, 0, LT_OP_AUT);}
 	;
 exp2:
 	exp3									{$$ = $1;}
@@ -185,7 +185,7 @@ ltsTransition:
 	ltsTransitionPrefix ltsTrace '-''>' ltsStateLabel {$$ = automaton_transition_syntax_finish($1, $2, $5);}
 	;
 ltsTransitionPrefix:
-	"when" '(' exp ')'						{$$ = $3;}
+	t_WHEN '(' exp ')'						{$$ = $3;free($1);}
 	|										{$$ = NULL;}
 	;
 ltsTrace:

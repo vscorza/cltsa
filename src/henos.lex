@@ -20,7 +20,7 @@ number 		0{octalDigit}*|{decDigit}+|{hex}+
 ident 		{lower}{identChars}*
 upperIdent 	{upper}{identChars}*
 string 		\"(\\.|[^"\\])*\"
-keyword		set|range|const|\.\.
+keyword		set|range|const|\.\.|when
 %{
 #include <stdlib.h>
 void yyerror(char*);
@@ -76,6 +76,15 @@ fluent				{
 					#endif
 					yylval.text=p;
 					return(t_FLUENT);
+				}
+when			{
+					p=(char *)calloc(strlen(yytext)+1,sizeof(char));
+					strcpy(p,yytext);
+					#if DEBUG_LEX
+					printf("[keyword: <%s>]", yytext);
+					#endif
+					yylval.text=p;
+					return(t_WHEN);
 				}
 {ident}			{
 					p=(char *)calloc(strlen(yytext)+1,sizeof(char));
