@@ -1,9 +1,11 @@
 TODO:
 SPRINT1
 - convetir valuations en un array plano de tamaño (transitions_size * ctx->fluents_count) y luego resolver aritmetica de indice, apply valuations to states (|f| directive to parse compose with valuations, i.e. get game)
-- implement gr1
-- review and document code (particualarly compose)
+- implement gr1 use transitions instead of states since it will be easier to build strategy if last computation holds route to satisfaction
+- implementar valuations (aparte de inverted_valuations) para validar al momento de crear la composicion que no haya colision en los fluents
 - fluents transitions should be applied to superset of alphabet
+- review and document code (particualarly compose)
+- probar amba con concurrent labels
 SPRINT2
 - parse assertions, goals
 - parse safety ltl

@@ -21,6 +21,10 @@
 #define TRUE_VAR			"1"
 #define FALSE_VAR			"0"
 
+#define SET_BIT(A,k)     ( A[(k/32)] |= (1 << (k%32)) )
+#define CLEAR_BIT(A,k)   ( A[(k/32)] &= ~(1 << (k%32)) )
+#define TEST_BIT(A,k)    ( A[(k/32)] & (1 << (k%32)) )
+
 /** LIST FUNCTIONS **/
 void aut_add_ptr_list(void*** list, void* element, uint32_t* count);
 void aut_add_incr_ptr_list(void*** list, void* element, uint32_t* size, uint32_t* count);

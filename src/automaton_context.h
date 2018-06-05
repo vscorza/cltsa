@@ -14,7 +14,7 @@
 #define GLOBAL_ALPHABET_NAME_AUT		"Global_Alphabet"
 #define CONTROLLABLE_ALPHABET_NAME_AUT	"Controllable_Alphabet"
 
-#define DEBUG_PARSE_STATES 1
+#define DEBUG_PARSE_STATES 0
 
 #if DEBUG_PARSE_STATES
 #define aut_context_log(format, ...) printf(format, ##__VA_ARGS__ )
@@ -45,6 +45,7 @@ typedef struct automaton_parsing_table_entry_str{
 		int32_t int_value;
 		automaton_automaton* automaton_value;
 		automaton_range* range_value;
+		automaton_fluent* fluent_value;
 	}valuation;
 }automaton_parsing_table_entry;
 typedef struct automaton_parsing_tables_str{
@@ -89,6 +90,9 @@ bool automaton_statement_syntax_to_constant(automaton_automata_context* ctx, aut
 		, automaton_parsing_tables* tables);
 bool automaton_statement_syntax_to_range(automaton_automata_context* ctx, automaton_expression_syntax* range_def_syntax
 		, automaton_parsing_tables* tables);
+bool automaton_statement_syntax_to_fluent(automaton_automata_context* ctx, automaton_fluent_syntax* fluent_def_syntax
+		, automaton_parsing_tables* tables, automaton_alphabet* global_alphabet);
+automaton_fluent* automaton_fluent_create_from_syntax(automaton_parsing_tables* tables, automaton_fluent_syntax* fluent_def_syntax, automaton_alphabet* global_alphabet);
 void automaton_index_syntax_get_range(automaton_parsing_tables* tables, automaton_index_syntax* index, int32_t *lower_index, int32_t *upper_index);
 void automaton_indexes_syntax_eval_strings(automaton_parsing_tables* tables, automaton_indexes_valuation* valuation, char*** a, int32_t* a_count, automaton_indexes_syntax* indexes);
 #endif /* AUTOMATON_CONTEXT_H_ */

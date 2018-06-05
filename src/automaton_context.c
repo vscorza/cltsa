@@ -81,6 +81,12 @@ void automaton_parsing_table_entry_destroy(automaton_parsing_table_entry* entry)
 			entry->valuation.range_value	= NULL;
 		}
 		break;
+	case FLUENT_ENTRY_AUT:
+		if(entry->valuation.fluent_value != NULL){
+			automaton_fluent_destroy(entry->valuation.fluent_value, true);
+			entry->valuation.fluent_value	= NULL;
+		}
+		break;
 	default:
 		break;
 	}
@@ -485,7 +491,7 @@ automaton_indexes_valuation* automaton_indexes_valuation_create_from_indexes(aut
 
 bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, automaton_composition_syntax* composition_syntax
 		, automaton_parsing_tables* tables, bool is_synchronous){
-	int32_t main_index, index, i, j, k, l, m, n, o, p, r;
+	int32_t main_index, index, i, j, k, l, m, n, o, p, r, s;
 	main_index						= automaton_parsing_tables_get_entry_index(tables, COMPOSITION_ENTRY_AUT, composition_syntax->name);
 	if(main_index >= 0)if(tables->composition_entries[main_index]->solved)	return false;
 	//check whether composition syntax is a composition or a single automaton description
@@ -769,7 +775,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 		}
 		aut_context_log("local alphabet built with size %d\n", local_alphabet_count);
 		/** CREATE AUTOMATON **/
-		automaton_automaton* automaton	= automaton_automaton_create(composition_syntax->name, ctx, local_alphabet_count, local_alphabet);
+		automaton_automaton* automaton	= automaton_automaton_create(composition_syntax->name, ctx, local_alphabet_count, local_alphabet, false);
 		free(local_alphabet);
 		//add transitions
 		//map state label to int
@@ -870,7 +876,8 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 			aut_context_log("\ts[%d]\n", i);
 			while(first_run_from || (current_valuation != NULL && automaton_indexes_valuation_has_next(current_valuation))){
 #if DEBUG_PARSE_STATES
-				automaton_indexes_valuation_print(current_valuation, "", "\n");
+				if(current_valuation != NULL)
+					automaton_indexes_valuation_print(current_valuation, "", "\n");
 #endif
 				first_run_from = false;
 				label_indexes[0] = '\0';
@@ -924,9 +931,8 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 						}else{
 							to_state	= (uint32_t)label_position;
 						}
-						next_from_state	= 0;
 						for(r = 0; r < (int32_t)current_from_state_count; r++){
-							if(automaton_transition_count <= (automaton_transition_size - 1)){
+							if(automaton_transition_count >= (automaton_transition_size - 1)){
 								uint32_t new_size	= automaton_transition_size * LIST_INCREASE_FACTOR;
 								automaton_transition** new_automaton_transitions;
 								new_automaton_transitions =  malloc(sizeof(automaton_transition*) * new_size);
@@ -938,7 +944,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 							}
 							current_automaton_transition[automaton_transition_count++]	= automaton_transition_create(current_from_state[r], to_state);
 							aut_context_log("(%d->%d)[General]<%d>", current_from_state[r], to_state,automaton_transition_count);
-							if(next_from_state_count <= (next_from_state_size - 1)){
+							if(next_from_state_count >= (next_from_state_size - 1)){
 								uint32_t new_size	= next_from_state_size * LIST_INCREASE_FACTOR;
 								uint32_t* new_next_from	= malloc(sizeof(uint32_t) * new_size);
 								for(l = 0; l < (int32_t)next_from_state_count; l++){
@@ -998,7 +1004,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 												aut_context_log("\n");
 #endif
 												to_state	= (uint32_t)label_position;
-												if(automaton_transition_count <= (automaton_transition_size - 1)){
+												if(automaton_transition_count >= (automaton_transition_size - 1)){
 													uint32_t new_size	= automaton_transition_size * LIST_INCREASE_FACTOR;
 													automaton_transition** new_transitions	= malloc(sizeof(automaton_transition*) * new_size);
 													for(l = 0; l < (int32_t)automaton_transition_count; l++){
@@ -1010,7 +1016,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 												}
 												current_automaton_transition[automaton_transition_count++]	= automaton_transition_create(current_from_state[r], to_state);
 												aut_context_log("(%d->%d)[!SET|index]<%d>", current_from_state[r], to_state,automaton_transition_count);
-												if(next_from_state_count <= (next_from_state_size - 1)){
+												if(next_from_state_count >= (next_from_state_size - 1)){
 													uint32_t new_size	= next_from_state_size * LIST_INCREASE_FACTOR;
 													uint32_t* new_next_from	= malloc(sizeof(uint32_t) * new_size);
 													for(l = 0; l < (int32_t)next_from_state_count; l++){
@@ -1044,7 +1050,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 											}
 										}
 										if(element_global_index >= 0){
-											if(automaton_transition_count <= (automaton_transition_size - 1)){
+											if(automaton_transition_count >= (automaton_transition_size - 1)){
 												uint32_t new_size	= automaton_transition_size * LIST_INCREASE_FACTOR;
 												automaton_transition** new_transitions	= malloc(sizeof(automaton_transition*) * new_size);
 												for(l = 0; l < (int32_t)automaton_transition_count; l++){
@@ -1080,8 +1086,8 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 											if (atom_label->set->labels[n][o]->indexes != NULL){
 												//automaton_transition_destroy(current_automaton_transition[automaton_transition_count--], true);
 												if(ret_value != NULL){
-													for(n = 0; n < count; n++){
-														free(ret_value[n]);
+													for(s = 0; s < count; s++){
+														free(ret_value[s]);
 													}
 													free(ret_value);
 													ret_value = NULL;
@@ -1127,15 +1133,15 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 								}
 
 							}
-							for(r= 0; r < (int32_t)automaton_transition_count; r++){
-								automaton_automaton_add_transition(automaton, current_automaton_transition[r]);
-								automaton_transition_destroy(current_automaton_transition[r], true);
+							for(s= 0; s < (int32_t)automaton_transition_count; s++){
+								automaton_automaton_add_transition(automaton, current_automaton_transition[s]);
+								automaton_transition_destroy(current_automaton_transition[s], true);
 							}
 							automaton_transition_count	= 0;
 						}
 						current_from_state_count	= 0;
-						for(r = 0; r < (int32_t)next_from_state_count; r++){
-							if(current_from_state_count <= (current_from_state_size - 1)){
+						for(s = 0; s < (int32_t)next_from_state_count; s++){
+							if(current_from_state_count >= (current_from_state_size - 1)){
 								uint32_t new_size	= current_from_state_size * LIST_INCREASE_FACTOR;
 								uint32_t* new_current_from	= malloc(sizeof(uint32_t) * new_size);
 								for(l = 0; l < (int32_t)current_from_state_count; l++){
@@ -1145,7 +1151,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 								current_from_state_size	= new_size;
 								current_from_state			= new_current_from;
 							}
-							current_from_state[current_from_state_count++]	= next_from_state[r];
+							current_from_state[current_from_state_count++]	= next_from_state[s];
 						}
 						next_from_state_count	= 0;
 					}
@@ -1374,6 +1380,62 @@ bool automaton_statement_syntax_to_range(automaton_automata_context* ctx, automa
 	return false;
 }
 
+bool automaton_statement_syntax_to_fluent(automaton_automata_context* ctx, automaton_fluent_syntax* fluent_def_syntax
+		, automaton_parsing_tables* tables, automaton_alphabet* global_alphabet){
+	uint32_t main_index	= automaton_parsing_tables_get_entry_index(tables, FLUENT_ENTRY_AUT, fluent_def_syntax->name);
+	tables->fluent_entries[main_index]->solved					= true;
+	tables->fluent_entries[main_index]->valuation_count			= 1;
+	tables->fluent_entries[main_index]->valuation.fluent_value	= automaton_fluent_create_from_syntax(tables, fluent_def_syntax, global_alphabet);
+	return false;
+}
+
+automaton_fluent* automaton_fluent_create_from_syntax(automaton_parsing_tables* tables, automaton_fluent_syntax* fluent_def_syntax
+		, automaton_alphabet* global_alphabet){
+	//TODO:implement fluents initial value
+	automaton_fluent* fluent	= automaton_fluent_create(fluent_def_syntax->name, false);
+	uint32_t i;
+	if(fluent_def_syntax->initiating_set->is_ident || fluent_def_syntax->finishing_set->is_ident){
+		//TODO: implement set by ref in fluents
+		printf("[FATAL ERROR] fluent set by ref not implemented\n");
+		exit(-1);
+	}
+	for(i =0; i < fluent_def_syntax->initiating_set->count; i++){
+		if(fluent_def_syntax->initiating_set->labels_count[i] != 1){
+			//TODO: implement concurrent fluents
+			printf("[FATAL ERROR] concurrent labels in fluents not implement\n");
+			exit(-1);
+		}
+	}
+	for(i =0; i < fluent_def_syntax->finishing_set->count; i++){
+		if(fluent_def_syntax->finishing_set->labels_count[i] != 1){
+			//TODO: implement concurrent fluents
+			printf("[FATAL ERROR] concurrent labels in fluents not implement\n");
+			exit(-1);
+		}
+	}
+	automaton_signal_event* sig_event;
+	for(i = 0; i < fluent_def_syntax->initiating_set->count; i++){
+		if(fluent_def_syntax->initiating_set->labels[i][0]->is_set){
+			printf("[FATAL ERROR] fluent set by ref not implemented\n");
+			exit(-1);
+		}
+		sig_event = automaton_signal_event_create(fluent_def_syntax->initiating_set->labels[i][0]->string_terminal, INPUT_SIG);
+		automaton_fluent_add_starting_signal(fluent, global_alphabet, sig_event);
+		automaton_signal_event_destroy(sig_event, true);
+	}
+	for(i = 0; i < fluent_def_syntax->finishing_set->count; i++){
+		if(fluent_def_syntax->finishing_set->labels[i][0]->is_set){
+			printf("[FATAL ERROR] fluent set by ref not implemented\n");
+			exit(-1);
+		}
+		sig_event = automaton_signal_event_create(fluent_def_syntax->finishing_set->labels[i][0]->string_terminal, INPUT_SIG);
+		automaton_fluent_add_ending_signal(fluent, global_alphabet, sig_event);
+		automaton_signal_event_destroy(sig_event, true);
+	}
+
+	return fluent;
+}
+
 automaton_automata_context* automaton_automata_context_create_from_syntax(automaton_program_syntax* program, char* ctx_name, bool is_synchronous){
 	automaton_parsing_tables* tables	= automaton_parsing_tables_create();
 	automaton_automata_context* ctx		= malloc(sizeof(automaton_automata_context));
@@ -1392,7 +1454,23 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 	}
 	//get global alphabet
 	automaton_alphabet* global_alphabet		= automaton_parsing_tables_get_global_alphabet(tables);
-	automaton_automata_context_initialize(ctx, ctx_name, global_alphabet, 0, NULL);
+	uint32_t fluent_count	= 0;
+	for(i = 0; i < program->count; i++)
+		if(program->statements[i]->type == FLUENT_AUT)
+			fluent_count++;
+	automaton_fluent** fluents				= malloc(sizeof(automaton_fluent*) * fluent_count);
+	fluent_count = 0;
+	uint32_t fluent_index;
+	for(i = 0; i < program->count; i++){
+		if(program->statements[i]->type == FLUENT_AUT){
+			automaton_statement_syntax_to_fluent(ctx, program->statements[i]->fluent_def, tables, global_alphabet);
+			fluent_index = automaton_parsing_tables_get_entry_index(tables, FLUENT_ENTRY_AUT, program->statements[i]->fluent_def->name);
+			fluents[fluent_count++]			= tables->fluent_entries[fluent_index]->valuation.fluent_value;
+		}
+	}
+	//get fluents
+	automaton_automata_context_initialize(ctx, ctx_name, global_alphabet, fluent_count, fluents);
+	free(fluents);
 	automaton_alphabet_destroy(global_alphabet);
 	//build automata
 	bool pending_statements	= true;

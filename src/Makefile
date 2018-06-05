@@ -8,9 +8,9 @@ LEX = lex
 YACC = yacc -d
 #YACC = yacc -d
 #YACCFLAGS = --debug --verbose
-YACCFLAGS = -Wconflicts-sr -Wconflicts-rr --debug --verbose
+#YACCFLAGS = -Wconflicts-sr -Wconflicts-rr --debug --verbose
 #YACCFLAGS = -Wconflicts-sr -Wconflicts-rr --debug
-#YACCFLAGS = 
+YACCFLAGS = 
 
 all: main
 

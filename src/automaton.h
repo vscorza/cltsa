@@ -23,11 +23,20 @@
 #define DEBUG_COMPOSITE_TREE 0
 
 #define BUCKET_SIZE		1000000
-#define PRINT_PARTIAL_COMPOSITION 0
+#define FLUENT_BUCKET_SIZE 10000
+#define PRINT_PARTIAL_COMPOSITION 1
 
 #define AUT_TAU_CONSTANT	"__tau__"
 
+#define FLUENT_ENTRY_SIZE	32
+#define GET_FLUENTS_ARR_SIZE(fluent_count, trans_size)	(1 + ((fluent_count * trans_size) / FLUENT_ENTRY_SIZE))
+#define GET_STATE_FLUENT_INDEX(fluent_count, state_index, fluent_index)	((state_index * fluent_count) + fluent_index)
+#define SET_FLUENT_BIT(arr,index)     ( arr[(index/FLUENT_ENTRY_SIZE)] |= (1 << (index%FLUENT_ENTRY_SIZE)) )
+#define CLEAR_FLUENT_BIT(arr,index)   ( arr[(index/FLUENT_ENTRY_SIZE)] &= ~(1 << (index%FLUENT_ENTRY_SIZE)) )
+#define TEST_FLUENT_BIT(arr,index)    ( arr[(index/FLUENT_ENTRY_SIZE)] & (1 << (index%FLUENT_ENTRY_SIZE)) )
+
 typedef uint16_t signal_t;
+typedef uint8_t fluent_count_t;
 /****************
 ==== ENUMS ==== 
 ****************/
@@ -145,8 +154,11 @@ typedef struct automaton_str{
 	automaton_transition**	inverted_transitions;
 	uint32_t				initial_states_count;
 	uint32_t*				initial_states;
-	automaton_valuation*	valuations;
+	bool					is_game;
+	uint32_t				valuations_size;
+	uint32_t*				valuations;
 	automaton_transitions_pool*	transitions_pool;
+	automaton_bucket_list**	inverted_valuations;
 } automaton_automaton;
 
 /** AUTOMATA **/
@@ -206,7 +218,7 @@ automaton_transition* automaton_transition_create(uint32_t from_state, uint32_t 
 automaton_fluent* automaton_fluent_create(char* name, bool initial_valuation);
 automaton_valuation* automaton_valuation_create(uint32_t state);
 automaton_automata_context* automaton_automata_context_create(char* name, automaton_alphabet* alphabet, uint32_t fluents_count, automaton_fluent** fluents);
-automaton_automaton* automaton_automaton_create(char* name, automaton_automata_context* ctx, uint32_t local_alphabet_count, uint32_t* local_alphabet);
+automaton_automaton* automaton_automaton_create(char* name, automaton_automata_context* ctx, uint32_t local_alphabet_count, uint32_t* local_alphabet, bool is_game);
 automaton_range* automaton_range_create(char* name, uint32_t lower_value, uint32_t upper_value);
 automaton_indexes_valuation* automaton_indexes_valuation_create();
 /** INIT FUNCTIONS **/
@@ -216,7 +228,7 @@ void automaton_transition_initialize(automaton_transition* transition, uint32_t 
 void automaton_fluent_initialize(automaton_fluent* fluent, char* name, bool initial_valuation);
 void automaton_valuation_initialize(automaton_valuation* valuation, uint32_t state);
 void automaton_automata_context_initialize(automaton_automata_context* ctx, char* name, automaton_alphabet* alphabet, uint32_t fluents_count, automaton_fluent** fluents);
-void automaton_automaton_initialize(automaton_automaton* automaton, char* name, automaton_automata_context* ctx, uint32_t local_alphabet_count, uint32_t* local_alphabet);
+void automaton_automaton_initialize(automaton_automaton* automaton, char* name, automaton_automata_context* ctx, uint32_t local_alphabet_count, uint32_t* local_alphabet, bool is_game);
 void automaton_range_initialize(automaton_range* range, char* name, uint32_t lower_value, uint32_t upper_value);
 /** DESTROY FUNCTIONS **/
 void automaton_signal_event_destroy(automaton_signal_event* signal_event, bool freeBase);
@@ -248,6 +260,7 @@ void automaton_indexes_valuation_set_value(automaton_indexes_valuation* valuatio
 /** ALPHABET **/
 bool automaton_alphabet_has_signal_event(automaton_alphabet* alphabet, automaton_signal_event* signal_event);
 bool automaton_alphabet_add_signal_event(automaton_alphabet* alphabet, automaton_signal_event* signal_event);
+int32_t automaton_alphabet_get_value_index(automaton_alphabet* alphabet, char* signal_name);
 signal_t automaton_alphabet_get_signal_index(automaton_alphabet* alphabet, automaton_signal_event* signal_event);
 /** TRANSITION **/
 bool automaton_transition_has_signal_event(automaton_transition* transition, automaton_automata_context* ctx, automaton_signal_event* signal_event);

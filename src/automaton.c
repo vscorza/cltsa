@@ -152,9 +152,18 @@ void automaton_automaton_copy(automaton_automaton* source, automaton_automaton* 
 	for(i = 0; i < target->initial_states_count; i++){
 		target->initial_states[i]	= source->initial_states[i];
 	}
-	target->valuations				= malloc(sizeof(automaton_valuation) * target->transitions_size);
-	for(i = 0; i < target->transitions_count; i++){
-		automaton_valuation_copy(&(source->valuations[i]), &(target->valuations[i]));
+	target->is_game					= source->is_game;
+	if(source->is_game){
+		target->valuations_size			= source->valuations_size;
+		target->valuations				= malloc(sizeof(uint32_t) * target->valuations_size);
+		for(i = 0; i < target->valuations_size; i++){
+			target->valuations[i]		= source->valuations[i];
+		}
+
+		target->inverted_valuations						= malloc(sizeof(automaton_bucket_list*) * target->context->global_fluents_count);
+		for(i = 0; i < target->context->global_fluents_count; i++){
+			target->inverted_valuations[i]				= automaton_bucket_list_create(FLUENT_BUCKET_SIZE);
+		}
 	}
 }
 automaton_automata* automaton_automata_clone(automaton_automata* source){
@@ -343,10 +352,22 @@ void automaton_automaton_print(automaton_automaton* current_automaton, bool prin
 		}
 		printf("}\n");
 	}
-	if(print_valuations){
+	if(print_valuations && current_automaton->is_game){
 		printf("%sValuations:\n", prefix2);
-		for(i = 0; i < current_automaton->transitions_count; i ++){
-			automaton_valuation_print(&(current_automaton->valuations[i]), ctx, prefix2, "\n");
+		for(i = 0; i < current_automaton->transitions_size; i ++){
+			printf("%x", current_automaton->valuations[i]);
+		}
+		printf("\n");
+		printf("%sInv. Valuations:\n", prefix2);
+		for(i = 0; i < current_automaton->context->global_fluents_count; i++){
+			printf("%sFluent\t%s:", prefix2, current_automaton->context->global_fluents[i].name);
+			//TODO: print inverted fluent bucket
+			/*
+			for(j = 0; j < current_automaton->inverted_valuations_counts[i]; j++){
+				printf("%d%s", current_automaton->inverted_valuations[i][j], j < (current_automaton->inverted_valuations_counts[i] -1 )? ",":"");
+			}
+			*/
+			printf("\n");
 		}
 	}
 	printf("%sTransitions:\n", prefix2);
@@ -467,9 +488,9 @@ automaton_automata_context* automaton_automata_context_create(char* name, automa
 	automaton_automata_context_initialize(ctx, name, alphabet, fluents_count, fluents);
 	return ctx;
 }
-automaton_automaton* automaton_automaton_create(char* name, automaton_automata_context* ctx, uint32_t local_alphabet_count, uint32_t* local_alphabet){
+automaton_automaton* automaton_automaton_create(char* name, automaton_automata_context* ctx, uint32_t local_alphabet_count, uint32_t* local_alphabet, bool is_game){
 	automaton_automaton* automaton		= malloc(sizeof(automaton_automaton));
-	automaton_automaton_initialize(automaton, name, ctx, local_alphabet_count, local_alphabet);
+	automaton_automaton_initialize(automaton, name, ctx, local_alphabet_count, local_alphabet, is_game);
 	return automaton;
 }
 automaton_range* automaton_range_create(char* name, uint32_t lower_value, uint32_t upper_value){
@@ -529,7 +550,7 @@ void automaton_automata_context_initialize(automaton_automata_context* ctx, char
 		automaton_fluent_copy(fluents[i], &(ctx->global_fluents[i]));
 	}
 }
-void automaton_automaton_initialize(automaton_automaton* automaton, char* name, automaton_automata_context* ctx, uint32_t local_alphabet_count, uint32_t* local_alphabet){
+void automaton_automaton_initialize(automaton_automaton* automaton, char* name, automaton_automata_context* ctx, uint32_t local_alphabet_count, uint32_t* local_alphabet, bool is_game){
 	automaton->name						= malloc(sizeof(char) * (strlen(name) + 1));
 	strcpy(automaton->name, name);
 	automaton->context					= ctx;
@@ -591,7 +612,15 @@ void automaton_automaton_initialize(automaton_automaton* automaton, char* name, 
 			automaton_transition_initialize(&(automaton->inverted_transitions[i][j]), 0, 0);
 	}
 	automaton->initial_states_count		= 0;
-	automaton->valuations 				= malloc(sizeof(automaton_valuation) * automaton->transitions_size);
+	automaton->is_game					= is_game;
+	if(is_game){
+		uint32_t new_size					= GET_FLUENTS_ARR_SIZE(automaton->context->global_fluents_count, automaton->transitions_size);
+		automaton->valuations 				= malloc(sizeof(uint32_t) * new_size);
+		automaton->inverted_valuations		= malloc(sizeof(automaton_bucket_list*) * automaton->context->global_fluents_count);
+		for(i = 0; i < automaton->context->global_fluents_count; i++){
+			automaton->inverted_valuations[i]	= automaton_bucket_list_create(FLUENT_BUCKET_SIZE);
+		}
+	}
 }
 void automaton_range_initialize(automaton_range* range, char* name, uint32_t lower_value, uint32_t upper_value){
 	if(name != NULL){
@@ -687,10 +716,12 @@ void automaton_automaton_destroy(automaton_automaton* automaton){
 	free(automaton->in_size);
 	free(automaton->out_size);
 	free(automaton->initial_states);
-	for(i = 0; i < automaton->transitions_count; i++){
-		automaton_valuation_destroy(&(automaton->valuations[i]));
+	if(automaton->is_game){
+		for(i = 0; i < automaton->context->global_fluents_count; i++)
+			automaton_bucket_destroy(automaton->inverted_valuations[i]);
+		free(automaton->inverted_valuations);
+		free(automaton->valuations);
 	}
-	free(automaton->valuations);
 	automaton->name			= NULL;
 	automaton->context		= NULL;
 	automaton->local_alphabet_count	= 0;
@@ -706,7 +737,9 @@ void automaton_automaton_destroy(automaton_automaton* automaton){
 	automaton->inverted_transitions	= NULL;
 	automaton->initial_states_count	= 0;
 	automaton->initial_states		= NULL;
+	automaton->valuations_size		= 0;
 	automaton->valuations			= NULL;
+	automaton->inverted_transitions	= NULL;
 	free(automaton);
 }
 void automaton_range_destroy(automaton_range* range){
@@ -815,6 +848,14 @@ bool automaton_alphabet_add_signal_event(automaton_alphabet* alphabet, automaton
 	automaton_signal_event_copy(signal_event, &(alphabet->list[signal_ordered_index]));
 	alphabet->count++;
 	return false;
+}
+int32_t automaton_alphabet_get_value_index(automaton_alphabet* alphabet, char* signal_name){
+	int32_t i;
+	for(i = 0; i < alphabet->size; i++){
+		if(strcmp(alphabet->list[i].name, signal_name) == 0)
+			return i;
+	}
+	return -1;
 }
 signal_t automaton_alphabet_get_signal_index(automaton_alphabet* alphabet, automaton_signal_event* signal_event){
 	signal_t i;
@@ -982,7 +1023,7 @@ automaton_automaton* automaton_fluent_build_automaton(automaton_automata_context
 	automaton_transition *ending_loop			= automaton_transition_create(1, 1);
 
 	//TODO:should be superset both on transition and loop
-	automaton_automaton* current_automaton	= automaton_automaton_create(current_fluent->name, ctx, alphabet_count, local_alphabet);
+	automaton_automaton* current_automaton	= automaton_automaton_create(current_fluent->name, ctx, alphabet_count, local_alphabet, false);
 	for(i = 0; i < current_fluent->starting_signals_count; i++){
 		automaton_transition_initialize(starting_transition, 0, 1);
 		automaton_transition_initialize(starting_loop, 0, 0);
@@ -1123,6 +1164,7 @@ void automaton_automaton_resize_to_state(automaton_automaton* current_automaton,
 			automaton_transition_initialize(&(next_inv_trans[i][j]), 0, 0);
 		}
 	}
+
 	free(current_automaton->out_degree);
 	free(current_automaton->in_degree);
 	free(current_automaton->out_size);
@@ -1137,6 +1179,18 @@ void automaton_automaton_resize_to_state(automaton_automaton* current_automaton,
 	current_automaton->transitions	= next_trans;
 	current_automaton->inverted_transitions	= next_inv_trans;
 	current_automaton->transitions_size		= next_size;
+
+	uint32_t old_valuations_size, new_valuations_size;
+	if(current_automaton->is_game){
+		old_valuations_size						= GET_FLUENTS_ARR_SIZE(current_automaton->context->global_fluents_count, old_size);
+		new_valuations_size						= GET_FLUENTS_ARR_SIZE(current_automaton->context->global_fluents_count, current_automaton->transitions_size);
+		uint32_t* new_valuations 				= malloc(sizeof(uint32_t) * new_valuations_size);
+		for(i = 0; i < old_valuations_size; i++){
+			new_valuations[i]					= current_automaton->valuations[i];
+		}
+		free(current_automaton->valuations);
+		current_automaton->valuations			= new_valuations;
+	}
 
 }
 bool automaton_automaton_add_transition(automaton_automaton* current_automaton, automaton_transition* transition){
@@ -1280,9 +1334,9 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 	}
 	automaton_automaton* composition;
 	if(is_game){
-		composition = automaton_automaton_create("Game", ctx, alphabet_count, alphabet);
+		composition = automaton_automaton_create("Game", ctx, alphabet_count, alphabet, true);
 	}else{
-		composition = automaton_automaton_create("Composition", ctx, alphabet_count, alphabet);
+		composition = automaton_automaton_create("Composition", ctx, alphabet_count, alphabet, false);
 	}
 	/** get signal to automata list structure **/
 	bool** signal_to_automata	= malloc(sizeof(bool*) * alphabet_count);
@@ -1366,6 +1420,16 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 	composite_frontier[0]				= composite_initial_state;
 	automaton_bucket_add_entry(bucket_list, composite_initial_state);
 	automaton_automaton_add_initial_state(composition, composite_initial_state);
+	uint32_t fluent_count				= ctx->global_fluents_count;
+	if(is_game){
+		uint32_t fluent_index;
+		for(i = 0; i < fluent_count; i++){
+			fluent_index	= GET_STATE_FLUENT_INDEX(fluent_count, 0, i);
+			//TODO:we are assuming fluents start as false
+			CLEAR_FLUENT_BIT(composition->valuations, fluent_index);
+		}
+	}
+
 	//consume frontier
 	while(frontier_count > 0){
 		from_state	= composite_frontier[frontier_count - 1];
@@ -1749,6 +1813,28 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 			printf("](%d)\n", composite_to);
 #endif
 			automaton_automaton_add_transition(composition, current_transition);
+			if(is_game){
+				uint32_t fluent_index;
+				uint32_t fluent_automata_index;
+				int32_t state_position	= -1;
+				bool state_found;
+				for(i = 0; i < fluent_count; i++){
+					fluent_index	= GET_STATE_FLUENT_INDEX(fluent_count, composite_to, i);
+					//set new valuation
+					fluent_automata_index	= automata_count - fluent_count + i;
+					if(current_to_state[fluent_automata_index] == 1){
+						//Check if it should be added to the inverted valuation list
+						state_found		= automaton_bucket_has_entry(composition->inverted_valuations[i], composite_to);
+						//
+						if(!state_found){
+							automaton_bucket_add_entry(composition->inverted_valuations[i], composite_to);
+						}
+						SET_FLUENT_BIT(composition->valuations, fluent_index);
+					}else{
+						CLEAR_FLUENT_BIT(composition->valuations, fluent_index);
+					}
+				}
+			}
 			transitions_added_count++;
 #if PRINT_PARTIAL_COMPOSITION
 			if((transitions_added_count % 300000) == 0){
