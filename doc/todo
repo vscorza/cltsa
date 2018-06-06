@@ -1,12 +1,18 @@
 TODO:
 SPRINT1
-- convetir valuations en un array plano de tamaño (transitions_size * ctx->fluents_count) y luego resolver aritmetica de indice, apply valuations to states (|f| directive to parse compose with valuations, i.e. get game)
 - implement gr1 use transitions instead of states since it will be easier to build strategy if last computation holds route to satisfaction
-- implementar valuations (aparte de inverted_valuations) para validar al momento de crear la composicion que no haya colision en los fluents
+	para gr1 definir estructura de punto fijo sobre transiciones, mantiene trans_viejas, trans_agregadas, bool initialized
+	el & de obdd es expandir frontera (predecesores a lo bruto)
+		va de un conj de transiciones (las acumuladas) x transiciones (frontera) -> transiciones (agregadas)
+	el | de obdd es una unión de transiciones, sí tenemos agregadas no hace falta revisar mucho, sólo se agregan y ya
+	el cox es igual que el & pero hace predecesores que no llevan fuera de acumuladas por no controlables
+	de hecho el & puede obviarse y aplicarse sólo cox ya que el & tiene sentido en sincrónico con sys y env particionado
+	habría que armar un bucket list de transiciones, en base a los estados to-state	
 - fluents transitions should be applied to superset of alphabet
 - review and document code (particualarly compose)
 - probar amba con concurrent labels
 SPRINT2
+- aparte de <a,b,c> introducir >a,b,c< que define concurrencia débil, puede transicionar con un subconj de estos
 - parse assertions, goals
 - parse safety ltl
 - check compatibility with fluents when composing
