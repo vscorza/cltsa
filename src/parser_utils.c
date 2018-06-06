@@ -290,13 +290,23 @@ automaton_composition_syntax* automaton_composition_syntax_create_from_ref(char*
 
 	return composition;
 }
+automaton_gr1_game_syntax* automaton_gr1_game_syntax_create(char* name, char* composition_name
+		, automaton_set_syntax* assumptions, automaton_set_syntax* goals){
+	automaton_gr1_game_syntax* gr1_game	= malloc(sizeof(automaton_gr1_game_syntax));
+	aut_dupstr(&(gr1_game->name), name);
+	aut_dupstr(&(gr1_game->composition_name), composition_name);
+	gr1_game->assumptions	= assumptions;
+	gr1_game->guarantees	= goals;
+	return gr1_game;
+}
 automaton_components_syntax* automaton_components_syntax_create(automaton_component_syntax* component){
-	automaton_components_syntax* components	= malloc(sizeof(automaton_components_syntax));
-	components->count	= 1;
-	components->components	= malloc(sizeof(automaton_component_syntax*) * components->count);
-	components->components[0]	= component;
+	automaton_components_syntax* components		= malloc(sizeof(automaton_components_syntax));
+	components->count							= 1;
+	components->components						= malloc(sizeof(automaton_component_syntax*) * components->count);
+	components->components[0]					= component;
 	return components;
 }
+
 automaton_components_syntax* automaton_components_syntax_add_component(automaton_components_syntax* components, automaton_component_syntax* component){
 	components->count++;
 	automaton_component_syntax** new_components	= malloc(sizeof(automaton_component_syntax*) * components->count);
@@ -334,7 +344,7 @@ automaton_program_syntax* automaton_program_syntax_add_statement(automaton_progr
 }
 automaton_statement_syntax* automaton_statement_syntax_create(automaton_statement_type_syntax type, automaton_composition_syntax* composition_def,
 		automaton_expression_syntax* range_def, automaton_expression_syntax* const_def, automaton_fluent_syntax* fluent_def,
-		automaton_set_def_syntax* set_def){
+		automaton_set_def_syntax* set_def, automaton_gr1_game_syntax* gr1_game_def){
 	automaton_statement_syntax* statement	= malloc(sizeof(automaton_statement_syntax));
 	statement->type	= type;
 	statement->composition_def	= composition_def;
@@ -342,6 +352,7 @@ automaton_statement_syntax* automaton_statement_syntax_create(automaton_statemen
 	statement->const_def		= const_def;
 	statement->fluent_def		= fluent_def;
 	statement->set_def			= set_def;
+	statement->gr1_game_def		= gr1_game_def;
 	return statement;
 }
 
@@ -361,6 +372,7 @@ void automaton_statement_syntax_destroy(automaton_statement_syntax* statement){
 	case ASSERTION_AUT: break;
 	case SET_AUT: automaton_set_def_syntax_destroy(statement->set_def);break;
 	case COMPOSITION_AUT: automaton_composition_syntax_destroy(statement->composition_def);break;
+	case GR_1_AUT: automaton_gr1_game_syntax_destroy(statement->gr1_game_def);break;
 	case GOAL_AUT: break;
 	}
 	free(statement);
@@ -389,6 +401,18 @@ void automaton_composition_syntax_destroy(automaton_composition_syntax* composit
 		free(composition->states);
 	}
 	free(composition);
+}
+
+void automaton_gr1_game_syntax_destroy(automaton_gr1_game_syntax* gr1_game){
+	if(gr1_game->name != NULL)
+		free(gr1_game->name);
+	if(gr1_game->composition_name != NULL)
+		free(gr1_game->composition_name);
+	if(gr1_game->assumptions != NULL)
+		automaton_set_syntax_destroy(gr1_game->assumptions);
+	if(gr1_game->guarantees != NULL)
+		automaton_set_syntax_destroy(gr1_game->guarantees);
+	free(gr1_game);
 }
 void automaton_states_syntax_destroy(automaton_states_syntax* states){
 	uint32_t i;

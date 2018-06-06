@@ -402,10 +402,10 @@ char** automaton_set_syntax_evaluate(automaton_parsing_tables* tables, automaton
 		}
 		if(indexes != NULL){
 			char** tmp_value	= malloc(sizeof(char*) * inner_count);
-			for(k = 0; k < inner_count;k++)aut_dupstr(&(tmp_value[k]), inner_value[k]);
+			for(k = 0; k < (uint32_t)inner_count;k++)aut_dupstr(&(tmp_value[k]), inner_value[k]);
 			automaton_indexes_syntax_eval_strings(tables, NULL, &tmp_value, &inner_count, indexes);
 			aut_merge_string_lists(&ret_value, count, tmp_value, inner_count, true, false);
-			for(k = 0; k < inner_count;k++)free(tmp_value[k]);
+			for(k = 0; k < (uint32_t)inner_count;k++)free(tmp_value[k]);
 			free(tmp_value);
 		}else{
 			aut_merge_string_lists(&ret_value, count, inner_value, inner_count, true, false);
@@ -514,11 +514,11 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 		if(composition_syntax->is_game){
 			uint32_t new_composition_count		= composition_count + ctx->global_fluents_count;
 			automaton_automaton** new_automata	= malloc(sizeof(automaton_automaton*) * new_composition_count);
-			for(i = 0; i < composition_count; i++){
+			for(i = 0; i < (int32_t)composition_count; i++){
 				new_automata[i]	= automata[i];
 			}
 			//build fluent automata
-			for(i = 0; i < ctx->global_fluents_count; i++){
+			for(i = 0; i < (int32_t)ctx->global_fluents_count; i++){
 				new_automata[i + composition_count]	= automaton_fluent_build_automaton(ctx, i);
 			}
 			free(automata);
@@ -1436,7 +1436,7 @@ automaton_fluent* automaton_fluent_create_from_syntax(automaton_parsing_tables* 
 	return fluent;
 }
 
-automaton_automata_context* automaton_automata_context_create_from_syntax(automaton_program_syntax* program, char* ctx_name, bool is_synchronous){
+automaton_automata_context* automaton_automata_context_create_from_syntax(automaton_program_syntax* program, char* ctx_name, bool is_synchronous, bool print_fsp){
 	automaton_parsing_tables* tables	= automaton_parsing_tables_create();
 	automaton_automata_context* ctx		= malloc(sizeof(automaton_automata_context));
 
@@ -1482,17 +1482,38 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 			}
 		}
 	}
-
-	char buf[255];
-
-	for(i = 0; i < tables->composition_count; i++){
-		if(tables->composition_entries[i]->solved){
-			//automaton_automaton_print(tables->composition_entries[i]->valuation.automaton_value, true, true, true, "*\t", "*\t");
-			sprintf(buf, "%s_%d_result_%s.fsp", ctx_name, i, is_synchronous? "synch": "asynch");
-			automaton_automaton_print_fsp(tables->composition_entries[i]->valuation.automaton_value, buf);
+	//compute gr1 games
+	int32_t main_index;
+	automaton_gr1_game_syntax* gr1_game;
+	automaton_automaton *game_automaton, *winning_region_automaton;
+	char **assumptions, **guarantees;
+	char set_name[255];
+	int32_t assumptions_count, guarantees_count;
+	for(i = 0; i < program->count; i++){
+		if(program->statements[i]->type == GR_1_AUT){
+			gr1_game		= program->statements[i]->gr1_game_def;
+			main_index		= automaton_parsing_tables_get_entry_index(tables, COMPOSITION_ENTRY_AUT, gr1_game->composition_name);
+			game_automaton	= tables->automaton_entries[main_index]->valuation.automaton_value;
+			sprintf(set_name, "Assumption %s", gr1_game->name);
+			assumptions		= automaton_set_syntax_evaluate(tables, gr1_game->assumptions, &assumptions_count, set_name);
+			sprintf(set_name, "Guarantees %s", gr1_game->name);
+			guarantees		= automaton_set_syntax_evaluate(tables, gr1_game->guarantees, &guarantees_count, set_name);
+			winning_region_automaton	= automaton_get_gr1_winning_region(game_automaton, assumptions, guarantees);
+			automaton_automaton_destroy(winning_region_automaton);
 		}
 	}
 
+	if(print_fsp){
+		char buf[255];
+
+		for(i = 0; i < tables->composition_count; i++){
+			if(tables->composition_entries[i]->solved){
+				//automaton_automaton_print(tables->composition_entries[i]->valuation.automaton_value, true, true, true, "*\t", "*\t");
+				sprintf(buf, "%s_%d_result_%s.fsp", ctx_name, i, is_synchronous? "synch": "asynch");
+				automaton_automaton_print_fsp(tables->composition_entries[i]->valuation.automaton_value, buf);
+			}
+		}
+	}
 	automaton_parsing_tables_destroy(tables);
 	return ctx;
 }

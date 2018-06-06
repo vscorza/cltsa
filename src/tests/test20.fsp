@@ -1,0 +1,14 @@
+range R = 1..4
+set Global_Alphabet = {in[i:R],hidden,internal,out,mute,jack,built,on,off,green,red,destroyed}
+set Controllable_Alphabet = {out}
+A=(in[i:R]->hidden->internal->A).
+B=(hidden->out->B).
+C=(on->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->off->C).
+D=(green->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->red->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->D).
+E=(built->built->built->built->built->built->built->built->built->built->built->built->built->built->built->built->built->built->built->built->built->built->built->built->built->built->built->built->built->built->built->built->built->built->built->built->built->built->built->built->built->built->built->built->built->built->built->built->built->built->built->built->built->built->built->built->built->built->built->built->built->built->built->built->built->built->built->built->destroyed->E).
+fluent F_out 	= <out, hidden>
+fluent F_on 	= <on,off>
+fluent F_green	= <green, red>
+fluent F_build	= <built, destroyed>
+|f|F=(A||B||C||D||E).
+//TOTAL Composition has [008081280] states and [179808480] transitions run for [308.083432] KEY ACCESS.: [Misses:48273259,hits:206287061]

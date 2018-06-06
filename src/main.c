@@ -25,10 +25,11 @@ void run_parse_test(char* test_file, char* test_name){
 	char buf[255];
 	sprintf(buf, "results/%s", test_name);
 	bool FIRST_IS_CONCURRENT	= false;
-	automaton_automata_context* ctx		= automaton_automata_context_create_from_syntax(parsed_program, buf, FIRST_IS_CONCURRENT);
+	bool PRINT_FSP				= false;
+	automaton_automata_context* ctx		= automaton_automata_context_create_from_syntax(parsed_program, buf, FIRST_IS_CONCURRENT, PRINT_FSP);
     automaton_automata_context_destroy(ctx);
     /*
-    ctx		= automaton_automata_context_create_from_syntax(parsed_program, buf, !FIRST_IS_SYNCH);
+    ctx		= automaton_automata_context_create_from_syntax(parsed_program, buf, !FIRST_IS_SYNCH, PRINT_FSP);
     automaton_automata_context_destroy(ctx);
     */
     automaton_program_syntax_destroy(parsed_program);
@@ -78,7 +79,7 @@ void run_tree_tests(){
 	for(i = 0; i < 5; i++){key0_2[i]	= 0; limit *= values;}
 	for(i = 0; i < limit; i++){
 		j = 4;
-		while(key0_2[j] == values && j >= 0){
+		while(key0_2[j] == values){
 			key0_2[j]	= 0;
 			j--;
 		}
@@ -171,7 +172,7 @@ int main (void){
 	//run_parse_test("test5.fsp");
 	//run_fsp_tests(18);
 	//run_parse_test("tests/test18.fsp",  "test18");
-	run_parse_test("tests/test19.fsp", "test19");
+	run_parse_test("tests/test20.fsp", "test20");
 	return 0;    
 }
 

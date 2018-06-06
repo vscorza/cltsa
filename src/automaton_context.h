@@ -73,7 +73,8 @@ automaton_parsing_table_entry* automaton_parsing_table_entry_create(automaton_pa
 void automaton_parsing_table_entry_destroy(automaton_parsing_table_entry* entry);
 int32_t automaton_parsing_tables_get_entry_index(automaton_parsing_tables* tables, automaton_parsing_table_entry_type type, char* value);
 int32_t automaton_parsing_tables_add_entry(automaton_parsing_tables* tables, automaton_parsing_table_entry_type type, char* key, void* value);
-automaton_automata_context* automaton_automata_context_create_from_syntax(automaton_program_syntax* program, char* ctx_name, bool is_synchronous);
+automaton_automata_context* automaton_automata_context_create_from_syntax(automaton_program_syntax* program, char* ctx_name
+		, bool is_synchronous, bool print_fsp);
 automaton_indexes_valuation* automaton_indexes_valuation_create_from_indexes(automaton_parsing_tables* tables, automaton_indexes_syntax* indexes);
 void automaton_indexes_valuation_increase(automaton_indexes_valuation* valuation);
 bool automaton_indexes_valuation_has_next(automaton_indexes_valuation* valuation);

@@ -29,13 +29,14 @@ automaton_program_syntax* parsed_program = NULL;
 	automaton_component_syntax*		component;
 	automaton_statement_syntax*		statement;
 	automaton_program_syntax*		program;
+	automaton_gr1_game_syntax*		gr1_game;
 };
-%token	t_INTEGER t_IDENT t_UPPER_IDENT t_STRING t_CONST t_RANGE t_SET t_FLUENT t_DOTS t_WHEN t_GAME_COMPOSE t_PARALLEL
+%token	t_INTEGER t_IDENT t_UPPER_IDENT t_STRING t_CONST t_RANGE t_SET t_FLUENT t_DOTS t_WHEN t_GAME_COMPOSE t_PARALLEL t_GR_1
 %left '+' '-' ','
 %left '*' '/'
 
 
-%type<text> 				t_STRING t_IDENT t_UPPER_IDENT t_CONST t_RANGE t_SET t_FLUENT t_DOTS t_WHEN t_GAME_COMPOSE t_PARALLEL
+%type<text> 				t_STRING t_IDENT t_UPPER_IDENT t_CONST t_RANGE t_SET t_FLUENT t_DOTS t_WHEN t_GAME_COMPOSE t_PARALLEL t_GR_1
 %type<integer>				t_INTEGER
 %type<expr>					exp exp2 exp3 exp4 constDef range rangeDef ltsTransitionPrefix
 %type<label>				label concurrentLabel 
@@ -56,6 +57,7 @@ automaton_program_syntax* parsed_program = NULL;
 %type<component>			compositionExp2
 %type<statement>			statement
 %type<program>				program statements		
+%type<gr1_game>				gr1
 %%
 program:
 	statements								{parsed_program = $1; $$ = $1;}
@@ -65,15 +67,16 @@ statements:
 	|statement								{$$ = automaton_program_syntax_create($1);}
 	;
 statement:
-	import									{$$ = automaton_statement_syntax_create(IMPORT_AUT, NULL, NULL, NULL, NULL, NULL);}
-	|menu									{$$ = automaton_statement_syntax_create(MENU_AUT, NULL, NULL, NULL, NULL, NULL);}
-	|constDef								{$$ = automaton_statement_syntax_create(CONST_AUT, NULL, NULL, $1, NULL, NULL);}
-	|rangeDef								{$$ = automaton_statement_syntax_create(RANGE_AUT, NULL, $1, NULL, NULL, NULL);}
-	|fluentDef								{$$ = automaton_statement_syntax_create(FLUENT_AUT, NULL, NULL, NULL, $1, NULL);}
+	import									{$$ = automaton_statement_syntax_create(IMPORT_AUT, NULL, NULL, NULL, NULL, NULL, NULL);}
+	|menu									{$$ = automaton_statement_syntax_create(MENU_AUT, NULL, NULL, NULL, NULL, NULL, NULL);}
+	|constDef								{$$ = automaton_statement_syntax_create(CONST_AUT, NULL, NULL, $1, NULL, NULL, NULL);}
+	|rangeDef								{$$ = automaton_statement_syntax_create(RANGE_AUT, NULL, $1, NULL, NULL, NULL, NULL);}
+	|fluentDef								{$$ = automaton_statement_syntax_create(FLUENT_AUT, NULL, NULL, NULL, $1, NULL, NULL);}
 	//|assertionDef							
-	|setDef									{$$ = automaton_statement_syntax_create(SET_AUT, NULL, NULL, NULL, NULL, $1);}
-	|compositionDef							{$$ = automaton_statement_syntax_create(COMPOSITION_AUT, $1, NULL, NULL, NULL, NULL);}
+	|setDef									{$$ = automaton_statement_syntax_create(SET_AUT, NULL, NULL, NULL, NULL, $1, NULL);}
+	|compositionDef							{$$ = automaton_statement_syntax_create(COMPOSITION_AUT, $1, NULL, NULL, NULL, NULL, NULL);}
 	//|goalDef
+	|gr1									{$$ = automaton_statement_syntax_create(GR_1_AUT, NULL, NULL, NULL, NULL, NULL, $1);}
 	;
 label:
 	concurrentLabel							{$$ = $1;}
@@ -208,6 +211,8 @@ composition:
 	| t_PARALLEL t_UPPER_IDENT '=' '(' compositionExp ')'	{$$ = automaton_composition_syntax_create_from_ref($2, $5, false); free($1);free($2);free($5);}
 	| t_GAME_COMPOSE t_UPPER_IDENT '=' '(' compositionExp ')'	{$$ = automaton_composition_syntax_create_from_ref($2, $5, true); free($1);free($2);free($5);}	
 	;
+gr1:
+	t_GR_1 '<' set '>' '<' set '>' t_UPPER_IDENT '=' t_UPPER_IDENT '.'			{$$ = automaton_gr1_game_syntax_create($8, $10, $3, $6); free($1);free($8); free($10);}
 compositionExp:
 	compositionExp2							{$$ = automaton_components_syntax_create($1);}
 	|compositionExp t_PARALLEL compositionExp2	{$$ = automaton_components_syntax_add_component($1, $3);free($2);}
