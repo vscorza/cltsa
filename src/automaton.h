@@ -104,6 +104,7 @@ typedef struct automaton_transition_str{
 	uint32_t	signals_size;
 	signal_t	signals[FIXED_SIGNALS_COUNT];
 	signal_t*	other_signals;
+	bool 		is_input;
 } automaton_transition;
 
 typedef struct automaton_fluent_str{
@@ -286,6 +287,9 @@ bool automaton_automaton_has_transition(automaton_automaton* current_automaton, 
 bool automaton_automaton_remove_transition(automaton_automaton* current_automaton, automaton_transition* transition);
 bool automaton_automaton_has_state(automaton_automaton* current_automaton, uint32_t state);
 bool automaton_automaton_add_initial_state(automaton_automaton* current_automaton, uint32_t state);
+uint32_t automaton_transition_key_extractor(automaton_transition* transition);
+uint32_t automaton_cox(automaton_automaton* current_automaton, automaton_ptr_bucket_list* frontier
+		, automaton_ptr_bucket_list* old_set, automaton_ptr_bucket_list* new_set, automaton_bucket_list* original_state_set);
 automaton_automaton* automaton_get_gr1_winning_region(automaton_automaton* game_automaton, char** assumptions, char** guarantees);
 /** AUTOMATA OPERATIONS **/
 uint32_t automaton_automata_get_composite_state(uint32_t states_count, uint32_t* states);

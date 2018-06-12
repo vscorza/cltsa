@@ -36,6 +36,7 @@ void automaton_transition_copy(automaton_transition* source, automaton_transitio
 	target->state_to				= source->state_to;
 	target->signals_count			= source->signals_count;
 	target->signals_size			= source->signals_size;
+	target->is_input				= source->is_input;
 	uint32_t i;
 	for(i = 0; i < FIXED_SIGNALS_COUNT; i++)
 		target->signals[i]			= source->signals[i];
@@ -524,6 +525,7 @@ void automaton_transition_initialize(automaton_transition* transition, uint32_t 
 	transition->signals_count	= 0;
 	transition->signals_size	= FIXED_SIGNALS_COUNT;
 	transition->other_signals	= NULL;
+	transition->is_input		= false;
 }
 void automaton_fluent_initialize(automaton_fluent* fluent, char* name, bool initial_valuation){
 	fluent->name	= malloc(sizeof(char) * (strlen(name) + 1));
@@ -884,6 +886,8 @@ bool automaton_transition_has_signal_event(automaton_transition* transition, aut
 bool automaton_transition_add_signal_event(automaton_transition* transition, automaton_automata_context* ctx, automaton_signal_event* signal_event){ 
 	if(automaton_transition_has_signal_event(transition, ctx, signal_event))
 		return true;
+	if(signal_event->type == INPUT_SIG)
+		transition->is_input	= true;
 	//signals should preserve order within the transition
 	int32_t i, signal_ordered_index	= -1;
 	int32_t old_count	= (int32_t)transition->signals_count;
@@ -1333,6 +1337,54 @@ bool automaton_automaton_add_initial_state(automaton_automaton* current_automato
     winningPositions = nu2.getValue();
 }
  * */
+uint32_t automaton_transition_key_extractor(automaton_transition* transition){
+	return transition->state_from;
+}
+/*
+ * frontier es el conjunto de transiciones siendo expandido, old_set son las que ya están exploradas,
+ * new_set es donde va a poner las nuevas transicioes, original_state_set es el conjunto inicial de estados
+ * si devuelve 0 es porque llego a punto fijo, sino se puede hacer merge de new_set con old_set, cambiar
+ * frontier por new_set y ya, porque cuando se llame de nuevo se resetea
+ * */
+uint32_t automaton_cox(automaton_automaton* current_automaton, automaton_ptr_bucket_list* frontier
+		, automaton_ptr_bucket_list* old_set, automaton_ptr_bucket_list* new_set, automaton_bucket_list* original_state_set){
+	automaton_ptr_bucket_reset(new_set);
+	automaton_transition *current_transition, *frontier_transition, *exit_transition;
+	uint32_t new_transitions_count	= 0;
+	uint32_t i,j,k,l,m,n;
+	bool exits_set;
+
+	for(i = 0; i < frontier->count; i++){
+		for(j = 0; j < frontier->bucket_count[i]; j++){
+			current_transition			= (automaton_transition*)frontier->buckets[i][j];
+			for(k = 0; k < current_automaton->in_degree[current_transition->state_from]; k++){
+				frontier_transition		= &(current_automaton->inverted_transitions[current_transition->state_from][k]);
+				if(frontier_transition != current_transition){
+					exits_set = false;
+					for(l = 0; l < current_automaton->out_degree[frontier_transition->state_from]; l++){
+						exit_transition	= &(current_automaton->transitions[frontier_transition->state_from][l]);
+						if(exit_transition != frontier_transition && exit_transition != current_transition){
+							if(!exit_transition->is_input || automaton_ptr_bucket_has_entry(old_set, exit_transition, exit_transition->state_from)
+									|| automaton_ptr_bucket_has_entry(new_set, exit_transition, exit_transition->state_from))continue;
+							if(!automaton_ptr_bucket_has_key(old_set, exit_transition->state_to, automaton_transition_key_extractor)
+									&& !automaton_ptr_bucket_has_key(frontier, exit_transition->state_to, automaton_transition_key_extractor)
+									&& !automaton_bucket_has_entry(original_state_set, exit_transition->state_to)){
+								exits_set	= true;
+								break;
+							}
+
+						}
+					}
+					if(!exits_set){
+						new_transitions_count++;
+						automaton_ptr_bucket_add_entry(new_set, frontier_transition, frontier_transition->state_from);
+					}
+				}
+			}
+		}
+	}
+	return new_transitions_count;
+}
 automaton_automaton* automaton_get_gr1_winning_region(automaton_automaton* game_automaton, char** assumptions, char** guarantees){
 	return automaton_automaton_clone(game_automaton);
 }

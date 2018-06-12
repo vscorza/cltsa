@@ -7,7 +7,7 @@ SPRINT1
 	el | de obdd es una unión de transiciones, sí tenemos agregadas no hace falta revisar mucho, sólo se agregan y ya
 	el cox es igual que el & pero hace predecesores que no llevan fuera de acumuladas por no controlables
 	de hecho el & puede obviarse y aplicarse sólo cox ya que el & tiene sentido en sincrónico con sys y env particionado
-	habría que armar un bucket list de transiciones, en base a los estados to-state	
+	habría que armar un bucket list de transiciones, en base a los estados to-state	(HECHO)
 - fluents transitions should be applied to superset of alphabet
 - review and document code (particualarly compose)
 - probar amba con concurrent labels
@@ -26,5 +26,6 @@ A = ( <a, b[i:R], c[j:R]> -> A). should translate to A = ( {<a,b.1,c.1>, <a,b.2,
 A = ( <a, b[i], c[i]>[i:R] -> A). should translate to A = ( {<a,b.1,c.1>, <a,b.2,c.2>}->A).
 - add feedback for errors
 SPRINTX
+- partitioned composition, everything not on the frontier can be downloaded to a bucket list of files in order to free the memory
 - keep indexes and other information in the automaton structure (concolyc style)
 - merge obdd and lts
