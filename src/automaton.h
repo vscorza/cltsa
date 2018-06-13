@@ -24,6 +24,7 @@
 
 #define BUCKET_SIZE		1000000
 #define FLUENT_BUCKET_SIZE 10000
+#define TRANSITIONS_BUCKET_SIZE 10000
 #define PRINT_PARTIAL_COMPOSITION 1
 
 #define AUT_TAU_CONSTANT	"__tau__"
@@ -287,10 +288,11 @@ bool automaton_automaton_has_transition(automaton_automaton* current_automaton, 
 bool automaton_automaton_remove_transition(automaton_automaton* current_automaton, automaton_transition* transition);
 bool automaton_automaton_has_state(automaton_automaton* current_automaton, uint32_t state);
 bool automaton_automaton_add_initial_state(automaton_automaton* current_automaton, uint32_t state);
-uint32_t automaton_transition_key_extractor(automaton_transition* transition);
+uint32_t automaton_transition_key_extractor(void* transition);
 uint32_t automaton_cox(automaton_automaton* current_automaton, automaton_ptr_bucket_list* frontier
 		, automaton_ptr_bucket_list* old_set, automaton_ptr_bucket_list* new_set, automaton_bucket_list* original_state_set);
-automaton_automaton* automaton_get_gr1_winning_region(automaton_automaton* game_automaton, char** assumptions, char** guarantees);
+automaton_automaton* automaton_get_gr1_winning_region(automaton_automaton* game_automaton, char** assumptions, uint32_t assumptions_count
+		, char** guarantees, uint32_t guarantees_count);
 /** AUTOMATA OPERATIONS **/
 uint32_t automaton_automata_get_composite_state(uint32_t states_count, uint32_t* states);
 automaton_automaton* automaton_automata_compose(automaton_automaton** automata, uint32_t automata_count, automaton_synchronization_type type, bool is_game);

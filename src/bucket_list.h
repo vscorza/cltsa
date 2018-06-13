@@ -33,7 +33,10 @@ typedef struct automaton_ptr_bucket_list_str{
 }automaton_ptr_bucket_list;
 
 automaton_ptr_bucket_list* automaton_ptr_bucket_list_create(uint32_t count);
+automaton_ptr_bucket_list* automaton_ptr_bucket_list_clone(automaton_ptr_bucket_list* source);
 void automaton_ptr_bucket_list_merge(automaton_ptr_bucket_list* list, automaton_ptr_bucket_list* new_elements
+		, automaton_ptr_bucket_list_key_extractor extractor);
+void automaton_ptr_bucket_list_intersect(automaton_ptr_bucket_list* list, automaton_ptr_bucket_list* new_elements
 		, automaton_ptr_bucket_list_key_extractor extractor);
 bool automaton_ptr_bucket_has_key(automaton_ptr_bucket_list* list, uint32_t key, automaton_ptr_bucket_list_key_extractor extractor);
 bool automaton_ptr_bucket_has_entry(automaton_ptr_bucket_list* list, void* entry, uint32_t key);

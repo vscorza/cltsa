@@ -24,16 +24,6 @@ automaton_bucket_list* automaton_bucket_list_create(uint32_t count){
 	}
 	return bucket;
 }
-void automaton_ptr_bucket_list_merge(automaton_ptr_bucket_list* list, automaton_ptr_bucket_list* new_elements
-		, automaton_ptr_bucket_list_key_extractor extractor){
-	uint32_t i, j;
-	for(i = 0; i < new_elements->count; i++){
-		for(j = 0; j < new_elements->bucket_count[i]; j++){
-			automaton_ptr_bucket_add_entry(list, new_elements->buckets[i][j], extractor(new_elements->buckets[i][j]));
-		}
-	}
-}
-
 bool automaton_bucket_has_entry(automaton_bucket_list* list, uint32_t entry){
 	uint32_t index		= entry % list->count;
 	uint32_t* bucket	= list->buckets[index];
@@ -121,6 +111,48 @@ automaton_ptr_bucket_list* automaton_ptr_bucket_list_create(uint32_t count){
 	}
 	return bucket;
 }
+automaton_ptr_bucket_list* automaton_ptr_bucket_list_clone(automaton_ptr_bucket_list* source){
+	automaton_ptr_bucket_list* target	= malloc(sizeof(automaton_ptr_bucket_list));
+	uint32_t i, j;
+	target->count					= source->count;
+	target->bucket_count			= malloc(sizeof(uint32_t) * target->count);
+	target->bucket_size				= malloc(sizeof(uint32_t) * target->count);
+	target->buckets					= malloc(sizeof(void**) * target->count);
+	for(i = 0; i < target->count; i++){
+		target->bucket_count[i]		= source->bucket_count[i];
+		target->bucket_size[i]		= source->bucket_size[i];
+		target->buckets[i]			= malloc(sizeof(void*) * target->bucket_size[i]);
+		for(j =0; j < target->bucket_count[i]; j++){
+			target->buckets[i][j]	= source->buckets[i][j];
+		}
+	}
+	return target;
+}
+
+void automaton_ptr_bucket_list_merge(automaton_ptr_bucket_list* list, automaton_ptr_bucket_list* new_elements
+		, automaton_ptr_bucket_list_key_extractor extractor){
+	uint32_t i, j;
+	for(i = 0; i < new_elements->count; i++){
+		for(j = 0; j < new_elements->bucket_count[i]; j++){
+			automaton_ptr_bucket_add_entry(list, new_elements->buckets[i][j], extractor(new_elements->buckets[i][j]));
+		}
+	}
+}
+
+void automaton_ptr_bucket_list_intersect(automaton_ptr_bucket_list* list, automaton_ptr_bucket_list* new_elements
+		, automaton_ptr_bucket_list_key_extractor extractor){
+	uint32_t i, j, current_key;
+	void *current_entry;
+	for(i = 0; i < new_elements->count; i++){
+		for(j = 0; j < new_elements->bucket_count[i]; j++){
+			current_entry	= new_elements->buckets[i][j];
+			current_key		= extractor(current_entry);
+			if(!automaton_ptr_bucket_has_entry(list, current_entry, current_key))
+				automaton_ptr_bucket_remove_entry(list, current_entry, current_key);
+		}
+	}
+}
+
 bool automaton_ptr_bucket_has_key(automaton_ptr_bucket_list* list, uint32_t key, automaton_ptr_bucket_list_key_extractor extractor){
 	uint32_t index		= key % list->count;
 	void** bucket	= list->buckets[index];

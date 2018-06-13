@@ -1337,8 +1337,8 @@ bool automaton_automaton_add_initial_state(automaton_automaton* current_automato
     winningPositions = nu2.getValue();
 }
  * */
-uint32_t automaton_transition_key_extractor(automaton_transition* transition){
-	return transition->state_from;
+uint32_t automaton_transition_key_extractor(void* transition){
+	return ((automaton_transition*)transition)->state_from;
 }
 /*
  * frontier es el conjunto de transiciones siendo expandido, old_set son las que ya están exploradas,
@@ -1385,7 +1385,79 @@ uint32_t automaton_cox(automaton_automaton* current_automaton, automaton_ptr_buc
 	}
 	return new_transitions_count;
 }
-automaton_automaton* automaton_get_gr1_winning_region(automaton_automaton* game_automaton, char** assumptions, char** guarantees){
+automaton_automaton* automaton_get_gr1_winning_region(automaton_automaton* game_automaton, char** assumptions, uint32_t assumptions_count
+		, char** guarantees, uint32_t guarantees_count){
+	uint32_t i, j; //i for assumptions, j for guarantees
+	uint32_t k, l;
+	automaton_automata_context*	ctx		= game_automaton->context;
+	automaton_ptr_bucket_list	*swap_frontier;
+	automaton_ptr_bucket_list	*transitions_frontier	= automaton_ptr_bucket_list_create(TRANSITIONS_BUCKET_SIZE);
+	automaton_ptr_bucket_list	*z_old	= NULL;
+	automaton_ptr_bucket_list	*z_new	= automaton_ptr_bucket_list_create(TRANSITIONS_BUCKET_SIZE);
+	automaton_ptr_bucket_list	*y_old	= NULL;
+	automaton_ptr_bucket_list	*y_new	= automaton_ptr_bucket_list_create(TRANSITIONS_BUCKET_SIZE);
+	automaton_ptr_bucket_list	*x_old	= NULL;
+	automaton_ptr_bucket_list	*x_new	= NULL;
+	automaton_ptr_bucket_list	*true_list	= automaton_ptr_bucket_list_create(TRANSITIONS_BUCKET_SIZE);
+	for(i = 0; i < game_automaton->states_count; i++){
+		for(j = 0;  j < game_automaton->out_degree[i]; j++){
+			automaton_ptr_bucket_add_entry(true_list, &(game_automaton->transitions[i][j]), game_automaton->transitions[i][j].state_from);
+		}
+	}
+	automaton_bucket_list		*original_goal_states, *original_assumptions_states;
+	uint32_t z_update_size				= -1;
+	uint32_t y_update_size				= -1;
+	uint32_t x_update_size				= -1;
+	while(z_update_size != 0){//nu2, Z
+		for(j = 0; j < guarantees_count; j++){
+			while(y_update_size != 0)
+			for(i = 0; i < assumptions_count; i++){
+				//set original states to states satisfying ass_i
+				if(x_old != NULL){
+					automaton_ptr_bucket_destroy(x_old);
+					x_old	= NULL;
+				}
+				if(x_new != NULL){
+					automaton_ptr_bucket_destroy(x_new);
+					x_new	= NULL;
+				}
+
+				for(k = 0; k < ctx->global_fluents_count; k++){
+					if(strcmp(ctx->global_fluents[k].name, assumptions[i]) == 0){
+						original_assumptions_states	= game_automaton->inverted_valuations[k];
+						break;
+					}
+				}
+				x_new	= automaton_ptr_bucket_list_create(TRANSITIONS_BUCKET_SIZE);
+				//x_new		= create from incoming into original_assumptions_states
+				automaton_cox(game_automaton, transitions_frontier, x_new, x_new, original_assumptions_states);
+				x_old		= automaton_ptr_bucket_list_clone(true_list);
+				while(x_update_size != 0){
+					//get cox for assumptions, process x through intersect (is nu)
+					swap_frontier	= transitions_frontier;
+					transitions_frontier	= x_new;
+					automaton_ptr_bucket_reset(swap_frontier);
+					x_new			= swap_frontier;
+					x_update_size	= automaton_cox(game_automaton, transitions_frontier, x_old, x_new, original_assumptions_states);
+					if(x_update_size != 0){
+						automaton_ptr_bucket_list_intersect(x_old, x_new, automaton_transition_key_extractor);
+					}else{
+						break;
+					}
+				}
+				x_update_size	= -1;
+			}
+			y_update_size 	= -1;
+		}
+	}
+	automaton_ptr_bucket_destroy(true_list);	true_list	= NULL;
+	automaton_ptr_bucket_destroy(transitions_frontier);	transitions_frontier	= NULL;
+	automaton_ptr_bucket_destroy(z_old);automaton_ptr_bucket_destroy(z_new);
+	automaton_ptr_bucket_destroy(y_old);automaton_ptr_bucket_destroy(y_new);
+	automaton_ptr_bucket_destroy(x_old);automaton_ptr_bucket_destroy(x_new);
+	z_old	= z_new	= NULL;
+	x_old	= x_new	= NULL;
+	y_old	= y_new	= NULL;
 	return automaton_automaton_clone(game_automaton);
 }
 uint32_t automaton_automata_get_composite_state(uint32_t states_count, uint32_t* states){
