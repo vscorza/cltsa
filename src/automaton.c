@@ -1408,6 +1408,7 @@ automaton_automaton* automaton_get_gr1_winning_region(automaton_automaton* game_
 	uint32_t z_update_size				= -1;
 	uint32_t y_update_size				= -1;
 	uint32_t x_update_size				= -1;
+	bool found;
 	while(z_update_size != 0){//nu2, Z
 		for(j = 0; j < guarantees_count; j++){
 			while(y_update_size != 0)
@@ -1421,12 +1422,17 @@ automaton_automaton* automaton_get_gr1_winning_region(automaton_automaton* game_
 					automaton_ptr_bucket_destroy(x_new);
 					x_new	= NULL;
 				}
-
+				found	= false;
 				for(k = 0; k < ctx->global_fluents_count; k++){
 					if(strcmp(ctx->global_fluents[k].name, assumptions[i]) == 0){
 						original_assumptions_states	= game_automaton->inverted_valuations[k];
+						found	= true;
 						break;
 					}
+				}
+				if(!found){
+					printf("[FATAL ERROR] assumption not found %s\n", assumptions[i]);
+					exit(-1);
 				}
 				x_new	= automaton_ptr_bucket_list_create(TRANSITIONS_BUCKET_SIZE);
 				//x_new		= create from incoming into original_assumptions_states
