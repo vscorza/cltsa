@@ -1347,7 +1347,8 @@ uint32_t automaton_transition_key_extractor(void* transition){
  * frontier por new_set y ya, porque cuando se llame de nuevo se resetea
  * */
 uint32_t automaton_cox(automaton_automaton* current_automaton, automaton_ptr_bucket_list* frontier
-		, automaton_ptr_bucket_list* old_set, automaton_ptr_bucket_list* new_set, automaton_bucket_list* original_state_set){
+		, automaton_ptr_bucket_list* old_set, automaton_ptr_bucket_list* new_set
+		, automaton_bucket_list* original_state_set, bool negate_original_state_set){
 	automaton_ptr_bucket_reset(new_set);
 	automaton_transition *current_transition, *frontier_transition, *exit_transition;
 	uint32_t new_transitions_count	= 0;
@@ -1359,6 +1360,8 @@ uint32_t automaton_cox(automaton_automaton* current_automaton, automaton_ptr_buc
 			current_transition			= (automaton_transition*)frontier->buckets[i][j];
 			for(k = 0; k < current_automaton->in_degree[current_transition->state_from]; k++){
 				frontier_transition		= &(current_automaton->inverted_transitions[current_transition->state_from][k]);
+				if(negate_original_state_set && automaton_bucket_has_entry(original_state_set, frontier_transition->state_to))
+					continue;
 				if(frontier_transition != current_transition){
 					exits_set = false;
 					for(l = 0; l < current_automaton->out_degree[frontier_transition->state_from]; l++){
@@ -1368,7 +1371,7 @@ uint32_t automaton_cox(automaton_automaton* current_automaton, automaton_ptr_buc
 									|| automaton_ptr_bucket_has_entry(new_set, exit_transition, exit_transition->state_from))continue;
 							if(!automaton_ptr_bucket_has_key(old_set, exit_transition->state_to, automaton_transition_key_extractor)
 									&& !automaton_ptr_bucket_has_key(frontier, exit_transition->state_to, automaton_transition_key_extractor)
-									&& !automaton_bucket_has_entry(original_state_set, exit_transition->state_to)){
+									&& !(!negate_original_state_set && automaton_bucket_has_entry(original_state_set, exit_transition->state_to))){
 								exits_set	= true;
 								break;
 							}
@@ -1388,75 +1391,114 @@ uint32_t automaton_cox(automaton_automaton* current_automaton, automaton_ptr_buc
 automaton_automaton* automaton_get_gr1_winning_region(automaton_automaton* game_automaton, char** assumptions, uint32_t assumptions_count
 		, char** guarantees, uint32_t guarantees_count){
 	uint32_t i, j; //i for assumptions, j for guarantees
-	uint32_t k, l;
+	uint32_t k, l, m;
 	automaton_automata_context*	ctx		= game_automaton->context;
 	automaton_ptr_bucket_list	*swap_frontier;
 	automaton_ptr_bucket_list	*transitions_frontier	= automaton_ptr_bucket_list_create(TRANSITIONS_BUCKET_SIZE);
-	automaton_ptr_bucket_list	*z_old	= NULL;
+	automaton_ptr_bucket_list	*z_old	= automaton_ptr_bucket_list_create(TRANSITIONS_BUCKET_SIZE);
 	automaton_ptr_bucket_list	*z_new	= automaton_ptr_bucket_list_create(TRANSITIONS_BUCKET_SIZE);
-	automaton_ptr_bucket_list	*y_old	= NULL;
+	automaton_ptr_bucket_list	*y_old	= automaton_ptr_bucket_list_create(TRANSITIONS_BUCKET_SIZE);
 	automaton_ptr_bucket_list	*y_new	= automaton_ptr_bucket_list_create(TRANSITIONS_BUCKET_SIZE);
-	automaton_ptr_bucket_list	*x_old	= NULL;
-	automaton_ptr_bucket_list	*x_new	= NULL;
-	automaton_ptr_bucket_list	*true_list	= automaton_ptr_bucket_list_create(TRANSITIONS_BUCKET_SIZE);
+	automaton_ptr_bucket_list	*x_old	= automaton_ptr_bucket_list_create(TRANSITIONS_BUCKET_SIZE);
+	automaton_ptr_bucket_list	*x_new	= automaton_ptr_bucket_list_create(TRANSITIONS_BUCKET_SIZE);
+	automaton_ptr_bucket_list	*true_list			= automaton_ptr_bucket_list_create(TRANSITIONS_BUCKET_SIZE);
+	automaton_ptr_bucket_list	*assumptions_accum	= automaton_ptr_bucket_list_create(TRANSITIONS_BUCKET_SIZE);
 	for(i = 0; i < game_automaton->states_count; i++){
 		for(j = 0;  j < game_automaton->out_degree[i]; j++){
 			automaton_ptr_bucket_add_entry(true_list, &(game_automaton->transitions[i][j]), game_automaton->transitions[i][j].state_from);
 		}
 	}
-	automaton_bucket_list		*original_goal_states, *original_assumptions_states;
+	automaton_bucket_list		*original_goals_states, *original_assumptions_states;
 	uint32_t z_update_size				= -1;
 	uint32_t y_update_size				= -1;
 	uint32_t x_update_size				= -1;
+	automaton_transition* current_transition;
 	bool found;
+	//get the set of states violating one assumption
+	for(i = 0; i < assumptions_count; i++){
+		//original assumptions states <- states not satisfying ass_i
+		automaton_ptr_bucket_reset(x_old);
+		automaton_ptr_bucket_reset(x_new);
+		found	= false;
+		for(k = 0; k < ctx->global_fluents_count; k++){
+			if(strcmp(ctx->global_fluents[k].name, assumptions[i]) == 0){
+				original_assumptions_states	= game_automaton->inverted_valuations[k];
+				found	= true;
+				break;
+			}
+		}
+		if(!found){
+			printf("[FATAL ERROR] assumption not found %s\n", assumptions[i]);
+			exit(-1);
+		}
+		automaton_ptr_bucket_reset(transitions_frontier);
+		automaton_ptr_bucket_list_copy(x_old,true_list);
+		for(k = 0; k < x_old->count; k++){
+			for(l = 0; l < x_old->bucket_count[k]; l++){
+				current_transition	= (automaton_transition*)x_old->buckets[k][l];
+				if(automaton_bucket_has_entry(original_assumptions_states, current_transition->state_to))
+					continue;
+				automaton_ptr_bucket_add_entry(transitions_frontier, current_transition, current_transition->state_from);
+			}
+		}
+		automaton_cox(game_automaton, transitions_frontier, x_new, x_new, original_assumptions_states, true);
+		while(x_update_size != 0){
+			//get cox for assumptions, process x through intersect (is nu)
+			swap_frontier	= transitions_frontier;
+			transitions_frontier	= x_new;
+			automaton_ptr_bucket_reset(swap_frontier);
+			x_new			= swap_frontier;
+			x_update_size	= automaton_cox(game_automaton, transitions_frontier, x_old, x_new, original_assumptions_states, true);
+			if(x_update_size != 0){
+				automaton_ptr_bucket_list_intersect(x_old, x_new, automaton_transition_key_extractor);
+			}else{
+				break;
+			}
+		}
+		x_update_size	= -1;
+		automaton_ptr_bucket_list_merge(assumptions_accum, x_old, automaton_transition_key_extractor);
+	}
+	automaton_ptr_bucket_list_copy(z_old,true_list);
+	//compute winning for every guarantee
 	while(z_update_size != 0){//nu2, Z
 		for(j = 0; j < guarantees_count; j++){
-			while(y_update_size != 0)
-			for(i = 0; i < assumptions_count; i++){
-				//set original states to states satisfying ass_i
-				if(x_old != NULL){
-					automaton_ptr_bucket_destroy(x_old);
-					x_old	= NULL;
+			//original goals states <- states satisfying g_j
+			automaton_ptr_bucket_reset(y_old);
+			automaton_ptr_bucket_reset(y_new);
+			found	= false;
+			for(k = 0; k < ctx->global_fluents_count; k++){
+				if(strcmp(ctx->global_fluents[k].name, guarantees[j]) == 0){
+					original_goals_states	= game_automaton->inverted_valuations[k];
+					found	= true;
+					break;
 				}
-				if(x_new != NULL){
-					automaton_ptr_bucket_destroy(x_new);
-					x_new	= NULL;
+			}
+			if(!found){
+				printf("[FATAL ERROR] goal not found %s\n", guarantees[j]);
+				exit(-1);
+			}
+			automaton_ptr_bucket_reset(transitions_frontier);
+			automaton_ptr_bucket_list_copy(y_old, true_list);
+			for(k = 0; k < y_old->count; k++){
+				for(l = 0; l < y_old->bucket_count[k]; l++){
+					current_transition	= (automaton_transition*)y_old->buckets[k][l];
+					if(!automaton_bucket_has_entry(original_goals_states, current_transition->state_to))
+						continue;
+					automaton_ptr_bucket_add_entry(original_goals_states, current_transition, current_transition->state_from);
 				}
-				found	= false;
-				for(k = 0; k < ctx->global_fluents_count; k++){
-					if(strcmp(ctx->global_fluents[k].name, assumptions[i]) == 0){
-						original_assumptions_states	= game_automaton->inverted_valuations[k];
-						found	= true;
-						break;
-					}
-				}
-				if(!found){
-					printf("[FATAL ERROR] assumption not found %s\n", assumptions[i]);
-					exit(-1);
-				}
-				x_new	= automaton_ptr_bucket_list_create(TRANSITIONS_BUCKET_SIZE);
-				//x_new		= create from incoming into original_assumptions_states
-				automaton_cox(game_automaton, transitions_frontier, x_new, x_new, original_assumptions_states);
-				x_old		= automaton_ptr_bucket_list_clone(true_list);
-				while(x_update_size != 0){
-					//get cox for assumptions, process x through intersect (is nu)
-					swap_frontier	= transitions_frontier;
-					transitions_frontier	= x_new;
-					automaton_ptr_bucket_reset(swap_frontier);
-					x_new			= swap_frontier;
-					x_update_size	= automaton_cox(game_automaton, transitions_frontier, x_old, x_new, original_assumptions_states);
-					if(x_update_size != 0){
-						automaton_ptr_bucket_list_intersect(x_old, x_new, automaton_transition_key_extractor);
-					}else{
-						break;
-					}
-				}
-				x_update_size	= -1;
+			}
+			automaton_cox(game_automaton, transitions_frontier, x_new, x_new, original_assumptions_states, true);
+
+			while(y_update_size != 0){
+				//check intersection with assumptions violation
 			}
 			y_update_size 	= -1;
 		}
 	}
+	if(original_assumptions_states != NULL)automaton_bucket_destroy(original_assumptions_states); original_assumptions_states	= NULL;
+	if(original_goals_states != NULL)automaton_bucket_destroy(original_goals_states); original_goals_states	= NULL;
 	automaton_ptr_bucket_destroy(true_list);	true_list	= NULL;
+	automaton_ptr_bucket_destroy(assumptions_accum);	assumptions_accum		= NULL;
 	automaton_ptr_bucket_destroy(transitions_frontier);	transitions_frontier	= NULL;
 	automaton_ptr_bucket_destroy(z_old);automaton_ptr_bucket_destroy(z_new);
 	automaton_ptr_bucket_destroy(y_old);automaton_ptr_bucket_destroy(y_new);

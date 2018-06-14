@@ -13,6 +13,7 @@
 automaton_bucket_list* automaton_bucket_list_create(uint32_t count){
 	automaton_bucket_list* bucket	= malloc(sizeof(automaton_bucket_list));
 	uint32_t i;
+	bucket->composite_count			= 0;
 	bucket->count					= count;
 	bucket->bucket_count			= malloc(sizeof(uint32_t) * count);
 	bucket->bucket_size				= malloc(sizeof(uint32_t) * count);
@@ -42,6 +43,8 @@ bool automaton_bucket_add_entry(automaton_bucket_list* list, uint32_t entry){
 	uint32_t* bucket	= list->buckets[index];
 	uint32_t i;
 
+	list->composite_count++;
+
 	if(bucket == NULL){
 		list->bucket_size[index]	= 2;
 		list->buckets[index]		= malloc(sizeof(uint32_t) * list->bucket_size[index]);
@@ -66,9 +69,13 @@ bool automaton_bucket_add_entry(automaton_bucket_list* list, uint32_t entry){
 bool automaton_bucket_remove_entry(automaton_bucket_list* list, uint32_t entry){
 	if(!automaton_bucket_has_entry(list, entry))
 		return false;
+
 	uint32_t index		= entry % list->count;
 	uint32_t* bucket	= list->buckets[index];
 	uint32_t i;
+
+	list->composite_count--;
+
 	bool found	= false;
 	for(i = 0; i < list->bucket_count[index]; i++){
 		if(bucket[i] == entry){
@@ -99,7 +106,12 @@ void automaton_bucket_destroy(automaton_bucket_list* list){
 
 automaton_ptr_bucket_list* automaton_ptr_bucket_list_create(uint32_t count){
 	automaton_ptr_bucket_list* bucket	= malloc(sizeof(automaton_ptr_bucket_list));
+	automaton_ptr_bucket_list_initialize(bucket, count);
+	return bucket;
+}
+void automaton_ptr_bucket_list_initialize(automaton_ptr_bucket_list* bucket, uint32_t count){
 	uint32_t i;
+	bucket->composite_count			= 0;
 	bucket->count					= count;
 	bucket->bucket_count			= malloc(sizeof(uint32_t) * count);
 	bucket->bucket_size				= malloc(sizeof(uint32_t) * count);
@@ -109,11 +121,29 @@ automaton_ptr_bucket_list* automaton_ptr_bucket_list_create(uint32_t count){
 		bucket->bucket_size[i]		= 0;
 		bucket->buckets[i]			= NULL;
 	}
-	return bucket;
+}
+void automaton_ptr_bucket_list_copy(automaton_ptr_bucket_list* target, automaton_ptr_bucket_list* source){
+	if(target->count != source->count){
+		automaton_ptr_bucket_destroy(target);
+		automaton_ptr_bucket_list_initialize(target, source->count);
+	}
+	uint32_t i, j;
+	for(i = 0; i < target->count; i++){
+		if(target->bucket_size[i] < source->bucket_size[i]){
+			free(target->buckets[i]);
+			target->buckets[i]	= malloc(sizeof(void*) * source->bucket_size[i]);
+			target->bucket_size[i]	= source->bucket_size[i];
+		}
+		for(j = 0; j < target->bucket_count[i]; j++){
+			target->buckets[i][j]	= source->buckets[i][j];
+		}
+		target->bucket_count[i]		= source->bucket_count[i];
+	}
 }
 automaton_ptr_bucket_list* automaton_ptr_bucket_list_clone(automaton_ptr_bucket_list* source){
 	automaton_ptr_bucket_list* target	= malloc(sizeof(automaton_ptr_bucket_list));
 	uint32_t i, j;
+	target->composite_count			= source->composite_count;
 	target->count					= source->count;
 	target->bucket_count			= malloc(sizeof(uint32_t) * target->count);
 	target->bucket_size				= malloc(sizeof(uint32_t) * target->count);
@@ -182,6 +212,8 @@ bool automaton_ptr_bucket_add_entry(automaton_ptr_bucket_list* list, void* entry
 	void** bucket	= list->buckets[index];
 	uint32_t i;
 
+	list->composite_count++;
+
 	if(bucket == NULL){
 		list->bucket_size[index]	= 2;
 		list->buckets[index]		= malloc(sizeof(void*) * list->bucket_size[index]);
@@ -209,6 +241,9 @@ bool automaton_ptr_bucket_remove_entry(automaton_ptr_bucket_list* list, void* en
 	uint32_t index		= key % list->count;
 	void** bucket	= list->buckets[index];
 	uint32_t i;
+
+	list->composite_count--;
+
 	bool found	= false;
 	for(i = 0; i < list->bucket_count[index]; i++){
 		if(bucket[i] == entry){
@@ -227,6 +262,7 @@ void automaton_ptr_bucket_reset(automaton_ptr_bucket_list* list){
 	for(i = 0; i < list->count; i++){
 		list->bucket_size[i]	= 0;
 	}
+	list->composite_count		= 0;
 }
 
 void automaton_ptr_bucket_destroy(automaton_ptr_bucket_list* list){

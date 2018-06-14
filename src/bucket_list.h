@@ -11,6 +11,7 @@
 #include "automaton_utils.h"
 
 typedef struct automaton_bucket_list_str{
+	uint32_t composite_count;
 	uint32_t count;
 	uint32_t *bucket_count;
 	uint32_t *bucket_size;
@@ -26,6 +27,7 @@ void automaton_bucket_destroy(automaton_bucket_list* list);
 typedef uint32_t (*automaton_ptr_bucket_list_key_extractor)(void*);
 
 typedef struct automaton_ptr_bucket_list_str{
+	uint32_t composite_count;
 	uint32_t count;
 	uint32_t *bucket_count;
 	uint32_t *bucket_size;
@@ -33,7 +35,9 @@ typedef struct automaton_ptr_bucket_list_str{
 }automaton_ptr_bucket_list;
 
 automaton_ptr_bucket_list* automaton_ptr_bucket_list_create(uint32_t count);
+void automaton_ptr_bucket_list_initialize(automaton_ptr_bucket_list* bucket, uint32_t count);
 automaton_ptr_bucket_list* automaton_ptr_bucket_list_clone(automaton_ptr_bucket_list* source);
+void automaton_ptr_bucket_list_copy(automaton_ptr_bucket_list* target, automaton_ptr_bucket_list* source);
 void automaton_ptr_bucket_list_merge(automaton_ptr_bucket_list* list, automaton_ptr_bucket_list* new_elements
 		, automaton_ptr_bucket_list_key_extractor extractor);
 void automaton_ptr_bucket_list_intersect(automaton_ptr_bucket_list* list, automaton_ptr_bucket_list* new_elements
