@@ -1054,6 +1054,7 @@ automaton_automaton* automaton_fluent_build_automaton(automaton_automata_context
 		automaton_transition_destroy(ending_transition, false);
 		automaton_transition_destroy(ending_loop, false);
 	}
+	free(local_alphabet);
 	automaton_transition_destroy(ending_transition, true);
 	automaton_transition_destroy(ending_loop, true);
 	automaton_automaton_add_initial_state(current_automaton, 0);
@@ -1407,7 +1408,7 @@ void automaton_ranking_increment(automaton_automaton* game_automaton, automaton_
 		return;
 	}
 	//apply numerical increment
-	//TODO:
+	//TODO:review this, not sure if it shouldnt be sr
 	if(ranking->value < (int32_t)(max_delta[current_guarantee] - 1)){
 		ranking->value++;
 	}else{

@@ -527,6 +527,9 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 		}
 		aut_context_log("composing.\n");
 		automaton_automaton* automaton	= automaton_automata_compose(automata, composition_count, is_synchronous? CONCURRENT : INTERLEAVED, composition_syntax->is_game);//SYNCHRONOUS);
+		if(composition_syntax->is_game)
+			for(i = 0; i < (int32_t)ctx->global_fluents_count; i++)
+				automaton_automaton_destroy(automata[composition_count - i - 1]);
 		tables->composition_entries[main_index]->solved	= true;
 		tables->composition_entries[main_index]->valuation_count			= 1;
 		tables->composition_entries[main_index]->valuation.automaton_value	= automaton;
@@ -1442,6 +1445,7 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 
 	//build look up tables
 	uint32_t i;
+	int32_t j;
 	for(i = 0; i < program->count; i++){
 		automaton_statement_syntax_to_table(program->statements[i], tables);
 	}
@@ -1502,6 +1506,12 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 					, guarantees, guarantees_count);
 			if(winning_region_automaton != NULL)
 				automaton_automaton_destroy(winning_region_automaton);
+			for(j = 0; j < assumptions_count; j++)
+				free(assumptions[j]);
+			free(assumptions);
+			for(j = 0; j < guarantees_count; j++)
+				free(guarantees[j]);
+			free(guarantees);
 		}
 	}
 
