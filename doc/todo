@@ -1,5 +1,6 @@
 TODO:
 SPRINT1
+- for gr1 preallocate pending states and rankings
 - implement gr1 use transitions instead of states since it will be easier to build strategy if last computation holds route to satisfaction
 	para gr1 definir estructura de punto fijo sobre transiciones, mantiene trans_viejas, trans_agregadas, bool initialized
 	el & de obdd es expandir frontera (predecesores a lo bruto)

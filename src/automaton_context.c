@@ -1488,19 +1488,20 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 	automaton_automaton *game_automaton, *winning_region_automaton;
 	char **assumptions, **guarantees;
 	char set_name[255];
-	int32_t assumptions_count, guarantees_count;
+	int32_t assumptions_count = 0, guarantees_count = 0;
 	for(i = 0; i < program->count; i++){
 		if(program->statements[i]->type == GR_1_AUT){
 			gr1_game		= program->statements[i]->gr1_game_def;
 			main_index		= automaton_parsing_tables_get_entry_index(tables, COMPOSITION_ENTRY_AUT, gr1_game->composition_name);
-			game_automaton	= tables->automaton_entries[main_index]->valuation.automaton_value;
+			game_automaton	= tables->composition_entries[main_index]->valuation.automaton_value;
 			sprintf(set_name, "Assumption %s", gr1_game->name);
 			assumptions		= automaton_set_syntax_evaluate(tables, gr1_game->assumptions, &assumptions_count, set_name);
 			sprintf(set_name, "Guarantees %s", gr1_game->name);
 			guarantees		= automaton_set_syntax_evaluate(tables, gr1_game->guarantees, &guarantees_count, set_name);
-			winning_region_automaton	= automaton_get_gr1_winning_region(game_automaton, assumptions, assumptions_count
+			winning_region_automaton	= automaton_get_gr1_strategy(game_automaton, assumptions, assumptions_count
 					, guarantees, guarantees_count);
-			automaton_automaton_destroy(winning_region_automaton);
+			if(winning_region_automaton != NULL)
+				automaton_automaton_destroy(winning_region_automaton);
 		}
 	}
 

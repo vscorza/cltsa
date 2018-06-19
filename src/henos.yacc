@@ -82,6 +82,7 @@ label:
 	concurrentLabel							{$$ = $1;}
 	|set									{$$ = automaton_label_syntax_create(true, $1, NULL, NULL);}
 	|t_IDENT indexes						{$$ = automaton_label_syntax_create(false, NULL, $1, $2);free($1);}
+	|t_UPPER_IDENT indexes					{$$ = automaton_label_syntax_create(false, NULL, $1, $2);free($1);}
 	;
 labels:
 	labels ',' label						{$$ = automaton_set_syntax_concat_labels($1,$3);}

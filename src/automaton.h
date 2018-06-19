@@ -182,7 +182,6 @@ typedef struct automata_str{
 typedef struct automaton_ranking_str{
 	uint32_t state;
 	int32_t value;
-	int32_t assumption_counter;
 	int32_t assumption_to_satisfy;
 } automaton_ranking;
 typedef struct automaton_pending_state_str{
@@ -302,7 +301,6 @@ bool automaton_automaton_has_state(automaton_automaton* current_automaton, uint3
 bool automaton_automaton_add_initial_state(automaton_automaton* current_automaton, uint32_t state);
 automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automaton, char** assumptions, uint32_t assumptions_count
 		, char** guarantees, uint32_t guarantees_count);
-uint32_t automaton_ranking_key_extractor(automaton_ranking* ranking);
 /** AUTOMATA OPERATIONS **/
 uint32_t automaton_automata_get_composite_state(uint32_t states_count, uint32_t* states);
 automaton_automaton* automaton_automata_compose(automaton_automaton** automata, uint32_t automata_count, automaton_synchronization_type type, bool is_game);
@@ -312,6 +310,7 @@ void automaton_automaton_minimize(automaton_automaton* current_automaton);
 bool automaton_automaton_check_reachability(automaton_automaton* current_automaton, automaton_valuation target);
 bool automaton_automaton_check_liveness(automaton_automaton* current_automaton, automaton_valuation target);
 /** AUTOMATON RANKING AND PENDING **/
+uint32_t automaton_ranking_key_extractor(void* ranking);
 automaton_ranking* automaton_ranking_create(uint32_t current_state, int32_t assumption_to_satisfy);
 void automaton_ranking_destroy(automaton_ranking*  ranking);
 automaton_pending_state* automaton_pending_state_create(uint32_t current_state, int32_t goal_to_satisfy);
@@ -321,9 +320,13 @@ int32_t automaton_state_predecessor_ranking(automaton_automaton* game_automaton,
 bool automaton_state_is_stable(automaton_automaton* game_automaton, uint32_t state, automaton_ptr_bucket_list** ranking
 		, uint32_t current_guarantee, uint32_t guarantee_count, uint32_t assumptions_count
 		, uint32_t* guarantees_indexes, uint32_t* assumptions_indexes, int32_t first_assumption_index);
-void automaton_add_unstable_predecessors(automaton_automaton* game_automaton, uint32_t state, automaton_ptr_bucket_list** ranking
+void automaton_add_unstable_predecessors(automaton_automaton* game_automaton, automaton_ptr_bucket_list* pending_list
+		, uint32_t state, automaton_ptr_bucket_list** ranking
 		, uint32_t current_guarantee, uint32_t guarantee_count, uint32_t assumptions_count
 		, uint32_t* guarantees_indexes, uint32_t* assumptions_indexes, int32_t first_assumption_index);
+void automaton_ranking_increment(automaton_automaton* game_automaton, automaton_ranking* ranking, uint32_t* max_delta
+		, uint32_t current_guarantee, uint32_t guarantee_count, uint32_t assumptions_count
+		, uint32_t* guarantees_indexes, uint32_t* assumptions_indexes, uint32_t first_assumption_index);
 /** COMPOSITE TREE **/
 automaton_composite_tree* automaton_composite_tree_create(uint32_t key_length);
 automaton_composite_tree_entry* automaton_composite_tree_entry_get_from_pool(automaton_composite_tree* tree);

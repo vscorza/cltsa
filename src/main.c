@@ -25,7 +25,7 @@ void run_parse_test(char* test_file, char* test_name){
 	char buf[255];
 	sprintf(buf, "results/%s", test_name);
 	bool FIRST_IS_CONCURRENT	= false;
-	bool PRINT_FSP				= false;
+	bool PRINT_FSP				= true;
 	automaton_automata_context* ctx		= automaton_automata_context_create_from_syntax(parsed_program, buf, FIRST_IS_CONCURRENT, PRINT_FSP);
     automaton_automata_context_destroy(ctx);
     /*
@@ -172,7 +172,7 @@ int main (void){
 	//run_parse_test("test5.fsp");
 	//run_fsp_tests(18);
 	//run_parse_test("tests/test18.fsp",  "test18");
-	run_parse_test("tests/test20.fsp", "test20");
+	run_parse_test("tests/test21.fsp", "test21");
 	return 0;    
 }
 
