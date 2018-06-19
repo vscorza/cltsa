@@ -19,12 +19,14 @@
 #define SIGNALS_INCREASE_FACTOR 2
 #define TRANSITIONS_INITIAL_SIZE 2
 
+#define RANKING_INFINITY	-1
+
 #define DEBUG_COMPOSITION 0
 #define DEBUG_COMPOSITE_TREE 0
 
 #define BUCKET_SIZE		1000000
 #define FLUENT_BUCKET_SIZE 10000
-#define TRANSITIONS_BUCKET_SIZE 10000
+#define RANKING_BUCKET_SIZE 10000
 #define PRINT_PARTIAL_COMPOSITION 1
 
 #define AUT_TAU_CONSTANT	"__tau__"
@@ -148,6 +150,7 @@ typedef struct automaton_str{
 	uint32_t				transitions_composite_count;
 	uint32_t				max_out_degree;
 	uint32_t				max_concurrent_degree;
+	bool*					is_controllable;
 	uint32_t*				out_degree;
 	uint32_t*				out_size;
 	automaton_transition**	transitions;			// S -> list of transitions (s,s')
@@ -176,7 +179,16 @@ typedef struct automata_str{
 } automaton_automata;
 
 /** AUX **/
-
+typedef struct automaton_ranking_str{
+	uint32_t state;
+	int32_t value;
+	int32_t assumption_counter;
+	int32_t assumption_to_satisfy;
+} automaton_ranking;
+typedef struct automaton_pending_state_str{
+	uint32_t state;
+	int32_t goal_to_satisfy;
+} automaton_pending_state;
 typedef struct dictionary_entry_str {
     char *key;
     uint32_t value;
@@ -288,12 +300,9 @@ bool automaton_automaton_has_transition(automaton_automaton* current_automaton, 
 bool automaton_automaton_remove_transition(automaton_automaton* current_automaton, automaton_transition* transition);
 bool automaton_automaton_has_state(automaton_automaton* current_automaton, uint32_t state);
 bool automaton_automaton_add_initial_state(automaton_automaton* current_automaton, uint32_t state);
-uint32_t automaton_transition_key_extractor(void* transition);
-uint32_t automaton_cox(automaton_automaton* current_automaton, automaton_ptr_bucket_list* frontier
-		, automaton_ptr_bucket_list* old_set, automaton_ptr_bucket_list* new_set
-		, automaton_bucket_list* original_state_set, bool negate_original_state_set);
-automaton_automaton* automaton_get_gr1_winning_region(automaton_automaton* game_automaton, char** assumptions, uint32_t assumptions_count
+automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automaton, char** assumptions, uint32_t assumptions_count
 		, char** guarantees, uint32_t guarantees_count);
+uint32_t automaton_ranking_key_extractor(automaton_ranking* ranking);
 /** AUTOMATA OPERATIONS **/
 uint32_t automaton_automata_get_composite_state(uint32_t states_count, uint32_t* states);
 automaton_automaton* automaton_automata_compose(automaton_automaton** automata, uint32_t automata_count, automaton_synchronization_type type, bool is_game);
@@ -302,6 +311,19 @@ bool automaton_automaton_update_valuation(automaton_automaton* current_automaton
 void automaton_automaton_minimize(automaton_automaton* current_automaton);
 bool automaton_automaton_check_reachability(automaton_automaton* current_automaton, automaton_valuation target);
 bool automaton_automaton_check_liveness(automaton_automaton* current_automaton, automaton_valuation target);
+/** AUTOMATON RANKING AND PENDING **/
+automaton_ranking* automaton_ranking_create(uint32_t current_state, int32_t assumption_to_satisfy);
+void automaton_ranking_destroy(automaton_ranking*  ranking);
+automaton_pending_state* automaton_pending_state_create(uint32_t current_state, int32_t goal_to_satisfy);
+void automaton_pending_state_destroy(automaton_pending_state*  pending_state);
+int32_t automaton_state_predecessor_ranking(automaton_automaton* game_automaton, uint32_t state, automaton_ptr_bucket_list** ranking
+		, uint32_t current_guarantee, uint32_t guarantee_count, uint32_t* guarantees_indexes);
+bool automaton_state_is_stable(automaton_automaton* game_automaton, uint32_t state, automaton_ptr_bucket_list** ranking
+		, uint32_t current_guarantee, uint32_t guarantee_count, uint32_t assumptions_count
+		, uint32_t* guarantees_indexes, uint32_t* assumptions_indexes, int32_t first_assumption_index);
+void automaton_add_unstable_predecessors(automaton_automaton* game_automaton, uint32_t state, automaton_ptr_bucket_list** ranking
+		, uint32_t current_guarantee, uint32_t guarantee_count, uint32_t assumptions_count
+		, uint32_t* guarantees_indexes, uint32_t* assumptions_indexes, int32_t first_assumption_index);
 /** COMPOSITE TREE **/
 automaton_composite_tree* automaton_composite_tree_create(uint32_t key_length);
 automaton_composite_tree_entry* automaton_composite_tree_entry_get_from_pool(automaton_composite_tree* tree);

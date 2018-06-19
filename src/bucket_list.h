@@ -32,6 +32,9 @@ typedef struct automaton_ptr_bucket_list_str{
 	uint32_t *bucket_count;
 	uint32_t *bucket_size;
 	void ***buckets;
+	uint32_t last_added_bucket;
+	uint32_t last_added_index;
+	bool has_last_index;
 }automaton_ptr_bucket_list;
 
 automaton_ptr_bucket_list* automaton_ptr_bucket_list_create(uint32_t count);
@@ -44,6 +47,8 @@ void automaton_ptr_bucket_list_intersect(automaton_ptr_bucket_list* list, automa
 		, automaton_ptr_bucket_list_key_extractor extractor);
 bool automaton_ptr_bucket_has_key(automaton_ptr_bucket_list* list, uint32_t key, automaton_ptr_bucket_list_key_extractor extractor);
 bool automaton_ptr_bucket_has_entry(automaton_ptr_bucket_list* list, void* entry, uint32_t key);
+void* automaton_ptr_bucket_get_entry(automaton_ptr_bucket_list* list, uint32_t key, automaton_ptr_bucket_list_key_extractor extractor);
+void* automaton_ptr_bucket_pop_entry(automaton_ptr_bucket_list* list);
 bool automaton_ptr_bucket_add_entry(automaton_ptr_bucket_list* list, void* entry, uint32_t key);
 bool automaton_ptr_bucket_remove_entry(automaton_ptr_bucket_list* list, void* entry, uint32_t key);
 void automaton_ptr_bucket_reset(automaton_ptr_bucket_list* list);

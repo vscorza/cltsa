@@ -9,6 +9,7 @@
 #define AUTOMATON_CONTEXT_H_
 
 #include "automaton.h"
+#include "automaton_mu_calculus.h"
 #include "parser_utils.h"
 
 #define GLOBAL_ALPHABET_NAME_AUT		"Global_Alphabet"

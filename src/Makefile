@@ -14,16 +14,19 @@ YACCFLAGS =
 
 all: main
 
-main: main.c parser_utils_c.o y.tab.o lex.yy.o automaton_c.o automaton_utils_c.o automaton_context_c.o  bucket_list_c.o
+main: main.c parser_utils_c.o y.tab.o lex.yy.o automaton_c.o automaton_utils_c.o automaton_context_c.o  bucket_list_c.o automaton_mu_calculus_c.o
 	$(CC) $(CFLAGS) $^ -o $@
 
 automaton_utils_c.o: automaton_utils.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-automaton_c.o: automaton.c bucket_list_c.o
+automaton_c.o: automaton.c bucket_list_c.o automaton_mu_calculus_c.o
 	$(CC) $(CFLAGS) -c $< -o $@
 
-automaton_context_c.o: automaton_context.c parser_utils_c.o
+automaton_context_c.o: automaton_context.c parser_utils_c.o automaton_mu_calculus_c.o
+	$(CC) $(CFLAGS) -c $< -o $@
+
+automaton_mu_calculus_c.o: automaton_mu_calculus.c automaton_utils_c.o
 	$(CC) $(CFLAGS) -c $< -o $@
 
 bucket_list_c.o: bucket_list.c automaton_utils_c.o
