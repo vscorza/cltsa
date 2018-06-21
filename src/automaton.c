@@ -1408,17 +1408,12 @@ void automaton_ranking_increment(automaton_automaton* game_automaton, automaton_
 		return;
 	}
 	//apply numerical increment
-	//TODO:review this, not sure if it shouldnt be sr
-	if(ranking->value < (int32_t)(max_delta[current_guarantee] - 1)){
+	if(ranking->assumption_to_satisfy < (int32_t)(assumptions_count - 1)){
+		ranking->assumption_to_satisfy = (ranking->assumption_to_satisfy + 1);
+	}else if(ranking->value < (int32_t)(max_delta[current_guarantee] - 1)){
 		ranking->value++;
 	}else{
-		ranking->value 					= 0;
-		for(i = 0; i < assumptions_count; i++){
-			if(ranking->assumption_to_satisfy == (int32_t)assumptions_indexes[i]){
-				ranking->assumption_to_satisfy 	= assumptions_indexes[i + 1 % assumptions_count];
-				break;
-			}
-		}
+		ranking->value 					= RANKING_INFINITY;
 	}
 }
 automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automaton, char** assumptions, uint32_t assumptions_count
@@ -1454,13 +1449,25 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 		}
 	}
 	//get max_l(|fi_l - gamma_g|)
+	automaton_bucket_list *bigger_bucket_list, *smaller_bucket_list;
 	uint32_t* max_delta	= malloc(sizeof(uint32_t) * guarantees_count);
 	uint32_t current_delta;
 	for(l = 0; l < guarantees_count; l++){
 		max_delta[l]	= 0;
 		for(k = 0; k < assumptions_count; k++){
-			current_delta	= abs(game_automaton->inverted_valuations[assumptions_indexes[k]]->composite_count
-					- game_automaton->inverted_valuations[guarantees_indexes[l]]->composite_count);
+			if(game_automaton->inverted_valuations[assumptions_indexes[k]]->composite_count >
+				game_automaton->inverted_valuations[guarantees_indexes[l]]->composite_count){
+				bigger_bucket_list	= game_automaton->inverted_valuations[assumptions_indexes[k]];
+				smaller_bucket_list	= game_automaton->inverted_valuations[guarantees_indexes[l]];
+			}else{
+				smaller_bucket_list	= game_automaton->inverted_valuations[assumptions_indexes[k]];
+				bigger_bucket_list	= game_automaton->inverted_valuations[guarantees_indexes[l]];
+			}
+			current_delta	= 0;
+			for(i = 0; i < bigger_bucket_list->count; i++)
+				for(j = 0; j < bigger_bucket_list->bucket_count[i]; j++)
+					if(!automaton_bucket_has_entry(smaller_bucket_list, bigger_bucket_list->buckets[i][j]))
+						current_delta++;
 			max_delta[l]	= current_delta > max_delta[l] ? current_delta : max_delta[l];
 		}
 	}
