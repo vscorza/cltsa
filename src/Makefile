@@ -1,5 +1,5 @@
 #CC=gcc
-CC=c99
+CC=gcc-8
 CFLAGS= -Wall -Wextra -pedantic -g -lm -Wno-unused-variable -Wno-unused-parameter -O0
 #CFLAGS= -Wall -Wextra -pedantic -lm -Wno-unused-variable -Wno-unused-parameter -O3
 NASM=nasm

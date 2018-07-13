@@ -134,7 +134,7 @@ automaton_automaton* automaton_get_gr1_winning_region(automaton_automaton* game_
 	automaton_ptr_bucket_list	*x_new	= automaton_ptr_bucket_list_create(TRANSITIONS_BUCKET_SIZE);
 	automaton_ptr_bucket_list	*true_list			= automaton_ptr_bucket_list_create(TRANSITIONS_BUCKET_SIZE);
 	automaton_ptr_bucket_list	*assumptions_accum	= automaton_ptr_bucket_list_create(TRANSITIONS_BUCKET_SIZE);
-	for(i = 0; i < game_automaton->states_count; i++){
+	for(i = 0; i < game_automaton->transitions_count; i++){
 		for(j = 0;  j < game_automaton->out_degree[i]; j++){
 			automaton_ptr_bucket_add_entry(true_list, &(game_automaton->transitions[i][j]), game_automaton->transitions[i][j].state_from);
 		}

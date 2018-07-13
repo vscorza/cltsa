@@ -144,7 +144,6 @@ typedef struct automaton_str{
 	automaton_automata_context*		context;
 	uint32_t				local_alphabet_count;
 	uint32_t*				local_alphabet;
-	uint32_t				states_count;
 	uint32_t				transitions_size;
 	uint32_t				transitions_count;
 	uint32_t				transitions_composite_count;
