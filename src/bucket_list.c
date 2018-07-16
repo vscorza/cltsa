@@ -142,7 +142,6 @@ void automaton_ptr_bucket_list_copy(automaton_ptr_bucket_list* target, automaton
 	}
 	target->has_last_index			= source->has_last_index;
 	target->last_added_bucket		= source->last_added_bucket;
-	target->last_added_index		= source->last_added_index;
 }
 automaton_ptr_bucket_list* automaton_ptr_bucket_list_clone(automaton_ptr_bucket_list* source){
 	automaton_ptr_bucket_list* target	= malloc(sizeof(automaton_ptr_bucket_list));
@@ -162,7 +161,6 @@ automaton_ptr_bucket_list* automaton_ptr_bucket_list_clone(automaton_ptr_bucket_
 	}
 	target->has_last_index			= source->has_last_index;
 	target->last_added_bucket		= source->last_added_bucket;
-	target->last_added_index		= source->last_added_index;
 	return target;
 }
 
@@ -225,20 +223,15 @@ void* automaton_ptr_bucket_get_entry(automaton_ptr_bucket_list* list, uint32_t k
 }
 void* automaton_ptr_bucket_pop_entry(automaton_ptr_bucket_list* list){
 	if(!list->has_last_index)return NULL;
-	void* entry	= list->buckets[list->last_added_bucket][list->last_added_index];
+	void* entry	= list->buckets[list->last_added_bucket][--(list->bucket_count[list->last_added_bucket])];
 	list->composite_count--;
 
-	if(list->last_added_index > 0){
-		list->bucket_count[list->last_added_bucket]--;
-		list->last_added_index--;
-
-	}else{
+	if(list->bucket_count[list->last_added_bucket] == 0){
 		uint32_t i;
 		bool found	= false;
 		for(i = 0; i < list->count; i++){
 			if(list->bucket_count[i] > 0){
 				list->last_added_bucket	= i;
-				list->last_added_index	= list->bucket_count[i] - 1;
 				found	= true;
 				break;
 			}
@@ -276,33 +269,12 @@ bool automaton_ptr_bucket_add_entry(automaton_ptr_bucket_list* list, void* entry
 	}
 	list->has_last_index			= true;
 	list->last_added_bucket			= index;
-	list->last_added_index			= list->bucket_count[index];
 	bucket[(list->bucket_count[index])++]	= entry;
 	return false;
 }
 bool automaton_ptr_bucket_remove_entry(automaton_ptr_bucket_list* list, void* entry, uint32_t key){
-	if(!automaton_ptr_bucket_has_entry(list, entry, key))
-		return false;
-	uint32_t index		= key % list->count;
-	void** bucket	= list->buckets[index];
-	uint32_t i;
-
-	bool found	= false;
-	for(i = 0; i < list->bucket_count[index]; i++){
-		if(bucket[i] == entry){
-			found = true;
-			if(i == list->last_added_index && index == list->last_added_bucket){
-				automaton_ptr_bucket_pop_entry(list);
-				return true;
-			}
-		}
-		if(found){
-			bucket[i]	= bucket[i + 1];
-		}
-	}
-	list->composite_count--;
-	list->bucket_count[index]--;
-	return true;
+	printf("NOT IMPLEMENTED\n"); exit(-1);
+	return false;
 }
 
 void automaton_ptr_bucket_reset(automaton_ptr_bucket_list* list){

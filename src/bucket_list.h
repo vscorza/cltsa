@@ -33,7 +33,6 @@ typedef struct automaton_ptr_bucket_list_str{
 	uint32_t *bucket_size;
 	void ***buckets;
 	uint32_t last_added_bucket;
-	uint32_t last_added_index;
 	bool has_last_index;
 }automaton_ptr_bucket_list;
 

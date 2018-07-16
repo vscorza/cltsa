@@ -1259,12 +1259,13 @@ void automaton_indexes_valuation_set_label(automaton_indexes_valuation* valuatio
 		sprintf(target, "%s_%d", target, valuation->current_values[i]);
 	}
 }
+#define INDEX_BUF_SIZE 800
 void automaton_indexes_syntax_eval_strings(automaton_parsing_tables* tables, automaton_indexes_valuation* valuation, char*** a, int32_t* a_count, automaton_indexes_syntax* indexes){
 	uint32_t i, j, k;
 	int32_t *lower_index, *upper_index, *current_index, position;
 	uint32_t total_combinations = 1;
 
-	char buffer[400], buffer2[400];
+	char buffer[INDEX_BUF_SIZE], buffer2[INDEX_BUF_SIZE];
 
 	char** ret_value			= NULL;
 	int32_t inner_count			= 0;
@@ -1312,10 +1313,18 @@ void automaton_indexes_syntax_eval_strings(automaton_parsing_tables* tables, aut
 	for(i = 0; i < total_combinations; i++){
 		buffer[0] = '\0';
 		for(j = 0; j < (uint32_t)effective_count; j++){
+			if(strlen(buffer) > (INDEX_BUF_SIZE - 10) ){
+				printf("[automaton_indexes_syntax_eval_strings] buffer overrun\n");
+				exit(-1);
+			}
 			sprintf(buffer, "%s_%d", buffer, current_index[j]);
 		}
 
 		for(k = 0; k < (uint32_t)*a_count; k++){
+			if(strlen(buffer2) > (INDEX_BUF_SIZE - 10) ){
+				printf("[automaton_indexes_syntax_eval_strings] buffer overrun\n");
+				exit(-1);
+			}
 			sprintf(buffer2, "%s%s", (*a)[k], buffer);
 
 			aut_push_string_to_list(&ret_value, &inner_count, buffer2, &position, true, false);
@@ -1493,6 +1502,7 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 	char **assumptions, **guarantees;
 	char set_name[255];
 	int32_t assumptions_count = 0, guarantees_count = 0;
+
 	for(i = 0; i < program->count; i++){
 		if(program->statements[i]->type == GR_1_AUT){
 			gr1_game		= program->statements[i]->gr1_game_def;
@@ -1504,6 +1514,12 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 			guarantees		= automaton_set_syntax_evaluate(tables, gr1_game->guarantees, &guarantees_count, set_name);
 			winning_region_automaton	= automaton_get_gr1_strategy(game_automaton, assumptions, assumptions_count
 					, guarantees, guarantees_count);
+			if(print_fsp){
+				char buf[255];
+				//automaton_automaton_print(tables->composition_entries[i]->valuation.automaton_value, true, true, true, "*\t", "*\t");
+				sprintf(buf, "%s_%d_strat_%s.fsp", ctx_name, i, is_synchronous? "synch": "asynch");
+				automaton_automaton_print_fsp(winning_region_automaton, buf);
+			}
 			if(winning_region_automaton != NULL)
 				automaton_automaton_destroy(winning_region_automaton);
 			for(j = 0; j < assumptions_count; j++)
