@@ -999,10 +999,11 @@ bool automaton_fluent_add_ending_signal(automaton_fluent* fluent, automaton_alph
 automaton_automaton* automaton_fluent_build_automaton(automaton_automata_context* ctx, uint32_t fluent_index){
 	automaton_fluent* current_fluent	= &(ctx->global_fluents[fluent_index]);
 	uint32_t i, j;
-	uint32_t* local_alphabet			= malloc(sizeof(uint32_t) * (current_fluent->ending_signals_count + current_fluent->starting_signals_count));
+	//uint32_t* local_alphabet			= malloc(sizeof(uint32_t) * (current_fluent->ending_signals_count + current_fluent->starting_signals_count));
+	uint32_t* local_alphabet			= malloc(sizeof(uint32_t) * (ctx->global_alphabet->count));
 	uint32_t alphabet_count				= 0;
 	bool found							= false;
-	for(i = 0; i < current_fluent->starting_signals_count; i++){
+	/*for(i = 0; i < current_fluent->starting_signals_count; i++){
 		found	= false;
 		for(j = 0; j < alphabet_count; j++)
 			if(local_alphabet[j] == current_fluent->starting_signals[i]){
@@ -1021,8 +1022,9 @@ automaton_automaton* automaton_fluent_build_automaton(automaton_automata_context
 			}
 		if(!found)
 			local_alphabet[alphabet_count++]	= current_fluent->ending_signals[i];
-	}
-
+	}*/
+	for(j = 0; j < ctx->global_alphabet->count; j++)
+		local_alphabet[alphabet_count++]	= j;
 
 	automaton_transition *starting_transition	= automaton_transition_create(0, 1);
 	automaton_transition *starting_loop			= automaton_transition_create(0, 0);
@@ -1031,31 +1033,44 @@ automaton_automaton* automaton_fluent_build_automaton(automaton_automata_context
 
 	//TODO:should be superset both on transition and loop
 	automaton_automaton* current_automaton	= automaton_automaton_create(current_fluent->name, ctx, alphabet_count, local_alphabet, false);
+	for(i = 0; i < ctx->global_alphabet->count; i++){
+		for(j = 0; j < current_fluent->starting_signals_count; j++){
+			if(i != current_fluent->starting_signals[j]){
+				automaton_transition_initialize(starting_loop, 0, 0);
+				automaton_transition_add_signal_event(starting_loop, ctx, &(ctx->global_alphabet->list[i]));
+				automaton_automaton_add_transition(current_automaton, starting_loop);
+				automaton_transition_destroy(starting_loop, false);
+			}
+		}
+		for(j = 0; j < current_fluent->ending_signals_count; j++){
+			if(i != current_fluent->ending_signals[j]){
+				automaton_transition_initialize(ending_loop, 1, 1);
+				automaton_transition_add_signal_event(ending_loop, ctx, &(ctx->global_alphabet->list[i]));
+				automaton_automaton_add_transition(current_automaton, ending_loop);
+				automaton_transition_destroy(ending_loop, false);
+			}
+		}
+	}
+	automaton_transition_destroy(starting_loop, true);
+	automaton_transition_destroy(ending_loop, true);
+
 	for(i = 0; i < current_fluent->starting_signals_count; i++){
 		automaton_transition_initialize(starting_transition, 0, 1);
-		automaton_transition_initialize(starting_loop, 0, 0);
 		automaton_transition_add_signal_event(starting_transition, ctx, &(ctx->global_alphabet->list[current_fluent->starting_signals[i]]));
-		automaton_transition_add_signal_event(starting_loop, ctx, &(ctx->global_alphabet->list[current_fluent->starting_signals[i]]));
 		automaton_automaton_add_transition(current_automaton, starting_transition);
-		automaton_automaton_add_transition(current_automaton, starting_loop);
 		automaton_transition_destroy(starting_transition, false);
-		automaton_transition_destroy(starting_loop, false);
+
 	}
 	automaton_transition_destroy(starting_transition, true);
-	automaton_transition_destroy(starting_loop, true);
+
 	for(i = 0; i < current_fluent->ending_signals_count; i++){
 		automaton_transition_initialize(ending_transition, 1, 0);
-		automaton_transition_initialize(ending_loop, 1, 1);
 		automaton_transition_add_signal_event(ending_transition, ctx, &(ctx->global_alphabet->list[current_fluent->ending_signals[i]]));
-		automaton_transition_add_signal_event(ending_loop, ctx, &(ctx->global_alphabet->list[current_fluent->ending_signals[i]]));
 		automaton_automaton_add_transition(current_automaton, ending_transition);
-		automaton_automaton_add_transition(current_automaton, ending_loop);
 		automaton_transition_destroy(ending_transition, false);
-		automaton_transition_destroy(ending_loop, false);
 	}
 	free(local_alphabet);
 	automaton_transition_destroy(ending_transition, true);
-	automaton_transition_destroy(ending_loop, true);
 	automaton_automaton_add_initial_state(current_automaton, 0);
 	return current_automaton;
 }

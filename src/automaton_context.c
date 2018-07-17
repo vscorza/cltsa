@@ -520,6 +520,10 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 			//build fluent automata
 			for(i = 0; i < (int32_t)ctx->global_fluents_count; i++){
 				new_automata[i + composition_count]	= automaton_fluent_build_automaton(ctx, i);
+				char buf[255];
+				//automaton_automaton_print(tables->composition_entries[i]->valuation.automaton_value, true, true, true, "*\t", "*\t");
+				sprintf(buf, "%s_%d_fluent_%s.fsp", ctx->name, i + composition_count, is_synchronous? "synch": "asynch");
+				automaton_automaton_print_fsp(new_automata[i + composition_count], buf);
 			}
 			free(automata);
 			automata							= new_automata;
@@ -1043,7 +1047,11 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 											}
 										}
 									}else{
-
+										if(!first_index_set){
+											automaton_transition_destroy(current_automaton_transition[--automaton_transition_count], true);
+											next_from_state_count--;
+											first_index_set	= true;
+										}
 										element_global_index= -1;
 										element_position	= 0;
 										for(m = 0; m < (int32_t)ctx->global_alphabet->count; m++){
@@ -1074,10 +1082,28 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 											}
 											aut_context_log("\n");
 #endif
+											if(next_from_state_count >= (next_from_state_size - 1)){
+												uint32_t new_size	= next_from_state_size * LIST_INCREASE_FACTOR;
+												uint32_t* new_next_from	= malloc(sizeof(uint32_t) * new_size);
+												for(l = 0; l < (int32_t)next_from_state_count; l++){
+													new_next_from[l]	= next_from_state[l];
+												}
+												free(next_from_state);
+												next_from_state_size	= new_size;
+												next_from_state			= new_next_from;
+											}
+											next_from_state[next_from_state_count++]	= to_state;
 											to_state	= (uint32_t)label_position;
 											automaton_transition_add_signal_event(current_automaton_transition[automaton_transition_count - 1], ctx, &(ctx->global_alphabet->list[element_global_index]));
 											aut_context_log(".%s", ctx->global_alphabet->list[element_global_index].name);
 											//automaton_automaton_add_transition(automaton, automaton_transition[automaton_transition_count - 1]);
+										}else{
+											printf("Element not found:%s\nAlphabet:", element_to_find);
+											for(m = 0; m < (int32_t)ctx->global_alphabet->count; m++)
+												printf("%s%s", ctx->global_alphabet->list[m].name, m == ((int32_t)ctx->global_alphabet->count - 1) ? "": ",");
+											printf("\n");
+											fflush(stdout);
+											exit(-1);
 										}
 									}
 
