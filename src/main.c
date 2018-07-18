@@ -172,7 +172,7 @@ int main (void){
 	//run_parse_test("test5.fsp");
 	//run_fsp_tests(18);
 	//run_parse_test("tests/test18.fsp",  "test18");
-	run_parse_test("tests/test21.fsp", "test21");
+	 run_parse_test("tests/test21.fsp", "test21");
 	return 0;    
 }
 
