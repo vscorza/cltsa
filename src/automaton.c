@@ -331,6 +331,7 @@ void automaton_automata_context_print(automaton_automata_context* ctx, char* pre
 		printf("%s", suffix);	
 }
 
+
 void automaton_automaton_print(automaton_automaton* current_automaton, bool print_ctx, bool print_alphabet, bool print_valuations, char* prefix, char* suffix){
 	if(prefix != NULL)
 		printf("%s", prefix);
@@ -354,9 +355,22 @@ void automaton_automaton_print(automaton_automaton* current_automaton, bool prin
 		printf("}\n");
 	}
 	if(print_valuations && current_automaton->is_game){
-		printf("%sValuations:\n", prefix2);
-		for(i = 0; i < current_automaton->transitions_size; i ++){
-			printf("%x", current_automaton->valuations[i]);
+		printf("%sValuations:\n%s", prefix2, prefix2);
+		for(j = 0; j < ctx->global_fluents_count; j++){
+			printf(ctx->global_fluents[j].name);
+			if(j < (ctx->global_fluents_count - 1))printf(",");
+		}
+		printf("\n%s", prefix2);
+		uint32_t fluent_index;
+		bool satisfies_valuation;
+		for(i = 0; i < current_automaton->transitions_count; i ++){
+			printf("s_%d:", i);
+			for(j = 0; j < ctx->global_fluents_count; j++){
+				fluent_index		= GET_STATE_FLUENT_INDEX(ctx->global_fluents_count, i, j);
+				satisfies_valuation	= TEST_FLUENT_BIT(current_automaton->valuations, fluent_index);
+				printf(satisfies_valuation? "1" : "0");
+			}
+			printf("\n%s", prefix2);
 		}
 		printf("\n");
 		printf("%sInv. Valuations:\n", prefix2);
@@ -1569,6 +1583,22 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 	char strategy_name[255];
 	sprintf(strategy_name, "%s strategy", game_automaton->name);
 	strategy	= automaton_automaton_create(strategy_name, game_automaton->context, game_automaton->local_alphabet_count, game_automaton->local_alphabet, false);
+
+#if DEBUG_SYNTHESIS
+	printf("!!RANKING STABILIZATION ACHIEVED FOR %s!!\n", strategy_name);
+	automaton_automaton_print(game_automaton, false, false, true, "", "\n");
+	printf("State: R_guarantee_index=<value, ass_to_satisfy>\n");
+	for(i = 0; i < game_automaton->transitions_count; i++){
+		if(game_automaton->out_degree[i] <= 0) continue;
+		printf("S %d:\t", i);
+		for(j = 0; j < guarantees_count; j++){
+			current_ranking	= ((automaton_ranking*)automaton_ptr_bucket_get_entry(ranking_list[j], i
+					,automaton_ranking_key_extractor));
+			printf("R_%d=<%d,%d>\t", j, current_ranking->value, current_ranking->assumption_to_satisfy);
+		}
+		printf("\n");
+	}
+#endif
 
 	bool is_winning = true;
 	//check if all rankings have the initial state
