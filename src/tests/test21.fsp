@@ -6,7 +6,7 @@ COOKING = (cooking->COOKING | finishedCooking->FINISHED | cook->OVERHEATED),
 FINISHED = (cook->COOKING | moveToBelt->BISCOTTI),  
 OVERHEATED = (overHeated->OVERHEATED).
 
-fluent F_NotCooking = <finishedCooking, cooking> initially 1
+fluent F_NotCooking = <finishedCooking, cook> initially 1
 fluent F_MoveToBelt = <moveToBelt, cook>
 
 SUCCESSFULLY_COOKED_TWICE = (cook->cook->moveToBelt->SUCCESSFULLY_COOKED_TWICE). 

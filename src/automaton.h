@@ -330,7 +330,7 @@ void automaton_add_unstable_predecessors(automaton_automaton* game_automaton, au
 		, uint32_t state, automaton_ptr_bucket_list** ranking
 		, uint32_t current_guarantee, uint32_t guarantee_count, uint32_t assumptions_count
 		, uint32_t* guarantees_indexes, uint32_t* assumptions_indexes, int32_t first_assumption_index);
-void automaton_ranking_increment(automaton_automaton* game_automaton, automaton_ptr_bucket_list** ranking, automaton_ranking* current_ranking, uint32_t* max_delta
+void automaton_ranking_increment(automaton_automaton* game_automaton, automaton_ptr_bucket_list** ranking, automaton_ranking* current_ranking, uint32_t ref_state, uint32_t* max_delta
 		, uint32_t current_guarantee, uint32_t guarantee_count, uint32_t assumptions_count
 		, uint32_t* guarantees_indexes, uint32_t* assumptions_indexes, uint32_t first_assumption_index, automaton_ranking* target_ranking);
 void automaton_ranking_update(automaton_automaton* game_automaton, automaton_ptr_bucket_list** ranking, automaton_ranking* current_ranking, uint32_t* max_delta
