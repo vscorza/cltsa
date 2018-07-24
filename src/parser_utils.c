@@ -110,10 +110,11 @@ automaton_set_def_syntax* automaton_set_def_syntax_create(automaton_set_syntax* 
 	aut_dupstr(&(set_def->name), name);
 	return set_def;
 }
-automaton_fluent_syntax* automaton_fluent_syntax_create(char* name, automaton_set_syntax* initiating_set, automaton_set_syntax* finishing_set){
+automaton_fluent_syntax* automaton_fluent_syntax_create(char* name, automaton_set_syntax* initiating_set, automaton_set_syntax* finishing_set, uint32_t initial_value){
 	automaton_fluent_syntax* fluent	= malloc(sizeof(automaton_fluent_syntax));
 	fluent->initiating_set	= initiating_set;
 	fluent->finishing_set	= finishing_set;
+	fluent->initial_value 	= initial_value;
 	aut_dupstr(&(fluent->name), name);
 	return fluent;
 }

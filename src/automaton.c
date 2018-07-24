@@ -1085,7 +1085,7 @@ automaton_automaton* automaton_fluent_build_automaton(automaton_automata_context
 	}
 	free(local_alphabet);
 	automaton_transition_destroy(ending_transition, true);
-	automaton_automaton_add_initial_state(current_automaton, 0);
+	automaton_automaton_add_initial_state(current_automaton, current_fluent->initial_valuation? 1 : 0);
 	return current_automaton;
 }
 /** VALUATION **/

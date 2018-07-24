@@ -31,13 +31,13 @@ automaton_program_syntax* parsed_program = NULL;
 	automaton_program_syntax*		program;
 	automaton_gr1_game_syntax*		gr1_game;
 };
-%token	t_INTEGER t_IDENT t_UPPER_IDENT t_STRING t_CONST t_RANGE t_SET t_FLUENT t_DOTS t_WHEN t_GAME_COMPOSE t_PARALLEL t_GR_1
+%token	t_INTEGER t_IDENT t_UPPER_IDENT t_STRING t_CONST t_RANGE t_SET t_FLUENT t_DOTS t_WHEN t_GAME_COMPOSE t_PARALLEL t_GR_1 t_INITIALLY
 %left '+' '-' ','
 %left '*' '/'
 
 
-%type<text> 				t_STRING t_IDENT t_UPPER_IDENT t_CONST t_RANGE t_SET t_FLUENT t_DOTS t_WHEN t_GAME_COMPOSE t_PARALLEL t_GR_1
-%type<integer>				t_INTEGER
+%type<text> 				t_STRING t_IDENT t_UPPER_IDENT t_CONST t_RANGE t_SET t_FLUENT t_DOTS t_WHEN t_GAME_COMPOSE t_PARALLEL t_GR_1 t_INITIALLY
+%type<integer>				t_INTEGER fluentInitialCondition
 %type<expr>					exp exp2 exp3 exp4 constDef range rangeDef ltsTransitionPrefix
 %type<label>				label concurrentLabel 
 %type<set>					set setExp concurrentLabels  labels fluentSet
@@ -113,7 +113,11 @@ set:
 	;
 	*/
 fluentDef:
-	t_FLUENT t_UPPER_IDENT '=' '<' fluentSet ',' fluentSet '>'	{$$ = automaton_fluent_syntax_create($2, $5, $7);free($1); free($2);}
+	t_FLUENT t_UPPER_IDENT '=' '<' fluentSet ',' fluentSet '>' fluentInitialCondition	{$$ = automaton_fluent_syntax_create($2, $5, $7, $9);free($1); free($2);}
+	;
+fluentInitialCondition:
+	t_INITIALLY t_INTEGER					{$$ = $2; free($1);}
+	|										{$$ = 0;}
 	;
 fluentSet:
 	label									{$$ = automaton_set_syntax_create_from_label($1);}

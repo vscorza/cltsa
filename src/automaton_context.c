@@ -1470,7 +1470,7 @@ automaton_fluent* automaton_fluent_create_from_syntax(automaton_parsing_tables* 
 		automaton_fluent_add_ending_signal(fluent, global_alphabet, sig_event);
 		automaton_signal_event_destroy(sig_event, true);
 	}
-
+	fluent->initial_valuation	= fluent_def_syntax->initial_value != 0;
 	return fluent;
 }
 
