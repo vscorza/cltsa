@@ -20,6 +20,7 @@
 #define TRANSITIONS_INITIAL_SIZE 2
 
 #define RANKING_INFINITY	-1
+#define INITIAL_RANKING_VALUE 0
 
 #define DEBUG_COMPOSITION 0
 #define DEBUG_SYNTHESIS 1
@@ -311,12 +312,17 @@ bool automaton_automaton_check_reachability(automaton_automaton* current_automat
 bool automaton_automaton_check_liveness(automaton_automaton* current_automaton, automaton_valuation target);
 /** AUTOMATON RANKING AND PENDING **/
 uint32_t automaton_ranking_key_extractor(void* ranking);
+automaton_ranking* automaton_ranking_create_infinity(uint32_t current_state, int32_t assumption_to_satisfy);
 automaton_ranking* automaton_ranking_create(uint32_t current_state, int32_t assumption_to_satisfy);
 void automaton_ranking_destroy(automaton_ranking*  ranking);
+uint32_t automaton_pending_state_extractor(void* pending_state);
 automaton_pending_state* automaton_pending_state_create(uint32_t current_state, int32_t goal_to_satisfy);
 void automaton_pending_state_destroy(automaton_pending_state*  pending_state);
-automaton_ranking* automaton_state_predecessor_ranking(automaton_automaton* game_automaton, uint32_t state, automaton_ptr_bucket_list** ranking
+automaton_ranking* automaton_state_best_successor_ranking(automaton_automaton* game_automaton, uint32_t state, automaton_ptr_bucket_list** ranking
 		, uint32_t current_guarantee, uint32_t guarantee_count, uint32_t* guarantees_indexes);
+bool automaton_ranking_gt(automaton_ranking* left, automaton_ranking* right);
+bool automaton_ranking_eq(automaton_ranking* left, automaton_ranking* right);
+bool automaton_ranking_lt(automaton_ranking* left, automaton_ranking* right);
 bool automaton_state_is_stable(automaton_automaton* game_automaton, uint32_t state, automaton_ptr_bucket_list** ranking
 		, uint32_t current_guarantee, uint32_t guarantee_count, uint32_t assumptions_count
 		, uint32_t* guarantees_indexes, uint32_t* assumptions_indexes, int32_t first_assumption_index);
@@ -325,6 +331,9 @@ void automaton_add_unstable_predecessors(automaton_automaton* game_automaton, au
 		, uint32_t current_guarantee, uint32_t guarantee_count, uint32_t assumptions_count
 		, uint32_t* guarantees_indexes, uint32_t* assumptions_indexes, int32_t first_assumption_index);
 void automaton_ranking_increment(automaton_automaton* game_automaton, automaton_ptr_bucket_list** ranking, automaton_ranking* current_ranking, uint32_t* max_delta
+		, uint32_t current_guarantee, uint32_t guarantee_count, uint32_t assumptions_count
+		, uint32_t* guarantees_indexes, uint32_t* assumptions_indexes, uint32_t first_assumption_index, automaton_ranking* target_ranking);
+void automaton_ranking_update(automaton_automaton* game_automaton, automaton_ptr_bucket_list** ranking, automaton_ranking* current_ranking, uint32_t* max_delta
 		, uint32_t current_guarantee, uint32_t guarantee_count, uint32_t assumptions_count
 		, uint32_t* guarantees_indexes, uint32_t* assumptions_indexes, uint32_t first_assumption_index);
 /** COMPOSITE TREE **/
