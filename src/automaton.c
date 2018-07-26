@@ -1546,6 +1546,7 @@ void automaton_ranking_update(automaton_automaton* game_automaton, automaton_ptr
 
 automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automaton, char** assumptions, uint32_t assumptions_count
 		, char** guarantees, uint32_t guarantees_count){
+	clock_t begin = clock();
 	//TODO: preallocate pending states and rankings
 	automaton_automata_context* ctx				= game_automaton->context;
 	uint32_t i, j ,k, l, m;
@@ -1655,7 +1656,7 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 	printf("!!STABILIZING GR1 GAME FOR %s!!\n", strategy_name);
 	automaton_automaton_print(game_automaton, false, false, true, "", "\n");
 #endif
-
+	uint32_t pending_processed	= 0;
 	while(pending_list->composite_count > 0){
 		current_pending_state	= (automaton_pending_state*)automaton_ptr_bucket_pop_entry(pending_list);
 		current_ranking			= automaton_ptr_bucket_get_entry(ranking_list[current_pending_state->goal_to_satisfy], current_pending_state->state, automaton_ranking_key_extractor);
@@ -1679,6 +1680,14 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 				, ranking_list, current_pending_state->goal_to_satisfy, guarantees_count
 				, assumptions_count, guarantees_indexes, assumptions_indexes, first_assumption_index);
 		automaton_pending_state_destroy(current_pending_state);
+		pending_processed++;
+#if PRINT_PARTIAL_SYNTHESIS
+		if((pending_processed % 300000) == 0){
+			printf("Partial Synthesis has [%09d] pending states and [%09d] processed states, running for [%08f]s\n",
+					pending_list->composite_count, pending_processed, (double)(clock() - begin) / CLOCKS_PER_SEC);
+
+		}
+#endif
 	}
 #if DEBUG_SYNTHESIS
 	printf("!!RANKING STABILIZATION ACHIEVED FOR %s!!\n", strategy_name);
@@ -1697,7 +1706,7 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 	printf("\tpending:%d\n", pending_list->composite_count);
 #endif
 
-
+	printf("Synthesis processed [%09d] states, run for [%08f]s\n", pending_processed, (double)(clock() - begin) / CLOCKS_PER_SEC);
 	//build strategy
 
 	strategy	= automaton_automaton_create(strategy_name, game_automaton->context, game_automaton->local_alphabet_count, game_automaton->local_alphabet, false);
