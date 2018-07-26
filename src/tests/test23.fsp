@@ -1,0 +1,24 @@
+range R = 1..4
+set Controllable_Alphabet = {out}
+
+set Global_Alphabet = {in[i:R],hidden,internal,out,mute,jack,built,on,off,green,red,destroyed,cook, finishedCooking, cooking, moveToBelt, overHeated, idle}
+set Controllable_Alphabet = {idle, cook, moveToBelt}
+A=(in[i:R]->hidden->internal->{idle,cook, moveToBelt}->A).
+B=(hidden->out->{idle,cook, moveToBelt}->B).
+C=(on->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->{idle,cook, moveToBelt}->C).
+D=(green->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->{idle,cook, moveToBelt}->D).
+E=(built->built->built->destroyed->{idle,cook, moveToBelt}->E).
+
+
+BISCOTTI = (idle->BISCOTTI | cook->COOKING),
+COOKING = (cooking->COOKING | finishedCooking->FINISHED | cook->OVERHEATED), 
+FINISHED = (cook->COOKING | moveToBelt->BISCOTTI),  
+OVERHEATED = (overHeated->OVERHEATED).
+
+fluent F_NotCooking = <finishedCooking, cook> initially 1
+fluent F_MoveToBelt = <moveToBelt, cook>
+
+SUCCESSFULLY_COOKED_TWICE = (cook->cook->moveToBelt->SUCCESSFULLY_COOKED_TWICE). 
+
+|f| ENV =(A||B||C||D||E||BISCOTTI || SUCCESSFULLY_COOKED_TWICE).
+|gr1| <{F_NotCooking}><{F_MoveToBelt}> STRAT = ENV.

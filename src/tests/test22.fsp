@@ -1,0 +1,21 @@
+const N = 4
+range R_N = 1..4
+
+set Global_Alphabet = {req[i:R_N].{up,down},grant[i:R_N].{up,down}}
+set Controllable_Alphabet = {grant[i:R_N].{up,down}}
+
+//signal req.
+//enum mutex = <set, init>.
+
+BISCOTTI = (idle->BISCOTTI | cook->COOKING),
+COOKING = (cooking->COOKING | finishedCooking->FINISHED | cook->OVERHEATED), 
+FINISHED = (cook->COOKING | moveToBelt->BISCOTTI),  
+OVERHEATED = (overHeated->OVERHEATED).
+
+fluent F_NotCooking = <finishedCooking, cook> initially 1
+fluent F_MoveToBelt = <moveToBelt, cook>
+
+SUCCESSFULLY_COOKED_TWICE = (cook->cook->moveToBelt->SUCCESSFULLY_COOKED_TWICE). 
+
+|f| ENV =(BISCOTTI || SUCCESSFULLY_COOKED_TWICE).
+|gr1| <{F_NotCooking}><{F_MoveToBelt}> STRAT = ENV.

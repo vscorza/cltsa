@@ -173,7 +173,7 @@ int main (void){
 	//run_fsp_tests(18);
 	//run_parse_test("tests/test18.fsp",  "test18");
 	//run_parse_test("tests/test21.fsp", "test21");
-	run_parse_test("tests/test23.fsp", "test23");
+	run_parse_test("tests/test24.fsp", "test24");
 	return 0;    
 }
 
