@@ -1682,8 +1682,8 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 		automaton_pending_state_destroy(current_pending_state);
 		pending_processed++;
 #if PRINT_PARTIAL_SYNTHESIS
-		if((pending_processed % 300000) == 0){
-			printf("Partial Synthesis has [%09d] pending states and [%09d] processed states, running for [%08f]s\n",
+		if((pending_processed % 900000) == 0){
+			printf("Partial Synthesis has [%09d] pending states and [%012d] processed states, running for [%08f]s\n",
 					pending_list->composite_count, pending_processed, (double)(clock() - begin) / CLOCKS_PER_SEC);
 
 		}

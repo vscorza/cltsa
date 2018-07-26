@@ -1,17 +1,13 @@
 TODO:
 SPRINT1
 - for gr1 preallocate pending states and rankings
-- implement gr1 use transitions instead of states since it will be easier to build strategy if last computation holds route to satisfaction
-	para gr1 definir estructura de punto fijo sobre transiciones, mantiene trans_viejas, trans_agregadas, bool initialized
-	el & de obdd es expandir frontera (predecesores a lo bruto)
-		va de un conj de transiciones (las acumuladas) x transiciones (frontera) -> transiciones (agregadas)
-	el | de obdd es una unión de transiciones, sí tenemos agregadas no hace falta revisar mucho, sólo se agregan y ya
-	el cox es igual que el & pero hace predecesores que no llevan fuera de acumuladas por no controlables
-	de hecho el & puede obviarse y aplicarse sólo cox ya que el & tiene sentido en sincrónico con sys y env particionado
-	habría que armar un bucket list de transiciones, en base a los estados to-state	(HECHO)
-- fluents transitions should be applied to superset of alphabet
-- review and document code (particualarly compose)
+	para esto crear un bucket list con punteros a funciones que hagan la realocación, la extracción de la clave
+	la copia y el cálculo de aritmética de puntero, se mantiene una lista de bool de si el elemento está asignado o no,
+	el count(efectivo), size (tamaño) y length(count viejo, tiene asignados y no) cuando el count/length pasa cierto threshold
+	se puede disparar una limpieza que reacomoda los elementos en el bucket para evitar disparar resizes innecesarios 
+	
 - probar amba con concurrent labels
+- fluents transitions should be applied to superset of alphabet
 SPRINT2
 - aparte de <a,b,c> introducir >a,b,c< que define concurrencia débil, puede transicionar con un subconj de estos
 - parse assertions, goals
