@@ -1684,12 +1684,16 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 #if DEBUG_SYNTHESIS
 			printf("Popping from pending (%d, %d) with ranking (%d, %d)\n", current_pending_state->state, current_pending_state->goal_to_satisfy, current_ranking->value, current_ranking->assumption_to_satisfy);
 #endif
-		if(current_ranking->value == RANKING_INFINITY)
+		if(current_ranking->value == RANKING_INFINITY){
+			pending_processed++;
 			continue;
+		}
 		if(automaton_state_is_stable(game_automaton, current_pending_state.state, ranking_list
 				, current_pending_state.goal_to_satisfy, guarantees_count, assumptions_count
-				, guarantees_indexes, assumptions_indexes, first_assumption_index))
+				, guarantees_indexes, assumptions_indexes, first_assumption_index)){
+			pending_processed++;
 			continue;
+		}
 		automaton_ranking_update(game_automaton, ranking_list,
 				(automaton_ranking*)automaton_concrete_bucket_get_entry(ranking_list[current_pending_state.goal_to_satisfy], current_pending_state.state)
 				, max_delta, current_pending_state.goal_to_satisfy, guarantees_count, assumptions_count

@@ -1,8 +1,7 @@
 range R = 1..2
-set Controllable_Alphabet = {out}
 
 set Global_Alphabet = {in[i:R],hidden,internal,out,mute,jack,built,on,off,green,red,destroyed,cook, finishedCooking, cooking, moveToBelt, overHeated, idle}
-set Controllable_Alphabet = {idle, cook, moveToBelt}
+set Controllable_Alphabet = {in[i:R],hidden,internal,out,mute,jack,built,on,off,green,red,destroyed,idle, cook, moveToBelt}
 A=(in[i:R]->hidden->internal->{idle,cook, moveToBelt}->A).
 B=(hidden->out->{idle,cook, moveToBelt}->B).
 C=(on->mute->mute->mute->mute->{idle,cook, moveToBelt}->C).

@@ -1,11 +1,6 @@
 TODO:
 SPRINT1
-- for gr1 preallocate pending states and rankings
-	para esto crear un bucket list con punteros a funciones que hagan la realocación, la extracción de la clave
-	la copia y el cálculo de aritmética de puntero, se mantiene una lista de bool de si el elemento está asignado o no,
-	el count(efectivo), size (tamaño) y length(count viejo, tiene asignados y no) cuando el count/length pasa cierto threshold
-	se puede disparar una limpieza que reacomoda los elementos en el bucket para evitar disparar resizes innecesarios 
-	
+- hay que meter una optimización para no realizabilidad, porque es cuando pega el peor caso, reimplementar konighoefer
 - probar amba con concurrent labels
 - fluents transitions should be applied to superset of alphabet
 SPRINT2
