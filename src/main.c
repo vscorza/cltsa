@@ -36,6 +36,35 @@ void run_parse_test(char* test_file, char* test_name){
     fclose(yyin);
 }
 
+typedef struct test_item_bucket_str{
+	uint32_t a; uint32_t b;
+}test_item_bucket;
+
+uint32_t test_item_extractor(void* entry){ return ((test_item_bucket*)entry)->a;}
+void test_item_copy(void* source, void* target){
+	test_item_bucket* source_it	= (test_item_bucket*)source;
+	test_item_bucket* target_it	= (test_item_bucket*)target;
+	source_it->a				= target_it->a;
+	source_it->b				= target_it->b;
+}
+void run_concrete_bucket_list_tests(){
+	automaton_concrete_bucket_list* list	= automaton_concrete_bucket_list_create(RANKING_BUCKET_SIZE, test_item_extractor, test_item_copy, sizeof(test_item_bucket));
+	test_item_bucket current_item;
+	uint32_t i;
+	uint32_t cycles = 60;
+	for(i = 0; i < cycles; i++){
+		current_item.b = i; current_item.a = i % 2;
+		automaton_concrete_bucket_add_entry(list, &current_item);
+	}
+	for(i = 0; i < cycles; i++){
+		automaton_concrete_bucket_pop_entry(list, &current_item);
+		if(i % 500){
+			printf("ITEM at %d: <%d,%d>\n", i, current_item.a, current_item.b);
+		}
+	}
+	automaton_concrete_bucket_destroy(list);
+}
+
 void run_fsp_tests(uint32_t test_count){
 	uint32_t i;
 	char buf[255], buf2[255];
@@ -172,8 +201,11 @@ int main (void){
 	//run_parse_test("test5.fsp");
 	//run_fsp_tests(18);
 	//run_parse_test("tests/test18.fsp",  "test18");
+	run_parse_test("tests/test23.fsp", "test23");
+
 	//run_parse_test("tests/test21.fsp", "test21");
-	run_parse_test("tests/test24.fsp", "test24");
+
+	//run_concrete_bucket_list_tests();
 	return 0;    
 }
 

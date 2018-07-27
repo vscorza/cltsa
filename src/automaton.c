@@ -1323,6 +1323,13 @@ automaton_ranking* automaton_ranking_create_infinity(uint32_t state, int32_t ass
 	ranking->assumption_to_satisfy	= assumption_to_satisfy;
 	return ranking;
 }
+void automaton_ranking_copy(void* target_input, void* source_input){
+	automaton_ranking* target	= (automaton_ranking*)target_input;
+	automaton_ranking* source	= (automaton_ranking*)source_input;
+	target->state				= source->state;
+	target->value				= source->value;
+	target->assumption_to_satisfy	= source->assumption_to_satisfy;
+}
 automaton_ranking* automaton_ranking_create(uint32_t state, int32_t assumption_to_satisfy){
 	automaton_ranking* ranking	= malloc(sizeof(automaton_ranking));
 	ranking->state			= state;
@@ -1342,13 +1349,20 @@ automaton_pending_state* automaton_pending_state_create(uint32_t state, int32_t 
 	pending->goal_to_satisfy= goal_to_satisfy;
 	return pending;
 }
+void automaton_pending_state_copy(void* target_input, void* source_input){
+	automaton_pending_state* target	= (automaton_pending_state*)target_input;
+	automaton_pending_state* source	= (automaton_pending_state*)source_input;
+	target->state				= source->state;
+	target->goal_to_satisfy		= source->goal_to_satisfy;
+}
+
 void automaton_pending_state_destroy(automaton_pending_state*  pending_state){
 	free(pending_state);
 }
 /**
  * best_j(v)
  */
-automaton_ranking* automaton_state_best_successor_ranking(automaton_automaton* game_automaton, uint32_t state, automaton_ptr_bucket_list** ranking
+automaton_ranking* automaton_state_best_successor_ranking(automaton_automaton* game_automaton, uint32_t state, automaton_concrete_bucket_list** ranking
 		, uint32_t current_guarantee, uint32_t guarantee_count, uint32_t* guarantees_indexes){
 	if(game_automaton->out_degree[state] == 0)return NULL;
 	uint32_t fluent_count		= game_automaton->context->global_fluents_count;
@@ -1366,8 +1380,7 @@ automaton_ranking* automaton_state_best_successor_ranking(automaton_automaton* g
 	for(i = 0; i < game_automaton->out_degree[state]; i++){
 		to_state	= game_automaton->transitions[state][i].state_to;
 		//if(to_state == state)continue;
-		current_value	= ((automaton_ranking*)automaton_ptr_bucket_get_entry(ranking[j], to_state
-				,automaton_ranking_key_extractor));
+		current_value	= ((automaton_ranking*)automaton_concrete_bucket_get_entry(ranking[j], to_state));
 		if(min_ranking == NULL){
 			min_value = max_value = current_value->value;
 			min_ranking = max_ranking = current_value;
@@ -1403,15 +1416,14 @@ bool automaton_ranking_eq(automaton_ranking* left, automaton_ranking* right){
 bool automaton_ranking_lt(automaton_ranking* left, automaton_ranking* right){
 	return automaton_ranking_gt(right, left);
 }
-bool automaton_state_is_stable(automaton_automaton* game_automaton, uint32_t state, automaton_ptr_bucket_list** ranking
+bool automaton_state_is_stable(automaton_automaton* game_automaton, uint32_t state, automaton_concrete_bucket_list** ranking
 		, uint32_t current_guarantee, uint32_t guarantee_count, uint32_t assumptions_count
 		, uint32_t* guarantees_indexes, uint32_t* assumptions_indexes, int32_t first_assumption_index){
 	uint32_t i, j, to_state;
 	/**
 	 * r_j(v)
 	 */
-	automaton_ranking*	current_ranking	= ((automaton_ranking*)automaton_ptr_bucket_get_entry(ranking[current_guarantee], state
-				, automaton_ranking_key_extractor));
+	automaton_ranking*	current_ranking	= ((automaton_ranking*)automaton_concrete_bucket_get_entry(ranking[current_guarantee], state));
 	/**
 	 * v in Q_j
 	 */
@@ -1461,28 +1473,29 @@ bool automaton_state_is_stable(automaton_automaton* game_automaton, uint32_t sta
 #endif
 	return is_stable;
 }
-void automaton_add_unstable_predecessors(automaton_automaton* game_automaton, automaton_ptr_bucket_list* pending_list
-		, uint32_t state, automaton_ptr_bucket_list** ranking
+void automaton_add_unstable_predecessors(automaton_automaton* game_automaton, automaton_concrete_bucket_list* pending_list
+		, uint32_t state, automaton_concrete_bucket_list** ranking
 		, uint32_t current_guarantee, uint32_t guarantee_count, uint32_t assumptions_count
 		, uint32_t* guarantees_indexes, uint32_t* assumptions_indexes, int32_t first_assumption_index){
 	//TODO:implement this
 	uint32_t i;
 	automaton_transition* current_transition;
+	automaton_pending_state current_pending_state;
 	for(i = 0; i < game_automaton->in_degree[state]; i++){
 		current_transition	= &(game_automaton->inverted_transitions[state][i]);
-		if(automaton_ptr_bucket_has_key(pending_list, current_transition->state_from, automaton_pending_state_extractor))
+		if(automaton_concrete_bucket_has_key(pending_list, current_transition->state_from))
 			continue;
 		if(!automaton_state_is_stable(game_automaton, current_transition->state_from, ranking, current_guarantee, guarantee_count
 				, assumptions_count, guarantees_indexes, assumptions_indexes, first_assumption_index) || current_transition->is_input){
 #if DEBUG_SYNTHESIS
 	printf("[Unstable] Pushing into pending (%d, %d) from state %d\n", current_transition->state_from, current_guarantee, state);
 #endif
-			automaton_ptr_bucket_add_entry(pending_list, automaton_pending_state_create(current_transition->state_from, current_guarantee)
-					, current_transition->state_from);
+			current_pending_state.goal_to_satisfy	= current_guarantee; current_pending_state.state = current_transition->state_from;
+			automaton_concrete_bucket_add_entry(pending_list, &current_pending_state);
 		}
 	}
 }
-void automaton_ranking_increment(automaton_automaton* game_automaton, automaton_ptr_bucket_list** ranking, automaton_ranking* current_ranking, uint32_t ref_state, uint32_t* max_delta
+void automaton_ranking_increment(automaton_automaton* game_automaton, automaton_concrete_bucket_list** ranking, automaton_ranking* current_ranking, uint32_t ref_state, uint32_t* max_delta
 		, uint32_t current_guarantee, uint32_t guarantee_count, uint32_t assumptions_count
 		, uint32_t* guarantees_indexes, uint32_t* assumptions_indexes, uint32_t first_assumption_index, automaton_ranking* target_ranking){
 	automaton_automata_context* ctx		= game_automaton->context;
@@ -1519,7 +1532,7 @@ void automaton_ranking_increment(automaton_automaton* game_automaton, automaton_
 	}
 }
 
-void automaton_ranking_update(automaton_automaton* game_automaton, automaton_ptr_bucket_list** ranking, automaton_ranking* current_ranking, uint32_t* max_delta
+void automaton_ranking_update(automaton_automaton* game_automaton, automaton_concrete_bucket_list** ranking, automaton_ranking* current_ranking, uint32_t* max_delta
 		, uint32_t current_guarantee, uint32_t guarantee_count, uint32_t assumptions_count
 		, uint32_t* guarantees_indexes, uint32_t* assumptions_indexes, uint32_t first_assumption_index){
 	automaton_ranking incr_ranking;
@@ -1550,13 +1563,14 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 	//TODO: preallocate pending states and rankings
 	automaton_automata_context* ctx				= game_automaton->context;
 	uint32_t i, j ,k, l, m;
-	automaton_ptr_bucket_list** ranking_list	= malloc(sizeof(automaton_ptr_bucket_list*) * guarantees_count);
-	automaton_ptr_bucket_list* pending_list		= automaton_ptr_bucket_list_create(RANKING_BUCKET_SIZE);
+	automaton_concrete_bucket_list** ranking_list	= malloc(sizeof(automaton_concrete_bucket_list*) * guarantees_count);
+	automaton_concrete_bucket_list* pending_list	= automaton_concrete_bucket_list_create(RANKING_BUCKET_SIZE, automaton_pending_state_extractor
+			, automaton_pending_state_copy, sizeof(automaton_pending_state));
 	uint32_t current_state;
 	uint32_t* assumptions_indexes				= malloc(sizeof(uint32_t) * assumptions_count);
 	uint32_t* guarantees_indexes				= malloc(sizeof(uint32_t) * guarantees_count);
 	int32_t first_assumption_index				= 0;
-	uint32_t fluent_count				= ctx->global_fluents_count;
+	uint32_t fluent_count						= ctx->global_fluents_count;
 	uint32_t fluent_index;
 	//get assumptions and guarantees indexes
 	for(i = 0; i < assumptions_count; i++){
@@ -1610,14 +1624,18 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 	printf("\n");
 #endif
 	//initialize transitions ranking
+	automaton_ranking concrete_ranking;
+	automaton_pending_state concrete_pending_state;
 	for(i = 0; i < guarantees_count; i++)
-		ranking_list[i]	= automaton_ptr_bucket_list_create(RANKING_BUCKET_SIZE);
+		ranking_list[i]	= automaton_concrete_bucket_list_create(RANKING_BUCKET_SIZE, automaton_ranking_key_extractor, automaton_ranking_copy
+				, sizeof(automaton_ranking));
 	for(i = 0; i < game_automaton->transitions_count; i++){
 		for(j = 0; j < guarantees_count; j++){
 			if(game_automaton->out_degree[i] == 0){
 				//state is deadlock
-				automaton_ptr_bucket_add_entry(ranking_list[j],
-						automaton_ranking_create_infinity(i, 0), i);
+				concrete_ranking.state	= i; concrete_ranking.assumption_to_satisfy	= 0;
+				concrete_ranking.value	= RANKING_INFINITY;
+				automaton_concrete_bucket_add_entry(ranking_list[j], &concrete_ranking);
 #if DEBUG_SYNTHESIS
 	printf("[Deadlock] Adding unstable pred for %d\n", i);
 #endif
@@ -1625,8 +1643,9 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 						, assumptions_count, guarantees_indexes, assumptions_indexes, assumptions_indexes[first_assumption_index]);
 			}else{
 				//rank_g(state) = (0, 1)
-				automaton_ptr_bucket_add_entry(ranking_list[j],
-						automaton_ranking_create(i, 0), i);
+				concrete_ranking.state	= i; concrete_ranking.assumption_to_satisfy	= 0;
+				concrete_ranking.value	= 0;
+				automaton_concrete_bucket_add_entry(ranking_list[j], &concrete_ranking);
 				//g falsifies one guarantee and satisfies ass_1 then add to pending
 				fluent_index	= GET_STATE_FLUENT_INDEX(fluent_count, i, assumptions_indexes[first_assumption_index]);
 				if(TEST_FLUENT_BIT(game_automaton->valuations, fluent_index)){
@@ -1636,7 +1655,8 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 #if DEBUG_SYNTHESIS
 	printf("[Init] Pushing into pending (%d, %d)\n", i, guarantees_indexes[j]);
 #endif
-							automaton_ptr_bucket_add_entry(pending_list, automaton_pending_state_create(i, guarantees_indexes[j]), i);
+							concrete_pending_state.state 	= i; concrete_pending_state.goal_to_satisfy	= guarantees_indexes[j];
+							automaton_concrete_bucket_add_entry(pending_list, &concrete_pending_state);
 							break;
 						}
 					}
@@ -1649,7 +1669,7 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 	char strategy_name[255];
 	sprintf(strategy_name, "%s strategy", game_automaton->name);
 	//stabilization
-	automaton_pending_state* current_pending_state;
+	automaton_pending_state current_pending_state;
 	automaton_ranking* current_ranking;
 	automaton_automaton* strategy = NULL;
 #if DEBUG_SYNTHESIS
@@ -1658,28 +1678,28 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 #endif
 	uint32_t pending_processed	= 0;
 	while(pending_list->composite_count > 0){
-		current_pending_state	= (automaton_pending_state*)automaton_ptr_bucket_pop_entry(pending_list);
-		current_ranking			= automaton_ptr_bucket_get_entry(ranking_list[current_pending_state->goal_to_satisfy], current_pending_state->state, automaton_ranking_key_extractor);
+		//current_pending_state	= (automaton_pending_state*)automaton_ptr_bucket_pop_entry(pending_list);
+		automaton_concrete_bucket_pop_entry(pending_list, &current_pending_state);
+		current_ranking			= (automaton_ranking*)automaton_concrete_bucket_get_entry(ranking_list[current_pending_state.goal_to_satisfy], current_pending_state.state);
 #if DEBUG_SYNTHESIS
 			printf("Popping from pending (%d, %d) with ranking (%d, %d)\n", current_pending_state->state, current_pending_state->goal_to_satisfy, current_ranking->value, current_ranking->assumption_to_satisfy);
 #endif
 		if(current_ranking->value == RANKING_INFINITY)
 			continue;
-		if(automaton_state_is_stable(game_automaton, current_pending_state->state, ranking_list
-				, current_pending_state->goal_to_satisfy, guarantees_count, assumptions_count
+		if(automaton_state_is_stable(game_automaton, current_pending_state.state, ranking_list
+				, current_pending_state.goal_to_satisfy, guarantees_count, assumptions_count
 				, guarantees_indexes, assumptions_indexes, first_assumption_index))
 			continue;
 		automaton_ranking_update(game_automaton, ranking_list,
-				(automaton_ranking*)automaton_ptr_bucket_get_entry(ranking_list[current_pending_state->goal_to_satisfy], current_pending_state->state, automaton_ranking_key_extractor)
-				, max_delta, current_pending_state->goal_to_satisfy, guarantees_count, assumptions_count
+				(automaton_ranking*)automaton_concrete_bucket_get_entry(ranking_list[current_pending_state.goal_to_satisfy], current_pending_state.state)
+				, max_delta, current_pending_state.goal_to_satisfy, guarantees_count, assumptions_count
 				, guarantees_indexes, assumptions_indexes, first_assumption_index);
 #if DEBUG_SYNTHESIS
 	printf("[PENDING PROC.] Adding unstable pred for %d\n", current_pending_state->state);
 #endif
-		automaton_add_unstable_predecessors(game_automaton, pending_list, current_pending_state->state
-				, ranking_list, current_pending_state->goal_to_satisfy, guarantees_count
+		automaton_add_unstable_predecessors(game_automaton, pending_list, current_pending_state.state
+				, ranking_list, current_pending_state.goal_to_satisfy, guarantees_count
 				, assumptions_count, guarantees_indexes, assumptions_indexes, first_assumption_index);
-		automaton_pending_state_destroy(current_pending_state);
 		pending_processed++;
 #if PRINT_PARTIAL_SYNTHESIS
 		if((pending_processed % 900000) == 0){
@@ -1696,8 +1716,7 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 		//printf("S %d:\t", i);
 		printf("[S %d:", i);
 		for(j = 0; j < guarantees_count; j++){
-			current_ranking	= ((automaton_ranking*)automaton_ptr_bucket_get_entry(ranking_list[j], i
-					,automaton_ranking_key_extractor));
+			current_ranking	= ((automaton_ranking*)automaton_concrete_bucket_get_entry(ranking_list[j], i));
 			//printf("R_%d=<%d,%d>\t", j, current_ranking->value, current_ranking->assumption_to_satisfy);
 			printf("%d,<%d,%d>", j, current_ranking->value, current_ranking->assumption_to_satisfy);
 		}
@@ -1719,8 +1738,8 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 	for(i = 0; i < guarantees_count; i++){
 		one_option	= false;
 		for(j = 0; j < game_automaton->out_degree[game_automaton->initial_states[0]]; j++){
-			if(((automaton_ranking*)automaton_ptr_bucket_get_entry(ranking_list[i], game_automaton->transitions[game_automaton->initial_states[0]][j].state_to
-					, automaton_ranking_key_extractor))->value != RANKING_INFINITY){
+			if(((automaton_ranking*)automaton_concrete_bucket_get_entry(ranking_list[i]
+																					 , game_automaton->transitions[game_automaton->initial_states[0]][j].state_to))->value != RANKING_INFINITY){
 				one_option = true;
 			}
 		}
@@ -1737,25 +1756,6 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 		automaton_ranking *current_ranking, *succ_ranking;
 		automaton_transition* current_transition;
 		int32_t b;
-/*
-		for(i = 0; i < guarantees_count; i++){
-			for(j = 0; j < ranking_list[i]->count; j++){
-				new_list 	= malloc(sizeof(void*) * ranking_list[i]->bucket_size[j]);
-				new_count 	= 0;
-				for(b = (int32_t)ranking_list[i]->bucket_count[j] - 1; b >= 0; b--){
-					current_ranking = (automaton_ranking*)ranking_list[i]->buckets[j][b];
-					if(current_ranking->value == RANKING_INFINITY){
-						automaton_ranking_destroy(current_ranking);
-					}else{
-						new_list[new_count++]	= current_ranking;
-					}
-				}
-				free(ranking_list[i]->buckets[j]);
-				ranking_list[i]->bucket_count[j]	= new_count;
-				ranking_list[i]->buckets[j]			= new_list;
-			}
-		}
-		*/
 		//build strategy automaton out of ranking_list
 		//define map between strategy compose state (s x goal) to strategy automaton state (s)
 		uint32_t** strategy_maps			= malloc(sizeof(uint32_t*) * guarantees_count);
@@ -1776,7 +1776,7 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 			for(j = 0; j < ranking_list[i]->count; j++){
 				for(b = (int32_t)ranking_list[i]->bucket_count[j] - 1; b >= 0; b--){
 
-					current_ranking = (automaton_ranking*)ranking_list[i]->buckets[j][b];
+					current_ranking = (automaton_ranking*)GET_CONCRETE_BUCKET_LIST_ENTRY(ranking_list[i], j, b);
 					if(!strategy_maps_is_set[i][current_ranking->state]){
 						strategy_maps[i][current_ranking->state]	= last_strategy_state++;
 					}
@@ -1786,7 +1786,7 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 					is_controllable	= game_automaton->is_controllable[current_ranking->state];
 					for(l = 0; l < game_automaton->out_degree[current_ranking->state]; l++){
 						current_transition	= &(game_automaton->transitions[current_ranking->state][l]);
-						succ_ranking		=  (automaton_ranking*)automaton_ptr_bucket_get_entry(ranking_list[succ_guarantee], current_transition->state_to, automaton_ranking_key_extractor);
+						succ_ranking		=  (automaton_ranking*)automaton_concrete_bucket_get_entry(ranking_list[succ_guarantee], current_transition->state_to);
 						//TODO: check this condition
 						if(succ_ranking == NULL) continue;
 						//check if succ ranking is better than current
@@ -1838,22 +1838,10 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 	//destroy structures
 	free(max_delta);
 	for(i = 0; i < guarantees_count; i++){
-		for(j = 0; j < ranking_list[i]->count; j++){
-			for(k = 0; k < ranking_list[i]->bucket_count[j]; k++){
-				automaton_ranking_destroy((automaton_ranking*)ranking_list[i]->buckets[j][k]);
-			}
-		}
-		automaton_ptr_bucket_destroy(ranking_list[i]);
+		automaton_concrete_bucket_destroy(ranking_list[i]);
 	}
 	free(ranking_list);
-	/*
-	for(j = 0; j < pending_list->count; j++){
-		for(k = 0; k < pending_list->bucket_count[j]; k++){
-			automaton_pending_state_destroy((automaton_pending_state*)pending_list->buckets[j][k]);
-		}
-	}
-	*/
-	automaton_ptr_bucket_destroy(pending_list);
+	automaton_concrete_bucket_destroy(pending_list);
 	free(assumptions_indexes);
 	free(guarantees_indexes);
 	return strategy;
