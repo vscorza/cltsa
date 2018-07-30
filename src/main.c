@@ -70,6 +70,7 @@ void run_ordered_list_tests(){
 	test_item_bucket current_item;
 	uint32_t i;
 	uint32_t cycles = 10;//100000;
+	printf("Testing temp size: 100, 10 elements \n");
 	for(i = 0; i < cycles; i++){
 		current_item.b = i; current_item.a = i % 13;
 		printf("PUSHING ITEM at %d: <%d,%d>\n", i, current_item.a, current_item.b);
@@ -79,6 +80,7 @@ void run_ordered_list_tests(){
 		automaton_ordered_list_pop_entry(ordered_list, &current_item);
 		printf("POPPING ITEM at %d: <%d,%d>\n", i, current_item.a, current_item.b);
 	}
+	printf("Testing temp size: 5, 20 elements \n");
 	automaton_ordered_list_destroy(ordered_list);
 	ordered_list	= automaton_ordered_list_create(5, test_item_extractor, test_item_copy, sizeof(test_item_bucket));
 	cycles = 20;//100000;
@@ -87,6 +89,15 @@ void run_ordered_list_tests(){
 		printf("PUSHING ITEM at %d: <%d,%d>\n", i, current_item.a, current_item.b);
 		automaton_ordered_list_add_entry(ordered_list, &current_item);
 	}
+	test_item_bucket* print_bucket;
+	for(i = 0; i < ordered_list->temporary_count; i++){
+		print_bucket = GET_ORDERED_LIST_SINGLE_ENTRY(ordered_list, ordered_list->temporary, i);
+		printf("temporary item at %d: <%d,%d>\n", i, print_bucket->a, print_bucket->b);
+	}
+	for(i = 0; i < ordered_list->count; i++){
+			print_bucket = GET_ORDERED_LIST_SINGLE_ENTRY(ordered_list, ordered_list->values, i);
+			printf("values item at %d: <%d,%d>\n", i, print_bucket->a, print_bucket->b);
+		}
 	for(i = 0; i < cycles; i++){
 		automaton_ordered_list_pop_entry(ordered_list, &current_item);
 		printf("POPPING ITEM at %d: <%d,%d>\n", i, current_item.a, current_item.b);
