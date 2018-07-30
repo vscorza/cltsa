@@ -11,6 +11,7 @@
 #include "automaton_utils.h"
 #include "parser_utils.h"
 #include "bucket_list.h"
+#include "ordered_list.h"
 #include "y.tab.h"
 
 #define COMPOSE_SYNCH	1

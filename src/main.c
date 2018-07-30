@@ -65,6 +65,35 @@ void run_concrete_bucket_list_tests(){
 	automaton_concrete_bucket_destroy(list);
 }
 
+void run_ordered_list_tests(){
+	automaton_ordered_list* ordered_list	= automaton_ordered_list_create(100, test_item_extractor, test_item_copy, sizeof(test_item_bucket));
+	test_item_bucket current_item;
+	uint32_t i;
+	uint32_t cycles = 10;//100000;
+	for(i = 0; i < cycles; i++){
+		current_item.b = i; current_item.a = i % 13;
+		printf("PUSHING ITEM at %d: <%d,%d>\n", i, current_item.a, current_item.b);
+		automaton_ordered_list_add_entry(ordered_list, &current_item);
+	}
+	for(i = 0; i < cycles; i++){
+		automaton_ordered_list_pop_entry(ordered_list, &current_item);
+		printf("POPPING ITEM at %d: <%d,%d>\n", i, current_item.a, current_item.b);
+	}
+	automaton_ordered_list_destroy(ordered_list);
+	ordered_list	= automaton_ordered_list_create(5, test_item_extractor, test_item_copy, sizeof(test_item_bucket));
+	cycles = 20;//100000;
+	for(i = 0; i < cycles; i++){
+		current_item.b = i; current_item.a = i % 13;
+		printf("PUSHING ITEM at %d: <%d,%d>\n", i, current_item.a, current_item.b);
+		automaton_ordered_list_add_entry(ordered_list, &current_item);
+	}
+	for(i = 0; i < cycles; i++){
+		automaton_ordered_list_pop_entry(ordered_list, &current_item);
+		printf("POPPING ITEM at %d: <%d,%d>\n", i, current_item.a, current_item.b);
+	}
+	automaton_ordered_list_destroy(ordered_list);
+}
+
 void run_fsp_tests(uint32_t test_count){
 	uint32_t i;
 	char buf[255], buf2[255];
@@ -201,11 +230,12 @@ int main (void){
 	//run_parse_test("test5.fsp");
 	//run_fsp_tests(18);
 	//run_parse_test("tests/test18.fsp",  "test18");
-	run_parse_test("tests/test23.fsp", "test23");
+	//run_parse_test("tests/test23.fsp", "test23");
 
 	//run_parse_test("tests/test24.fsp", "test24");
 
 	//run_concrete_bucket_list_tests();
+	run_ordered_list_tests();
 	return 0;    
 }
 

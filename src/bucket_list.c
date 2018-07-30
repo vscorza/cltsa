@@ -337,7 +337,7 @@ void automaton_concrete_bucket_list_copy(automaton_concrete_bucket_list* target,
 	for(i = 0; i < target->count; i++){
 		if(target->bucket_size[i] < source->bucket_size[i]){
 			free(target->buckets[i]);
-			target->buckets[i]	= malloc(sizeof(source->sizeof_element) * source->bucket_size[i]);
+			target->buckets[i]	= malloc(source->sizeof_element * source->bucket_size[i]);
 			target->bucket_size[i]	= source->bucket_size[i];
 		}
 		for(j = 0; j < target->bucket_count[i]; j++){

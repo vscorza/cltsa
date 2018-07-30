@@ -1,5 +1,6 @@
 TODO:
 SPRINT1
+- Armar lista que priorice Los que tienen mayor subida de ranking Según el timestamp (processedstates) desde el último incremento 
 - hay que meter una optimización para no realizabilidad, porque es cuando pega el peor caso, reimplementar konighoefer
 - probar amba con concurrent labels
 - fluents transitions should be applied to superset of alphabet
