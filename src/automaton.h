@@ -188,11 +188,12 @@ typedef struct automaton_ranking_str{
 	uint32_t state;
 	int32_t value;
 	int32_t assumption_to_satisfy;
-	int32_t processed_states_at_push;
 } automaton_ranking;
 typedef struct automaton_pending_state_str{
 	uint32_t state;
 	int32_t goal_to_satisfy;
+	int32_t value;
+	uint32_t timestamp;
 } automaton_pending_state;
 typedef struct dictionary_entry_str {
     char *key;
@@ -317,13 +318,14 @@ bool automaton_automaton_check_reachability(automaton_automaton* current_automat
 bool automaton_automaton_check_liveness(automaton_automaton* current_automaton, automaton_valuation target);
 /** AUTOMATON RANKING AND PENDING **/
 uint32_t automaton_ranking_key_extractor(void* ranking);
-int32_t automaton_ranking_state_compare(void* left_ranking_state, void* right_ranking_state);
-void automaton_ranking_state_copy(void* target_ranking_state, void* source_ranking_state);
+int32_t automaton_pending_state_compare(void* left_pending_state, void* right_pending_state);
+void automaton_pending_state_copy(void* target_pending_state, void* source_pending_state);
 automaton_ranking* automaton_ranking_create_infinity(uint32_t current_state, int32_t assumption_to_satisfy);
 automaton_ranking* automaton_ranking_create(uint32_t current_state, int32_t assumption_to_satisfy);
 void automaton_ranking_destroy(automaton_ranking*  ranking);
 uint32_t automaton_pending_state_extractor(void* pending_state);
-automaton_pending_state* automaton_pending_state_create(uint32_t current_state, int32_t goal_to_satisfy);
+uint32_t automaton_pending_state_ranking_extractor(void* pending_state);
+automaton_pending_state* automaton_pending_state_create(uint32_t current_state, int32_t goal_to_satisfy, int32_t value, uint32_t timestamp);
 void automaton_pending_state_destroy(automaton_pending_state*  pending_state);
 automaton_ranking* automaton_state_best_successor_ranking(automaton_automaton* game_automaton, uint32_t state, automaton_concrete_bucket_list** ranking
 		, uint32_t current_guarantee, uint32_t guarantee_count, uint32_t* guarantees_indexes);
@@ -333,10 +335,10 @@ bool automaton_ranking_lt(automaton_ranking* left, automaton_ranking* right);
 bool automaton_state_is_stable(automaton_automaton* game_automaton, uint32_t state, automaton_concrete_bucket_list** ranking
 		, uint32_t current_guarantee, uint32_t guarantee_count, uint32_t assumptions_count
 		, uint32_t* guarantees_indexes, uint32_t* assumptions_indexes, int32_t first_assumption_index);
-void automaton_add_unstable_predecessors(automaton_automaton* game_automaton, automaton_concrete_bucket_list* pending_list
+void automaton_add_unstable_predecessors(automaton_automaton* game_automaton, automaton_max_heap* pending_list
 		, uint32_t state, automaton_concrete_bucket_list** ranking
 		, uint32_t current_guarantee, uint32_t guarantee_count, uint32_t assumptions_count
-		, uint32_t* guarantees_indexes, uint32_t* assumptions_indexes, int32_t first_assumption_index);
+		, uint32_t* guarantees_indexes, uint32_t* assumptions_indexes, int32_t first_assumption_index, uint32_t timestamp);
 void automaton_ranking_increment(automaton_automaton* game_automaton, automaton_concrete_bucket_list** ranking, automaton_ranking* current_ranking, uint32_t ref_state, uint32_t* max_delta
 		, uint32_t current_guarantee, uint32_t guarantee_count, uint32_t assumptions_count
 		, uint32_t* guarantees_indexes, uint32_t* assumptions_indexes, uint32_t first_assumption_index, automaton_ranking* target_ranking);

@@ -59,7 +59,7 @@ void test_item_copy(void* source, void* target){
 	source_it->b				= target_it->b;
 }
 void run_max_heap_tests(){
-	automaton_max_heap* heap	= automaton_max_heap_create(sizeof(test_item_bucket), test_item_compare, test_item_copy);
+	automaton_max_heap* heap	= automaton_max_heap_create(sizeof(test_item_bucket), test_item_compare, test_item_copy, test_item_extractor);
 	test_item_bucket current_item;
 	uint32_t i;
 	uint32_t cycles = 100;
@@ -265,13 +265,13 @@ int main (void){
 	//run_parse_test("test5.fsp");
 	//run_fsp_tests(18);
 	//run_parse_test("tests/test18.fsp",  "test18");
-	//run_parse_test("tests/test23.fsp", "test23");
+	run_parse_test("tests/test23.fsp", "test23");
 
 	//run_parse_test("tests/test24.fsp", "test24");
 
 	//run_concrete_bucket_list_tests();
 	//run_ordered_list_tests();
-	run_max_heap_tests();
+	//run_max_heap_tests();
 	return 0;    
 }
 
