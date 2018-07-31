@@ -40,6 +40,17 @@ typedef struct test_item_bucket_str{
 	uint32_t a; uint32_t b;
 }test_item_bucket;
 
+uint32_t test_item_compare(void* left, void* right){
+	test_item_bucket* left_entry	= (test_item_bucket*)left;
+	test_item_bucket* right_entry	= (test_item_bucket*)right;
+	if(left_entry->a > right_entry->a){
+		return 1;
+	}else if(left_entry->a == right_entry->a){
+		return 0;
+	}else{
+		return -1;
+	}
+}
 uint32_t test_item_extractor(void* entry){ return ((test_item_bucket*)entry)->a;}
 void test_item_copy(void* source, void* target){
 	test_item_bucket* source_it	= (test_item_bucket*)source;
@@ -47,6 +58,28 @@ void test_item_copy(void* source, void* target){
 	source_it->a				= target_it->a;
 	source_it->b				= target_it->b;
 }
+void run_max_heap_tests(){
+	automaton_max_heap* heap	= automaton_max_heap_create(sizeof(test_item_bucket), test_item_compare, test_item_copy);
+	test_item_bucket current_item;
+	uint32_t i;
+	uint32_t cycles = 100;
+	for(i = 0; i < cycles; i++){
+		current_item.b = i; current_item.a = i + cycles;
+		automaton_max_heap_add_entry(heap, &current_item);
+		printf("PUSHING ITEM <%d,%d>\n", current_item.a, current_item.b);
+	}
+	for(i = 0; i < cycles; i++){
+		current_item.b = i; current_item.a = i;
+		automaton_max_heap_add_entry(heap, &current_item);
+		printf("PUSHING ITEM <%d,%d>\n", current_item.a, current_item.b);
+	}
+	for(i = 0; i < cycles * 2; i++){
+		automaton_max_heap_pop_entry(heap, &current_item);
+		printf("POPPING ITEM: <%d,%d>\n", i, current_item.a, current_item.b);
+	}
+	automaton_max_heap_destroy(heap);
+}
+
 void run_concrete_bucket_list_tests(){
 	automaton_concrete_bucket_list* list	= automaton_concrete_bucket_list_create(RANKING_BUCKET_SIZE, test_item_extractor, test_item_copy, sizeof(test_item_bucket));
 	test_item_bucket current_item;
@@ -66,26 +99,17 @@ void run_concrete_bucket_list_tests(){
 }
 
 void run_ordered_list_tests(){
-	automaton_ordered_list* ordered_list	= automaton_ordered_list_create(100, test_item_extractor, test_item_copy, sizeof(test_item_bucket));
 	test_item_bucket current_item;
 	uint32_t i;
-	uint32_t cycles = 10;//100000;
-	printf("Testing temp size: 100, 10 elements \n");
+	automaton_ordered_list* ordered_list	= automaton_ordered_list_create(2, test_item_extractor, test_item_copy, sizeof(test_item_bucket));
+	uint32_t cycles = 6;//100000;
 	for(i = 0; i < cycles; i++){
-		current_item.b = i; current_item.a = i % 13;
+		current_item.b = i; current_item.a = i + cycles;
 		printf("PUSHING ITEM at %d: <%d,%d>\n", i, current_item.a, current_item.b);
 		automaton_ordered_list_add_entry(ordered_list, &current_item);
 	}
 	for(i = 0; i < cycles; i++){
-		automaton_ordered_list_pop_entry(ordered_list, &current_item);
-		printf("POPPING ITEM at %d: <%d,%d>\n", i, current_item.a, current_item.b);
-	}
-	printf("Testing temp size: 5, 20 elements \n");
-	automaton_ordered_list_destroy(ordered_list);
-	ordered_list	= automaton_ordered_list_create(5, test_item_extractor, test_item_copy, sizeof(test_item_bucket));
-	cycles = 20;//100000;
-	for(i = 0; i < cycles; i++){
-		current_item.b = i; current_item.a = i % 13;
+		current_item.b = i; current_item.a = i;
 		printf("PUSHING ITEM at %d: <%d,%d>\n", i, current_item.a, current_item.b);
 		automaton_ordered_list_add_entry(ordered_list, &current_item);
 	}
@@ -98,7 +122,7 @@ void run_ordered_list_tests(){
 			print_bucket = GET_ORDERED_LIST_SINGLE_ENTRY(ordered_list, ordered_list->values, i);
 			printf("values item at %d: <%d,%d>\n", i, print_bucket->a, print_bucket->b);
 		}
-	for(i = 0; i < cycles; i++){
+	for(i = 0; i < cycles * 2; i++){
 		automaton_ordered_list_pop_entry(ordered_list, &current_item);
 		printf("POPPING ITEM at %d: <%d,%d>\n", i, current_item.a, current_item.b);
 	}
@@ -246,7 +270,8 @@ int main (void){
 	//run_parse_test("tests/test24.fsp", "test24");
 
 	//run_concrete_bucket_list_tests();
-	run_ordered_list_tests();
+	//run_ordered_list_tests();
+	run_max_heap_tests();
 	return 0;    
 }
 

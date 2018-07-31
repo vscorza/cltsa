@@ -12,6 +12,7 @@
 #include "parser_utils.h"
 #include "bucket_list.h"
 #include "ordered_list.h"
+#include "max_heap.h"
 #include "y.tab.h"
 
 #define COMPOSE_SYNCH	1
@@ -187,6 +188,7 @@ typedef struct automaton_ranking_str{
 	uint32_t state;
 	int32_t value;
 	int32_t assumption_to_satisfy;
+	int32_t processed_states_at_push;
 } automaton_ranking;
 typedef struct automaton_pending_state_str{
 	uint32_t state;
@@ -315,6 +317,8 @@ bool automaton_automaton_check_reachability(automaton_automaton* current_automat
 bool automaton_automaton_check_liveness(automaton_automaton* current_automaton, automaton_valuation target);
 /** AUTOMATON RANKING AND PENDING **/
 uint32_t automaton_ranking_key_extractor(void* ranking);
+int32_t automaton_ranking_state_compare(void* left_ranking_state, void* right_ranking_state);
+void automaton_ranking_state_copy(void* target_ranking_state, void* source_ranking_state);
 automaton_ranking* automaton_ranking_create_infinity(uint32_t current_state, int32_t assumption_to_satisfy);
 automaton_ranking* automaton_ranking_create(uint32_t current_state, int32_t assumption_to_satisfy);
 void automaton_ranking_destroy(automaton_ranking*  ranking);

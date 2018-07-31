@@ -1323,18 +1323,36 @@ automaton_ranking* automaton_ranking_create_infinity(uint32_t state, int32_t ass
 	ranking->assumption_to_satisfy	= assumption_to_satisfy;
 	return ranking;
 }
-void automaton_ranking_copy(void* target_input, void* source_input){
-	automaton_ranking* target	= (automaton_ranking*)target_input;
-	automaton_ranking* source	= (automaton_ranking*)source_input;
+int32_t automaton_ranking_state_compare(void* left_ranking_state, void* right_ranking_state){
+	automaton_ranking* left	= (automaton_ranking*)left_ranking_state;
+	automaton_ranking* right= (automaton_ranking*)right_ranking_state;
+
+	if(left->value > right->value){
+		return 1;
+	}else if(left->value < right->value){
+		return -1;
+	}else if(left->processed_states_at_push > right->processed_states_at_push){
+		return 1;
+	}else if(left->processed_states_at_push < left->processed_states_at_push){
+		return -1;
+	}else{
+		return 0;
+	}
+}
+void automaton_ranking_state_copy(void* target_ranking_state, void* source_ranking_state){
+	automaton_ranking* target	= (automaton_ranking*)target_ranking_state;
+	automaton_ranking* source	= (automaton_ranking*)source_ranking_state;
 	target->state				= source->state;
 	target->value				= source->value;
 	target->assumption_to_satisfy	= source->assumption_to_satisfy;
+	target->processed_states_at_push	= source->processed_states_at_push;
 }
 automaton_ranking* automaton_ranking_create(uint32_t state, int32_t assumption_to_satisfy){
 	automaton_ranking* ranking	= malloc(sizeof(automaton_ranking));
 	ranking->state			= state;
 	ranking->value			= 0;
-	ranking->assumption_to_satisfy	= assumption_to_satisfy;
+	ranking->assumption_to_satisfy		= assumption_to_satisfy;
+	ranking->processed_states_at_push	= 0;
 	return ranking;
 }
 void automaton_ranking_destroy(automaton_ranking*  ranking){
@@ -1627,7 +1645,7 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 	automaton_ranking concrete_ranking;
 	automaton_pending_state concrete_pending_state;
 	for(i = 0; i < guarantees_count; i++)
-		ranking_list[i]	= automaton_concrete_bucket_list_create(RANKING_BUCKET_SIZE, automaton_ranking_key_extractor, automaton_ranking_copy
+		ranking_list[i]	= automaton_concrete_bucket_list_create(RANKING_BUCKET_SIZE, automaton_ranking_key_extractor, automaton_ranking_state_copy
 				, sizeof(automaton_ranking));
 	for(i = 0; i < game_automaton->transitions_count; i++){
 		for(j = 0; j < guarantees_count; j++){
