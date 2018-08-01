@@ -485,7 +485,39 @@ bool automaton_concrete_bucket_add_entry(automaton_concrete_bucket_list* list, v
 }
 
 bool automaton_concrete_bucket_remove_entry(automaton_concrete_bucket_list* list, void* entry){
-	printf("NOT IMPLEMENTED\n"); exit(-1);
+	if(!automaton_concrete_bucket_has_entry(list, entry))
+		return true;
+
+	uint32_t index		= list->extractor_func(entry) % list->count;
+	bool found			= false;
+	int32_t i, j;
+	for(i = 0; i < (int32_t)list->bucket_count[index]; i++){
+		if(GET_CONCRETE_BUCKET_LIST_ENTRY(list, index, i) == entry){
+			found = true;
+			j = i;
+			break;
+		}
+	}
+	for(i = j; i < (int32_t)(list->bucket_count[index] - 1); i++){
+		list->copy_func(GET_CONCRETE_BUCKET_LIST_ENTRY(list, index, i), GET_CONCRETE_BUCKET_LIST_ENTRY(list, index, i + 1));
+	}
+	list->bucket_count[index]--;
+
+	list->composite_count--;
+
+	if(list->bucket_count[list->last_added_bucket] == 0){
+		uint32_t i;
+		bool found	= false;
+		for(i = 0; i < list->count; i++){
+			if(list->bucket_count[i] > 0){
+				list->last_added_bucket	= i;
+				found	= true;
+				break;
+			}
+		}
+		if(!found)
+			list->has_last_index	= false;
+	}
 	return false;
 }
 

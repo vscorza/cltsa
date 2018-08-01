@@ -59,7 +59,7 @@ void test_item_copy(void* source, void* target){
 	source_it->b				= target_it->b;
 }
 void run_max_heap_tests(){
-	automaton_max_heap* heap	= automaton_max_heap_create(sizeof(test_item_bucket), test_item_compare, test_item_copy, test_item_extractor);
+	automaton_max_heap* heap	= automaton_max_heap_create(sizeof(test_item_bucket), test_item_compare, test_item_copy);
 	test_item_bucket current_item;
 	uint32_t i;
 	uint32_t cycles = 100;
