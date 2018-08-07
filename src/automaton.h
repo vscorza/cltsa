@@ -13,6 +13,8 @@
 #include "bucket_list.h"
 #include "ordered_list.h"
 #include "max_heap.h"
+#include "dictionary.h"
+#include "obdd.h"
 #include "y.tab.h"
 
 #define COMPOSE_SYNCH	1
@@ -195,16 +197,6 @@ typedef struct automaton_pending_state_str{
 	int32_t value;
 	uint32_t timestamp;
 } automaton_pending_state;
-typedef struct dictionary_entry_str {
-    char *key;
-    uint32_t value;
-}  dictionary_entry;
-
-typedef struct dictionary_str{
-	uint32_t size;
-	uint32_t max_size;
-	dictionary_entry* entries;
-}  dictionary;
 
 /****************
 ==== FUNCTIONS ==== 

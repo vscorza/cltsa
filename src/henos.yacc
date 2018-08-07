@@ -1,6 +1,7 @@
 %{
 #include <stdio.h>
 #include "parser_utils.h"
+#include "obdd.h"
 int yylex(void);
 void yyerror(char *);
 int sym[26];
@@ -30,13 +31,15 @@ automaton_program_syntax* parsed_program = NULL;
 	automaton_statement_syntax*		statement;
 	automaton_program_syntax*		program;
 	automaton_gr1_game_syntax*		gr1_game;
+	obdd* 							ltl_aut_expression;
+	ltl_rule_syntax*				ltl_rule;
 };
-%token	t_INTEGER t_IDENT t_UPPER_IDENT t_STRING t_CONST t_RANGE t_SET t_FLUENT t_DOTS t_WHEN t_GAME_COMPOSE t_PARALLEL t_GR_1 t_INITIALLY
+%token	t_INTEGER t_IDENT t_UPPER_IDENT t_STRING t_CONST t_RANGE t_SET t_FLUENT t_DOTS t_WHEN t_GAME_COMPOSE t_PARALLEL t_GR_1 t_INITIALLY t_LTL t_ENV t_SYS t_RHO t_THETA t_IN 
 %left '+' '-' ','
 %left '*' '/'
 
 
-%type<text> 				t_STRING t_IDENT t_UPPER_IDENT t_CONST t_RANGE t_SET t_FLUENT t_DOTS t_WHEN t_GAME_COMPOSE t_PARALLEL t_GR_1 t_INITIALLY
+%type<text> 				t_STRING t_IDENT t_UPPER_IDENT t_CONST t_RANGE t_SET t_FLUENT t_DOTS t_WHEN t_GAME_COMPOSE t_PARALLEL t_GR_1 t_INITIALLY t_LTL t_ENV t_SYS t_RHO t_THETA t_IN
 %type<integer>				t_INTEGER fluentInitialCondition
 %type<expr>					exp exp2 exp3 exp4 constDef range rangeDef ltsTransitionPrefix
 %type<label>				label concurrentLabel 
@@ -58,6 +61,8 @@ automaton_program_syntax* parsed_program = NULL;
 %type<statement>			statement
 %type<program>				program statements		
 %type<gr1_game>				gr1
+%type<ltl_aut_expression>	ltlAutExp ltlAutExp2
+%type<ltl_rule>				ltlAutRule
 %%
 program:
 	statements								{parsed_program = $1; $$ = $1;}
@@ -67,16 +72,15 @@ statements:
 	|statement								{$$ = automaton_program_syntax_create($1);}
 	;
 statement:
-	import									{$$ = automaton_statement_syntax_create(IMPORT_AUT, NULL, NULL, NULL, NULL, NULL, NULL);}
-	|menu									{$$ = automaton_statement_syntax_create(MENU_AUT, NULL, NULL, NULL, NULL, NULL, NULL);}
-	|constDef								{$$ = automaton_statement_syntax_create(CONST_AUT, NULL, NULL, $1, NULL, NULL, NULL);}
-	|rangeDef								{$$ = automaton_statement_syntax_create(RANGE_AUT, NULL, $1, NULL, NULL, NULL, NULL);}
-	|fluentDef								{$$ = automaton_statement_syntax_create(FLUENT_AUT, NULL, NULL, NULL, $1, NULL, NULL);}
-	//|assertionDef							
-	|setDef									{$$ = automaton_statement_syntax_create(SET_AUT, NULL, NULL, NULL, NULL, $1, NULL);}
-	|compositionDef							{$$ = automaton_statement_syntax_create(COMPOSITION_AUT, $1, NULL, NULL, NULL, NULL, NULL);}
-	//|goalDef
-	|gr1									{$$ = automaton_statement_syntax_create(GR_1_AUT, NULL, NULL, NULL, NULL, NULL, $1);}
+	import									{$$ = automaton_statement_syntax_create(IMPORT_AUT, NULL, NULL, NULL, NULL, NULL, NULL, NULL);}
+	|menu									{$$ = automaton_statement_syntax_create(MENU_AUT, NULL, NULL, NULL, NULL, NULL, NULL, NULL);}
+	|constDef								{$$ = automaton_statement_syntax_create(CONST_AUT, NULL, NULL, $1, NULL, NULL, NULL, NULL);}
+	|rangeDef								{$$ = automaton_statement_syntax_create(RANGE_AUT, NULL, $1, NULL, NULL, NULL, NULL, NULL);}
+	|fluentDef								{$$ = automaton_statement_syntax_create(FLUENT_AUT, NULL, NULL, NULL, $1, NULL, NULL, NULL);}
+	|setDef									{$$ = automaton_statement_syntax_create(SET_AUT, NULL, NULL, NULL, NULL, $1, NULL, NULL);}
+	|compositionDef							{$$ = automaton_statement_syntax_create(COMPOSITION_AUT, $1, NULL, NULL, NULL, NULL, NULL, NULL);}
+	|gr1									{$$ = automaton_statement_syntax_create(GR_1_AUT, NULL, NULL, NULL, NULL, NULL, $1, NULL);}
+	|ltlAutRule								{$$ = automaton_statement_syntax_create(LTL_RULE_AUT, NULL, NULL, NULL, NULL, NULL, NULL, $1);}
 	;
 label:
 	concurrentLabel							{$$ = $1;}
@@ -227,6 +231,25 @@ compositionExp2:
 	|t_IDENT indexes ':' t_UPPER_IDENT		{$$ = automaton_component_syntax_create($4, $1, NULL, $2);free($1); free($4);}
 	|index indexes ':' t_UPPER_IDENT		{$$ = automaton_component_syntax_create($4, NULL, $1, $2);free($4);}
 	;
+ltlAutRule:
+	t_LTL t_ENV t_THETA t_UPPER_IDENT t_IN t_UPPER_IDENT '=' ltlAutExp '.'			{$$ = ltl_rule_syntax_create(true, true, $4, $6, $8);free($1);free($2);free($3);free($4);free($5);free($6); }
+	|t_LTL t_SYS t_THETA t_UPPER_IDENT t_IN t_UPPER_IDENT '=' ltlAutExp '.'			{$$ = ltl_rule_syntax_create(true, false, $4, $6, $8);free($1);free($2);free($3);free($4);free($5);free($6); }
+	|t_LTL t_ENV t_RHO t_UPPER_IDENT t_IN t_UPPER_IDENT '=' '['']' ltlAutExp '.'		{$$ = ltl_rule_syntax_create(false, true, $4, $6, $10);free($1);free($2);free($3);free($4);free($5);free($6); }
+	|t_LTL t_SYS t_RHO t_UPPER_IDENT t_IN t_UPPER_IDENT '=' '['']' ltlAutExp '.'		{$$ = ltl_rule_syntax_create(false, false, $4, $6, $10);free($1);free($2);free($3);free($4);free($5);free($6); }
+	;
+ltlAutExp:
+	ltlAutExp2								{$$ = $1;}
+	|ltlAutExp '-''>' ltlAutExp2			{$$ = obdd_apply_or(obdd_apply_not($1), $4);}
+	|ltlAutExp '<''-''>' ltlAutExp2			{$$ = obdd_apply_equals($1, $5);}
+	|ltlAutExp '&''&' ltlAutExp2			{$$ = obdd_apply_and($1, $4);}
+	|ltlAutExp '|''|' ltlAutExp2			{$$ = obdd_apply_or($1, $4);}
+	;
+ltlAutExp2:
+	t_IDENT									{$$ = obdd_mgr_var(parser_get_obdd_mgr(), $1); free($1);}
+	|'!' ltlAutExp2							{$$ = obdd_apply_not($2);}
+	|'X' ltlAutExp2							{$$ = obdd_apply_next($2);}
+	|'(' ltlAutExp2 ')'						{$$ = $2;}
+	;	
 /*
 compositionDef:
 	compositionKind composition '.'
@@ -338,7 +361,7 @@ ltlExp2:
 	|'!' ltlExp2
 	|'X' ltlExp2
 	|'<''>' ltlExp2
-	|'[]' ltlExp2
+	|'['']' ltlExp2
 	|'(' ltlExp ')'
 	;
 	*/

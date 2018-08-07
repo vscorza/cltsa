@@ -36,6 +36,58 @@ void run_parse_test(char* test_file, char* test_name){
     fclose(yyin);
 }
 
+void run_obdd_tests(){
+	obdd_mgr* new_mgr	= obdd_mgr_create();
+	//compare x1 & !(x2 | x3) == x1 & !x2 & !x3
+	obdd* x1_obdd		= obdd_mgr_var(new_mgr, "x1");
+	obdd* x2_obdd		= obdd_mgr_var(new_mgr, "x2");
+	obdd* x1_or_x2_obdd	= obdd_apply_or(x1_obdd, x2_obdd);
+    	obdd* x1_and_x2_obdd	= obdd_apply_and(x1_obdd, x2_obdd);
+	obdd* not_x1_obdd	= obdd_apply_not(x1_obdd);
+	obdd* x1_and_not_x1_obdd= obdd_apply_and(x1_obdd,not_x1_obdd);
+
+	obdd* not_x1_and_x2_obdd= obdd_apply_not(x1_and_x2_obdd);
+	obdd* x1_and_x2_then_x1	= obdd_apply_or(not_x1_and_x2_obdd, x1_obdd);
+
+	obdd* x2_eq_fallacy_obdd= obdd_apply_equals(x2_obdd, x1_and_not_x1_obdd);
+	obdd* exists_obdd	= obdd_exists(x2_eq_fallacy_obdd, "x2");
+
+	obdd_print(x1_or_x2_obdd);
+	printf("x1 || x2 sat? : %s \n", is_sat(new_mgr, x1_or_x2_obdd->root_obdd) ? "yes" : "no");
+	printf("x1 || x2 taut? : %s \n", is_tautology(new_mgr, x1_or_x2_obdd->root_obdd) ? "yes" : "no");
+
+	obdd_print(x1_and_x2_obdd);
+	printf("x1 && x2 sat? : %s \n", is_sat(new_mgr, x1_and_x2_obdd->root_obdd) ? "yes" : "no");
+	printf("x1 && x2 taut? : %s \n", is_tautology(new_mgr, x1_and_x2_obdd->root_obdd) ? "yes" : "no");
+
+	obdd_print(x1_and_not_x1_obdd);
+	printf("x1 && !x1 sat? : %s \n", is_sat(new_mgr, x1_and_not_x1_obdd->root_obdd) ? "yes" : "no");
+	printf("x1 && !x1 taut? : %s \n", is_tautology(new_mgr, x1_and_not_x1_obdd->root_obdd) ? "yes" : "no");
+
+	obdd_print(x1_and_x2_then_x1);
+	printf("(x1 && x2)->x1 sat? : %s \n", is_sat(new_mgr, x1_and_x2_then_x1->root_obdd) ? "yes" : "no");
+	printf("(x1 && x2)->x1 taut? : %s \n", is_tautology(new_mgr, x1_and_x2_then_x1->root_obdd) ? "yes" : "no");
+
+	obdd_print(exists_obdd);
+	printf("E x2.(x2 = (x1 && !x1)) sat? : %s \n", is_sat(new_mgr, exists_obdd->root_obdd) ? "yes" : "no");
+	printf("E x2.(x2 = (x1 && !x1)) taut? : %s \n", is_tautology(new_mgr, exists_obdd->root_obdd) ? "yes" : "no");
+
+	obdd_mgr_print(new_mgr);
+
+	obdd_destroy(x1_obdd);
+	obdd_destroy(x2_obdd);
+	obdd_destroy(x1_or_x2_obdd);
+	obdd_destroy(x1_and_x2_obdd);
+	obdd_destroy(not_x1_obdd);
+	obdd_destroy(x1_and_not_x1_obdd);
+	obdd_destroy(not_x1_and_x2_obdd);
+	obdd_destroy(x1_and_x2_then_x1);
+	obdd_destroy(x2_eq_fallacy_obdd);
+	obdd_destroy(exists_obdd);
+	obdd_mgr_destroy(new_mgr);
+
+}
+
 typedef struct test_item_bucket_str{
 	uint32_t a; uint32_t b;
 }test_item_bucket;
@@ -138,6 +190,22 @@ void run_fsp_tests(uint32_t test_count){
 		sprintf(buf2, "test%d", i);
 		run_parse_test(buf, buf2);
 	}
+}
+
+void run_obdd_tree_tests(){
+	obdd_state_tree* tree	= obdd_state_tree_create(5);
+	bool key1[5]				= {true, true, true, true, true};
+	bool key2[5]				= {true, false, true, true, true};
+	bool key3[5]				= {true, true, false, true, true};
+	bool key4[5]				= {false, false, false, true, false};
+	bool key5[5]				= {false, false, false, true, true};
+	printf("new key %d\n", obdd_state_tree_get_key(tree, key1));
+	printf("new key %d\n", obdd_state_tree_get_key(tree, key2));
+	printf("new key %d\n", obdd_state_tree_get_key(tree, key3));
+	printf("new key %d\n", obdd_state_tree_get_key(tree, key4));
+	printf("new key %d\n", obdd_state_tree_get_key(tree, key5));
+	obdd_state_tree_print(tree);
+	obdd_state_tree_destroy(tree);
 }
 
 void run_tree_tests(){
@@ -265,8 +333,9 @@ int main (void){
 	//run_parse_test("test5.fsp");
 	//run_fsp_tests(18);
 	//run_parse_test("tests/test18.fsp",  "test18");
-	run_parse_test("tests/test23.fsp", "test23");
-
+	//run_parse_test("tests/test23.fsp", "test23");
+	run_obdd_tree_tests();
+	run_obdd_tests();
 	//run_parse_test("tests/test24.fsp", "test24");
 
 	//run_concrete_bucket_list_tests();

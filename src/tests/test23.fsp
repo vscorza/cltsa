@@ -2,11 +2,11 @@ range R = 1..4
 
 set Global_Alphabet = {in[i:R],hidden,internal,out,mute,jack,built,on,off,green,red,destroyed,cook, finishedCooking, cooking, moveToBelt, overHeated, idle}
 set Controllable_Alphabet = {in[i:R],hidden,internal,out,mute,jack,built,on,off,green,red,destroyed,idle, cook, moveToBelt}
-A=(in[i:R]->hidden->internal->{idle,cook, moveToBelt}->A).
-B=(hidden->out->{idle,cook, moveToBelt}->B).
-C=(on->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->{idle,cook, moveToBelt}->C).
-D=(green->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->{idle,cook, moveToBelt}->D).
-E=(built->built->built->built->built->built->built->built->built->built->built->built->built->destroyed->{idle,cook, moveToBelt}->E).
+A=(in[i:R]->hidden->internal->internal->internal->internal->internal->{idle,cook, moveToBelt}->A).
+B=(hidden->out->out->out->out->out->out->out->out->out->{idle,cook, moveToBelt}->B).
+C=(on->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->mute->{idle,cook, moveToBelt}->C).
+D=(green->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->jack->{idle,cook, moveToBelt}->D).
+E=(built->built->built->built->built->built->built->built->destroyed->{idle,cook, moveToBelt}->E).
 
 
 BISCOTTI = (idle->BISCOTTI | cook->COOKING),

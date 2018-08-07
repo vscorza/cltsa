@@ -8,6 +8,7 @@
 #include <assert.h>
 #include <stdbool.h>
 #include "automaton_utils.h"
+#include "obdd.h"
 
 /****************
 ==== ENUMS ====
@@ -54,7 +55,8 @@ typedef enum {
 	SET_AUT,
 	COMPOSITION_AUT,
 	GR_1_AUT,
-	GOAL_AUT
+	GOAL_AUT,
+	LTL_RULE_AUT
 } automaton_statement_type_syntax;
 /****************
 ==== STRUCTS ====
@@ -165,11 +167,20 @@ typedef struct automaton_statement_syntax_str{
 	struct automaton_fluent_syntax_str* fluent_def;
 	struct automaton_set_def_syntax_str* set_def;
 	struct automaton_gr1_game_syntax_str* gr1_game_def;
+	struct ltl_rule_syntax_str* ltl_rule_def;
 }automaton_statement_syntax;
 typedef struct automaton_program_syntax_str{
 	uint32_t count;
 	struct automaton_statement_syntax_str** statements;
 }automaton_program_syntax;
+typedef struct ltl_rule_syntax_str{
+	bool is_theta;
+	bool is_env;
+	char* name;
+	char* game_structure_name;
+	obdd* obdd;
+}ltl_rule_syntax;
+
 /****************
 ==== FUNCTIONS ====
 */
@@ -193,6 +204,7 @@ void automaton_set_syntax_destroy(automaton_set_syntax* set);
 void automaton_set_def_syntax_destroy(automaton_set_def_syntax* set_def);
 void automaton_expression_syntax_destroy(automaton_expression_syntax* expr);
 void automaton_gr1_game_syntax_destroy(automaton_gr1_game_syntax* gr1_game);
+void ltl_rule_syntax_destroy(ltl_rule_syntax* ltl_rule);
 automaton_expression_syntax* automaton_expression_syntax_create(automaton_expression_type_syntax type, automaton_expression_syntax* first
 		, automaton_expression_syntax* second, char* string_terminal, int32_t integer_terminal, automaton_expression_operator_syntax op);
 automaton_set_syntax* automaton_set_syntax_create(bool is_ident, uint32_t count, uint32_t* labels_count,
@@ -234,6 +246,8 @@ automaton_program_syntax* automaton_program_syntax_create(automaton_statement_sy
 automaton_program_syntax* automaton_program_syntax_add_statement(automaton_program_syntax* program, automaton_statement_syntax* statement);
 automaton_statement_syntax* automaton_statement_syntax_create(automaton_statement_type_syntax type, automaton_composition_syntax* composition_def,
 		automaton_expression_syntax* range_def, automaton_expression_syntax* const_def, automaton_fluent_syntax* fluent_def,
-		automaton_set_def_syntax* set_def, automaton_gr1_game_syntax* gr1_game_def);
+		automaton_set_def_syntax* set_def, automaton_gr1_game_syntax* gr1_game_def, ltl_rule_syntax* ltl_rule_def);
 bool automaton_syntax_is_reserved(char* token);
+ltl_rule_syntax* ltl_rule_syntax_create(bool is_theta, bool is_env, char* name, char* game_structure_name, obdd* obdd);
+obdd_mgr* parser_get_obdd_mgr();
 #endif

@@ -1,6 +1,8 @@
 #include "parser_utils.h"
 #include "assert.h"
 
+parser_obdd_mgr = NULL;
+
 automaton_expression_syntax* automaton_expression_syntax_create(automaton_expression_type_syntax type, automaton_expression_syntax* first
 		, automaton_expression_syntax* second, char* string_terminal, int32_t integer_terminal, automaton_expression_operator_syntax op){
 	automaton_expression_syntax* expr	= malloc(sizeof(automaton_expression_syntax));
@@ -345,7 +347,7 @@ automaton_program_syntax* automaton_program_syntax_add_statement(automaton_progr
 }
 automaton_statement_syntax* automaton_statement_syntax_create(automaton_statement_type_syntax type, automaton_composition_syntax* composition_def,
 		automaton_expression_syntax* range_def, automaton_expression_syntax* const_def, automaton_fluent_syntax* fluent_def,
-		automaton_set_def_syntax* set_def, automaton_gr1_game_syntax* gr1_game_def){
+		automaton_set_def_syntax* set_def, automaton_gr1_game_syntax* gr1_game_def, ltl_rule_syntax* ltl_rule){
 	automaton_statement_syntax* statement	= malloc(sizeof(automaton_statement_syntax));
 	statement->type	= type;
 	statement->composition_def	= composition_def;
@@ -354,7 +356,18 @@ automaton_statement_syntax* automaton_statement_syntax_create(automaton_statemen
 	statement->fluent_def		= fluent_def;
 	statement->set_def			= set_def;
 	statement->gr1_game_def		= gr1_game_def;
+	statement->ltl_rule_def		= ltl_rule;
 	return statement;
+}
+
+ltl_rule_syntax* ltl_rule_syntax_create(bool is_theta, bool is_env, char* name, char* game_structure_name, obdd* obdd){
+	ltl_rule_syntax* ltl_rule	= malloc(sizeof(ltl_rule_syntax));
+	ltl_rule->is_theta			= is_theta;
+	ltl_rule->is_env			= is_env;
+	aut_dupstr(&name, name);
+	aut_dupstr(&game_structure_name, game_structure_name);
+	ltl_rule->obdd				= obdd;
+	return ltl_rule;
 }
 
 void automaton_program_syntax_destroy(automaton_program_syntax* program){
@@ -374,6 +387,7 @@ void automaton_statement_syntax_destroy(automaton_statement_syntax* statement){
 	case SET_AUT: automaton_set_def_syntax_destroy(statement->set_def);break;
 	case COMPOSITION_AUT: automaton_composition_syntax_destroy(statement->composition_def);break;
 	case GR_1_AUT: automaton_gr1_game_syntax_destroy(statement->gr1_game_def);break;
+	case LTL_RULE_AUT: ltl_rule_syntax_destroy(statement->ltl_rule_def);break;
 	case GOAL_AUT: break;
 	}
 	free(statement);
@@ -517,4 +531,17 @@ bool automaton_syntax_is_reserved(char* token){
 			return true;
 	}
 	return false;
+}
+
+
+obdd_mgr* parser_get_obdd_mgr(){
+	static obdd_mgr* parser_obdd_mgr	= NULL;
+	if(parser_obdd_mgr == NULL)
+		parser_obdd_mgr	= obdd_mgr_create();
+	return parser_obdd_mgr;
+}
+
+void ltl_rule_syntax_destroy(ltl_rule_syntax* ltl_rule){
+	obdd_destroy(ltl_rule->obdd);
+	free(ltl_rule);
 }
