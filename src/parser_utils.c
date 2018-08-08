@@ -370,6 +370,13 @@ ltl_rule_syntax* ltl_rule_syntax_create(bool is_theta, bool is_env, char* name, 
 	return ltl_rule;
 }
 
+ltl_fluent_syntax* automaton_ltl_fluent_syntax_create(char* name, obdd* obdd){
+	ltl_fluent_syntax* ltl_fluent	= malloc(sizeof(ltl_fluent_syntax));
+	aut_dupstr(&(ltl_fluent->name), name);
+	ltl_fluent->obdd			= obdd;
+	return ltl_fluent;
+}
+
 void automaton_program_syntax_destroy(automaton_program_syntax* program){
 	uint32_t i;
 	for(i = 0; i < program->count; i++)	automaton_statement_syntax_destroy(program->statements[i]);
@@ -542,6 +549,14 @@ obdd_mgr* parser_get_obdd_mgr(){
 }
 
 void ltl_rule_syntax_destroy(ltl_rule_syntax* ltl_rule){
+	if(ltl_rule->game_structure_name != NULL)free(ltl_rule->game_structure_name);
+	if(ltl_rule->name != NULL)free(ltl_rule->name);
 	obdd_destroy(ltl_rule->obdd);
 	free(ltl_rule);
+}
+
+void ltl_fluent_syntax_destroy(ltl_fluent_syntax* ltl_fluent){
+	if(ltl_fluent->name != NULL)free(ltl_fluent->name);
+	obdd_destroy(ltl_fluent->obdd);
+	free(ltl_fluent);
 }

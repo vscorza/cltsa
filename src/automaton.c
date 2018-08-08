@@ -108,6 +108,8 @@ automaton_automaton* automaton_automaton_clone(automaton_automaton* source){
 void automaton_automaton_copy(automaton_automaton* source, automaton_automaton* target){
 	uint32_t i, j, in_degree, out_degree, in_size, out_size;
 	target->name					= malloc(sizeof(char) * (strlen(source->name) + 1));
+	target->is_game					= source->is_game;
+	target->built_from_ltl			= source->built_from_ltl;
 	strcpy(target->name, source->name);
 	target->context					= source->context;
 	target->local_alphabet_count	= source->local_alphabet_count;
@@ -503,9 +505,9 @@ automaton_automata_context* automaton_automata_context_create(char* name, automa
 	automaton_automata_context_initialize(ctx, name, alphabet, fluents_count, fluents);
 	return ctx;
 }
-automaton_automaton* automaton_automaton_create(char* name, automaton_automata_context* ctx, uint32_t local_alphabet_count, uint32_t* local_alphabet, bool is_game){
+automaton_automaton* automaton_automaton_create(char* name, automaton_automata_context* ctx, uint32_t local_alphabet_count, uint32_t* local_alphabet, bool is_game, bool built_from_ltl){
 	automaton_automaton* automaton		= malloc(sizeof(automaton_automaton));
-	automaton_automaton_initialize(automaton, name, ctx, local_alphabet_count, local_alphabet, is_game);
+	automaton_automaton_initialize(automaton, name, ctx, local_alphabet_count, local_alphabet, is_game, built_from_ltl);
 	return automaton;
 }
 automaton_range* automaton_range_create(char* name, uint32_t lower_value, uint32_t upper_value){
@@ -566,7 +568,8 @@ void automaton_automata_context_initialize(automaton_automata_context* ctx, char
 		automaton_fluent_copy(fluents[i], &(ctx->global_fluents[i]));
 	}
 }
-void automaton_automaton_initialize(automaton_automaton* automaton, char* name, automaton_automata_context* ctx, uint32_t local_alphabet_count, uint32_t* local_alphabet, bool is_game){
+void automaton_automaton_initialize(automaton_automaton* automaton, char* name, automaton_automata_context* ctx, uint32_t local_alphabet_count, uint32_t* local_alphabet, bool is_game, bool built_from_ltl){
+	automaton->built_from_ltl			= built_from_ltl;
 	automaton->name						= malloc(sizeof(char) * (strlen(name) + 1));
 	strcpy(automaton->name, name);
 	automaton->context					= ctx;
@@ -1046,7 +1049,7 @@ automaton_automaton* automaton_fluent_build_automaton(automaton_automata_context
 	automaton_transition *ending_loop			= automaton_transition_create(1, 1);
 
 	//TODO:should be superset both on transition and loop
-	automaton_automaton* current_automaton	= automaton_automaton_create(current_fluent->name, ctx, alphabet_count, local_alphabet, false);
+	automaton_automaton* current_automaton	= automaton_automaton_create(current_fluent->name, ctx, alphabet_count, local_alphabet, false, false);
 	for(i = 0; i < ctx->global_alphabet->count; i++){
 		for(j = 0; j < current_fluent->starting_signals_count; j++){
 			if(i != current_fluent->starting_signals[j]){
@@ -1787,7 +1790,7 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 	printf("Synthesis processed [%09d] states, run for [%08f]s\n", pending_processed, (double)(clock() - begin) / CLOCKS_PER_SEC);
 	//build strategy
 
-	strategy	= automaton_automaton_create(strategy_name, game_automaton->context, game_automaton->local_alphabet_count, game_automaton->local_alphabet, false);
+	strategy	= automaton_automaton_create(strategy_name, game_automaton->context, game_automaton->local_alphabet_count, game_automaton->local_alphabet, false, false);
 
 
 
@@ -2027,9 +2030,9 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 	 ***********************/
 	automaton_automaton* composition;
 	if(is_game){
-		composition = automaton_automaton_create("Game", ctx, alphabet_count, alphabet, true);
+		composition = automaton_automaton_create("Game", ctx, alphabet_count, alphabet, true, false);
 	}else{
-		composition = automaton_automaton_create("Composition", ctx, alphabet_count, alphabet, false);
+		composition = automaton_automaton_create("Composition", ctx, alphabet_count, alphabet, false, false);
 	}
 	/** get signal to automata list structure **/
 	bool** signal_to_automata	= malloc(sizeof(bool*) * alphabet_count);

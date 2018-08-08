@@ -33,6 +33,7 @@ automaton_program_syntax* parsed_program = NULL;
 	automaton_gr1_game_syntax*		gr1_game;
 	obdd* 							ltl_aut_expression;
 	ltl_rule_syntax*				ltl_rule;
+	ltl_fluent_syntax*				ltl_fluent;
 };
 %token	t_INTEGER t_IDENT t_UPPER_IDENT t_STRING t_CONST t_RANGE t_SET t_FLUENT t_DOTS t_WHEN t_GAME_COMPOSE t_PARALLEL t_GR_1 t_INITIALLY t_LTL t_ENV t_SYS t_RHO t_THETA t_IN 
 %left '+' '-' ','
@@ -63,6 +64,7 @@ automaton_program_syntax* parsed_program = NULL;
 %type<gr1_game>				gr1
 %type<ltl_aut_expression>	ltlAutExp ltlAutExp2
 %type<ltl_rule>				ltlAutRule
+%type<ltl_fluent>			ltlFluent
 %%
 program:
 	statements								{parsed_program = $1; $$ = $1;}
@@ -231,6 +233,8 @@ compositionExp2:
 	|t_IDENT indexes ':' t_UPPER_IDENT		{$$ = automaton_component_syntax_create($4, $1, NULL, $2);free($1); free($4);}
 	|index indexes ':' t_UPPER_IDENT		{$$ = automaton_component_syntax_create($4, NULL, $1, $2);free($4);}
 	;
+ltlFluent:
+	t_LTL t_FLUENT t_UPPER_IDENT '=' ltlAutExp '.'	{$$ = automaton_ltl_fluent_syntax_create($3, $5);free($1); free($2);free($3);}
 ltlAutRule:
 	t_LTL t_ENV t_THETA t_UPPER_IDENT t_IN t_UPPER_IDENT '=' ltlAutExp '.'			{$$ = ltl_rule_syntax_create(true, true, $4, $6, $8);free($1);free($2);free($3);free($4);free($5);free($6); }
 	|t_LTL t_SYS t_THETA t_UPPER_IDENT t_IN t_UPPER_IDENT '=' ltlAutExp '.'			{$$ = ltl_rule_syntax_create(true, false, $4, $6, $8);free($1);free($2);free($3);free($4);free($5);free($6); }
@@ -245,7 +249,16 @@ ltlAutExp:
 	|ltlAutExp '|''|' ltlAutExp2			{$$ = obdd_apply_or($1, $4);}
 	;
 ltlAutExp2:
-	t_IDENT									{$$ = obdd_mgr_var(parser_get_obdd_mgr(), $1); free($1);}
+	t_IDENT									{
+												//we force the addition of the prime variable to the mgr dictionary in order to keep both orders (primed and non primed) consistent
+												//in order to then just replace the indexes when applying the next operator
+												$$ = obdd_mgr_var(parser_get_obdd_mgr(), $1);
+												char prime_name[255];
+												strcpy(prime_name, $1);
+												strcat(prime_name, SIGNAL_PRIME_SUFFIX);
+												dictionary_add_entry(parser_get_obdd_mgr(), prime_name);
+												free($1);
+											}
 	|'!' ltlAutExp2							{$$ = obdd_apply_not($2);}
 	|'X' ltlAutExp2							{$$ = obdd_apply_next($2);}
 	|'(' ltlAutExp2 ')'						{$$ = $2;}

@@ -1,0 +1,36 @@
+/*
+range R = 1..2
+
+set Global_Alphabet = {cook, finishedCooking, cooking, moveToBelt, overHeated, idle}
+set Controllable_Alphabet = {idle, cook, moveToBelt}
+
+BISCOTTI = (idle->BISCOTTI | cook->COOKING),
+COOKING = (cooking->COOKING | finishedCooking->FINISHED | cook->OVERHEATED), 
+FINISHED = (cook->COOKING | moveToBelt->BISCOTTI),  
+OVERHEATED = (overHeated->OVERHEATED).
+
+fluent F_NotCooking = <finishedCooking, cook> initially 1
+fluent F_MoveToBelt = <moveToBelt, cook>
+
+SUCCESSFULLY_COOKED_TWICE = (cook->cook->moveToBelt->SUCCESSFULLY_COOKED_TWICE). 
+
+|f| ENV =(BISCOTTI || SUCCESSFULLY_COOKED_TWICE).
+|gr1| <{F_NotCooking}><{F_MoveToBelt}> STRAT = ENV.
+*/
+
+set Global_Signals	= {r_1, r_2, r_3, g_1, g_2, g_3}
+set Output_Signals	= {g_1, g_2, g_3}
+
+ltl env theta Init_Lift_e in LIFT	= (!r_1 && !r_2 && !r_3).
+ltl sys theta Init_Lift_s in LIFT	= (!g_1 && !g_2 && !g_3).
+ltl env rho Wait_For_Grant_1 in LIFT	= [](!(r_1 <-> g_1) -> (X(r_1) = r_1)).
+ltl env rho Wait_For_Grant_2 in LIFT	= [](!(r_2 <-> g_2) -> (X(r_2) = r_2)).
+ltl env rho Wait_For_Grant_3 in LIFT	= [](!(r_3 <-> g_3) -> (X(r_3) = r_3)).
+ltl sys rho Mutex_Grant_s in LIFT	= [](!(g_1 && g_2) && !(g_1 && g_3) && !(g_2 && g_3)).
+ltl sys rho Kee_Grant_1 in LIFT		= []((r_1 <-> g_1) - > (X(g_1) = g_1).
+ltl sys rho Kee_Grant_2 in LIFT		= []((r_2 <-> g_2) - > (X(g_2) = g_2).
+ltl sys rho Kee_Grant_3 in LIFT		= []((r_3 <-> g_3) - > (X(g_3) = g_3).
+
+ltl fluent Ass	= (!(r_1 && g_1) && !(r_2 && g_2) && !(r_3 && g_3)).
+ltl fluent Goal	= ((r_1 <-> g_1) && (r_2 <-> g_2) && (r_3 <-> g_3)).
+

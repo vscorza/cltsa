@@ -424,6 +424,8 @@ automaton_alphabet* automaton_parsing_tables_get_global_alphabet(automaton_parsi
 	automaton_alphabet* global_alphabet	= automaton_alphabet_create();
 	int32_t global_index		= automaton_parsing_tables_get_entry_index(tables, SET_ENTRY_AUT, GLOBAL_ALPHABET_NAME_AUT);
 	int32_t controllable_index	= automaton_parsing_tables_get_entry_index(tables, SET_ENTRY_AUT, CONTROLLABLE_ALPHABET_NAME_AUT);
+	int32_t global_signals_index	= automaton_parsing_tables_get_entry_index(tables, SET_ENTRY_AUT, GLOBAL_SIGNALS_NAME_AUT);
+	int32_t output_signals_index	= automaton_parsing_tables_get_entry_index(tables, SET_ENTRY_AUT, OUTPUT_SIGNALS_NAME_AUT);
 	if(global_index < 0)
 		return NULL;
 	if(controllable_index < 0)
@@ -437,7 +439,7 @@ automaton_alphabet* automaton_parsing_tables_get_global_alphabet(automaton_parsi
 			, &controllable_count, ((automaton_set_def_syntax*)tables->set_entries[controllable_index]->value)->name);
 
 	bool is_controllable;
-
+	automaton_signal_event* sig_event;
 	for(i = 0; i < global_count; i++){
 		is_controllable	= false;
 		for(j = 0; j < controllable_count; j++){
@@ -446,18 +448,53 @@ automaton_alphabet* automaton_parsing_tables_get_global_alphabet(automaton_parsi
 				break;
 			}
 		}
-		automaton_signal_event* sig_event = automaton_signal_event_create(global_values[i], is_controllable? OUTPUT_SIG : INPUT_SIG);
+		sig_event = automaton_signal_event_create(global_values[i], is_controllable? OUTPUT_SIG : INPUT_SIG);
 		automaton_alphabet_add_signal_event(global_alphabet, sig_event);
 		automaton_signal_event_destroy(sig_event, true);
 	}
-/*
-	for(i = 0; i < global_count; i++)
-		free(global_values[i]);
-	free(global_values);
-	for(i = 0; i < controllable_count; i++)
-			free(controllable_values[i]);
-		free(controllable_values);
-*/
+	char signal_name[255];
+	if(global_signals_index >= 0){
+		global_count = 0;
+		controllable_count = 0;
+		global_values		= automaton_set_syntax_evaluate(tables, ((automaton_set_def_syntax*)tables->set_entries[global_signals_index]->value)->set
+					, &global_count, ((automaton_set_def_syntax*)tables->set_entries[global_signals_index]->value)->name);
+		if(output_signals_index >= 0){
+			controllable_values	= automaton_set_syntax_evaluate(tables, ((automaton_set_def_syntax*)tables->set_entries[output_signals_index]->value)->set
+					, &controllable_count, ((automaton_set_def_syntax*)tables->set_entries[output_signals_index]->value)->name);
+		}
+		for(i = 0; i < global_count; i++){
+				is_controllable	= false;
+				for(j = 0; j < controllable_count; j++){
+					if(strcmp(global_values[i], controllable_values[j]) == 0){
+						is_controllable	= true;
+						break;
+					}
+				}
+				//add on, off and primed elements to alphabet
+				strcpy(signal_name, global_values[i]);
+				strcat(signal_name, SIGNAL_ON_SUFFIX);
+				sig_event = automaton_signal_event_create(global_values[i], is_controllable? OUTPUT_SIG : INPUT_SIG);
+				automaton_alphabet_add_signal_event(global_alphabet, sig_event);
+				automaton_signal_event_destroy(sig_event, true);
+				strcpy(signal_name, global_values[i]);
+				strcat(signal_name, SIGNAL_OFF_SUFFIX);
+				sig_event = automaton_signal_event_create(global_values[i], is_controllable? OUTPUT_SIG : INPUT_SIG);
+				automaton_alphabet_add_signal_event(global_alphabet, sig_event);
+				automaton_signal_event_destroy(sig_event, true);
+				strcpy(signal_name, global_values[i]);
+				strcat(signal_name, SIGNAL_PRIME_SUFFIX);
+				strcat(signal_name, SIGNAL_ON_SUFFIX);
+				sig_event = automaton_signal_event_create(global_values[i], is_controllable? OUTPUT_SIG : INPUT_SIG);
+				automaton_alphabet_add_signal_event(global_alphabet, sig_event);
+				automaton_signal_event_destroy(sig_event, true);
+				strcpy(signal_name, global_values[i]);
+				strcat(signal_name, SIGNAL_PRIME_SUFFIX);
+				strcat(signal_name, SIGNAL_OFF_SUFFIX);
+				sig_event = automaton_signal_event_create(global_values[i], is_controllable? OUTPUT_SIG : INPUT_SIG);
+				automaton_alphabet_add_signal_event(global_alphabet, sig_event);
+				automaton_signal_event_destroy(sig_event, true);
+			}
+	}
 	return global_alphabet;
 }
 automaton_indexes_valuation* automaton_indexes_valuation_create_from_indexes(automaton_parsing_tables* tables, automaton_indexes_syntax* indexes){
@@ -782,7 +819,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 		}
 		aut_context_log("local alphabet built with size %d\n", local_alphabet_count);
 		/** CREATE AUTOMATON **/
-		automaton_automaton* automaton	= automaton_automaton_create(composition_syntax->name, ctx, local_alphabet_count, local_alphabet, false);
+		automaton_automaton* automaton	= automaton_automaton_create(composition_syntax->name, ctx, local_alphabet_count, local_alphabet, false, false);
 		free(local_alphabet);
 		//add transitions
 		//map state label to int
@@ -1474,6 +1511,15 @@ automaton_fluent* automaton_fluent_create_from_syntax(automaton_parsing_tables* 
 	return fluent;
 }
 
+void automaton_build_automaton_from_obdd(automaton_automata_context* ctx, char* name, obdd* env_theta_obdd, obdd* sys_theta_obdd
+		, obdd* env_rho_obdd, obdd* sys_rho_obdd, automaton_parsing_tables* tables){
+	//remember that if automaton was built from ltl its valuations should be added when building it
+	//and should be kept when composing it, if several automata are to be composed from ltl their composed valuation
+	//equals to the conjunction of the components' valuations
+	printf("automaton_built_automaton_from_obdd not implemented\n");
+	exit(-1);
+}
+
 automaton_automata_context* automaton_automata_context_create_from_syntax(automaton_program_syntax* program, char* ctx_name, bool is_synchronous, bool print_fsp){
 	automaton_parsing_tables* tables	= automaton_parsing_tables_create();
 	automaton_automata_context* ctx		= malloc(sizeof(automaton_automata_context));
@@ -1507,6 +1553,100 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 			fluents[fluent_count++]			= tables->fluent_entries[fluent_index]->valuation.fluent_value;
 		}
 	}
+	//get ltl rules
+	uint32_t ltl_automata_count = 0;
+	char** ltl_automata_names	= NULL;
+	bool ltl_automata_found		= false;
+	for(i = 0; i < program->count; i++)
+		if(program->statements[i]->type == LTL_RULE_AUT){
+			ltl_automata_found	= false;
+			for(j = 0; j < ltl_automata_count; j++)
+				if(strcmp(ltl_automata_names[j], program->statements[i]->ltl_rule_def->game_structure_name) == 0){
+					ltl_automata_found	= true;
+					break;
+				}
+			if(!ltl_automata_found){
+				if(ltl_automata_names == NULL){
+					ltl_automata_names	= malloc(sizeof(char*) * (ltl_automata_count + 1));
+				}else{
+					realloc(ltl_automata_names, sizeof(char*) * (ltl_automata_count + 1));
+				}
+				ltl_automata_names[ltl_automata_count++]	= program->statements[i]->ltl_rule_def->game_structure_name;
+			}
+		}
+	uint32_t *sys_theta_count	= malloc(sizeof(uint32_t) * ltl_automata_count);
+	uint32_t *env_theta_count	= malloc(sizeof(uint32_t) * ltl_automata_count);
+	uint32_t *sys_rho_count		= malloc(sizeof(uint32_t) * ltl_automata_count);
+	uint32_t *env_rho_count		= malloc(sizeof(uint32_t) * ltl_automata_count);
+	for(i = 0; i < ltl_automata_count; i++){
+		sys_theta_count[i]	= 0;	env_theta_count[i]	= 0;
+		sys_rho_count[i]	= 0;	env_rho_count[i]	= 0;
+	}
+	bool is_env, is_theta;
+	uint32_t ltl_automaton_index;
+	for(i = 0; i < program->count; i++)
+		if(program->statements[i]->type == LTL_RULE_AUT){
+			for(j = 0; j < ltl_automata_count; j++)
+				if(strcmp(ltl_automata_names[j], program->statements[i]->ltl_rule_def->game_structure_name) == 0){
+					ltl_automaton_index	= j;
+					break;
+				}
+			is_env	= program->statements[i]->ltl_rule_def->is_env;
+			is_theta= program->statements[i]->ltl_rule_def->is_theta;
+			if(is_env){
+				if(is_theta)	env_theta_count[j]++;
+				else			env_rho_count[j]++;
+			}else{
+				if(is_theta)	sys_theta_count[j]++;
+				else			sys_rho_count[j]++;
+			}
+		}
+	obdd ***sys_theta_obdd	= malloc(sizeof(obdd**) * ltl_automata_count);
+	obdd ***env_theta_obdd	= malloc(sizeof(obdd**) * ltl_automata_count);
+	obdd ***sys_rho_obdd	= malloc(sizeof(obdd**) * ltl_automata_count);
+	obdd ***env_rho_obdd	= malloc(sizeof(obdd**) * ltl_automata_count);
+	for(i = 0; i < ltl_automata_count; i++){
+		sys_theta_obdd[i]	= malloc(sizeof(obdd*) * sys_theta_count[i]);
+		env_theta_obdd[i]	= malloc(sizeof(obdd*) * env_theta_count[i]);
+		sys_rho_obdd[i]		= malloc(sizeof(obdd*) * sys_rho_count[i]);
+		env_rho_obdd[i]		= malloc(sizeof(obdd*) * env_rho_count[i]);
+	}
+	for(i = 0; i < ltl_automata_count; i++){
+		sys_theta_count[i]	= 0;
+		env_theta_count[i]	= 0;
+		sys_rho_count[i]	= 0;
+		env_rho_count[i]	= 0;
+	}
+	for(i = 0; i < program->count; i++)
+			if(program->statements[i]->type == LTL_RULE_AUT){
+				for(j = 0; j < ltl_automata_count; j++)
+					if(strcmp(ltl_automata_names[j], program->statements[i]->ltl_rule_def->game_structure_name) == 0){
+						ltl_automaton_index	= j;
+						break;
+					}
+				is_env	= program->statements[i]->ltl_rule_def->is_env;
+				is_theta= program->statements[i]->ltl_rule_def->is_theta;
+				if(is_env){
+					if(is_theta)	env_theta_obdd[ltl_automaton_index][env_theta_count[ltl_automaton_index]++]	= program->statements[i]->ltl_rule_def->obdd;
+					else			env_rho_obdd[ltl_automaton_index][env_rho_count[ltl_automaton_index]++]		= program->statements[i]->ltl_rule_def->obdd;
+				}else{
+					if(is_theta)	sys_theta_obdd[ltl_automaton_index][sys_theta_count[ltl_automaton_index]++]	= program->statements[i]->ltl_rule_def->obdd;
+					else			sys_rho_obdd[ltl_automaton_index][sys_rho_count[ltl_automaton_index]++]		= program->statements[i]->ltl_rule_def->obdd;
+				}
+			}
+	//build automata from ltl
+	for(i = 0; i < ltl_automata_count; i++){
+		automaton_build_automaton_from_obdd(ctx, ltl_automata_names[i], env_theta_obdd[i], sys_theta_obdd[i], env_rho_obdd[i], sys_rho_obdd[i], tables);
+	}
+	for(i = 0; i < ltl_automata_count; i++){
+		free(sys_theta_obdd[i]);		free(env_theta_obdd[i]);
+		free(sys_rho_obdd[i]);			free(env_rho_obdd[i]);
+	}
+	free(sys_theta_obdd);		free(env_theta_obdd);
+	free(sys_rho_obdd);			free(env_rho_obdd);
+	free(sys_theta_count);		free(env_theta_count);
+	free(sys_rho_count);		free(env_rho_count);
+	free(ltl_automata_names);
 	//get fluents
 	automaton_automata_context_initialize(ctx, ctx_name, global_alphabet, fluent_count, fluents);
 	free(fluents);

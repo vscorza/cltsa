@@ -10,6 +10,10 @@
 #include "automaton_utils.h"
 #include "obdd.h"
 
+#define SIGNAL_ON_SUFFIX	".on"
+#define SIGNAL_OFF_SUFFIX	".off"
+#define SIGNAL_PRIME_SUFFIX	"_p"
+
 /****************
 ==== ENUMS ====
 ****************/
@@ -180,7 +184,10 @@ typedef struct ltl_rule_syntax_str{
 	char* game_structure_name;
 	obdd* obdd;
 }ltl_rule_syntax;
-
+typedef struct ltl_fluent_syntax_str{
+	char* name;
+	obdd* obdd;
+}ltl_fluent_syntax;
 /****************
 ==== FUNCTIONS ====
 */
@@ -205,6 +212,7 @@ void automaton_set_def_syntax_destroy(automaton_set_def_syntax* set_def);
 void automaton_expression_syntax_destroy(automaton_expression_syntax* expr);
 void automaton_gr1_game_syntax_destroy(automaton_gr1_game_syntax* gr1_game);
 void ltl_rule_syntax_destroy(ltl_rule_syntax* ltl_rule);
+void ltl_fluent_syntax_destroy(ltl_fluent_syntax* ltl_fluent);
 automaton_expression_syntax* automaton_expression_syntax_create(automaton_expression_type_syntax type, automaton_expression_syntax* first
 		, automaton_expression_syntax* second, char* string_terminal, int32_t integer_terminal, automaton_expression_operator_syntax op);
 automaton_set_syntax* automaton_set_syntax_create(bool is_ident, uint32_t count, uint32_t* labels_count,
@@ -249,5 +257,6 @@ automaton_statement_syntax* automaton_statement_syntax_create(automaton_statemen
 		automaton_set_def_syntax* set_def, automaton_gr1_game_syntax* gr1_game_def, ltl_rule_syntax* ltl_rule_def);
 bool automaton_syntax_is_reserved(char* token);
 ltl_rule_syntax* ltl_rule_syntax_create(bool is_theta, bool is_env, char* name, char* game_structure_name, obdd* obdd);
+ltl_fluent_syntax* automaton_ltl_fluent_syntax_create(char* name, obdd* obdd);
 obdd_mgr* parser_get_obdd_mgr();
 #endif

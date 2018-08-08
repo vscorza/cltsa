@@ -277,7 +277,7 @@ void run_automaton_tests(){
 	uint32_t* local_alphabet_2		= malloc(sizeof(uint32_t) * 2);
 	local_alphabet_2[0]				= automaton_alphabet_get_signal_index(alphabet, tau);
 	local_alphabet_2[1]				= automaton_alphabet_get_signal_index(alphabet, out);
-	automaton_automaton* automaton_1= automaton_automaton_create("Automaton 1", ctx, 2, local_alphabet_1, false);
+	automaton_automaton* automaton_1= automaton_automaton_create("Automaton 1", ctx, 2, local_alphabet_1, false, false);
 	automaton_transition* t1_1_2	= automaton_transition_create(1, 2);
 	automaton_transition* t1_2_1	= automaton_transition_create(2, 1);
 	automaton_transition_add_signal_event(t1_1_2, ctx, in);
@@ -285,7 +285,7 @@ void run_automaton_tests(){
 	automaton_automaton_add_transition(automaton_1, t1_1_2);
 	automaton_automaton_add_transition(automaton_1, t1_2_1);
 	automaton_automaton_add_initial_state(automaton_1, 1);
-	automaton_automaton* automaton_2= automaton_automaton_create("Automaton 2", ctx, 2, local_alphabet_2, false);
+	automaton_automaton* automaton_2= automaton_automaton_create("Automaton 2", ctx, 2, local_alphabet_2, false, false);
 	automaton_transition* t2_1_2	= automaton_transition_create(1, 2);
 	automaton_transition* t2_2_1	= automaton_transition_create(2, 1);
 	automaton_transition_add_signal_event(t2_1_2, ctx, tau);
