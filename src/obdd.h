@@ -40,11 +40,17 @@ typedef struct obdd_node_t{
 	uint32_t		ref_count;
 	struct obdd_node_t*	high_obdd;
 	struct obdd_node_t*	low_obdd;
+	uint32_t high_predecessors_count;
+	struct obdd_node_t** high_predecessors;
+	uint32_t low_predecessors_count;
+	struct obdd_node_t** low_predecessors;
 }obdd_node;
 
 typedef struct obdd_t{
 	struct obdd_mgr_t*	mgr;
 	struct obdd_node_t*	root_obdd;
+	struct obdd_node_t* true_obdd;
+	struct obdd_node_t* false_obdd;
 }obdd;
 /*
 typedef struct obdd_partial_automaton_t{
@@ -81,8 +87,14 @@ uint32_t obdd_mgr_get_next_node_ID(obdd_mgr* mgr);
 obdd_node* obdd_mgr_mk_node(obdd_mgr* mgr, char* var, obdd_node* high, obdd_node* low);
 void obdd_node_destroy(obdd_node* root);
 /** OBDD **/
+obdd_node* obdd_node_get_false_node(obdd_mgr* mgr, obdd_node* node);
+obdd_node* obdd_node_get_true_node(obdd_mgr* mgr, obdd_node* node);
 obdd* obdd_create(obdd_mgr* mgr, obdd_node* root);
 void obdd_destroy(obdd* root);
+void obdd_add_high_succesor(obdd_node* src, obdd_node* dst);
+void obdd_add_low_succesor(obdd_node* src, obdd_node* dst);
+void obdd_remove_high_succesor(obdd_node* src, obdd_node* dst);
+void obdd_remove_low_succesor(obdd_node* src, obdd_node* dst);
 
 /** CORE COMPUTATION **/
 obdd* obdd_restrict(obdd* root, char* var, bool value);
@@ -99,6 +111,7 @@ bool obdd_apply_and_fkt(bool left, bool right);
 bool obdd_apply_or_fkt(bool left, bool right);
 
 obdd* obdd_apply_not(obdd* value);
+obdd_node* obdd_node_apply_next(obdd_mgr* mgr, obdd_node* value);
 obdd* obdd_apply_next(obdd* value);
 
 obdd* obdd_apply_equals(obdd* left, obdd* right);
@@ -110,9 +123,9 @@ obdd_node* obdd_node_apply(bool (*apply_fkt)(bool,bool), obdd_mgr* mgr, obdd_nod
 void obdd_remove_duplicated_terminals(obdd_mgr* mgr, obdd_node* root, obdd_node** true_node, obdd_node** false_node);
 void obdd_merge_redundant_nodes(obdd_mgr* mgr, obdd_node* root);
 void obdd_reduce(obdd* root);
-bool is_true(obdd_mgr* mgr, obdd_node* root);
-bool is_constant(obdd_mgr* mgr, obdd_node* root);						//checks if representation is constant
-bool is_tautology(obdd_mgr* mgr, obdd_node* root);						//checks if representation is always true
-bool is_sat(obdd_mgr* mgr, obdd_node* root);							//checks if representation is satisfiable
-
+bool obdd_is_true(obdd_mgr* mgr, obdd_node* root);
+bool obdd_is_constant(obdd_mgr* mgr, obdd_node* root);						//checks if representation is constant
+bool obdd_is_tautology(obdd_mgr* mgr, obdd_node* root);						//checks if representation is always true
+bool obdd_is_sat(obdd_mgr* mgr, obdd_node* root);							//checks if representation is satisfiable
+bool** obdd_get_valuatons(obdd_mgr* mgr, obdd* root);
 #endif

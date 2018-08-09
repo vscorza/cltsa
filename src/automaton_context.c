@@ -1511,13 +1511,34 @@ automaton_fluent* automaton_fluent_create_from_syntax(automaton_parsing_tables* 
 	return fluent;
 }
 
-void automaton_build_automaton_from_obdd(automaton_automata_context* ctx, char* name, obdd* env_theta_obdd, obdd* sys_theta_obdd
+automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_context* ctx, char* name, obdd* env_theta_obdd, obdd* sys_theta_obdd
 		, obdd* env_rho_obdd, obdd* sys_rho_obdd, automaton_parsing_tables* tables){
 	//remember that if automaton was built from ltl its valuations should be added when building it
 	//and should be kept when composing it, if several automata are to be composed from ltl their composed valuation
 	//equals to the conjunction of the components' valuations
-	printf("automaton_built_automaton_from_obdd not implemented\n");
-	exit(-1);
+	obdd_mgr* mgr						= parser_get_obdd_mgr();
+	obdd_state_tree* state_map			= obdd_state_tree_create(mgr->vars_dict->size);
+	uint32_t local_alphabet_count		= mgr->vars_dict->size * 2;
+	uint32_t i, current_element 		= 0;
+	uint32_t* local_alphabet			= malloc(sizeof(uint32_t) * local_alphabet_count);
+	char current_dict_entry[255];
+	for(i = 0; i < mgr->vars_dict->size; i++){
+		strcpy(current_dict_entry, mgr->vars_dict->entries[i].key);
+		local_alphabet[current_element++]	= dictionary_value_for_key(mgr->vars_dict, current_dict_entry);
+		strcpy(current_dict_entry, mgr->vars_dict->entries[i].key);
+		strcat(current_dict_entry, SIGNAL_ON_SUFFIX);
+		local_alphabet[current_element++]	= dictionary_value_for_key(mgr->vars_dict, current_dict_entry);
+		strcpy(current_dict_entry, mgr->vars_dict->entries[i].key);
+		strcat(current_dict_entry, SIGNAL_OFF_SUFFIX);
+		local_alphabet[current_element++]	= dictionary_value_for_key(mgr->vars_dict, current_dict_entry);
+	}
+	automaton_automaton* ltl_automaton	= automaton_automaton_create(name, ctx, local_alphabet_count, local_alphabet, false, true);
+
+
+
+	free(local_alphabet);
+	obdd_state_tree_destroy(state_map);
+	return ltl_automaton;
 }
 
 automaton_automata_context* automaton_automata_context_create_from_syntax(automaton_program_syntax* program, char* ctx_name, bool is_synchronous, bool print_fsp){
@@ -1569,7 +1590,13 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 				if(ltl_automata_names == NULL){
 					ltl_automata_names	= malloc(sizeof(char*) * (ltl_automata_count + 1));
 				}else{
-					realloc(ltl_automata_names, sizeof(char*) * (ltl_automata_count + 1));
+					char** ptr	= realloc(ltl_automata_names, sizeof(char*) * (ltl_automata_count + 1));
+					if(ptr == NULL){
+						printf("Could not allocate memory\n");
+						exit(-1);
+					}else{
+						ltl_automata_names	= ptr;
+					}
 				}
 				ltl_automata_names[ltl_automata_count++]	= program->statements[i]->ltl_rule_def->game_structure_name;
 			}

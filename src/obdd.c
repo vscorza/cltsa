@@ -38,10 +38,20 @@ obdd_state_tree* obdd_state_tree_create(uint32_t key_length){
 obdd_state_tree_entry* obdd_state_tree_entry_get_from_pool(obdd_state_tree* tree){
 	if(tree->entries_count >= tree->entries_size){
 		uint32_t new_size			= tree->entries_size * LIST_INCREASE_FACTOR;
-		realloc(tree->entries_pool, sizeof(obdd_state_tree_entry) * new_size);
+		obdd_state_tree_entry* ptr	= realloc(tree->entries_pool, sizeof(obdd_state_tree_entry) * new_size);
+		if(ptr == NULL){
+			printf("Could not allocate memory\n");
+			exit(-1);
+		}else{
+			tree->entries_pool	= ptr;
+		}
 		tree->entries_size			= new_size;
 	}
 	obdd_state_tree_entry* entry	= &(tree->entries_pool[tree->entries_count++]);
+	entry->high						= NULL;
+	entry->low						= NULL;
+	entry->is_leaf					= false;
+	entry->leaf_value				= 0;
 	return entry;
 }
 uint32_t obdd_state_tree_get_key(obdd_state_tree* tree, bool* valuation){
@@ -111,11 +121,17 @@ obdd_mgr*	obdd_mgr_create(){
 	//create constant obdds for true and false values
 	obdd* true_obdd		= malloc(sizeof(obdd));
 	true_obdd->root_obdd= obdd_mgr_mk_node(new_mgr, TRUE_VAR, NULL, NULL);
+	//true_obdd->root_obdd->ref_count++;
 	true_obdd->mgr		= new_mgr;
+	true_obdd->true_obdd	= NULL;
+	true_obdd->false_obdd	= NULL;
 	new_mgr->true_obdd	= true_obdd;
 	obdd* false_obdd	= malloc(sizeof(obdd));
 	false_obdd->root_obdd= obdd_mgr_mk_node(new_mgr, FALSE_VAR, NULL, NULL);
+	//false_obdd->root_obdd->ref_count++;
 	false_obdd->mgr		= new_mgr;
+	false_obdd->true_obdd	= NULL;
+	false_obdd->false_obdd	= NULL;
 	new_mgr->false_obdd	= false_obdd;
 	return new_mgr;
 }
@@ -126,10 +142,14 @@ void obdd_mgr_destroy(obdd_mgr* mgr){
 		mgr->vars_dict 	= NULL;
 	}
 	if(mgr->true_obdd != NULL){
+		if(mgr->true_obdd->root_obdd->ref_count > 0)
+			mgr->true_obdd->root_obdd->ref_count = 0;
 		obdd_destroy(mgr->true_obdd);
 		mgr->true_obdd	= NULL;
 	}
 	if(mgr->false_obdd != NULL){
+		if(mgr->false_obdd->root_obdd->ref_count > 0)
+			mgr->false_obdd->root_obdd->ref_count = 0;
 		obdd_destroy(mgr->false_obdd);
 		mgr->false_obdd	= NULL;
 	}
@@ -152,27 +172,111 @@ uint32_t obdd_mgr_get_next_node_ID(obdd_mgr* mgr){
 	return previous_ID;
 }
 
+void obdd_add_high_succesor(obdd_node* src, obdd_node* dst){
+	src->high_obdd	= dst;
+	if(dst != NULL){
+		if(dst->high_predecessors == NULL)		dst->high_predecessors		= malloc(sizeof(obdd_node*));
+		else{
+			obdd_node** ptr	= realloc(dst->high_predecessors, sizeof(obdd_node*) * (dst->high_predecessors_count + 1));
+			if(ptr == NULL){
+				printf("Could not allocate memory\n");
+				exit(-1);
+			}else{
+				dst->high_predecessors	= ptr;
+			}
+		}
+		dst->high_predecessors[dst->high_predecessors_count++]	= src;
+		dst->ref_count++;
+	}
+}
+void obdd_add_low_succesor(obdd_node* src, obdd_node* dst){
+	src->low_obdd	= dst;
+	if(dst != NULL){
+		if(dst->low_predecessors == NULL)		dst->low_predecessors		= malloc(sizeof(obdd_node*));
+		else{
+			obdd_node** ptr	= realloc(dst->low_predecessors, sizeof(obdd_node*) * (dst->low_predecessors_count + 1));
+			if(ptr == NULL){
+				printf("Could not allocate memory\n");
+				exit(-1);
+			}else{
+				dst->low_predecessors	= ptr;
+			}
+		}
+		dst->low_predecessors[dst->low_predecessors_count++]	= src;
+		dst->ref_count++;
+	}
+}
+void obdd_remove_high_succesor(obdd_node* src, obdd_node* dst){
+	int32_t index	= -1;
+	int32_t i;
+	if(dst != NULL){
+		for(i = 0; i < (int32_t)dst->high_predecessors_count; i++)
+			if(dst->high_predecessors[i] == src){
+				index = i;
+				break;
+			}
+		for(i = index; i < (int32_t)(dst->high_predecessors_count - 1); i++){
+			dst->high_predecessors[i]	= dst->high_predecessors[i+ 1];
+		}
+		if(dst->high_predecessors_count == 1)		free(dst->high_predecessors);
+		else{
+			obdd_node** ptr	= realloc(dst->high_predecessors, sizeof(obdd_node*) * (dst->high_predecessors_count - 1));
+			if(ptr == NULL){
+				printf("Could not allocate memory\n");
+				exit(-1);
+			}else{
+				dst->high_predecessors	= ptr;
+			}
+		}
+		dst->high_predecessors_count--;
+		dst->ref_count--;
+	}
+}
+void obdd_remove_low_succesor(obdd_node* src, obdd_node* dst){
+	int32_t index	= -1;
+	int32_t i;
+	if(dst != NULL){
+		for(i = 0; i < (int32_t)dst->low_predecessors_count; i++)
+			if(dst->low_predecessors[i] == src){
+				index = i;
+				break;
+			}
+		for(i = index; i < (int32_t)(dst->low_predecessors_count - 1); i++){
+			dst->low_predecessors[i]	= dst->low_predecessors[i+ 1];
+		}
+		if(dst->low_predecessors_count == 1)		free(dst->low_predecessors);
+		else{
+			obdd_node** ptr	= realloc(dst->low_predecessors, sizeof(obdd_node*) * (dst->low_predecessors_count - 1));
+			if(ptr == NULL){
+				printf("Could not allocate memory\n");
+				exit(-1);
+			}else{
+				dst->low_predecessors	= ptr;
+			}
+		}
+		dst->low_predecessors_count--;
+		dst->ref_count--;
+	}
+}
 obdd_node* obdd_mgr_mk_node(obdd_mgr* mgr, char* var, obdd_node* high, obdd_node* low){
 	uint32_t var_ID		= dictionary_add_entry(mgr->vars_dict, var);
 	obdd_node* new_node	= malloc(sizeof(obdd_node));
 	new_node->var_ID	= var_ID;
 	new_node->node_ID	= obdd_mgr_get_next_node_ID(mgr);
-	new_node->high_obdd	= high;
-	if(high != NULL)
-		high->ref_count++;
-	new_node->low_obdd	= low;
-	if(low != NULL)
-		low->ref_count++;
+	new_node->high_predecessors_count	= 0;
+	new_node->high_predecessors			= NULL;
+	new_node->low_predecessors_count	= 0;
+	new_node->low_predecessors			= NULL;
+	obdd_add_high_succesor(new_node, high);
+	obdd_add_low_succesor(new_node, low);
 	new_node->ref_count	= 0;
 	return new_node;
 }
 
 obdd*	obdd_mgr_var(obdd_mgr* mgr, char* name){
-	obdd* var_obdd	= malloc(sizeof(obdd));
-	var_obdd->mgr	= mgr;
+	obdd* var_obdd	= obdd_create(mgr, NULL);
 	var_obdd->root_obdd= obdd_mgr_mk_node(mgr, name
-		, obdd_mgr_mk_node(mgr, TRUE_VAR, NULL, NULL)
-		, obdd_mgr_mk_node(mgr, FALSE_VAR, NULL, NULL));
+		, var_obdd->true_obdd, var_obdd->false_obdd);
 	return var_obdd;	
 }
 
@@ -184,6 +288,8 @@ obdd* obdd_create(obdd_mgr* mgr, obdd_node* root){
 	obdd* new_obdd		= malloc(sizeof(obdd));
 	new_obdd->mgr		= mgr;
 	new_obdd->root_obdd	= root;
+	new_obdd->true_obdd	= mgr->true_obdd->root_obdd;
+	new_obdd->false_obdd= mgr->false_obdd->root_obdd;
 	return new_obdd;
 }
 
@@ -192,6 +298,9 @@ void obdd_destroy(obdd* root){
 		obdd_node_destroy(root->root_obdd);
 		root->root_obdd		= NULL;
 	}
+	//must not delete true and false obdd since they are being destroyed by recursive call on root
+	root->true_obdd	= NULL;
+	root->false_obdd	= NULL;
 	root->mgr			= NULL;
 	free(root);
 }
@@ -206,18 +315,23 @@ obdd* obdd_apply_not(obdd* value){
 	return obdd_apply_xor(value->mgr->true_obdd, value);
 }
 
-obdd* obdd_apply_next(obdd* value){
-	dictionary* dict	= value->mgr->vars_dict;
-	obdd_node* current_node	= value->root_obdd;
+obdd_node* obdd_node_apply_next(obdd_mgr* mgr, obdd_node* value){
+	dictionary* dict	= mgr->vars_dict;
 	char var_next[200];
-	strcpy(var_next, dictionary_key_for_value(dict, current_node->var_ID));
+	strcpy(var_next, dictionary_key_for_value(dict, value->var_ID));
 	strcat(var_next, VAR_NEXT_SUFFIX);
 	uint32_t var_ID		= dictionary_add_entry(dict,  var_next);
-	current_node->var_ID	= var_ID;
-	if(current_node->high_obdd != NULL)
-		obdd_apply_next(current_node->high_obdd);
-	if(current_node->low_obdd != NULL)
-			obdd_apply_next(current_node->low_obdd);
+	value->var_ID		= var_ID;
+	if(value->high_obdd != NULL)
+		obdd_node_apply_next(mgr, value->high_obdd);
+	if(value->low_obdd != NULL)
+		obdd_node_apply_next(mgr, value->low_obdd);
+	return value;
+}
+
+
+obdd* obdd_apply_next(obdd* value){
+	obdd_node_apply_next(value->mgr, value->root_obdd);
 	return value;
 }
 
@@ -238,18 +352,17 @@ obdd* obdd_apply_or(obdd* left, obdd* right){
 }
 
 void obdd_remove_duplicated_terminals(obdd_mgr* mgr, obdd_node* root, obdd_node** true_node, obdd_node** false_node){
-	if(is_constant(mgr, root))
+	if(obdd_is_constant(mgr, root))
 		return;
-	if(is_constant(mgr, root->high_obdd)){
-		if(is_true(mgr, root->high_obdd)){
+	if(obdd_is_constant(mgr, root->high_obdd)){
+		if(obdd_is_true(mgr, root->high_obdd)){
 			if(*true_node == NULL){
 				*true_node	= root->high_obdd;
 			}else{
 				if(root->high_obdd != NULL)
 					root->high_obdd->ref_count--;
 				obdd_node_destroy(root->high_obdd);
-				root->high_obdd = *(true_node);
-				(*(true_node))->ref_count++;
+				obdd_add_high_succesor(root, *(true_node));
 			}
 		}else{
 			if(*false_node == NULL){
@@ -258,23 +371,21 @@ void obdd_remove_duplicated_terminals(obdd_mgr* mgr, obdd_node* root, obdd_node*
 				if(root->high_obdd != NULL)
 					root->high_obdd->ref_count--;
 				obdd_node_destroy(root->high_obdd);
-				root->high_obdd = *(false_node);
-				(*(false_node))->ref_count++;
+				obdd_add_high_succesor(root, *(false_node));
 			}
 		}
 	}else{
 		obdd_remove_duplicated_terminals(mgr, root->high_obdd, true_node, false_node);
 	}
-	if(is_constant(mgr, root->low_obdd)){
-		if(is_true(mgr, root->low_obdd)){
+	if(obdd_is_constant(mgr, root->low_obdd)){
+		if(obdd_is_true(mgr, root->low_obdd)){
 			if(*true_node == NULL){
 				*true_node	= root->low_obdd;
 			}else{
 				if(root->low_obdd != NULL)
 					root->low_obdd->ref_count--;
 				obdd_node_destroy(root->low_obdd);
-				root->low_obdd = *(true_node);
-				(*(true_node))->ref_count++;
+				obdd_add_low_succesor(root, *(true_node));
 			}
 		}else{
 			if(*false_node == NULL){
@@ -283,8 +394,7 @@ void obdd_remove_duplicated_terminals(obdd_mgr* mgr, obdd_node* root, obdd_node*
 				if(root->low_obdd != NULL)
 					root->low_obdd->ref_count--;
 				obdd_node_destroy(root->low_obdd);
-				root->low_obdd = *(false_node);
-				(*(false_node))->ref_count++;
+				obdd_add_low_succesor(root, *(false_node));
 			}
 		}
 	}else{
@@ -294,25 +404,23 @@ void obdd_remove_duplicated_terminals(obdd_mgr* mgr, obdd_node* root, obdd_node*
 }
 
 void obdd_merge_redundant_nodes(obdd_mgr* mgr, obdd_node* root){
-	if(is_constant(mgr, root))
+	if(obdd_is_constant(mgr, root))
 		return;
 	obdd_merge_redundant_nodes(mgr, root->high_obdd);
 	obdd_merge_redundant_nodes(mgr, root->low_obdd);
-	if(!is_constant(mgr, root->high_obdd)){
+	if(!obdd_is_constant(mgr, root->high_obdd)){
 		if(root->high_obdd->high_obdd->node_ID == root->high_obdd->low_obdd->node_ID){
 			obdd_node* to_remove	= root->high_obdd;
-			root->high_obdd = root->high_obdd->high_obdd;
-			root->high_obdd->ref_count++;
-			to_remove->ref_count--;
+			obdd_remove_high_succesor(root->high_obdd, root->high_obdd->high_obdd);
+			obdd_add_high_succesor(root, root->high_obdd->high_obdd);
 			obdd_node_destroy(to_remove);
 		}
 	}
-	if(!is_constant(mgr, root->low_obdd)){
+	if(!obdd_is_constant(mgr, root->low_obdd)){
 		if(root->low_obdd->high_obdd->node_ID == root->low_obdd->low_obdd->node_ID){
 			obdd_node* to_remove	= root->low_obdd;
-			root->low_obdd = root->low_obdd->high_obdd;
-			root->low_obdd->ref_count++;
-			to_remove->ref_count--;
+			obdd_remove_low_succesor(root->low_obdd, root->low_obdd->low_obdd);
+			obdd_add_low_succesor(root, root->low_obdd->low_obdd);
 			obdd_node_destroy(to_remove);
 		}
 	}
@@ -342,14 +450,14 @@ obdd_node* obdd_node_apply(bool (*apply_fkt)(bool,bool), obdd_mgr* mgr, obdd_nod
 	char* left_var			= dictionary_key_for_value(mgr->vars_dict,left_var_ID);
 	char* right_var			= dictionary_key_for_value(mgr->vars_dict,right_var_ID);
 
-	bool is_left_constant		= is_constant(mgr, left_node);
-	bool is_right_constant		= is_constant(mgr, right_node);
+	bool is_left_constant		= obdd_is_constant(mgr, left_node);
+	bool is_right_constant		= obdd_is_constant(mgr, right_node);
 
 	if(is_left_constant && is_right_constant){
-		if((*apply_fkt)(is_true(mgr, left_node), is_true(mgr, right_node))){
-			return obdd_mgr_mk_node(mgr, TRUE_VAR, NULL, NULL);
+		if((*apply_fkt)(obdd_is_true(mgr, left_node), obdd_is_true(mgr, right_node))){
+			return mgr->true_obdd->root_obdd;
 		}else{
-			return obdd_mgr_mk_node(mgr, FALSE_VAR, NULL, NULL);
+			return mgr->false_obdd->root_obdd;
 		}
 	}
 
@@ -388,7 +496,7 @@ obdd* obdd_restrict(obdd* root, char* var, bool value){
 }
 
 obdd_node* obdd_node_restrict(obdd_mgr* mgr, obdd_node* root, char* var, uint32_t var_ID, bool value){
-	bool is_root_constant	= is_constant(mgr, root);
+	bool is_root_constant	= obdd_is_constant(mgr, root);
 	uint32_t root_var_ID	= root->var_ID;
 	char* root_var		= dictionary_key_for_value(mgr->vars_dict,root_var_ID);
 
@@ -402,8 +510,8 @@ obdd_node* obdd_node_restrict(obdd_mgr* mgr, obdd_node* root, char* var, uint32_
 	char* low_var			= dictionary_key_for_value(mgr->vars_dict,low_var_ID);
 	char* high_var			= dictionary_key_for_value(mgr->vars_dict,high_var_ID);
 
-	bool is_low_constant		= is_constant(mgr, root->low_obdd);
-	bool is_high_constant		= is_constant(mgr, root->high_obdd);
+	bool is_low_constant		= obdd_is_constant(mgr, root->low_obdd);
+	bool is_high_constant		= obdd_is_constant(mgr, root->high_obdd);
 
 	obdd_node* applied_node;
 
@@ -455,7 +563,7 @@ void obdd_print(obdd* root){
 
 void obdd_node_print(obdd_mgr* mgr, obdd_node* root, uint32_t spaces){
 	char* var			= dictionary_key_for_value(mgr->vars_dict,root->var_ID);	
-	if(is_constant(mgr, root)){
+	if(obdd_is_constant(mgr, root)){
 		printf("->%s", var);
 		return;
 	}else if(spaces > 0){
@@ -486,28 +594,32 @@ void obdd_node_print(obdd_mgr* mgr, obdd_node* root, uint32_t spaces){
 	}	
 }
 
-bool is_true(obdd_mgr* mgr, obdd_node* root){
+bool obdd_is_true(obdd_mgr* mgr, obdd_node* root){
 	return (root->var_ID == mgr->true_obdd->root_obdd->var_ID);
 }
-bool is_constant(obdd_mgr* mgr, obdd_node* root){
+bool obdd_is_constant(obdd_mgr* mgr, obdd_node* root){
 	return ((root->var_ID == mgr->true_obdd->root_obdd->var_ID) 
 		|| (root->var_ID == mgr->false_obdd->root_obdd->var_ID));
 }
 
-bool is_tautology(obdd_mgr* mgr, obdd_node* root){
-	if(is_constant(mgr, root)){
-		return is_true(mgr, root);
+bool obdd_is_tautology(obdd_mgr* mgr, obdd_node* root){
+	if(obdd_is_constant(mgr, root)){
+		return obdd_is_true(mgr, root);
 	}else{
-		return is_tautology(mgr, root->high_obdd) && is_tautology(mgr, root->low_obdd);	
+		return obdd_is_tautology(mgr, root->high_obdd) && obdd_is_tautology(mgr, root->low_obdd);
 	}
 }
 
-bool is_sat(obdd_mgr* mgr, obdd_node* root){
-	if(is_constant(mgr, root)){
-		return is_true(mgr, root);
+bool obdd_is_sat(obdd_mgr* mgr, obdd_node* root){
+	if(obdd_is_constant(mgr, root)){
+		return obdd_is_true(mgr, root);
 	}else{
-		return is_sat(mgr, root->high_obdd) || is_sat(mgr, root->low_obdd);	
+		return obdd_is_sat(mgr, root->high_obdd) || obdd_is_sat(mgr, root->low_obdd);
 	}
+}
+
+bool** obdd_get_valuations(obdd_mgr* mgr, obdd_node* root){
+	exit(-1);
 }
 
 /** OBDD NODE FUNCTIONS **/
@@ -525,8 +637,18 @@ void obdd_node_destroy(obdd_node* node){
 			to_remove->ref_count--;
 			obdd_node_destroy(to_remove);
 		}
-		node->var_ID	= 0;
-		node->node_ID	= 0;
-		free(node);
+		if(node->low_predecessors != NULL){
+			node->low_predecessors_count	= 0;
+			free(node->low_predecessors);
+			node->low_predecessors	= NULL;
+			node->high_predecessors_count	= 0;
+			free(node->high_predecessors);
+			node->high_predecessors	= NULL;
+			node->var_ID	= 0;
+			node->node_ID	= 0;
+			free(node);
+		}else{
+			printf("reentry on obdd_node_destroy should not be happening\n");
+		}
 	}
 }
