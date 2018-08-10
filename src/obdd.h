@@ -8,6 +8,8 @@
 #define FALSE_VAR			"0"
 
 #define VAR_NEXT_SUFFIX		"_p"
+
+#define DEBUG_OBDD	1
 /** STRUCTS **/
 /** BINARY MAP TREE **/
 typedef struct obdd_state_tree_entry_str{

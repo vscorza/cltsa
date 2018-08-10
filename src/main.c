@@ -42,12 +42,14 @@ void run_obdd_tests(){
 	obdd* x1_obdd		= obdd_mgr_var(new_mgr, "x1");
 	obdd* x2_obdd		= obdd_mgr_var(new_mgr, "x2");
 	obdd* x1_or_x2_obdd	= obdd_apply_or(x1_obdd, x2_obdd);
-    /*/
+
 	obdd* x1_and_x2_obdd	= obdd_apply_and(x1_obdd, x2_obdd);
+
 	obdd* not_x1_obdd	= obdd_apply_not(x1_obdd);
 	obdd* x1_and_not_x1_obdd= obdd_apply_and(x1_obdd,not_x1_obdd);
 
 	obdd* not_x1_and_x2_obdd= obdd_apply_not(x1_and_x2_obdd);
+/*
 	obdd* x1_and_x2_then_x1	= obdd_apply_or(not_x1_and_x2_obdd, x1_obdd);
 
 	obdd* x2_eq_fallacy_obdd= obdd_apply_equals(x2_obdd, x1_and_not_x1_obdd);
@@ -78,11 +80,14 @@ void run_obdd_tests(){
 	obdd_destroy(x1_obdd);
 	obdd_destroy(x2_obdd);
 	obdd_destroy(x1_or_x2_obdd);
-	/*
+
 	obdd_destroy(x1_and_x2_obdd);
+
 	obdd_destroy(not_x1_obdd);
 	obdd_destroy(x1_and_not_x1_obdd);
+
 	obdd_destroy(not_x1_and_x2_obdd);
+	/*
 	obdd_destroy(x1_and_x2_then_x1);
 	obdd_destroy(x2_eq_fallacy_obdd);
 	obdd_destroy(exists_obdd);
