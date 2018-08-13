@@ -662,8 +662,154 @@ bool obdd_is_sat(obdd_mgr* mgr, obdd_node* root){
 	}
 }
 
-bool** obdd_get_valuations(obdd_mgr* mgr, obdd_node* root){
-	exit(-1);
+void obdd_node_get_obdd_nodes(obdd_mgr* mgr, obdd_node* root, obdd_node*** nodes, uint32_t* nodes_count, uint32_t* nodes_size){
+	uint32_t i;
+	bool found	= false;
+	for(i = 0; i < *nodes_count; i++)
+		if((*nodes)[i] == root){
+			found = true;
+			break;
+		}
+	if(!found){
+		if(*nodes_count >= *nodes_size){
+			*nodes_size	= *nodes_size * LIST_INCREASE_FACTOR;
+			obdd_node** ptr	= realloc(*nodes, *nodes_size);
+			if(ptr == NULL){
+				printf("Realloc failed while getting obdd nodes\n");
+				exit(-1);
+			}
+			*nodes		= ptr;
+		}
+		(*nodes)[*nodes_count]	= root;
+		*nodes_count			= *nodes_count + 1;
+	}
+	if(root->high_obdd != NULL)
+		obdd_node_get_obdd_nodes(mgr, root->high_obdd, nodes, nodes_count, nodes_size);
+	if(root->high_obdd != NULL)
+			obdd_node_get_obdd_nodes(mgr, root->low_obdd, nodes, nodes_count, nodes_size);
+}
+
+obdd_node** obdd_get_obdd_nodes(obdd_mgr* mgr, obdd* root, uint32_t* nodes_count){
+	uint32_t nodes_size	= LIST_INITIAL_SIZE;
+	obdd_node** nodes	= malloc(sizeof(obdd_node*) * nodes_size);
+	*nodes_count		= 0;
+	obdd_node_get_obdd_nodes(mgr, root->root_obdd, &nodes, nodes_count, &nodes_size);
+	return nodes;
+}
+
+bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count){
+	int32_t i, j, dont_cares_count;
+	uint32_t nodes_count;
+	obdd_node** nodes	= obdd_get_obdd_nodes(mgr, root, &nodes_count);
+
+	*valuations_count			= 0;
+	uint32_t valuations_size	= LIST_INITIAL_SIZE;
+	uint32_t variables_count	= mgr->vars_dict->size;
+	bool* valuations			= malloc(sizeof(bool) * variables_count * valuations_size);
+	bool* dont_care_list		= malloc(sizeof(bool) * variables_count);
+	bool* partial_valuation		= malloc(sizeof(bool) * variables_count);
+
+	obdd_node** last_nodes		= malloc(sizeof(obdd_node**) * variables_count);
+	int32_t* last_pred_index	= malloc(sizeof(int32_t) * variables_count);
+	int32_t last_node_index	= 0;
+
+	obdd_node* current_node		= mgr->true_obdd->root_obdd;
+	obdd_node* current_predecessor;
+	obdd_node* last_node;
+
+	last_nodes[last_node_index]	= current_node;
+	last_pred_index[last_node_index]	= 0;
+	bool belongs, through_high;
+	//perform dfs exploration of obdd
+	while(last_pred_index[last_node_index] != -1){
+		last_node	= last_nodes[last_node_index];
+
+		if(last_node->high_predecessors_count == 0 && last_node->low_predecessors_count == 0){//terminal case, add valuation
+			dont_cares_count	= 1;
+			//set unexplored variables as dont care
+			for(i = last_node_index - 1; i >= 0; i--)
+				dont_care_list[i]	= true;
+			//count dont cares to get number of new valuations
+			for(i = 0; i < (int32_t)variables_count; i++)
+				if(dont_care_list[i])dont_cares_count *= 2;
+			uint32_t new_size	= *valuations_count + dont_cares_count;
+			if(new_size >= valuations_size){
+				bool* ptr	= realloc(valuations, sizeof(bool*) * variables_count * new_size);
+				if(ptr == NULL){
+					printf("Could not reallocate valuations array\n");
+					exit(-1);
+				}
+				valuations	= ptr;
+				valuations_size	= new_size;
+			}
+			uint32_t modulo	= dont_cares_count;
+			for(i = 0; i < (int32_t)variables_count; i++){
+				modulo /= 2;
+				for(j = 0; j < dont_cares_count; j++){
+					if(dont_care_list[i]){
+						//set according to modulo division if current position was set to dont care
+						GET_VAR_IN_VALUATION(valuations, variables_count, *valuations_count + j, i)	= (j / modulo % 2) == 1;
+					}else{
+						//set to predefined value for this search
+						GET_VAR_IN_VALUATION(valuations, variables_count, *valuations_count + j, i)	= partial_valuation[i];
+					}
+				}
+			}
+			*valuations_count	+= dont_cares_count;
+			//now we must backtrack the search
+			while(--last_node_index >= 0){
+				if(last_pred_index[last_node_index] != -1)
+					break;
+			}
+		}else if(last_pred_index[last_node_index] <
+				(int32_t)(last_node->high_predecessors_count + last_node->low_predecessors_count)){//check if we can still explore the current node
+			//get current predecessor
+			belongs	= false;
+			while(!belongs){
+				if(last_pred_index[last_node_index] < (int32_t)last_node->high_predecessors_count){
+					current_predecessor	= last_node->high_predecessors[last_pred_index[last_node_index]];
+					through_high		= true;
+				}else if(last_pred_index[last_node_index] <
+						(int32_t)(last_node->high_predecessors_count + last_node->low_predecessors_count)){
+					current_predecessor	= last_node->low_predecessors[last_pred_index[last_node_index - last_node->high_predecessors_count]];
+					through_high		= false;
+				}else{
+					printf("Should not have reached this point\n");
+					exit(-1);
+				}
+				//if this is the last node we should check that only current-obdd predecessors are
+				//take into account
+				if(last_node_index == 0){
+					for(i = 0; i < (int32_t)nodes_count; i++)
+						if(nodes[i] == current_predecessor){
+							belongs	= true;
+							break;
+						}
+				}else	belongs	= true;
+			}
+			//updates structures and keep exploring
+			partial_valuation[current_predecessor->var_ID]	= through_high;
+			dont_care_list[current_predecessor->var_ID]		= false;
+			for(i = (int32_t)current_predecessor->var_ID; i < (int32_t)last_node->var_ID; i++){
+				dont_care_list[i]	= true;
+			}
+			last_pred_index[last_node_index]++;
+			if(last_pred_index[last_node_index] ==
+					(int32_t)(last_node->high_predecessors_count + last_node->low_predecessors_count))
+				last_pred_index[last_node_index]	= -1;
+			last_node_index++;
+			last_nodes[last_node_index]			= current_predecessor;
+			last_pred_index[last_node_index]	= 0;
+		}
+
+	}
+
+
+	free(nodes);
+	free(last_nodes);
+	free(last_pred_index);
+	free(dont_care_list);
+	return valuations;
 }
 
 /** OBDD NODE FUNCTIONS **/

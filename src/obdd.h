@@ -10,6 +10,9 @@
 #define VAR_NEXT_SUFFIX		"_p"
 
 #define DEBUG_OBDD	1
+
+#define GET_VAR_IN_VALUATION(arr, variable_count, valuation_index, variable_index)	(arr[(variable_count * valuation_index) + variable_index])
+
 /** STRUCTS **/
 /** BINARY MAP TREE **/
 typedef struct obdd_state_tree_entry_str{
@@ -129,5 +132,7 @@ bool obdd_is_true(obdd_mgr* mgr, obdd_node* root);
 bool obdd_is_constant(obdd_mgr* mgr, obdd_node* root);						//checks if representation is constant
 bool obdd_is_tautology(obdd_mgr* mgr, obdd_node* root);						//checks if representation is always true
 bool obdd_is_sat(obdd_mgr* mgr, obdd_node* root);							//checks if representation is satisfiable
-bool** obdd_get_valuatons(obdd_mgr* mgr, obdd* root);
+bool* obdd_get_valuatons(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count);
+void obdd_node_get_obdd_nodes(obdd_mgr* mgr, obdd_node* root, obdd_node*** nodes, uint32_t* nodes_count, uint32_t* nodes_size);
+obdd_node** obdd_get_obdd_nodes(obdd_mgr* mgr, obdd* root, uint32_t* nodes_count);
 #endif
