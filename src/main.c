@@ -35,7 +35,17 @@ void run_parse_test(char* test_file, char* test_name){
     automaton_program_syntax_destroy(parsed_program);
     fclose(yyin);
 }
-
+void run_small_obdd_tests(){
+	obdd_mgr* new_mgr	= obdd_mgr_create();
+	//compare x1 & !(x2 | x3) == x1 & !x2 & !x3
+	obdd* x1_obdd		= obdd_mgr_var(new_mgr, "x1");
+	obdd* x2_obdd		= obdd_mgr_var(new_mgr, "x2");
+	obdd* x1_or_x2_obdd	= obdd_apply_or(x1_obdd, x2_obdd);
+	obdd_destroy(x1_obdd);
+	obdd_destroy(x2_obdd);
+	obdd_destroy(x1_or_x2_obdd);
+	obdd_mgr_destroy(new_mgr);
+}
 void run_obdd_tests(){
 	obdd_mgr* new_mgr	= obdd_mgr_create();
 	//compare x1 & !(x2 | x3) == x1 & !x2 & !x3
@@ -49,7 +59,7 @@ void run_obdd_tests(){
 	obdd* x1_and_not_x1_obdd= obdd_apply_and(x1_obdd,not_x1_obdd);
 
 	obdd* not_x1_and_x2_obdd= obdd_apply_not(x1_and_x2_obdd);
-/*
+
 	obdd* x1_and_x2_then_x1	= obdd_apply_or(not_x1_and_x2_obdd, x1_obdd);
 
 	obdd* x2_eq_fallacy_obdd= obdd_apply_equals(x2_obdd, x1_and_not_x1_obdd);
@@ -76,9 +86,10 @@ void run_obdd_tests(){
 	printf("E x2.(x2 = (x1 && !x1)) taut? : %s \n", obdd_is_tautology(new_mgr, exists_obdd->root_obdd) ? "yes" : "no");
 
 	obdd_mgr_print(new_mgr);
-*/
+
 	obdd_destroy(x1_obdd);
 	obdd_destroy(x2_obdd);
+	obdd_print(x1_or_x2_obdd);
 	obdd_destroy(x1_or_x2_obdd);
 
 	obdd_destroy(x1_and_x2_obdd);
@@ -87,11 +98,11 @@ void run_obdd_tests(){
 	obdd_destroy(x1_and_not_x1_obdd);
 
 	obdd_destroy(not_x1_and_x2_obdd);
-	/*
+
 	obdd_destroy(x1_and_x2_then_x1);
 	obdd_destroy(x2_eq_fallacy_obdd);
 	obdd_destroy(exists_obdd);
-	*/
+
 	obdd_mgr_destroy(new_mgr);
 
 }
@@ -342,8 +353,9 @@ int main (void){
 	//run_fsp_tests(18);
 	//run_parse_test("tests/test18.fsp",  "test18");
 	//run_parse_test("tests/test23.fsp", "test23");
-	run_obdd_tree_tests();
-	run_obdd_tests();
+	//run_obdd_tree_tests();
+	//run_obdd_tests();
+	run_small_obdd_tests();
 	//run_parse_test("tests/test24.fsp", "test24");
 
 	//run_concrete_bucket_list_tests();
