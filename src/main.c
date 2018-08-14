@@ -87,6 +87,14 @@ void run_obdd_tests(){
 
 	obdd_mgr_print(new_mgr);
 
+	uint32_t valuations_count;
+	bool* valuations	= obdd_get_valuations(new_mgr, x1_and_x2_obdd, &valuations_count);
+	obdd_print_valuations(new_mgr, valuations, valuations_count);
+	free(valuations);
+	valuations	= obdd_get_valuations(new_mgr, x1_or_x2_obdd, &valuations_count);
+	obdd_print_valuations(new_mgr, valuations, valuations_count);
+	free(valuations);
+
 	obdd_destroy(x1_obdd);
 	obdd_destroy(x2_obdd);
 	obdd_print(x1_or_x2_obdd);
