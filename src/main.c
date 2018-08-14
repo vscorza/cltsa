@@ -39,11 +39,21 @@ void run_small_obdd_tests(){
 	obdd_mgr* new_mgr	= obdd_mgr_create();
 	//compare x1 & !(x2 | x3) == x1 & !x2 & !x3
 	obdd* x1_obdd		= obdd_mgr_var(new_mgr, "x1");
+	obdd* not_x1_obdd	= obdd_apply_not(x1_obdd);
 	obdd* x2_obdd		= obdd_mgr_var(new_mgr, "x2");
 	obdd* x1_or_x2_obdd	= obdd_apply_or(x1_obdd, x2_obdd);
+	obdd* x1_then_x2_obdd	= obdd_apply_or(not_x1_obdd, x2_obdd);
+	printf("X1 -> X2\n");
+	obdd_print(x1_then_x2_obdd);
+	uint32_t valuations_count;
+	bool* valuations	= obdd_get_valuations(new_mgr, x1_then_x2_obdd, &valuations_count);
+	obdd_print_valuations(new_mgr, valuations, valuations_count);
+	free(valuations);
 	obdd_destroy(x1_obdd);
+	obdd_destroy(not_x1_obdd);
 	obdd_destroy(x2_obdd);
 	obdd_destroy(x1_or_x2_obdd);
+	obdd_destroy(x1_then_x2_obdd);
 	obdd_mgr_destroy(new_mgr);
 }
 void run_obdd_tests(){
@@ -380,8 +390,9 @@ int main (void){
 	//run_parse_test("tests/test18.fsp",  "test18");
 	//run_parse_test("tests/test23.fsp", "test23");
 	//run_obdd_tree_tests();
+	run_small_obdd_tests();
 	run_obdd_tests();
-	//run_small_obdd_tests();
+
 	//run_parse_test("tests/test24.fsp", "test24");
 
 	//run_concrete_bucket_list_tests();

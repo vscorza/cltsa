@@ -899,10 +899,10 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count)
 						if(dont_care_list[i]){
 							modulo /= 2;
 							//set according to modulo division if current position was set to dont care
-							GET_VAR_IN_VALUATION(valuations, variables_count, *valuations_count + k, (variables_count - 1) - i)	= ((k / modulo) % 2) == 0;
+							GET_VAR_IN_VALUATION(valuations, variables_count, *valuations_count + k, /*(variables_count - 1) -*/ i)	= ((k / modulo) % 2) == 0;
 						}else{
 							//set to predefined value for this search
-							GET_VAR_IN_VALUATION(valuations, variables_count, *valuations_count + k, (variables_count - 1) - i)	= partial_valuation[i];
+							GET_VAR_IN_VALUATION(valuations, variables_count, *valuations_count + k, /*(variables_count - 1) -*/ i)	= partial_valuation[i];
 						}
 					}
 				}
@@ -913,7 +913,7 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count)
 				for(j = 0; j < (int32_t)*valuations_count; j++){
 					printf("[");
 					for(i = 0; i < (int32_t)variables_count; i++)
-						printf("%s", GET_VAR_IN_VALUATION(valuations, variables_count, j, (variables_count - 1) - i) ? "1" : "0");
+						printf("%s", GET_VAR_IN_VALUATION(valuations, variables_count, j, /*(variables_count - 1)*/ - i) ? "1" : "0");
 					printf("]\n");
 				}
 #endif
