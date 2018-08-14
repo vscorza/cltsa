@@ -680,13 +680,13 @@ bool obdd_is_sat(obdd_mgr* mgr, obdd_node* root){
 }
 
 void obdd_print_valuations(obdd_mgr* mgr, bool* valuations, uint32_t valuations_count){
-	uint32_t i, j, variables_count	= mgr->vars_dict->size;
-	for(i = 2; i < variables_count; i++){
-		printf("%s\t", mgr->vars_dict->entries[i].key);
+	uint32_t i, j, variables_count	= mgr->vars_dict->size - 2;
+	for(i = 0; i < variables_count; i++){
+		printf("%s\t", mgr->vars_dict->entries[i + 2].key);
 	}
 	printf("\n");
 	for(i = 0; i < valuations_count; i++){
-		for(j = 0; j < (variables_count-2); j++)
+		for(j = 0; j < (variables_count); j++)
 			printf("%s\t", GET_VAR_IN_VALUATION(valuations, variables_count, i, j) ? "1" : "0");
 		printf("\n");
 	}
@@ -723,11 +723,11 @@ obdd_node** obdd_get_obdd_nodes(obdd_mgr* mgr, obdd* root, uint32_t* nodes_count
 	uint32_t nodes_size	= LIST_INITIAL_SIZE;
 	obdd_node** nodes	= malloc(sizeof(obdd_node*) * nodes_size);
 	*nodes_count		= 0;
-#if DEBUG_OBDD
+#if DEBUG_OBDD_VALUATIONS
 	printf("Getting OBDD nodes\n");
 #endif
 	obdd_node_get_obdd_nodes(mgr, root->root_obdd, &nodes, nodes_count, &nodes_size);
-#if DEBUG_OBDD
+#if DEBUG_OBDD_VALUATIONS
 	uint32_t i;
 	for(i = 0; i < *nodes_count; i++)
 		printf("<%p>\n", (void*)nodes[i]);
@@ -762,75 +762,61 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count)
 
 	last_nodes[last_node_index]	= current_node;
 	last_pred_index[last_node_index]	= 0;
-	bool belongs, through_high;
-#if DEBUG_OBDD
+	bool belongs, through_high, has_no_pred;
+#if DEBUG_OBDD_VALUATIONS
 	printf("Getting OBDD valuations\n");
+	printf("[N]ow on node: %d (%s) \n", last_node_index, dictionary_key_for_value(mgr->vars_dict,last_nodes[last_node_index]->var_ID));
+	printf("High pred. count: %d \tLow pred.count: %d\n", last_nodes[last_node_index]->high_predecessors_count, last_nodes[last_node_index]->low_predecessors_count);
 #endif
 	//perform dfs exploration of obdd
 	while(last_pred_index[last_node_index] != -1){
-
 		last_node	= last_nodes[last_node_index];
-
-		if(last_node->high_predecessors_count == 0 && last_node->low_predecessors_count == 0){//terminal case, add valuation
-			dont_cares_count	= 1;
-			//set unexplored variables as dont care
-			for(i = max_pred_index + 1; i < variables_count; i++)
-				dont_care_list[i]	= true;
-			//count dont cares to get number of new valuations
-			for(i = 0; i < (int32_t)variables_count; i++)
-				if(dont_care_list[i])dont_cares_count *= 2;
-			uint32_t new_size	= *valuations_count + dont_cares_count;
-			if(new_size >= valuations_size){
-				bool* ptr	= realloc(valuations, sizeof(bool*) * variables_count * new_size);
-				if(ptr == NULL){
-					printf("Could not reallocate valuations array\n");
-					exit(-1);
-				}
-				valuations	= ptr;
-				valuations_size	= new_size;
-			}
-			uint32_t modulo	= dont_cares_count;
-#if DEBUG_OBDD
-	printf("Terminals:\n");
-#endif
-			for(i = 0; i < (int32_t)variables_count; i++){
-				modulo /= 2;
-				for(j = 0; j < dont_cares_count; j++){
-					if(dont_care_list[i]){
-						//set according to modulo division if current position was set to dont care
-						GET_VAR_IN_VALUATION(valuations, variables_count, *valuations_count + j, i)	= (j / modulo % 2) == 1;
-					}else{
-						//set to predefined value for this search
-						GET_VAR_IN_VALUATION(valuations, variables_count, *valuations_count + j, i)	= partial_valuation[i];
-					}
-				}
-			}
-#if DEBUG_OBDD
-			for(j = 0; j < dont_cares_count; j++){
-				printf("[");
-				for(i = 0; i < (int32_t)variables_count; i++)
-					printf("%s", GET_VAR_IN_VALUATION(valuations, variables_count, *valuations_count + j, i) ? "1" : "0");
-				printf("]\n");
-			}
-#endif
-			*valuations_count	+= dont_cares_count;
-			//now we must backtrack the search
-			while(--last_node_index > 0){
-				if(last_pred_index[last_node_index] != -1)
-					break;
-			}
-#if DEBUG_OBDD
-	printf("Backtracked to %d\n", last_node_index);
-#endif
-		}else if(last_pred_index[last_node_index] <
+		has_no_pred	= false;
+		if((int32_t)(last_node->high_predecessors_count + last_node->low_predecessors_count) == 0){
+			has_no_pred	= true;
+		}
+		if(has_no_pred || last_pred_index[last_node_index] <
 				(int32_t)(last_node->high_predecessors_count + last_node->low_predecessors_count)){//check if we can still explore the current node
 			//get current predecessor
 
 			//if this is the last node we should check that only current-obdd predecessors are
 			//take into account
-			if(last_node_index == 0){
-				belongs	= false;
-				while(!belongs){
+			if(!has_no_pred){
+				if(last_node_index == 0){
+					belongs	= false;
+					while(!belongs){
+						if(last_pred_index[last_node_index] < (int32_t)last_node->high_predecessors_count){
+							current_predecessor	= last_node->high_predecessors[last_pred_index[last_node_index]];
+							through_high		= true;
+						}else if(last_pred_index[last_node_index] <
+								(int32_t)(last_node->high_predecessors_count + last_node->low_predecessors_count)){
+							current_predecessor	= last_node->low_predecessors[last_pred_index[last_node_index]  - last_node->high_predecessors_count];
+							through_high		= false;
+						}else{
+							last_pred_index[last_node_index]	= -1;
+	#if DEBUG_OBDD_VALUATIONS
+								printf("NF.exit\n");
+	#endif
+							break;//breaks while
+						}
+						for(i = 0; i < (int32_t)nodes_count; i++){
+							if(nodes[i] == current_predecessor){
+								belongs	= true;
+	#if DEBUG_OBDD_VALUATIONS
+								printf("F.exit\n");
+	#endif
+								break;
+							}
+						}
+						if(!belongs){
+							last_pred_index[last_node_index]++;
+	#if DEBUG_OBDD_VALUATIONS
+							printf("NF.");
+	#endif
+						}
+					}
+					if(!belongs)break;
+				}else{
 					if(last_pred_index[last_node_index] < (int32_t)last_node->high_predecessors_count){
 						current_predecessor	= last_node->high_predecessors[last_pred_index[last_node_index]];
 						through_high		= true;
@@ -838,54 +824,28 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count)
 							(int32_t)(last_node->high_predecessors_count + last_node->low_predecessors_count)){
 						current_predecessor	= last_node->low_predecessors[last_pred_index[last_node_index]  - last_node->high_predecessors_count];
 						through_high		= false;
-					}else{
-						last_pred_index[last_node_index]	= -1;
-#if DEBUG_OBDD
-							printf("NF.exit\n");
-#endif
-						break;//breaks while
-					}
-					for(i = 0; i < (int32_t)nodes_count; i++){
-						if(nodes[i] == current_predecessor){
-							belongs	= true;
-#if DEBUG_OBDD
-							printf("F.exit\n");
-#endif
-							break;
-						}
-					}
-					if(!belongs){
-						last_pred_index[last_node_index]++;
-#if DEBUG_OBDD
-						printf("NF.");
-#endif
 					}
 				}
-			}else{
-				if(last_pred_index[last_node_index] < (int32_t)last_node->high_predecessors_count){
-					current_predecessor	= last_node->high_predecessors[last_pred_index[last_node_index]];
-					through_high		= true;
-				}else if(last_pred_index[last_node_index] <
-						(int32_t)(last_node->high_predecessors_count + last_node->low_predecessors_count)){
-					current_predecessor	= last_node->low_predecessors[last_pred_index[last_node_index]  - last_node->high_predecessors_count];
-					through_high		= false;
+				//updates structures and keep exploring
+				if(last_pred_index[last_node_index] > -1){
+					partial_valuation[current_predecessor->var_ID - 2]	= through_high;
+					dont_care_list[current_predecessor->var_ID - 2]		= false;
+					for(i = (int32_t)(current_predecessor->var_ID - 2)+ 1; i < (int32_t)(last_node->var_ID - 2); i++){
+						dont_care_list[i]	= true;
+					}
+					last_pred_index[last_node_index]++;
 				}
+			}else{//had no pred
+				last_pred_index[last_node_index]	= -1;
+				current_predecessor	= last_node;
 			}
-			//updates structures and keep exploring
-			if(last_pred_index[last_node_index] > -1){
-				partial_valuation[current_predecessor->var_ID - 2]	= through_high;
-				dont_care_list[current_predecessor->var_ID - 2]		= false;
-				for(i = (int32_t)(current_predecessor->var_ID - 2)+ 1; i < (int32_t)(last_node->var_ID - 2); i++){
-					dont_care_list[i]	= true;
-				}
-				last_pred_index[last_node_index]++;
-			}
-#if DEBUG_OBDD
+
+#if DEBUG_OBDD_VALUATIONS
 			printf("last_pred_index[%d]:%d\t<", last_node_index, last_pred_index[last_node_index]);
-			for(i = variables_count - 1; i > last_node_index; i--)
-				printf("x");
 			for(i = 0; i <= (int32_t)last_node_index; i++)
 				printf("%s", dont_care_list[i]? "?" : (partial_valuation[i]? "1" : "0"));
+			for(i = variables_count - 1; i > last_node_index; i--)
+				printf("x");
 			printf(">\n");
 			printf("Partial Valuation\t<");
 			for(i = 0; i < (int32_t)variables_count; i++)
@@ -896,27 +856,108 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count)
 				printf("%s", dont_care_list[i]? "?" : "0");
 			printf(">\n");
 #endif
+			if(current_predecessor->high_predecessors_count == 0 && current_predecessor->low_predecessors_count == 0){//terminal case, add valuation
+				dont_cares_count	= 1;
+				//set unexplored variables as dont care
+				for(i = max_pred_index + 1; i < variables_count; i++)
+					dont_care_list[i]	= true;
+				//count dont cares to get number of new valuations
+				for(i = 0; i < (int32_t)variables_count; i++)
+					if(dont_care_list[i])dont_cares_count *= 2;
+				uint32_t new_size	= *valuations_count + dont_cares_count;
+				if(new_size >= valuations_size){
+					bool* ptr	= realloc(valuations, sizeof(bool*) * variables_count * new_size);
+					if(ptr == NULL){
+						printf("Could not reallocate valuations array\n");
+						exit(-1);
+					}
+					valuations	= ptr;
+					valuations_size	= new_size;
+				}
+				uint32_t modulo	= dont_cares_count;
+#if DEBUG_OBDD_VALUATIONS
+				printf("[T]erminals:\n");
+				printf("last_pred_index[%d]:%d\t<", last_node_index, last_pred_index[last_node_index]);
+				for(i = 0; i <= (int32_t)last_node_index; i++)
+					printf("%s", dont_care_list[i]? "?" : (partial_valuation[i]? "1" : "0"));
+				for(i = variables_count - 1; i > last_node_index; i--)
+					printf("x");
+				printf(">\n");
+				printf("Partial Valuation\t<");
+				for(i = 0; i < (int32_t)variables_count; i++)
+					printf("%s", partial_valuation[i]? "1" : "0");
+				printf(">\n");
+				printf("Dont care list\t<");
+				for(i = 0; i < (int32_t)variables_count; i++)
+					printf("%s", dont_care_list[i]? "?" : "0");
+				printf(">\n");
+#endif
+				uint32_t k;
+				for(k = 0; k < (uint32_t)dont_cares_count; k++){
+					modulo	= dont_cares_count;
+					for(i = 0; i < (int32_t)variables_count; i++){
+						if(dont_care_list[i]){
+							modulo /= 2;
+							//set according to modulo division if current position was set to dont care
+							GET_VAR_IN_VALUATION(valuations, variables_count, *valuations_count + k, (variables_count - 1) - i)	= ((k / modulo) % 2) == 0;
+						}else{
+							//set to predefined value for this search
+							GET_VAR_IN_VALUATION(valuations, variables_count, *valuations_count + k, (variables_count - 1) - i)	= partial_valuation[i];
+						}
+					}
+				}
+
+
+				*valuations_count	+= dont_cares_count;
+#if DEBUG_OBDD_VALUATIONS
+				for(j = 0; j < (int32_t)*valuations_count; j++){
+					printf("[");
+					for(i = 0; i < (int32_t)variables_count; i++)
+						printf("%s", GET_VAR_IN_VALUATION(valuations, variables_count, j, (variables_count - 1) - i) ? "1" : "0");
+					printf("]\n");
+				}
+#endif
+			}
 
 			if(last_pred_index[last_node_index] >=
-					(int32_t)(last_node->high_predecessors_count + last_node->low_predecessors_count))
+					(int32_t)(last_node->high_predecessors_count + last_node->low_predecessors_count)){
 				last_pred_index[last_node_index]	= -1;
+#if DEBUG_OBDD_VALUATIONS
+				printf("[E]xhausted node: %d (%s) -1 \n", last_node_index, dictionary_key_for_value(mgr->vars_dict,last_nodes[last_node_index]->var_ID));
+#endif
+			}
 			if(last_node_index < (int32_t)(variables_count - 1)){
 				last_node_index++;
-				if(last_node_index > max_pred_index)
+				if(last_node_index > max_pred_index){
 							max_pred_index	= last_node_index;
+#if DEBUG_OBDD_VALUATIONS
+							printf("New max index: %d\n", max_pred_index);
+#endif
+				}
 				last_nodes[last_node_index]			= current_predecessor;
 				last_pred_index[last_node_index]	= 0;
-#if DEBUG_OBDD
-			printf("Now on node: %d\n", last_node_index);
+#if DEBUG_OBDD_VALUATIONS
+				printf("[N]ow on node: %d (%s) \n", last_node_index, dictionary_key_for_value(mgr->vars_dict,last_nodes[last_node_index]->var_ID));
+				printf("High pred. count: %d \tLow pred.count: %d\n", last_nodes[last_node_index]->high_predecessors_count, last_nodes[last_node_index]->low_predecessors_count);
 #endif
+
 			}else{
-				while(--last_node_index > 0){
+				dont_care_list[last_node_index]	= true;
+				while(--last_node_index > 0){//firing backtrack can avoid terminals
+					dont_care_list[last_node_index]	= true;
 					if(last_pred_index[last_node_index] != -1)
 						break;
 				}
+#if DEBUG_OBDD_VALUATIONS
+	printf("[B]acktracked on exploration to %d\n", last_node_index);
+#endif
 			}
+		}else{
+			printf("Should not have reached this point\n");
+			printf("[W]as on node: %d (%s) %d\n", last_node_index, dictionary_key_for_value(mgr->vars_dict,last_nodes[last_node_index]->var_ID)
+					,last_pred_index[last_node_index]);
+			break;
 		}
-
 	}
 
 

@@ -51,9 +51,11 @@ void run_obdd_tests(){
 	//compare x1 & !(x2 | x3) == x1 & !x2 & !x3
 	obdd* x1_obdd		= obdd_mgr_var(new_mgr, "x1");
 	obdd* x2_obdd		= obdd_mgr_var(new_mgr, "x2");
+	obdd* x3_obdd		= obdd_mgr_var(new_mgr, "x3");
 	obdd* x1_or_x2_obdd	= obdd_apply_or(x1_obdd, x2_obdd);
-
+	obdd* x1_or_x2_or_x3_obdd	= obdd_apply_or(x1_or_x2_obdd, x3_obdd);
 	obdd* x1_and_x2_obdd	= obdd_apply_and(x1_obdd, x2_obdd);
+	obdd* x1_and_x2_and_x3_obdd	= obdd_apply_and(x1_and_x2_obdd, x3_obdd);
 
 	obdd* not_x1_obdd	= obdd_apply_not(x1_obdd);
 	obdd* x1_and_not_x1_obdd= obdd_apply_and(x1_obdd,not_x1_obdd);
@@ -86,22 +88,38 @@ void run_obdd_tests(){
 	printf("E x2.(x2 = (x1 && !x1)) taut? : %s \n", obdd_is_tautology(new_mgr, exists_obdd->root_obdd) ? "yes" : "no");
 
 	obdd_mgr_print(new_mgr);
-
 	uint32_t valuations_count;
-	bool* valuations	= obdd_get_valuations(new_mgr, x1_and_x2_obdd, &valuations_count);
+	bool* valuations;
+
+	printf("X1 && X2\n");
+	obdd_print(x1_and_x2_obdd);
+	valuations	= obdd_get_valuations(new_mgr, x1_and_x2_obdd, &valuations_count);
 	obdd_print_valuations(new_mgr, valuations, valuations_count);
 	free(valuations);
+
+	printf("X1 & X2 && X3\n");
+	obdd_print(x1_and_x2_and_x3_obdd);
+	valuations	= obdd_get_valuations(new_mgr, x1_and_x2_and_x3_obdd, &valuations_count);
+	obdd_print_valuations(new_mgr, valuations, valuations_count);
+	free(valuations);
+
+	printf("X1 || X2\n");
+	obdd_print(x1_or_x2_obdd);
 	valuations	= obdd_get_valuations(new_mgr, x1_or_x2_obdd, &valuations_count);
 	obdd_print_valuations(new_mgr, valuations, valuations_count);
 	free(valuations);
-
+	printf("X1 || X2 || X3\n");
+	obdd_print(x1_or_x2_or_x3_obdd);
+	valuations	= obdd_get_valuations(new_mgr, x1_or_x2_or_x3_obdd, &valuations_count);
+	obdd_print_valuations(new_mgr, valuations, valuations_count);
+	free(valuations);
 	obdd_destroy(x1_obdd);
 	obdd_destroy(x2_obdd);
-	obdd_print(x1_or_x2_obdd);
+	obdd_destroy(x3_obdd);
 	obdd_destroy(x1_or_x2_obdd);
-
+	obdd_destroy(x1_or_x2_or_x3_obdd);
 	obdd_destroy(x1_and_x2_obdd);
-
+	obdd_destroy(x1_and_x2_and_x3_obdd);
 	obdd_destroy(not_x1_obdd);
 	obdd_destroy(x1_and_not_x1_obdd);
 
