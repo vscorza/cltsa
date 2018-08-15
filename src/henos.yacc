@@ -267,7 +267,7 @@ ltlAutExp:
 	|ltlAutExp t_AND ltlAutExp				{$$ = obdd_apply_and($1, $3);obdd_destroy($1);obdd_destroy($3);free($2);}
 	|ltlAutExp t_PARALLEL ltlAutExp			{$$ = obdd_apply_or($1, $3);obdd_destroy($1);obdd_destroy($3);free($2);}
 	|'!' ltlAutExp							{$$ = obdd_apply_not($2);obdd_destroy($2);}
-	|t_NEXT ltlAutExp							{$$ = obdd_apply_next($2);free($1);}
+	|t_NEXT ltlAutExp						{$$ = obdd_apply_next($2);free($1);}
 	|'(' ltlAutExp ')'						{$$ = $2;}
 	;	
 /*

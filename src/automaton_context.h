@@ -69,8 +69,6 @@ typedef struct automaton_parsing_tables_str{
 	struct automaton_parsing_table_entry_str** automaton_entries;
 	uint32_t composition_count;
 	struct automaton_parsing_table_entry_str** composition_entries;
-	uint32_t ltl_rules_count;
-	struct automaton_parsing_table_entry_str** ltl_rules_entries;
 }automaton_parsing_tables;
 /****************
 ==== FUNCTIONS ====
@@ -104,6 +102,6 @@ bool automaton_statement_syntax_to_fluent(automaton_automata_context* ctx, autom
 automaton_fluent* automaton_fluent_create_from_syntax(automaton_parsing_tables* tables, automaton_fluent_syntax* fluent_def_syntax, automaton_alphabet* global_alphabet);
 void automaton_index_syntax_get_range(automaton_parsing_tables* tables, automaton_index_syntax* index, int32_t *lower_index, int32_t *upper_index);
 void automaton_indexes_syntax_eval_strings(automaton_parsing_tables* tables, automaton_indexes_valuation* valuation, char*** a, int32_t* a_count, automaton_indexes_syntax* indexes);
-automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_context* ctx, char* name, obdd* env_theta_obdd, obdd* sys_theta_obdd
-		, obdd* env_rho_obdd, obdd* sys_rho_obdd, automaton_parsing_tables* tables);
+automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_context* ctx, char* name, obdd* env_theta_obdd, uint32_t env_theta_count, obdd* sys_theta_obdd, uint32_t sys_theta_count
+		, obdd* env_rho_obdd, uint32_t env_rho_count, obdd* sys_rho_obdd, uint32_t sys_rho_count, automaton_parsing_tables* tables);
 #endif /* AUTOMATON_CONTEXT_H_ */

@@ -1514,8 +1514,8 @@ automaton_fluent* automaton_fluent_create_from_syntax(automaton_parsing_tables* 
 	return fluent;
 }
 
-automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_context* ctx, char* name, obdd* env_theta_obdd, obdd* sys_theta_obdd
-		, obdd* env_rho_obdd, obdd* sys_rho_obdd, automaton_parsing_tables* tables){
+automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_context* ctx, char* name, obdd* env_theta_obdd, uint32_t env_theta_count, obdd* sys_theta_obdd, uint32_t sys_theta_count
+		, obdd* env_rho_obdd, uint32_t env_rho_count, obdd* sys_rho_obdd, uint32_t sys_rho_count, automaton_parsing_tables* tables){
 	//remember that if automaton was built from ltl its valuations should be added when building it
 	//and should be kept when composing it, if several automata are to be composed from ltl their composed valuation
 	//equals to the conjunction of the components' valuations
@@ -1528,10 +1528,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	for(i = 0; i < mgr->vars_dict->size; i++){
 		if((strcmp(mgr->vars_dict->entries[i].key, TRUE_VAR) == 0) || (strcmp(mgr->vars_dict->entries[i].key, FALSE_VAR) == 0))
 			continue;
-		printf("%s.", mgr->vars_dict->entries[i].key);
 		strcpy(current_dict_entry, mgr->vars_dict->entries[i].key);
-		//local_alphabet[current_element++]	= dictionary_value_for_key(mgr->vars_dict, current_dict_entry);
-		//strcpy(current_dict_entry, mgr->vars_dict->entries[i].key);
 		strcat(current_dict_entry, SIGNAL_ON_SUFFIX);
 		local_alphabet[current_element++]	= automaton_alphabet_get_value_index(ctx->global_alphabet, current_dict_entry);
 		strcpy(current_dict_entry, mgr->vars_dict->entries[i].key);
@@ -1678,8 +1675,16 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 			}
 	//build automata from ltl
 	for(i = 0; i < ltl_automata_count; i++){
-		automaton_build_automaton_from_obdd(ctx, ltl_automata_names[i], env_theta_obdd[i], sys_theta_obdd[i], env_rho_obdd[i], sys_rho_obdd[i], tables);
+		automaton_build_automaton_from_obdd(ctx, ltl_automata_names[i], env_theta_obdd[i], env_theta_count[i], sys_theta_obdd[i], sys_theta_count[i],
+				env_rho_obdd[i], env_rho_count[i], sys_rho_obdd[i], sys_rho_count[i], tables);
 	}
+	/*
+	for(i = 0; i < ltl_automata_count; i++){
+		for(j = 0; j < sys_theta_count[i]; j++)obdd_destroy(sys_theta_obdd[i][j]);
+		for(j = 0; j < env_theta_count[i]; j++)obdd_destroy(env_theta_obdd[i][j]);
+		for(j = 0; j < sys_rho_count[i]; j++)obdd_destroy(sys_rho_obdd[i][j]);
+		for(j = 0; j < env_rho_count[i]; j++)obdd_destroy(env_rho_obdd[i][j]);
+	}*/
 	for(i = 0; i < ltl_automata_count; i++){
 		free(sys_theta_obdd[i]);		free(env_theta_obdd[i]);
 		free(sys_rho_obdd[i]);			free(env_rho_obdd[i]);
