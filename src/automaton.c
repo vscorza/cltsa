@@ -848,7 +848,7 @@ bool automaton_alphabet_add_signal_event(automaton_alphabet* alphabet, automaton
 		uint32_t new_size	= alphabet->size * LIST_INCREASE_FACTOR;
 		automaton_signal_event* new_list	= malloc(sizeof(automaton_signal_event) * new_size);
 		for(i = 0; i < old_count; i++){
-			if(signal_ordered_index >= i){
+			if(signal_ordered_index <= i){
 				automaton_signal_event_copy(&(alphabet->list[i]), &(new_list[i+1]));
 			}else{
 				automaton_signal_event_copy(&(alphabet->list[i]), &(new_list[i]));
@@ -859,7 +859,7 @@ bool automaton_alphabet_add_signal_event(automaton_alphabet* alphabet, automaton
 		alphabet->list	= new_list;
 		alphabet->size	= new_size;
 	}else if(signal_ordered_index > -1){
-		for(i = (alphabet->count) - 1; i > signal_ordered_index; i--){
+		for(i = (alphabet->count) - 1; i >= signal_ordered_index; i--){
 			automaton_signal_event_copy(&(alphabet->list[i]), &(alphabet->list[i + 1]));
 			automaton_signal_event_destroy(&(alphabet->list[i]), false);
 		}

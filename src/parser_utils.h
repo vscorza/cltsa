@@ -8,6 +8,7 @@
 #include <assert.h>
 #include <stdbool.h>
 #include "automaton_utils.h"
+//#include "automaton.h"
 #include "obdd.h"
 
 #define SIGNAL_ON_SUFFIX	".on"
@@ -60,8 +61,14 @@ typedef enum {
 	COMPOSITION_AUT,
 	GR_1_AUT,
 	GOAL_AUT,
-	LTL_RULE_AUT
+	LTL_RULE_AUT,
+	LTL_FLUENT_AUT
 } automaton_statement_type_syntax;
+typedef enum {
+	ASYNCH_AUT,
+	SYNCH_AUT,
+	CONCURRENT_AUT
+} automaton_synchronization_type_syntax;
 /****************
 ==== STRUCTS ====
 */
@@ -145,6 +152,7 @@ typedef struct automaton_component_syntax_str{
 	char* prefix;
 	automaton_index_syntax* index;
 	automaton_indexes_syntax* indexes;
+	automaton_synchronization_type_syntax synch_type;
 }automaton_component_syntax;
 typedef struct automaton_components_syntax_str{
 	uint32_t count;
@@ -172,6 +180,7 @@ typedef struct automaton_statement_syntax_str{
 	struct automaton_set_def_syntax_str* set_def;
 	struct automaton_gr1_game_syntax_str* gr1_game_def;
 	struct ltl_rule_syntax_str* ltl_rule_def;
+	struct ltl_fluent_syntax_str* ltl_fluent_def;
 }automaton_statement_syntax;
 typedef struct automaton_program_syntax_str{
 	uint32_t count;
@@ -248,13 +257,13 @@ automaton_composition_syntax* automaton_composition_syntax_create_from_states(au
 automaton_composition_syntax* automaton_composition_syntax_create_from_ref(char* name, automaton_components_syntax* components, bool is_game);
 automaton_gr1_game_syntax* automaton_gr1_game_syntax_create(char* name, char* composition_name, automaton_set_syntax* assumptions, automaton_set_syntax* goals);
 automaton_components_syntax* automaton_components_syntax_create(automaton_component_syntax* component);
-automaton_components_syntax* automaton_components_syntax_add_component(automaton_components_syntax* components, automaton_component_syntax* component);
+automaton_components_syntax* automaton_components_syntax_add_component(automaton_components_syntax* components, automaton_component_syntax* component, automaton_synchronization_type_syntax type);
 automaton_component_syntax* automaton_component_syntax_create(char* ident, char* prefix, automaton_index_syntax* index, automaton_indexes_syntax* indexes);
 automaton_program_syntax* automaton_program_syntax_create(automaton_statement_syntax* first_statement);
 automaton_program_syntax* automaton_program_syntax_add_statement(automaton_program_syntax* program, automaton_statement_syntax* statement);
 automaton_statement_syntax* automaton_statement_syntax_create(automaton_statement_type_syntax type, automaton_composition_syntax* composition_def,
 		automaton_expression_syntax* range_def, automaton_expression_syntax* const_def, automaton_fluent_syntax* fluent_def,
-		automaton_set_def_syntax* set_def, automaton_gr1_game_syntax* gr1_game_def, ltl_rule_syntax* ltl_rule_def);
+		automaton_set_def_syntax* set_def, automaton_gr1_game_syntax* gr1_game_def, ltl_rule_syntax* ltl_rule_def, ltl_fluent_syntax* ltl_fluent_def);
 bool automaton_syntax_is_reserved(char* token);
 ltl_rule_syntax* ltl_rule_syntax_create(bool is_theta, bool is_env, char* name, char* game_structure_name, obdd* obdd);
 ltl_fluent_syntax* automaton_ltl_fluent_syntax_create(char* name, obdd* obdd);

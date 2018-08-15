@@ -351,9 +351,9 @@ obdd_node* obdd_node_apply_next(obdd_mgr* mgr, obdd_node* value){
 	strcat(var_next, VAR_NEXT_SUFFIX);
 	uint32_t var_ID		= dictionary_add_entry(dict,  var_next);
 	value->var_ID		= var_ID;
-	if(value->high_obdd != NULL)
+	if(value->high_obdd != NULL && !obdd_is_constant(mgr, value->high_obdd))
 		obdd_node_apply_next(mgr, value->high_obdd);
-	if(value->low_obdd != NULL)
+	if(value->low_obdd != NULL && !obdd_is_constant(mgr, value->low_obdd))
 		obdd_node_apply_next(mgr, value->low_obdd);
 	return value;
 }

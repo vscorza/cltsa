@@ -60,7 +60,7 @@ typedef enum aumaton_signal_type_enum{
 
 typedef enum aumaton_synchronization_type_enum{
 	CONCURRENT 	= 0,
-	INTERLEAVED	= 1,
+	ASYNCHRONOUS	= 1,
 	SYNCHRONOUS = 2
 } automaton_synchronization_type;
 

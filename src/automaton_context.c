@@ -567,7 +567,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 			composition_count					= new_composition_count;
 		}
 		aut_context_log("composing.\n");
-		automaton_automaton* automaton	= automaton_automata_compose(automata, composition_count, is_synchronous? CONCURRENT : INTERLEAVED, composition_syntax->is_game);//SYNCHRONOUS);
+		automaton_automaton* automaton	= automaton_automata_compose(automata, composition_count, is_synchronous? CONCURRENT : ASYNCHRONOUS, composition_syntax->is_game);//SYNCHRONOUS);
 		if(composition_syntax->is_game)
 			for(i = 0; i < (int32_t)ctx->global_fluents_count; i++)
 				automaton_automaton_destroy(automata[composition_count - i - 1]);
@@ -1518,7 +1518,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	//equals to the conjunction of the components' valuations
 	obdd_mgr* mgr						= parser_get_obdd_mgr();
 	obdd_state_tree* state_map			= obdd_state_tree_create(mgr->vars_dict->size);
-	uint32_t local_alphabet_count		= mgr->vars_dict->size * 2;
+	uint32_t local_alphabet_count		= mgr->vars_dict->size * 3;
 	uint32_t i, current_element 		= 0;
 	uint32_t* local_alphabet			= malloc(sizeof(uint32_t) * local_alphabet_count);
 	char current_dict_entry[255];

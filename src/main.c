@@ -390,10 +390,10 @@ int main (void){
 	//run_parse_test("tests/test18.fsp",  "test18");
 	//run_parse_test("tests/test23.fsp", "test23");
 	//run_obdd_tree_tests();
-	run_small_obdd_tests();
-	run_obdd_tests();
+	//run_small_obdd_tests();
+	//run_obdd_tests();
 
-	//run_parse_test("tests/test24.fsp", "test24");
+	run_parse_test("tests/test26.fsp", "test26");
 
 	//run_concrete_bucket_list_tests();
 	//run_ordered_list_tests();

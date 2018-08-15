@@ -310,11 +310,12 @@ automaton_components_syntax* automaton_components_syntax_create(automaton_compon
 	return components;
 }
 
-automaton_components_syntax* automaton_components_syntax_add_component(automaton_components_syntax* components, automaton_component_syntax* component){
+automaton_components_syntax* automaton_components_syntax_add_component(automaton_components_syntax* components, automaton_component_syntax* component, automaton_synchronization_type_syntax type){
 	components->count++;
 	automaton_component_syntax** new_components	= malloc(sizeof(automaton_component_syntax*) * components->count);
 	uint32_t i;
 	for(i = 0; i < (components->count -1); i++)new_components[i] = components->components[i];
+	component->synch_type	= type;
 	new_components[components->count -1]	= component;
 	free(components->components);
 	components->components	= new_components;
@@ -326,6 +327,7 @@ automaton_component_syntax* automaton_component_syntax_create(char* ident, char*
 	aut_dupstr(&(component->prefix), prefix);
 	component->index	= index;
 	component->indexes	= indexes;
+	component->synch_type		= ASYNCH_AUT;
 	return component;
 }
 automaton_program_syntax* automaton_program_syntax_create(automaton_statement_syntax* first_statement){
@@ -347,7 +349,7 @@ automaton_program_syntax* automaton_program_syntax_add_statement(automaton_progr
 }
 automaton_statement_syntax* automaton_statement_syntax_create(automaton_statement_type_syntax type, automaton_composition_syntax* composition_def,
 		automaton_expression_syntax* range_def, automaton_expression_syntax* const_def, automaton_fluent_syntax* fluent_def,
-		automaton_set_def_syntax* set_def, automaton_gr1_game_syntax* gr1_game_def, ltl_rule_syntax* ltl_rule){
+		automaton_set_def_syntax* set_def, automaton_gr1_game_syntax* gr1_game_def, ltl_rule_syntax* ltl_rule, ltl_fluent_syntax* ltl_fluent){
 	automaton_statement_syntax* statement	= malloc(sizeof(automaton_statement_syntax));
 	statement->type	= type;
 	statement->composition_def	= composition_def;
@@ -357,6 +359,7 @@ automaton_statement_syntax* automaton_statement_syntax_create(automaton_statemen
 	statement->set_def			= set_def;
 	statement->gr1_game_def		= gr1_game_def;
 	statement->ltl_rule_def		= ltl_rule;
+	statement->ltl_fluent_def	= ltl_fluent;
 	return statement;
 }
 
@@ -365,7 +368,7 @@ ltl_rule_syntax* ltl_rule_syntax_create(bool is_theta, bool is_env, char* name, 
 	ltl_rule->is_theta			= is_theta;
 	ltl_rule->is_env			= is_env;
 	aut_dupstr(&name, name);
-	aut_dupstr(&game_structure_name, game_structure_name);
+	aut_dupstr(&(ltl_rule->game_structure_name), game_structure_name);
 	ltl_rule->obdd				= obdd;
 	return ltl_rule;
 }
@@ -395,6 +398,7 @@ void automaton_statement_syntax_destroy(automaton_statement_syntax* statement){
 	case COMPOSITION_AUT: automaton_composition_syntax_destroy(statement->composition_def);break;
 	case GR_1_AUT: automaton_gr1_game_syntax_destroy(statement->gr1_game_def);break;
 	case LTL_RULE_AUT: ltl_rule_syntax_destroy(statement->ltl_rule_def);break;
+	case LTL_FLUENT_AUT: ltl_fluent_syntax_destroy(statement->ltl_fluent_def); break;
 	case GOAL_AUT: break;
 	}
 	free(statement);
