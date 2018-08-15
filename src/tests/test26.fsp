@@ -11,6 +11,8 @@ COOKING = (cooking->COOKING | finishedCooking->FINISHED | cook->OVERHEATED),
 FINISHED = (cook->COOKING | moveToBelt->BISCOTTI),  
 OVERHEATED = (overHeated->OVERHEATED).
 
+SUCCESSFULLY_COOKED_TWICE = (cook->cook->moveToBelt->SUCCESSFULLY_COOKED_TWICE). 
+
 ltl env theta Init_Lift_e in LIFT	= (!r_1 && !r_2 && !r_3).
 ltl sys theta Init_Lift_s in LIFT	= (!g_1 && !g_2 && !g_3).
 ltl env rho Wait_For_Grant_1 in LIFT	= [](!(r_1 <-> g_1) -> (X(r_1) <-> r_1)).
@@ -27,6 +29,7 @@ fluent F_MoveToBelt = <moveToBelt, cook>
 ltl fluent Ass	= (!(r_1 && g_1) && !(r_2 && g_2) && !(r_3 && g_3)).
 ltl fluent Goal	= ((r_1 <-> g_1) && (r_2 <-> g_2) && (r_3 <-> g_3)).
 
-|f| ENV =((BISCOTTI || SUCCESSFULLY_COOKED_TWICE) ||_c LIFT).
-|gr1| <{F_NotCooking, Ass}><{F_MoveToBelt, Goal}> STRAT = ENV.
+|f| ENV =((BISCOTTI || SUCCESSFULLY_COOKED_TWICE)).// ||_c LIFT).
+//|gr1| <{F_NotCooking, Ass}><{F_MoveToBelt, Goal}> STRAT = ENV.
+|gr1| <{F_NotCooking}><{F_MoveToBelt}> STRAT = ENV.
 

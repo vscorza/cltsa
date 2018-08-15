@@ -394,6 +394,7 @@ int main (void){
 	//run_obdd_tests();
 
 	run_parse_test("tests/test26.fsp", "test26");
+	//run_parse_test("tests/test21.fsp", "test21");
 
 	//run_concrete_bucket_list_tests();
 	//run_ordered_list_tests();

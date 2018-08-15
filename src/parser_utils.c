@@ -367,7 +367,7 @@ ltl_rule_syntax* ltl_rule_syntax_create(bool is_theta, bool is_env, char* name, 
 	ltl_rule_syntax* ltl_rule	= malloc(sizeof(ltl_rule_syntax));
 	ltl_rule->is_theta			= is_theta;
 	ltl_rule->is_env			= is_env;
-	aut_dupstr(&name, name);
+	aut_dupstr(&(ltl_rule->name), name);
 	aut_dupstr(&(ltl_rule->game_structure_name), game_structure_name);
 	ltl_rule->obdd				= obdd;
 	return ltl_rule;

@@ -873,7 +873,7 @@ bool automaton_alphabet_add_signal_event(automaton_alphabet* alphabet, automaton
 }
 int32_t automaton_alphabet_get_value_index(automaton_alphabet* alphabet, char* signal_name){
 	int32_t i;
-	for(i = 0; i < (int32_t)alphabet->size; i++){
+	for(i = 0; i < (int32_t)alphabet->count; i++){
 		if(strcmp(alphabet->list[i].name, signal_name) == 0)
 			return i;
 	}

@@ -262,11 +262,11 @@ ltlAutExp:
 												dictionary_add_entry(parser_get_obdd_mgr()->vars_dict, prime_name);
 												free($1);
 											}
-	|ltlAutExp t_THEN ltlAutExp				{$$ = obdd_apply_or(obdd_apply_not($1), $3);free($2);}
-	|ltlAutExp t_IFF ltlAutExp				{$$ = obdd_apply_equals($1, $3);free($2);}
-	|ltlAutExp t_AND ltlAutExp				{$$ = obdd_apply_and($1, $3);free($2);}
-	|ltlAutExp t_PARALLEL ltlAutExp			{$$ = obdd_apply_or($1, $3);free($2);}
-	|'!' ltlAutExp							{$$ = obdd_apply_not($2);}
+	|ltlAutExp t_THEN ltlAutExp				{obdd* obdd_not = obdd_apply_not($1); $$ = obdd_apply_or(obdd_not, $3);obdd_destroy(obdd_not);obdd_destroy($3);free($2);}
+	|ltlAutExp t_IFF ltlAutExp				{$$ = obdd_apply_equals($1, $3);obdd_destroy($1);obdd_destroy($3);free($2);}
+	|ltlAutExp t_AND ltlAutExp				{$$ = obdd_apply_and($1, $3);obdd_destroy($1);obdd_destroy($3);free($2);}
+	|ltlAutExp t_PARALLEL ltlAutExp			{$$ = obdd_apply_or($1, $3);obdd_destroy($1);obdd_destroy($3);free($2);}
+	|'!' ltlAutExp							{$$ = obdd_apply_not($2);obdd_destroy($2);}
 	|t_NEXT ltlAutExp							{$$ = obdd_apply_next($2);free($1);}
 	|'(' ltlAutExp ')'						{$$ = $2;}
 	;	

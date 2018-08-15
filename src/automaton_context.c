@@ -473,24 +473,24 @@ automaton_alphabet* automaton_parsing_tables_get_global_alphabet(automaton_parsi
 				//add on, off and primed elements to alphabet
 				strcpy(signal_name, global_values[i]);
 				strcat(signal_name, SIGNAL_ON_SUFFIX);
-				sig_event = automaton_signal_event_create(global_values[i], is_controllable? OUTPUT_SIG : INPUT_SIG);
+				sig_event = automaton_signal_event_create(signal_name, is_controllable? OUTPUT_SIG : INPUT_SIG);
 				automaton_alphabet_add_signal_event(global_alphabet, sig_event);
 				automaton_signal_event_destroy(sig_event, true);
 				strcpy(signal_name, global_values[i]);
 				strcat(signal_name, SIGNAL_OFF_SUFFIX);
-				sig_event = automaton_signal_event_create(global_values[i], is_controllable? OUTPUT_SIG : INPUT_SIG);
+				sig_event = automaton_signal_event_create(signal_name, is_controllable? OUTPUT_SIG : INPUT_SIG);
 				automaton_alphabet_add_signal_event(global_alphabet, sig_event);
 				automaton_signal_event_destroy(sig_event, true);
 				strcpy(signal_name, global_values[i]);
 				strcat(signal_name, SIGNAL_PRIME_SUFFIX);
 				strcat(signal_name, SIGNAL_ON_SUFFIX);
-				sig_event = automaton_signal_event_create(global_values[i], is_controllable? OUTPUT_SIG : INPUT_SIG);
+				sig_event = automaton_signal_event_create(signal_name, is_controllable? OUTPUT_SIG : INPUT_SIG);
 				automaton_alphabet_add_signal_event(global_alphabet, sig_event);
 				automaton_signal_event_destroy(sig_event, true);
 				strcpy(signal_name, global_values[i]);
 				strcat(signal_name, SIGNAL_PRIME_SUFFIX);
 				strcat(signal_name, SIGNAL_OFF_SUFFIX);
-				sig_event = automaton_signal_event_create(global_values[i], is_controllable? OUTPUT_SIG : INPUT_SIG);
+				sig_event = automaton_signal_event_create(signal_name, is_controllable? OUTPUT_SIG : INPUT_SIG);
 				automaton_alphabet_add_signal_event(global_alphabet, sig_event);
 				automaton_signal_event_destroy(sig_event, true);
 			}
@@ -537,7 +537,10 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 		//if one component has not been solved then report pending automata
 		for(i = 0; i < (int32_t)composition_syntax->count; i++){
 			index						= automaton_parsing_tables_get_entry_index(tables, COMPOSITION_ENTRY_AUT, composition_syntax->components[i]->ident);
-			if(index < 0) return true; if(!tables->composition_entries[index]->solved) return true;
+			if(index < 0)
+				return true;
+			if(!tables->composition_entries[index]->solved)
+				return true;
 		}
 		//build composition and add to table
 		automaton_automaton** automata	= malloc(sizeof(automaton_automaton*) * composition_syntax->count);
@@ -1518,23 +1521,31 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	//equals to the conjunction of the components' valuations
 	obdd_mgr* mgr						= parser_get_obdd_mgr();
 	obdd_state_tree* state_map			= obdd_state_tree_create(mgr->vars_dict->size);
-	uint32_t local_alphabet_count		= mgr->vars_dict->size * 3;
+	uint32_t local_alphabet_count		= (mgr->vars_dict->size - 2) * 2;
 	uint32_t i, current_element 		= 0;
 	uint32_t* local_alphabet			= malloc(sizeof(uint32_t) * local_alphabet_count);
 	char current_dict_entry[255];
 	for(i = 0; i < mgr->vars_dict->size; i++){
+		if((strcmp(mgr->vars_dict->entries[i].key, TRUE_VAR) == 0) || (strcmp(mgr->vars_dict->entries[i].key, FALSE_VAR) == 0))
+			continue;
+		printf("%s.", mgr->vars_dict->entries[i].key);
 		strcpy(current_dict_entry, mgr->vars_dict->entries[i].key);
-		local_alphabet[current_element++]	= dictionary_value_for_key(mgr->vars_dict, current_dict_entry);
-		strcpy(current_dict_entry, mgr->vars_dict->entries[i].key);
+		//local_alphabet[current_element++]	= dictionary_value_for_key(mgr->vars_dict, current_dict_entry);
+		//strcpy(current_dict_entry, mgr->vars_dict->entries[i].key);
 		strcat(current_dict_entry, SIGNAL_ON_SUFFIX);
-		local_alphabet[current_element++]	= dictionary_value_for_key(mgr->vars_dict, current_dict_entry);
+		local_alphabet[current_element++]	= automaton_alphabet_get_value_index(ctx->global_alphabet, current_dict_entry);
 		strcpy(current_dict_entry, mgr->vars_dict->entries[i].key);
 		strcat(current_dict_entry, SIGNAL_OFF_SUFFIX);
-		local_alphabet[current_element++]	= dictionary_value_for_key(mgr->vars_dict, current_dict_entry);
+		local_alphabet[current_element++]	= automaton_alphabet_get_value_index(ctx->global_alphabet, current_dict_entry);
 	}
 	automaton_automaton* ltl_automaton	= automaton_automaton_create(name, ctx, local_alphabet_count, local_alphabet, false, true);
 
+	//TODO: build automaton
 
+	int32_t main_index					= automaton_parsing_tables_add_entry(tables, COMPOSITION_ENTRY_AUT, name, ltl_automaton);
+	tables->composition_entries[main_index]->solved	= true;
+	tables->composition_entries[main_index]->valuation_count			= 1;
+	tables->composition_entries[main_index]->valuation.automaton_value	= ltl_automaton;
 
 	free(local_alphabet);
 	obdd_state_tree_destroy(state_map);
@@ -1574,6 +1585,10 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 			fluents[fluent_count++]			= tables->fluent_entries[fluent_index]->valuation.fluent_value;
 		}
 	}
+	//get fluents
+	automaton_automata_context_initialize(ctx, ctx_name, global_alphabet, fluent_count, fluents);
+	free(fluents);
+	automaton_alphabet_destroy(global_alphabet);
 	//get ltl rules
 	uint32_t ltl_automata_count = 0;
 	char** ltl_automata_names	= NULL;
@@ -1674,10 +1689,7 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 	free(sys_theta_count);		free(env_theta_count);
 	free(sys_rho_count);		free(env_rho_count);
 	free(ltl_automata_names);
-	//get fluents
-	automaton_automata_context_initialize(ctx, ctx_name, global_alphabet, fluent_count, fluents);
-	free(fluents);
-	automaton_alphabet_destroy(global_alphabet);
+
 	//build automata
 	bool pending_statements	= true;
 	while(pending_statements){
