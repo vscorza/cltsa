@@ -1514,8 +1514,8 @@ automaton_fluent* automaton_fluent_create_from_syntax(automaton_parsing_tables* 
 	return fluent;
 }
 
-automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_context* ctx, char* name, obdd* env_theta_obdd, uint32_t env_theta_count, obdd* sys_theta_obdd, uint32_t sys_theta_count
-		, obdd* env_rho_obdd, uint32_t env_rho_count, obdd* sys_rho_obdd, uint32_t sys_rho_count, automaton_parsing_tables* tables){
+automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_context* ctx, char* name, obdd** env_theta_obdd, uint32_t env_theta_count, obdd** sys_theta_obdd, uint32_t sys_theta_count
+		, obdd** env_rho_obdd, uint32_t env_rho_count, obdd** sys_rho_obdd, uint32_t sys_rho_count, automaton_parsing_tables* tables){
 	//remember that if automaton was built from ltl its valuations should be added when building it
 	//and should be kept when composing it, if several automata are to be composed from ltl their composed valuation
 	//equals to the conjunction of the components' valuations
@@ -1537,12 +1537,56 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	}
 	automaton_automaton* ltl_automaton	= automaton_automaton_create(name, ctx, local_alphabet_count, local_alphabet, false, true);
 
+	obdd* old_obdd;
+	obdd* env_theta_composed			= NULL;
+	obdd* sys_theta_composed			= NULL;
+	obdd* env_rho_composed				= NULL;
+	obdd* sys_rho_composed				= NULL;
+	for(i = 0; i < env_theta_count; i++)
+		if(i == 0){ env_theta_composed	= env_theta_obdd[i];
+		}else{
+			old_obdd	= env_theta_composed;
+			env_theta_composed	= obdd_apply_and(env_theta_composed, env_theta_obdd[i]);
+			if(i > 1)obdd_destroy(old_obdd);
+		}
+	for(i = 0; i < sys_theta_count; i++)
+		if(i == 0){ sys_theta_composed	= sys_theta_obdd[i];
+		}else{
+			old_obdd	= sys_theta_composed;
+			sys_theta_composed	= obdd_apply_and(sys_theta_composed, sys_theta_obdd[i]);
+			if(i > 1)obdd_destroy(old_obdd);
+		}
+	for(i = 0; i < env_rho_count; i++)
+		if(i == 0){ env_rho_composed	= env_rho_obdd[i];
+		}else{
+			old_obdd	= env_rho_composed;
+			env_rho_composed	= obdd_apply_and(env_rho_composed, env_rho_obdd[i]);
+			if(i > 1)obdd_destroy(old_obdd);
+		}
+	for(i = 0; i < sys_rho_count; i++)
+		if(i == 0){ sys_rho_composed	= sys_rho_obdd[i];
+		}else{
+			old_obdd	= sys_rho_composed;
+			sys_rho_composed	= obdd_apply_and(sys_rho_composed, sys_rho_obdd[i]);
+			if(i > 1)obdd_destroy(old_obdd);
+		}
+
 	//TODO: build automaton
+	uint32_t valuations_count;
+	obdd_print(env_theta_composed);
+	bool* valuations	= obdd_get_valuations(mgr, env_theta_composed, &valuations_count);
+	obdd_print_valuations(mgr, valuations, valuations_count);
+	free(valuations);
 
 	int32_t main_index					= automaton_parsing_tables_add_entry(tables, COMPOSITION_ENTRY_AUT, name, ltl_automaton);
 	tables->composition_entries[main_index]->solved	= true;
 	tables->composition_entries[main_index]->valuation_count			= 1;
 	tables->composition_entries[main_index]->valuation.automaton_value	= ltl_automaton;
+
+	if(env_theta_count > 1)obdd_destroy(env_theta_composed);
+	if(sys_theta_count > 1)obdd_destroy(sys_theta_composed);
+	if(env_rho_count > 1)obdd_destroy(env_rho_composed);
+	if(sys_rho_count > 1)obdd_destroy(sys_rho_composed);
 
 	free(local_alphabet);
 	obdd_state_tree_destroy(state_map);
