@@ -679,15 +679,15 @@ bool obdd_is_sat(obdd_mgr* mgr, obdd_node* root){
 	}
 }
 
-void obdd_print_valuations(obdd_mgr* mgr, bool* valuations, uint32_t valuations_count){
-	uint32_t i, j, variables_count	= mgr->vars_dict->size - 2;
-	for(i = 0; i < variables_count; i++){
-		printf("%s\t", mgr->vars_dict->entries[i + 2].key);
+void obdd_print_valuations(obdd_mgr* mgr, bool* valuations, uint32_t valuations_count, uint32_t* valuation_img, uint32_t img_count){
+	uint32_t i, j;
+	for(i = 0; i < img_count; i++){
+		printf("%s\t", mgr->vars_dict->entries[valuation_img[i]].key);
 	}
 	printf("\n");
 	for(i = 0; i < valuations_count; i++){
-		for(j = 0; j < (variables_count); j++)
-			printf("%s\t", GET_VAR_IN_VALUATION(valuations, variables_count, i, j) ? "1" : "0");
+		for(j = 0; j < (img_count); j++)
+			printf("%s\t", GET_VAR_IN_VALUATION(valuations, img_count, i, j) ? "1" : "0");
 		printf("\n");
 	}
 }
@@ -737,7 +737,7 @@ obdd_node** obdd_get_obdd_nodes(obdd_mgr* mgr, obdd* root, uint32_t* nodes_count
 	return nodes;
 }
 
-bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count){
+bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count, uint32_t* valuation_img, uint32_t img_count){
 	int32_t i, j, dont_cares_count;
 	uint32_t nodes_count;
 	obdd_node** nodes	= obdd_get_obdd_nodes(mgr, root, &nodes_count);
@@ -745,7 +745,7 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count)
 	*valuations_count			= 0;
 	uint32_t valuations_size	= LIST_INITIAL_SIZE;
 	uint32_t variables_count	= mgr->vars_dict->size - 2;
-	bool* valuations			= malloc(sizeof(bool) * variables_count * valuations_size);
+	bool* valuations			= malloc(sizeof(bool) * img_count * valuations_size);
 	bool* dont_care_list		= malloc(sizeof(bool) * variables_count);
 	for( i = 0; i < (int32_t)variables_count; i++)
 		dont_care_list[i]		= true;
@@ -763,6 +763,7 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count)
 	last_nodes[last_node_index]	= current_node;
 	last_pred_index[last_node_index]	= 0;
 	bool belongs, through_high, has_no_pred;
+	bool at_least_one_node_expanded		= true;
 #if DEBUG_OBDD_VALUATIONS
 	printf("Getting OBDD valuations\n");
 	printf("[N]ow on node: %d (%s) \n", last_node_index, dictionary_key_for_value(mgr->vars_dict,last_nodes[last_node_index]->var_ID));
@@ -834,6 +835,10 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count)
 						dont_care_list[i]	= true;
 					}
 					last_pred_index[last_node_index]++;
+					at_least_one_node_expanded		= true;
+#if DEBUG_OBDD_VALUATIONS
+					printf("E[X]panded %d\n", last_node_index);
+#endif
 				}
 			}else{//had no pred
 				last_pred_index[last_node_index]	= -1;
@@ -856,17 +861,29 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count)
 				printf("%s", dont_care_list[i]? "?" : "0");
 			printf(">\n");
 #endif
-			if(current_predecessor->high_predecessors_count == 0 && current_predecessor->low_predecessors_count == 0){//terminal case, add valuation
+			if(current_predecessor->high_predecessors_count == 0 && current_predecessor->low_predecessors_count == 0
+					&& at_least_one_node_expanded){//terminal case, add valuation
 				dont_cares_count	= 1;
 				//set unexplored variables as dont care
-				for(i = max_pred_index + 1; i < variables_count; i++)
+				for(i = max_pred_index + 1; i < (int32_t)variables_count; i++)
 					dont_care_list[i]	= true;
 				//count dont cares to get number of new valuations
-				for(i = 0; i < (int32_t)variables_count; i++)
-					if(dont_care_list[i])dont_cares_count *= 2;
+				int32_t variable_index;
+				for(i = 0; i < (int32_t)variables_count; i++){
+					if(dont_care_list[i]){
+						variable_index	= -1;
+						for(j = 0; j < (int32_t)img_count; j++)
+							if(valuation_img[j] == (uint32_t)(i + 2)){
+								variable_index	= j;
+								break;
+							}
+						if(variable_index >= 0)
+							dont_cares_count *= 2;
+					}
+				}
 				uint32_t new_size	= *valuations_count + dont_cares_count;
 				if(new_size >= valuations_size){
-					bool* ptr	= realloc(valuations, sizeof(bool*) * variables_count * new_size);
+					bool* ptr	= realloc(valuations, sizeof(bool*) * img_count * new_size);
 					if(ptr == NULL){
 						printf("Could not reallocate valuations array\n");
 						exit(-1);
@@ -896,13 +913,21 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count)
 				for(k = 0; k < (uint32_t)dont_cares_count; k++){
 					modulo	= dont_cares_count;
 					for(i = 0; i < (int32_t)variables_count; i++){
-						if(dont_care_list[i]){
-							modulo /= 2;
-							//set according to modulo division if current position was set to dont care
-							GET_VAR_IN_VALUATION(valuations, variables_count, *valuations_count + k, /*(variables_count - 1) -*/ i)	= ((k / modulo) % 2) == 0;
-						}else{
-							//set to predefined value for this search
-							GET_VAR_IN_VALUATION(valuations, variables_count, *valuations_count + k, /*(variables_count - 1) -*/ i)	= partial_valuation[i];
+						variable_index	= -1;
+						for(j = 0; j < (int32_t)img_count; j++)
+							if(valuation_img[j] == (uint32_t)(i + 2)){
+								variable_index	= j;
+								break;
+							}
+						if(variable_index >= 0){
+							if(dont_care_list[i]){
+								modulo /= 2;
+								//set according to modulo division if current position was set to dont care
+								GET_VAR_IN_VALUATION(valuations, img_count, *valuations_count + k, /*(variables_count - 1) -*/ variable_index)	= ((k / modulo) % 2) == 0;
+							}else{
+								//set to predefined value for this search
+								GET_VAR_IN_VALUATION(valuations, img_count, *valuations_count + k, /*(variables_count - 1) -*/ variable_index)	= partial_valuation[i];
+							}
 						}
 					}
 				}
@@ -912,8 +937,8 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count)
 #if DEBUG_OBDD_VALUATIONS
 				for(j = 0; j < (int32_t)*valuations_count; j++){
 					printf("[");
-					for(i = 0; i < (int32_t)variables_count; i++)
-						printf("%s", GET_VAR_IN_VALUATION(valuations, variables_count, j, /*(variables_count - 1)*/ - i) ? "1" : "0");
+					for(i = 0; i < (int32_t)img_count; i++)
+						printf("%s", GET_VAR_IN_VALUATION(valuations, img_count, j, /*(variables_count - 1) -*/ i) ? "1" : "0");
 					printf("]\n");
 				}
 #endif
@@ -922,6 +947,7 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count)
 			if(last_pred_index[last_node_index] >=
 					(int32_t)(last_node->high_predecessors_count + last_node->low_predecessors_count)){
 				last_pred_index[last_node_index]	= -1;
+				at_least_one_node_expanded			= false;
 #if DEBUG_OBDD_VALUATIONS
 				printf("[E]xhausted node: %d (%s) -1 \n", last_node_index, dictionary_key_for_value(mgr->vars_dict,last_nodes[last_node_index]->var_ID));
 #endif
@@ -942,6 +968,7 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count)
 #endif
 
 			}else{
+				at_least_one_node_expanded		= false;
 				dont_care_list[last_node_index]	= true;
 				while(--last_node_index > 0){//firing backtrack can avoid terminals
 					dont_care_list[last_node_index]	= true;
@@ -960,7 +987,36 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count)
 		}
 	}
 
-
+	//if it is projecting, remove duplicates
+	if(img_count != variables_count){
+		uint32_t new_count			= 0;
+		uint32_t k;
+		bool* new_valuations	= malloc(sizeof(bool) * *valuations_count * img_count);
+		bool has_valuation;
+		bool* current_valuation	= malloc(sizeof(bool) * img_count);
+		for(i = 0; i < (int32_t)*valuations_count; i++){
+			for(j = 0; j < (int32_t)img_count; j++)
+				current_valuation[j] = GET_VAR_IN_VALUATION(valuations, img_count, i, j);
+			for(k = 0; k < new_count; k++){
+				has_valuation		= true;
+				for(j = 0; j < (int32_t)img_count; j++){
+					if(current_valuation[j] != GET_VAR_IN_VALUATION(new_valuations, img_count, k, j)){
+						has_valuation = false;
+						break;
+					}
+				}
+				if(has_valuation)break;
+			}
+			if(!has_valuation){
+				for(j = 0; j < (int32_t)img_count; j++)
+					GET_VAR_IN_VALUATION(new_valuations, img_count, new_count, j)	= current_valuation[j];
+				new_count++;
+			}
+		}
+		free(valuations);
+		valuations			= new_valuations;
+		*valuations_count	= new_count;
+	}
 	free(nodes);
 	free(last_nodes);
 	free(last_pred_index);

@@ -1574,10 +1574,11 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	//TODO: build automaton
 	uint32_t valuations_count;
 	obdd_print(env_theta_composed);
+	/*
 	bool* valuations	= obdd_get_valuations(mgr, env_theta_composed, &valuations_count);
 	obdd_print_valuations(mgr, valuations, valuations_count);
 	free(valuations);
-
+*/
 	int32_t main_index					= automaton_parsing_tables_add_entry(tables, COMPOSITION_ENTRY_AUT, name, ltl_automaton);
 	tables->composition_entries[main_index]->solved	= true;
 	tables->composition_entries[main_index]->valuation_count			= 1;

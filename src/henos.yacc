@@ -63,7 +63,7 @@ automaton_program_syntax* parsed_program = NULL;
 %type<statement>			statement
 %type<program>				program statements		
 %type<gr1_game>				gr1
-%type<ltl_aut_expression>	ltlAutExp ltlAutExp2
+%type<ltl_aut_expression>	ltlAutExp
 %type<ltl_rule>				ltlAutRule
 %type<ltl_fluent>			ltlFluent
 %type<composition_type>		compositionType
