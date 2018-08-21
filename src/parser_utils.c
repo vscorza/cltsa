@@ -552,48 +552,42 @@ obdd_mgr* parser_get_obdd_mgr(){
 	return parser_obdd_mgr;
 }
 
-uint32_t** parser_get_primed_variables(uint32_t** primed_variables_count, uint32_t** primed_variables_size){
-	static uint32_t* parser_primed_variables	= NULL;
-	static uint32_t parser_primed_variables_size	= 0;
-	static uint32_t parser_primed_variables_count	= 0;
+uint32_t* parser_primed_variables	= NULL;
+uint32_t parser_primed_variables_size	= 0;
+uint32_t parser_primed_variables_count	= 0;
+
+uint32_t* parser_get_primed_variables(){
 	if(parser_primed_variables == NULL){
 		parser_primed_variables_size	= LIST_INITIAL_SIZE;
+		parser_primed_variables_count	= 0;
 		parser_primed_variables			= malloc(sizeof(uint32_t) * parser_primed_variables_size);
 	}
-	*primed_variables_count				= &parser_primed_variables_count;
-	*primed_variables_size				= &parser_primed_variables_size;
-	return &parser_primed_variables;
+	return parser_primed_variables;
 }
 
 void parser_add_primed_variables(uint32_t primed_variable){
-	uint32_t **primed_variables_count_ptr, **primed_variables_size_ptr;
-	uint32_t** primed_variables_ptr	= parser_get_primed_variables(primed_variables_count_ptr, primed_variables_size_ptr);
-	uint32_t primed_variables_count	= **primed_variables_count_ptr;
-	uint32_t primed_variables_size	= **primed_variables_size_ptr;
-	uint32_t* primed_variables		= *primed_variables_ptr;
 	int32_t last_less_than		= -1;
 	int32_t i;
-	for(i = 0; i < (int32_t)primed_variables_count; i++){
-		if(primed_variables[i] < primed_variable)last_less_than	= i;
-		if(primed_variables[i] == primed_variable)	return;
+	parser_get_primed_variables();
+	for(i = 0; i < (int32_t)parser_primed_variables_count; i++){
+		if(parser_primed_variables[i] < primed_variable)last_less_than	= i;
+		if(parser_primed_variables[i] == primed_variable)	return;
 	}
-	if(primed_variables_count == primed_variables_size){
-		uint32_t new_size		= primed_variables_size * LIST_INCREASE_FACTOR;
-		uint32_t* ptr	= realloc(primed_variables, new_size);
+	if(parser_primed_variables_count == parser_primed_variables_size){
+		uint32_t new_size		= parser_primed_variables_size * LIST_INCREASE_FACTOR;
+		uint32_t* ptr	= realloc(parser_primed_variables, new_size);
 		if(ptr == NULL){
 			printf("Could not allocate more space for primed variables list\n");
 			exit(-1);
 		}
-		*primed_variables_ptr	= ptr;
-		primed_variables		= ptr;
-		**primed_variables_size_ptr	= new_size;
-		primed_variables_size		= new_size;
+		parser_primed_variables			= ptr;
+		parser_primed_variables_size	= new_size;
 	}
-	for(i = primed_variables_count - 1; i > last_less_than && i > 0; i--){
-		primed_variables[i]		= primed_variables[i - 1];
+	for(i = parser_primed_variables_count - 1; i > last_less_than && i > 0; i--){
+		parser_primed_variables[i]		= parser_primed_variables[i - 1];
 	}
-	primed_variables[last_less_than + 1]	= primed_variable;
-	**primed_variables_count_ptr	= primed_variables_count + 1;
+	parser_primed_variables[last_less_than + 1]	= primed_variable;
+	parser_primed_variables_count++;
 }
 
 void ltl_rule_syntax_destroy(ltl_rule_syntax* ltl_rule){

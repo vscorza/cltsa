@@ -44,17 +44,14 @@ uint32_t dictionary_add_entry(struct dictionary_t* dict, char* key){
 	aut_dupstr(&(dict->entries[index].key), key);
 	dict->entries[index].value		= dict->size++;
 	//if the entries array is full its capacity is doubled
-	if(dict->size >= (dict->max_size - 1)){
+	if(dict->size == (dict->max_size - 1)){
 		dict->max_size		*= 2;
-		struct dictionary_entry_t* new_entries	= malloc(sizeof(dictionary_entry) * dict->max_size);
-		uint32_t i 	= 0;
-		for(i = 0; i < dict->size; i++){
-			new_entries[i].key		= dict->entries[i].key;
-			new_entries[i].value	= dict->entries[i].value;
-			free(dict->entries[i].key);
+		dictionary_entry* ptr	= realloc(dict->entries, sizeof(dictionary_entry) * dict->max_size);
+		if(ptr == NULL){
+			printf("Could not allocate space for dictionary entries\n");
+			exit(-1);
 		}
-		free(dict->entries);
-		dict->entries			= new_entries;
+		dict->entries			= ptr;
 	}
 	return dict->entries[index].value;
 }

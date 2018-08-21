@@ -63,7 +63,7 @@ automaton_program_syntax* parsed_program = NULL;
 %type<statement>			statement
 %type<program>				program statements		
 %type<gr1_game>				gr1
-%type<ltl_aut_expression>	ltlAutExp
+%type<ltl_aut_expression>	ltlAutExp ltlAutExp2
 %type<ltl_rule>				ltlAutRule
 %type<ltl_fluent>			ltlFluent
 %type<composition_type>		compositionType
@@ -252,6 +252,13 @@ ltlAutRule:
 	;
 
 ltlAutExp:
+	ltlAutExp2								{$$ = $1;}	
+	|ltlAutExp t_THEN ltlAutExp2			{obdd* obdd_not = obdd_apply_not($1); $$ = obdd_apply_or(obdd_not, $3);obdd_destroy(obdd_not);obdd_destroy($3);free($2);}
+	|ltlAutExp t_IFF ltlAutExp2				{$$ = obdd_apply_equals($1, $3);obdd_destroy($1);obdd_destroy($3);free($2);}
+	|ltlAutExp t_AND ltlAutExp2				{$$ = obdd_apply_and($1, $3);obdd_destroy($1);obdd_destroy($3);free($2);}
+	|ltlAutExp t_PARALLEL ltlAutExp2		{$$ = obdd_apply_or($1, $3);obdd_destroy($1);obdd_destroy($3);free($2);}
+	;	
+ltlAutExp2:
 	t_IDENT									{
 												//we force the addition of the prime variable to the mgr dictionary in order to keep both orders (primed and non primed) consistent
 												//in order to then just replace the indexes when applying the next operator
@@ -260,16 +267,13 @@ ltlAutExp:
 												strcpy(prime_name, $1);
 												strcat(prime_name, SIGNAL_PRIME_SUFFIX);
 												dictionary_add_entry(parser_get_obdd_mgr()->vars_dict, prime_name);
+												parser_add_primed_variables(dictionary_add_entry(parser_get_obdd_mgr()->vars_dict, prime_name));
 												free($1);
 											}
-	|ltlAutExp t_THEN ltlAutExp				{obdd* obdd_not = obdd_apply_not($1); $$ = obdd_apply_or(obdd_not, $3);obdd_destroy(obdd_not);obdd_destroy($3);free($2);}
-	|ltlAutExp t_IFF ltlAutExp				{$$ = obdd_apply_equals($1, $3);obdd_destroy($1);obdd_destroy($3);free($2);}
-	|ltlAutExp t_AND ltlAutExp				{$$ = obdd_apply_and($1, $3);obdd_destroy($1);obdd_destroy($3);free($2);}
-	|ltlAutExp t_PARALLEL ltlAutExp			{$$ = obdd_apply_or($1, $3);obdd_destroy($1);obdd_destroy($3);free($2);}
-	|'!' ltlAutExp							{$$ = obdd_apply_not($2);obdd_destroy($2);}
-	|t_NEXT ltlAutExp						{$$ = obdd_apply_next($2);free($1);}
+	|'!' ltlAutExp2							{$$ = obdd_apply_not($2);obdd_destroy($2);}
+	|t_NEXT ltlAutExp2						{$$ = obdd_apply_next($2);free($1);}
 	|'(' ltlAutExp ')'						{$$ = $2;}
-	;	
+	;
 /*
 ltlAutExp:
 	ltlAutExp2								{$$ = $1;}

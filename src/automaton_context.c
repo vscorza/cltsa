@@ -1525,28 +1525,30 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	uint32_t i, j, current_element 		= 0;
 	uint32_t* local_alphabet			= malloc(sizeof(uint32_t) * local_alphabet_count);
 	char current_dict_entry[255];
-	uint32_t* primed_variables_size;
-	uint32_t* primed_variables_count;
-	uint32_t **primed_variables_size_ptr = &primed_variables_size,	**primed_variables_count_ptr = primed_variables_count;
-	uint32_t** primed_variables_ptr		= parser_get_primed_variables(primed_variables_count_ptr, primed_variables_size_ptr);
-	uint32_t* primed_variables			= *primed_variables_ptr;
+	parser_get_primed_variables();
 
 	uint32_t x_count = 0, y_count = 0, x_p_count = 0, y_p_count = 0;
 	uint32_t alphabet_element_index;
 	int32_t global_index;
 	bool is_primed;
+	char current_key[255];
+	bool is_input;
 	for(i = 0; i < mgr->vars_dict->size; i++){
 		if((strcmp(mgr->vars_dict->entries[i].key, TRUE_VAR) == 0) || (strcmp(mgr->vars_dict->entries[i].key, FALSE_VAR) == 0))
 			continue;
 		alphabet_element_index	= mgr->vars_dict->entries[i].value;
 		is_primed				= false;
-		for(j = 0; j < *primed_variables_count; j++)
-			if(primed_variables[j] == alphabet_element_index){
+		for(j = 0; j < parser_primed_variables_count; j++)
+			if(parser_primed_variables[j] == alphabet_element_index){
 				is_primed	= true;
 				break;
 			}
-		global_index	= automaton_alphabet_get_value_index(ctx->global_alphabet, mgr->vars_dict->entries[i].key);
-		if(ctx->global_alphabet->list[global_index].type == INPUT_SIG){
+
+		strcpy(current_key, mgr->vars_dict->entries[i].key);
+		strcat(current_key, SIGNAL_ON_SUFFIX);
+		global_index	= automaton_alphabet_get_value_index(ctx->global_alphabet, current_key);
+		is_input		= ctx->global_alphabet->list[global_index].type == INPUT_SIG;
+		if(is_input){
 			if(is_primed)x_p_count++; else x_count++;
 		}else{
 			if(is_primed)y_p_count++; else y_count++;
@@ -1568,18 +1570,20 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 			continue;
 		alphabet_element_index	= mgr->vars_dict->entries[i].value;
 		is_primed				= false;
-		for(j = 0; j < *primed_variables_count; j++)
-			if(primed_variables[j] == alphabet_element_index){
+		for(j = 0; j < parser_primed_variables_count; j++)
+			if(parser_primed_variables[j] == alphabet_element_index){
 				is_primed	= true;
 				break;
 			}
-		global_index	= automaton_alphabet_get_value_index(ctx->global_alphabet, mgr->vars_dict->entries[i].key);
-		if(ctx->global_alphabet->list[global_index].type == INPUT_SIG){
-			if(is_primed)x_p_alphabet[x_p_count++]	= global_index; else x_alphabet[x_count++]	= global_index;
+		strcpy(current_key, mgr->vars_dict->entries[i].key);
+		strcat(current_key, SIGNAL_ON_SUFFIX);
+		global_index	= automaton_alphabet_get_value_index(ctx->global_alphabet, current_key);
+		is_input		= ctx->global_alphabet->list[global_index].type == INPUT_SIG;
+		if(is_input){
+			if(is_primed)x_p_alphabet[x_p_count++]	= i; else x_alphabet[x_count++]	= i;
 		}else{
-			if(is_primed)y_p_alphabet[y_p_count++]	= global_index; else y_alphabet[y_count++]	= global_index;
+			if(is_primed)y_p_alphabet[y_p_count++]	= i; else y_alphabet[y_count++]	= i;
 		}
-
 	}
 	automaton_automaton* ltl_automaton	= automaton_automaton_create(name, ctx, local_alphabet_count, local_alphabet, false, true);
 
@@ -1620,6 +1624,13 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	//TODO: build automaton
 	uint32_t valuations_count;
 	obdd_print(env_theta_composed);
+
+	printf("Primed_alphabet:");
+	for(i = 0; i < parser_primed_variables_count; i++)
+		printf("%d%s", parser_primed_variables[i], i == parser_primed_variables_count - 1 ? "\n" : ",");
+	printf("X_alphabet:");
+	for(i = 0; i < x_count; i++)
+		printf("%d%s", x_alphabet[i], i == x_count - 1 ? "\n" : ",");
 
 	bool* valuations	= obdd_get_valuations(mgr, env_theta_composed, &valuations_count, x_alphabet, x_count);
 	obdd_print_valuations(mgr, valuations, valuations_count, x_alphabet, x_count);
@@ -1685,7 +1696,7 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 	for(i = 0; i < program->count; i++)
 		if(program->statements[i]->type == LTL_RULE_AUT){
 			ltl_automata_found	= false;
-			for(j = 0; j < ltl_automata_count; j++)
+			for(j = 0; j < (int32_t)ltl_automata_count; j++)
 				if(strcmp(ltl_automata_names[j], program->statements[i]->ltl_rule_def->game_structure_name) == 0){
 					ltl_automata_found	= true;
 					break;
@@ -1772,9 +1783,7 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 	}
 	obdd_mgr* mgr	= parser_get_obdd_mgr();
 	obdd_mgr_destroy(mgr);
-	uint32_t **primed_size, **primed_count;
-	uint32_t **primed_vars	= parser_get_primed_variables(primed_size, primed_count);
-	free(*primed_vars);
+	free(parser_primed_variables);
 
 
 	for(i = 0; i < ltl_automata_count; i++){

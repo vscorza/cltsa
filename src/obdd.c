@@ -997,6 +997,7 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 		for(i = 0; i < (int32_t)*valuations_count; i++){
 			for(j = 0; j < (int32_t)img_count; j++)
 				current_valuation[j] = GET_VAR_IN_VALUATION(valuations, img_count, i, j);
+			has_valuation = false;
 			for(k = 0; k < new_count; k++){
 				has_valuation		= true;
 				for(j = 0; j < (int32_t)img_count; j++){
@@ -1014,9 +1015,11 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 			}
 		}
 		free(valuations);
+		free(current_valuation);
 		valuations			= new_valuations;
 		*valuations_count	= new_count;
 	}
+
 	free(nodes);
 	free(last_nodes);
 	free(last_pred_index);

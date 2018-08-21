@@ -8,9 +8,9 @@ LEX = lex
 YACC = yacc -d
 #YACC = yacc -d
 #YACCFLAGS = --debug --verbose
-YACCFLAGS = -Wconflicts-sr -Wconflicts-rr --debug --verbose
+#YACCFLAGS = -Wconflicts-sr -Wconflicts-rr --debug --verbose
 #YACCFLAGS = -Wconflicts-sr -Wconflicts-rr --debug
-#YACCFLAGS = 
+YACCFLAGS = 
 
 all: main
 
@@ -24,25 +24,25 @@ dictionary_c.o: dictionary.c automaton_utils_c.o
 	$(CC) $(CFLAGS) -c $< -o $@
 
 
-automaton_c.o: automaton.c bucket_list_c.o automaton_mu_calculus_c.o
+automaton_c.o: automaton.c bucket_list_c.o automaton_mu_calculus_c.o parser_utils_c.o
 	$(CC) $(CFLAGS) -c $< -o $@
 
 automaton_context_c.o: automaton_context.c parser_utils_c.o automaton_mu_calculus_c.o
 	$(CC) $(CFLAGS) -c $< -o $@
 
-automaton_mu_calculus_c.o: automaton_mu_calculus.c automaton_utils_c.o
+automaton_mu_calculus_c.o: automaton_mu_calculus.c automaton_utils_c.o parser_utils_c.o
 	$(CC) $(CFLAGS) -c $< -o $@
 
-bucket_list_c.o: bucket_list.c automaton_utils_c.o
+bucket_list_c.o: bucket_list.c automaton_utils_c.o parser_utils_c.o
 	$(CC) $(CFLAGS) -c $< -o $@
 
-ordered_list_c.o: ordered_list.c automaton_utils_c.o
+ordered_list_c.o: ordered_list.c automaton_utils_c.o parser_utils_c.o
 	$(CC) $(CFLAGS) -c $< -o $@
 
 obdd_c.o: obdd.c automaton_utils_c.o
 	$(CC) $(CFLAGS) -c $< -o $@
 
-max_heap_c.o: max_heap.c automaton_utils_c.o
+max_heap_c.o: max_heap.c automaton_utils_c.o parser_utils_c.o
 	$(CC) $(CFLAGS) -c $< -o $@
 
 parser: y.tab.o lex.yy.o parser_utils_c.o automaton_utils_c.o obdd_c.o
