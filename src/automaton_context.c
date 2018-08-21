@@ -1525,11 +1525,12 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	uint32_t i, j, current_element 		= 0;
 	uint32_t* local_alphabet			= malloc(sizeof(uint32_t) * local_alphabet_count);
 	char current_dict_entry[255];
-	uint32_t **primed_variables_size_ptr,	**primed_variables_count_ptr;
+	uint32_t* primed_variables_size;
+	uint32_t* primed_variables_count;
+	uint32_t **primed_variables_size_ptr = &primed_variables_size,	**primed_variables_count_ptr = primed_variables_count;
 	uint32_t** primed_variables_ptr		= parser_get_primed_variables(primed_variables_count_ptr, primed_variables_size_ptr);
 	uint32_t* primed_variables			= *primed_variables_ptr;
-	uint32_t primed_variables_size		= **primed_variables_size_ptr;
-	uint32_t primed_variables_count		= **primed_variables_count_ptr;
+
 	uint32_t x_count = 0, y_count = 0, x_p_count = 0, y_p_count = 0;
 	uint32_t alphabet_element_index;
 	int32_t global_index;
@@ -1539,7 +1540,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 			continue;
 		alphabet_element_index	= mgr->vars_dict->entries[i].value;
 		is_primed				= false;
-		for(j = 0; j < primed_variables_count; j++)
+		for(j = 0; j < *primed_variables_count; j++)
 			if(primed_variables[j] == alphabet_element_index){
 				is_primed	= true;
 				break;
@@ -1567,7 +1568,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 			continue;
 		alphabet_element_index	= mgr->vars_dict->entries[i].value;
 		is_primed				= false;
-		for(j = 0; j < primed_variables_count; j++)
+		for(j = 0; j < *primed_variables_count; j++)
 			if(primed_variables[j] == alphabet_element_index){
 				is_primed	= true;
 				break;

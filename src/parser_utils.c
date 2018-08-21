@@ -566,10 +566,10 @@ uint32_t** parser_get_primed_variables(uint32_t** primed_variables_count, uint32
 }
 
 void parser_add_primed_variables(uint32_t primed_variable){
-	uint32_t *primed_variables_count_ptr, *primed_variables_size_ptr;
-	uint32_t** primed_variables_ptr	= parser_get_primed_variables(&primed_variables_count_ptr, &primed_variables_size_ptr);
-	uint32_t primed_variables_count	= *primed_variables_count_ptr;
-	uint32_t primed_variables_size	= *primed_variables_size_ptr;
+	uint32_t **primed_variables_count_ptr, **primed_variables_size_ptr;
+	uint32_t** primed_variables_ptr	= parser_get_primed_variables(primed_variables_count_ptr, primed_variables_size_ptr);
+	uint32_t primed_variables_count	= **primed_variables_count_ptr;
+	uint32_t primed_variables_size	= **primed_variables_size_ptr;
 	uint32_t* primed_variables		= *primed_variables_ptr;
 	int32_t last_less_than		= -1;
 	int32_t i;
@@ -586,14 +586,14 @@ void parser_add_primed_variables(uint32_t primed_variable){
 		}
 		*primed_variables_ptr	= ptr;
 		primed_variables		= ptr;
-		*primed_variables_size_ptr	= new_size;
+		**primed_variables_size_ptr	= new_size;
 		primed_variables_size		= new_size;
 	}
 	for(i = primed_variables_count - 1; i > last_less_than && i > 0; i--){
 		primed_variables[i]		= primed_variables[i - 1];
 	}
 	primed_variables[last_less_than + 1]	= primed_variable;
-	*primed_variables_count_ptr	= primed_variables_count + 1;
+	**primed_variables_count_ptr	= primed_variables_count + 1;
 }
 
 void ltl_rule_syntax_destroy(ltl_rule_syntax* ltl_rule){
