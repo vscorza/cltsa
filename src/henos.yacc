@@ -286,7 +286,7 @@ ltlAutExp2:
 												char prime_name[255];
 												strcpy(prime_name, $1);
 												strcat(prime_name, SIGNAL_PRIME_SUFFIX);
-												dictionary_add_entry(parser_get_obdd_mgr()->vars_dict, prime_name);
+												parser_add_primed_variables(dictionary_add_entry(parser_get_obdd_mgr()->vars_dict, prime_name));
 												free($1);
 											}
 	|'!' ltlAutExp2							{$$ = obdd_apply_not($2);}

@@ -18,7 +18,11 @@ void run_parse_test(char* test_file, char* test_name){
 	FILE *fd;
     if (!(yyin = fopen(test_file, "r")))
     {
+        char cwd[1024];
+        getcwd(cwd, sizeof(cwd));
+        printf("Current working dir: %s\n", cwd);
         perror("Error: ");
+        return;
     }
 	yyparse();
     //printf("\n\n%d\n\n\n", parsed_program->count);
@@ -46,9 +50,16 @@ void run_small_obdd_tests(){
 	printf("X1 -> X2\n");
 	obdd_print(x1_then_x2_obdd);
 	uint32_t valuations_count;
-	bool* valuations	= obdd_get_valuations(new_mgr, x1_then_x2_obdd, &valuations_count);
-	obdd_print_valuations(new_mgr, valuations, valuations_count);
+	uint32_t img_count	= new_mgr->vars_dict->size - 2;
+	uint32_t* total_img	= malloc(sizeof(uint32_t) * img_count);
+	uint32_t i;
+
+	for(i = 0; i < img_count; i++)
+		total_img[i]	= i + 2;
+	bool* valuations	= obdd_get_valuations(new_mgr, x1_then_x2_obdd, &valuations_count, total_img, img_count);
+	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count);
 	free(valuations);
+	free(total_img);
 	obdd_destroy(x1_obdd);
 	obdd_destroy(not_x1_obdd);
 	obdd_destroy(x2_obdd);
@@ -101,28 +112,36 @@ void run_obdd_tests(){
 	uint32_t valuations_count;
 	bool* valuations;
 
+	uint32_t img_count	= new_mgr->vars_dict->size - 3;
+	uint32_t* total_img	= malloc(sizeof(uint32_t) * img_count);
+	uint32_t i;
+
+	for(i = 0; i < img_count; i++)
+		total_img[i]	= i + 2;
+
 	printf("X1 && X2\n");
 	obdd_print(x1_and_x2_obdd);
-	valuations	= obdd_get_valuations(new_mgr, x1_and_x2_obdd, &valuations_count);
-	obdd_print_valuations(new_mgr, valuations, valuations_count);
+	valuations	= obdd_get_valuations(new_mgr, x1_and_x2_obdd, &valuations_count, total_img, img_count);
+	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count);
 	free(valuations);
 
 	printf("X1 & X2 && X3\n");
 	obdd_print(x1_and_x2_and_x3_obdd);
-	valuations	= obdd_get_valuations(new_mgr, x1_and_x2_and_x3_obdd, &valuations_count);
-	obdd_print_valuations(new_mgr, valuations, valuations_count);
+	valuations	= obdd_get_valuations(new_mgr, x1_and_x2_and_x3_obdd, &valuations_count, total_img, img_count);
+	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count);
 	free(valuations);
 
 	printf("X1 || X2\n");
 	obdd_print(x1_or_x2_obdd);
-	valuations	= obdd_get_valuations(new_mgr, x1_or_x2_obdd, &valuations_count);
-	obdd_print_valuations(new_mgr, valuations, valuations_count);
+	valuations	= obdd_get_valuations(new_mgr, x1_or_x2_obdd, &valuations_count, total_img, img_count);
+	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count);
 	free(valuations);
 	printf("X1 || X2 || X3\n");
 	obdd_print(x1_or_x2_or_x3_obdd);
-	valuations	= obdd_get_valuations(new_mgr, x1_or_x2_or_x3_obdd, &valuations_count);
-	obdd_print_valuations(new_mgr, valuations, valuations_count);
+	valuations	= obdd_get_valuations(new_mgr, x1_or_x2_or_x3_obdd, &valuations_count, total_img, img_count);
+	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count);
 	free(valuations);
+	free(total_img);
 	obdd_destroy(x1_obdd);
 	obdd_destroy(x2_obdd);
 	obdd_destroy(x3_obdd);

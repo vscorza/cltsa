@@ -268,4 +268,6 @@ bool automaton_syntax_is_reserved(char* token);
 ltl_rule_syntax* ltl_rule_syntax_create(bool is_theta, bool is_env, char* name, char* game_structure_name, obdd* obdd);
 ltl_fluent_syntax* automaton_ltl_fluent_syntax_create(char* name, obdd* obdd);
 obdd_mgr* parser_get_obdd_mgr();
+uint32_t** parser_get_primed_variables(uint32_t** primed_variables_count, uint32_t** primed_variables_size);
+void parser_add_primed_variables(uint32_t primed_variable);
 #endif

@@ -1522,18 +1522,63 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	obdd_mgr* mgr						= parser_get_obdd_mgr();
 	obdd_state_tree* state_map			= obdd_state_tree_create(mgr->vars_dict->size);
 	uint32_t local_alphabet_count		= (mgr->vars_dict->size - 2) * 2;
-	uint32_t i, current_element 		= 0;
+	uint32_t i, j, current_element 		= 0;
 	uint32_t* local_alphabet			= malloc(sizeof(uint32_t) * local_alphabet_count);
 	char current_dict_entry[255];
+	uint32_t **primed_variables_size_ptr,	**primed_variables_count_ptr;
+	uint32_t** primed_variables_ptr		= parser_get_primed_variables(primed_variables_count_ptr, primed_variables_size_ptr);
+	uint32_t* primed_variables			= *primed_variables_ptr;
+	uint32_t primed_variables_size		= **primed_variables_size_ptr;
+	uint32_t primed_variables_count		= **primed_variables_count_ptr;
+	uint32_t x_count = 0, y_count = 0, x_p_count = 0, y_p_count = 0;
+	uint32_t alphabet_element_index;
+	int32_t global_index;
+	bool is_primed;
 	for(i = 0; i < mgr->vars_dict->size; i++){
 		if((strcmp(mgr->vars_dict->entries[i].key, TRUE_VAR) == 0) || (strcmp(mgr->vars_dict->entries[i].key, FALSE_VAR) == 0))
 			continue;
+		alphabet_element_index	= mgr->vars_dict->entries[i].value;
+		is_primed				= false;
+		for(j = 0; j < primed_variables_count; j++)
+			if(primed_variables[j] == alphabet_element_index){
+				is_primed	= true;
+				break;
+			}
+		global_index	= automaton_alphabet_get_value_index(ctx->global_alphabet, mgr->vars_dict->entries[i].key);
+		if(ctx->global_alphabet->list[global_index].type == INPUT_SIG){
+			if(is_primed)x_p_count++; else x_count++;
+		}else{
+			if(is_primed)y_p_count++; else y_count++;
+		}
 		strcpy(current_dict_entry, mgr->vars_dict->entries[i].key);
 		strcat(current_dict_entry, SIGNAL_ON_SUFFIX);
 		local_alphabet[current_element++]	= automaton_alphabet_get_value_index(ctx->global_alphabet, current_dict_entry);
 		strcpy(current_dict_entry, mgr->vars_dict->entries[i].key);
 		strcat(current_dict_entry, SIGNAL_OFF_SUFFIX);
 		local_alphabet[current_element++]	= automaton_alphabet_get_value_index(ctx->global_alphabet, current_dict_entry);
+	}
+	uint32_t* x_alphabet	= malloc(sizeof(uint32_t) * x_count);
+	uint32_t* y_alphabet	= malloc(sizeof(uint32_t) * y_count);
+	uint32_t* x_p_alphabet	= malloc(sizeof(uint32_t) * x_p_count);
+	uint32_t* y_p_alphabet	= malloc(sizeof(uint32_t) * y_p_count);
+	x_count = 0, y_count = 0, x_p_count = 0, y_p_count = 0;
+	for(i = 0; i < mgr->vars_dict->size; i++){
+		if((strcmp(mgr->vars_dict->entries[i].key, TRUE_VAR) == 0) || (strcmp(mgr->vars_dict->entries[i].key, FALSE_VAR) == 0))
+			continue;
+		alphabet_element_index	= mgr->vars_dict->entries[i].value;
+		is_primed				= false;
+		for(j = 0; j < primed_variables_count; j++)
+			if(primed_variables[j] == alphabet_element_index){
+				is_primed	= true;
+				break;
+			}
+		global_index	= automaton_alphabet_get_value_index(ctx->global_alphabet, mgr->vars_dict->entries[i].key);
+		if(ctx->global_alphabet->list[global_index].type == INPUT_SIG){
+			if(is_primed)x_p_alphabet[x_p_count++]	= global_index; else x_alphabet[x_count++]	= global_index;
+		}else{
+			if(is_primed)y_p_alphabet[y_p_count++]	= global_index; else y_alphabet[y_count++]	= global_index;
+		}
+
 	}
 	automaton_automaton* ltl_automaton	= automaton_automaton_create(name, ctx, local_alphabet_count, local_alphabet, false, true);
 
@@ -1574,11 +1619,11 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	//TODO: build automaton
 	uint32_t valuations_count;
 	obdd_print(env_theta_composed);
-	/*
-	bool* valuations	= obdd_get_valuations(mgr, env_theta_composed, &valuations_count);
-	obdd_print_valuations(mgr, valuations, valuations_count);
+
+	bool* valuations	= obdd_get_valuations(mgr, env_theta_composed, &valuations_count, x_alphabet, x_count);
+	obdd_print_valuations(mgr, valuations, valuations_count, x_alphabet, x_count);
 	free(valuations);
-*/
+
 	int32_t main_index					= automaton_parsing_tables_add_entry(tables, COMPOSITION_ENTRY_AUT, name, ltl_automaton);
 	tables->composition_entries[main_index]->solved	= true;
 	tables->composition_entries[main_index]->valuation_count			= 1;
@@ -1589,6 +1634,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	if(env_rho_count > 1)obdd_destroy(env_rho_composed);
 	if(sys_rho_count > 1)obdd_destroy(sys_rho_composed);
 
+	free(x_alphabet); free(y_alphabet); free(x_p_alphabet); free(y_p_alphabet);
 	free(local_alphabet);
 	obdd_state_tree_destroy(state_map);
 	return ltl_automaton;
@@ -1670,7 +1716,7 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 	uint32_t ltl_automaton_index;
 	for(i = 0; i < program->count; i++)
 		if(program->statements[i]->type == LTL_RULE_AUT){
-			for(j = 0; j < ltl_automata_count; j++)
+			for(j = 0; j < (int32_t)ltl_automata_count; j++)
 				if(strcmp(ltl_automata_names[j], program->statements[i]->ltl_rule_def->game_structure_name) == 0){
 					ltl_automaton_index	= j;
 					break;
@@ -1703,7 +1749,7 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 	}
 	for(i = 0; i < program->count; i++)
 			if(program->statements[i]->type == LTL_RULE_AUT){
-				for(j = 0; j < ltl_automata_count; j++)
+				for(j = 0; j < (int32_t)ltl_automata_count; j++)
 					if(strcmp(ltl_automata_names[j], program->statements[i]->ltl_rule_def->game_structure_name) == 0){
 						ltl_automaton_index	= j;
 						break;
@@ -1723,13 +1769,13 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 		automaton_build_automaton_from_obdd(ctx, ltl_automata_names[i], env_theta_obdd[i], env_theta_count[i], sys_theta_obdd[i], sys_theta_count[i],
 				env_rho_obdd[i], env_rho_count[i], sys_rho_obdd[i], sys_rho_count[i], tables);
 	}
-	/*
-	for(i = 0; i < ltl_automata_count; i++){
-		for(j = 0; j < sys_theta_count[i]; j++)obdd_destroy(sys_theta_obdd[i][j]);
-		for(j = 0; j < env_theta_count[i]; j++)obdd_destroy(env_theta_obdd[i][j]);
-		for(j = 0; j < sys_rho_count[i]; j++)obdd_destroy(sys_rho_obdd[i][j]);
-		for(j = 0; j < env_rho_count[i]; j++)obdd_destroy(env_rho_obdd[i][j]);
-	}*/
+	obdd_mgr* mgr	= parser_get_obdd_mgr();
+	obdd_mgr_destroy(mgr);
+	uint32_t **primed_size, **primed_count;
+	uint32_t **primed_vars	= parser_get_primed_variables(primed_size, primed_count);
+	free(*primed_vars);
+
+
 	for(i = 0; i < ltl_automata_count; i++){
 		free(sys_theta_obdd[i]);		free(env_theta_obdd[i]);
 		free(sys_rho_obdd[i]);			free(env_rho_obdd[i]);
