@@ -1514,6 +1514,45 @@ automaton_fluent* automaton_fluent_create_from_syntax(automaton_parsing_tables* 
 	return fluent;
 }
 
+void automaton_set_composed_valuation(bool* valuation, bool* partial_valuation, bool is_input, uint32_t x_count, uint32_t y_count){
+	uint32_t i;
+	if(is_input) for(i = 0; i < x_count; i++)valuation[i]	= partial_valuation[i];
+	else for(i = x_count; i < (x_count + y_count); i++)valuation[i]	= partial_valuation[i];
+}
+void automaton_add_transition_from_valuations(obdd_mgr* mgr, automaton_automaton* automaton, uint32_t from_state, uint32_t to_state
+		, bool* from_valuation, bool* to_valuation, uint32_t* x_alphabet, uint32_t* y_alphabet, uint32_t x_count
+		, uint32_t y_count){
+	uint32_t i, fluent_index, fluent_count	= x_count + y_count;
+	automaton_transition* transition		= automaton_transition_create(from_state, to_state);
+	automaton_signal_event* signal_event	= automaton_signal_event_create("", INPUT_SIG);
+	char signal_name[255];
+	//TODO: no son estas las valuaciones que van, son las especificadas explicitamente en el fsp
+	for(i = 0; i < x_count; i++){
+		if(from_valuation[i] != to_valuation[i]){
+			strcpy(signal_name, mgr->vars_dict->entries[x_alphabet[i]].key);
+			strcat(signal_name, from_valuation[i]? SIGNAL_OFF_SUFFIX: SIGNAL_ON_SUFFIX);
+			signal_event->name	= signal_name;
+			automaton_transition_add_signal_event(transition, automaton->context, signal_event);
+		}
+	}
+	for(i = 0; i < y_count; i++){
+		if(from_valuation[i + x_count] != to_valuation[i]){
+			strcpy(signal_name, mgr->vars_dict->entries[y_alphabet[i]].key);
+			strcat(signal_name, from_valuation[i]? SIGNAL_OFF_SUFFIX: SIGNAL_ON_SUFFIX);
+			signal_event->name	= signal_name;
+			automaton_transition_add_signal_event(transition, automaton->context, signal_event);
+		}
+	}
+	signal_event->type	= OUTPUT_SIG;
+	automaton_automaton_add_transition(automaton, transition);
+	automaton_transition_destroy(transition, true);
+	//should add after adding transition since structure resizing may not have been triggered
+	for(i = 0; i < fluent_count; i++){
+		fluent_index	= GET_STATE_FLUENT_INDEX(fluent_count, to_state, i);
+		if(to_valuation[i])SET_FLUENT_BIT(automaton->valuations, fluent_index);
+		else CLEAR_FLUENT_BIT(automaton->valuations, fluent_index);
+	}
+}
 automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_context* ctx, char* name, obdd** env_theta_obdd, uint32_t env_theta_count, obdd** sys_theta_obdd, uint32_t sys_theta_count
 		, obdd** env_rho_obdd, uint32_t env_rho_count, obdd** sys_rho_obdd, uint32_t sys_rho_count, automaton_parsing_tables* tables){
 	//remember that if automaton was built from ltl its valuations should be added when building it
@@ -1560,6 +1599,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 		strcat(current_dict_entry, SIGNAL_OFF_SUFFIX);
 		local_alphabet[current_element++]	= automaton_alphabet_get_value_index(ctx->global_alphabet, current_dict_entry);
 	}
+	//get x, y, x', y' alphabets
 	uint32_t* x_alphabet	= malloc(sizeof(uint32_t) * x_count);
 	uint32_t* y_alphabet	= malloc(sizeof(uint32_t) * y_count);
 	uint32_t* x_p_alphabet	= malloc(sizeof(uint32_t) * x_p_count);
@@ -1585,8 +1625,10 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 			if(is_primed)y_p_alphabet[y_p_count++]	= i; else y_alphabet[y_count++]	= i;
 		}
 	}
-	automaton_automaton* ltl_automaton	= automaton_automaton_create(name, ctx, local_alphabet_count, local_alphabet, false, true);
+	//get automaton
+	automaton_automaton* ltl_automaton	= automaton_automaton_create(name, ctx, local_alphabet_count, local_alphabet, true, true);
 
+	//get the conjunction of rho and theta formulae
 	obdd* old_obdd;
 	obdd* env_theta_composed			= NULL;
 	obdd* sys_theta_composed			= NULL;
@@ -1621,20 +1663,57 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 			if(i > 1)obdd_destroy(old_obdd);
 		}
 
-	//TODO: build automaton
-	uint32_t valuations_count;
-	obdd_print(env_theta_composed);
-
-	printf("Primed_alphabet:");
-	for(i = 0; i < parser_primed_variables_count; i++)
-		printf("%d%s", parser_primed_variables[i], i == parser_primed_variables_count - 1 ? "\n" : ",");
-	printf("X_alphabet:");
-	for(i = 0; i < x_count; i++)
-		printf("%d%s", x_alphabet[i], i == x_count - 1 ? "\n" : ",");
-
-	bool* valuations	= obdd_get_valuations(mgr, env_theta_composed, &valuations_count, x_alphabet, x_count);
-	obdd_print_valuations(mgr, valuations, valuations_count, x_alphabet, x_count);
-	free(valuations);
+	//incrementally build the transition relation and valuation
+	uint32_t current_valuations_count, current_state, next_state;
+	uint32_t fluent_count	= x_count + y_count;
+	bool* current_valuations;
+	obdd_state_tree* obdd_state_map	= obdd_state_tree_create(x_count + y_count);
+	automaton_concrete_bucket_list* bucket_list	= automaton_concrete_bucket_list_create(
+			LTL_BUCKET_SIZE, automaton_int_extractor, automaton_int_copy, sizeof(uint32_t));
+	bool* composed_valuation		= malloc(sizeof(bool) * (x_count + y_count));
+	bool* composed_next_valuation		= malloc(sizeof(bool) * (x_count + y_count));
+	for(i = 0; i < (x_count + y_count); i++)composed_valuation[i]	= composed_next_valuation[i] = false;
+	current_state		= obdd_state_tree_get_key(obdd_state_map, composed_valuation);
+	automaton_automaton_add_initial_state(ltl_automaton, current_state);
+	uint32_t fluent_index;
+	for(i = 0; i < fluent_count; i++){
+		fluent_index	= GET_STATE_FLUENT_INDEX(fluent_count, current_state, i);
+		CLEAR_FLUENT_BIT(ltl_automaton->valuations, fluent_index);
+	}
+	//add initial env valuations
+	current_valuations	= obdd_get_valuations(mgr, env_theta_composed, &current_valuations_count, x_alphabet, x_count);
+#if DEBUG_LTL_AUTOMATON
+	printf("Init env valuations\n");
+	obdd_print_valuations(mgr, current_valuations, current_valuations_count, x_alphabet, x_count);
+#endif
+	for(i = 0; i < current_valuations_count; i++){
+		automaton_set_composed_valuation(composed_next_valuation, (bool*)(current_valuations + x_count * i * sizeof(bool)), true, x_count, y_count);
+		next_state		= obdd_state_tree_get_key(obdd_state_map, composed_next_valuation);
+		automaton_add_transition_from_valuations(mgr, ltl_automaton, current_state, next_state
+				, composed_valuation, composed_next_valuation, x_alphabet, y_alphabet, x_count, y_count);
+		automaton_concrete_bucket_add_entry(bucket_list, &next_state);
+	}
+	free(current_valuations);
+	obdd* initial_obdd	= obdd_apply_and(env_theta_composed, sys_theta_composed);
+	current_valuations	= obdd_get_valuations(mgr, env_theta_composed, &current_valuations_count, x_alphabet, x_count);
+#if DEBUG_LTL_AUTOMATON
+	printf("Init sys valuations\n");
+	obdd_print_valuations(mgr, current_valuations, current_valuations_count, y_alphabet, y_count);
+#endif
+	uint32_t state_ptr = 0;
+	automaton_concrete_bucket_pop_entry(bucket_list, &state_ptr);
+	while(state_ptr != NULL){
+		for(i = 0; i < current_valuations_count; i++){
+			automaton_set_composed_valuation(composed_next_valuation, (bool*)(current_valuations + y_count * i * sizeof(bool)), true, x_count, y_count);
+			next_state		= obdd_state_tree_get_key(obdd_state_map, composed_next_valuation);
+			automaton_add_transition_from_valuations(mgr, ltl_automaton, current_state, next_state
+					, composed_valuation, composed_next_valuation, x_alphabet, y_alphabet, x_count, y_count);
+			automaton_bucket_add_entry(bucket_list, next_state);
+		}
+		automaton_concrete_bucket_pop_entry(bucket_list, &state_ptr);
+	}
+	obdd_destroy(initial_obdd);
+	free(current_valuations);
 
 	int32_t main_index					= automaton_parsing_tables_add_entry(tables, COMPOSITION_ENTRY_AUT, name, ltl_automaton);
 	tables->composition_entries[main_index]->solved	= true;
@@ -1646,8 +1725,11 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	if(env_rho_count > 1)obdd_destroy(env_rho_composed);
 	if(sys_rho_count > 1)obdd_destroy(sys_rho_composed);
 
+	automaton_concrete_bucket_destroy(bucket_list);
 	free(x_alphabet); free(y_alphabet); free(x_p_alphabet); free(y_p_alphabet);
 	free(local_alphabet);
+	free(composed_valuation);
+	free(composed_next_valuation);
 	obdd_state_tree_destroy(state_map);
 	return ltl_automaton;
 }

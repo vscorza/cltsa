@@ -10,7 +10,7 @@
 #define VAR_NEXT_SUFFIX		"_p"
 
 #define DEBUG_OBDD	0
-#define DEBUG_OBDD_VALUATIONS	1
+#define DEBUG_OBDD_VALUATIONS	0
 
 #define GET_VAR_INDEX(variable_count, valuation_index, variable_index) (((variable_count) * (valuation_index)) + (variable_index))
 #define GET_VAR_IN_VALUATION(arr, variable_count, valuation_index, variable_index)	(arr[GET_VAR_INDEX(variable_count, valuation_index, variable_index)])
@@ -106,6 +106,8 @@ void obdd_remove_low_succesor(obdd_node* src, obdd_node* dst);
 /** CORE COMPUTATION **/
 obdd* obdd_restrict(obdd* root, char* var, bool value);
 obdd_node* obdd_node_restrict(obdd_mgr* mgr, obdd_node* root, char* var, uint32_t var_ID, bool value);
+obdd* obdd_restrict_vector(obdd* root, uint32_t* var_ids, bool* values, uint32_t count);
+obdd_node* obdd_node_restrict_vector(obdd_mgr* mgr, obdd_node* root, uint32_t* var_ids, bool* values, uint32_t count);
 obdd* obdd_exists(obdd* root, char* var);					//apply reduction based on shannon
 obdd* obdd_forall(obdd* root, char* var);					//apply reduction based on shannon
 void obdd_print(obdd* root);

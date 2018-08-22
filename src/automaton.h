@@ -345,6 +345,11 @@ uint32_t automaton_composite_tree_get_key(automaton_composite_tree* tree, uint32
 void automaton_composite_tree_destroy(automaton_composite_tree* tree);
 void automaton_composite_tree_entry_print(automaton_composite_tree_entry* entry, bool comes_from_next, uint32_t* tabs);
 void automaton_composite_tree_print(automaton_composite_tree* tree);
+/** INT AUX FUNCT **/
+uint32_t automaton_int_extractor(void* value);
+int32_t automaton_int_compare(void* left_int, void* right_int);
+void automaton_int_copy(void* target_input, void* source_input);
+void automaton_pending_state_destroy(automaton_pending_state*  pending_state);
 /** AUTOMATA **/
 
 #endif

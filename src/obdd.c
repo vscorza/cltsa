@@ -575,6 +575,45 @@ obdd_node* obdd_node_restrict(obdd_mgr* mgr, obdd_node* root, char* var, uint32_
 	return applied_node;	
 }
 
+obdd* obdd_restrict_vector(obdd* root, uint32_t* var_ids, bool* values, uint32_t count){
+	obdd_node* restricted_node	= obdd_node_restrict_vector(root->mgr, root->root_obdd, var_ids, values, count);
+
+	return (obdd_create(root->mgr, restricted_node));
+}
+
+obdd_node* obdd_node_restrict_vector(obdd_mgr* mgr, obdd_node* root, uint32_t* var_ids, bool* values, uint32_t count){
+	bool is_root_constant	= obdd_is_constant(mgr, root);
+
+	if(is_root_constant){
+		return root;
+	}
+	uint32_t i;
+	uint32_t low_var_ID	=  root->low_obdd->var_ID;
+	uint32_t high_var_ID	=  root->high_obdd->var_ID;
+
+	bool is_low_constant		= obdd_is_constant(mgr, root->low_obdd);
+	bool is_high_constant		= obdd_is_constant(mgr, root->high_obdd);
+
+	obdd_node* applied_node;
+
+	for(i = 0; i < count; i++){
+		if(root->var_ID == var_ids[i]){
+			if(values[i]){
+				applied_node 	= obdd_mgr_mk_node(mgr, dictionary_key_for_value(mgr->vars_dict,high_var_ID)
+					, root->high_obdd->high_obdd, root->high_obdd->low_obdd);
+			}else{
+				applied_node 	= obdd_mgr_mk_node(mgr, dictionary_key_for_value(mgr->vars_dict,low_var_ID)
+					, root->low_obdd->high_obdd, root->low_obdd->low_obdd);
+			}
+		}else{
+			applied_node 	= obdd_mgr_mk_node(mgr, dictionary_key_for_value(mgr->vars_dict,root->var_ID)
+				, obdd_node_restrict_vector(mgr, root->high_obdd, var_ids, values, count)
+				, obdd_node_restrict_vector(mgr, root->low_obdd, var_ids, values, count));
+		}
+	}
+	return applied_node;
+}
+
 obdd* obdd_exists(obdd* root, char* var){ 
 	obdd* restrict_true_obdd	= obdd_restrict(root, var, true);
 	obdd* restrict_false_obdd	= obdd_restrict(root, var, false);
@@ -915,7 +954,7 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 				uint32_t k;
 				for(k = 0; k < (uint32_t)dont_cares_count; k++){
 					modulo	= dont_cares_count;
-					for(i = 0; i < (int32_t)variables_count; i++){
+					for(i = 0; i < (int32_t)last_node_index; i++){
 						variable_index	= -1;
 						for(j = 0; j < (int32_t)img_count; j++)
 							if(valuation_img[j] == (uint32_t)(i + 2)){
