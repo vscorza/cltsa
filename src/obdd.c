@@ -766,7 +766,10 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 	bool at_least_one_node_expanded		= true;
 #if DEBUG_OBDD_VALUATIONS
 	printf("Getting OBDD valuations\n");
-	printf("[N]ow on node: %d (%s) \n", last_node_index, dictionary_key_for_value(mgr->vars_dict,last_nodes[last_node_index]->var_ID));
+	printf("Projected over:[");
+	for(i = 0; i < (int32_t)img_count; i++)
+		printf("%d%s", valuation_img[i], i == ((int32_t)img_count -1) ? "]\n": ",");
+	printf("[N]ow on node: %d (%d:%s) \n", last_node_index, last_nodes[last_node_index]->var_ID,dictionary_key_for_value(mgr->vars_dict,last_nodes[last_node_index]->var_ID));
 	printf("High pred. count: %d \tLow pred.count: %d\n", last_nodes[last_node_index]->high_predecessors_count, last_nodes[last_node_index]->low_predecessors_count);
 #endif
 	//perform dfs exploration of obdd
@@ -963,7 +966,7 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 				last_nodes[last_node_index]			= current_predecessor;
 				last_pred_index[last_node_index]	= 0;
 #if DEBUG_OBDD_VALUATIONS
-				printf("[N]ow on node: %d (%s) \n", last_node_index, dictionary_key_for_value(mgr->vars_dict,last_nodes[last_node_index]->var_ID));
+				printf("[N]ow on node: %d (%d:%s) \n", last_node_index, last_nodes[last_node_index]->var_ID,dictionary_key_for_value(mgr->vars_dict,last_nodes[last_node_index]->var_ID));
 				printf("High pred. count: %d \tLow pred.count: %d\n", last_nodes[last_node_index]->high_predecessors_count, last_nodes[last_node_index]->low_predecessors_count);
 #endif
 
