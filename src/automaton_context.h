@@ -103,5 +103,5 @@ void automaton_index_syntax_get_range(automaton_parsing_tables* tables, automato
 void automaton_indexes_syntax_eval_strings(automaton_parsing_tables* tables, automaton_indexes_valuation* valuation, char*** a, int32_t* a_count, automaton_indexes_syntax* indexes);
 void automaton_set_composed_valuation(bool* valuation, bool* partial_valuation, bool is_input, uint32_t x_count, uint32_t y_count);
 automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_context* ctx, char* name, obdd** env_theta_obdd, uint32_t env_theta_count, obdd** sys_theta_obdd, uint32_t sys_theta_count
-		, obdd** env_rho_obdd, uint32_t env_rho_count, obdd** sys_rho_obdd, uint32_t sys_rho_count, automaton_parsing_tables* tables);
+		, obdd** env_rho_obdd, uint32_t env_rho_count, obdd** sys_rho_obdd, uint32_t sys_rho_count, obdd** liveness_formulas, uint32_t liveness_count, automaton_parsing_tables* tables);
 #endif /* AUTOMATON_CONTEXT_H_ */

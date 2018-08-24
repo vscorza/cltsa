@@ -1554,7 +1554,7 @@ void automaton_add_transition_from_valuations(obdd_mgr* mgr, automaton_automaton
 	}
 }
 automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_context* ctx, char* name, obdd** env_theta_obdd, uint32_t env_theta_count, obdd** sys_theta_obdd, uint32_t sys_theta_count
-		, obdd** env_rho_obdd, uint32_t env_rho_count, obdd** sys_rho_obdd, uint32_t sys_rho_count, automaton_parsing_tables* tables){
+		, obdd** env_rho_obdd, uint32_t env_rho_count, obdd** sys_rho_obdd, uint32_t sys_rho_count, obdd** liveness_formulas, uint32_t liveness_count, automaton_parsing_tables* tables){
 	//remember that if automaton was built from ltl its valuations should be added when building it
 	//and should be kept when composing it, if several automata are to be composed from ltl their composed valuation
 	//equals to the conjunction of the components' valuations
@@ -1802,13 +1802,18 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 	uint32_t *env_theta_count	= malloc(sizeof(uint32_t) * ltl_automata_count);
 	uint32_t *sys_rho_count		= malloc(sizeof(uint32_t) * ltl_automata_count);
 	uint32_t *env_rho_count		= malloc(sizeof(uint32_t) * ltl_automata_count);
+	uint32_t liveness_formulas_count	= 0;
+	char** liveness_formulas_names		= NULL;
+	obdd** liveness_formulas			= NULL;
 	for(i = 0; i < ltl_automata_count; i++){
 		sys_theta_count[i]	= 0;	env_theta_count[i]	= 0;
 		sys_rho_count[i]	= 0;	env_rho_count[i]	= 0;
 	}
 	bool is_env, is_theta;
 	uint32_t ltl_automaton_index;
-	for(i = 0; i < program->count; i++)
+	for(i = 0; i < program->count; i++){
+		if(program->statements[i]->type == LTL_FLUENT_AUT)
+			liveness_formulas_count++;
 		if(program->statements[i]->type == LTL_RULE_AUT){
 			for(j = 0; j < (int32_t)ltl_automata_count; j++)
 				if(strcmp(ltl_automata_names[j], program->statements[i]->ltl_rule_def->game_structure_name) == 0){
@@ -1825,6 +1830,7 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 				else			sys_rho_count[j]++;
 			}
 		}
+	}
 	obdd ***sys_theta_obdd	= malloc(sizeof(obdd**) * ltl_automata_count);
 	obdd ***env_theta_obdd	= malloc(sizeof(obdd**) * ltl_automata_count);
 	obdd ***sys_rho_obdd	= malloc(sizeof(obdd**) * ltl_automata_count);
@@ -1841,27 +1847,36 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 		sys_rho_count[i]	= 0;
 		env_rho_count[i]	= 0;
 	}
-	for(i = 0; i < program->count; i++)
-			if(program->statements[i]->type == LTL_RULE_AUT){
-				for(j = 0; j < (int32_t)ltl_automata_count; j++)
-					if(strcmp(ltl_automata_names[j], program->statements[i]->ltl_rule_def->game_structure_name) == 0){
-						ltl_automaton_index	= j;
-						break;
-					}
-				is_env	= program->statements[i]->ltl_rule_def->is_env;
-				is_theta= program->statements[i]->ltl_rule_def->is_theta;
-				if(is_env){
-					if(is_theta)	env_theta_obdd[ltl_automaton_index][env_theta_count[ltl_automaton_index]++]	= program->statements[i]->ltl_rule_def->obdd;
-					else			env_rho_obdd[ltl_automaton_index][env_rho_count[ltl_automaton_index]++]		= program->statements[i]->ltl_rule_def->obdd;
-				}else{
-					if(is_theta)	sys_theta_obdd[ltl_automaton_index][sys_theta_count[ltl_automaton_index]++]	= program->statements[i]->ltl_rule_def->obdd;
-					else			sys_rho_obdd[ltl_automaton_index][sys_rho_count[ltl_automaton_index]++]		= program->statements[i]->ltl_rule_def->obdd;
+	liveness_formulas		= malloc(sizeof(obdd*) * liveness_formulas_count);
+	liveness_formulas_names	= malloc(sizeof(char*) * liveness_formulas_count);
+	liveness_formulas_count	= 0;
+	for(i = 0; i < program->count; i++){
+		if(program->statements[i]->type == LTL_FLUENT_AUT){
+			liveness_formulas[liveness_formulas_count]			= program->statements[i]->ltl_fluent_def->obdd;
+			liveness_formulas_names[liveness_formulas_count++]	= program->statements[i]->ltl_fluent_def->name;
+		}
+
+		if(program->statements[i]->type == LTL_RULE_AUT){
+			for(j = 0; j < (int32_t)ltl_automata_count; j++)
+				if(strcmp(ltl_automata_names[j], program->statements[i]->ltl_rule_def->game_structure_name) == 0){
+					ltl_automaton_index	= j;
+					break;
 				}
+			is_env	= program->statements[i]->ltl_rule_def->is_env;
+			is_theta= program->statements[i]->ltl_rule_def->is_theta;
+			if(is_env){
+				if(is_theta)	env_theta_obdd[ltl_automaton_index][env_theta_count[ltl_automaton_index]++]	= program->statements[i]->ltl_rule_def->obdd;
+				else			env_rho_obdd[ltl_automaton_index][env_rho_count[ltl_automaton_index]++]		= program->statements[i]->ltl_rule_def->obdd;
+			}else{
+				if(is_theta)	sys_theta_obdd[ltl_automaton_index][sys_theta_count[ltl_automaton_index]++]	= program->statements[i]->ltl_rule_def->obdd;
+				else			sys_rho_obdd[ltl_automaton_index][sys_rho_count[ltl_automaton_index]++]		= program->statements[i]->ltl_rule_def->obdd;
 			}
+		}
+	}
 	//build automata from ltl
 	for(i = 0; i < ltl_automata_count; i++){
 		automaton_build_automaton_from_obdd(ctx, ltl_automata_names[i], env_theta_obdd[i], env_theta_count[i], sys_theta_obdd[i], sys_theta_count[i],
-				env_rho_obdd[i], env_rho_count[i], sys_rho_obdd[i], sys_rho_count[i], tables);
+				env_rho_obdd[i], env_rho_count[i], sys_rho_obdd[i], sys_rho_count[i], liveness_formulas, liveness_formulas_count, tables);
 	}
 	obdd_mgr* mgr	= parser_get_obdd_mgr();
 	obdd_mgr_destroy(mgr);
@@ -1935,6 +1950,7 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 			}
 		}
 	}
+	free(liveness_formulas); free(liveness_formulas_names);
 	automaton_parsing_tables_destroy(tables);
 	return ctx;
 }
