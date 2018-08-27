@@ -97,6 +97,8 @@ void obdd_node_destroy(obdd_node* root);
 obdd_node* obdd_node_get_false_node(obdd_mgr* mgr, obdd_node* node);
 obdd_node* obdd_node_get_true_node(obdd_mgr* mgr, obdd_node* node);
 obdd* obdd_create(obdd_mgr* mgr, obdd_node* root);
+obdd_node* obdd_node_clone(obdd_mgr* mgr, obdd_node* root);
+obdd* obdd_clone(obdd* root);
 void obdd_destroy(obdd* root);
 void obdd_add_high_succesor(obdd_node* src, obdd_node* dst);
 void obdd_add_low_succesor(obdd_node* src, obdd_node* dst);

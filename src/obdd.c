@@ -322,6 +322,24 @@ obdd* obdd_create(obdd_mgr* mgr, obdd_node* root){
 	return new_obdd;
 }
 
+obdd_node* obdd_node_clone(obdd_mgr* mgr, obdd_node* root){
+	if(obdd_is_constant(mgr, root))
+		return root;
+	obdd_node* clone	= obdd_mgr_mk_node(mgr, dictionary_key_for_value(mgr->vars_dict, root->var_ID)
+			, obdd_node_clone(mgr, root->high_obdd), obdd_node_clone(mgr, root->low_obdd));
+	return clone;
+}
+
+obdd* obdd_clone(obdd* root){
+	obdd* clone	= malloc(sizeof(obdd));
+	clone->false_obdd	= root->false_obdd;
+	clone->true_obdd	= root->true_obdd;
+	clone->mgr			= root->mgr;
+	clone->root_obdd	= obdd_node_clone(root->mgr, root->root_obdd);
+	obdd_reduce(clone);
+	return clone;
+}
+
 void obdd_destroy(obdd* root){
 	if(root->root_obdd != NULL){
 		obdd_node_destroy(root->root_obdd);

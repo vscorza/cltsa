@@ -99,6 +99,11 @@ void automaton_automata_context_copy(automaton_automata_context* source, automat
 	for(i = 0; i < target->global_fluents_count; i++){
 		automaton_fluent_copy(&(source->global_fluents[i]), &(target->global_fluents[i]));	
 	}
+	target->liveness_valuations_count	= source->liveness_valuations_count;
+	target->liveness_valuations		= malloc(sizeof(obdd*) * target->liveness_valuations_count);
+	for(i = 0; i < target->liveness_valuations_count; i++){
+		target->liveness_valuations[i]	= obdd_clone(source->liveness_valuations[i]);
+	}
 }
 automaton_automaton* automaton_automaton_clone(automaton_automaton* source){
 	automaton_automaton* copy		= malloc(sizeof(automaton_automaton));
@@ -329,6 +334,10 @@ void automaton_automata_context_print(automaton_automata_context* ctx, char* pre
 	for(i = 0; i < ctx->global_fluents_count; i++){
 		automaton_fluent_print(&(ctx->global_fluents[i]), ctx, prefix2, "\n");
 	}
+	printf("%sLiveness Valuations:\n", prefix2);
+	for(i = 0; i < ctx->liveness_valuations_count; i++){
+		obdd_print(ctx->liveness_valuations[i]);
+	}
 	if(suffix != NULL)
 		printf("%s", suffix);	
 }
@@ -500,9 +509,10 @@ automaton_valuation* automaton_valuation_create(uint32_t state){
 	automaton_valuation_initialize(valuation, state);
 	return valuation;
 }
-automaton_automata_context* automaton_automata_context_create(char* name, automaton_alphabet* alphabet, uint32_t fluents_count, automaton_fluent** fluents){
+automaton_automata_context* automaton_automata_context_create(char* name, automaton_alphabet* alphabet, uint32_t fluents_count, automaton_fluent** fluents, uint32_t liveness_valuations_count
+		, obdd** liveness_valuations){
 	automaton_automata_context* ctx		= malloc(sizeof(automaton_automata_context));
-	automaton_automata_context_initialize(ctx, name, alphabet, fluents_count, fluents);
+	automaton_automata_context_initialize(ctx, name, alphabet, fluents_count, fluents, liveness_valuations_count, liveness_valuations);
 	return ctx;
 }
 automaton_automaton* automaton_automaton_create(char* name, automaton_automata_context* ctx, uint32_t local_alphabet_count, uint32_t* local_alphabet, bool is_game, bool built_from_ltl){
@@ -557,7 +567,7 @@ void automaton_valuation_initialize(automaton_valuation* valuation, uint32_t sta
 	valuation->active_fluents_count	= 0;
 	valuation->active_fluents		= NULL;
 }
-void automaton_automata_context_initialize(automaton_automata_context* ctx, char* name, automaton_alphabet* alphabet, uint32_t fluents_count, automaton_fluent** fluents){
+void automaton_automata_context_initialize(automaton_automata_context* ctx, char* name, automaton_alphabet* alphabet, uint32_t fluents_count, automaton_fluent** fluents, uint32_t liveness_valuations_count, obdd** liveness_valuations){
 	ctx->name					= malloc(sizeof(char) * (strlen(name) + 1));
 	strcpy(ctx->name, name);
 	ctx->global_alphabet		= automaton_alphabet_clone(alphabet);
@@ -566,6 +576,11 @@ void automaton_automata_context_initialize(automaton_automata_context* ctx, char
 	uint32_t i;
 	for(i = 0; i < ctx->global_fluents_count; i++){
 		automaton_fluent_copy(fluents[i], &(ctx->global_fluents[i]));
+	}
+	ctx->liveness_valuations_count	= liveness_valuations_count;
+	ctx->liveness_valuations		= malloc(sizeof(obdd*) * liveness_valuations_count);
+	for(i = 0; i < ctx->liveness_valuations_count; i++){
+		ctx->liveness_valuations[i]	= obdd_clone(liveness_valuations[i]);
 	}
 }
 void automaton_automaton_initialize(automaton_automaton* automaton, char* name, automaton_automata_context* ctx, uint32_t local_alphabet_count, uint32_t* local_alphabet, bool is_game, bool built_from_ltl){
@@ -710,6 +725,13 @@ void automaton_automata_context_destroy(automaton_automata_context* ctx){
 	}
 	if(ctx->global_fluents != NULL)
 		free(ctx->global_fluents);
+	for(i = 0; i < ctx->liveness_valuations_count; i++){
+		obdd_destroy(ctx->liveness_valuations[i]);
+	}
+	if(ctx->liveness_valuations != NULL)
+		free(ctx->liveness_valuations);
+	ctx->liveness_valuations	= NULL;
+	ctx->liveness_valuations_count	= 0;
 	ctx->name					= NULL;
 	ctx->global_alphabet		= NULL;
 	ctx->global_fluents_count	= 0;

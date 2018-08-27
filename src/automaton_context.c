@@ -1554,7 +1554,7 @@ void automaton_add_transition_from_valuations(obdd_mgr* mgr, automaton_automaton
 	}
 }
 automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_context* ctx, char* name, obdd** env_theta_obdd, uint32_t env_theta_count, obdd** sys_theta_obdd, uint32_t sys_theta_count
-		, obdd** env_rho_obdd, uint32_t env_rho_count, obdd** sys_rho_obdd, uint32_t sys_rho_count, obdd** liveness_formulas, uint32_t liveness_count, automaton_parsing_tables* tables){
+		, obdd** env_rho_obdd, uint32_t env_rho_count, obdd** sys_rho_obdd, uint32_t sys_rho_count, automaton_parsing_tables* tables){
 	//remember that if automaton was built from ltl its valuations should be added when building it
 	//and should be kept when composing it, if several automata are to be composed from ltl their composed valuation
 	//equals to the conjunction of the components' valuations
@@ -1767,10 +1767,7 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 			fluents[fluent_count++]			= tables->fluent_entries[fluent_index]->valuation.fluent_value;
 		}
 	}
-	//get fluents
-	automaton_automata_context_initialize(ctx, ctx_name, global_alphabet, fluent_count, fluents);
-	free(fluents);
-	automaton_alphabet_destroy(global_alphabet);
+
 	//get ltl rules
 	uint32_t ltl_automata_count = 0;
 	char** ltl_automata_names	= NULL;
@@ -1873,10 +1870,14 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 			}
 		}
 	}
+	//get fluents
+	automaton_automata_context_initialize(ctx, ctx_name, global_alphabet, fluent_count, fluents, liveness_formulas_count, liveness_formulas);
+	free(fluents);
+	automaton_alphabet_destroy(global_alphabet);
 	//build automata from ltl
 	for(i = 0; i < ltl_automata_count; i++){
 		automaton_build_automaton_from_obdd(ctx, ltl_automata_names[i], env_theta_obdd[i], env_theta_count[i], sys_theta_obdd[i], sys_theta_count[i],
-				env_rho_obdd[i], env_rho_count[i], sys_rho_obdd[i], sys_rho_count[i], liveness_formulas, liveness_formulas_count, tables);
+				env_rho_obdd[i], env_rho_count[i], sys_rho_obdd[i], sys_rho_count[i], tables);
 	}
 	obdd_mgr* mgr	= parser_get_obdd_mgr();
 	obdd_mgr_destroy(mgr);

@@ -138,6 +138,8 @@ typedef struct automata_context_str{
 	automaton_alphabet*	global_alphabet;
 	uint32_t			global_fluents_count;
 	automaton_fluent*	global_fluents;
+	uint32_t			liveness_valuations_count;
+	obdd**				liveness_valuations;
 } automaton_automata_context;
 typedef struct automaton_transitions_pool_str{
 	uint32_t entries_size_count;
@@ -230,7 +232,7 @@ automaton_alphabet* automaton_alphabet_create();
 automaton_transition* automaton_transition_create(uint32_t from_state, uint32_t to_state);
 automaton_fluent* automaton_fluent_create(char* name, bool initial_valuation);
 automaton_valuation* automaton_valuation_create(uint32_t state);
-automaton_automata_context* automaton_automata_context_create(char* name, automaton_alphabet* alphabet, uint32_t fluents_count, automaton_fluent** fluents);
+automaton_automata_context* automaton_automata_context_create(char* name, automaton_alphabet* alphabet, uint32_t fluents_count, automaton_fluent** fluents, uint32_t liveness_valuations_count, obdd** liveness_valuations);
 automaton_automaton* automaton_automaton_create(char* name, automaton_automata_context* ctx, uint32_t local_alphabet_count, uint32_t* local_alphabet, bool is_game, bool built_from_ltl);
 automaton_range* automaton_range_create(char* name, uint32_t lower_value, uint32_t upper_value);
 automaton_indexes_valuation* automaton_indexes_valuation_create();
@@ -240,7 +242,7 @@ void automaton_alphabet_initialize(automaton_alphabet* alphabet);
 void automaton_transition_initialize(automaton_transition* transition, uint32_t from_state, uint32_t to_state);
 void automaton_fluent_initialize(automaton_fluent* fluent, char* name, bool initial_valuation);
 void automaton_valuation_initialize(automaton_valuation* valuation, uint32_t state);
-void automaton_automata_context_initialize(automaton_automata_context* ctx, char* name, automaton_alphabet* alphabet, uint32_t fluents_count, automaton_fluent** fluents);
+void automaton_automata_context_initialize(automaton_automata_context* ctx, char* name, automaton_alphabet* alphabet, uint32_t fluents_count, automaton_fluent** fluents, uint32_t liveness_valuations_count, obdd** liveness_valuations);
 void automaton_automaton_initialize(automaton_automaton* automaton, char* name, automaton_automata_context* ctx, uint32_t local_alphabet_count, uint32_t* local_alphabet, bool is_game, bool built_from_ltl);
 void automaton_range_initialize(automaton_range* range, char* name, uint32_t lower_value, uint32_t upper_value);
 /** DESTROY FUNCTIONS **/
