@@ -650,12 +650,13 @@ void automaton_automaton_initialize(automaton_automaton* automaton, char* name, 
 	automaton->initial_states			= NULL;
 	automaton->is_game					= is_game;
 	if(is_game){
-		uint32_t new_size					= GET_FLUENTS_ARR_SIZE(automaton->context->global_fluents_count, automaton->transitions_size);
+		uint32_t new_size					= GET_FLUENTS_ARR_SIZE((built_from_ltl? automaton->context->liveness_valuations_count : automaton->context->global_fluents_count), automaton->transitions_size);
 		automaton->valuations 				= malloc(sizeof(uint32_t) * new_size);
 		automaton->inverted_valuations		= malloc(sizeof(automaton_bucket_list*) * automaton->context->global_fluents_count);
 		for(i = 0; i < automaton->context->global_fluents_count; i++){
 			automaton->inverted_valuations[i]	= automaton_bucket_list_create(FLUENT_BUCKET_SIZE);
 		}
+
 	}
 }
 void automaton_range_initialize(automaton_range* range, char* name, uint32_t lower_value, uint32_t upper_value){
@@ -1248,8 +1249,8 @@ void automaton_automaton_resize_to_state(automaton_automaton* current_automaton,
 
 	uint32_t old_valuations_size, new_valuations_size;
 	if(current_automaton->is_game){
-		old_valuations_size						= GET_FLUENTS_ARR_SIZE(current_automaton->context->global_fluents_count, old_size);
-		new_valuations_size						= GET_FLUENTS_ARR_SIZE(current_automaton->context->global_fluents_count, current_automaton->transitions_size);
+		old_valuations_size						= GET_FLUENTS_ARR_SIZE((current_automaton->built_from_ltl? current_automaton->context->liveness_valuations_count : current_automaton->context->global_fluents_count), old_size);
+		new_valuations_size						= GET_FLUENTS_ARR_SIZE((current_automaton->built_from_ltl? current_automaton->context->liveness_valuations_count : current_automaton->context->global_fluents_count), current_automaton->transitions_size);
 		uint32_t* new_valuations 				= malloc(sizeof(uint32_t) * new_valuations_size);
 		for(i = 0; i < old_valuations_size; i++){
 			new_valuations[i]					= current_automaton->valuations[i];

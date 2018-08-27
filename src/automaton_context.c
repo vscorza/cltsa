@@ -1520,8 +1520,9 @@ void automaton_set_composed_valuation(bool* valuation, bool* partial_valuation, 
 	else for(i = x_count; i < (x_count + y_count); i++)valuation[i]	= partial_valuation[i];
 }
 void automaton_add_transition_from_valuations(obdd_mgr* mgr, automaton_automaton* automaton, uint32_t from_state, uint32_t to_state
-		, bool* from_valuation, bool* to_valuation, uint32_t* x_alphabet, uint32_t* y_alphabet, uint32_t x_count
-		, uint32_t y_count){
+		, bool* from_valuation, bool* to_valuation){
+	//TODO: implement this
+	/*
 	uint32_t i, fluent_index, fluent_count	= x_count + y_count;
 	automaton_transition* transition		= automaton_transition_create(from_state, to_state);
 	automaton_signal_event* signal_event	= automaton_signal_event_create("", INPUT_SIG);
@@ -1552,6 +1553,7 @@ void automaton_add_transition_from_valuations(obdd_mgr* mgr, automaton_automaton
 		if(to_valuation[i])SET_FLUENT_BIT(automaton->valuations, fluent_index);
 		else CLEAR_FLUENT_BIT(automaton->valuations, fluent_index);
 	}
+	*/
 }
 automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_context* ctx, char* name, obdd** env_theta_obdd, uint32_t env_theta_count, obdd** sys_theta_obdd, uint32_t sys_theta_count
 		, obdd** env_rho_obdd, uint32_t env_rho_count, obdd** sys_rho_obdd, uint32_t sys_rho_count, automaton_parsing_tables* tables){
