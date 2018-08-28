@@ -172,8 +172,11 @@ typedef struct automaton_str{
 	bool					is_game;
 	uint32_t				valuations_size;
 	uint32_t*				valuations;
+	uint32_t				liveness_valuations_size;
+	uint32_t*				liveness_valuations;
 	automaton_transitions_pool*	transitions_pool;
 	automaton_bucket_list**	inverted_valuations;
+	automaton_bucket_list**	liveness_inverted_valuations;
 } automaton_automaton;
 
 /** AUTOMATA **/

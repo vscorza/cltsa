@@ -167,11 +167,20 @@ void automaton_automaton_copy(automaton_automaton* source, automaton_automaton* 
 		for(i = 0; i < target->valuations_size; i++){
 			target->valuations[i]		= source->valuations[i];
 		}
-
+		target->liveness_valuations_size	= source->liveness_valuations_size;
+		target->liveness_valuations			= malloc(sizeof(uint32_t) * target->liveness_valuations_size);
+		for(i = 0; i < target->liveness_valuations_size; i++){
+				target->liveness_valuations[i]		= source->liveness_valuations[i];
+			}
 		target->inverted_valuations						= malloc(sizeof(automaton_bucket_list*) * target->context->global_fluents_count);
 		for(i = 0; i < target->context->global_fluents_count; i++){
 			target->inverted_valuations[i]				= automaton_bucket_list_create(FLUENT_BUCKET_SIZE);
 		}
+		target->liveness_inverted_valuations			= malloc(sizeof(automaton_bucket_list*) * target->context->liveness_valuations_count);
+		for(i = 0; i < target->context->liveness_valuations_count; i++){
+			target->liveness_inverted_valuations[i]		= automaton_bucket_list_create(FLUENT_BUCKET_SIZE);
+		}
+		//TODO: copy buckets contents
 	}
 }
 automaton_automata* automaton_automata_clone(automaton_automata* source){
@@ -381,6 +390,12 @@ void automaton_automaton_print(automaton_automaton* current_automaton, bool prin
 				satisfies_valuation	= TEST_FLUENT_BIT(current_automaton->valuations, fluent_index);
 				printf(satisfies_valuation? "1" : "0");
 			}
+			printf(" ");
+			for(j = 0; j < ctx->liveness_valuations_count; j++){
+				fluent_index		= GET_STATE_FLUENT_INDEX(ctx->liveness_valuations_count, i, j);
+				satisfies_valuation	= TEST_FLUENT_BIT(current_automaton->liveness_valuations, fluent_index);
+				printf(satisfies_valuation? "1" : "0");
+			}
 			printf("\n%s", prefix2);
 		}
 		printf("\n");
@@ -395,6 +410,7 @@ void automaton_automaton_print(automaton_automaton* current_automaton, bool prin
 			*/
 			printf("\n");
 		}
+
 	}
 	printf("%sTransitions:\n", prefix2);
 	for(i = 0; i < current_automaton->transitions_count; i++){
@@ -650,13 +666,18 @@ void automaton_automaton_initialize(automaton_automaton* automaton, char* name, 
 	automaton->initial_states			= NULL;
 	automaton->is_game					= is_game;
 	if(is_game){
-		uint32_t new_size					= GET_FLUENTS_ARR_SIZE((built_from_ltl? automaton->context->liveness_valuations_count : automaton->context->global_fluents_count), automaton->transitions_size);
+		uint32_t new_size					= GET_FLUENTS_ARR_SIZE(automaton->context->global_fluents_count, automaton->transitions_size);
 		automaton->valuations 				= malloc(sizeof(uint32_t) * new_size);
 		automaton->inverted_valuations		= malloc(sizeof(automaton_bucket_list*) * automaton->context->global_fluents_count);
 		for(i = 0; i < automaton->context->global_fluents_count; i++){
 			automaton->inverted_valuations[i]	= automaton_bucket_list_create(FLUENT_BUCKET_SIZE);
 		}
-
+		new_size					= GET_FLUENTS_ARR_SIZE(automaton->context->liveness_valuations_count, automaton->transitions_size);
+		automaton->liveness_valuations 				= malloc(sizeof(uint32_t) * new_size);
+		automaton->liveness_inverted_valuations		= malloc(sizeof(automaton_bucket_list*) * automaton->context->liveness_valuations_count);
+		for(i = 0; i < automaton->context->liveness_valuations_count; i++){
+			automaton->liveness_inverted_valuations[i]	= automaton_bucket_list_create(FLUENT_BUCKET_SIZE);
+		}
 	}
 }
 void automaton_range_initialize(automaton_range* range, char* name, uint32_t lower_value, uint32_t upper_value){
@@ -767,6 +788,10 @@ void automaton_automaton_destroy(automaton_automaton* automaton){
 			automaton_bucket_destroy(automaton->inverted_valuations[i]);
 		free(automaton->inverted_valuations);
 		free(automaton->valuations);
+		for(i = 0; i < automaton->context->liveness_valuations_count; i++)
+			automaton_bucket_destroy(automaton->liveness_inverted_valuations[i]);
+		free(automaton->liveness_inverted_valuations);
+		free(automaton->liveness_valuations);
 	}
 	automaton->name			= NULL;
 	automaton->context		= NULL;
@@ -785,6 +810,8 @@ void automaton_automaton_destroy(automaton_automaton* automaton){
 	automaton->valuations_size		= 0;
 	automaton->valuations			= NULL;
 	automaton->inverted_transitions	= NULL;
+	automaton->liveness_valuations	= NULL;
+	automaton->liveness_inverted_valuations	= NULL;
 	free(automaton);
 }
 void automaton_range_destroy(automaton_range* range){
@@ -1249,14 +1276,22 @@ void automaton_automaton_resize_to_state(automaton_automaton* current_automaton,
 
 	uint32_t old_valuations_size, new_valuations_size;
 	if(current_automaton->is_game){
-		old_valuations_size						= GET_FLUENTS_ARR_SIZE((current_automaton->built_from_ltl? current_automaton->context->liveness_valuations_count : current_automaton->context->global_fluents_count), old_size);
-		new_valuations_size						= GET_FLUENTS_ARR_SIZE((current_automaton->built_from_ltl? current_automaton->context->liveness_valuations_count : current_automaton->context->global_fluents_count), current_automaton->transitions_size);
+		old_valuations_size						= GET_FLUENTS_ARR_SIZE(current_automaton->context->global_fluents_count, old_size);
+		new_valuations_size						= GET_FLUENTS_ARR_SIZE(current_automaton->context->global_fluents_count, current_automaton->transitions_size);
 		uint32_t* new_valuations 				= malloc(sizeof(uint32_t) * new_valuations_size);
 		for(i = 0; i < old_valuations_size; i++){
 			new_valuations[i]					= current_automaton->valuations[i];
 		}
 		free(current_automaton->valuations);
 		current_automaton->valuations			= new_valuations;
+		old_valuations_size						= GET_FLUENTS_ARR_SIZE(current_automaton->context->liveness_valuations_count, old_size);
+		new_valuations_size						= GET_FLUENTS_ARR_SIZE(current_automaton->context->liveness_valuations_count, current_automaton->transitions_size);
+		new_valuations 							= malloc(sizeof(uint32_t) * new_valuations_size);
+		for(i = 0; i < old_valuations_size; i++){
+			new_valuations[i]					= current_automaton->liveness_valuations[i];
+		}
+		free(current_automaton->liveness_valuations);
+		current_automaton->liveness_valuations	= new_valuations;
 	}
 
 }
@@ -2143,6 +2178,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 	automaton_bucket_add_entry(bucket_list, composite_initial_state);
 	automaton_automaton_add_initial_state(composition, composite_initial_state);
 	uint32_t fluent_count				= ctx->global_fluents_count;
+	uint32_t liveness_valuations_count	= ctx->liveness_valuations_count;
 	/***********************
 	 * set initial state valuation
 	 ***********************/
@@ -2152,6 +2188,11 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 			fluent_index	= GET_STATE_FLUENT_INDEX(fluent_count, 0, i);
 			//TODO:we are assuming fluents start as false
 			CLEAR_FLUENT_BIT(composition->valuations, fluent_index);
+		}
+		for(i = 0; i < liveness_valuations_count; i++){
+			fluent_index	= GET_STATE_FLUENT_INDEX(liveness_valuations_count, 0, i);
+			//TODO:we are assuming fluents start as false
+			CLEAR_FLUENT_BIT(composition->liveness_valuations, fluent_index);
 		}
 	}
 	/***********************
@@ -2559,6 +2600,23 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 						SET_FLUENT_BIT(composition->valuations, fluent_index);
 					}else{
 						CLEAR_FLUENT_BIT(composition->valuations, fluent_index);
+					}
+				}
+				//set liveness valuations
+				for(i = 0; i < liveness_valuations_count; i++){
+					bool current_valuation = true;
+					for(j = 0; j < automata_count - fluent_count; j++){
+						if(automata[j]->built_from_ltl){
+							fluent_index	= GET_STATE_FLUENT_INDEX(liveness_valuations_count, current_to_state[j], i);
+							current_valuation &= TEST_FLUENT_BIT(automata[j]->liveness_valuations, fluent_index);
+						}
+						if(!current_valuation)break;
+					}
+					fluent_index	= GET_STATE_FLUENT_INDEX(fluent_count, composite_to, i);
+					if(current_valuation){
+						SET_FLUENT_BIT(composition->liveness_valuations, fluent_index);
+					}else{
+						CLEAR_FLUENT_BIT(composition->liveness_valuations, fluent_index);
 					}
 				}
 			}
