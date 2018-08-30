@@ -100,9 +100,11 @@ void automaton_automata_context_copy(automaton_automata_context* source, automat
 		automaton_fluent_copy(&(source->global_fluents[i]), &(target->global_fluents[i]));	
 	}
 	target->liveness_valuations_count	= source->liveness_valuations_count;
-	target->liveness_valuations		= malloc(sizeof(obdd*) * target->liveness_valuations_count);
+	target->liveness_valuations			= malloc(sizeof(obdd*) * target->liveness_valuations_count);
+	target->liveness_valuations_names	= malloc(sizeof(char*) * target->liveness_valuations_count);
 	for(i = 0; i < target->liveness_valuations_count; i++){
 		target->liveness_valuations[i]	= obdd_clone(source->liveness_valuations[i]);
+		aut_dupstr(&(target->liveness_valuations_names[i]), source->liveness_valuations_names[i]);
 	}
 }
 automaton_automaton* automaton_automaton_clone(automaton_automaton* source){
@@ -345,6 +347,7 @@ void automaton_automata_context_print(automaton_automata_context* ctx, char* pre
 	}
 	printf("%sLiveness Valuations:\n", prefix2);
 	for(i = 0; i < ctx->liveness_valuations_count; i++){
+		printf("%s:\n", ctx->liveness_valuations_names[i]);
 		obdd_print(ctx->liveness_valuations[i]);
 	}
 	if(suffix != NULL)
@@ -526,9 +529,9 @@ automaton_valuation* automaton_valuation_create(uint32_t state){
 	return valuation;
 }
 automaton_automata_context* automaton_automata_context_create(char* name, automaton_alphabet* alphabet, uint32_t fluents_count, automaton_fluent** fluents, uint32_t liveness_valuations_count
-		, obdd** liveness_valuations){
+		, obdd** liveness_valuations, char** liveness_valuations_names){
 	automaton_automata_context* ctx		= malloc(sizeof(automaton_automata_context));
-	automaton_automata_context_initialize(ctx, name, alphabet, fluents_count, fluents, liveness_valuations_count, liveness_valuations);
+	automaton_automata_context_initialize(ctx, name, alphabet, fluents_count, fluents, liveness_valuations_count, liveness_valuations, liveness_valuations_names);
 	return ctx;
 }
 automaton_automaton* automaton_automaton_create(char* name, automaton_automata_context* ctx, uint32_t local_alphabet_count, uint32_t* local_alphabet, bool is_game, bool built_from_ltl){
@@ -583,7 +586,8 @@ void automaton_valuation_initialize(automaton_valuation* valuation, uint32_t sta
 	valuation->active_fluents_count	= 0;
 	valuation->active_fluents		= NULL;
 }
-void automaton_automata_context_initialize(automaton_automata_context* ctx, char* name, automaton_alphabet* alphabet, uint32_t fluents_count, automaton_fluent** fluents, uint32_t liveness_valuations_count, obdd** liveness_valuations){
+void automaton_automata_context_initialize(automaton_automata_context* ctx, char* name, automaton_alphabet* alphabet, uint32_t fluents_count, automaton_fluent** fluents, uint32_t liveness_valuations_count, obdd** liveness_valuations
+		, char** liveness_valuations_names){
 	ctx->name					= malloc(sizeof(char) * (strlen(name) + 1));
 	strcpy(ctx->name, name);
 	ctx->global_alphabet		= automaton_alphabet_clone(alphabet);
@@ -597,6 +601,7 @@ void automaton_automata_context_initialize(automaton_automata_context* ctx, char
 	ctx->liveness_valuations		= malloc(sizeof(obdd*) * liveness_valuations_count);
 	for(i = 0; i < ctx->liveness_valuations_count; i++){
 		ctx->liveness_valuations[i]	= obdd_clone(liveness_valuations[i]);
+		aut_dupstr(&(ctx->liveness_valuations_names[i]), liveness_valuations_names[i]);
 	}
 }
 void automaton_automaton_initialize(automaton_automaton* automaton, char* name, automaton_automata_context* ctx, uint32_t local_alphabet_count, uint32_t* local_alphabet, bool is_game, bool built_from_ltl){
@@ -749,10 +754,14 @@ void automaton_automata_context_destroy(automaton_automata_context* ctx){
 		free(ctx->global_fluents);
 	for(i = 0; i < ctx->liveness_valuations_count; i++){
 		obdd_destroy(ctx->liveness_valuations[i]);
+		free(ctx->liveness_valuations_names);
 	}
 	if(ctx->liveness_valuations != NULL)
 		free(ctx->liveness_valuations);
+	if(ctx->liveness_valuations_names != NULL)
+		free(ctx->liveness_valuations_names);
 	ctx->liveness_valuations	= NULL;
+	ctx->liveness_valuations_names	= NULL;
 	ctx->liveness_valuations_count	= 0;
 	ctx->name					= NULL;
 	ctx->global_alphabet		= NULL;

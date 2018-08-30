@@ -1871,7 +1871,7 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 		}
 	}
 	//get fluents
-	automaton_automata_context_initialize(ctx, ctx_name, global_alphabet, fluent_count, fluents, liveness_formulas_count, liveness_formulas);
+	automaton_automata_context_initialize(ctx, ctx_name, global_alphabet, fluent_count, fluents, liveness_formulas_count, liveness_formulas, liveness_formulas_names);
 	free(fluents);
 	automaton_alphabet_destroy(global_alphabet);
 	//build automata from ltl
@@ -1917,6 +1917,65 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 			gr1_game		= program->statements[i]->gr1_game_def;
 			main_index		= automaton_parsing_tables_get_entry_index(tables, COMPOSITION_ENTRY_AUT, gr1_game->composition_name);
 			game_automaton	= tables->composition_entries[main_index]->valuation.automaton_value;
+			//here we will merge fluent and liveness ltl valuations and restore them after synthesis
+			bool was_merged	= false;
+			uint32_t other_fluent_index;
+			uint32_t k;
+			automaton_bucket_list** old_inverted_valuations	= NULL;
+			uint32_t* old_valuations						= NULL;
+			uint32_t old_valuations_size					= 0;
+			//merge context
+			uint32_t old_fluents_count						= 0;
+			automaton_fluent* old_fluents					= NULL;
+			automaton_fluent current_fluent;
+			current_fluent.ending_signals_count	= 0; current_fluent.ending_signals	= NULL;
+			current_fluent.starting_signals_count	= 0; current_fluent.starting_signals	= NULL;
+			if(game_automaton->liveness_valuations_size > 0){
+				was_merged	= true;
+				old_inverted_valuations	= game_automaton->inverted_valuations;
+				old_valuations			= game_automaton->valuations;
+				old_valuations_size		= game_automaton->valuations_size;
+				old_fluents_count		= ctx->global_fluents_count;
+				old_fluents				= ctx->global_fluents;
+
+				ctx->global_fluents_count	+= game_automaton->liveness_valuations_size;
+				ctx->global_fluents		= malloc(sizeof(automaton_fluent) * ctx->global_fluents_count);
+				for(j = 0; j < old_fluents_count; j++)
+					automaton_fluent_copy(old_fluents[j], &(ctx->global_fluents[j]));
+				for(j = old_fluents_count; j < ctx->global_fluents_count; j++){
+					current_fluent.name	= liveness_formulas_names[j - old_fluents_count];
+					automaton_fluent_copy(&current_fluent, &(ctx->global_fluents[j]));
+				}
+				uint32_t new_size					= GET_FLUENTS_ARR_SIZE(ctx->global_fluents_count, game_automaton->transitions_size);
+				game_automaton->valuations 				= malloc(sizeof(uint32_t) * new_size);
+				game_automaton->inverted_valuations		= malloc(sizeof(automaton_bucket_list*) * ctx->global_fluents_count);
+				for(j = 0; j < old_fluents_count; j++){
+					game_automaton->inverted_valuations[j]	= old_inverted_valuations[j];
+				}
+				for(j = old_fluents_count; j < ctx->global_fluents_count; j++){
+					game_automaton->inverted_valuations[j]	= game_automaton->liveness_inverted_valuations[j - old_fluents_count];
+				}
+				for(j = 0; j < game_automaton->transitions_count; j++){
+					for(k = 0; j < old_fluents_count; k++){
+						fluent_index		= GET_STATE_FLUENT_INDEX(old_fluents_count, j, k);
+						other_fluent_index	= GET_STATE_FLUENT_INDEX(ctx->global_fluents_count, j, k);
+						if(TEST_FLUENT_BIT(old_valuations, fluent_index)){
+							SET_FLUENT_BIT(game_automaton->valuations, other_fluent_index);
+						}else{
+							CLEAR_FLUENT_BIT(game_automaton->valuations, other_fluent_index);
+						}
+					}
+					for(k = 0; k < liveness_formulas_count; k++){
+						fluent_index		= GET_STATE_FLUENT_INDEX(liveness_formulas_count, j, k);
+						other_fluent_index	= GET_STATE_FLUENT_INDEX(ctx->global_fluents_count, j, old_fluents_count + k);
+						if(TEST_FLUENT_BIT(game_automaton->liveness_valuations, fluent_index)){
+							SET_FLUENT_BIT(game_automaton->valuations, other_fluent_index);
+						}else{
+							CLEAR_FLUENT_BIT(game_automaton->valuations, other_fluent_index);
+						}
+					}
+				}
+			}
 			sprintf(set_name, "Assumption %s", gr1_game->name);
 			assumptions		= automaton_set_syntax_evaluate(tables, gr1_game->assumptions, &assumptions_count, set_name);
 			sprintf(set_name, "Guarantees %s", gr1_game->name);
@@ -1928,6 +1987,18 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 				//automaton_automaton_print(tables->composition_entries[i]->valuation.automaton_value, true, true, true, "*\t", "*\t");
 				sprintf(buf, "%s_%d_strat_%s.fsp", ctx_name, i, is_synchronous? "synch": "asynch");
 				automaton_automaton_print_fsp(winning_region_automaton, buf);
+			}
+			//restore old liveness valuations and old context
+			if(was_merged){
+				free(ctx->global_fluents);
+				free(game_automaton->valuations);
+				free(game_automaton->inverted_valuations);
+				was_merged	= false;
+				game_automaton->inverted_valuations	= old_inverted_valuations;
+				game_automaton->valuations			= old_valuations;
+				game_automaton->valuations_size		= old_valuations_size;
+				ctx->global_fluents_count			= old_fluents_count;
+				ctx->global_fluents					= old_fluents;
 			}
 			if(winning_region_automaton != NULL)
 				automaton_automaton_destroy(winning_region_automaton);

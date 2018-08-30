@@ -343,7 +343,7 @@ void run_automaton_tests(){
 	automaton_fluent_add_ending_signal(fluents[1], alphabet, in);
 
 	uint32_t fluents_count			= 2;
-	automaton_automata_context* ctx	= automaton_automata_context_create("Context 1", alphabet, fluents_count, fluents, 0, NULL);
+	automaton_automata_context* ctx	= automaton_automata_context_create("Context 1", alphabet, fluents_count, fluents, 0, NULL, NULL);
 	automaton_automata_context_print(ctx, "\t", "\n");
 	uint32_t* local_alphabet_1		= malloc(sizeof(uint32_t) * 2);
 	local_alphabet_1[0]				= automaton_alphabet_get_signal_index(alphabet, in);
