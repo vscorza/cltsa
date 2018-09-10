@@ -1519,7 +1519,7 @@ void automaton_set_composed_valuation(bool* valuation, bool* partial_valuation, 
 	if(is_input) for(i = 0; i < x_count; i++)valuation[i]	= partial_valuation[i];
 	else for(i = x_count; i < (x_count + y_count); i++)valuation[i]	= partial_valuation[i];
 }
-void automaton_add_transition_from_valuations(obdd_mgr* mgr, automaton_automaton* automaton, uint32_t from_state, uint32_t to_state
+bool automaton_add_transition_from_valuations(obdd_mgr* mgr, automaton_automaton* automaton, uint32_t from_state, uint32_t to_state
 		, bool* from_valuation, bool* to_valuation, uint32_t* x_alphabet, uint32_t* y_alphabet, uint32_t x_count
 		, uint32_t y_count){
 	uint32_t i, fluent_index, fluent_count	= automaton->context->liveness_valuations_count;
@@ -1535,6 +1535,7 @@ void automaton_add_transition_from_valuations(obdd_mgr* mgr, automaton_automaton
 			automaton_transition_add_signal_event(transition, automaton->context, signal_event);
 		}
 	}
+	signal_event->type	= OUTPUT_SIG;
 	for(i = 0; i < y_count; i++){
 		if(from_valuation[i + x_count] != to_valuation[i]){
 			strcpy(signal_name, mgr->vars_dict->entries[y_alphabet[i]].key);
@@ -1543,15 +1544,19 @@ void automaton_add_transition_from_valuations(obdd_mgr* mgr, automaton_automaton
 			automaton_transition_add_signal_event(transition, automaton->context, signal_event);
 		}
 	}
-	signal_event->type	= OUTPUT_SIG;
-	automaton_automaton_add_transition(automaton, transition);
+	automaton_signal_event_destroy(signal_event, true);
+	bool has_transition = automaton_automaton_has_transition(automaton, transition);
+	if(!has_transition)
+		automaton_automaton_add_transition(automaton, transition);
 	automaton_transition_destroy(transition, true);
 	//should add after adding transition since structure resizing may not have been triggered
-	for(i = 0; i < fluent_count; i++){
-		fluent_index	= GET_STATE_FLUENT_INDEX(fluent_count, to_state, i);
-		if(to_valuation[i])SET_FLUENT_BIT(automaton->valuations, fluent_index);
-		else CLEAR_FLUENT_BIT(automaton->valuations, fluent_index);
-	}
+	if(!has_transition)
+		for(i = 0; i < fluent_count; i++){
+			fluent_index	= GET_STATE_FLUENT_INDEX(fluent_count, to_state, i);
+			if(to_valuation[i])SET_FLUENT_BIT(automaton->valuations, fluent_index);
+			else CLEAR_FLUENT_BIT(automaton->valuations, fluent_index);
+		}
+	return has_transition;
 }
 automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_context* ctx, char* name, obdd** env_theta_obdd, uint32_t env_theta_count, obdd** sys_theta_obdd, uint32_t sys_theta_count
 		, obdd** env_rho_obdd, uint32_t env_rho_count, obdd** sys_rho_obdd, uint32_t sys_rho_count, automaton_parsing_tables* tables){
@@ -1686,12 +1691,14 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	printf("Init env valuations\n");
 	obdd_print_valuations(mgr, current_valuations, current_valuations_count, x_alphabet, x_count);
 #endif
+	bool has_transition;
 	for(i = 0; i < current_valuations_count; i++){
 		automaton_set_composed_valuation(composed_next_valuation, (bool*)(current_valuations + x_count * i * sizeof(bool)), true, x_count, y_count);
 		next_state		= obdd_state_tree_get_key(obdd_state_map, composed_next_valuation);
-		automaton_add_transition_from_valuations(mgr, ltl_automaton, current_state, next_state
+		has_transition	= automaton_add_transition_from_valuations(mgr, ltl_automaton, current_state, next_state
 				, composed_valuation, composed_next_valuation, x_alphabet, y_alphabet, x_count, y_count);
-		automaton_concrete_bucket_add_entry(bucket_list, &next_state);
+		if(!has_transition)
+			automaton_concrete_bucket_add_entry(bucket_list, &next_state);
 	}
 	free(current_valuations);
 	obdd* initial_obdd	= obdd_apply_and(env_theta_composed, sys_theta_composed);
@@ -1699,6 +1706,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 #if DEBUG_LTL_AUTOMATON
 	printf("Init sys valuations\n");
 	obdd_print_valuations(mgr, current_valuations, current_valuations_count, y_alphabet, y_count);
+	int32_t state_counter = 0;
 #endif
 	uint32_t state_ptr = 0;
 	automaton_concrete_bucket_pop_entry(bucket_list, &state_ptr);
@@ -1706,9 +1714,19 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 		for(i = 0; i < current_valuations_count; i++){
 			automaton_set_composed_valuation(composed_next_valuation, (bool*)(current_valuations + y_count * i * sizeof(bool)), true, x_count, y_count);
 			next_state		= obdd_state_tree_get_key(obdd_state_map, composed_next_valuation);
-			automaton_add_transition_from_valuations(mgr, ltl_automaton, current_state, next_state
+#if DEBUG_LTL_AUTOMATON
+			printf("%d ->", current_state);
+			for(j = 0; j < x_count + y_count; j++)
+				printf("%s", composed_next_valuation[j] ? "1" : "0");
+			state_counter++;
+			printf(" %d%s", next_state, state_counter % 10 == 0 ? "\n" : " ");
+			if(state_counter % 1000 == 0)
+				printf("States processed for ltl: %d\n", state_counter);
+#endif
+			has_transition	= automaton_add_transition_from_valuations(mgr, ltl_automaton, current_state, next_state
 					, composed_valuation, composed_next_valuation, x_alphabet, y_alphabet, x_count, y_count);
-			automaton_bucket_add_entry(bucket_list, next_state);
+			if(!has_transition)
+				automaton_concrete_bucket_add_entry(bucket_list, &next_state);
 		}
 		automaton_concrete_bucket_pop_entry(bucket_list, &state_ptr);
 	}
@@ -1731,6 +1749,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	free(composed_valuation);
 	free(composed_next_valuation);
 	obdd_state_tree_destroy(state_map);
+	obdd_state_tree_destroy(obdd_state_map);
 	return ltl_automaton;
 }
 
@@ -1941,7 +1960,7 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 				ctx->global_fluents_count	+= game_automaton->liveness_valuations_size;
 				ctx->global_fluents		= malloc(sizeof(automaton_fluent) * ctx->global_fluents_count);
 				for(j = 0; j < old_fluents_count; j++)
-					automaton_fluent_copy(old_fluents[j], &(ctx->global_fluents[j]));
+					automaton_fluent_copy(&(old_fluents[j]), &(ctx->global_fluents[j]));
 				for(j = old_fluents_count; j < ctx->global_fluents_count; j++){
 					current_fluent.name	= liveness_formulas_names[j - old_fluents_count];
 					automaton_fluent_copy(&current_fluent, &(ctx->global_fluents[j]));

@@ -599,6 +599,7 @@ void automaton_automata_context_initialize(automaton_automata_context* ctx, char
 	}
 	ctx->liveness_valuations_count	= liveness_valuations_count;
 	ctx->liveness_valuations		= malloc(sizeof(obdd*) * liveness_valuations_count);
+	ctx->liveness_valuations_names		= malloc(sizeof(char*) * liveness_valuations_count);
 	for(i = 0; i < ctx->liveness_valuations_count; i++){
 		ctx->liveness_valuations[i]	= obdd_clone(liveness_valuations[i]);
 		aut_dupstr(&(ctx->liveness_valuations_names[i]), liveness_valuations_names[i]);
@@ -670,6 +671,7 @@ void automaton_automaton_initialize(automaton_automaton* automaton, char* name, 
 	automaton->initial_states_count		= 0;
 	automaton->initial_states			= NULL;
 	automaton->is_game					= is_game;
+	automaton->liveness_valuations_size = 0;
 	if(is_game){
 		uint32_t new_size					= GET_FLUENTS_ARR_SIZE(automaton->context->global_fluents_count, automaton->transitions_size);
 		automaton->valuations 				= malloc(sizeof(uint32_t) * new_size);
@@ -678,6 +680,7 @@ void automaton_automaton_initialize(automaton_automaton* automaton, char* name, 
 			automaton->inverted_valuations[i]	= automaton_bucket_list_create(FLUENT_BUCKET_SIZE);
 		}
 		new_size					= GET_FLUENTS_ARR_SIZE(automaton->context->liveness_valuations_count, automaton->transitions_size);
+		//automaton->liveness_valuations_size			= new_size;
 		automaton->liveness_valuations 				= malloc(sizeof(uint32_t) * new_size);
 		automaton->liveness_inverted_valuations		= malloc(sizeof(automaton_bucket_list*) * automaton->context->liveness_valuations_count);
 		for(i = 0; i < automaton->context->liveness_valuations_count; i++){
@@ -754,7 +757,7 @@ void automaton_automata_context_destroy(automaton_automata_context* ctx){
 		free(ctx->global_fluents);
 	for(i = 0; i < ctx->liveness_valuations_count; i++){
 		obdd_destroy(ctx->liveness_valuations[i]);
-		free(ctx->liveness_valuations_names);
+		free(ctx->liveness_valuations_names[i]);
 	}
 	if(ctx->liveness_valuations != NULL)
 		free(ctx->liveness_valuations);
@@ -1209,6 +1212,7 @@ bool automaton_automaton_has_transition(automaton_automaton* current_automaton, 
 		return false;
 	bool found	= false;
 	for(i = 0; i < out_degree; i++){
+		found	= false;
 		if(current_transitions[i].signals_count != transition->signals_count)
 			continue;
 		if(current_transitions[i].state_to == to_state){
@@ -1223,8 +1227,6 @@ bool automaton_automaton_has_transition(automaton_automaton* current_automaton, 
 				}
 				if(found)break;
 			}
-			if(!found)
-				return false;
 		}
 	}
 	return found;

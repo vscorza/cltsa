@@ -20,8 +20,8 @@
 typedef struct obdd_state_tree_entry_str{
 	bool is_leaf;
 	uint32_t leaf_value;
-	struct obdd_state_tree_entry_str* low;
-	struct obdd_state_tree_entry_str* high;
+	int32_t low_index;
+	int32_t high_index;
 } obdd_state_tree_entry;
 typedef struct obdd_state_tree_str{
 	uint32_t entries_size;
@@ -29,7 +29,7 @@ typedef struct obdd_state_tree_str{
 	obdd_state_tree_entry* entries_pool;
 	uint32_t key_length;
 	uint32_t max_value;
-	obdd_state_tree_entry* first_entry;
+	int32_t first_entry_index;
 } obdd_state_tree;
 /** OBDD **/
 typedef struct obdd_mgr_t {
@@ -74,10 +74,10 @@ typedef struct obdd_partial_automaton_t{
 }obdd_partial_automaton;*/
 /** MAP TREE **/
 obdd_state_tree* obdd_state_tree_create(uint32_t key_length);
-obdd_state_tree_entry* obdd_state_tree_entry_get_from_pool(obdd_state_tree* tree);
+int32_t obdd_state_tree_entry_get_from_pool(obdd_state_tree* tree);
 uint32_t obdd_state_tree_get_key(obdd_state_tree* tree, bool* valuation);
 void obdd_state_tree_destroy(obdd_state_tree* tree);
-void obdd_state_tree_entry_print(obdd_state_tree_entry* entry);
+void obdd_state_tree_entry_print(obdd_state_tree* tree, obdd_state_tree_entry* entry);
 void obdd_state_tree_print(obdd_state_tree* tree);
 /** GLOBAL **/
 uint32_t get_next_mgr_ID();

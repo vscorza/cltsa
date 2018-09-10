@@ -266,7 +266,7 @@ void run_fsp_tests(uint32_t test_count){
 	}
 }
 
-void run_obdd_tree_tests(){
+void run_small_obdd_tree_tests(){
 	obdd_state_tree* tree	= obdd_state_tree_create(5);
 	bool key1[5]				= {true, true, true, true, true};
 	bool key2[5]				= {true, false, true, true, true};
@@ -279,6 +279,26 @@ void run_obdd_tree_tests(){
 	printf("new key %d\n", obdd_state_tree_get_key(tree, key4));
 	printf("new key %d\n", obdd_state_tree_get_key(tree, key5));
 	obdd_state_tree_print(tree);
+	obdd_state_tree_destroy(tree);
+}
+void run_obdd_tree_tests(){
+	obdd_state_tree* tree	= obdd_state_tree_create(7);
+	bool key1[7]				= {false, false, false, false, false, false, false};
+	uint32_t i, j;
+	for(i = 0; i < 128; i++){
+		for(j = 0; j < 7; j++){
+			key1[j] = ((i >> j) & 0x1) == 0;
+		}
+		printf("%d:%d %s", i, obdd_state_tree_get_key(tree, key1), i % 5 == 0 ? "\n" : "  ");
+	}
+	printf("\nREPEATING VALUES\n");
+	for(i = 0; i < 128; i++){
+		for(j = 0; j < 7; j++){
+			key1[j] = ((i >> j) & 0x1) == 0;
+		}
+		printf("%d:%d %s", i, obdd_state_tree_get_key(tree, key1), i % 5 == 0 ? "\n" : "  ");
+	}
+	//obdd_state_tree_print(tree);
 	obdd_state_tree_destroy(tree);
 }
 

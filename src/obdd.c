@@ -4,39 +4,40 @@
 uint32_t obdd_mgr_greatest_ID = 0;
 
 /** MAP TREE **/
-void obdd_state_tree_entry_print(obdd_state_tree_entry* entry){
+void obdd_state_tree_entry_print(obdd_state_tree* tree, obdd_state_tree_entry* entry){
 	if(entry->is_leaf)
 		printf("[%d]\n", entry->leaf_value);
 	else{
-		if(entry->low != NULL){
+		if(entry->low_index != NULL){
 			printf("0");
-			obdd_state_tree_entry_print(entry->low);
+			obdd_state_tree_entry_print(tree, &(tree->entries_pool[entry->low_index]));
 		}
-		if(entry->high != NULL){
+		if(entry->high_index != NULL){
 			printf("1");
-			obdd_state_tree_entry_print(entry->high);
+			obdd_state_tree_entry_print(tree, &(tree->entries_pool[entry->high_index]));
 		}
 	}
 }
 
 void obdd_state_tree_print(obdd_state_tree* tree){
 	printf("Binary Map Tree.\n");
-	if(tree->first_entry != NULL)
-		obdd_state_tree_entry_print(tree->first_entry);
+	if(tree->first_entry_index != NULL)
+		obdd_state_tree_entry_print(tree, tree->first_entry_index);
 }
 
 obdd_state_tree* obdd_state_tree_create(uint32_t key_length){
 	obdd_state_tree* tree= malloc(sizeof(obdd_state_tree));
 	tree->key_length	= key_length;
 	tree->max_value		= 0;
-	tree->first_entry	= NULL;
+	tree->first_entry_index	= -1;
 	tree->entries_count	= 0;
 	tree->entries_size	= LIST_INITIAL_SIZE;
 	tree->entries_pool	= malloc(sizeof(obdd_state_tree_entry) * tree->entries_size);
 	return tree;
 }
-obdd_state_tree_entry* obdd_state_tree_entry_get_from_pool(obdd_state_tree* tree){
+int32_t obdd_state_tree_entry_get_from_pool(obdd_state_tree* tree){
 	if(tree->entries_count >= tree->entries_size){
+
 		uint32_t new_size			= tree->entries_size * LIST_INCREASE_FACTOR;
 		obdd_state_tree_entry* ptr	= realloc(tree->entries_pool, sizeof(obdd_state_tree_entry) * new_size);
 		if(ptr == NULL){
@@ -48,29 +49,36 @@ obdd_state_tree_entry* obdd_state_tree_entry_get_from_pool(obdd_state_tree* tree
 		tree->entries_size			= new_size;
 	}
 	obdd_state_tree_entry* entry	= &(tree->entries_pool[tree->entries_count++]);
-	entry->high						= NULL;
-	entry->low						= NULL;
+	entry->high_index						= -1;
+	entry->low_index						= -1;
 	entry->is_leaf					= false;
 	entry->leaf_value				= 0;
-	return entry;
+	return (tree->entries_count - 1);
 }
 uint32_t obdd_state_tree_get_key(obdd_state_tree* tree, bool* valuation){
 	uint32_t i,j;
-	obdd_state_tree_entry* current_entry 	= NULL;
-	obdd_state_tree_entry* last_entry		= NULL;
-	if(tree->first_entry == NULL){
-		current_entry		= obdd_state_tree_entry_get_from_pool(tree);
-		tree->first_entry	= current_entry;
+	int32_t current_entry_index, last_entry_index;
+	obdd_state_tree_entry* current_entry 	= -1;
+	obdd_state_tree_entry* last_entry		= -1;
+	if(tree->first_entry_index == -1){
+		current_entry_index		= obdd_state_tree_entry_get_from_pool(tree);
+		tree->first_entry_index	= current_entry_index;
 	}
-	last_entry				= tree->first_entry;
+	last_entry_index				= tree->first_entry_index;
+	last_entry						= &(tree->entries_pool[last_entry_index]);
 	bool next_is_high;
 	for(i = 0; i < tree->key_length; i++){
 		next_is_high		= valuation[i];
 
-		if((next_is_high && last_entry->high == NULL) || (!next_is_high && last_entry->low == NULL)){
-			current_entry		= obdd_state_tree_entry_get_from_pool(tree);
-			current_entry->high	= NULL;
-			current_entry->low	= NULL;
+		if((next_is_high && tree->entries_pool[last_entry_index].high_index == -1) || (!next_is_high && tree->entries_pool[last_entry_index].low_index == -1)){
+			current_entry_index			= obdd_state_tree_entry_get_from_pool(tree);
+			current_entry				= &(tree->entries_pool[current_entry_index]);
+			current_entry->high_index	= -1;
+			current_entry->low_index	= -1;
+			if(next_is_high)
+				tree->entries_pool[last_entry_index].high_index = current_entry_index;
+			else
+				tree->entries_pool[last_entry_index].low_index = current_entry_index;
 			if(i == (tree->key_length -1)){
 				current_entry->is_leaf		= true;
 				current_entry->leaf_value	= tree->max_value++;
@@ -78,16 +86,13 @@ uint32_t obdd_state_tree_get_key(obdd_state_tree* tree, bool* valuation){
 			}else{
 				current_entry->is_leaf	= false;
 			}
-			if(next_is_high)
-				last_entry->high = current_entry;
-			else
-				last_entry->low = current_entry;
 		}else{
-			current_entry	= next_is_high ? last_entry->high : last_entry->low;
+			current_entry_index	= next_is_high ? tree->entries_pool[last_entry_index].high_index : tree->entries_pool[last_entry_index].low_index;
+			current_entry				= &(tree->entries_pool[current_entry_index]);
 			if(i == (tree->key_length -1))
 				return current_entry->leaf_value;
 		}
-		last_entry = current_entry;
+		last_entry_index = current_entry_index;
 	}
 	return 0;
 }
@@ -802,7 +807,7 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 	*valuations_count			= 0;
 	uint32_t valuations_size	= LIST_INITIAL_SIZE;
 	uint32_t variables_count	= mgr->vars_dict->size - 2;
-	bool* valuations			= malloc(sizeof(bool) * img_count * valuations_size);
+	bool* valuations			= calloc(img_count * valuations_size, sizeof(bool));
 	bool* dont_care_list		= malloc(sizeof(bool) * variables_count);
 	for( i = 0; i < (int32_t)variables_count; i++)
 		dont_care_list[i]		= true;
@@ -1051,9 +1056,9 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 	if(img_count != variables_count){
 		uint32_t new_count			= 0;
 		uint32_t k;
-		bool* new_valuations	= malloc(sizeof(bool) * *valuations_count * img_count);
+		bool* new_valuations	= calloc(*valuations_count * img_count, sizeof(bool) );
 		bool has_valuation;
-		bool* current_valuation	= malloc(sizeof(bool) * img_count);
+		bool* current_valuation	= calloc(img_count, sizeof(bool));
 		for(i = 0; i < (int32_t)*valuations_count; i++){
 			for(j = 0; j < (int32_t)img_count; j++)
 				current_valuation[j] = GET_VAR_IN_VALUATION(valuations, img_count, i, j);
