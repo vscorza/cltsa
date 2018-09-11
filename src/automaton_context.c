@@ -1577,6 +1577,9 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	bool is_primed;
 	char current_key[255];
 	bool is_input;
+	/**
+	 * BUILD LOCAL ALPHABET
+	 */
 	for(i = 0; i < mgr->vars_dict->size; i++){
 		if((strcmp(mgr->vars_dict->entries[i].key, TRUE_VAR) == 0) || (strcmp(mgr->vars_dict->entries[i].key, FALSE_VAR) == 0))
 			continue;
@@ -1604,13 +1607,16 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 		strcat(current_dict_entry, SIGNAL_OFF_SUFFIX);
 		local_alphabet[current_element++]	= automaton_alphabet_get_value_index(ctx->global_alphabet, current_dict_entry);
 	}
-	//get x, y, x', y' alphabets
+	/**
+	 * get x, y, x', y' alphabets
+	 */
 	uint32_t* x_alphabet	= malloc(sizeof(uint32_t) * x_count);
 	uint32_t* y_alphabet	= malloc(sizeof(uint32_t) * y_count);
 	uint32_t* x_p_alphabet	= malloc(sizeof(uint32_t) * x_p_count);
 	uint32_t* y_p_alphabet	= malloc(sizeof(uint32_t) * y_p_count);
 	x_count = 0, y_count = 0, x_p_count = 0, y_p_count = 0;
 	for(i = 0; i < mgr->vars_dict->size; i++){
+		//avoid searching for the true/false variables
 		if((strcmp(mgr->vars_dict->entries[i].key, TRUE_VAR) == 0) || (strcmp(mgr->vars_dict->entries[i].key, FALSE_VAR) == 0))
 			continue;
 		alphabet_element_index	= mgr->vars_dict->entries[i].value;
@@ -1633,7 +1639,9 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	//get automaton
 	automaton_automaton* ltl_automaton	= automaton_automaton_create(name, ctx, local_alphabet_count, local_alphabet, true, true);
 
-	//get the conjunction of rho and theta formulae
+	/**
+	 * get the conjunction of rho and theta formulae
+	 */
 	obdd* old_obdd;
 	obdd* env_theta_composed			= NULL;
 	obdd* sys_theta_composed			= NULL;
@@ -1668,7 +1676,9 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 			if(i > 1)obdd_destroy(old_obdd);
 		}
 
-	//incrementally build the transition relation and valuation
+	/**
+	 * incrementally build the transition relation and valuation
+	 */
 	uint32_t current_valuations_count, current_state, next_state;
 	uint32_t fluent_count	= x_count + y_count;
 	bool* current_valuations;
@@ -1685,6 +1695,9 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 		fluent_index	= GET_STATE_FLUENT_INDEX(fluent_count, current_state, i);
 		CLEAR_FLUENT_BIT(ltl_automaton->valuations, fluent_index);
 	}
+	/**
+	 * THETA INITIAL CONDITION
+	 */
 	//add initial env valuations
 	current_valuations	= obdd_get_valuations(mgr, env_theta_composed, &current_valuations_count, x_alphabet, x_count);
 #if DEBUG_LTL_AUTOMATON
@@ -1708,29 +1721,50 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	obdd_print_valuations(mgr, current_valuations, current_valuations_count, y_alphabet, y_count);
 	int32_t state_counter = 0;
 #endif
+	/**
+	 * We restrict robdd(theta_env && theta_sys) with the valuation for each pending state s_i in bucket_list
+	 * and then ask for S_j = obdd_get_valuations, we build and add the transition between s_i and each s_j in S_j
+	 * adding s_j to rho_bucket_list
+	 */
+	//TODO: properly implement this
 	uint32_t state_ptr = 0;
-	automaton_concrete_bucket_pop_entry(bucket_list, &state_ptr);
-	while(state_ptr != NULL){
-		for(i = 0; i < current_valuations_count; i++){
-			automaton_set_composed_valuation(composed_next_valuation, (bool*)(current_valuations + y_count * i * sizeof(bool)), true, x_count, y_count);
-			next_state		= obdd_state_tree_get_key(obdd_state_map, composed_next_valuation);
+	if(bucket_list->composite_count > 0){
+		do{
+			automaton_concrete_bucket_pop_entry(bucket_list, &state_ptr);
+			for(i = 0; i < current_valuations_count; i++){
+				automaton_set_composed_valuation(composed_next_valuation, (bool*)(current_valuations + y_count * i * sizeof(bool)), true, x_count, y_count);
+				next_state		= obdd_state_tree_get_key(obdd_state_map, composed_next_valuation);
 #if DEBUG_LTL_AUTOMATON
-			printf("%d ->", current_state);
-			for(j = 0; j < x_count + y_count; j++)
-				printf("%s", composed_next_valuation[j] ? "1" : "0");
-			state_counter++;
-			printf(" %d%s", next_state, state_counter % 10 == 0 ? "\n" : " ");
-			if(state_counter % 1000 == 0)
-				printf("States processed for ltl: %d\n", state_counter);
+				printf("%d ->", current_state);
+				for(j = 0; j < x_count + y_count; j++)
+					printf("%s", composed_next_valuation[j] ? "1" : "0");
+				state_counter++;
+				printf(" %d%s", next_state, state_counter % 10 == 0 ? "\n" : " ");
+				if(state_counter % 1000 == 0)
+					printf("States processed for ltl: %d\n", state_counter);
 #endif
-			has_transition	= automaton_add_transition_from_valuations(mgr, ltl_automaton, current_state, next_state
-					, composed_valuation, composed_next_valuation, x_alphabet, y_alphabet, x_count, y_count);
-			if(!has_transition)
-				automaton_concrete_bucket_add_entry(bucket_list, &next_state);
-		}
-		automaton_concrete_bucket_pop_entry(bucket_list, &state_ptr);
+				has_transition	= automaton_add_transition_from_valuations(mgr, ltl_automaton, current_state, next_state
+						, composed_valuation, composed_next_valuation, x_alphabet, y_alphabet, x_count, y_count);
+				if(!has_transition && !automaton_concrete_bucket_has_entry(bucket_list, &next_state))
+					automaton_concrete_bucket_add_entry(bucket_list, &next_state);
+			}
+
+		}while(bucket_list->composite_count > 0);
 	}
 	obdd_destroy(initial_obdd);
+	/**
+	 * RHO TRANSITION RELATION
+	 */
+	//add transitions valuations
+	/**
+	 * We restrict robdd(rho_env) with the valuation for each pending state s_i rho_bucket_list
+	 * and then ask for S_env = obdd_get_valuations, we build and add the transition between s_i and each s_e in S_env
+	 * adding s_e to rho_env pending list, once rho_bucket_list is empty
+	 * we restrict robdd(rho_env && rho_sys) with the valuation for each pending state s_e rho_env_bucket_list
+	 * and then ask for S_j = obdd_get_valuations, we build and add the transition between s_e and each s_j in S_j
+	 * once rho_env_bucket_list is empty we start again with rho_bucket_list until both lists are empty
+	 */
+	//TODO: properly implement this
 	free(current_valuations);
 
 	int32_t main_index					= automaton_parsing_tables_add_entry(tables, COMPOSITION_ENTRY_AUT, name, ltl_automaton);

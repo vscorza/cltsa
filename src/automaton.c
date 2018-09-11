@@ -1216,16 +1216,19 @@ bool automaton_automaton_has_transition(automaton_automaton* current_automaton, 
 		if(current_transitions[i].signals_count != transition->signals_count)
 			continue;
 		if(current_transitions[i].state_to == to_state){
-			for(j = 0; j < transition->signals_count; j++){
-				for(k = 0; k < current_transitions[i].signals_count; k++){
-					signal_t sig_j	= j < FIXED_SIGNALS_COUNT? transition->signals[j] : transition->other_signals[j-FIXED_SIGNALS_COUNT];
-					signal_t sig_k	= k < FIXED_SIGNALS_COUNT? current_transitions[i].signals[k] : current_transitions[i].other_signals[k - FIXED_SIGNALS_COUNT];
-					if(sig_j == sig_k){
-						found	= true;
-						break;
+			if(transition->signals_count == 0 && current_transitions[i].signals_count == 0)found = true;
+			else{
+				for(j = 0; j < transition->signals_count; j++){
+					for(k = 0; k < current_transitions[i].signals_count; k++){
+						signal_t sig_j	= j < FIXED_SIGNALS_COUNT? transition->signals[j] : transition->other_signals[j-FIXED_SIGNALS_COUNT];
+						signal_t sig_k	= k < FIXED_SIGNALS_COUNT? current_transitions[i].signals[k] : current_transitions[i].other_signals[k - FIXED_SIGNALS_COUNT];
+						if(sig_j == sig_k){
+							found	= true;
+							break;
+						}
 					}
+					if(found)break;
 				}
-				if(found)break;
 			}
 		}
 	}
