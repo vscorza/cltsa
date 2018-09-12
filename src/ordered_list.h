@@ -26,14 +26,11 @@ typedef struct automaton_ordered_list_str{
 	void *temporary;
 	uint32_t sizeof_element;
 	automaton_ordered_list_key_extractor_func extractor_func;
-	automaton_ordered_list_copy_func copy_func;
 }automaton_ordered_list;
 
-automaton_ordered_list* automaton_ordered_list_create(uint32_t temporary_size, automaton_ordered_list_key_extractor_func extractor_func
-		, automaton_ordered_list_copy_func copy_func, uint32_t sizeof_element);
+automaton_ordered_list* automaton_ordered_list_create(uint32_t temporary_size, automaton_ordered_list_key_extractor_func extractor_func, uint32_t sizeof_element);
 void automaton_ordered_list_initialize(automaton_ordered_list* bucket, uint32_t temporary_size
-		, automaton_ordered_list_key_extractor_func extractor_func
-		, automaton_ordered_list_copy_func copy_func, uint32_t sizeof_element);
+		, automaton_ordered_list_key_extractor_func extractor_func, uint32_t sizeof_element);
 automaton_ordered_list* automaton_ordered_list_clone(automaton_ordered_list* source);
 void automaton_ordered_list_copy(automaton_ordered_list* target, automaton_ordered_list* source);
 int32_t automaton_ordered_list_binary_search(automaton_ordered_list* list, void* values, uint32_t low, uint32_t high, uint32_t key);

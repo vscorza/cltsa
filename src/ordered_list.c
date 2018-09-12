@@ -10,20 +10,17 @@
  * AUTOMATON_ORDERED_LIST
  *************************/
 
-automaton_ordered_list* automaton_ordered_list_create(uint32_t temporary_size, automaton_ordered_list_key_extractor_func extractor_func
-		, automaton_ordered_list_copy_func copy_func, uint32_t sizeof_element){
+automaton_ordered_list* automaton_ordered_list_create(uint32_t temporary_size, automaton_ordered_list_key_extractor_func extractor_func, uint32_t sizeof_element){
 	automaton_ordered_list* list	= malloc(sizeof(automaton_ordered_list));
-	automaton_ordered_list_initialize(list, temporary_size, extractor_func, copy_func, sizeof_element);
+	automaton_ordered_list_initialize(list, temporary_size, extractor_func, sizeof_element);
 	return list;
 }
 
 void automaton_ordered_list_initialize(automaton_ordered_list* list, uint32_t temporary_size
-		, automaton_ordered_list_key_extractor_func extractor_func
-		, automaton_ordered_list_copy_func copy_func, uint32_t sizeof_element){
+		, automaton_ordered_list_key_extractor_func extractor_func, uint32_t sizeof_element){
 	uint32_t i;
 	list->sizeof_element		= sizeof_element;
 	list->extractor_func		= extractor_func;
-	list->copy_func				= copy_func;
 	list->count					= 0;
 	list->size					= 0;
 	list->values				= NULL;
@@ -37,26 +34,25 @@ automaton_ordered_list* automaton_ordered_list_clone(automaton_ordered_list* sou
 	uint32_t i;
 	target->count					= source->count;
 	target->extractor_func			= source->extractor_func;
-	target->copy_func				= source->copy_func;
 	target->sizeof_element			= source->sizeof_element;
 	target->size					= source->size;
 	target->count					= source->count;
 	target->values					= malloc(target->sizeof_element * target->size);
 	for(i = 0; i < target->count; i++)
-		target->copy_func(GET_ORDERED_LIST_SINGLE_ENTRY(target, target->values, i), GET_ORDERED_LIST_SINGLE_ENTRY(source, source->values, i));
+		memcpy(GET_ORDERED_LIST_SINGLE_ENTRY(target, target->values, i), GET_ORDERED_LIST_SINGLE_ENTRY(source, source->values, i), target->sizeof_element);
 	target->temporary_count			= source->temporary_count;
 	target->temporary_size			= source->temporary_size;
 	target->temporary				= malloc(target->sizeof_element * target->temporary_size);
 	for(i = 0; i < target->temporary_count; i++)
-			target->copy_func(GET_ORDERED_LIST_SINGLE_ENTRY(target, target->temporary, i), GET_ORDERED_LIST_SINGLE_ENTRY(source, source->temporary, i));
+		memcpy(GET_ORDERED_LIST_SINGLE_ENTRY(target, target->temporary, i), GET_ORDERED_LIST_SINGLE_ENTRY(source, source->temporary, i), target->sizeof_element);
 	return target;
 }
 
 void automaton_ordered_list_copy(automaton_ordered_list* target, automaton_ordered_list* source){
 	if(target->count != source->count || target->sizeof_element != source->sizeof_element || target->extractor_func != source->extractor_func
-			|| target->copy_func != source->copy_func || target->temporary_size != source->temporary_size){
+			|| target->temporary_size != source->temporary_size){
 		automaton_ordered_list_destroy(target);
-		automaton_ordered_list_initialize(target, source->temporary_size, source->extractor_func, source->copy_func, source->sizeof_element);
+		automaton_ordered_list_initialize(target, source->temporary_size, source->extractor_func, source->sizeof_element);
 	}
 	uint32_t i;
 	if(target->size < source->size){
@@ -65,11 +61,11 @@ void automaton_ordered_list_copy(automaton_ordered_list* target, automaton_order
 		target->size	= source->size;
 	}
 	for(i = 0; i < target->count; i++)
-		target->copy_func(GET_ORDERED_LIST_SINGLE_ENTRY(target, target->values, i), GET_ORDERED_LIST_SINGLE_ENTRY(source, source->values, i));
+		memcpy(GET_ORDERED_LIST_SINGLE_ENTRY(target, target->values, i), GET_ORDERED_LIST_SINGLE_ENTRY(source, source->values, i), target->sizeof_element);
 	target->count		= source->count;
 	target->temporary_count			= source->temporary_count;
 	for(i = 0; i < target->temporary_count; i++)
-			target->copy_func(GET_ORDERED_LIST_SINGLE_ENTRY(target, target->temporary, i), GET_ORDERED_LIST_SINGLE_ENTRY(source, source->temporary, i));
+		memcpy(GET_ORDERED_LIST_SINGLE_ENTRY(target, target->temporary, i), GET_ORDERED_LIST_SINGLE_ENTRY(source, source->temporary, i), target->sizeof_element);
 }
 
 int32_t automaton_ordered_list_binary_search(automaton_ordered_list* list, void* values, uint32_t low, uint32_t high, uint32_t key){
@@ -119,15 +115,15 @@ void automaton_ordered_list_pop_entry(automaton_ordered_list* list, void* target
 	if(list->temporary_count > 0){
 		if((list->count == 0) || (list->extractor_func(GET_ORDERED_LIST_SINGLE_ENTRY(list, list->temporary, (list->temporary_count - 1)))
 				> list->extractor_func(GET_ORDERED_LIST_SINGLE_ENTRY(list, list->values, (list->count - 1)))))
-				list->copy_func(target, GET_ORDERED_LIST_SINGLE_ENTRY(list, list->temporary, --(list->temporary_count)));
+				memcpy(target, GET_ORDERED_LIST_SINGLE_ENTRY(list, list->temporary, --(list->temporary_count)), list->sizeof_element);
 		else if(list->count > 0)
-			list->copy_func(target, GET_ORDERED_LIST_SINGLE_ENTRY(list, list->values, --(list->count)));
+			memcpy(target, GET_ORDERED_LIST_SINGLE_ENTRY(list, list->values, --(list->count)), list->sizeof_element);
 		else{
 			printf("FATAL ERROR TRYING TO POP FROM EMPTY LIST");
 			exit(-1);
 		}
 	}else if(list->count > 0)
-		list->copy_func(target, GET_ORDERED_LIST_SINGLE_ENTRY(list, list->values, --(list->count)));
+		memcpy(target, GET_ORDERED_LIST_SINGLE_ENTRY(list, list->values, --(list->count)), list->sizeof_element);
 	else{
 		printf("FATAL ERROR TRYING TO POP FROM EMPTY LIST");
 		exit(-1);
@@ -155,7 +151,7 @@ bool automaton_ordered_list_add_entry(automaton_ordered_list* list, void* entry)
 			printf("INITIALIAZING ORDERED LIST(%d)\n", list->temporary_count);
 #endif
 			for(i = 0; i < list->temporary_count; i++){
-				list->copy_func(GET_ORDERED_LIST_SINGLE_ENTRY(list, new_values, (uint32_t)i), GET_ORDERED_LIST_SINGLE_ENTRY(list, list->temporary, (uint32_t)i));
+				memcpy(GET_ORDERED_LIST_SINGLE_ENTRY(list, new_values, (uint32_t)i), GET_ORDERED_LIST_SINGLE_ENTRY(list, list->temporary, (uint32_t)i), list->sizeof_element);
 #if DEBUG_ORDERED_LIST
 			printf("%d,", list->extractor_func(GET_ORDERED_LIST_SINGLE_ENTRY(list, new_values, (uint32_t)i)));
 #endif
@@ -179,12 +175,12 @@ bool automaton_ordered_list_add_entry(automaton_ordered_list* list, void* entry)
 #endif
 				if(values_index < (list->count) && list->extractor_func(GET_ORDERED_LIST_SINGLE_ENTRY(list, list->temporary, temporary_index)) >
 				list->extractor_func(GET_ORDERED_LIST_SINGLE_ENTRY(list, list->values,values_index))){
-					list->copy_func(GET_ORDERED_LIST_SINGLE_ENTRY(list, new_values, (uint32_t)i), GET_ORDERED_LIST_SINGLE_ENTRY(list, list->values, values_index++));
+					memcpy(GET_ORDERED_LIST_SINGLE_ENTRY(list, new_values, (uint32_t)i), GET_ORDERED_LIST_SINGLE_ENTRY(list, list->values, values_index++), list->sizeof_element);
 #if DEBUG_ORDERED_LIST
 					printf("%d(%d),", list->extractor_func(GET_ORDERED_LIST_SINGLE_ENTRY(list, new_values, (uint32_t)i)), values_index - 1);
 #endif
 				}else{
-					list->copy_func(GET_ORDERED_LIST_SINGLE_ENTRY(list, new_values, (uint32_t)i), GET_ORDERED_LIST_SINGLE_ENTRY(list, list->temporary, temporary_index++));
+					memcpy(GET_ORDERED_LIST_SINGLE_ENTRY(list, new_values, (uint32_t)i), GET_ORDERED_LIST_SINGLE_ENTRY(list, list->temporary, temporary_index++), list->sizeof_element);
 #if DEBUG_ORDERED_LIST
 					printf("%d*(%d),", list->extractor_func(GET_ORDERED_LIST_SINGLE_ENTRY(list, new_values, (uint32_t)i)), temporary_index - 1);
 #endif
@@ -208,17 +204,17 @@ bool automaton_ordered_list_add_entry(automaton_ordered_list* list, void* entry)
 		for(i = (int32_t)list->temporary_count - 1; i >= 0;  i--){
 			if(list->extractor_func(GET_ORDERED_LIST_SINGLE_ENTRY(list, list->temporary, (uint32_t)i)) >
 			list->extractor_func(entry)){
-				list->copy_func(GET_ORDERED_LIST_SINGLE_ENTRY(list, list->temporary, (uint32_t)(i+1)),GET_ORDERED_LIST_SINGLE_ENTRY(list, list->temporary, (uint32_t)i));
+				memcpy(GET_ORDERED_LIST_SINGLE_ENTRY(list, list->temporary, (uint32_t)(i+1)),GET_ORDERED_LIST_SINGLE_ENTRY(list, list->temporary, (uint32_t)i), list->sizeof_element);
 			}else{
 				found = true;
-				list->copy_func(GET_ORDERED_LIST_SINGLE_ENTRY(list, list->temporary, (uint32_t)(i+1)),entry);
+				memcpy(GET_ORDERED_LIST_SINGLE_ENTRY(list, list->temporary, (uint32_t)(i+1)),entry, list->sizeof_element);
 				break;
 			}
 		}
 	}
 	//if it was not found then add it at the beginning of the list
 	if(!found){
-		list->copy_func(GET_ORDERED_LIST_SINGLE_ENTRY(list, list->temporary, 0),entry);
+		memcpy(GET_ORDERED_LIST_SINGLE_ENTRY(list, list->temporary, 0),entry, list->sizeof_element);
 	}
 	list->temporary_count++;
 #if DEBUG_ORDERED_LIST

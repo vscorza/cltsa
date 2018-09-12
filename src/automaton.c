@@ -1398,14 +1398,6 @@ automaton_ranking* automaton_ranking_create_infinity(uint32_t state, int32_t ass
 	ranking->assumption_to_satisfy	= assumption_to_satisfy;
 	return ranking;
 }
-
-void automaton_ranking_state_copy(void* target_ranking_state, void* source_ranking_state){
-	automaton_ranking* target	= (automaton_ranking*)target_ranking_state;
-	automaton_ranking* source	= (automaton_ranking*)source_ranking_state;
-	target->state				= source->state;
-	target->value				= source->value;
-	target->assumption_to_satisfy	= source->assumption_to_satisfy;
-}
 automaton_ranking* automaton_ranking_create(uint32_t state, int32_t assumption_to_satisfy){
 	automaton_ranking* ranking	= malloc(sizeof(automaton_ranking));
 	ranking->state			= state;
@@ -1464,11 +1456,6 @@ int32_t automaton_int_compare(void* left_int, void* right_int){
 	}else{
 		return 0;
 	}
-}
-void automaton_int_copy(void* target_input, void* source_input){
-	uint32_t* target	= (uint32_t*)target_input;
-	uint32_t* source	= (uint32_t*)source_input;
-	*target				= *source;
 }
 void automaton_pending_state_destroy(automaton_pending_state*  pending_state){
 	free(pending_state);
@@ -1688,7 +1675,7 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 	automaton_concrete_bucket_list** ranking_list	= malloc(sizeof(automaton_concrete_bucket_list*) * guarantees_count);
 	automaton_max_heap* pending_list	= automaton_max_heap_create(sizeof(automaton_pending_state)
 			, automaton_pending_state_compare, automaton_pending_state_copy);
-	automaton_concrete_bucket_list* key_list		= automaton_concrete_bucket_list_create(RANKING_BUCKET_SIZE, automaton_int_extractor, automaton_int_copy, sizeof(uint32_t));
+	automaton_concrete_bucket_list* key_list		= automaton_concrete_bucket_list_create(RANKING_BUCKET_SIZE, automaton_int_extractor, sizeof(uint32_t));
 	uint32_t current_state;
 	uint32_t* assumptions_indexes				= malloc(sizeof(uint32_t) * assumptions_count);
 	uint32_t* guarantees_indexes				= malloc(sizeof(uint32_t) * guarantees_count);
@@ -1750,8 +1737,7 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 	automaton_ranking concrete_ranking;
 	automaton_pending_state concrete_pending_state;
 	for(i = 0; i < guarantees_count; i++)
-		ranking_list[i]	= automaton_concrete_bucket_list_create(RANKING_BUCKET_SIZE, automaton_ranking_key_extractor, automaton_ranking_state_copy
-				, sizeof(automaton_ranking));
+		ranking_list[i]	= automaton_concrete_bucket_list_create(RANKING_BUCKET_SIZE, automaton_ranking_key_extractor, sizeof(automaton_ranking));
 	for(i = 0; i < game_automaton->transitions_count; i++){
 		for(j = 0; j < guarantees_count; j++){
 			if(game_automaton->out_degree[i] == 0){

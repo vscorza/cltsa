@@ -67,13 +67,12 @@ typedef struct automaton_concrete_bucket_list_str{
 	bool has_last_index;
 	uint32_t sizeof_element;
 	automaton_ptr_bucket_list_key_extractor_func extractor_func;
-	automaton_ptr_bucket_list_copy_func copy_func;
 }automaton_concrete_bucket_list;
 
 automaton_concrete_bucket_list* automaton_concrete_bucket_list_create(uint32_t count, automaton_ptr_bucket_list_key_extractor_func extractor_func
-		, automaton_ptr_bucket_list_copy_func copy_func, uint32_t sizeof_element);
+		, uint32_t sizeof_element);
 void automaton_concrete_bucket_list_initialize(automaton_concrete_bucket_list* bucket, uint32_t count
-		, automaton_ptr_bucket_list_key_extractor_func extractor_func, automaton_ptr_bucket_list_copy_func copy_func, uint32_t sizeof_element);
+		, automaton_ptr_bucket_list_key_extractor_func extractor_func, uint32_t sizeof_element);
 automaton_concrete_bucket_list* automaton_concrete_bucket_list_clone(automaton_concrete_bucket_list* source);
 void automaton_concrete_bucket_list_copy(automaton_concrete_bucket_list* target, automaton_concrete_bucket_list* source);
 void automaton_concrete_bucket_list_merge(automaton_concrete_bucket_list* list, automaton_concrete_bucket_list* new_elements);

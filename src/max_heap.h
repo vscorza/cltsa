@@ -32,16 +32,14 @@ typedef struct automaton_max_heap_str {
 	uint32_t count;
 	uint32_t sizeof_element;
 	automaton_max_heap_compare_func cmp_func;
-	automaton_max_heap_copy_func copy_func;
 	automaton_max_heap_extractor_func extractor_func;
 	void* tmp_value;
 }automaton_max_heap;
 
-automaton_max_heap* automaton_max_heap_create(uint32_t sizeof_element, automaton_max_heap_compare_func compare_func, automaton_max_heap_copy_func copy_func);
+automaton_max_heap* automaton_max_heap_create(uint32_t sizeof_element, automaton_max_heap_compare_func compare_func);
 void automaton_max_heap_swap(automaton_max_heap* heap, void* n1, void* n2);
 void automaton_max_heap_heapify(automaton_max_heap* heap, uint32_t i) ;
-automaton_max_heap* automaton_max_heap_create_from_array(uint32_t sizeof_element, automaton_max_heap_compare_func compare_func, automaton_max_heap_copy_func copy_func
-		,void *arr, uint32_t count);
+automaton_max_heap* automaton_max_heap_create_from_array(uint32_t sizeof_element, automaton_max_heap_compare_func compare_func,void *arr, uint32_t count);
 void automaton_max_heap_add_entry(automaton_max_heap* heap, void* entry);
 void automaton_max_heap_pop_entry(automaton_max_heap* heap, void* target);
 uint32_t automaton_max_heap_get_min_entry_index(automaton_max_heap* heap, void* target, uint32_t i);

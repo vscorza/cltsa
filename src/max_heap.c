@@ -10,10 +10,9 @@
     Function to initialize the max heap with size = 0
 */
 
-automaton_max_heap* automaton_max_heap_create(uint32_t sizeof_element, automaton_max_heap_compare_func compare_func, automaton_max_heap_copy_func copy_func){
+automaton_max_heap* automaton_max_heap_create(uint32_t sizeof_element, automaton_max_heap_compare_func compare_func){
 	automaton_max_heap* max_heap	= malloc(sizeof(automaton_max_heap));
 	max_heap->cmp_func				= compare_func;
-	max_heap->copy_func				= copy_func;
 	max_heap->sizeof_element		= sizeof_element;
 	max_heap->count					= 0;
 	max_heap->size					= INITIAL_HEAP_SIZE;
@@ -23,9 +22,9 @@ automaton_max_heap* automaton_max_heap_create(uint32_t sizeof_element, automaton
 }
 
 void automaton_max_heap_swap(automaton_max_heap* heap, void* n1, void* n2) {
-	heap->copy_func(heap->tmp_value, n1);
-    heap->copy_func(n1, n2);
-    heap->copy_func(n2, heap->tmp_value);
+	memcpy(heap->tmp_value, n1, heap->sizeof_element);
+	memcpy(n1, n2, heap->sizeof_element);
+	memcpy(n2, heap->tmp_value, heap->sizeof_element);
 }
 
 
@@ -50,11 +49,9 @@ void automaton_max_heap_heapify(automaton_max_heap* heap, uint32_t i) {
     Instead of using insertNode() function n times for total complexity of O(nlogn),
     we can use the buildMaxHeap() function to build the heap in O(n) time
 */
-automaton_max_heap* automaton_max_heap_create_from_array(uint32_t sizeof_element, automaton_max_heap_compare_func compare_func, automaton_max_heap_copy_func copy_func
-		,void *arr, uint32_t count) {
+automaton_max_heap* automaton_max_heap_create_from_array(uint32_t sizeof_element, automaton_max_heap_compare_func compare_func,void *arr, uint32_t count) {
 	automaton_max_heap* max_heap	= malloc(sizeof(automaton_max_heap));
 	max_heap->cmp_func				= compare_func;
-	max_heap->copy_func				= copy_func;
 	max_heap->sizeof_element		= sizeof_element;
 	max_heap->count					= count;
 	max_heap->size					= count;
@@ -64,7 +61,7 @@ automaton_max_heap* automaton_max_heap_create_from_array(uint32_t sizeof_element
 
     // Insertion into the heap without violating the shape property
     for(i = 0; i < (int32_t)count; i++)
-        max_heap->copy_func(GET_MAX_HEAP_ENTRY(max_heap, (uint32_t)i), GET_MAX_HEAP_ARRAY_ENTRY(max_heap, arr, (uint32_t)i));
+        memcpy(GET_MAX_HEAP_ENTRY(max_heap, (uint32_t)i), GET_MAX_HEAP_ARRAY_ENTRY(max_heap, arr, (uint32_t)i), max_heap->sizeof_element);
     // Making sure that heap property is also satisfied
     for(i = (int32_t)(count - 1) / 2; i >= 0; i--)
     	automaton_max_heap_heapify(max_heap, (uint32_t)i) ;
@@ -82,7 +79,7 @@ void automaton_max_heap_add_entry(automaton_max_heap* heap, void* entry) {
 		uint32_t new_size	= heap->size * LIST_INCREASE_FACTOR;
 		void* new_values	= malloc(heap->sizeof_element * new_size);
 		for(i = 0; i < heap->count; i++)
-			heap->copy_func(GET_MAX_HEAP_ARRAY_ENTRY(heap, new_values, (uint32_t)i), GET_MAX_HEAP_ENTRY(heap, (uint32_t)i));
+			memcpy(GET_MAX_HEAP_ARRAY_ENTRY(heap, new_values, (uint32_t)i), GET_MAX_HEAP_ENTRY(heap, (uint32_t)i), heap->sizeof_element);
 		free(heap->values);
 		heap->values		= new_values;
 		heap->size			= new_size;
@@ -93,7 +90,7 @@ void automaton_max_heap_add_entry(automaton_max_heap* heap, void* entry) {
     	automaton_max_heap_swap(heap, GET_MAX_HEAP_ENTRY(heap, i), GET_MAX_HEAP_PARENT(heap, i));
         i = MAX_HEAP_PARENT_INDEX(i) ;
     }
-	heap->copy_func(GET_MAX_HEAP_ENTRY(heap, i), entry);
+	memcpy(GET_MAX_HEAP_ENTRY(heap, i), entry, heap->sizeof_element);
 }
 
 /*

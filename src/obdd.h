@@ -16,6 +16,11 @@
 #define GET_VAR_IN_VALUATION(arr, variable_count, valuation_index, variable_index)	(arr[GET_VAR_INDEX(variable_count, valuation_index, variable_index)])
 
 /** STRUCTS **/
+/** OBDD COMPOSITE STATE**/
+typedef struct obdd_composite_state_str{
+	uint32_t state;
+	bool* valuation;
+}obdd_composite_state;
 /** BINARY MAP TREE **/
 typedef struct obdd_state_tree_entry_str{
 	bool is_leaf;
@@ -72,6 +77,9 @@ typedef struct obdd_partial_automaton_t{
 	uint32_t			valuations_size;
 	uint32_t*			valuations;
 }obdd_partial_automaton;*/
+/** OBDD COMPOSITE STATE **/
+uint32_t automaton_obdd_composite_state_extractor(void* value);
+int32_t automaton_obdd_composite_state_compare(void* left_state, void* right_state);
 /** MAP TREE **/
 obdd_state_tree* obdd_state_tree_create(uint32_t key_length);
 int32_t obdd_state_tree_entry_get_from_pool(obdd_state_tree* tree);

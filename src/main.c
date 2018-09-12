@@ -178,14 +178,8 @@ uint32_t test_item_compare(void* left, void* right){
 	}
 }
 uint32_t test_item_extractor(void* entry){ return ((test_item_bucket*)entry)->a;}
-void test_item_copy(void* source, void* target){
-	test_item_bucket* source_it	= (test_item_bucket*)source;
-	test_item_bucket* target_it	= (test_item_bucket*)target;
-	source_it->a				= target_it->a;
-	source_it->b				= target_it->b;
-}
 void run_max_heap_tests(){
-	automaton_max_heap* heap	= automaton_max_heap_create(sizeof(test_item_bucket), test_item_compare, test_item_copy);
+	automaton_max_heap* heap	= automaton_max_heap_create(sizeof(test_item_bucket), test_item_compare);
 	test_item_bucket current_item;
 	uint32_t i;
 	uint32_t cycles = 100;
@@ -207,7 +201,7 @@ void run_max_heap_tests(){
 }
 
 void run_concrete_bucket_list_tests(){
-	automaton_concrete_bucket_list* list	= automaton_concrete_bucket_list_create(RANKING_BUCKET_SIZE, test_item_extractor, test_item_copy, sizeof(test_item_bucket));
+	automaton_concrete_bucket_list* list	= automaton_concrete_bucket_list_create(RANKING_BUCKET_SIZE, test_item_extractor, sizeof(test_item_bucket));
 	test_item_bucket current_item;
 	uint32_t i;
 	uint32_t cycles = 60;
@@ -227,7 +221,7 @@ void run_concrete_bucket_list_tests(){
 void run_ordered_list_tests(){
 	test_item_bucket current_item;
 	uint32_t i;
-	automaton_ordered_list* ordered_list	= automaton_ordered_list_create(2, test_item_extractor, test_item_copy, sizeof(test_item_bucket));
+	automaton_ordered_list* ordered_list	= automaton_ordered_list_create(2, test_item_extractor, sizeof(test_item_bucket));
 	uint32_t cycles = 6;//100000;
 	for(i = 0; i < cycles; i++){
 		current_item.b = i; current_item.a = i + cycles;

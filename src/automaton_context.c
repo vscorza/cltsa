@@ -1677,14 +1677,14 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 		}
 
 	/**
-	 * incrementally build the transition relation and valuation
+	 * BEHAVIOUR CONSTRUCTION (RHO AND THETA)
 	 */
 	uint32_t current_valuations_count, current_state, next_state;
 	uint32_t fluent_count	= x_count + y_count;
 	bool* current_valuations;
 	obdd_state_tree* obdd_state_map	= obdd_state_tree_create(x_count + y_count);
 	automaton_concrete_bucket_list* bucket_list	= automaton_concrete_bucket_list_create(
-			LTL_BUCKET_SIZE, automaton_int_extractor, automaton_int_copy, sizeof(uint32_t));
+			LTL_BUCKET_SIZE, automaton_int_extractor, sizeof(uint32_t));
 	bool* composed_valuation		= malloc(sizeof(bool) * (x_count + y_count));
 	bool* composed_next_valuation		= malloc(sizeof(bool) * (x_count + y_count));
 	for(i = 0; i < (x_count + y_count); i++)composed_valuation[i]	= composed_next_valuation[i] = false;

@@ -301,19 +301,18 @@ void automaton_ptr_bucket_destroy(automaton_ptr_bucket_list* list){
  * AUTOMATON_CONCRETE_BUCKET_LIST
  *************************/
 automaton_concrete_bucket_list* automaton_concrete_bucket_list_create(uint32_t count, automaton_ptr_bucket_list_key_extractor_func extractor_func
-		, automaton_ptr_bucket_list_copy_func copy_func, uint32_t sizeof_element){
+		, uint32_t sizeof_element){
 	automaton_concrete_bucket_list* bucket	= malloc(sizeof(automaton_concrete_bucket_list));
-	automaton_concrete_bucket_list_initialize(bucket, count, extractor_func, copy_func, sizeof_element);
+	automaton_concrete_bucket_list_initialize(bucket, count, extractor_func, sizeof_element);
 	return bucket;
 }
 
 
 void automaton_concrete_bucket_list_initialize(automaton_concrete_bucket_list* bucket, uint32_t count
-		, automaton_ptr_bucket_list_key_extractor_func extractor_func, automaton_ptr_bucket_list_copy_func copy_func, uint32_t sizeof_element){
+		, automaton_ptr_bucket_list_key_extractor_func extractor_func, uint32_t sizeof_element){
 	uint32_t i;
 	bucket->sizeof_element			= sizeof_element;
 	bucket->extractor_func			= extractor_func;
-	bucket->copy_func				= copy_func;
 	bucket->has_last_index			= false;
 	bucket->composite_count			= 0;
 	bucket->count					= count;
@@ -328,11 +327,11 @@ void automaton_concrete_bucket_list_initialize(automaton_concrete_bucket_list* b
 }
 
 void automaton_concrete_bucket_list_copy(automaton_concrete_bucket_list* target, automaton_concrete_bucket_list* source){
-	if(target->count != source->count || target->sizeof_element != source->sizeof_element || target->extractor_func != source->extractor_func
-			|| target->copy_func != source->copy_func){
+	if(target->count != source->count || target->sizeof_element != source->sizeof_element || target->extractor_func != source->extractor_func){
 		automaton_concrete_bucket_destroy(target);
-		automaton_concrete_bucket_list_initialize(target, source->count, source->extractor_func, source->copy_func, source->sizeof_element);
+		automaton_concrete_bucket_list_initialize(target, source->count, source->extractor_func, source->sizeof_element);
 	}
+	target->sizeof_element			= source->sizeof_element;
 	uint32_t i, j;
 	for(i = 0; i < target->count; i++){
 		if(target->bucket_size[i] < source->bucket_size[i]){
@@ -341,7 +340,7 @@ void automaton_concrete_bucket_list_copy(automaton_concrete_bucket_list* target,
 			target->bucket_size[i]	= source->bucket_size[i];
 		}
 		for(j = 0; j < target->bucket_count[i]; j++){
-			target->copy_func(GET_CONCRETE_BUCKET_LIST_ENTRY(target, i, j), GET_CONCRETE_BUCKET_LIST_ENTRY(source, i, j));
+			memcpy(GET_CONCRETE_BUCKET_LIST_ENTRY(target, i, j), GET_CONCRETE_BUCKET_LIST_ENTRY(source, i, j), target->sizeof_element);
 		}
 		target->bucket_count[i]		= source->bucket_count[i];
 	}
@@ -355,7 +354,6 @@ automaton_concrete_bucket_list* automaton_concrete_bucket_list_clone(automaton_c
 	target->composite_count			= source->composite_count;
 	target->count					= source->count;
 	target->extractor_func			= source->extractor_func;
-	target->copy_func				= source->copy_func;
 	target->sizeof_element			= source->sizeof_element;
 	target->bucket_count			= malloc(sizeof(uint32_t) * target->count);
 	target->bucket_size				= malloc(sizeof(uint32_t) * target->count);
@@ -365,7 +363,7 @@ automaton_concrete_bucket_list* automaton_concrete_bucket_list_clone(automaton_c
 		target->bucket_size[i]		= source->bucket_size[i];
 		target->buckets[i]			= malloc(target->sizeof_element * target->bucket_size[i]);
 		for(j =0; j < target->bucket_count[i]; j++){
-			target->copy_func(GET_CONCRETE_BUCKET_LIST_ENTRY(target, i, j), GET_CONCRETE_BUCKET_LIST_ENTRY(source, i, j));
+			memcpy(GET_CONCRETE_BUCKET_LIST_ENTRY(target, i, j), GET_CONCRETE_BUCKET_LIST_ENTRY(source, i, j), target->sizeof_element);
 		}
 	}
 	target->has_last_index			= source->has_last_index;
@@ -449,7 +447,7 @@ void automaton_concrete_bucket_pop_entry(automaton_concrete_bucket_list* list, v
 		if(!found)
 			list->has_last_index	= false;
 	}
-	list->copy_func(target, entry);
+	memcpy(target, entry, list->sizeof_element);
 }
 
 bool automaton_concrete_bucket_add_entry(automaton_concrete_bucket_list* list, void* entry){
@@ -471,7 +469,7 @@ bool automaton_concrete_bucket_add_entry(automaton_concrete_bucket_list* list, v
 		uint32_t new_size			= list->bucket_size[index] * LIST_INCREASE_FACTOR;
 		void* new_bucket			= malloc(list->sizeof_element * new_size);
 		for(i = 0; i < list->bucket_count[index]; i++){
-			list->copy_func(GET_CONCRETE_BUCKET_SINGLE_ENTRY(list, new_bucket, i), GET_CONCRETE_BUCKET_LIST_ENTRY(list, index, i));
+			memcpy(GET_CONCRETE_BUCKET_SINGLE_ENTRY(list, new_bucket, i), GET_CONCRETE_BUCKET_LIST_ENTRY(list, index, i), list->sizeof_element);
 		}
 		list->bucket_size[index]	= new_size;
 		free(bucket);
@@ -480,7 +478,7 @@ bool automaton_concrete_bucket_add_entry(automaton_concrete_bucket_list* list, v
 	}
 	list->has_last_index			= true;
 	list->last_added_bucket			= index;
-	list->copy_func(GET_CONCRETE_BUCKET_LIST_ENTRY(list, index, (list->bucket_count[index])++), entry);
+	memcpy(GET_CONCRETE_BUCKET_LIST_ENTRY(list, index, (list->bucket_count[index])++), entry, list->sizeof_element);
 	return false;
 }
 
@@ -499,7 +497,7 @@ bool automaton_concrete_bucket_remove_entry(automaton_concrete_bucket_list* list
 		}
 	}
 	for(i = j; i < (int32_t)(list->bucket_count[index] - 1); i++){
-		list->copy_func(GET_CONCRETE_BUCKET_LIST_ENTRY(list, index, i), GET_CONCRETE_BUCKET_LIST_ENTRY(list, index, i + 1));
+		memcpy(GET_CONCRETE_BUCKET_LIST_ENTRY(list, index, i), GET_CONCRETE_BUCKET_LIST_ENTRY(list, index, i + 1), list->sizeof_element);
 	}
 	list->bucket_count[index]--;
 

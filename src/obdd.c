@@ -2,6 +2,18 @@
 #include "assert.h"
 
 uint32_t obdd_mgr_greatest_ID = 0;
+/** OBDD COMPOSITE STATE **/
+uint32_t automaton_obdd_composite_state_extractor(void* value){
+	return ((obdd_composite_state*)value)->state;
+}
+int32_t automaton_obdd_composite_state_compare(void* left_state, void* right_state){
+	uint32_t left_value	= ((obdd_composite_state*)left_state)->state;
+	uint32_t right_value	= ((obdd_composite_state*)right_state)->state;
+
+	if(left_value < right_value) return -1;
+	if(left_value == right_value) return 0;
+	return 1;
+}
 
 /** MAP TREE **/
 void obdd_state_tree_entry_print(obdd_state_tree* tree, obdd_state_tree_entry* entry){
