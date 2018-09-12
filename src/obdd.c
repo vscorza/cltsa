@@ -3,10 +3,10 @@
 
 uint32_t obdd_mgr_greatest_ID = 0;
 /** OBDD COMPOSITE STATE **/
-uint32_t automaton_obdd_composite_state_extractor(void* value){
+uint32_t obdd_composite_state_extractor(void* value){
 	return ((obdd_composite_state*)value)->state;
 }
-int32_t automaton_obdd_composite_state_compare(void* left_state, void* right_state){
+int32_t obdd_composite_state_compare(void* left_state, void* right_state){
 	uint32_t left_value	= ((obdd_composite_state*)left_state)->state;
 	uint32_t right_value	= ((obdd_composite_state*)right_state)->state;
 
@@ -67,7 +67,7 @@ int32_t obdd_state_tree_entry_get_from_pool(obdd_state_tree* tree){
 	entry->leaf_value				= 0;
 	return (tree->entries_count - 1);
 }
-uint32_t obdd_state_tree_get_key(obdd_state_tree* tree, bool* valuation){
+uint32_t obdd_state_tree_get_key(obdd_state_tree* tree, bool* valuation, int32_t key_length){
 	uint32_t i,j;
 	int32_t current_entry_index, last_entry_index;
 	obdd_state_tree_entry* current_entry 	= -1;
@@ -79,7 +79,8 @@ uint32_t obdd_state_tree_get_key(obdd_state_tree* tree, bool* valuation){
 	last_entry_index				= tree->first_entry_index;
 	last_entry						= &(tree->entries_pool[last_entry_index]);
 	bool next_is_high;
-	for(i = 0; i < tree->key_length; i++){
+	uint32_t current_length			= key_length < 1 ? tree->key_length : key_length;
+	for(i = 0; i < current_length; i++){
 		next_is_high		= valuation[i];
 
 		if((next_is_high && tree->entries_pool[last_entry_index].high_index == -1) || (!next_is_high && tree->entries_pool[last_entry_index].low_index == -1)){
@@ -91,7 +92,7 @@ uint32_t obdd_state_tree_get_key(obdd_state_tree* tree, bool* valuation){
 				tree->entries_pool[last_entry_index].high_index = current_entry_index;
 			else
 				tree->entries_pool[last_entry_index].low_index = current_entry_index;
-			if(i == (tree->key_length -1)){
+			if(i == (current_length -1)){
 				current_entry->is_leaf		= true;
 				current_entry->leaf_value	= tree->max_value++;
 				return current_entry->leaf_value;
@@ -101,7 +102,7 @@ uint32_t obdd_state_tree_get_key(obdd_state_tree* tree, bool* valuation){
 		}else{
 			current_entry_index	= next_is_high ? tree->entries_pool[last_entry_index].high_index : tree->entries_pool[last_entry_index].low_index;
 			current_entry				= &(tree->entries_pool[current_entry_index]);
-			if(i == (tree->key_length -1))
+			if(i == (current_length -1))
 				return current_entry->leaf_value;
 		}
 		last_entry_index = current_entry_index;

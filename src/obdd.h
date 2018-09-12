@@ -78,12 +78,12 @@ typedef struct obdd_partial_automaton_t{
 	uint32_t*			valuations;
 }obdd_partial_automaton;*/
 /** OBDD COMPOSITE STATE **/
-uint32_t automaton_obdd_composite_state_extractor(void* value);
-int32_t automaton_obdd_composite_state_compare(void* left_state, void* right_state);
+uint32_t obdd_composite_state_extractor(void* value);
+int32_t obdd_composite_state_compare(void* left_state, void* right_state);
 /** MAP TREE **/
 obdd_state_tree* obdd_state_tree_create(uint32_t key_length);
 int32_t obdd_state_tree_entry_get_from_pool(obdd_state_tree* tree);
-uint32_t obdd_state_tree_get_key(obdd_state_tree* tree, bool* valuation);
+uint32_t obdd_state_tree_get_key(obdd_state_tree* tree, bool* valuation, int32_t key_length);
 void obdd_state_tree_destroy(obdd_state_tree* tree);
 void obdd_state_tree_entry_print(obdd_state_tree* tree, obdd_state_tree_entry* entry);
 void obdd_state_tree_print(obdd_state_tree* tree);

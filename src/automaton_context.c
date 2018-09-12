@@ -1679,20 +1679,27 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	/**
 	 * BEHAVIOUR CONSTRUCTION (RHO AND THETA)
 	 */
-	uint32_t current_valuations_count, current_state, next_state;
+	uint32_t current_valuations_count;
+	obdd_composite_state* env_state = malloc(sizeof(uint32_t) + sizeof(bool) * (x_count));
+	obdd_composite_state* sys_state = malloc(sizeof(uint32_t) + sizeof(bool) * (x_count + y_count));
 	uint32_t fluent_count	= x_count + y_count;
 	bool* current_valuations;
 	obdd_state_tree* obdd_state_map	= obdd_state_tree_create(x_count + y_count);
-	automaton_concrete_bucket_list* bucket_list	= automaton_concrete_bucket_list_create(
-			LTL_BUCKET_SIZE, automaton_int_extractor, sizeof(uint32_t));
-	bool* composed_valuation		= malloc(sizeof(bool) * (x_count + y_count));
-	bool* composed_next_valuation		= malloc(sizeof(bool) * (x_count + y_count));
-	for(i = 0; i < (x_count + y_count); i++)composed_valuation[i]	= composed_next_valuation[i] = false;
-	current_state		= obdd_state_tree_get_key(obdd_state_map, composed_valuation);
-	automaton_automaton_add_initial_state(ltl_automaton, current_state);
+	automaton_concrete_bucket_list* theta_env_bucket_list	= automaton_concrete_bucket_list_create(
+			LTL_BUCKET_SIZE, obdd_composite_state_extractor, sizeof(uint32_t) + sizeof(bool) * x_count);
+	automaton_concrete_bucket_list* theta_sys_bucket_list	= automaton_concrete_bucket_list_create(
+			LTL_BUCKET_SIZE, obdd_composite_state_extractor, sizeof(uint32_t) + sizeof(bool) * (x_count + y_count));
+	automaton_concrete_bucket_list* rho_env_bucket_list	= automaton_concrete_bucket_list_create(
+			LTL_BUCKET_SIZE, obdd_composite_state_extractor, sizeof(uint32_t) + sizeof(bool) * x_count);
+	automaton_concrete_bucket_list* rho_sys_bucket_list	= automaton_concrete_bucket_list_create(
+			LTL_BUCKET_SIZE, obdd_composite_state_extractor, sizeof(uint32_t) + sizeof(bool) * (x_count + y_count));
+	for(i = 0; i < x_count; i++)env_state->valuation[i]	= false;
+	for(i = 0; i < (x_count + y_count); i++)sys_state->valuation[i]	= false;
+	sys_state->state		= obdd_state_tree_get_key(obdd_state_map, sys_state->valuation, -1);
+	automaton_automaton_add_initial_state(ltl_automaton, sys_state->state);
 	uint32_t fluent_index;
 	for(i = 0; i < fluent_count; i++){
-		fluent_index	= GET_STATE_FLUENT_INDEX(fluent_count, current_state, i);
+		fluent_index	= GET_STATE_FLUENT_INDEX(fluent_count, sys_state->state, i);
 		CLEAR_FLUENT_BIT(ltl_automaton->valuations, fluent_index);
 	}
 	/**
@@ -1706,12 +1713,12 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 #endif
 	bool has_transition;
 	for(i = 0; i < current_valuations_count; i++){
-		automaton_set_composed_valuation(composed_next_valuation, (bool*)(current_valuations + x_count * i * sizeof(bool)), true, x_count, y_count);
-		next_state		= obdd_state_tree_get_key(obdd_state_map, composed_next_valuation);
-		has_transition	= automaton_add_transition_from_valuations(mgr, ltl_automaton, current_state, next_state
-				, composed_valuation, composed_next_valuation, x_alphabet, y_alphabet, x_count, y_count);
+		automaton_set_composed_valuation(env_state->valuation, (bool*)(current_valuations + x_count * i * sizeof(bool)), true, x_count, y_count);
+		env_state->state		= obdd_state_tree_get_key(obdd_state_map, env_state->valuation, x_count);
+		has_transition	= automaton_add_transition_from_valuations(mgr, ltl_automaton, sys_state->state, env_state->state
+				, sys_state->valuation, env_state->valuation, x_alphabet, y_alphabet, x_count, y_count);
 		if(!has_transition)
-			automaton_concrete_bucket_add_entry(bucket_list, &next_state);
+			automaton_concrete_bucket_add_entry(theta_env_bucket_list, env_state);
 	}
 	free(current_valuations);
 	obdd* initial_obdd	= obdd_apply_and(env_theta_composed, sys_theta_composed);
@@ -1728,28 +1735,28 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	 */
 	//TODO: properly implement this
 	uint32_t state_ptr = 0;
-	if(bucket_list->composite_count > 0){
+	if(theta_env_bucket_list->composite_count > 0){
 		do{
-			automaton_concrete_bucket_pop_entry(bucket_list, &state_ptr);
+			automaton_concrete_bucket_pop_entry(theta_env_bucket_list, env_state);
 			for(i = 0; i < current_valuations_count; i++){
-				automaton_set_composed_valuation(composed_next_valuation, (bool*)(current_valuations + y_count * i * sizeof(bool)), true, x_count, y_count);
-				next_state		= obdd_state_tree_get_key(obdd_state_map, composed_next_valuation);
+				automaton_set_composed_valuation(sys_state->valuation, (bool*)(current_valuations + y_count * i * sizeof(bool)), false, x_count, y_count);
+				sys_state->state		= obdd_state_tree_get_key(obdd_state_map, sys_state->valuation, -1);
 #if DEBUG_LTL_AUTOMATON
-				printf("%d ->", current_state);
+				printf("%d ->", sys_state->state);
 				for(j = 0; j < x_count + y_count; j++)
-					printf("%s", composed_next_valuation[j] ? "1" : "0");
+					printf("%s", sys_state->valuation[j] ? "1" : "0");
 				state_counter++;
-				printf(" %d%s", next_state, state_counter % 10 == 0 ? "\n" : " ");
+				printf(" %d%s", sys_state->state, state_counter % 10 == 0 ? "\n" : " ");
 				if(state_counter % 1000 == 0)
 					printf("States processed for ltl: %d\n", state_counter);
 #endif
-				has_transition	= automaton_add_transition_from_valuations(mgr, ltl_automaton, current_state, next_state
-						, composed_valuation, composed_next_valuation, x_alphabet, y_alphabet, x_count, y_count);
-				if(!has_transition && !automaton_concrete_bucket_has_entry(bucket_list, &next_state))
-					automaton_concrete_bucket_add_entry(bucket_list, &next_state);
+				has_transition	= automaton_add_transition_from_valuations(mgr, ltl_automaton, env_state->state, sys_state->state
+						, env_state->valuation, sys_state->valuation, x_alphabet, y_alphabet, x_count, y_count);
+				if(!has_transition && !automaton_concrete_bucket_has_entry(theta_sys_bucket_list, sys_state))
+					automaton_concrete_bucket_add_entry(theta_sys_bucket_list, next_state);
 			}
 
-		}while(bucket_list->composite_count > 0);
+		}while(theta_env_bucket_list->composite_count > 0);
 	}
 	obdd_destroy(initial_obdd);
 	/**
@@ -1777,11 +1784,11 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	if(env_rho_count > 1)obdd_destroy(env_rho_composed);
 	if(sys_rho_count > 1)obdd_destroy(sys_rho_composed);
 
-	automaton_concrete_bucket_destroy(bucket_list);
+	free(env_state); free(sys_state);
+	automaton_concrete_bucket_destroy(theta_env_bucket_list);automaton_concrete_bucket_destroy(theta_sys_bucket_list);
+	automaton_concrete_bucket_destroy(rho_env_bucket_list);automaton_concrete_bucket_destroy(rho_sys_bucket_list);
 	free(x_alphabet); free(y_alphabet); free(x_p_alphabet); free(y_p_alphabet);
 	free(local_alphabet);
-	free(composed_valuation);
-	free(composed_next_valuation);
 	obdd_state_tree_destroy(state_map);
 	obdd_state_tree_destroy(obdd_state_map);
 	return ltl_automaton;
