@@ -3,6 +3,15 @@
 
 uint32_t obdd_mgr_greatest_ID = 0;
 /** OBDD COMPOSITE STATE **/
+obdd_composite_state* obdd_composite_state_create(uint32_t state, uint32_t valuation_count){
+	uint32_t alignment_offset	= 4;
+	obdd_composite_state* composite_state = malloc(sizeof(uint32_t) + alignment_offset + sizeof(bool) * (valuation_count));
+	composite_state->state	= state;
+	uint32_t i;
+	for(i = 0; i < valuation_count; i++)
+		composite_state->valuation[i]	= false;
+	return composite_state;
+}
 uint32_t obdd_composite_state_extractor(void* value){
 	return ((obdd_composite_state*)value)->state;
 }
@@ -102,8 +111,13 @@ uint32_t obdd_state_tree_get_key(obdd_state_tree* tree, bool* valuation, int32_t
 		}else{
 			current_entry_index	= next_is_high ? tree->entries_pool[last_entry_index].high_index : tree->entries_pool[last_entry_index].low_index;
 			current_entry				= &(tree->entries_pool[current_entry_index]);
-			if(i == (current_length -1))
+			if(i == (current_length -1)){
+				if(!current_entry->is_leaf){
+					current_entry->is_leaf	= true;
+					current_entry->leaf_value	= tree->max_value++;
+				}
 				return current_entry->leaf_value;
+			}
 		}
 		last_entry_index = current_entry_index;
 	}
@@ -1069,7 +1083,7 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 	if(img_count != variables_count){
 		uint32_t new_count			= 0;
 		uint32_t k;
-		bool* new_valuations	= calloc(*valuations_count * img_count, sizeof(bool) );
+		bool* new_valuations	= calloc((*valuations_count) * img_count, sizeof(bool) );
 		bool has_valuation;
 		bool* current_valuation	= calloc(img_count, sizeof(bool));
 		for(i = 0; i < (int32_t)*valuations_count; i++){

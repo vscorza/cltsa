@@ -12,14 +12,14 @@
 #define DEBUG_OBDD	0
 #define DEBUG_OBDD_VALUATIONS	0
 
-#define GET_VAR_INDEX(variable_count, valuation_index, variable_index) (((variable_count) * (valuation_index)) + (variable_index))
+#define GET_VAR_INDEX(variable_count, valuation_index, variable_index) (((variable_count * valuation_index + variable_index) * sizeof(bool)))
 #define GET_VAR_IN_VALUATION(arr, variable_count, valuation_index, variable_index)	(arr[GET_VAR_INDEX(variable_count, valuation_index, variable_index)])
 
 /** STRUCTS **/
 /** OBDD COMPOSITE STATE**/
 typedef struct obdd_composite_state_str{
 	uint32_t state;
-	bool* valuation;
+	bool valuation[0];
 }obdd_composite_state;
 /** BINARY MAP TREE **/
 typedef struct obdd_state_tree_entry_str{
@@ -78,6 +78,7 @@ typedef struct obdd_partial_automaton_t{
 	uint32_t*			valuations;
 }obdd_partial_automaton;*/
 /** OBDD COMPOSITE STATE **/
+obdd_composite_state* obdd_composite_state_create(uint32_t state, uint32_t valuation_count);
 uint32_t obdd_composite_state_extractor(void* value);
 int32_t obdd_composite_state_compare(void* left_state, void* right_state);
 /** MAP TREE **/

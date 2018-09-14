@@ -1674,7 +1674,7 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 	uint32_t i, j ,k, l, m;
 	automaton_concrete_bucket_list** ranking_list	= malloc(sizeof(automaton_concrete_bucket_list*) * guarantees_count);
 	automaton_max_heap* pending_list	= automaton_max_heap_create(sizeof(automaton_pending_state)
-			, automaton_pending_state_compare, automaton_pending_state_copy);
+			, automaton_pending_state_compare);
 	automaton_concrete_bucket_list* key_list		= automaton_concrete_bucket_list_create(RANKING_BUCKET_SIZE, automaton_int_extractor, sizeof(uint32_t));
 	uint32_t current_state;
 	uint32_t* assumptions_indexes				= malloc(sizeof(uint32_t) * assumptions_count);

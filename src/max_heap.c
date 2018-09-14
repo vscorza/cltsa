@@ -22,6 +22,7 @@ automaton_max_heap* automaton_max_heap_create(uint32_t sizeof_element, automaton
 }
 
 void automaton_max_heap_swap(automaton_max_heap* heap, void* n1, void* n2) {
+	if(n1 == n2)return;
 	memcpy(heap->tmp_value, n1, heap->sizeof_element);
 	memcpy(n1, n2, heap->sizeof_element);
 	memcpy(n2, heap->tmp_value, heap->sizeof_element);
@@ -101,7 +102,7 @@ void automaton_max_heap_add_entry(automaton_max_heap* heap, void* entry) {
 */
 void automaton_max_heap_pop_entry(automaton_max_heap* heap, void* target) {
     if(heap->count > 0) {
-    	heap->copy_func(target, GET_MAX_HEAP_ENTRY(heap, 0));
+    	memcpy(target, GET_MAX_HEAP_ENTRY(heap, 0), heap->sizeof_element);
         automaton_max_heap_swap(heap, GET_MAX_HEAP_ENTRY(heap, 0), GET_MAX_HEAP_ENTRY(heap, --(heap->count)));
         automaton_max_heap_heapify(heap, 0) ;
     } else {
@@ -118,7 +119,7 @@ void automaton_max_heap_pop_entry(automaton_max_heap* heap, void* target) {
 */
 uint32_t automaton_max_heap_get_min_entry_index(automaton_max_heap* heap, void* target, uint32_t i) {
     if(MAX_HEAP_L_INDEX(i) >= heap->count)
-    	heap->copy_func(target, GET_MAX_HEAP_ENTRY(heap, i));
+    	memcpy(target, GET_MAX_HEAP_ENTRY(heap, i), heap->sizeof_element);
 
     uint32_t l = automaton_max_heap_get_min_entry_index(heap, target, MAX_HEAP_L_INDEX(i));
     uint32_t r = automaton_max_heap_get_min_entry_index(heap, target, MAX_HEAP_R_INDEX(i));
