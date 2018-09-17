@@ -467,6 +467,7 @@ void run_all_tests(){
 }
 
 int main (void){
+	//chdir("/Users/ezequiel/henos/henos-automata/src");
 	/*
 	run_all_tests();
 	*/

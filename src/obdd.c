@@ -627,8 +627,9 @@ obdd_node* obdd_node_restrict(obdd_mgr* mgr, obdd_node* root, char* var, uint32_
 
 obdd* obdd_restrict_vector(obdd* root, uint32_t* var_ids, bool* values, uint32_t count){
 	obdd_node* restricted_node	= obdd_node_restrict_vector(root->mgr, root->root_obdd, var_ids, values, count);
-
-	return (obdd_create(root->mgr, restricted_node));
+	obdd* restricted_obdd = obdd_create(root->mgr, restricted_node);
+	obdd_reduce(restricted_obdd);
+	return restricted_obdd;
 }
 
 obdd_node* obdd_node_restrict_vector(obdd_mgr* mgr, obdd_node* root, uint32_t* var_ids, bool* values, uint32_t count){
@@ -645,21 +646,26 @@ obdd_node* obdd_node_restrict_vector(obdd_mgr* mgr, obdd_node* root, uint32_t* v
 	bool is_high_constant		= obdd_is_constant(mgr, root->high_obdd);
 
 	obdd_node* applied_node;
-
+	bool found = false;
 	for(i = 0; i < count; i++){
 		if(root->var_ID == var_ids[i]){
+			found = true;
 			if(values[i]){
-				applied_node 	= obdd_mgr_mk_node(mgr, dictionary_key_for_value(mgr->vars_dict,high_var_ID)
-					, root->high_obdd->high_obdd, root->high_obdd->low_obdd);
+				applied_node 	= obdd_mgr_mk_node(mgr, dictionary_key_for_value(mgr->vars_dict,root->var_ID)
+					, obdd_node_restrict_vector(mgr, root->high_obdd, var_ids, values, count)
+					, mgr->false_obdd->root_obdd);
 			}else{
-				applied_node 	= obdd_mgr_mk_node(mgr, dictionary_key_for_value(mgr->vars_dict,low_var_ID)
-					, root->low_obdd->high_obdd, root->low_obdd->low_obdd);
+				applied_node 	= obdd_mgr_mk_node(mgr, dictionary_key_for_value(mgr->vars_dict,root->var_ID)
+					, mgr->false_obdd->root_obdd
+					, obdd_node_restrict_vector(mgr, root->low_obdd, var_ids, values, count));
 			}
-		}else{
-			applied_node 	= obdd_mgr_mk_node(mgr, dictionary_key_for_value(mgr->vars_dict,root->var_ID)
-				, obdd_node_restrict_vector(mgr, root->high_obdd, var_ids, values, count)
-				, obdd_node_restrict_vector(mgr, root->low_obdd, var_ids, values, count));
+			break;
 		}
+	}
+	if(!found){
+		applied_node 	= obdd_mgr_mk_node(mgr, dictionary_key_for_value(mgr->vars_dict,root->var_ID)
+			, obdd_node_restrict_vector(mgr, root->high_obdd, var_ids, values, count)
+			, obdd_node_restrict_vector(mgr, root->low_obdd, var_ids, values, count));
 	}
 	return applied_node;
 }
@@ -1079,30 +1085,51 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 		}
 	}
 
+	int32_t variable_index;
 	//if it is projecting, remove duplicates
 	if(img_count != variables_count){
 		uint32_t new_count			= 0;
 		uint32_t k;
 		bool* new_valuations	= calloc((*valuations_count) * img_count, sizeof(bool) );
-		bool has_valuation;
+		bool has_valuation, one_found;
 		bool* current_valuation	= calloc(img_count, sizeof(bool));
 		for(i = 0; i < (int32_t)*valuations_count; i++){
-			for(j = 0; j < (int32_t)img_count; j++)
-				current_valuation[j] = GET_VAR_IN_VALUATION(valuations, img_count, i, j);
+			for(j = 0; j < (int32_t)img_count; j++){
+				variable_index	= -1;
+				for(k = 0; k < (int32_t)variables_count; k++)
+					if(valuation_img[j] == (uint32_t)(k + 2)){
+						variable_index	= j;
+						break;
+					}
+				current_valuation[variable_index] = GET_VAR_IN_VALUATION(valuations, img_count, i, variable_index);
+			}
 			has_valuation = false;
+			one_found = false;
+			int32_t l;
 			for(k = 0; k < new_count; k++){
 				has_valuation		= true;
 				for(j = 0; j < (int32_t)img_count; j++){
-					if(current_valuation[j] != GET_VAR_IN_VALUATION(new_valuations, img_count, k, j)){
+					for(l = 0; l < (int32_t)variables_count; l++)
+						if(valuation_img[j] == (uint32_t)(l + 2)){
+							variable_index	= j;
+							break;
+						}
+					if(current_valuation[variable_index] != GET_VAR_IN_VALUATION(new_valuations, img_count, k, variable_index)){
 						has_valuation = false;
-						break;
 					}
 				}
-				if(has_valuation)break;
+				one_found = one_found || has_valuation;
+				if(one_found)break;
 			}
-			if(!has_valuation){
-				for(j = 0; j < (int32_t)img_count; j++)
-					GET_VAR_IN_VALUATION(new_valuations, img_count, new_count, j)	= current_valuation[j];
+			if(!one_found){
+				for(j = 0; j < (int32_t)img_count; j++){
+					for(l = 0; l < (int32_t)variables_count; l++)
+						if(valuation_img[j] == (uint32_t)(l + 2)){
+							variable_index	= j;
+							break;
+						}
+					GET_VAR_IN_VALUATION(new_valuations, img_count, new_count, variable_index)	= current_valuation[variable_index];
+				}
 				new_count++;
 			}
 		}
