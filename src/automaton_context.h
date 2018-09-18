@@ -18,7 +18,7 @@
 #define OUTPUT_SIGNALS_NAME_AUT			"Output_Signals"
 
 #define DEBUG_PARSE_STATES 0
-#define DEBUG_LTL_AUTOMATON 1
+#define DEBUG_LTL_AUTOMATON 0
 #define LTL_BUCKET_SIZE	10000
 #if DEBUG_PARSE_STATES
 #define aut_context_log(format, ...) printf(format, ##__VA_ARGS__ )
@@ -101,7 +101,7 @@ bool automaton_statement_syntax_to_fluent(automaton_automata_context* ctx, autom
 automaton_fluent* automaton_fluent_create_from_syntax(automaton_parsing_tables* tables, automaton_fluent_syntax* fluent_def_syntax, automaton_alphabet* global_alphabet);
 void automaton_index_syntax_get_range(automaton_parsing_tables* tables, automaton_index_syntax* index, int32_t *lower_index, int32_t *upper_index);
 void automaton_indexes_syntax_eval_strings(automaton_parsing_tables* tables, automaton_indexes_valuation* valuation, char*** a, int32_t* a_count, automaton_indexes_syntax* indexes);
-void automaton_set_composed_valuation(bool* valuation, bool* partial_valuation, bool is_input, uint32_t x_count, uint32_t y_count);
+void automaton_set_composed_valuation(bool* valuation, bool* partial_valuation, uint32_t valuation_offset, bool is_input, uint32_t x_count, uint32_t y_count);
 automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_context* ctx, char* name, obdd** env_theta_obdd, uint32_t env_theta_count, obdd** sys_theta_obdd, uint32_t sys_theta_count
 		, obdd** env_rho_obdd, uint32_t env_rho_count, obdd** sys_rho_obdd, uint32_t sys_rho_count, automaton_parsing_tables* tables);
 #endif /* AUTOMATON_CONTEXT_H_ */

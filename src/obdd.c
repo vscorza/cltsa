@@ -708,11 +708,11 @@ void obdd_node_print(obdd_mgr* mgr, obdd_node* root, uint32_t spaces){
 		printf("->%s", var);
 		return;
 	}else if(spaces > 0){
-		printf(" &");
+		printf("^");
 	}
 	printf("\n");
 	for(i = 0; i < spaces; i++)
-		printf(" ");
+		printf("\t");
 	bool has_left_side = false;
 
 	if(root->var_ID != mgr->true_obdd->root_obdd->var_ID && root->var_ID != mgr->false_obdd->root_obdd->var_ID){
@@ -729,7 +729,8 @@ void obdd_node_print(obdd_mgr* mgr, obdd_node* root, uint32_t spaces){
 			printf("]\n");
 		}
 	}
-
+	for(i = 0; i < spaces; i++)
+		printf("\t");
 	if(root->high_obdd != NULL){
 		printf("%s", var);
 		obdd_node_print(mgr, root->high_obdd, spaces + 1);
@@ -739,11 +740,8 @@ void obdd_node_print(obdd_mgr* mgr, obdd_node* root, uint32_t spaces){
 		if(has_left_side){
 			printf("\n");
 			for(i = 0; i < spaces; i++)
-				printf(" ");
-			printf("|");
-			printf("\n");
-			for(i = 0; i < spaces; i++)
-				printf(" ");
+				printf("\t");
+			printf("v");
 		}
 		printf("(!%s)", var);
 		obdd_node_print(mgr, root->low_obdd, spaces + 1);
@@ -781,8 +779,14 @@ void obdd_print_valuations(obdd_mgr* mgr, bool* valuations, uint32_t valuations_
 	}
 	printf("\n");
 	for(i = 0; i < valuations_count; i++){
-		for(j = 0; j < (img_count); j++)
-			printf("%s\t", GET_VAR_IN_VALUATION(valuations, img_count, i, j) ? "1" : "0");
+		for(j = 0; j < (img_count); j++){
+			int value = GET_VAR_IN_VALUATION(valuations, img_count, i, j);
+			//printf("%s\t",  value > 1 ? "X" : (value != 0 ? "1" : "0"));
+			if(value > 1)
+				printf("%d[%d %d]\t", value,  i, j);
+			else
+				printf("%d\t",  value);
+		}
 		printf("\n");
 	}
 }
@@ -797,8 +801,8 @@ void obdd_node_get_obdd_nodes(obdd_mgr* mgr, obdd_node* root, obdd_node*** nodes
 		}
 	if(!found){
 		if(*nodes_count >= *nodes_size){
-			*nodes_size	= *nodes_size * LIST_INCREASE_FACTOR;
-			obdd_node** ptr	= realloc(*nodes, *nodes_size);
+			*nodes_size	= (*nodes_size) * LIST_INCREASE_FACTOR;
+			obdd_node** ptr	= realloc(*nodes, sizeof(obdd_node*) * (*nodes_size));
 			if(ptr == NULL){
 				printf("Realloc failed while getting obdd nodes\n");
 				exit(-1);
@@ -831,12 +835,11 @@ obdd_node** obdd_get_obdd_nodes(obdd_mgr* mgr, obdd* root, uint32_t* nodes_count
 
 	return nodes;
 }
-
 bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count, uint32_t* valuation_img, uint32_t img_count){
 	int32_t i, j, dont_cares_count;
 	uint32_t nodes_count;
+	//gets a list of the obdd nodes
 	obdd_node** nodes	= obdd_get_obdd_nodes(mgr, root, &nodes_count);
-
 	*valuations_count			= 0;
 	uint32_t valuations_size	= LIST_INITIAL_SIZE;
 	uint32_t variables_count	= mgr->vars_dict->size - 2;
@@ -847,10 +850,14 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 	bool* partial_valuation		= malloc(sizeof(bool) * variables_count);
 	for( i = 0; i < (int32_t)variables_count; i++)
 			partial_valuation[i]= false;
-	obdd_node** last_nodes		= malloc(sizeof(obdd_node**) * variables_count);
+	bool* valuation_set			= malloc(sizeof(bool) * img_count);
+	//keeps a stack of visited nodes
+	obdd_node** last_nodes		= malloc(sizeof(obdd_node*) * variables_count);
+	//keeps a stack of predecessors as track of the path taken
 	int32_t* last_pred_index	= malloc(sizeof(int32_t) * variables_count);
 	int32_t last_node_index	= 0;
 	int32_t max_pred_index	= 0;
+	//starts from the TRUE leaf and keeps backtracking
 	obdd_node* current_node		= mgr->true_obdd->root_obdd;
 	obdd_node* current_predecessor;
 	obdd_node* last_node;
@@ -863,7 +870,7 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 	printf("Getting OBDD valuations\n");
 	printf("Projected over:[");
 	for(i = 0; i < (int32_t)img_count; i++)
-		printf("%d%s", valuation_img[i], i == ((int32_t)img_count -1) ? "]\n": ",");
+		printf("%d %s %s", valuation_img[i], dictionary_key_for_value(mgr->vars_dict, valuation_img[i]), i == ((int32_t)img_count -1) ? "]\n": ",");
 	printf("[N]ow on node: %d (%d:%s) \n", last_node_index, last_nodes[last_node_index]->var_ID,dictionary_key_for_value(mgr->vars_dict,last_nodes[last_node_index]->var_ID));
 	printf("High pred. count: %d \tLow pred.count: %d\n", last_nodes[last_node_index]->high_predecessors_count, last_nodes[last_node_index]->low_predecessors_count);
 #endif
@@ -877,21 +884,22 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 		if(has_no_pred || last_pred_index[last_node_index] <
 				(int32_t)(last_node->high_predecessors_count + last_node->low_predecessors_count)){//check if we can still explore the current node
 			//get current predecessor
-
-			//if this is the last node we should check that only current-obdd predecessors are
-			//take into account
+			//if this is the last node we should check that only current-obdd predecessors are take into account, since many obdds share TRUE/FALSE leaves
 			if(!has_no_pred){
 				if(last_node_index == 0){
 					belongs	= false;
 					while(!belongs){
 						if(last_pred_index[last_node_index] < (int32_t)last_node->high_predecessors_count){
+							//backtrack through high pred.
 							current_predecessor	= last_node->high_predecessors[last_pred_index[last_node_index]];
 							through_high		= true;
 						}else if(last_pred_index[last_node_index] <
 								(int32_t)(last_node->high_predecessors_count + last_node->low_predecessors_count)){
+							//backtrack through low pred.
 							current_predecessor	= last_node->low_predecessors[last_pred_index[last_node_index]  - last_node->high_predecessors_count];
 							through_high		= false;
 						}else{
+							//should only happen after exhaustive backtrack
 							last_pred_index[last_node_index]	= -1;
 	#if DEBUG_OBDD_VALUATIONS
 								printf("NF.exit\n");
@@ -907,6 +915,7 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 								break;
 							}
 						}
+						//keep looking for proper pred.
 						if(!belongs){
 							last_pred_index[last_node_index]++;
 	#if DEBUG_OBDD_VALUATIONS
@@ -914,13 +923,16 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 	#endif
 						}
 					}
+					//should only happen after exhaustive backtrack
 					if(!belongs)break;
 				}else{
 					if(last_pred_index[last_node_index] < (int32_t)last_node->high_predecessors_count){
+						//backtrack through high pred.
 						current_predecessor	= last_node->high_predecessors[last_pred_index[last_node_index]];
 						through_high		= true;
 					}else if(last_pred_index[last_node_index] <
 							(int32_t)(last_node->high_predecessors_count + last_node->low_predecessors_count)){
+						//backtrack through low pred.
 						current_predecessor	= last_node->low_predecessors[last_pred_index[last_node_index]  - last_node->high_predecessors_count];
 						through_high		= false;
 					}
@@ -929,9 +941,9 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 				if(last_pred_index[last_node_index] > -1){
 					partial_valuation[current_predecessor->var_ID - 2]	= through_high;
 					dont_care_list[current_predecessor->var_ID - 2]		= false;
-					for(i = (int32_t)(current_predecessor->var_ID - 2)+ 1; i < (int32_t)(last_node->var_ID - 2); i++){
+					//update dont care list for nodes skipped due to obdd reduction
+					for(i = (int32_t)(current_predecessor->var_ID - 2)+ 1; i < (int32_t)(last_node->var_ID - 2); i++)
 						dont_care_list[i]	= true;
-					}
 					last_pred_index[last_node_index]++;
 					at_least_one_node_expanded		= true;
 #if DEBUG_OBDD_VALUATIONS
@@ -959,29 +971,31 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 				printf("%s", dont_care_list[i]? "?" : "0");
 			printf(">\n");
 #endif
+			//terminal case reached
 			if(current_predecessor->high_predecessors_count == 0 && current_predecessor->low_predecessors_count == 0
 					&& at_least_one_node_expanded){//terminal case, add valuation
 				dont_cares_count	= 1;
 				//set unexplored variables as dont care
 				for(i = max_pred_index + 1; i < (int32_t)variables_count; i++)
 					dont_care_list[i]	= true;
-				//count dont cares to get number of new valuations
+				//count dont cares to get number of new valuations (only for variables belonging to the image)
 				int32_t variable_index;
 				for(i = 0; i < (int32_t)variables_count; i++){
 					if(dont_care_list[i]){
 						variable_index	= -1;
 						for(j = 0; j < (int32_t)img_count; j++)
-							if(valuation_img[j] == (uint32_t)(i + 2)){
-								variable_index	= j;
+							if(valuation_img[j] == (uint32_t)i + 2){
+								variable_index	= valuation_img[j] - 2;
 								break;
 							}
 						if(variable_index >= 0)
 							dont_cares_count *= 2;
 					}
 				}
+				//get new valuations according to dont care list
 				uint32_t new_size	= *valuations_count + dont_cares_count;
 				if(new_size >= valuations_size){
-					bool* ptr	= realloc(valuations, sizeof(bool*) * img_count * new_size);
+					bool* ptr	= realloc(valuations, sizeof(bool) * img_count * new_size);
 					if(ptr == NULL){
 						printf("Could not reallocate valuations array\n");
 						exit(-1);
@@ -990,8 +1004,10 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 					valuations_size	= new_size;
 				}
 				uint32_t modulo	= dont_cares_count;
+
 #if DEBUG_OBDD_VALUATIONS
-				printf("[T]erminals:\n");
+				printf("[T]erminals on node: %d (%d:%s) :\n", last_node_index, last_nodes[last_node_index]->var_ID,dictionary_key_for_value(mgr->vars_dict,last_nodes[last_node_index]->var_ID));
+
 				printf("last_pred_index[%d]:%d\t<", last_node_index, last_pred_index[last_node_index]);
 				for(i = 0; i <= (int32_t)last_node_index; i++)
 					printf("%s", dont_care_list[i]? "?" : (partial_valuation[i]? "1" : "0"));
@@ -1008,40 +1024,44 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 				printf(">\n");
 #endif
 				uint32_t k;
+
 				for(k = 0; k < (uint32_t)dont_cares_count; k++){
 					modulo	= dont_cares_count;
-					for(i = 0; i < (int32_t)last_node_index; i++){
+					for(i = 0; i < (int32_t)img_count; i++){
+						valuation_set[i] = false;
+					}
+					for(i = 0; i < (int32_t)variables_count; i++){ //for(i =0; i < (int32_t)last_node_index; i++){
 						variable_index	= -1;
-						for(j = 0; j < (int32_t)img_count; j++)
-							if(valuation_img[j] == (uint32_t)(i + 2)){
-								variable_index	= j;
+						for(j = 0; j < (int32_t)img_count; j++){
+							if(valuation_img[j] == (uint32_t)i + 2){
+								variable_index	= valuation_img[j] - 2;
+								valuation_set[j]	= true;
 								break;
 							}
+						}
 						if(variable_index >= 0){
 							if(dont_care_list[i]){
 								modulo /= 2;
 								//set according to modulo division if current position was set to dont care
-								GET_VAR_IN_VALUATION(valuations, img_count, *valuations_count + k, /*(variables_count - 1) -*/ variable_index)	= ((k / modulo) % 2) == 0;
+								GET_VAR_IN_VALUATION(valuations, img_count, *valuations_count + k, variable_index)	= ((k / modulo) % 2) == 0;
 							}else{
 								//set to predefined value for this search
-								GET_VAR_IN_VALUATION(valuations, img_count, *valuations_count + k, /*(variables_count - 1) -*/ variable_index)	= partial_valuation[i];
+								GET_VAR_IN_VALUATION(valuations, img_count, *valuations_count + k, variable_index)	= partial_valuation[i];
 							}
 						}
 					}
+#if DEBUG_OBDD_VALUATIONS
+					printf("[");
+					for(i = 0; i < (int32_t)img_count; i++)
+						printf("%s", GET_VAR_IN_VALUATION(valuations, img_count, *valuations_count + k, i) ? (dont_care_list[valuation_img[i]] ? "i" : "1") : (dont_care_list[valuation_img[i] - 2] ? "o" : "0"));
+					printf("]\n");
+#endif
 				}
 
 
 				*valuations_count	+= dont_cares_count;
-#if DEBUG_OBDD_VALUATIONS
-				for(j = 0; j < (int32_t)*valuations_count; j++){
-					printf("[");
-					for(i = 0; i < (int32_t)img_count; i++)
-						printf("%s", GET_VAR_IN_VALUATION(valuations, img_count, j, /*(variables_count - 1) -*/ i) ? "1" : "0");
-					printf("]\n");
-				}
-#endif
 			}
-
+			//all options have been taken for last_node
 			if(last_pred_index[last_node_index] >=
 					(int32_t)(last_node->high_predecessors_count + last_node->low_predecessors_count)){
 				last_pred_index[last_node_index]	= -1;
@@ -1052,11 +1072,13 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 			}
 			if(last_node_index < (int32_t)(variables_count - 1)){
 				last_node_index++;
-				if(last_node_index > max_pred_index){
-							max_pred_index	= last_node_index;
-#if DEBUG_OBDD_VALUATIONS
-							printf("New max index: %d\n", max_pred_index);
-#endif
+				if(last_node->var_ID > 1){
+					if((last_node->var_ID - 2) > (int32_t)max_pred_index){
+								max_pred_index	= last_node->var_ID - 2;
+	#if DEBUG_OBDD_VALUATIONS
+								printf("New [M]ax index: %d\n", max_pred_index);
+	#endif
+					}
 				}
 				last_nodes[last_node_index]			= current_predecessor;
 				last_pred_index[last_node_index]	= 0;
@@ -1065,7 +1087,7 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 				printf("High pred. count: %d \tLow pred.count: %d\n", last_nodes[last_node_index]->high_predecessors_count, last_nodes[last_node_index]->low_predecessors_count);
 #endif
 
-			}else{
+			}else{//start backtracking until one node exists with unexplored preds.
 				at_least_one_node_expanded		= false;
 				dont_care_list[last_node_index]	= true;
 				while(--last_node_index > 0){//firing backtrack can avoid terminals
@@ -1084,10 +1106,10 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 			break;
 		}
 	}
-
 	int32_t variable_index;
 	//if it is projecting, remove duplicates
-	if(img_count != variables_count){
+
+	if(img_count != variables_count && *valuations_count > 0){
 		uint32_t new_count			= 0;
 		uint32_t k;
 		bool* new_valuations	= calloc((*valuations_count) * img_count, sizeof(bool) );
@@ -1096,12 +1118,12 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 		for(i = 0; i < (int32_t)*valuations_count; i++){
 			for(j = 0; j < (int32_t)img_count; j++){
 				variable_index	= -1;
-				for(k = 0; k < (int32_t)variables_count; k++)
+				for(k = 0; k < variables_count; k++)
 					if(valuation_img[j] == (uint32_t)(k + 2)){
-						variable_index	= j;
+						variable_index	= valuation_img[j] -2;
+						current_valuation[j] = GET_VAR_IN_VALUATION(valuations, img_count, i, j);
 						break;
 					}
-				current_valuation[variable_index] = GET_VAR_IN_VALUATION(valuations, img_count, i, variable_index);
 			}
 			has_valuation = false;
 			one_found = false;
@@ -1109,26 +1131,36 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 			for(k = 0; k < new_count; k++){
 				has_valuation		= true;
 				for(j = 0; j < (int32_t)img_count; j++){
+					variable_index = -1;
 					for(l = 0; l < (int32_t)variables_count; l++)
 						if(valuation_img[j] == (uint32_t)(l + 2)){
-							variable_index	= j;
+							variable_index	= valuation_img[j] - 2;
+							if(current_valuation[j] != GET_VAR_IN_VALUATION(new_valuations, img_count, k, j)){
+								has_valuation = false;
+							}
 							break;
 						}
-					if(current_valuation[variable_index] != GET_VAR_IN_VALUATION(new_valuations, img_count, k, variable_index)){
-						has_valuation = false;
+					if(variable_index == -1){
+						exit(-1);
 					}
+
 				}
 				one_found = one_found || has_valuation;
 				if(one_found)break;
 			}
 			if(!one_found){
 				for(j = 0; j < (int32_t)img_count; j++){
+					variable_index = -1;
 					for(l = 0; l < (int32_t)variables_count; l++)
 						if(valuation_img[j] == (uint32_t)(l + 2)){
-							variable_index	= j;
+							variable_index	= valuation_img[j] - 2;
+							GET_VAR_IN_VALUATION(new_valuations, img_count, new_count, j)	= current_valuation[j];
 							break;
 						}
-					GET_VAR_IN_VALUATION(new_valuations, img_count, new_count, variable_index)	= current_valuation[variable_index];
+					if(variable_index == -1){
+						exit(-1);
+					}
+
 				}
 				new_count++;
 			}
@@ -1138,7 +1170,7 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 		valuations			= new_valuations;
 		*valuations_count	= new_count;
 	}
-
+	free(valuation_set);
 	free(nodes);
 	free(last_nodes);
 	free(last_pred_index);
