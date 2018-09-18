@@ -843,6 +843,7 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 	*valuations_count			= 0;
 	uint32_t valuations_size	= LIST_INITIAL_SIZE;
 	uint32_t variables_count	= mgr->vars_dict->size - 2;
+	int32_t last_bit_index		= -1;
 	bool* valuations			= calloc(img_count * valuations_size, sizeof(bool));
 	bool* dont_care_list		= malloc(sizeof(bool) * variables_count);
 	for( i = 0; i < (int32_t)variables_count; i++)
@@ -866,12 +867,12 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 	last_pred_index[last_node_index]	= 0;
 	bool belongs, through_high, has_no_pred;
 	bool at_least_one_node_expanded		= true;
-
+#if DEBUG_OBDD_VALUATIONS
 	printf("Getting OBDD valuations\n");
 	printf("Projected over:[");
 	for(i = 0; i < (int32_t)img_count; i++)
 		printf("%d %s %s", valuation_img[i], dictionary_key_for_value(mgr->vars_dict, valuation_img[i]), i == ((int32_t)img_count -1) ? "]\n": ",");
-#if DEBUG_OBDD_VALUATIONS
+
 	printf("[N]ow on node: %d (%d:%s) \n", last_node_index, last_nodes[last_node_index]->var_ID,dictionary_key_for_value(mgr->vars_dict,last_nodes[last_node_index]->var_ID));
 	printf("High pred. count: %d \tLow pred.count: %d\n", last_nodes[last_node_index]->high_predecessors_count, last_nodes[last_node_index]->low_predecessors_count);
 #endif
@@ -1020,41 +1021,60 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 					printf("%s", partial_valuation[i]? "1" : "0");
 				printf(">\n");
 				printf("Dont care list\t<");
-				for(i = 0; i < (int32_t)variables_count; i++)
-					printf("%s", dont_care_list[i]? "?" : "0");
-				printf(">\n");
-#endif
-				uint32_t k;
-
-				for(k = 0; k < (uint32_t)dont_cares_count; k++){
-					modulo	= dont_cares_count;
-					for(i = 0; i < (int32_t)img_count; i++){
-						valuation_set[i] = false;
+				for(i = 0; i < (int32_t)variables_count; i++){
+					variable_index	= -1;
+					for(j = 0; j < (int32_t)img_count; j++){
+						if(valuation_img[j] == (uint32_t)i + 2){
+							variable_index	= valuation_img[j] - 2;
+							break;
+						}
 					}
-					for(i = 0; i < (int32_t)variables_count; i++){ //for(i =0; i < (int32_t)last_node_index; i++){
+					printf("%s", dont_care_list[i]? (variable_index > -1 ? "?" : "_") : "0");
+				}
+				printf("> count:%d\n", dont_cares_count);
+#endif
+
+				uint32_t k;
+				uint32_t img_index;
+				for(k = 0; k < (uint32_t)dont_cares_count; k++){
+					for(i = 0; i < (int32_t)img_count; i++)
+						valuation_set[i] = false;
+					last_bit_index = -1;
+					for(i = 0; i < (int32_t)variables_count; i++){
 						variable_index	= -1;
-						for(j = 0; j < (int32_t)img_count; j++){
+						//only setting odd variables
+						for(j = 0; j < (int32_t)img_count && variable_index < 0; j++){
 							if(valuation_img[j] == (uint32_t)i + 2){
 								variable_index	= valuation_img[j] - 2;
+								img_index		= j;
 								valuation_set[j]	= true;
-								break;
 							}
 						}
+
 						if(variable_index >= 0){
-							if(dont_care_list[i]){
-								modulo /= 2;
+							if(dont_care_list[variable_index]){
+								last_bit_index++;
 								//set according to modulo division if current position was set to dont care
-								GET_VAR_IN_VALUATION(valuations, img_count, *valuations_count + k, variable_index)	= ((k / modulo) % 2) == 0;
+								GET_VAR_IN_VALUATION(valuations, img_count, *valuations_count + k, img_index)	= (k & (0x1 << last_bit_index)) != 0;
 							}else{
 								//set to predefined value for this search
-								GET_VAR_IN_VALUATION(valuations, img_count, *valuations_count + k, variable_index)	= partial_valuation[i];
+								GET_VAR_IN_VALUATION(valuations, img_count, *valuations_count + k, img_index)	= partial_valuation[variable_index];
 							}
+						}
+					}
+					for(j = 0; j < (int32_t)img_count; j++){
+						if(!valuation_set[j]){
+							printf("Value not set for %s on valuation %d\n", dictionary_key_for_value(mgr->vars_dict, valuation_img[j]), *valuations_count + k );
+							exit(-1);
 						}
 					}
 #if DEBUG_OBDD_VALUATIONS
 					printf("[");
-					for(i = 0; i < (int32_t)img_count; i++)
-						printf("%s", GET_VAR_IN_VALUATION(valuations, img_count, *valuations_count + k, i) ? (dont_care_list[valuation_img[i]] ? "i" : "1") : (dont_care_list[valuation_img[i] - 2] ? "o" : "0"));
+					for(i = 0; i < (int32_t)img_count; i++){
+						bool value = GET_VAR_IN_VALUATION(valuations, img_count, *valuations_count + k, i);
+						bool care_for_value = dont_care_list[valuation_img[i] - 2];
+						printf("%s", value ? (care_for_value ? "i" : "1") : (care_for_value ? "o" : "0"));
+					}
 					printf("]\n");
 #endif
 				}
