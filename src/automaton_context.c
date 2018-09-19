@@ -1905,6 +1905,10 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 				automaton_concrete_bucket_pop_entry(rho_env_bucket_list, env_state);
 				automaton_concrete_bucket_add_entry(rho_env_processed_bucket_list, env_state);
 				obdd_current_state	= obdd_restrict_vector(env_sys_rho_composed, x_y_x_p_alphabet, env_state->valuation, x_y_x_p_count);
+				/* take a look at this for a hint
+				obdd_current_state	= obdd_restrict_vector(sys_rho_obdd[0], x_y_x_p_alphabet, env_state->valuation, x_y_x_p_count);
+				obdd_print(obdd_current_state);
+				*/
 				current_valuations	= obdd_get_valuations(mgr, obdd_current_state, &current_valuations_count, x_y_x_p_alphabet, x_y_x_p_count);
 				//TODO: review this
 				//with state = 8 obdd_current_state == false, something is wrong when restricting 0000000111 with
