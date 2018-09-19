@@ -18,7 +18,7 @@
 #define OUTPUT_SIGNALS_NAME_AUT			"Output_Signals"
 
 #define DEBUG_PARSE_STATES 0
-#define DEBUG_LTL_AUTOMATON 0
+#define DEBUG_LTL_AUTOMATON 1
 #define LTL_BUCKET_SIZE	10000
 #if DEBUG_PARSE_STATES
 #define aut_context_log(format, ...) printf(format, ##__VA_ARGS__ )

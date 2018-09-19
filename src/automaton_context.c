@@ -1906,6 +1906,13 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 				automaton_concrete_bucket_add_entry(rho_env_processed_bucket_list, env_state);
 				obdd_current_state	= obdd_restrict_vector(env_sys_rho_composed, x_y_x_p_alphabet, env_state->valuation, x_y_x_p_count);
 				current_valuations	= obdd_get_valuations(mgr, obdd_current_state, &current_valuations_count, x_y_x_p_alphabet, x_y_x_p_count);
+				//TODO: review this
+				//with state = 8 obdd_current_state == false, something is wrong when restricting 0000000111 with
+				//env_sys_rho_composed
+				/*
+				obdd_print(env_sys_rho_composed);
+				obdd_print(obdd_current_state);
+				*/
 #if DEBUG_LTL_AUTOMATON
 				printf("X'->X'Y'\n");
 				obdd_print_valuations(mgr, current_valuations, current_valuations_count, x_p_alphabet, x_p_count);
@@ -1960,8 +1967,9 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	free(local_alphabet);
 	obdd_state_tree_destroy(state_map);
 	obdd_state_tree_destroy(obdd_state_map);
-	automaton_automaton_print(ltl_automaton, true, true, true, "", "");
-	automaton_automaton_print_fsp(ltl_automaton, "ltl_automaton_lift.fsp");
+	//TODO:remove this
+	//automaton_automaton_print(ltl_automaton, true, true, true, "", "");
+	//automaton_automaton_print_fsp(ltl_automaton, "tests/ltl_automaton_lift.fsp");
 	return ltl_automaton;
 }
 
