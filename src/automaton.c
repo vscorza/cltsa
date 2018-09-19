@@ -943,7 +943,7 @@ int32_t automaton_alphabet_get_value_index(automaton_alphabet* alphabet, char* s
 }
 signal_t automaton_alphabet_get_signal_index(automaton_alphabet* alphabet, automaton_signal_event* signal_event){
 	signal_t i;
-	for(i = 0; i < alphabet->size; i++){
+	for(i = 0; i < alphabet->count; i++){
 		if(strcmp(alphabet->list[i].name, signal_event->name) == 0)
 			return i;
 	}
@@ -1210,29 +1210,31 @@ bool automaton_automaton_has_transition(automaton_automaton* current_automaton, 
 	uint32_t i, j, k;
 	if(out_degree == 0)
 		return false;
-	bool found	= false;
+	bool found_signal = false;
 	for(i = 0; i < out_degree; i++){
-		found	= false;
 		if(current_transitions[i].signals_count != transition->signals_count)
 			continue;
 		if(current_transitions[i].state_to == to_state){
-			if(transition->signals_count == 0 && current_transitions[i].signals_count == 0)found = true;
-			else{
+			if(transition->signals_count == 0 && current_transitions[i].signals_count == 0){
+				return true;
+			}else{
 				for(j = 0; j < transition->signals_count; j++){
+					found_signal = false;
 					for(k = 0; k < current_transitions[i].signals_count; k++){
 						signal_t sig_j	= j < FIXED_SIGNALS_COUNT? transition->signals[j] : transition->other_signals[j-FIXED_SIGNALS_COUNT];
 						signal_t sig_k	= k < FIXED_SIGNALS_COUNT? current_transitions[i].signals[k] : current_transitions[i].other_signals[k - FIXED_SIGNALS_COUNT];
 						if(sig_j == sig_k){
-							found	= true;
+							found_signal = true;
 							break;
 						}
 					}
-					if(found)break;
+					if(!found_signal)return false;
 				}
+				return true;
 			}
 		}
 	}
-	return found;
+	return false;
 }
 void automaton_automaton_resize_to_state(automaton_automaton* current_automaton, uint32_t state){
 	if(state < current_automaton->transitions_size) return;

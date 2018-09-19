@@ -341,6 +341,13 @@ obdd*	obdd_mgr_var(obdd_mgr* mgr, char* name){
 	return var_obdd;	
 }
 
+obdd*	obdd_mgr_not_var(obdd_mgr* mgr, char* name){
+	obdd* var_obdd	= obdd_create(mgr, NULL);
+	var_obdd->root_obdd= obdd_mgr_mk_node(mgr, name
+		, var_obdd->false_obdd, var_obdd->true_obdd);
+	return var_obdd;
+}
+
 obdd*	obdd_mgr_true(obdd_mgr* mgr){ return mgr->true_obdd; }
 obdd*	obdd_mgr_false(obdd_mgr* mgr){ return mgr->false_obdd; }
 
@@ -626,50 +633,70 @@ obdd_node* obdd_node_restrict(obdd_mgr* mgr, obdd_node* root, char* var, uint32_
 }
 
 obdd* obdd_restrict_vector(obdd* root, uint32_t* var_ids, bool* values, uint32_t count){
-	obdd_node* restricted_node	= obdd_node_restrict_vector(root->mgr, root->root_obdd, var_ids, values, count);
-	obdd* restricted_obdd = obdd_create(root->mgr, restricted_node);
+	obdd *acum_obdd = NULL, *new_obdd = NULL, *tmp_obdd = NULL;
+	uint32_t i;
+	for(i = 0; i < count; i++){
+		new_obdd	= (values[i]) ? obdd_mgr_var(root->mgr, dictionary_key_for_value(root->mgr->vars_dict, var_ids[i])) : obdd_mgr_not_var(root->mgr, dictionary_key_for_value(root->mgr->vars_dict, var_ids[i]));
+		if(acum_obdd == NULL){
+			acum_obdd	= new_obdd;
+		}else{
+			tmp_obdd	= obdd_apply_and(acum_obdd, new_obdd);
+			obdd_destroy(acum_obdd); obdd_destroy(new_obdd);
+			acum_obdd	= tmp_obdd;
+		}
+	}
+	obdd* return_obdd	=  obdd_apply_and(root, acum_obdd);
+	obdd_destroy(acum_obdd);
+	return return_obdd;
+	/*
+	obdd_node* restricted_node	= obdd_node_restrict_vector(root->mgr, root->root_obdd, var_ids, values, 0, count);
+	obdd* restricted_obdd = obdd_apply_and(root->mgr, restricted_node);
 	obdd_reduce(restricted_obdd);
 	return restricted_obdd;
+	*/
 }
-
-obdd_node* obdd_node_restrict_vector(obdd_mgr* mgr, obdd_node* root, uint32_t* var_ids, bool* values, uint32_t count){
+/*
+obdd_node* obdd_node_restrict_vector(obdd_mgr* mgr, obdd_node* root, uint32_t* var_ids, bool* values, uint32_t current_index, uint32_t count){
 	bool is_root_constant	= obdd_is_constant(mgr, root);
 
 	if(is_root_constant){
 		return root;
 	}
-	uint32_t i;
-	uint32_t low_var_ID	=  root->low_obdd->var_ID;
-	uint32_t high_var_ID	=  root->high_obdd->var_ID;
-
-	bool is_low_constant		= obdd_is_constant(mgr, root->low_obdd);
-	bool is_high_constant		= obdd_is_constant(mgr, root->high_obdd);
 
 	obdd_node* applied_node;
-	bool found = false;
-	for(i = 0; i < count; i++){
-		if(root->var_ID == var_ids[i]){
-			found = true;
-			if(values[i]){
-				applied_node 	= obdd_mgr_mk_node(mgr, dictionary_key_for_value(mgr->vars_dict,root->var_ID)
-					, obdd_node_restrict_vector(mgr, root->high_obdd, var_ids, values, count)
-					, mgr->false_obdd->root_obdd);
-			}else{
-				applied_node 	= obdd_mgr_mk_node(mgr, dictionary_key_for_value(mgr->vars_dict,root->var_ID)
-					, mgr->false_obdd->root_obdd
-					, obdd_node_restrict_vector(mgr, root->low_obdd, var_ids, values, count));
-			}
-			break;
+	if(root->var_ID == var_ids[current_index]){//current var should be restricted
+		if(values[current_index]){
+			current_index++;
+			applied_node 	= obdd_mgr_mk_node(mgr, dictionary_key_for_value(mgr->vars_dict,root->var_ID)
+				, obdd_node_restrict_vector(mgr, root->high_obdd, var_ids, values, current_index, count)
+				, mgr->false_obdd->root_obdd);
+		}else{
+			current_index++;
+			applied_node 	= obdd_mgr_mk_node(mgr, dictionary_key_for_value(mgr->vars_dict,root->var_ID)
+				, mgr->false_obdd->root_obdd
+				, obdd_node_restrict_vector(mgr, root->low_obdd, var_ids, values, current_index, count));
 		}
-	}
-	if(!found){
+	}else if(root->var_ID > var_ids[current_index]){//current var was not present, add node for current restriction
+		uint32_t added_var_ID	= var_ids[current_index];
+		if(values[current_index]){
+			current_index++;
+			applied_node 	= obdd_mgr_mk_node(mgr, dictionary_key_for_value(mgr->vars_dict,added_var_ID)
+				, obdd_node_restrict_vector(mgr, root, var_ids, values, current_index, count)
+				, mgr->false_obdd->root_obdd);
+		}else{
+			current_index++;
+			applied_node 	= obdd_mgr_mk_node(mgr, dictionary_key_for_value(mgr->vars_dict,added_var_ID)
+				, mgr->false_obdd->root_obdd
+				, obdd_node_restrict_vector(mgr, root, var_ids, values, current_index, count));
+		}
+	}else{//variables prior to current restriction
 		applied_node 	= obdd_mgr_mk_node(mgr, dictionary_key_for_value(mgr->vars_dict,root->var_ID)
-			, obdd_node_restrict_vector(mgr, root->high_obdd, var_ids, values, count)
-			, obdd_node_restrict_vector(mgr, root->low_obdd, var_ids, values, count));
+			, obdd_node_restrict_vector(mgr, root->high_obdd, var_ids, values, current_index, count)
+			, obdd_node_restrict_vector(mgr, root->low_obdd, var_ids, values, current_index, count));
 	}
 	return applied_node;
 }
-
+*/
 obdd* obdd_exists(obdd* root, char* var){ 
 	obdd* restrict_true_obdd	= obdd_restrict(root, var, true);
 	obdd* restrict_false_obdd	= obdd_restrict(root, var, false);
@@ -714,7 +741,7 @@ void obdd_node_print(obdd_mgr* mgr, obdd_node* root, uint32_t spaces){
 	for(i = 0; i < spaces; i++)
 		printf("\t");
 	bool has_left_side = false;
-
+/*
 	if(root->var_ID != mgr->true_obdd->root_obdd->var_ID && root->var_ID != mgr->false_obdd->root_obdd->var_ID){
 		if(root->high_predecessors_count > 0){
 			printf("[1 pred:");
@@ -731,6 +758,7 @@ void obdd_node_print(obdd_mgr* mgr, obdd_node* root, uint32_t spaces){
 	}
 	for(i = 0; i < spaces; i++)
 		printf("\t");
+		*/
 	if(root->high_obdd != NULL){
 		printf("%s", var);
 		obdd_node_print(mgr, root->high_obdd, spaces + 1);
