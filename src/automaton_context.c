@@ -1531,7 +1531,8 @@ void automaton_set_composed_valuation(bool* valuation, bool* partial_valuation, 
 	for(i = 0; i < var_count; i++)valuation[left_offset + i]	= partial_valuation[offset_size * valuation_offset + right_offset + i];
 }
 bool automaton_add_transition_from_valuations(obdd_mgr* mgr, automaton_automaton* automaton, uint32_t from_state, uint32_t to_state, bool* from_valuation,
-		bool* to_valuation, bool is_initial, bool is_input, uint32_t x_count, uint32_t y_count, char** obdd_on_indexes, char** obdd_off_indexes){
+		bool* to_valuation, bool is_initial, bool is_input, uint32_t x_count, uint32_t y_count, char** obdd_on_indexes, char** obdd_off_indexes,
+		uint32_t* x_y_alphabet, uint32_t* x_y_x_p_alphabet){
 	uint32_t i, fluent_index, fluent_count	= automaton->context->liveness_valuations_count;
 	automaton_transition* transition		= automaton_transition_create(from_state, to_state);
 	automaton_signal_event* signal_event	= automaton_signal_event_create("", INPUT_SIG);
@@ -1569,16 +1570,26 @@ bool automaton_add_transition_from_valuations(obdd_mgr* mgr, automaton_automaton
 	printf("%s\n", has_transition? "" : "*");
 #endif
 	automaton_transition_destroy(transition, true);
+	//TODO:check this
 	//should add after adding transition since structure resizing may not have been triggered
+	obdd* obdd_current_state;
 	if(!has_transition)
 		for(i = 0; i < fluent_count; i++){
 			fluent_index	= GET_STATE_FLUENT_INDEX(fluent_count, to_state, i);
-			//TODO:
 			//evaluate each liveness formula on landing state to check if formula is satisfied and then set bit
-			/*
-			if(to_valuation[i])SET_FLUENT_BIT(automaton->valuations, fluent_index);
-			else CLEAR_FLUENT_BIT(automaton->valuations, fluent_index);
-			*/
+			if(!is_initial){
+				if(is_input){
+					obdd_current_state	= obdd_restrict_vector(automaton->context->liveness_valuations[i],
+							x_y_x_p_alphabet, to_valuation, x_count * 2 + y_count);
+				}else{
+					obdd_current_state	= obdd_restrict_vector(automaton->context->liveness_valuations[i],
+												x_y_alphabet, to_valuation, x_count + y_count);
+				}
+				if(obdd_is_sat(mgr, obdd_current_state->root_obdd)){
+						SET_FLUENT_BIT(automaton->valuations, fluent_index);
+				}else CLEAR_FLUENT_BIT(automaton->valuations, fluent_index);
+				obdd_destroy(obdd_current_state);
+			}
 		}
 	return has_transition;
 }
@@ -1874,7 +1885,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 		has_transition	= automaton_add_transition_from_valuations(mgr, ltl_automaton, sys_state->state, env_state->state
 				, sys_state->valuation, env_state->valuation, true, true
 				, x_count, y_count
-				, obdd_on_signals_indexes, obdd_off_signals_indexes);
+				, obdd_on_signals_indexes, obdd_off_signals_indexes, x_y_alphabet, x_y_x_p_alphabet);
 		if(!has_transition){
 #if DEBUG_LTL_AUTOMATON
 			printf("(%d-[", sys_state->state);
@@ -1923,7 +1934,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 				has_transition	= automaton_add_transition_from_valuations(mgr, ltl_automaton, env_state->state, sys_state->state
 						, env_state->valuation, sys_state->valuation, true, false
 						, x_count, y_count
-						, obdd_on_signals_indexes, obdd_off_signals_indexes);
+						, obdd_on_signals_indexes, obdd_off_signals_indexes, x_y_alphabet, x_y_x_p_alphabet);
 				if(!has_transition && !automaton_concrete_bucket_has_entry(rho_sys_bucket_list, sys_state)){
 #if DEBUG_LTL_AUTOMATON
 					printf("(%d-[", env_state->state);
@@ -1988,7 +1999,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 					has_transition	= automaton_add_transition_from_valuations(mgr, ltl_automaton, sys_state->state, env_state->state
 							, sys_state->valuation, env_state->valuation, false, true
 							, x_count, y_count
-							, obdd_on_signals_indexes, obdd_off_signals_indexes);
+							, obdd_on_signals_indexes, obdd_off_signals_indexes, x_y_alphabet, x_y_x_p_alphabet);
 
 
 #if DEBUG_LTL_AUTOMATON
@@ -2046,7 +2057,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 					has_transition	= automaton_add_transition_from_valuations(mgr, ltl_automaton, env_state->state, sys_state->state
 							, env_state->valuation, sys_state->valuation, false, false
 							, x_count, y_count
-							, obdd_on_signals_indexes, obdd_off_signals_indexes);
+							, obdd_on_signals_indexes, obdd_off_signals_indexes, x_y_alphabet, x_y_x_p_alphabet);
 #if DEBUG_LTL_AUTOMATON
 						printf("(%d-[", env_state->state);
 						for(j = 0; j < x_y_count; j++)
