@@ -19,6 +19,7 @@ ltl env rho Wait_For_Grant_1 in LIFT	= [](!(r_1 <-> g_1) -> (X(r_1) <-> r_1)).
 ltl env rho Wait_For_Grant_2 in LIFT	= [](!(r_2 <-> g_2) -> (X(r_2) <-> r_2)).
 ltl env rho Wait_For_Grant_3 in LIFT	= [](!(r_3 <-> g_3) -> (X(r_3) <-> r_3)).
 ltl sys rho Mutex_Grant_s in LIFT	= [](!(g_1 && g_2) && !(g_1 && g_3) && !(g_2 && g_3)).
+ltl sys rho Mutex_X_Grant_s in LIFT	= [](!(X(g_1) && X(g_2)) && !(X(g_1) && X(g_3)) && !(X(g_2) && X(g_3))).
 ltl sys rho Kee_Grant_1 in LIFT		= []((r_1 <-> g_1) -> (X(g_1) <-> g_1)).
 ltl sys rho Kee_Grant_2 in LIFT		= []((r_2 <-> g_2) -> (X(g_2) <-> g_2)).
 ltl sys rho Kee_Grant_3 in LIFT		= []((r_3 <-> g_3) -> (X(g_3) <-> g_3)).

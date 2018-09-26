@@ -462,7 +462,7 @@ bool automaton_automaton_print_fsp(automaton_automaton* current_automaton, char*
 			if(j < (current_automaton->out_degree[i] - 1))fprintf(f, "|");
 			if(j == (current_automaton->out_degree[i] - 1))fprintf(f, ")");
 		}
-		if(i == (current_automaton->transitions_count - 1)){fprintf(f, ".");}else{fprintf(f, ",");}
+		if(i == (current_automaton->transitions_count - 1)){fprintf(f, ".");}else{fprintf(f, ",\n");}
 	}
 	fclose(f);
 	return true;
