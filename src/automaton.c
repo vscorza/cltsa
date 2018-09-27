@@ -468,6 +468,47 @@ bool automaton_automaton_print_fsp(automaton_automaton* current_automaton, char*
 	return true;
 }
 
+bool automaton_automaton_print_dot(automaton_automaton* current_automaton, char* filename){
+	FILE *f = fopen(filename, "w");
+	if (f == NULL)
+	{
+	    printf("Error opening file!\n");
+	    return false;
+	}
+
+	fprintf(f, "/* AUTO-GENERATED_FILE\n\tAutomaton %s */\n", current_automaton->name);
+	fprintf(f, "digraph %s {\n\tgraph [fontname=Arial,fontsize=10,layout = circo, overlap=false,splines=true];\n\t node [shape = circle, label=\"STOP\", fontsize=14] STOP; \n\t node [shape = point ]; qi \n", current_automaton->name);
+
+	automaton_automata_context* ctx		= current_automaton->context;
+	uint32_t i,j,k;
+	for(i = 0; i < current_automaton->initial_states_count; i++){
+		fprintf(f, "\tqi -> S_%d;\n", current_automaton->initial_states[i]);
+	}
+	for(i = 0; i < current_automaton->transitions_count; i++){
+		fprintf(f, "\tnode [shape = circle, label=\"S_%d\", fontsize=14] S_%d\n", i, i);
+	}
+	automaton_transition* current_transition;
+	for(i = 0; i < current_automaton->transitions_count; i++){
+		if(current_automaton->out_degree[i] <= 0){
+			fprintf(f, "\tS_%d  -> STOP;\n", i);
+
+		}
+		for(j = 0; j < current_automaton->out_degree[i]; j++){
+			current_transition	= &(current_automaton->transitions[i][j]);
+			fprintf(f, "\tS_%d -> S_%d [ label = \"", current_transition->state_from, current_transition->state_to);
+			if(current_transition->signals_count == 0)fprintf(f, "%s", AUT_TAU_CONSTANT);
+			for(k = 0; k < current_transition->signals_count; k++){
+				signal_t sig	= k < FIXED_SIGNALS_COUNT ? current_transition->signals[k] : current_transition->other_signals[k - FIXED_SIGNALS_COUNT];
+				fprintf(f,"%s%s", ctx->global_alphabet->list[sig].name, (k < (current_transition->signals_count -1)? "," : ""));
+			}
+			fprintf(f, "\"];\n");
+		}
+	}
+	fprintf(f, "}\n");
+	fclose(f);
+	return true;
+}
+
 void automaton_range_print(automaton_range* range, char* prefix, char* suffix){
 	if(prefix != NULL)
 		printf("%s", prefix);

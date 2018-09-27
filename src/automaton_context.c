@@ -2109,7 +2109,8 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	obdd_state_tree_destroy(obdd_state_map);
 	//TODO:remove this
 	//automaton_automaton_print(ltl_automaton, true, true, true, "", "");
-	automaton_automaton_print_fsp(ltl_automaton, "tests/ltl_automaton_lift.fsp");
+	//automaton_automaton_print_fsp(ltl_automaton, "tests/ltl_automaton_lift.fsp");
+	automaton_automaton_print_dot(ltl_automaton, "tests/ltl_automaton_lift.dot");
 	return ltl_automaton;
 }
 
