@@ -6,7 +6,6 @@ NASM=nasm
 NASMFLAGS=-f elf64 -g -F DWARF
 LEX = lex
 YACC = yacc -d
-#YACC = yacc -d
 #YACCFLAGS = --debug --verbose
 #YACCFLAGS = -Wconflicts-sr -Wconflicts-rr --debug --verbose
 #YACCFLAGS = -Wconflicts-sr -Wconflicts-rr --debug

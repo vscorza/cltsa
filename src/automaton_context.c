@@ -2361,10 +2361,17 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 			winning_region_automaton	= automaton_get_gr1_strategy(game_automaton, assumptions, assumptions_count
 					, guarantees, guarantees_count);
 			if(print_fsp){
-				char buf[255];
+				char buf[150];
+				char cmd[350];
 				//automaton_automaton_print(tables->composition_entries[i]->valuation.automaton_value, true, true, true, "*\t", "*\t");
 				sprintf(buf, "%s_%d_strat_%s.fsp", ctx_name, i, is_synchronous? "synch": "asynch");
 				automaton_automaton_print_fsp(winning_region_automaton, buf);
+				sprintf(buf, "%s_%d_strat_%s.dot", ctx_name, i, is_synchronous? "synch": "asynch");
+				automaton_automaton_print_dot(winning_region_automaton, buf);
+				sprintf(cmd, "sfdp -Tsvg %s > %s.svg\n", buf, buf);
+				printf(cmd);
+				system(cmd);
+
 			}
 			//restore old liveness valuations and old context
 			if(was_merged){
@@ -2390,13 +2397,18 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 	}
 
 	if(print_fsp){
-		char buf[255];
-
+		char buf[150];
+		char cmd[350];
 		for(i = 0; i < tables->composition_count; i++){
 			if(tables->composition_entries[i]->solved){
 				//automaton_automaton_print(tables->composition_entries[i]->valuation.automaton_value, true, true, true, "*\t", "*\t");
 				sprintf(buf, "%s_%d_result_%s.fsp", ctx_name, i, is_synchronous? "synch": "asynch");
 				automaton_automaton_print_fsp(tables->composition_entries[i]->valuation.automaton_value, buf);
+				sprintf(buf, "%s_%d_result_%s.dot", ctx_name, i, is_synchronous? "synch": "asynch");
+				automaton_automaton_print_dot(tables->composition_entries[i]->valuation.automaton_value, buf);
+				sprintf(cmd, "sfdp -Tsvg %s > %s.svg\n", buf, buf);
+				printf(cmd);
+				system(cmd);
 			}
 		}
 	}

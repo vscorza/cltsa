@@ -1,0 +1,28 @@
+range R = 1..2
+
+set Global_Alphabet = {a,b,g}
+set Controllable_Alphabet = {g}
+
+set Global_Signals	= {x, y}
+set Output_Signals	= {y}
+
+AUTOMATA = (y.on-> WIN | y.off -> LOSE),
+WIN = ( <y.on, g> -> WIN | <y.off, g> -> WIN | a -> WAIT),
+WAIT = (a -> WAIT | b -> WIN),
+LOSE = (<y.on,b> -> LOSE | <y.off,b> -> LOSE).
+
+
+ltl env theta Init_Lift_e in GAME_LTL	= (x || !x).
+ltl sys theta Init_Lift_s in GAME_LTL	= (y || !y).
+ltl env rho Env_Rho in GAME_LTL	= [](x || !x).
+ltl sys rho Sys_Rho in GAME_LTL	= [](y <-> X(y)).
+
+fluent F_Goal = <g, a>
+fluent F_Ass = <b, g>
+
+ltl fluent Ass = (x).
+ltl fluent Goal	= (y).
+
+|f| ENV =(AUTOMATA ||_c GAME_LTL).
+|gr1| <{F_Ass}><{F_Goal}> STRAT = ENV.
+

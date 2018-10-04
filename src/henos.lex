@@ -16,8 +16,9 @@ upper 		[A-Z]
 octalDigit	[0-7]
 decDigit	[0-9]
 identChars	{lower}|{upper}|{digit}|[_?]
+lowerIdentChars	{lower}|{upper}|{digit}|[_?\.]
 number 		0{octalDigit}*|{decDigit}+|{hex}+
-ident 		{lower}{identChars}*
+ident 		{lower}{lowerIdentChars}*
 upperIdent 	{upper}{identChars}*
 string 		\"(\\.|[^"\\])*\"
 keyword		set|range|const|\.\.|when|\|f\||\|\||\|gr1\|initially|ltl|env|sys|rho|theta|in

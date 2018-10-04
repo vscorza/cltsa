@@ -481,11 +481,11 @@ bool automaton_automaton_print_dot(automaton_automaton* current_automaton, char*
 
 	automaton_automata_context* ctx		= current_automaton->context;
 	uint32_t i,j,k;
-	for(i = 0; i < current_automaton->initial_states_count; i++){
-		fprintf(f, "\tqi -> S_%d;\n", current_automaton->initial_states[i]);
-	}
 	for(i = 0; i < current_automaton->transitions_count; i++){
 		fprintf(f, "\tnode [shape = circle, label=\"S_%d\", fontsize=14] S_%d\n", i, i);
+	}
+	for(i = 0; i < current_automaton->initial_states_count; i++){
+		fprintf(f, "\tqi -> S_%d;\n", current_automaton->initial_states[i]);
 	}
 	automaton_transition* current_transition;
 	for(i = 0; i < current_automaton->transitions_count; i++){
@@ -1720,6 +1720,7 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 			, automaton_pending_state_compare);
 	automaton_concrete_bucket_list* key_list		= automaton_concrete_bucket_list_create(RANKING_BUCKET_SIZE, automaton_int_extractor, sizeof(uint32_t));
 	uint32_t current_state;
+	//these are the indexes from the global fluents list, should not be used in ranking_list
 	uint32_t* assumptions_indexes				= malloc(sizeof(uint32_t) * assumptions_count);
 	uint32_t* guarantees_indexes				= malloc(sizeof(uint32_t) * guarantees_count);
 	int32_t first_assumption_index				= 0;
@@ -1791,7 +1792,7 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 #if DEBUG_SYNTHESIS
 	printf("[Deadlock] Adding unstable pred for %d\n", i);
 #endif
-				automaton_add_unstable_predecessors(game_automaton, pending_list, key_list, i, ranking_list, guarantees_indexes[j], guarantees_count
+				automaton_add_unstable_predecessors(game_automaton, pending_list, key_list, i, ranking_list, /*guarantees_indexes[j] <- WAS*/ j, guarantees_count
 						, assumptions_count, guarantees_indexes, assumptions_indexes, assumptions_indexes[first_assumption_index], pending_processed);
 			}else{
 				//rank_g(state) = (0, 1)
@@ -1807,7 +1808,7 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 #if DEBUG_SYNTHESIS
 	printf("[Init] Pushing into pending (%d, %d)\n", i, guarantees_indexes[j]);
 #endif
-							concrete_pending_state.state 	= i; concrete_pending_state.goal_to_satisfy	= guarantees_indexes[j];
+							concrete_pending_state.state 	= i; concrete_pending_state.goal_to_satisfy	= j;//TODO: check this, was ...goal_to_satisfy = guarantees_indexes[j];
 							concrete_pending_state.value	= 0; concrete_pending_state.timestamp		= 0;
 							automaton_max_heap_add_entry(pending_list, &concrete_pending_state);
 							automaton_concrete_bucket_add_entry(key_list, &(i));
@@ -1821,7 +1822,7 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 	}
 
 	char strategy_name[255];
-	sprintf(strategy_name, "%s strategy", game_automaton->name);
+	sprintf(strategy_name, "%s_strategy", game_automaton->name);
 	//stabilization
 	automaton_pending_state current_pending_state;
 	automaton_ranking* current_ranking;
