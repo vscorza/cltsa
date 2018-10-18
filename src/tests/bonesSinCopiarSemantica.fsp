@@ -1,0 +1,196 @@
+set Events = {st,po,wka,co,rfoodo,eat,pay,fp,fg}
+set Actions = {Events.disable,Events.happened}
+set A = {Actions, exec, finished, enableAll}
+set UncA = {Events.happened}
+set ControllableActions = {A\UncA}
+
+//ENVIRONMENT
+ENABLEMENT = ENABLE,
+DISABLE = (enableAll -> ENABLE),
+ENABLE = (disable -> DISABLE | {enableAll,happened} -> ENABLE).
+
+EXECUTION = (exec -> Events.happened -> enableAll -> EXECUTION | 
+			Events.disable -> EXECUTION | 
+			finished -> EXECUTION).
+
+||Environment = (Events:ENABLEMENT/{enableAll/Events.enableAll} || EXECUTION).
+
+// GOALS
+fluent StHappened = <st.happened, finished>
+fluent PoHappened = <po.happened, finished>
+//fluent RdoHappened = <rdo.happened, finished>
+//fluent PdHappened = <pd.happened, finished>
+//fluent SdHappened = <sd.happened, finished>
+fluent WkaHappened = <wka.happened, finished>
+fluent CoHappened = <co.happened, finished>
+fluent RfoodoHappened = <rfoodo.happened, finished>
+//fluent RfulloHappened = <rfullo.happened, finished>
+fluent EatHappened = <eat.happened, finished>
+fluent PayHappened = <pay.happened, finished>
+fluent FpHappened = <fp.happened, finished>
+fluent FgHappened = <fg.happened, finished>
+
+ltl_property StBeforeWka 		= [](wka.happened -> StHappened)
+//ltl_property WkaBeforeLaat 	= [](laat.happened -> WkaHappened)
+ltl_property StBeforePo 		= [](po.happened -> StHappened)
+
+//ltl_property PoBeforeRdo 		= [](rdo.happened -> PoHappened)
+//ltl_property RdoBeforePd 		= [](pd.happened -> RdoHappened)
+//ltl_property PdBeforeSd 		= [](sd.happened -> PdHappened)
+//ltl_property RdoBeforeSd 		= [](sd.happened -> RdoHappened)
+//ltl_property SdBeforeRfullo	= [](rfullo.happened -> SdHappened)
+
+ltl_property PoBeforeRfoodo 	= [](rfoodo.happened -> PoHappened)
+ltl_property RfoodoBeforeCo		= [](co.happened -> RfoodoHappened)
+ltl_property CoBeforeFp			= [](fp.happened -> CoHappened)
+ltl_property FpBeforeFg			= [](fg.happened -> FpHappened)
+//ltl_property FgBeforeRfullo		= [](rfullo.happened -> FgHappened)
+ltl_property FgBeforeEat		= [](eat.happened -> FgHappened)
+
+//ltl_property RfulloBeforeEat	= [](eat.happened -> RfulloHappened)
+ltl_property EatBeforePay		= [](pay.happened -> EatHappened)
+//ltl_property RfulloBeforePay	= [](pay.happened -> RfulloHappened)
+
+// Exclusions
+fluent StEnabled = <enableAll, st.disable>
+fluent PoEnabled = <enableAll, po.disable>
+fluent WkaEnabled = <enableAll, wka.disable>
+fluent RfoodoEnabled = <enableAll, rfoodo.disable>
+fluent CoEnabled = <enableAll, co.disable>
+fluent FpEnabled = <enableAll, fp.disable>
+fluent FgEnabled = <enableAll, fg.disable>
+//fluent RdoEnabled = <enableAll, rdo.disable>
+//fluent SdEnabled = <enableAll, sd.disable>
+//fluent RfulloEnabled = <enableAll, rfullo.disable>
+fluent EatEnabled = <enableAll, eat.disable>
+fluent PayEnabled = <enableAll, pay.disable>
+fluent OldMustFinish = <pay.happened, finished>
+fluent PaidThisTurn = <pay.happened,exec>
+ltl_property StHappensOnce = []((StHappened && StEnabled) -> !exec)
+ltl_property OrderingPhaseHappensOnce = []((PoHappened && (PoEnabled || WkaEnabled)) -> !exec)
+
+//ltl_property RdoHappensOnce = []((RdoHappened && RdoEnabled) -> !exec)
+//ltl_property DrinksPhaseHappensOnce = []((SdHappened && (SdEnabled)) -> !exec)
+
+ltl_property RfoodoHappensOnce = []((RfoodoHappened && RfoodoEnabled) -> !exec)
+ltl_property CoHappensOnce = []((CoHappened && CoEnabled) -> !exec)
+ltl_property ServingPhaseHappensOnce = []((FgHappened && (FgEnabled || FpEnabled)) -> !exec)
+
+//ltl_property RfulloHappensOnce = []((RfulloHappened && RfulloEnabled) -> !exec)
+ltl_property EatHappensOnce = []((EatHappened && EatEnabled) -> !exec)
+ltl_property PayHappensOnce = []((PayHappened && PayEnabled) -> !exec)
+
+ltl_property OldFinishedPolicy 	= []((OldMustFinish -> !exec) && (finished -> PaidThisTurn))
+
+// ---------------------------------OLD CONTROLLER------------------------------------------------------
+
+fluent Exec = <exec, Events.happened>
+controllerSpec EatThenPay = {
+    safety = {StBeforeWka, StBeforePo, 
+			PoBeforeRfoodo,	RfoodoBeforeCo, CoBeforeFp, FpBeforeFg, 
+			FgBeforeEat, EatBeforePay,
+			StHappensOnce, OrderingPhaseHappensOnce,
+			RfoodoHappensOnce, CoHappensOnce, ServingPhaseHappensOnce,
+			EatHappensOnce, PayHappensOnce,
+			OldFinishedPolicy}
+    controllable = {ControllableActions}
+}
+
+controller ||Bones = Environment~{EatThenPay}.
+minimal ||BonesController = (Bones || Environment).//@{Events.happened}.
+
+deterministic ||BonesHidedController = BonesController.
+
+OLD_DESIRED = (st.happened -> S0),
+S0 = (po.happened -> ORDERED | wka.happened -> S0),
+ORDERED = (rfoodo.happened -> co.happened -> APPROVE),
+//PREPARE = (imdp.happened -> S1),
+//S1 = (igao.happened -> pp.happened -> S2 | imdp.happened -> S1), 
+//S2 = (dga.happened -> fd.happened -> CHECK | pp.happened -> S2),
+//CHECK = (da.happened -> PREPARE | a.happened -> APPROVE), 
+APPROVE = (fp.happened -> S3),
+S3 = (fp.happened -> S3 | fg.happened -> eat.happened -> pay.happened -> OLD_DESIRED).
+
+//DRINKS = (rdo.happened -> sd.happened -> rfullo.happened -> DRINKS).
+
+||CHECK_OLD = (BonesController || OLD_DESIRED).
+
+// ---------------------------------NEW CONTROLLER------------------------------------------------------
+fluent NewMustFinish = <eat.happened,finished>
+fluent AteThisTurn = <eat.happened,exec>
+
+ltl_property PayBeforeOrdering = [](st.happened -> PayHappened)
+ltl_property NewFinishedPolicy = [](NewMustFinish -> !exec)
+
+controllerSpec PayThenEat = {
+    safety = {PayBeforeOrdering, StBeforeWka, StBeforePo, 
+			PoBeforeRfoodo,	RfoodoBeforeCo, CoBeforeFp, FpBeforeFg, 
+			FgBeforeEat,
+			StHappensOnce, OrderingPhaseHappensOnce,
+			RfoodoHappensOnce, CoHappensOnce, ServingPhaseHappensOnce,
+			EatHappensOnce, PayHappensOnce,
+			NewFinishedPolicy}
+    controllable = {ControllableActions}
+}
+
+controller ||BonesPayThenEat = Environment~{PayThenEat}.
+minimal ||BonesNewController = (BonesPayThenEat || Environment).//@{Events.happened}.
+
+//deterministic ||AUX = BonesNewController.
+
+NEW_DESIRED = (pay.happened -> st.happened -> S0),
+S0 = (po.happened -> ORDERED | wka.happened -> S0),
+ORDERED = (rfoodo.happened -> co.happened -> APPROVE),
+//PREPARE = (imdp.happened -> S1),
+//S1 = (igao.happened -> pp.happened -> S2 | imdp.happened -> S1), 
+//S2 = (dga.happened -> fd.happened -> CHECK | pp.happened -> S2),
+//CHECK = (da.happened -> PREPARE | a.happened -> APPROVE), 
+APPROVE = (fp.happened -> S3),
+S3 = (fp.happened -> S3 | fg.happened -> eat.happened -> NEW_DESIRED).
+
+//property ||PPP = NEW_DESIRED.
+
+//||CHECK_NEW = (AUX || NEW_DESIRED).
+
+// ---------------------------UPDATING CONTROLLER SPEC-----------------------------
+//Updating controller fluents
+fluent InTransition = <stopOldSpec, startNewSpec> 
+fluent StopOldSpec = <stopOldSpec, beginUpdate>
+fluent StartNewSpec= <startNewSpec, beginUpdate>
+fluent Reconfigure = <reconfigure, beginUpdate>
+fluent BeginUpdate = <beginUpdate, finished>
+
+//Mapping Environment
+BEFORE_RECONF = (reconfigure -> AFTER_RECONF | A -> BEFORE_RECONF),
+AFTER_RECONF = (A -> AFTER_RECONF).
+
+||MappingEnvironment = (Environment || BEFORE_RECONF).
+
+assert AnyAction = (st.disable || po.disable|| wka.disable || co.disable || rfoodo.disable || 
+			eat.disable || pay.disable || fp.disable || fg.disable || exec)
+
+assert OnlyFinishedOnTransition = ((StopOldSpec && !StartNewSpec) -> !(AnyAction))
+assert EmptyTransition = ((StopOldSpec && !StartNewSpec) -> !(AnyAction || finished))
+ltl_property KEEP_OLD_SPEC = [](EmptyTransition && (StHappened -> !startNewSpec))
+ltl_property FORCE_FINISHED = [](OnlyFinishedOnTransition && (StHappened -> !startNewSpec))
+
+updatingController UpdCont = {
+    oldController = BonesController,
+    mapping = MappingEnvironment,
+    oldGoal = EatThenPay, 
+    newGoal = PayThenEat,
+//	T = True is executed if no transition requirement is set
+	transition = KEEP_OLD_SPEC,
+	transition = FORCE_FINISHED,
+	nonblocking
+}
+
+||UPDATE_CONTROLLER = (UpdCont).
+
+// ---------------------------TEST AND RESULTS-----------------------------
+//assert S_OLD = (PROCEDURE_WHILE_STOPPED && MAINTEINANCE_GUARANTEED && PROCEDURE_IF_REQUEST && PUMP_OFF_ONLY_OK_NOT_PENDING)
+//assert S_NEW = (NEVER_STOP && MAINTEINANCE_GUARANTEED_NEW && PROCEDURE_IF_REQUEST)
+
+//assert TEST_FORMULA1 = [](!StopOldSpec -> S_OLD)
+//assert TEST_FORMULA2 = [](StartNewSpec -> S_NEW)
+//assert TEST_FORMULA3 = [](beginUpdate -> (<>stopOldSpec && <>startNewSpec && <>reconfigure))

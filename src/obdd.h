@@ -11,6 +11,7 @@
 
 #define DEBUG_OBDD	0
 #define DEBUG_OBDD_VALUATIONS	0
+#define DEBUG_OBDD_STATE_TREE	0
 
 #define GET_VAR_INDEX(variable_count, valuation_index, variable_index) ((((variable_count) * (valuation_index) + (variable_index)) * sizeof(bool)))
 #define GET_VAR_IN_VALUATION(arr, variable_count, valuation_index, variable_index)	(arr[GET_VAR_INDEX(variable_count, valuation_index, variable_index)])

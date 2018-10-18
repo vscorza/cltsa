@@ -1539,27 +1539,58 @@ bool automaton_add_transition_from_valuations(obdd_mgr* mgr, automaton_automaton
 	char signal_name[255];
 	//TODO: optimize alphabet indexes computation
 #if DEBUG_LTL_AUTOMATON
-	printf("(%d-[", from_state);
+	uint32_t to_state_size	= is_input? (is_initial? x_count : x_count * 2 + y_count) : (x_count + y_count);
+	uint32_t from_state_size	= !is_input? (is_initial? x_count+y_count : x_count * 2 + y_count) : (is_initial? x_count : x_count + y_count);
+	printf("(");
+	for(i = 0; i < from_state_size; i++)
+		printf("%s", from_valuation[i]?"1":"0");
+	printf("):%d-[", from_state);
 #endif
 	char* signal_dict_name;
 	uint32_t var_count = is_input ? x_count : y_count;
 	uint32_t left_offset	= is_input ? 0 : x_count;
 	uint32_t right_offset	= is_input ? (is_initial? 0 : x_count + y_count) : x_count;
 	bool take_on;
-	for(i = 0; i < var_count; i++){
-		if(from_valuation[left_offset + i] != to_valuation[right_offset + i]){
-			take_on				= is_input? from_valuation[i] : !from_valuation[i];
-			signal_dict_name	= (take_on? obdd_off_indexes[left_offset + i]: obdd_on_indexes[left_offset + i]);
-			strcpy(signal_name, signal_dict_name);
-			aut_dupstr(&(signal_event->name), signal_name);
-			automaton_transition_add_signal_event(transition, automaton->context, signal_event);
 #if DEBUG_LTL_AUTOMATON
-			printf("%s%s", signal_name, i < var_count - 1 ? "," : "");
+	bool has_action = false;
 #endif
+	for(i = 0; i < var_count; i++){
+		if(!is_initial){
+			if(from_valuation[left_offset + i] != to_valuation[right_offset + i]){
+#if DEBUG_LTL_AUTOMATON
+				has_action 	= true;
+#endif
+				take_on				= is_input? from_valuation[left_offset + i] : !from_valuation[left_offset + i];
+				signal_dict_name	= (take_on? obdd_off_indexes[left_offset + i]: obdd_on_indexes[left_offset + i]);
+				strcpy(signal_name, signal_dict_name);
+				aut_dupstr(&(signal_event->name), signal_name);
+				automaton_transition_add_signal_event(transition, automaton->context, signal_event);
+#if DEBUG_LTL_AUTOMATON
+				printf("%s%s", signal_name, i < var_count - 1 ? "," : "");
+#endif
+			}
+		}else{
+#if DEBUG_LTL_AUTOMATON
+			has_action 	= true;
+#endif
+			take_on		= to_valuation[right_offset + i];
+			if(take_on){
+				signal_dict_name	= (take_on? obdd_on_indexes[right_offset + i]: obdd_off_indexes[right_offset + i]);
+				strcpy(signal_name, signal_dict_name);
+				aut_dupstr(&(signal_event->name), signal_name);
+				automaton_transition_add_signal_event(transition, automaton->context, signal_event);
+#if DEBUG_LTL_AUTOMATON
+				printf("%s%s", signal_name, i < var_count - 1 ? "," : "");
+#endif
+			}
+
 		}
 	}
 #if DEBUG_LTL_AUTOMATON
-	printf("->%d)", to_state);
+	printf("%s]->(", !has_action? "__tau__" : "");
+	for(i = 0; i < to_state_size; i++)
+		printf("%s", to_valuation[i]?"1":"0");
+	printf(")%d",to_state);
 #endif
 	automaton_signal_event_destroy(signal_event, true);
 	bool has_transition = automaton_automaton_has_transition(automaton, transition);
@@ -1860,7 +1891,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 			LTL_BUCKET_SIZE, obdd_composite_state_extractor, sizeof(uint32_t) + sizeof(bool) * (x_count * 2 + y_count) );
 	automaton_concrete_bucket_list* rho_sys_processed_bucket_list	= automaton_concrete_bucket_list_create(
 			LTL_BUCKET_SIZE, obdd_composite_state_extractor, sizeof(uint32_t) + sizeof(bool) * (x_count + y_count));
-	sys_state->state		= obdd_state_tree_get_key(obdd_state_map, sys_state->valuation, x_y_count);
+	sys_state->state		= 0;//obdd_state_tree_get_key(obdd_state_map, sys_state->valuation, x_y_count);
 	automaton_automaton_add_initial_state(ltl_automaton, sys_state->state);
 	uint32_t fluent_index;
 	for(i = 0; i < fluent_count; i++){
@@ -1881,7 +1912,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	bool has_transition;
 	for(i = 0; i < current_valuations_count; i++){
 		automaton_set_composed_valuation(env_state->valuation, current_valuations, i, true, true, x_alphabet, x_count, y_count);
-		env_state->state		= obdd_state_tree_get_key(obdd_state_map, env_state->valuation, x_y_x_p_count);
+		env_state->state		= obdd_state_tree_get_key(obdd_state_map, env_state->valuation, x_count);
 		has_transition	= automaton_add_transition_from_valuations(mgr, ltl_automaton, sys_state->state, env_state->state
 				, sys_state->valuation, env_state->valuation, true, true
 				, x_count, y_count
@@ -1889,10 +1920,10 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 		if(!has_transition){
 #if DEBUG_LTL_AUTOMATON
 			printf("(%d-[", sys_state->state);
-			for(j = 0; j < x_y_x_p_count; j++)
+			for(j = 0; j < x_count; j++)
 				printf("%s", env_state->valuation[j] ? "1" : "0");
 			state_counter++;
-			printf("]->%d)%s", env_state->state, state_counter % 10 == 0 ? "\n" : " ");
+			printf("]->%d)\n", env_state->state);
 			if(state_counter % 1000 == 0){
 				printf("States processed for ltl: %d\n", state_counter);
 				fflush(stdout);
@@ -1907,7 +1938,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	state_counter = 0;
 	current_valuations	= obdd_get_valuations(mgr, env_sys_theta_composed, &current_valuations_count, x_y_alphabet, x_y_count);
 	printf("Init sys valuations\n");
-	obdd_print_valuations(mgr, current_valuations, current_valuations_count, y_alphabet, y_count);
+	obdd_print_valuations(mgr, current_valuations, current_valuations_count, x_y_alphabet, x_y_count);
 	free(current_valuations);
 #endif
 	/**
@@ -1922,9 +1953,13 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	if(theta_env_bucket_list->composite_count > 0){
 		do{
 			automaton_concrete_bucket_pop_entry(theta_env_bucket_list, env_state);
-			obdd_current_state	= obdd_restrict_vector(env_sys_theta_composed, x_y_alphabet_o, env_state->valuation, x_y_count);
-			current_valuations	= obdd_get_valuations(mgr, obdd_current_state, &current_valuations_count, x_y_alphabet, x_y_count);
+			obdd_current_state	= obdd_restrict_vector(env_sys_theta_composed, x_alphabet_o, env_state->valuation, x_count);
+			current_valuations	= obdd_get_valuations(mgr, obdd_current_state, &current_valuations_count, x_alphabet, x_count);
 #if DEBUG_LTL_AUTOMATON
+			printf("%d-[", sys_state->state);
+			for(j = 0; j < x_y_count; j++)
+				printf("%s", env_state->valuation[j] ? "1" : "0");
+			printf("]\n");
 			obdd_print_valuations(mgr, current_valuations, current_valuations_count, x_y_alphabet, x_y_count);
 #endif
 			for(i = 0; i < current_valuations_count; i++){
@@ -1935,19 +1970,18 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 						, env_state->valuation, sys_state->valuation, true, false
 						, x_count, y_count
 						, obdd_on_signals_indexes, obdd_off_signals_indexes, x_y_alphabet, x_y_x_p_alphabet);
-				if(!has_transition && !automaton_concrete_bucket_has_entry(rho_sys_bucket_list, sys_state)){
 #if DEBUG_LTL_AUTOMATON
 					printf("(%d-[", env_state->state);
 					for(j = 0; j < x_count + y_count; j++)
 						printf("%s", sys_state->valuation[j] ? "1" : "0");
 					state_counter++;
-					printf("]->%d)%s", sys_state->state, state_counter % 10 == 0 ? "\n" : " ");
+					printf("]->%d)%s\n", sys_state->state,!has_transition && !automaton_concrete_bucket_has_entry(rho_sys_bucket_list, sys_state)? "*":"");
 					if(state_counter % 1000 == 0){
 						printf("States processed for ltl: %d\n", state_counter);
 						fflush(stdout);
 					}
 #endif
-
+				if(!has_transition && !automaton_concrete_bucket_has_entry(rho_sys_bucket_list, sys_state)){
 					automaton_concrete_bucket_add_entry(rho_sys_bucket_list, sys_state);
 				}
 			}
@@ -2006,8 +2040,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 						printf("(%d-[", sys_state->state);
 						for(j = 0; j < x_y_x_p_count; j++)
 							printf("%s", env_state->valuation[j] ? "1" : "0");
-						printf("]->%d)%s%s", env_state->state, has_transition? "" : "*", state_counter % 10 == 0 ? "\n" : " ");
-						printf("\n");
+						printf("]->%d)%s\n", env_state->state, has_transition? "" : "*");
 						state_counter++;
 						if(state_counter % 1000 == 0){
 							printf("States processed for ltl: %d\n", state_counter);
@@ -2061,8 +2094,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 						for(j = 0; j < x_y_count; j++)
 							printf("%s", sys_state->valuation[j] ? "1" : "0");
 						state_counter++;
-						printf("]->%d)%s%s", sys_state->state, has_transition? "" : "*", state_counter % 10 == 0 ? "\n" : " ");
-						printf("\n");
+						printf("]->%d)%s\n", sys_state->state, has_transition? "" : "*");
 						if(state_counter % 1000 == 0){
 							printf("States processed for ltl: %d\n", state_counter);
 							fflush(stdout);

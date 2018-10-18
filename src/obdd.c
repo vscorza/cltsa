@@ -49,7 +49,7 @@ void obdd_state_tree_print(obdd_state_tree* tree){
 obdd_state_tree* obdd_state_tree_create(uint32_t key_length){
 	obdd_state_tree* tree= malloc(sizeof(obdd_state_tree));
 	tree->key_length	= key_length;
-	tree->max_value		= 0;
+	tree->max_value		= 1;
 	tree->first_entry_index	= -1;
 	tree->entries_count	= 0;
 	tree->entries_size	= LIST_INITIAL_SIZE;
@@ -89,6 +89,12 @@ uint32_t obdd_state_tree_get_key(obdd_state_tree* tree, bool* valuation, int32_t
 	last_entry						= &(tree->entries_pool[last_entry_index]);
 	bool next_is_high;
 	uint32_t current_length			= key_length < 1 ? tree->key_length : key_length;
+#if DEBUG_OBDD_STATE_TREE
+	printf("obdd map[");
+	for(i = 0; i < current_length; i++)
+		printf("%s", valuation[i]? "1" : "0");
+	printf("]:");
+#endif
 	for(i = 0; i < current_length; i++){
 		next_is_high		= valuation[i];
 
@@ -104,6 +110,9 @@ uint32_t obdd_state_tree_get_key(obdd_state_tree* tree, bool* valuation, int32_t
 			if(i == (current_length -1)){
 				current_entry->is_leaf		= true;
 				current_entry->leaf_value	= tree->max_value++;
+#if DEBUG_OBDD_STATE_TREE
+				printf("%d\n", current_entry->leaf_value);
+#endif
 				return current_entry->leaf_value;
 			}else{
 				current_entry->is_leaf	= false;
@@ -116,11 +125,17 @@ uint32_t obdd_state_tree_get_key(obdd_state_tree* tree, bool* valuation, int32_t
 					current_entry->is_leaf	= true;
 					current_entry->leaf_value	= tree->max_value++;
 				}
+#if DEBUG_OBDD_STATE_TREE
+				printf("%d\n", current_entry->leaf_value);
+#endif
 				return current_entry->leaf_value;
 			}
 		}
 		last_entry_index = current_entry_index;
 	}
+#if DEBUG_OBDD_STATE_TREE
+	printf("NOT FOUND\n");
+#endif
 	return 0;
 }
 void obdd_state_tree_destroy(obdd_state_tree* tree){
@@ -886,6 +901,7 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 	int32_t* last_pred_index	= malloc(sizeof(int32_t) * variables_count);
 	int32_t last_node_index	= 0;
 	int32_t max_pred_index	= 0;
+	int32_t min_var_ID		= mgr->vars_dict->size - 3;
 	//starts from the TRUE leaf and keeps backtracking
 	obdd_node* current_node		= mgr->true_obdd->root_obdd;
 	obdd_node* current_predecessor;
@@ -897,6 +913,7 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 	bool at_least_one_node_expanded		= true;
 #if DEBUG_OBDD_VALUATIONS
 	printf("Getting OBDD valuations\n");
+	obdd_print(root);
 	printf("Projected over:[");
 	for(i = 0; i < (int32_t)img_count; i++)
 		printf("%d %s %s", valuation_img[i], dictionary_key_for_value(mgr->vars_dict, valuation_img[i]), i == ((int32_t)img_count -1) ? "]\n": ",");
@@ -971,6 +988,12 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 				if(last_pred_index[last_node_index] > -1){
 					partial_valuation[current_predecessor->var_ID - 2]	= through_high;
 					dont_care_list[current_predecessor->var_ID - 2]		= false;
+					if((last_node->var_ID - 2) < (int32_t)min_var_ID){
+								min_var_ID	= current_predecessor->var_ID - 2;
+#if DEBUG_OBDD_VALUATIONS
+							printf("New [m]in var ID: %d\n", min_var_ID);
+#endif
+					}
 					//update dont care list for nodes skipped due to obdd reduction
 					for(i = (int32_t)(current_predecessor->var_ID - 2)+ 1; i < (int32_t)(last_node->var_ID - 2); i++)
 						dont_care_list[i]	= true;
@@ -1006,8 +1029,14 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 					&& at_least_one_node_expanded){//terminal case, add valuation
 				dont_cares_count	= 1;
 				//set unexplored variables as dont care
+				/*
 				for(i = max_pred_index + 1; i < (int32_t)variables_count; i++)
 					dont_care_list[i]	= true;
+					*/
+				if(min_var_ID > 0){
+					for(i = min_var_ID - 1; i >= 0; i--)
+							dont_care_list[i]	= true;
+				}
 				//count dont cares to get number of new valuations (only for variables belonging to the image)
 				int32_t variable_index;
 				for(i = 0; i < (int32_t)variables_count; i++){
@@ -1122,11 +1151,17 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 			if(last_node_index < (int32_t)(variables_count - 1)){
 				last_node_index++;
 				if(last_node->var_ID > 1){
+					if((last_node->var_ID - 2) < (int32_t)min_var_ID){
+								min_var_ID	= last_node->var_ID - 2;
+#if DEBUG_OBDD_VALUATIONS
+							printf("New [m]in var ID: %d\n", min_var_ID);
+#endif
+					}
 					if((last_node->var_ID - 2) > (int32_t)max_pred_index){
 								max_pred_index	= last_node->var_ID - 2;
-	#if DEBUG_OBDD_VALUATIONS
-								printf("New [M]ax index: %d\n", max_pred_index);
-	#endif
+#if DEBUG_OBDD_VALUATIONS
+							printf("New [M]ax index: %d\n", max_pred_index);
+#endif
 					}
 				}
 				last_nodes[last_node_index]			= current_predecessor;
@@ -1144,6 +1179,8 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 					if(last_pred_index[last_node_index] != -1)
 						break;
 				}
+				max_pred_index	= 0;
+				min_var_ID		= mgr->vars_dict->size - 3;
 #if DEBUG_OBDD_VALUATIONS
 	printf("[B]acktracked on exploration to %d\n", last_node_index);
 #endif

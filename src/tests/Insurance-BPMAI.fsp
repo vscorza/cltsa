@@ -1,0 +1,188 @@
+set Events = {receive, cacc, createc, confirmc, recca, supportcaa, moneyorder, close}
+set Actions = {Events.disable,Events.happened}
+set A = {Actions, exec, finished, enableAll}
+set UncA = {Events.happened}
+set ControllableActions = {A\UncA}
+
+//ENVIRONMENT
+ENABLEMENT = ENABLE,
+DISABLE = (enableAll -> ENABLE),
+ENABLE = (disable -> DISABLE | {enableAll,happened} -> ENABLE).
+
+EXECUTION = (exec -> Events.happened -> enableAll -> EXECUTION | 
+			Events.disable -> EXECUTION | 
+			finished -> EXECUTION).
+
+||Environment = (Events:ENABLEMENT/{enableAll/Events.enableAll} || EXECUTION).
+
+// FLUENTS
+fluent ReceiveHappened = <receive.happened, finished>
+fluent CaccHappened = <cacc.happened, finished>
+fluent CreatecHappened = <createc.happened, finished>
+fluent ConfirmcHappened = <confirmc.happened, finished>
+fluent ReccaHappened = <recca.happened, finished>
+fluent SupportcaaHappened = <supportcaa.happened, finished>
+fluent MoneyorderHappened = <moneyorder.happened, finished>
+fluent CloseHappened = <close.happened, finished>
+
+fluent ReceiveEnabled = <enableAll, receive.disable>
+fluent CaccEnabled = <enableAll, cacc.disable>
+fluent CreatecEnabled = <enableAll, createc.disable>
+fluent ConfirmcEnabled = <enableAll, confirmc.disable>
+fluent ReccaEnabled = <enableAll, recca.disable>
+fluent SupportcaaEnabled = <enableAll, supportcaa.disable>
+fluent MoneyorderEnabled = <enableAll, moneyorder.disable>
+fluent CloseEnabled = <enableAll, close.disable>
+
+// GOALS
+ltl_property ReceiveBeforeCacc		 = [](cacc.happened -> ReceiveHappened)
+ltl_property ReceiveBeforeCreatec	 = [](createc.happened -> ReceiveHappened)
+ltl_property CreatecBeforeRecca		 = [](recca.happened -> CreatecHappened)
+ltl_property ReccaBeforeMoneyorder	 = [](moneyorder.happened -> ReccaHappened)
+ltl_property CaccBeforeConfirmc		 = [](confirmc.happened -> CaccHappened)
+ltl_property ConfirmcBeforeSupportcaa= [](supportcaa.happened -> ConfirmcHappened)
+ltl_property ConfirmcBeforeRecca	 = [](recca.happened -> ConfirmcHappened)
+ltl_property SupportcaaBeforeClose	 = [](close.happened -> SupportcaaHappened)
+ltl_property MoneyorderBeforeClose	 = [](close.happened -> MoneyorderHappened)
+
+// Exclusions
+ltl_property ReceiveHappensOnce 	 = []((ReceiveHappened && ReceiveEnabled) -> !exec)
+ltl_property CaccHappensOnce 		 = []((CaccHappened && CaccEnabled) -> !exec)
+ltl_property ConfirmcHappensOnce 	 = []((ConfirmcHappened && ConfirmcEnabled) -> !exec)
+ltl_property SupportcaaHappensOnce 	 = []((SupportcaaHappened && SupportcaaEnabled) -> !exec)
+//ltl_property ReccaHappensOnce 		 = []((ReccaHappened && ReccaEnabled) -> !exec)
+//ltl_property CreatecHappensOnce 	 = []((CreatecHappened && CreatecEnabled) -> !exec)
+//ltl_property MoneyorderHappensOnce 	 = []((MoneyorderHappened && MoneyorderEnabled) -> !exec)
+//ltl_property CloseHappensOnce 		 = []((CloseHappened && CloseEnabled) -> !exec)
+
+fluent CloseThisTurn = <close.happened,exec>
+fluent MustFinish = <close.happened, finished>
+ltl_property FinishedPolicy 		= []((finished -> CloseThisTurn) && (MustFinish -> !exec))
+
+// ---------------------------------OLD CONTROLLER------------------------------------------------------
+fluent Exec = <exec, Events.happened>
+
+controllerSpec CreateAndCallAgent = {
+    safety = {ReceiveBeforeCacc, ReceiveBeforeCreatec, CreatecBeforeRecca,
+			ReccaBeforeMoneyorder,	CaccBeforeConfirmc, 
+			ConfirmcBeforeSupportcaa, ConfirmcBeforeRecca,
+			SupportcaaBeforeClose, MoneyorderBeforeClose,
+			
+//			ReceiveHappensOnce, CaccHappensOnce, ConfirmcHappensOnce,
+//			SupportcaaHappensOnce, ReccaHappensOnce, CreatecHappensOnce, 
+//			MoneyorderHappensOnce, CloseHappensOnce,
+			FinishedPolicy}
+    controllable = {ControllableActions}
+}
+
+controller ||Insurance = Environment~{CreateAndCallAgent}.
+||InsuranceProcess = (Insurance || Environment).//@{Events.happened,finished}.
+
+/*
+minimal ||InsuranceController = InsuranceProcess.
+deterministic ||Aux = InsuranceController.
+||Aux1 = Aux.
+
+OLD_DESIRED = (receive.happened -> S1),
+S1 = (cacc.happened -> S3 | createc.happened -> S2),
+S2 = (cacc.happened -> S4),
+S3 = (createc.happened -> S4 | confirmc.happened -> S5),
+S4 = (confirmc.happened -> S7),
+S5 = (createc.happened -> S7 | supportcaa.happened -> S9),
+S7 = (recca.happened -> S11 | supportcaa.happened -> S10),
+S9 = (createc.happened -> S10),
+S10 = (recca.happened -> S12),
+S11 = (moneyorder.happened -> S13 | supportcaa.happened -> S12),
+S12 = (moneyorder.happened -> S14),
+S13 = (supportcaa.happened -> S14),
+S14 = (close.happened -> End),
+End = (finished -> OLD_DESIRED | finished -> End).
+
+property ||PEPE = OLD_DESIRED.
+
+||CHECK_OLD = (Aux1 || PEPE).
+*/
+// ---------------------------------NEW CONTROLLER------------------------------------------------------
+
+ltl_property CreatecBeforeCacc = []((cacc.happened -> CreatecHappened) && (CaccHappened -> !createc.happened))
+
+controllerSpec CreateThenCall = {
+    safety = {ReceiveBeforeCreatec, CreatecBeforeCacc, CreatecBeforeRecca,
+			ReccaBeforeMoneyorder,	CaccBeforeConfirmc, 
+			ConfirmcBeforeSupportcaa, ConfirmcBeforeRecca,
+			SupportcaaBeforeClose, MoneyorderBeforeClose,
+
+//			ReceiveHappensOnce, CaccHappensOnce, ConfirmcHappensOnce,
+//			SupportcaaHappensOnce, ReccaHappensOnce, CreatecHappensOnce, 
+//			MoneyorderHappensOnce, CloseHappensOnce,
+			FinishedPolicy}
+    controllable = {ControllableActions}
+}
+
+controller ||InsuranceNew = Environment~{CreateThenCall}.
+||InsuranceProcessNew = (InsuranceNew || Environment).//@{Events.happened,finished}.
+
+/*
+minimal ||InsuranceNewController = InsuranceProcessNew.
+property ||AX = InsuranceNewController.
+
+NEW_DESIRED = (receive.happened -> S1),
+S1 = (createc.happened -> S2),
+S2 = (cacc.happened -> S4),
+S4 = (confirmc.happened -> S8),
+S8 = (recca.happened -> S11 | supportcaa.happened -> S10),
+S10 = (recca.happened -> S12),
+S11 = (moneyorder.happened -> S13 | supportcaa.happened -> S12),
+S12 = (moneyorder.happened -> S14),
+S13 = (supportcaa.happened -> S14),
+S14 = (close.happened -> End),
+End = (finished -> NEW_DESIRED | finished -> End).
+
+||PEPEP = NEW_DESIRED.
+
+||CHECK_NEW = (AX || PEPEP).
+*/
+
+// ---------------------------UPDATING CONTROLLER SPEC-----------------------------
+//Updating controller fluents
+fluent BeginUpdate = <beginUpdate, startNewSpec>
+fluent InTransition = <stopOldSpec, startNewSpec> 
+fluent StopOldSpec = <stopOldSpec, beginUpdate>
+fluent StartNewSpec= <startNewSpec, beginUpdate>
+fluent Reconfigure = <reconfigure, beginUpdate>
+
+//Mapping Environment
+BEFORE_RECONF = (reconfigure -> AFTER_RECONF | A -> BEFORE_RECONF),
+AFTER_RECONF = (A -> AFTER_RECONF).
+
+||MappingEnvironment = (Environment || BEFORE_RECONF).
+
+assert AnyAction = (confirmc.disable || cacc.disable|| receive.disable 
+					 || recca.disable || supportcaa.disable || enableAll || 
+				close.disable || createc.disable || moneyorder.disable || exec)
+
+ltl_property NoTransition = []( BeginUpdate -> !(AnyAction || finished)  )
+ltl_property ForceFinished = []( ( (StopOldSpec && !StartNewSpec) || (!StopOldSpec && StartNewSpec)) -> 
+								(!AnyAction W finished) )
+ltl_property ForceFinished2 = []( 
+		((StopOldSpec && !StartNewSpec && CaccHappened) || (!StopOldSpec && StartNewSpec && CaccHappened)) -> (!AnyAction W finished)  
+								)
+
+updatingController UpdCont = {
+    oldController = InsuranceProcess,
+    mapping = MappingEnvironment,
+    oldGoal = CreateAndCallAgent, 
+    newGoal = CreateThenCall,
+//	T = True is executed if no transition requirement is set
+//	transition = ForceFinished, // nice controller but too strong
+	transition = ForceFinished2, 
+//	transition = NoTransition, // no controller
+	nonblocking
+}
+
+||UPDATE_CONTROLLER = (UpdCont).
+progress Termina = finished
+
+
+// ---------------------------TEST AND RESULTS-----------------------------
+assert TEST_FORMULA3 = [](beginUpdate -> ([]<>Exec))
