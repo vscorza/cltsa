@@ -543,6 +543,114 @@ void automaton_indexes_valuation_print(automaton_indexes_valuation* valuation, c
 	if(suffix != NULL)
 		printf("%s", suffix);
 }
+/** SERIALIZING FUNCTIONS **/
+//<name,type>
+void automaton_signal_event_serialize_report(FILE *f, automaton_signal_event *evt){
+	fprintf(f, "%s%s%s%d%s", AUT_SER_OBJ_START, evt->name, AUT_SER_SEP, evt->type, AUT_SER_OBJ_END);
+}
+//<name,starting_count,[f_1,..,f_n],ending_count,[f'_1,..,f'_m],initially>
+void automaton_fluent_serialize_report(FILE *f, automaton_fluent *fluent){
+	fprintf(f, "%s%s%s%d%s%s", AUT_SER_OBJ_START, fluent->name, AUT_SER_SEP, fluent->starting_signals_count, AUT_SER_SEP, AUT_SER_ARRAY_START);
+	uint32_t i;
+	for(i = 0; i < fluent->starting_signals_count; i++){
+		fprintf(f, "%d%s", fluent->starting_signals[i], i == (fluent->starting_signals_count - 1)? "" :  AUT_SER_SEP);
+	}
+	fprintf(f, "%s%s%d%s%s", AUT_SER_ARRAY_END, AUT_SER_SEP, fluent->ending_signals_count, AUT_SER_SEP, AUT_SER_ARRAY_START);
+	for(i = 0; i < fluent->ending_signals_count; i++){
+		fprintf(f, "%d%s", fluent->ending_signals[i], i == (fluent->ending_signals_count - 1)? "" :  AUT_SER_SEP);
+	}
+	fprintf(f, "%s%s%s%s", AUT_SER_ARRAY_END, AUT_SER_SEP, fluent->initial_valuation? "1" : "0", AUT_SER_OBJ_END);
+}
+//<name,alphabet,fluents_count,[f_1.name,..,f_n.name],liveness_count,[l_1.name,..,l_m.name]>
+void automaton_automata_context_serialize_report(FILE *f, automaton_automata_context *ctx){
+	fprintf(f, "%s%s%s", AUT_SER_OBJ_START, ctx->name, AUT_SER_SEP);
+	automaton_alphabet_serialize_report(f, ctx->global_alphabet);
+	fprintf(f, "%s%d%s%s", AUT_SER_SEP, ctx->global_fluents_count, AUT_SER_SEP, AUT_SER_ARRAY_START);
+	uint32_t i;
+	for(i = 0; i < ctx->global_fluents_count; i++){
+		fprintf(f, "%s%s", ctx->global_fluents[i].name, i == (ctx->global_fluents_count - 1)? "" :  AUT_SER_SEP);
+	}
+	fprintf(f, "%s%s%d%s%s", AUT_SER_ARRAY_END, AUT_SER_SEP, ctx->liveness_valuations_count, AUT_SER_SEP, AUT_SER_ARRAY_START);
+	for(i = 0; i < ctx->liveness_valuations_count; i++){
+		fprintf(f, "%s%s", ctx->liveness_valuations_names[i], i == (ctx->liveness_valuations_count - 1)? "" :  AUT_SER_SEP);
+	}
+	fprintf(f, "%s%s", AUT_SER_ARRAY_END, AUT_SER_OBJ_END);
+}
+//<count,[sig_1,..,sig_count]>
+void automaton_alphabet_serialize_report(FILE *f, automaton_alphabet *alphabet){
+	fprintf(f, "%s%d%s%s", AUT_SER_OBJ_START, alphabet->count, AUT_SER_SEP, AUT_SER_ARRAY_START);
+	uint32_t i;
+	for(i = 0; i < alphabet->count; i++){
+		automaton_signal_event_serialize_report(f, &(alphabet->list[i]));
+		fprintf(f, "%s", i == (alphabet->count - 1)? "" :  AUT_SER_SEP);
+	}
+	fprintf(f, "%s%s", AUT_SER_ARRAY_END, AUT_SER_OBJ_END);
+}
+//<from,to,sig_count,[s_1.idx,..,s_N.idx],is_input>
+void automaton_transition_serialize_report(FILE *f, automaton_transition *transition){
+	fprintf(f, "%s%d%s%d%s%d%s%s", AUT_SER_OBJ_START, transition->state_from, AUT_SER_SEP, transition->state_to, AUT_SER_SEP, transition->signals_count, AUT_SER_SEP, AUT_SER_ARRAY_START);
+	uint32_t i;
+	for(i = 0; i < transition->signals_count; i++){
+		fprintf(f, "%d%s", ((i >= FIXED_SIGNALS_COUNT) ? (transition->other_signals[i - FIXED_SIGNALS_COUNT]) : transition->signals[i]), i == (transition->signals_count - 1)? "" :  AUT_SER_SEP);
+	}
+		fprintf(f, "%s%s%s%s", AUT_SER_ARRAY_END, AUT_SER_SEP, transition->is_input? "1" :"0",AUT_SER_OBJ_END);
+}
+/*
+ * <name,ctx,local_alphabet_count,[sig_1.idx,..,sig_N.idx],trans_count,[trans_1,..,trans_M],init_count,[init_i,..,init_K],[[val_s_0_f_0,..,val_s_0_f_L],..,[val_s_T_f_0,..,val_s_T_f_L]]
+,[[val_s_0_l_0,..,val_s_0_l_R],..,[val_s_T_l_0,..,val_s_T_l_R]]>
+ */
+void automaton_automaton_serialize_report(FILE *f, automaton_automaton *automaton){
+	fprintf(f, "%s%s%s", AUT_SER_OBJ_START, automaton->name, AUT_SER_SEP);
+	automaton_automata_context_serialize_report(f, automaton->context);
+	fprintf(f, "%s%d%s%s", AUT_SER_SEP, automaton->local_alphabet_count, AUT_SER_SEP, AUT_SER_ARRAY_START);
+	uint32_t i, j;
+	uint32_t fluent_index;
+	uint32_t fluent_count	= automaton->context->global_fluents_count;
+	uint32_t liveness_count	= automaton->context->liveness_valuations_count;
+	for(i = 0; i < automaton->local_alphabet_count; i++){
+		fprintf(f, "%d%s", automaton->local_alphabet[i], i == (automaton->local_alphabet_count - 1)? "" :  AUT_SER_SEP);
+	}
+	fprintf(f, "%s%s%d%s%s", AUT_SER_ARRAY_END, AUT_SER_SEP, automaton->transitions_count, AUT_SER_SEP, AUT_SER_ARRAY_START);
+	for(i = 0; i < automaton->transitions_count; i++){
+		automaton_transition_serialize_report(f, automaton->transitions[i]);
+		fprintf(f, "%s",i == (automaton->transitions_count - 1)? "" :  AUT_SER_SEP);
+	}
+	fprintf(f, "%s%s%d%s%s", AUT_SER_ARRAY_END, AUT_SER_SEP, automaton->initial_states_count, AUT_SER_SEP, AUT_SER_ARRAY_START);
+	for(i = 0; i < automaton->initial_states_count; i++){
+		fprintf(f, "%d%s", automaton->initial_states[i], i == (automaton->initial_states_count - 1)? "" :  AUT_SER_SEP);
+	}
+	fprintf(f, "%s%s%s", AUT_SER_ARRAY_END, AUT_SER_SEP, AUT_SER_ARRAY_START);
+	for(i = 0; i < automaton->transitions_count; i++){
+		fprintf(f, "%s", AUT_SER_ARRAY_START);
+		for(j = 0; j < fluent_count; j++){
+			fluent_index	= GET_STATE_FLUENT_INDEX(fluent_count, i, j);
+			fprintf(f, "%s%s", TEST_FLUENT_BIT(automaton->valuations, fluent_index) ? "1" : "0", j == (fluent_count - 1)? "" :  AUT_SER_SEP);
+		}
+		fprintf(f, "%s%s", AUT_SER_ARRAY_END, i == (automaton->transitions_count - 1) ? "" : AUT_SER_SEP);
+	}
+	fprintf(f, "%s%s%s", AUT_SER_ARRAY_END, AUT_SER_SEP, AUT_SER_ARRAY_START);
+	for(i = 0; i < automaton->transitions_count; i++){
+		fprintf(f, "%s", AUT_SER_ARRAY_START);
+		for(j = 0; j < liveness_count; j++){
+			fluent_index	= GET_STATE_FLUENT_INDEX(liveness_count, i, j);
+			fprintf(f, "%s%s", TEST_FLUENT_BIT(automaton->liveness_valuations, fluent_index) ? "1" : "0", j == (liveness_count - 1)? "" :  AUT_SER_SEP);
+		}
+		fprintf(f, "%s%s", AUT_SER_ARRAY_END, i == (automaton->transitions_count - 1) ? "" : AUT_SER_SEP);
+	}
+
+	fprintf(f, "%s%s", AUT_SER_ARRAY_END, AUT_SER_OBJ_END);
+}
+bool automaton_automaton_print_report(automaton_automaton *automaton, char *filename){
+	FILE *f = fopen(filename, "w");
+	if (f == NULL)
+	{
+	    printf("Error opening file!\n");
+	    return false;
+	}
+	automaton_automaton_serialize_report(f, automaton);
+	fclose(f);
+	return true;
+}
 /** CREATE FUNCTIONS **/
 automaton_signal_event* automaton_signal_event_create(char* name, automaton_signal_type type){ 
 	automaton_signal_event* signal_event	= malloc(sizeof(automaton_signal_event));

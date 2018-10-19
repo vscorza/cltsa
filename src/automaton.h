@@ -46,6 +46,12 @@
 #define CLEAR_FLUENT_BIT(arr,index)   ( arr[(index/FLUENT_ENTRY_SIZE)] &= ~(1 << (index%FLUENT_ENTRY_SIZE)) )
 #define TEST_FLUENT_BIT(arr,index)    ( arr[(index/FLUENT_ENTRY_SIZE)] & (1 << (index%FLUENT_ENTRY_SIZE)) )
 
+#define AUT_SER_OBJ_START "<"
+#define AUT_SER_OBJ_END ">"
+#define AUT_SER_ARRAY_START "["
+#define AUT_SER_ARRAY_END "]"
+#define AUT_SER_SEP ","
+
 typedef uint16_t signal_t;
 typedef uint8_t fluent_count_t;
 /****************
@@ -274,6 +280,14 @@ bool automaton_automaton_print_fsp(automaton_automaton* current_automaton, char*
 bool automaton_automaton_print_dot(automaton_automaton* current_automaton, char* filename);
 void automaton_range_print(automaton_range* range, char* prefix, char* suffix);
 void automaton_indexes_valuation_print(automaton_indexes_valuation* valuation, char* prefix, char* suffix);
+/** SERIALIZING FUNCTIONS **/
+void automaton_signal_event_serialize_report(FILE *f, automaton_signal_event *evt);
+void automaton_fluent_serialize_report(FILE *f, automaton_fluent *fluent);
+void automaton_automata_context_serialize_report(FILE *f, automaton_automata_context *ctx);
+void automaton_alphabet_serialize_report(FILE *f, automaton_alphabet *alphabet);
+void automaton_transition_serialize_report(FILE *f, automaton_transition *transition);
+void automaton_automaton_serialize_report(FILE *f, automaton_automaton *automaton);
+bool automaton_automaton_print_report(automaton_automaton *automaton, char *filename);
 /** INDEXES VALUATION **/
 bool automaton_indexes_valuation_has_range(automaton_indexes_valuation* valuation, automaton_range* range);
 bool automaton_indexes_valuation_add_range(automaton_indexes_valuation* valuation, automaton_range* range);

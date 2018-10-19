@@ -459,7 +459,77 @@ void run_automaton_tests(){
 	automaton_signal_event_destroy(out, true); out = NULL;
 	automaton_signal_event_destroy(tau, true); tau = NULL;
 }
+void run_report_tests(){
+	automaton_signal_event *x1 = automaton_signal_event_create("x1.on", INPUT_SIG);
+	automaton_signal_event *x2 = automaton_signal_event_create("x1.off", INPUT_SIG);
+	automaton_signal_event *y1 = automaton_signal_event_create("y1.on", OUTPUT_SIG);
+	automaton_signal_event *y2 = automaton_signal_event_create("y1.off", OUTPUT_SIG);
+	automaton_alphabet *alphabet = automaton_alphabet_create();
+	automaton_alphabet_add_signal_event(alphabet, x1);
+	automaton_alphabet_add_signal_event(alphabet, x2);
+	automaton_alphabet_add_signal_event(alphabet, y1);
+	automaton_alphabet_add_signal_event(alphabet, y2);
+	automaton_fluent *f1 = automaton_fluent_create("test fluent", true);
+	automaton_fluent_add_starting_signal(f1, alphabet, x1);
+	automaton_fluent_add_ending_signal(f1, alphabet, y1);
+	automaton_fluent_add_ending_signal(f1, alphabet, y2);
 
+	automaton_fluent **fluents	= malloc(sizeof(automaton_fluent*) * 1);
+	fluents[0]					= f1;
+	obdd **liveness_valuations	= malloc(sizeof(obdd*) * 2);
+	obdd_mgr* mgr				= obdd_mgr_create();
+	liveness_valuations[0]	= obdd_mgr_var(mgr, "x1");
+	liveness_valuations[1]	= obdd_mgr_var(mgr, "y1");
+	char** liveness_valuations_names	= malloc(sizeof(char*) * 2);
+	liveness_valuations_names[0]		= "ass_1";
+	liveness_valuations_names[1]		= "goal_1";
+	automaton_automata_context *ctx		= automaton_automata_context_create("CTX", alphabet, 1, fluents, 2, liveness_valuations, liveness_valuations_names);
+	automaton_transition *t1	= automaton_transition_create(0, 1);
+	automaton_transition_add_signal_event(t1, ctx, x1);
+	automaton_transition_add_signal_event(t1, ctx, y1);
+
+	uint32_t *local_alphabet				= malloc(sizeof(uint32_t) * 4);
+	uint32_t i;
+	for(i = 0; i < 4; i++)local_alphabet[i]	= i;
+
+	automaton_automaton *automaton		= automaton_automaton_create("automaton", ctx, 4, local_alphabet, true, true);
+	automaton_automaton_add_initial_state(automaton, 0);
+	automaton_automaton_add_transition(automaton, t1);
+	automaton_automaton_update_valuation(automaton);
+
+
+	obdd_destroy(liveness_valuations[0]);
+	obdd_destroy(liveness_valuations[1]);
+
+	free(local_alphabet);
+	free(fluents);
+	free(liveness_valuations);
+	free(liveness_valuations_names);
+
+	printf("FLUENT:");
+	automaton_fluent_serialize_report(stdout, f1);
+	printf("\n");
+	printf("ALPHABET:");
+	automaton_alphabet_serialize_report(stdout, alphabet);
+	printf("\n");
+	printf("CTX:");
+	automaton_automata_context_serialize_report(stdout, ctx);
+	printf("\n");
+	printf("Transition:");
+	automaton_transition_serialize_report(stdout, t1);
+	printf("\n");
+	printf("Automaton:");
+	automaton_automaton_serialize_report(stdout, automaton);
+	printf("\n");
+
+	automaton_transition_destroy(t1, true);
+	automaton_fluent_destroy(f1, true);
+	automaton_alphabet_destroy(alphabet);
+	automaton_signal_event_destroy(x1, true);
+	automaton_signal_event_destroy(x2, true);
+	automaton_signal_event_destroy(y1, true);
+	automaton_signal_event_destroy(y2, true);
+}
 void run_all_tests(){
 	run_tree_tests();
 	run_automaton_tests();
@@ -483,11 +553,12 @@ int main (void){
 
 	//run_parse_test("tests/test26.fsp", "test26");
 	//run_parse_test("tests/test27.fsp", "test27");
-	run_parse_test("tests/test28.fsp", "test28");
+	//run_parse_test("tests/test28.fsp", "test28");
 
 	//run_concrete_bucket_list_tests();
 	//run_ordered_list_tests();
 	//run_max_heap_tests();
+	run_report_tests();
 	return 0;    
 }
 
