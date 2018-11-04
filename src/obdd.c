@@ -924,6 +924,12 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 	//perform dfs exploration of obdd
 	while(last_pred_index[last_node_index] != -1){
 		last_node	= last_nodes[last_node_index];
+		if((last_node->var_ID - 2) < (int32_t)min_var_ID){
+					min_var_ID	= last_node->var_ID - 2;
+#if DEBUG_OBDD_VALUATIONS
+							printf("New [m]in var ID: %d\n", min_var_ID);
+#endif
+		}
 		has_no_pred	= false;
 		if((int32_t)(last_node->high_predecessors_count + last_node->low_predecessors_count) == 0){
 			has_no_pred	= true;
@@ -988,10 +994,10 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 				if(last_pred_index[last_node_index] > -1){
 					partial_valuation[current_predecessor->var_ID - 2]	= through_high;
 					dont_care_list[current_predecessor->var_ID - 2]		= false;
-					if((last_node->var_ID - 2) < (int32_t)min_var_ID){
-								min_var_ID	= current_predecessor->var_ID - 2;
+					if((current_predecessor->var_ID - 2) < (int32_t)min_var_ID){
+						min_var_ID	= current_predecessor->var_ID - 2;
 #if DEBUG_OBDD_VALUATIONS
-							printf("New [m]in var ID: %d\n", min_var_ID);
+						printf("New [m]in var ID: %d\n", min_var_ID);
 #endif
 					}
 					//update dont care list for nodes skipped due to obdd reduction
@@ -1007,6 +1013,7 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 				last_pred_index[last_node_index]	= -1;
 				current_predecessor	= last_node;
 			}
+			int32_t variable_index;
 
 #if DEBUG_OBDD_VALUATIONS
 			printf("last_pred_index[%d]:%d\t<", last_node_index, last_pred_index[last_node_index]);
@@ -1020,8 +1027,17 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 				printf("%s", partial_valuation[i]? "1" : "0");
 			printf(">\n");
 			printf("Dont care list\t<");
-			for(i = 0; i < (int32_t)variables_count; i++)
-				printf("%s", dont_care_list[i]? "?" : "0");
+			for(i = 0; i < (int32_t)variables_count; i++){
+				variable_index	= -1;
+				for(j = 0; j < (int32_t)img_count; j++){
+					if(valuation_img[j] == (uint32_t)i + 2){
+						variable_index	= valuation_img[j] - 2;
+						break;
+					}
+				}
+				printf("%s", dont_care_list[i]? (variable_index > -1 ? "?" : "_") : "0");
+			}
+
 			printf(">\n");
 #endif
 			//terminal case reached
@@ -1038,7 +1054,6 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 							dont_care_list[i]	= true;
 				}
 				//count dont cares to get number of new valuations (only for variables belonging to the image)
-				int32_t variable_index;
 				for(i = 0; i < (int32_t)variables_count; i++){
 					if(dont_care_list[i]){
 						variable_index	= -1;

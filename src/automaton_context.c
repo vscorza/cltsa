@@ -1535,6 +1535,8 @@ bool automaton_add_transition_from_valuations(obdd_mgr* mgr, automaton_automaton
 		uint32_t* x_y_alphabet, uint32_t* x_y_x_p_alphabet){
 	uint32_t i, fluent_index, fluent_count	= automaton->context->liveness_valuations_count;
 	automaton_transition* transition		= automaton_transition_create(from_state, to_state);
+	//if is-input set the transition type for non-labelled transitions
+	transition->is_input					= is_input;
 	automaton_signal_event* signal_event	= automaton_signal_event_create("", INPUT_SIG);
 	char signal_name[255];
 	//TODO: optimize alphabet indexes computation
@@ -1563,6 +1565,7 @@ bool automaton_add_transition_from_valuations(obdd_mgr* mgr, automaton_automaton
 				take_on				= is_input? from_valuation[left_offset + i] : !from_valuation[left_offset + i];
 				signal_dict_name	= (take_on? obdd_off_indexes[left_offset + i]: obdd_on_indexes[left_offset + i]);
 				strcpy(signal_name, signal_dict_name);
+				free(signal_event->name); signal_event->name	= NULL;
 				aut_dupstr(&(signal_event->name), signal_name);
 				automaton_transition_add_signal_event(transition, automaton->context, signal_event);
 #if DEBUG_LTL_AUTOMATON
@@ -1577,6 +1580,7 @@ bool automaton_add_transition_from_valuations(obdd_mgr* mgr, automaton_automaton
 			if(take_on){
 				signal_dict_name	= (take_on? obdd_on_indexes[right_offset + i]: obdd_off_indexes[right_offset + i]);
 				strcpy(signal_name, signal_dict_name);
+				free(signal_event->name); signal_event->name	= NULL;
 				aut_dupstr(&(signal_event->name), signal_name);
 				automaton_transition_add_signal_event(transition, automaton->context, signal_event);
 #if DEBUG_LTL_AUTOMATON
@@ -1739,10 +1743,10 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 			x_y_x_p_alphabet[x_y_x_p_count++] = i;
 			signals_alphabet[signals_count++]	= i;
 			strcpy(current_dict_entry, mgr->vars_dict->entries[i].key);	strcat(current_dict_entry, SIGNAL_ON_SUFFIX);
-			obdd_on_signals_indexes[obdd_on_count]		= malloc(sizeof(char) * strlen(current_dict_entry));
+			obdd_on_signals_indexes[obdd_on_count]			= malloc(sizeof(char) * (strlen(current_dict_entry) + 1));
 			strcpy(obdd_on_signals_indexes[obdd_on_count], current_dict_entry);obdd_on_count++;
 			strcpy(current_dict_entry, mgr->vars_dict->entries[i].key);	strcat(current_dict_entry, SIGNAL_OFF_SUFFIX);
-			obdd_off_signals_indexes[obdd_off_count]		= malloc(sizeof(char) * strlen(current_dict_entry));
+			obdd_off_signals_indexes[obdd_off_count]		= malloc(sizeof(char) * (strlen(current_dict_entry) + 1));
 			strcpy(obdd_off_signals_indexes[obdd_off_count], current_dict_entry);obdd_off_count++;
 		}
 	}
@@ -1761,10 +1765,10 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 				x_y_x_p_alphabet[x_y_x_p_count++] = i;
 				signals_alphabet[signals_count++]	= i;
 				strcpy(current_dict_entry, mgr->vars_dict->entries[i].key);	strcat(current_dict_entry, SIGNAL_ON_SUFFIX);
-				obdd_on_signals_indexes[obdd_on_count]		= malloc(sizeof(char) * strlen(current_dict_entry));
+				obdd_on_signals_indexes[obdd_on_count]		= malloc(sizeof(char) * (strlen(current_dict_entry) + 1));
 				strcpy(obdd_on_signals_indexes[obdd_on_count], current_dict_entry);obdd_on_count++;
 				strcpy(current_dict_entry, mgr->vars_dict->entries[i].key);	strcat(current_dict_entry, SIGNAL_OFF_SUFFIX);
-				obdd_off_signals_indexes[obdd_off_count]		= malloc(sizeof(char) * strlen(current_dict_entry));
+				obdd_off_signals_indexes[obdd_off_count]		= malloc(sizeof(char) * (strlen(current_dict_entry) + 1));
 				strcpy(obdd_off_signals_indexes[obdd_off_count], current_dict_entry);obdd_off_count++;
 			}
 		}
@@ -1954,7 +1958,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 		do{
 			automaton_concrete_bucket_pop_entry(theta_env_bucket_list, env_state);
 			obdd_current_state	= obdd_restrict_vector(env_sys_theta_composed, x_alphabet_o, env_state->valuation, x_count);
-			current_valuations	= obdd_get_valuations(mgr, obdd_current_state, &current_valuations_count, x_alphabet, x_count);
+			current_valuations	= obdd_get_valuations(mgr, obdd_current_state, &current_valuations_count, x_y_alphabet, x_y_count);
 #if DEBUG_LTL_AUTOMATON
 			printf("%d-[", sys_state->state);
 			for(j = 0; j < x_y_count; j++)
@@ -1963,6 +1967,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 			obdd_print_valuations(mgr, current_valuations, current_valuations_count, x_y_alphabet, x_y_count);
 #endif
 			for(i = 0; i < current_valuations_count; i++){
+				//TODO:review bad read here
 				automaton_set_composed_valuation(sys_state->valuation, current_valuations, i, true, false, x_y_alphabet, x_count, y_count);
 				sys_state->state		= obdd_state_tree_get_key(obdd_state_map, sys_state->valuation, x_y_count);
 
@@ -2134,14 +2139,16 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	automaton_concrete_bucket_destroy(rho_env_bucket_list);automaton_concrete_bucket_destroy(rho_sys_bucket_list);
 	automaton_concrete_bucket_destroy(rho_env_processed_bucket_list);automaton_concrete_bucket_destroy(rho_sys_processed_bucket_list);
 	free(x_alphabet); free(y_alphabet); free(x_p_alphabet); free(y_p_alphabet);free(x_y_alphabet); free(x_y_x_p_alphabet); free(x_p_y_p_alphabet); free(signals_alphabet);
+	free(x_alphabet_o); free(y_alphabet_o); free(x_p_alphabet_o); free(y_p_alphabet_o);free(x_y_alphabet_o); free(x_y_x_p_alphabet_o); free(x_p_y_p_alphabet_o); free(signals_alphabet_o);
+
 	free(local_alphabet);
 	obdd_state_tree_destroy(state_map);
 	obdd_state_tree_destroy(obdd_state_map);
 	//TODO:remove this
 	//automaton_automaton_print(ltl_automaton, true, true, true, "", "");
 	//automaton_automaton_print_fsp(ltl_automaton, "tests/ltl_automaton_lift.fsp");
-	automaton_automaton_print_dot(ltl_automaton, "tests/ltl_automaton_lift.dot");
-	automaton_automaton_print_report(ltl_automaton, "tests/ltl_automaton_lift.rep");
+	//automaton_automaton_print_dot(ltl_automaton, "tests/ltl_automaton_lift.dot");
+	//automaton_automaton_print_report(ltl_automaton, "tests/ltl_automaton_lift.rep");
 	return ltl_automaton;
 }
 
@@ -2358,15 +2365,15 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 					automaton_fluent_copy(&current_fluent, &(ctx->global_fluents[j]));
 				}
 				uint32_t new_size					= GET_FLUENTS_ARR_SIZE(ctx->global_fluents_count, game_automaton->transitions_size);
-				game_automaton->valuations 				= malloc(sizeof(uint32_t) * new_size);
+				game_automaton->valuations 				= calloc(new_size,  sizeof(uint32_t));
 				game_automaton->inverted_valuations		= malloc(sizeof(automaton_bucket_list*) * ctx->global_fluents_count);
-				for(j = 0; j < old_fluents_count; j++){
+				for(j = 0; j < (int32_t)old_fluents_count; j++){
 					game_automaton->inverted_valuations[j]	= old_inverted_valuations[j];
 				}
-				for(j = old_fluents_count; j < ctx->global_fluents_count; j++){
+				for(j = (int32_t)old_fluents_count; j < (int32_t)ctx->global_fluents_count; j++){
 					game_automaton->inverted_valuations[j]	= game_automaton->liveness_inverted_valuations[j - old_fluents_count];
 				}
-				for(j = 0; j < game_automaton->transitions_count; j++){
+				for(j = 0; j < (int32_t)game_automaton->transitions_count; j++){
 					for(k = 0; j < old_fluents_count; k++){
 						fluent_index		= GET_STATE_FLUENT_INDEX(old_fluents_count, j, k);
 						other_fluent_index	= GET_STATE_FLUENT_INDEX(ctx->global_fluents_count, j, k);
@@ -2399,10 +2406,12 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 				//automaton_automaton_print(tables->composition_entries[i]->valuation.automaton_value, true, true, true, "*\t", "*\t");
 				sprintf(buf, "%s_%d_strat_%s.fsp", ctx_name, i, is_synchronous? "synch": "asynch");
 				automaton_automaton_print_fsp(winning_region_automaton, buf);
+				sprintf(buf, "%s_%d_strat_%s.rep", ctx_name, i, is_synchronous? "synch": "asynch");
+				automaton_automaton_print_report(winning_region_automaton, buf);
 				sprintf(buf, "%s_%d_strat_%s.dot", ctx_name, i, is_synchronous? "synch": "asynch");
 				automaton_automaton_print_dot(winning_region_automaton, buf);
 				sprintf(cmd, "sfdp -Tsvg %s > %s.svg\n", buf, buf);
-				printf(cmd);
+				//printf(cmd);
 				system(cmd);
 
 			}
@@ -2437,6 +2446,8 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 				//automaton_automaton_print(tables->composition_entries[i]->valuation.automaton_value, true, true, true, "*\t", "*\t");
 				sprintf(buf, "%s_%d_result_%s.fsp", ctx_name, i, is_synchronous? "synch": "asynch");
 				automaton_automaton_print_fsp(tables->composition_entries[i]->valuation.automaton_value, buf);
+				sprintf(buf, "%s_%d_result_%s.rep", ctx_name, i, is_synchronous? "synch": "asynch");
+				automaton_automaton_print_report(tables->composition_entries[i]->valuation.automaton_value, buf);
 				sprintf(buf, "%s_%d_result_%s.dot", ctx_name, i, is_synchronous? "synch": "asynch");
 				automaton_automaton_print_dot(tables->composition_entries[i]->valuation.automaton_value, buf);
 				sprintf(cmd, "sfdp -Tsvg %s > %s.svg\n", buf, buf);

@@ -1,24 +1,24 @@
 range R = 1..2
 
 set Global_Alphabet = {a,b,g}
-set Controllable_Alphabet = {g}
+set Controllable_Alphabet = {a,g}
 
 set Global_Signals	= {x, y}
 set Output_Signals	= {y}
 
 AUTOMATA = (y.on-> WIN | y.off -> LOSE),
-WIN = ( <y.on, g> -> WIN | <y.off, g> -> WIN | a -> WAIT),
+WIN = ( g -> WIN | a -> WAIT),
 WAIT = (a -> WAIT | b -> WIN),
-LOSE = (<y.on,b> -> LOSE | <y.off,b> -> LOSE).
+LOSE = (b -> LOSE | b -> LOSE).
 
 
-ltl env theta Init_Lift_e in GAME_LTL	= (x || !x).
+ltl env theta Init_Lift_e in GAME_LTL	= (x).
 ltl sys theta Init_Lift_s in GAME_LTL	= (y || !y).
-ltl env rho Env_Rho in GAME_LTL	= [](x || !x).
+ltl env rho Env_Rho in GAME_LTL	= [](x <-> X(x)).
 ltl sys rho Sys_Rho in GAME_LTL	= [](y <-> X(y)).
 
 fluent F_Goal = <g, a>
-fluent F_Ass = <b, g>
+fluent F_Ass = <g, a> initially 1
 
 ltl fluent Ass = (x).
 ltl fluent Goal	= (y).

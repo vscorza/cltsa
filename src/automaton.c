@@ -611,9 +611,17 @@ void automaton_automaton_serialize_report(FILE *f, automaton_automaton *automato
 		fprintf(f, "%d%s", automaton->local_alphabet[i], i == (automaton->local_alphabet_count - 1)? "" :  AUT_SER_SEP);
 	}
 	fprintf(f, "%s%s%d%s%s", AUT_SER_ARRAY_END, AUT_SER_SEP, automaton->transitions_count, AUT_SER_SEP, AUT_SER_ARRAY_START);
+	uint32_t current_count	= 0;
 	for(i = 0; i < automaton->transitions_count; i++){
-		automaton_transition_serialize_report(f, automaton->transitions[i]);
-		fprintf(f, "%s",i == (automaton->transitions_count - 1)? "" :  AUT_SER_SEP);
+		for(j = 0; j < automaton->out_degree[i]; j++){
+			if(&(automaton->transitions[i][j]) != NULL){
+				automaton_transition_serialize_report(f, &(automaton->transitions[i][j]));
+				fprintf(f, "%s",current_count == (automaton->transitions_composite_count - 1)? "" :  AUT_SER_SEP);
+			}else{
+				printf("ERROR: Transition was null at [%d][%d]\n", i, j);
+			}
+			current_count++;
+		}
 	}
 	fprintf(f, "%s%s%d%s%s", AUT_SER_ARRAY_END, AUT_SER_SEP, automaton->initial_states_count, AUT_SER_SEP, AUT_SER_ARRAY_START);
 	for(i = 0; i < automaton->initial_states_count; i++){
@@ -623,8 +631,12 @@ void automaton_automaton_serialize_report(FILE *f, automaton_automaton *automato
 	for(i = 0; i < automaton->transitions_count; i++){
 		fprintf(f, "%s", AUT_SER_ARRAY_START);
 		for(j = 0; j < fluent_count; j++){
-			fluent_index	= GET_STATE_FLUENT_INDEX(fluent_count, i, j);
-			fprintf(f, "%s%s", TEST_FLUENT_BIT(automaton->valuations, fluent_index) ? "1" : "0", j == (fluent_count - 1)? "" :  AUT_SER_SEP);
+			if(automaton->is_game){
+				fluent_index	= GET_STATE_FLUENT_INDEX(fluent_count, i, j);
+				fprintf(f, "%s%s", TEST_FLUENT_BIT(automaton->valuations, fluent_index) ? "1" : "0", j == (fluent_count - 1)? "" :  AUT_SER_SEP);
+			}else{
+				fprintf(f, "%s%s", "0", j == (fluent_count - 1)? "" :  AUT_SER_SEP);
+			}
 		}
 		fprintf(f, "%s%s", AUT_SER_ARRAY_END, i == (automaton->transitions_count - 1) ? "" : AUT_SER_SEP);
 	}
@@ -632,8 +644,13 @@ void automaton_automaton_serialize_report(FILE *f, automaton_automaton *automato
 	for(i = 0; i < automaton->transitions_count; i++){
 		fprintf(f, "%s", AUT_SER_ARRAY_START);
 		for(j = 0; j < liveness_count; j++){
-			fluent_index	= GET_STATE_FLUENT_INDEX(liveness_count, i, j);
-			fprintf(f, "%s%s", TEST_FLUENT_BIT(automaton->liveness_valuations, fluent_index) ? "1" : "0", j == (liveness_count - 1)? "" :  AUT_SER_SEP);
+			if(automaton->is_game){
+				fluent_index	= GET_STATE_FLUENT_INDEX(liveness_count, i, j);
+				fprintf(f, "%s%s", TEST_FLUENT_BIT(automaton->liveness_valuations, fluent_index) ? "1" : "0", j == (liveness_count - 1)? "" :  AUT_SER_SEP);
+			}else{
+				fprintf(f, "%s%s", "0", j == (fluent_count - 1)? "" :  AUT_SER_SEP);
+			}
+
 		}
 		fprintf(f, "%s%s", AUT_SER_ARRAY_END, i == (automaton->transitions_count - 1) ? "" : AUT_SER_SEP);
 	}
@@ -1630,6 +1647,8 @@ automaton_ranking* automaton_state_best_successor_ranking(automaton_automaton* g
 	j = satisfies_guarantee? (current_guarantee + 1) % guarantee_count : current_guarantee;
 	//TODO: apply SIMD
 	for(i = 0; i < game_automaton->out_degree[state]; i++){
+		//if transition is controllable in non-controllable state, then skip
+		if(!is_controllable && !game_automaton->transitions[state][i].is_input)continue;
 		to_state	= game_automaton->transitions[state][i].state_to;
 		//if(to_state == state)continue;
 		current_value	= ((automaton_ranking*)automaton_concrete_bucket_get_entry(ranking[j], to_state));
@@ -1638,12 +1657,12 @@ automaton_ranking* automaton_state_best_successor_ranking(automaton_automaton* g
 			min_ranking = max_ranking = current_value;
 		}
 		if(is_controllable){
-			if(min_value >= current_value->value){
+			if((min_value >= current_value->value) || (current_value->value != RANKING_INFINITY && min_value == RANKING_INFINITY)){
 				min_value 	= current_value->value;
 				min_ranking	= current_value;
 			}
 		}else{
-			if(max_value <= current_value->value){
+			if((max_value <= current_value->value) || (current_value->value == RANKING_INFINITY && min_value != RANKING_INFINITY)){
 				max_value 	= current_value->value;
 				max_ranking	= current_value;
 			}
@@ -1657,8 +1676,10 @@ automaton_ranking* automaton_state_best_successor_ranking(automaton_automaton* g
 #endif
 	return return_value;
 }
+//return query for: left > right
 bool automaton_ranking_gt(automaton_ranking* left, automaton_ranking* right){
 	if(left->value == RANKING_INFINITY)return right->value != RANKING_INFINITY;
+	if(right->value == RANKING_INFINITY)return false;
 	return (left->value > right->value) || (left->value == right->value && left->assumption_to_satisfy > right->assumption_to_satisfy);
 }
 bool automaton_ranking_eq(automaton_ranking* left, automaton_ranking* right){
@@ -1680,7 +1701,7 @@ bool automaton_state_is_stable(automaton_automaton* game_automaton, uint32_t sta
 	 * v in Q_j
 	 */
 	uint32_t fluent_count		= game_automaton->context->global_fluents_count;
-	uint32_t fluent_index		= GET_STATE_FLUENT_INDEX(fluent_count, state, current_guarantee);//guarantees_indexes[current_guarantee]);
+	uint32_t fluent_index		= GET_STATE_FLUENT_INDEX(fluent_count, state, guarantees_indexes[current_guarantee]);//guarantees_indexes[current_guarantee]);
 	bool satisfies_guarantee	= TEST_FLUENT_BIT(game_automaton->valuations, fluent_index);
 	/**
 	 * v in P_i
@@ -1731,26 +1752,30 @@ void automaton_add_unstable_predecessors(automaton_automaton* game_automaton, au
 		, uint32_t current_guarantee, uint32_t guarantee_count, uint32_t assumptions_count
 		, uint32_t* guarantees_indexes, uint32_t* assumptions_indexes, int32_t first_assumption_index
 		, uint32_t timestamp){
-	//TODO:implement this
 	uint32_t i;
 	automaton_transition* current_transition;
 	automaton_pending_state current_pending_state;
+	automaton_pending_state *existing_pending_state;
 	for(i = 0; i < game_automaton->in_degree[state]; i++){
 		current_transition	= &(game_automaton->inverted_transitions[state][i]);
 		//TODO:check if we should add another structure to answer inclusion queries (heap of state_from synched with pending_state)
-		if(automaton_concrete_bucket_has_key(key_list, current_transition->state_from))
-			continue;
 		if(!automaton_state_is_stable(game_automaton, current_transition->state_from, ranking, current_guarantee, guarantee_count
 				, assumptions_count, guarantees_indexes, assumptions_indexes, first_assumption_index) || current_transition->is_input){
 #if DEBUG_SYNTHESIS
 	printf("[Unstable] Pushing into pending (%d, %d) from state %d\n", current_transition->state_from, current_guarantee, state);
 #endif
-
-			current_pending_state.goal_to_satisfy	= current_guarantee; current_pending_state.state = current_transition->state_from;
-			current_pending_state.value				= ((automaton_ranking*)automaton_concrete_bucket_get_entry(ranking[current_guarantee], current_transition->state_from))->value;
-			current_pending_state.timestamp			= timestamp;
-			automaton_max_heap_add_entry(pending_list, &current_pending_state);
-			automaton_concrete_bucket_add_entry(key_list, &(current_transition->state_from));
+			//check if entry exists in the pending structure, if so update previous value
+			if(automaton_concrete_bucket_has_key(key_list, current_transition->state_from)){
+				existing_pending_state					= automaton_concrete_bucket_get_entry(key_list, current_transition->state_from);
+				existing_pending_state->value			= ((automaton_ranking*)automaton_concrete_bucket_get_entry(ranking[current_guarantee], current_transition->state_from))->value;
+				existing_pending_state->timestamp		= timestamp;
+			}else{
+				current_pending_state.goal_to_satisfy	= current_guarantee; current_pending_state.state = current_transition->state_from;
+				current_pending_state.value				= ((automaton_ranking*)automaton_concrete_bucket_get_entry(ranking[current_guarantee], current_transition->state_from))->value;
+				current_pending_state.timestamp			= timestamp;
+				automaton_max_heap_add_entry(pending_list, &current_pending_state);
+				automaton_concrete_bucket_add_entry(key_list, &(current_transition->state_from));
+			}
 		}
 	}
 }
@@ -1769,7 +1794,7 @@ void automaton_ranking_increment(automaton_automaton* game_automaton, automaton_
 	}
 
 	uint32_t fluent_count				= ctx->global_fluents_count;
-	uint32_t fluent_index				= GET_STATE_FLUENT_INDEX(fluent_count, ref_state, current_guarantee);
+	uint32_t fluent_index				= GET_STATE_FLUENT_INDEX(fluent_count, ref_state, guarantees_indexes[current_guarantee]);
 	satisfies_goal						= TEST_FLUENT_BIT(game_automaton->valuations, fluent_index);
 	//goal satisfaction resets ranking
 	if(satisfies_goal){
@@ -1950,12 +1975,13 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 			automaton_concrete_bucket_remove_entry(key_list, state_location);
 		current_ranking			= (automaton_ranking*)automaton_concrete_bucket_get_entry(ranking_list[current_pending_state.goal_to_satisfy], current_pending_state.state);
 #if DEBUG_SYNTHESIS
-			printf("Popping from pending (%d, %d) with ranking (%d, %d)\n", current_pending_state->state, current_pending_state->goal_to_satisfy, current_ranking->value, current_ranking->assumption_to_satisfy);
+			printf("Popping from pending (%d, %d) with ranking (%d, %d)\n", current_pending_state.state, current_pending_state.goal_to_satisfy, current_ranking->value, current_ranking->assumption_to_satisfy);
 #endif
 		if(current_ranking->value == RANKING_INFINITY){
 			pending_processed++;
 			continue;
 		}
+
 		if(automaton_state_is_stable(game_automaton, current_pending_state.state, ranking_list
 				, current_pending_state.goal_to_satisfy, guarantees_count, assumptions_count
 				, guarantees_indexes, assumptions_indexes, first_assumption_index)){
@@ -1967,7 +1993,7 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 				, max_delta, current_pending_state.goal_to_satisfy, guarantees_count, assumptions_count
 				, guarantees_indexes, assumptions_indexes, first_assumption_index);
 #if DEBUG_SYNTHESIS
-	printf("[PENDING PROC.] Adding unstable pred for %d\n", current_pending_state->state);
+	printf("[PENDING PROC.] Adding unstable pred for %d\n", current_pending_state.state);
 #endif
 		automaton_add_unstable_predecessors(game_automaton, pending_list, key_list, current_pending_state.state
 				, ranking_list, current_pending_state.goal_to_satisfy, guarantees_count
@@ -1994,7 +2020,7 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 		}
 		printf("]");
 	}
-	printf("\tpending:%d\n", pending_list->composite_count);
+	printf("\tpending:%d\n", pending_list->count);
 #endif
 
 	printf("Synthesis processed [%09d] states, run for [%08f]s\n", pending_processed, (double)(clock() - begin) / CLOCKS_PER_SEC);
@@ -2086,7 +2112,8 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 							for(m = 0; m < FIXED_SIGNALS_COUNT; m++)
 								strategy_transition->signals[m]		= current_transition->signals[m];
 							strategy_transition->other_signals	= current_transition->other_signals;
-							automaton_automaton_add_transition(strategy, strategy_transition);
+							if(succ_ranking->value != RANKING_INFINITY)
+								automaton_automaton_add_transition(strategy, strategy_transition);
 							//add initial state if not already added
 							if(strategy->initial_states_count == 0 && current_ranking->state == game_automaton->initial_states[0]){
 								automaton_automaton_add_initial_state(strategy, strategy_maps[i][current_ranking->state]);

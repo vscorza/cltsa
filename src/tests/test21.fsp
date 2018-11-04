@@ -1,11 +1,14 @@
-set Global_Alphabet = {cook, finishedCooking, cooking, moveToBelt, overHeated, idle}
+//set Global_Alphabet = {cook, finishedCooking, cooking, moveToBelt, overHeated, idle}
+set Global_Alphabet = {cook, finishedCooking, cooking, moveToBelt, idle}
 set Controllable_Alphabet = {idle, cook, moveToBelt}
 
 BISCOTTI = (idle->BISCOTTI | cook->COOKING),
 COOKING = (cooking->COOKING | finishedCooking->FINISHED | cook->OVERHEATED), 
 FINISHED = (cook->COOKING | moveToBelt->BISCOTTI),  
-OVERHEATED = (overHeated->OVERHEATED).
+OVERHEATED = (finishedCooking->OVERHEATED).
+//OVERHEATED = (overHeated->OVERHEATED).
 
+//fluent F_NotCooking = <finishedCooking, {cook, overHeated}> initially 1
 fluent F_NotCooking = <finishedCooking, cook> initially 1
 fluent F_MoveToBelt = <moveToBelt, cook>
 
@@ -13,11 +16,4 @@ SUCCESSFULLY_COOKED_TWICE = (cook->cook->moveToBelt->SUCCESSFULLY_COOKED_TWICE).
 
 |f| ENV =(BISCOTTI || SUCCESSFULLY_COOKED_TWICE).
 |gr1| <{F_NotCooking}><{F_MoveToBelt}> STRAT = ENV.
-/*
-controllerSpec G1 = {
-       safety = {SUCCESSFULLY_COOKED_TWICE, NotOverHeated}
-       assumption = {NotCooking}
-       liveness = {MOVE_TO_BELT}
-       controllable = {Controllable}
-}
-*/
+
