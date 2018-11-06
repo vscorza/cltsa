@@ -366,6 +366,7 @@ char** automaton_set_syntax_evaluate(automaton_parsing_tables* tables, automaton
 	char** inner_value			= NULL;
 	bool is_set;
 	automaton_indexes_syntax* indexes	= NULL;
+	if(set == NULL)return NULL;
 	if(set->is_ident){
 		index						= automaton_parsing_tables_get_entry_index(tables, SET_ENTRY_AUT, set->string_terminal);
 		if(index >= 0)if(tables->set_entries[index]->solved)	return tables->set_entries[index]->valuation.labels_value;
@@ -2011,7 +2012,6 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	 * once rho_env_bucket_list is empty we start again with rho_bucket_list until both lists are empty
 	 */
 	uint32_t rho_counter = 0, skipped = 0, evaluated = 0;
-	//TODO: properly implement this
 	do{
 		if(rho_sys_bucket_list->composite_count > 0){
 			do{
@@ -2348,6 +2348,8 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 			automaton_fluent current_fluent;
 			current_fluent.ending_signals_count	= 0; current_fluent.ending_signals	= NULL;
 			current_fluent.starting_signals_count	= 0; current_fluent.starting_signals	= NULL;
+			//TODO:this needs to be done when building the game, not afterwards, when liveness data is lost, ends with restoration involving
+			//was_merged and old values
 			if(game_automaton->liveness_valuations_size > 0){
 				was_merged	= true;
 				old_inverted_valuations	= game_automaton->inverted_valuations;

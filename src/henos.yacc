@@ -96,6 +96,7 @@ label:
 labels:
 	labels ',' label						{$$ = automaton_set_syntax_concat_labels($1,$3);}
 	|label									{$$ = automaton_set_syntax_create_from_label($1);}
+	|										{$$	= NULL;}
 	;
 concurrentLabel:
 	'<' concurrentLabels '>' indexes		{$$ = automaton_label_syntax_create(true, $2, NULL, $4);}

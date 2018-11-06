@@ -549,11 +549,11 @@ int main (void){
 	//run_small_obdd_tests();
 	//run_obdd_tests();
 	//run_obdd_valuations();
-	run_parse_test("tests/test21.fsp", "test21");
+	//run_parse_test("tests/test21.fsp", "test21");
 
 	//run_parse_test("tests/test26.fsp", "test26");
 	//run_parse_test("tests/test27.fsp", "test27");
-	run_parse_test("tests/test28.fsp", "test28");
+	run_parse_test("tests/test29.fsp", "test29");
 
 	//run_concrete_bucket_list_tests();
 	//run_ordered_list_tests();
