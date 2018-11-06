@@ -1,4 +1,4 @@
-//lift example taken from Synthesis of Reactive(1) Designs
+//lift example taken from Synthesis of Reactive(1) Designs 3 floors
 set Global_Alphabet = {}
 set Controllable_Alphabet = {}
 
@@ -11,12 +11,10 @@ ltl env rho Env_Release_B in GAME_LTL	= [](((b1 && f1)-> X(!b1)) &&((b2 && f2)->
 ltl env rho Env_Keep_B in GAME_LTL		= [](((b1 && !f1)-> X(b1)) &&((b2 && !f2)-> X(b2)) &&((b3 && !f3)-> X(b3))).
 ltl sys rho Sys_Mutex in GAME_LTL		= [](!(f1 && f2) && !(f2 && f3) && !(f1 && f3)).
 ltl sys rho Sys_Adj_Floors in GAME_LTL	= []((f1 -> X(f1 || f2)) && (f2 -> X(f1 || f2 || f3)) && (f3 -> X(f3 || f2))).
-ltl sys rho Sys_Adj_Floors in GAME_LTL	= []((f1 -> X(f1 || f2)) && (f2 -> X(f1 || f2 || f3)) && (f3 -> X(f3 || f2))).
-ltl sys rho Sys_Move_Iff_B in GAME_LTL	= [](((f1 && X(f2)) || (f2 && X(f3)))->(b1 || b2 || b3)).
 ltl sys rho Sys_Move_Iff_B in GAME_LTL	= [](((f1 && X(f2)) || (f2 && X(f3)))->(b1 || b2 || b3)).
 
 
-ltl fluent Ass = (x || !x).
+ltl fluent Ass = (b1 || !b1).
 ltl fluent Goal_Back_To_Ground			= (f1 || (b1 || b2 || b3)).
 ltl fluent Goal_Serve_Request_1			= ((b1->f1)).
 ltl fluent Goal_Serve_Request_2			= ((b2->f2)).

@@ -1622,8 +1622,8 @@ bool automaton_add_transition_from_valuations(obdd_mgr* mgr, automaton_automaton
 												x_y_alphabet, to_valuation, x_count + y_count);
 				}
 				if(obdd_is_sat(mgr, obdd_current_state->root_obdd)){
-						SET_FLUENT_BIT(automaton->valuations, fluent_index);
-				}else CLEAR_FLUENT_BIT(automaton->valuations, fluent_index);
+						SET_FLUENT_BIT(automaton->liveness_valuations, fluent_index);
+				}else CLEAR_FLUENT_BIT(automaton->liveness_valuations, fluent_index);
 				obdd_destroy(obdd_current_state);
 			}
 		}
@@ -1898,11 +1898,12 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 			LTL_BUCKET_SIZE, obdd_composite_state_extractor, sizeof(uint32_t) + sizeof(bool) * (x_count + y_count));
 	sys_state->state		= 0;//obdd_state_tree_get_key(obdd_state_map, sys_state->valuation, x_y_count);
 	automaton_automaton_add_initial_state(ltl_automaton, sys_state->state);
+	/*
 	uint32_t fluent_index;
 	for(i = 0; i < fluent_count; i++){
 		fluent_index	= GET_STATE_FLUENT_INDEX(fluent_count, sys_state->state, i);
 		CLEAR_FLUENT_BIT(ltl_automaton->valuations, fluent_index);
-	}
+	}*/
 	/**
 	 * THETA INITIAL CONDITION
 	 */
@@ -2350,7 +2351,7 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 			current_fluent.starting_signals_count	= 0; current_fluent.starting_signals	= NULL;
 			//TODO:this needs to be done when building the game, not afterwards, when liveness data is lost, ends with restoration involving
 			//was_merged and old values
-			if(game_automaton->liveness_valuations_size > 0){
+			if(ctx->liveness_valuations_count > 0){
 				was_merged	= true;
 				old_inverted_valuations	= game_automaton->inverted_valuations;
 				old_valuations			= game_automaton->valuations;
@@ -2358,7 +2359,7 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 				old_fluents_count		= ctx->global_fluents_count;
 				old_fluents				= ctx->global_fluents;
 
-				ctx->global_fluents_count	+= game_automaton->liveness_valuations_size;
+				ctx->global_fluents_count	+= ctx->liveness_valuations_count;
 				ctx->global_fluents		= malloc(sizeof(automaton_fluent) * ctx->global_fluents_count);
 				for(j = 0; j < old_fluents_count; j++)
 					automaton_fluent_copy(&(old_fluents[j]), &(ctx->global_fluents[j]));
