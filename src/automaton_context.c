@@ -1563,7 +1563,7 @@ bool automaton_add_transition_from_valuations(obdd_mgr* mgr, automaton_automaton
 #if DEBUG_LTL_AUTOMATON
 				has_action 	= true;
 #endif
-				take_on				= is_input? from_valuation[left_offset + i] : !from_valuation[left_offset + i];
+				take_on				= from_valuation[left_offset + i]; //is_input? from_valuation[left_offset + i] : !from_valuation[left_offset + i];
 				signal_dict_name	= (take_on? obdd_off_indexes[left_offset + i]: obdd_on_indexes[left_offset + i]);
 				strcpy(signal_name, signal_dict_name);
 				free(signal_event->name); signal_event->name	= NULL;
@@ -1603,30 +1603,46 @@ bool automaton_add_transition_from_valuations(obdd_mgr* mgr, automaton_automaton
 		automaton_automaton_add_transition(automaton, transition);
 	}
 #if DEBUG_LTL_AUTOMATON
-	printf("%s\n", has_transition? "" : "*");
+	printf("%s", has_transition? "" : "*");
 #endif
 	automaton_transition_destroy(transition, true);
 	//TODO:check this
 	//should add after adding transition since structure resizing may not have been triggered
 	obdd* obdd_current_state;
-	if(!has_transition)
+	if(!has_transition){
+#if DEBUG_LTL_AUTOMATON
+		printf("% V:");
+#endif
 		for(i = 0; i < fluent_count; i++){
 			fluent_index	= GET_STATE_FLUENT_INDEX(fluent_count, to_state, i);
 			//evaluate each liveness formula on landing state to check if formula is satisfied and then set bit
 			if(!is_initial){
 				if(is_input){
 					obdd_current_state	= obdd_restrict_vector(automaton->context->liveness_valuations[i],
-							x_y_x_p_alphabet, to_valuation, x_count * 2 + y_count);
+							x_y_alphabet, to_valuation, x_count + y_count);
+							//x_y_x_p_alphabet, to_valuation, x_count * 2 + y_count);
 				}else{
 					obdd_current_state	= obdd_restrict_vector(automaton->context->liveness_valuations[i],
 												x_y_alphabet, to_valuation, x_count + y_count);
 				}
 				if(obdd_is_sat(mgr, obdd_current_state->root_obdd)){
+#if DEBUG_LTL_AUTOMATON
+					printf("1");
+#endif
 						SET_FLUENT_BIT(automaton->liveness_valuations, fluent_index);
-				}else CLEAR_FLUENT_BIT(automaton->liveness_valuations, fluent_index);
+				}else{
+#if DEBUG_LTL_AUTOMATON
+					printf("0");
+#endif
+					CLEAR_FLUENT_BIT(automaton->liveness_valuations, fluent_index);
+				}
 				obdd_destroy(obdd_current_state);
 			}
 		}
+	}
+#if DEBUG_LTL_AUTOMATON
+	printf("\n");
+#endif
 	return has_transition;
 }
 automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_context* ctx, char* name, obdd** env_theta_obdd, uint32_t env_theta_count, obdd** sys_theta_obdd, uint32_t sys_theta_count

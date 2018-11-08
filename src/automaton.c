@@ -2803,11 +2803,11 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 					for(j = 0; j < automata_count - fluent_count; j++){
 						if(automata[j]->built_from_ltl){
 							fluent_index	= GET_STATE_FLUENT_INDEX(liveness_valuations_count, current_to_state[j], i);
-							current_valuation &= TEST_FLUENT_BIT(automata[j]->liveness_valuations, fluent_index);
+							current_valuation = current_valuation && TEST_FLUENT_BIT(automata[j]->liveness_valuations, fluent_index);
 						}
 						if(!current_valuation)break;
 					}
-					fluent_index	= GET_STATE_FLUENT_INDEX(fluent_count, composite_to, i);
+					fluent_index	= GET_STATE_FLUENT_INDEX(liveness_valuations_count, composite_to, i);
 					if(current_valuation){
 						SET_FLUENT_BIT(composition->liveness_valuations, fluent_index);
 					}else{
