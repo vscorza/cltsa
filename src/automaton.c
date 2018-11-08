@@ -612,11 +612,13 @@ void automaton_automaton_serialize_report(FILE *f, automaton_automaton *automato
 	}
 	fprintf(f, "%s%s%d%s%s", AUT_SER_ARRAY_END, AUT_SER_SEP, automaton->transitions_count, AUT_SER_SEP, AUT_SER_ARRAY_START);
 	uint32_t current_count	= 0;
+	bool first_transition	= true;
 	for(i = 0; i < automaton->transitions_count; i++){
 		for(j = 0; j < automaton->out_degree[i]; j++){
 			if(&(automaton->transitions[i][j]) != NULL){
+				if(first_transition)first_transition = false;
+				else fprintf(f, "%s",AUT_SER_SEP);
 				automaton_transition_serialize_report(f, &(automaton->transitions[i][j]));
-				fprintf(f, "%s",current_count == (automaton->transitions_composite_count - 1)? "" :  AUT_SER_SEP);
 			}else{
 				printf("ERROR: Transition was null at [%d][%d]\n", i, j);
 			}
@@ -2160,7 +2162,66 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 	automaton_concrete_bucket_destroy(key_list);
 	free(assumptions_indexes);
 	free(guarantees_indexes);
+	automaton_automaton_remove_unreachable_states(strategy);
 	return strategy;
+}
+
+uint32_t* automaton_automaton_distance_to_state(automaton_automaton* automaton, uint32_t state){
+	uint32_t* distances	= calloc(automaton->transitions_count, sizeof(uint32_t));
+	bool* visited		= calloc(automaton->transitions_count, sizeof(bool));
+	automaton_concrete_bucket_list* pending_list		= automaton_concrete_bucket_list_create(DISTANCE_BUCKET_SIZE, automaton_int_extractor, sizeof(uint32_t));
+	uint32_t i;
+	uint32_t min_distance;
+	automaton_transition* current_transition;
+	uint32_t current_state;
+	//add initial states (excluding incoming state)
+	visited[state]		= true;
+	for(i = 0; i < automaton->out_degree[state]; i++){
+		current_transition	= &(automaton->transitions[state][i]);
+		if(current_transition->state_to != state && !visited[current_transition->state_to]){
+
+			automaton_concrete_bucket_add_entry(pending_list, &(current_transition->state_to));
+		}
+	}
+	//update distances
+	while(pending_list->composite_count > 0){
+		automaton_concrete_bucket_pop_entry(pending_list, &current_state);
+		if(visited[current_state])continue;
+		visited[current_state]	= true;
+		min_distance			= 0;
+		for(i = 0; i < automaton->in_degree[current_state]; i++){
+			current_transition	= &(automaton->inverted_transitions[current_state][i]);
+			if(!visited[current_transition->state_from])continue;
+			if(min_distance == 0 || (current_transition->state_from + 1 < min_distance))min_distance	= distances[current_transition->state_from] + 1;
+		}
+		distances[current_state]	= min_distance;
+
+		for(i = 0; i < automaton->out_degree[current_state]; i++){
+			current_transition	= &(automaton->transitions[current_state][i]);
+			if(!visited[current_transition->state_to]){
+				automaton_concrete_bucket_add_entry(pending_list, &(current_transition->state_to));
+			}
+		}
+
+	}
+
+	automaton_concrete_bucket_destroy(pending_list);
+	free(visited);
+	return distances;
+}
+
+void automaton_automaton_remove_unreachable_states(automaton_automaton* automaton){
+	if(automaton->initial_states_count < 1)return;
+	uint32_t* distances	= automaton_automaton_distance_to_state(automaton, automaton->initial_states[0]);
+	uint32_t i;
+	for(i = 0; i < automaton->transitions_count; i++){
+		if(distances[i] != 0 || i == automaton->initial_states[0])continue;
+		automaton->in_degree[i]	= 0;
+		automaton->out_degree[i]	= 0;
+		automaton->out_size[i]	= 0;
+		automaton->in_size[i]	= 0;
+	}
+	free(distances);
 }
 
 uint32_t automaton_automata_get_composite_state(uint32_t states_count, uint32_t* states){

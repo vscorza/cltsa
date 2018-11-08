@@ -33,6 +33,7 @@
 #define BUCKET_SIZE		1000000
 #define FLUENT_BUCKET_SIZE 10000
 #define RANKING_BUCKET_SIZE 10000
+#define DISTANCE_BUCKET_SIZE 1000
 #define PRINT_PARTIAL_COMPOSITION 1
 
 #define PRINT_PARTIAL_SYNTHESIS 1
@@ -332,6 +333,8 @@ bool automaton_automaton_update_valuation(automaton_automaton* current_automaton
 void automaton_automaton_minimize(automaton_automaton* current_automaton);
 bool automaton_automaton_check_reachability(automaton_automaton* current_automaton, automaton_valuation target);
 bool automaton_automaton_check_liveness(automaton_automaton* current_automaton, automaton_valuation target);
+uint32_t* automaton_automaton_distance_to_state(automaton_automaton* automaton, uint32_t state);
+void automaton_automaton_remove_unreachable_states(automaton_automaton* automaton);
 /** AUTOMATON RANKING AND PENDING **/
 uint32_t automaton_ranking_key_extractor(void* ranking);
 int32_t automaton_pending_state_compare(void* left_pending_state, void* right_pending_state);

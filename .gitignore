@@ -2,3 +2,6 @@ src/results/*.fsp
 *~
 *.o
 callgrind.out.*
+*.dot
+*.svg
+*.rep
