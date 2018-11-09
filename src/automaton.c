@@ -1737,12 +1737,12 @@ bool automaton_state_is_stable(automaton_automaton* game_automaton, uint32_t sta
 			, guarantee_count, guarantees_indexes);
 	if(sr == NULL){
 #if DEBUG_SYNTHESIS
-		printf("No best successor for %d\n", state);
+		printf("No best successor for %d R:%d\n", state, j);
 #endif
 		return true;
 	}
 #if DEBUG_SYNTHESIS
-		printf("best successor for %d is %d:(%d,%d)", state, sr->state,sr->value, sr->assumption_to_satisfy);
+		printf("best successor for %d is %d:(%d,%d) R:%d", state, sr->state,sr->value, sr->assumption_to_satisfy, j);
 #endif
 	/**
 	 * is ranking good?
@@ -2036,7 +2036,7 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 			//printf("R_%d=<%d,%d>\t", j, current_ranking->value, current_ranking->assumption_to_satisfy);
 			printf("%d,<%d,%d>", j, current_ranking->value, current_ranking->assumption_to_satisfy);
 		}
-		printf("]");
+		printf("]\n");
 	}
 	printf("\tpending:%d\n", pending_list->count);
 #endif
@@ -2870,6 +2870,12 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 					}
 					fluent_index	= GET_STATE_FLUENT_INDEX(liveness_valuations_count, composite_to, i);
 					if(current_valuation){
+						//Check if it should be added to the inverted valuation list
+						state_found		= automaton_bucket_has_entry(composition->liveness_inverted_valuations[i], composite_to);
+						//
+						if(!state_found){
+							automaton_bucket_add_entry(composition->liveness_inverted_valuations[i], composite_to);
+						}
 						SET_FLUENT_BIT(composition->liveness_valuations, fluent_index);
 					}else{
 						CLEAR_FLUENT_BIT(composition->liveness_valuations, fluent_index);
