@@ -32,11 +32,9 @@ void run_parse_test(char* test_file, char* test_name){
 	bool PRINT_FSP				= true;
 	automaton_automata_context* ctx		= automaton_automata_context_create_from_syntax(parsed_program, buf, FIRST_IS_CONCURRENT, PRINT_FSP);
     automaton_automata_context_destroy(ctx);
-    /*
-    ctx		= automaton_automata_context_create_from_syntax(parsed_program, buf, !FIRST_IS_SYNCH, PRINT_FSP);
-    automaton_automata_context_destroy(ctx);
-    */
     automaton_program_syntax_destroy(parsed_program);
+	obdd_mgr* mgr	= parser_get_obdd_mgr();
+	obdd_mgr_destroy(mgr);
     fclose(yyin);
 }
 void run_obdd_valuations(){
@@ -530,9 +528,72 @@ void run_report_tests(){
 	automaton_signal_event_destroy(y1, true);
 	automaton_signal_event_destroy(y2, true);
 }
+
+typedef struct test_item_pool_str{
+	uint32_t a; char name[250];
+}test_item_pool;
+
+#define MAX_POOL_COUNT	1000000
+
+void run_fast_pool_tests(){
+	size_t item_size	= sizeof(test_item_pool);
+	test_item_pool** pool_ref1	= malloc(MAX_POOL_COUNT * sizeof(test_item_pool*));
+	test_item_pool** pool_ref2	= malloc(MAX_POOL_COUNT * sizeof(test_item_pool*));
+
+
+
+	automaton_fast_pool* pool1	= automaton_fast_pool_create(item_size, 100, 100);
+	automaton_fast_pool* pool2	= automaton_fast_pool_create(item_size, 5, 2);
+
+	uint32_t i;
+	for(i = 0; i < MAX_POOL_COUNT/2; i++){
+		test_item_pool* item	= automaton_fast_pool_get_instance(pool1);
+		item->a		= i;
+		item->name[0]	= 'h';item->name[1]	= 'i';item->name[2]	= '!';item->name[3]	= '\0';
+		pool_ref1[i]	= item;
+		item	= automaton_fast_pool_get_instance(pool1);
+		item->a		= i;
+		item->name[0]	= 'h';item->name[1]	= 'i';item->name[2]	= '!';item->name[3]	= '\0';
+		pool_ref2[i]	= item;
+	}
+	printf("10 100 pool \n");
+	for(i = 0; i < MAX_POOL_COUNT/2; i++){
+		if(i % 999 == 0)
+			printf("%d%s ", pool_ref1[i]->a, pool_ref1[i]->name);
+	}
+	printf("\n");
+	printf("5 2 pool \n");
+	for(i = 0; i < MAX_POOL_COUNT/2; i++){
+		if(i % 999 == 0)
+			printf("%d%s ", pool_ref2[i]->a, pool_ref2[i]->name);
+	}
+	printf("\n");
+	for(i = 0; i < MAX_POOL_COUNT/2; i++){
+		automaton_fast_pool_release_instance(pool1, pool_ref1[i]);
+		automaton_fast_pool_release_instance(pool2, pool_ref2[i]);
+	}
+	for(i = 0; i < MAX_POOL_COUNT; i++){
+		test_item_pool* item	= automaton_fast_pool_get_instance(pool1);
+		item->a		= i;
+		item->name[0]	= 'h';item->name[1]	= 'i';item->name[2]	= '!';item->name[3]	= '\0';
+		pool_ref1[i]	= item;
+		item	= automaton_fast_pool_get_instance(pool1);
+		item->a		= i;
+		item->name[0]	= 'h';item->name[1]	= 'i';item->name[2]	= '!';item->name[3]	= '\0';
+		pool_ref2[i]	= item;
+		if(i % 999 == 0)
+			printf("%d%s ", item->a, item->name);
+	}
+	printf("\n");
+	automaton_fast_pool_destroy(pool1);
+	automaton_fast_pool_destroy(pool2);
+
+	free(pool_ref1);free(pool_ref2);
+}
 void run_all_tests(){
 	run_tree_tests();
 	run_automaton_tests();
+	run_fast_pool_tests();
 	run_fsp_tests(5);
 }
 
@@ -541,25 +602,28 @@ int main (void){
 	/*
 	run_all_tests();
 	*/
-	//run_parse_test("test5.fsp");
-	//run_fsp_tests(18);
-	//run_parse_test("tests/test18.fsp",  "test18");
-	//run_parse_test("tests/test23.fsp", "test23");
 	//run_obdd_tree_tests();
 	//run_small_obdd_tests();
 	//run_obdd_tests();
 	//run_obdd_valuations();
-	//run_parse_test("tests/test21.fsp", "test21");
-
-	//run_parse_test("tests/test26.fsp", "test26");
-	//run_parse_test("tests/test27.fsp", "test27");
-	//run_parse_test("tests/test30.fsp", "test30");
-	run_parse_test("tests/test29.fsp", "test29");
-
 	//run_concrete_bucket_list_tests();
 	//run_ordered_list_tests();
 	//run_max_heap_tests();
 	//run_report_tests();
+	//run_fast_pool_tests();
+
+	//run_fsp_tests(18);
+	//run_parse_test("test5.fsp");
+	//run_parse_test("tests/test18.fsp",  "test18");
+	//run_parse_test("tests/test23.fsp", "test23");
+	//run_parse_test("tests/test21.fsp", "test21");
+	//run_parse_test("tests/test26.fsp", "test26");
+	//run_parse_test("tests/test27.fsp", "test27");
+	//run_parse_test("tests/test30.fsp", "test30");
+	//run_parse_test("tests/test29.fsp", "test29");
+	run_parse_test("tests/test31.fsp", "test31");
+	//run_parse_test("tests/test32.fsp", "test32");
+	//run_parse_test("tests/test34.fsp", "test34");
 	return 0;    
 }
 

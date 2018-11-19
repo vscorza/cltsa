@@ -1,0 +1,17 @@
+set Global_Alphabet = {}
+set Controllable_Alphabet = {}
+set Global_Signals	= {x, y, z}
+set Output_Signals	= {y}
+
+ltl env theta Init_Lift_e in GAME_LTL	= (x).
+ltl sys theta Init_Lift_s in GAME_LTL	= (y || !y).
+ltl env rho Env_Rho in GAME_LTL	= [](x <-> X(x)).
+ltl sys rho Sys_Rho in GAME_LTL	= [](y <-> X(y)).
+ltl env rho Sys_Rho_2 in GAME_LTL	= [](z <-> X(z)).
+
+ltl fluent Ass = (x).
+ltl fluent Goal	= (y).
+
+|f| ENV = (GAME_LTL).
+|gr1| <{Ass}><{Goal}> STRAT = ENV.
+

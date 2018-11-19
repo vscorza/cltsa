@@ -8,6 +8,7 @@ int sym[26];
 int yydebug=5;
 automaton_program_syntax* parsed_program = NULL;
 %}
+%locations
 %union{
 	char* 							text;
 	int32_t 						integer;
@@ -254,7 +255,7 @@ ltlAutRule:
 
 ltlAutExp:
 	ltlAutExp2								{$$ = $1;}	
-	|ltlAutExp t_THEN ltlAutExp2			{obdd* obdd_not = obdd_apply_not($1); $$ = obdd_apply_or(obdd_not, $3);obdd_destroy(obdd_not);obdd_destroy($3);free($2);}
+	|ltlAutExp t_THEN ltlAutExp2			{obdd* obdd_not = obdd_apply_not($1); $$ = obdd_apply_or(obdd_not, $3);obdd_destroy(obdd_not);obdd_destroy($1);obdd_destroy($3);free($2);}
 	|ltlAutExp t_IFF ltlAutExp2				{$$ = obdd_apply_equals($1, $3);obdd_destroy($1);obdd_destroy($3);free($2);}
 	|ltlAutExp t_AND ltlAutExp2				{$$ = obdd_apply_and($1, $3);obdd_destroy($1);obdd_destroy($3);free($2);}
 	|ltlAutExp t_PARALLEL ltlAutExp2		{$$ = obdd_apply_or($1, $3);obdd_destroy($1);obdd_destroy($3);free($2);}
@@ -416,4 +417,8 @@ ltlExp2:
 %%
  //int main (void) {return yyparse ( );}
 
- void yyerror (char *s) {fprintf (stderr, "%s\n", s);}
+void yyerror(char *s)
+{
+    fprintf(stderr,"Error | Line: %d\n%s\n",yylloc.first_line,s);
+}
+

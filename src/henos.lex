@@ -2,10 +2,11 @@
 #include <stdlib.h>
 #include "parser_utils.h"
 #include "y.tab.h"
+#define YY_USER_ACTION yylloc.first_line = yylloc.last_line = yylineno;
 #define BEBUG_LEX 0
 char *p;
 %}
-
+%option yylineno
 %x C_COMMENT
 digit		[0-9]
 alpha		[a-fA-F]

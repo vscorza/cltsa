@@ -73,7 +73,7 @@ automaton_max_heap* automaton_max_heap_create_from_array(uint32_t sizeof_element
     Function to insert a node into the max heap, by allocating space for that node in the
     heap and also making sure that the heap property and shape propety are never violated.
 */
-void automaton_max_heap_add_entry(automaton_max_heap* heap, void* entry) {
+void* automaton_max_heap_add_entry(automaton_max_heap* heap, void* entry) {
 	//check if heap needs to be resized
 	uint32_t i;
 	if(heap->count == heap->size){
@@ -91,7 +91,7 @@ void automaton_max_heap_add_entry(automaton_max_heap* heap, void* entry) {
     	automaton_max_heap_swap(heap, GET_MAX_HEAP_ENTRY(heap, i), GET_MAX_HEAP_PARENT(heap, i));
         i = MAX_HEAP_PARENT_INDEX(i) ;
     }
-	memcpy(GET_MAX_HEAP_ENTRY(heap, i), entry, heap->sizeof_element);
+	return memcpy(GET_MAX_HEAP_ENTRY(heap, i), entry, heap->sizeof_element);
 }
 
 /*

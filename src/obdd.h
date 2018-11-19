@@ -3,6 +3,7 @@
 
 #include "automaton_utils.h"
 #include "dictionary.h"
+#include "fast_pool.h"
 
 #define TRUE_VAR			"1"
 #define FALSE_VAR			"0"
@@ -12,6 +13,12 @@
 #define DEBUG_OBDD	0
 #define DEBUG_OBDD_VALUATIONS	0
 #define DEBUG_OBDD_STATE_TREE	0
+
+#define OBDD_FRAGMENT_SIZE		100
+#define OBDD_FRAGMENTS_SIZE		1000
+#define OBDD_NODE_FRAGMENT_SIZE	1000
+#define OBDD_NODE_FRAGMENTS_SIZE	1000
+#define OBDD_NODE_LIST_SIZE		64
 
 #define GET_VAR_INDEX(variable_count, valuation_index, variable_index) ((((variable_count) * (valuation_index) + (variable_index)) * sizeof(bool)))
 #define GET_VAR_IN_VALUATION(arr, variable_count, valuation_index, variable_index)	(arr[GET_VAR_INDEX(variable_count, valuation_index, variable_index)])
@@ -45,6 +52,8 @@ typedef struct obdd_mgr_t {
 	struct obdd_t*			true_obdd;
 	struct obdd_t*			false_obdd;
 	dictionary*		vars_dict;
+	automaton_fast_pool*	obdd_pool;
+	automaton_fast_pool*	nodes_pool;
 }obdd_mgr;
 
 typedef struct obdd_node_t{
@@ -54,8 +63,10 @@ typedef struct obdd_node_t{
 	struct obdd_node_t*	high_obdd;
 	struct obdd_node_t*	low_obdd;
 	uint32_t high_predecessors_count;
+	uint32_t high_predecessors_size;
 	struct obdd_node_t** high_predecessors;
 	uint32_t low_predecessors_count;
+	uint32_t low_predecessors_size;
 	struct obdd_node_t** low_predecessors;
 }obdd_node;
 
@@ -103,7 +114,7 @@ bool obdd_mgr_equals(obdd_mgr* mgr, obdd* left, obdd* right);
 
 uint32_t obdd_mgr_get_next_node_ID(obdd_mgr* mgr);
 obdd_node* obdd_mgr_mk_node(obdd_mgr* mgr, char* var, obdd_node* high, obdd_node* low);
-void obdd_node_destroy(obdd_node* root);
+void obdd_node_destroy(obdd_mgr* mgr, obdd_node* root);
 /** OBDD **/
 obdd_node* obdd_node_get_false_node(obdd_mgr* mgr, obdd_node* node);
 obdd_node* obdd_node_get_true_node(obdd_mgr* mgr, obdd_node* node);
@@ -125,7 +136,6 @@ obdd* obdd_exists(obdd* root, char* var);					//apply reduction based on shannon
 obdd* obdd_forall(obdd* root, char* var);					//apply reduction based on shannon
 void obdd_print(obdd* root);
 void obdd_node_print(obdd_mgr* mgr, obdd_node* root, uint32_t spaces);
-void obdd_node_destroy(obdd_node* node);
 
 bool obdd_apply_equals_fkt(bool left, bool right);
 bool obdd_apply_xor_fkt(bool left, bool right);

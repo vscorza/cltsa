@@ -593,7 +593,8 @@ void parser_add_primed_variables(uint32_t primed_variable){
 void ltl_rule_syntax_destroy(ltl_rule_syntax* ltl_rule){
 	if(ltl_rule->game_structure_name != NULL)free(ltl_rule->game_structure_name);
 	if(ltl_rule->name != NULL)free(ltl_rule->name);
-	obdd_destroy(ltl_rule->obdd);
+	if(ltl_rule->obdd && ltl_rule->obdd->mgr != NULL)
+		obdd_destroy(ltl_rule->obdd);
 	free(ltl_rule);
 }
 

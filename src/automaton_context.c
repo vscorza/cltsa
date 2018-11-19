@@ -42,7 +42,7 @@ void automaton_parsing_tables_destroy(automaton_parsing_tables* tables){
 	free(tables);
 }
 automaton_parsing_table_entry* automaton_parsing_table_entry_create(automaton_parsing_table_entry_type type, char* key, void* value, int32_t index){
-	automaton_parsing_table_entry* entry	= malloc(sizeof(automaton_parsing_table_entry));
+	automaton_parsing_table_entry* entry	= calloc(1, sizeof(automaton_parsing_table_entry));
 	entry->type		= type;
 	aut_dupstr(&(entry->key), key);
 	entry->value	= value;
@@ -63,11 +63,14 @@ void automaton_parsing_table_entry_destroy(automaton_parsing_table_entry* entry)
 				free(labels[i]);
 			}
 			free(entry->valuation.labels_value);
+			entry->valuation.labels_value = NULL;
 		}
 		break;
 	case COMPOSITION_ENTRY_AUT:
-		if(entry->valuation.automaton_value != NULL)
+		if(entry->valuation.automaton_value != NULL){
 			automaton_automaton_destroy(entry->valuation.automaton_value);
+			entry->valuation.automaton_value = NULL;
+		}
 		break;
 	case AUTOMATON_ENTRY_AUT:
 		if(entry->valuation.automaton_value != NULL){
@@ -1670,6 +1673,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	/**
 	 * BUILD LOCAL ALPHABET
 	 */
+	printf("OBDD->Automaton\nBuilding Alphabets\n");
 	for(i = 0; i < mgr->vars_dict->size; i++){
 		if((strcmp(mgr->vars_dict->entries[i].key, TRUE_VAR) == 0) || (strcmp(mgr->vars_dict->entries[i].key, FALSE_VAR) == 0))
 			continue;
@@ -1701,7 +1705,6 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	/**
 	 * get x, y, x', y' alphabets
 	 */
-	//TODO: need to build another alphabet that respects obdd order
 	uint32_t* x_alphabet	= malloc(sizeof(uint32_t) * x_count);
 	uint32_t* y_alphabet	= malloc(sizeof(uint32_t) * y_count);
 	uint32_t* x_y_alphabet	= malloc(sizeof(uint32_t) * (x_count + y_count));
@@ -1855,11 +1858,13 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	obdd* env_rho_composed				= NULL;
 	obdd* sys_rho_composed				= NULL;
 	obdd* env_sys_rho_composed			= NULL;
+	printf("Composing env/sys theta functions\n");
 	for(i = 0; i < env_theta_count; i++){
 		if(i == 0){ env_theta_composed	= env_theta_obdd[i];
 		}else{
 			old_obdd	= env_theta_composed;
 			env_theta_composed	= obdd_apply_and(env_theta_composed, env_theta_obdd[i]);
+			obdd_destroy(env_theta_obdd[i]);
 			if(i > 1)obdd_destroy(old_obdd);
 		}
 	}
@@ -1868,25 +1873,36 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 		}else{
 			old_obdd	= sys_theta_composed;
 			sys_theta_composed	= obdd_apply_and(sys_theta_composed, sys_theta_obdd[i]);
+			obdd_destroy(sys_theta_obdd[i]);
 			if(i > 1)obdd_destroy(old_obdd);
 		}
 	}
+	printf("Composing env rho functions\n");
 	for(i = 0; i < env_rho_count; i++){
 		if(i == 0){ env_rho_composed	= env_rho_obdd[i];
 		}else{
 			old_obdd	= env_rho_composed;
 			env_rho_composed	= obdd_apply_and(env_rho_composed, env_rho_obdd[i]);
+			obdd_destroy(env_rho_obdd[i]);
 			if(i > 1)obdd_destroy(old_obdd);
 		}
+		printf("[%d]", env_rho_composed->mgr->nodes_pool->composite_count);
+		fflush(stdout);
 	}
+	printf("\nComposing sys rho functions\n");
 	for(i = 0; i < sys_rho_count; i++){
 		if(i == 0){ sys_rho_composed	= sys_rho_obdd[i];
 		}else{
 			old_obdd	= sys_rho_composed;
 			sys_rho_composed	= obdd_apply_and(sys_rho_composed, sys_rho_obdd[i]);
+			obdd_destroy(sys_rho_obdd[i]);
 			if(i > 1)obdd_destroy(old_obdd);
 		}
+		printf("[%d]", sys_rho_composed->mgr->nodes_pool->composite_count);
+		fflush(stdout);
 	}
+	printf("\n");
+	fflush(stdout);
 
 
 	env_sys_theta_composed				= obdd_apply_and(env_theta_composed, sys_theta_composed);
@@ -1924,6 +1940,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	 * THETA INITIAL CONDITION
 	 */
 	//add initial env valuations
+	printf("Building theta valuations\n");
 	current_valuations	= obdd_get_valuations(mgr, env_theta_composed, &current_valuations_count, x_alphabet, x_count);
 #if DEBUG_LTL_AUTOMATON
 	int32_t state_counter = 0;
@@ -2012,6 +2029,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 			free(current_valuations);
 		}while(theta_env_bucket_list->composite_count > 0);
 	}
+	printf("Building rho valuations\n");
 #if DEBUG_LTL_AUTOMATON
 	printf("Rho relation building\n");
 #endif
@@ -2032,14 +2050,17 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	do{
 		if(rho_sys_bucket_list->composite_count > 0){
 			do{
-#if DEBUG_LTL_AUTOMATON
 				rho_counter++;
-				if(rho_counter == 500){
+				if(rho_counter == 200){
+					printf(".");
+					fflush(stdout);
+#if DEBUG_LTL_AUTOMATON
 					printf("evaluated|processed|skipped:\t%d\t%d\t%d\t||\t", evaluated, rho_sys_processed_bucket_list->composite_count + rho_env_processed_bucket_list->composite_count, skipped);
 					printf("pending S (S|E|P_S|P_E):\t%d\t%d\t%d\t%d\n", rho_sys_bucket_list->composite_count, rho_env_bucket_list->composite_count, rho_sys_processed_bucket_list->composite_count, rho_env_processed_bucket_list->composite_count);
+#endif
 					rho_counter	= 0;
 				}
-#endif
+
 				automaton_concrete_bucket_pop_entry(rho_sys_bucket_list, sys_state);
 				automaton_concrete_bucket_add_entry(rho_sys_processed_bucket_list, sys_state);
 				for(i = 0; i < x_y_count; i++)env_state->valuation[i]	= sys_state->valuation[i];
@@ -2083,14 +2104,17 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 		}
 		if(rho_env_bucket_list->composite_count > 0){
 			do{
-#if DEBUG_LTL_AUTOMATON
 				rho_counter++;
 				if(rho_counter == 500){
+					printf(".");
+					fflush(stdout);
+#if DEBUG_LTL_AUTOMATON
+
 					printf("evaluated|processed|skipped:\t%d\t%d\t%d\t||\t", evaluated, rho_sys_processed_bucket_list->composite_count + rho_env_processed_bucket_list->composite_count, skipped);
 					printf("pending E (S|E|P_S|P_E):\t%d\t%d\t%d\t%d\n", rho_sys_bucket_list->composite_count, rho_env_bucket_list->composite_count, rho_sys_processed_bucket_list->composite_count, rho_env_processed_bucket_list->composite_count);
+#endif
 					rho_counter	= 0;
 				}
-#endif
 				automaton_concrete_bucket_pop_entry(rho_env_bucket_list, env_state);
 				automaton_concrete_bucket_add_entry(rho_env_processed_bucket_list, env_state);
 				obdd_current_state	= obdd_restrict_vector(env_sys_rho_composed, x_y_x_p_alphabet, env_state->valuation, x_y_x_p_count);
@@ -2137,6 +2161,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 		}
 	}while(rho_sys_bucket_list->composite_count > 0);
 
+	printf("\nOBDD->Automaton done\n");
 
 	int32_t main_index					= automaton_parsing_tables_add_entry(tables, COMPOSITION_ENTRY_AUT, name, ltl_automaton);
 	tables->composition_entries[main_index]->solved	= true;
@@ -2172,6 +2197,8 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 automaton_automata_context* automaton_automata_context_create_from_syntax(automaton_program_syntax* program, char* ctx_name, bool is_synchronous, bool print_fsp){
 	automaton_parsing_tables* tables	= automaton_parsing_tables_create();
 	automaton_automata_context* ctx		= malloc(sizeof(automaton_automata_context));
+
+	printf("Creating automaton %s\n", ctx_name);
 
 	//build look up tables
 	uint32_t i;
@@ -2309,14 +2336,17 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 	automaton_automata_context_initialize(ctx, ctx_name, global_alphabet, fluent_count, fluents, liveness_formulas_count, liveness_formulas, liveness_formulas_names);
 	free(fluents);
 	automaton_alphabet_destroy(global_alphabet);
+
+	printf("Building LTL automata\n");
+	fflush(stdout);
 	//build automata from ltl
 	for(i = 0; i < ltl_automata_count; i++){
 		automaton_build_automaton_from_obdd(ctx, ltl_automata_names[i], env_theta_obdd[i], env_theta_count[i], sys_theta_obdd[i], sys_theta_count[i],
 				env_rho_obdd[i], env_rho_count[i], sys_rho_obdd[i], sys_rho_count[i], tables);
+		printf(".");
+		fflush(stdout);
 	}
-	obdd_mgr* mgr	= parser_get_obdd_mgr();
-	obdd_mgr_destroy(mgr);
-	free(parser_primed_variables);
+
 
 
 	for(i = 0; i < ltl_automata_count; i++){
@@ -2329,6 +2359,8 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 	free(sys_rho_count);		free(env_rho_count);
 	free(ltl_automata_names);
 
+	printf("\nBuilding LTS automata\n");
+	fflush(stdout);
 	//build automata
 	bool pending_statements	= true;
 	while(pending_statements){
@@ -2336,6 +2368,8 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 		for(i = 0; i < program->count; i++){
 			if(program->statements[i]->type == COMPOSITION_AUT){
 				pending_statements = automaton_statement_syntax_to_automaton(ctx, program->statements[i]->composition_def, tables, is_synchronous) || pending_statements;
+				printf(".");
+				fflush(stdout);
 			}
 		}
 	}
@@ -2346,6 +2380,9 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 	char **assumptions, **guarantees;
 	char set_name[255];
 	int32_t assumptions_count = 0, guarantees_count = 0;
+
+	printf("\nSolving GR1\n");
+	fflush(stdout);
 
 	for(i = 0; i < program->count; i++){
 		if(program->statements[i]->type == GR_1_AUT){
@@ -2376,7 +2413,7 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 				old_fluents				= ctx->global_fluents;
 
 				ctx->global_fluents_count	+= ctx->liveness_valuations_count;
-				ctx->global_fluents		= malloc(sizeof(automaton_fluent) * ctx->global_fluents_count);
+				ctx->global_fluents		= calloc(ctx->global_fluents_count, sizeof(automaton_fluent));
 				for(j = 0; j < old_fluents_count; j++)
 					automaton_fluent_copy(&(old_fluents[j]), &(ctx->global_fluents[j]));
 				for(j = old_fluents_count; j < ctx->global_fluents_count; j++){
@@ -2427,15 +2464,17 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 				automaton_automaton_print_fsp(winning_region_automaton, buf);
 				sprintf(buf, "%s_%d_strat_%s.rep", ctx_name, i, is_synchronous? "synch": "asynch");
 				automaton_automaton_print_report(winning_region_automaton, buf);
+				/*
 				sprintf(buf, "%s_%d_strat_%s.dot", ctx_name, i, is_synchronous? "synch": "asynch");
 				automaton_automaton_print_dot(winning_region_automaton, buf);
 				sprintf(cmd, "sfdp -Tsvg %s > %s.svg\n", buf, buf);
-				//printf(cmd);
 				system(cmd);
-
+				*/
 			}
 			//restore old liveness valuations and old context
 			if(was_merged){
+				for(i = 0; i < ctx->global_fluents_count; i++)
+					automaton_fluent_destroy(&(ctx->global_fluents[i]), false);
 				free(ctx->global_fluents);
 				free(game_automaton->valuations);
 				free(game_automaton->inverted_valuations);
@@ -2454,6 +2493,8 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 			for(j = 0; j < guarantees_count; j++)
 				free(guarantees[j]);
 			free(guarantees);
+			printf(".");
+			fflush(stdout);
 		}
 	}
 
@@ -2467,16 +2508,23 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 				automaton_automaton_print_fsp(tables->composition_entries[i]->valuation.automaton_value, buf);
 				sprintf(buf, "%s_%d_result_%s.rep", ctx_name, i, is_synchronous? "synch": "asynch");
 				automaton_automaton_print_report(tables->composition_entries[i]->valuation.automaton_value, buf);
+				/*
 				sprintf(buf, "%s_%d_result_%s.dot", ctx_name, i, is_synchronous? "synch": "asynch");
 				automaton_automaton_print_dot(tables->composition_entries[i]->valuation.automaton_value, buf);
 				sprintf(cmd, "sfdp -Tsvg %s > %s.svg\n", buf, buf);
 				printf(cmd);
 				system(cmd);
+				*/
 			}
 		}
 	}
 	free(liveness_formulas); free(liveness_formulas_names);
 	automaton_parsing_tables_destroy(tables);
+
+	free(parser_primed_variables);
+
+	printf("\nDONE\n");
+
 	return ctx;
 }
 

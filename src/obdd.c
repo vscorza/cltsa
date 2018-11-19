@@ -158,6 +158,15 @@ obdd_mgr*	obdd_mgr_create(){
 	//instantiate manager
 	obdd_mgr* new_mgr	= malloc(sizeof(obdd_mgr));
 	new_mgr->ID			= get_new_mgr_ID();
+	//create pools
+	/*
+	 * #define OBDD_FRAGMENT_SIZE		100
+#define OBDD_FRAGMENTS_SIZE		1000
+#define OBDD_NODE_FRAGMENT_SIZE	1000
+#define OBDD_NODE_FRAGMENTS_SIZE	100
+	 * */
+	new_mgr->obdd_pool	= automaton_fast_pool_create(sizeof(obdd), OBDD_FRAGMENTS_SIZE, OBDD_FRAGMENT_SIZE);
+	new_mgr->nodes_pool	= automaton_fast_pool_create(sizeof(obdd_node), OBDD_NODE_FRAGMENTS_SIZE, OBDD_NODE_FRAGMENT_SIZE);
 	//is initialized in 1 so that we can later check for already deleted nodes
 	new_mgr->greatest_node_ID	= 1;
 	new_mgr->greatest_var_ID	= 0;
@@ -166,14 +175,14 @@ obdd_mgr*	obdd_mgr_create(){
 	new_mgr->vars_dict		= dictionary_create();
 	
 	//create constant obdds for true and false values
-	obdd* true_obdd		= malloc(sizeof(obdd));
+	obdd* true_obdd		= automaton_fast_pool_get_instance(new_mgr->obdd_pool);//malloc(sizeof(obdd));
 	true_obdd->root_obdd= obdd_mgr_mk_node(new_mgr, TRUE_VAR, NULL, NULL);
 	true_obdd->root_obdd->ref_count++;
 	true_obdd->mgr		= new_mgr;
 	true_obdd->true_obdd	= NULL;
 	true_obdd->false_obdd	= NULL;
 	new_mgr->true_obdd	= true_obdd;
-	obdd* false_obdd	= malloc(sizeof(obdd));
+	obdd* false_obdd	= automaton_fast_pool_get_instance(new_mgr->obdd_pool);//malloc(sizeof(obdd));
 	false_obdd->root_obdd= obdd_mgr_mk_node(new_mgr, FALSE_VAR, NULL, NULL);
 	false_obdd->root_obdd->ref_count++;
 	false_obdd->mgr		= new_mgr;
@@ -194,6 +203,10 @@ void obdd_mgr_destroy(obdd_mgr* mgr){
 	mgr->false_obdd->root_obdd->ref_count--;
 	obdd_destroy(mgr->false_obdd);
 	mgr->false_obdd	= NULL;
+	automaton_fast_pool_destroy(mgr->obdd_pool);
+	automaton_fast_pool_destroy(mgr->nodes_pool);
+	mgr->obdd_pool	= NULL;
+	mgr->nodes_pool	= NULL;
 	free(mgr);	
 }
 
@@ -217,9 +230,9 @@ void obdd_add_high_succesor(obdd_node* src, obdd_node* dst){
 	src->high_obdd	= dst;
 	uint32_t i;
 	if(dst != NULL){
-		if(dst->high_predecessors == NULL)		dst->high_predecessors		= malloc(sizeof(obdd_node*));
-		else{
-			obdd_node** ptr	= realloc(dst->high_predecessors, sizeof(obdd_node*) * (dst->high_predecessors_count + 1));
+		if(dst->high_predecessors_count == dst->high_predecessors_size){
+			dst->high_predecessors_size	= dst->high_predecessors_size * LIST_INCREASE_FACTOR;
+			obdd_node** ptr	= realloc(dst->high_predecessors, sizeof(obdd_node*) * dst->high_predecessors_size);
 			if(ptr == NULL){
 				printf("Could not allocate memory\n");
 				exit(-1);
@@ -244,9 +257,9 @@ void obdd_add_low_succesor(obdd_node* src, obdd_node* dst){
 	src->low_obdd	= dst;
 	uint32_t i;
 	if(dst != NULL){
-		if(dst->low_predecessors == NULL)		dst->low_predecessors		= malloc(sizeof(obdd_node*));
-		else{
-			obdd_node** ptr	= realloc(dst->low_predecessors, sizeof(obdd_node*) * (dst->low_predecessors_count + 1));
+		if(dst->low_predecessors_size == dst->low_predecessors_count){
+			dst->low_predecessors_size	= dst->low_predecessors_size * LIST_INCREASE_FACTOR;
+			obdd_node** ptr	= realloc(dst->low_predecessors, sizeof(obdd_node*) * dst->low_predecessors_size);
 			if(ptr == NULL){
 				printf("Could not allocate memory\n");
 				exit(-1);
@@ -277,20 +290,12 @@ void obdd_remove_high_succesor(obdd_node* src, obdd_node* dst){
 				index = i;
 				break;
 			}
+		if(index == -1){
+			printf("succ not found\n");
+			exit(-1);
+		}
 		for(i = index; i < (int32_t)(dst->high_predecessors_count - 1); i++){
 			dst->high_predecessors[i]	= dst->high_predecessors[i+ 1];
-		}
-		if(dst->high_predecessors_count == 1){
-			free(dst->high_predecessors);
-			dst->high_predecessors	= NULL;
-		}else{
-			obdd_node** ptr	= realloc(dst->high_predecessors, sizeof(obdd_node*) * (dst->high_predecessors_count - 1));
-			if(ptr == NULL){
-				printf("Could not allocate memory\n");
-				exit(-1);
-			}else{
-				dst->high_predecessors	= ptr;
-			}
 		}
 		dst->high_predecessors_count--;
 		dst->ref_count--;
@@ -309,20 +314,12 @@ void obdd_remove_low_succesor(obdd_node* src, obdd_node* dst){
 				index = i;
 				break;
 			}
+		if(index == -1){
+			printf("succ not found\n");
+			exit(-1);
+		}
 		for(i = index; i < (int32_t)(dst->low_predecessors_count - 1); i++){
 			dst->low_predecessors[i]	= dst->low_predecessors[i+ 1];
-		}
-		if(dst->low_predecessors_count == 1){
-			free(dst->low_predecessors);
-			dst->low_predecessors	= NULL;
-		}else{
-			obdd_node** ptr	= realloc(dst->low_predecessors, sizeof(obdd_node*) * (dst->low_predecessors_count - 1));
-			if(ptr == NULL){
-				printf("Could not allocate memory\n");
-				exit(-1);
-			}else{
-				dst->low_predecessors	= ptr;
-			}
 		}
 		dst->low_predecessors_count--;
 		dst->ref_count--;
@@ -333,13 +330,16 @@ void obdd_remove_low_succesor(obdd_node* src, obdd_node* dst){
 }
 obdd_node* obdd_mgr_mk_node(obdd_mgr* mgr, char* var, obdd_node* high, obdd_node* low){
 	uint32_t var_ID		= dictionary_add_entry(mgr->vars_dict, var);
-	obdd_node* new_node	= malloc(sizeof(obdd_node));
+	//obdd_node* new_node	= malloc(sizeof(obdd_node));
+	obdd_node* new_node	= automaton_fast_pool_get_instance(mgr->nodes_pool);
 	new_node->var_ID	= var_ID;
 	new_node->node_ID	= obdd_mgr_get_next_node_ID(mgr);
 	new_node->high_predecessors_count	= 0;
-	new_node->high_predecessors			= NULL;
+	new_node->high_predecessors_size	= OBDD_NODE_LIST_SIZE;
+	new_node->high_predecessors			= malloc(sizeof(obdd_node*) * new_node->high_predecessors_size);
 	new_node->low_predecessors_count	= 0;
-	new_node->low_predecessors			= NULL;
+	new_node->low_predecessors_size		= OBDD_NODE_LIST_SIZE;
+	new_node->low_predecessors			= malloc(sizeof(obdd_node*) * new_node->low_predecessors_size);
 	obdd_add_high_succesor(new_node, high);
 	obdd_add_low_succesor(new_node, low);
 	new_node->ref_count	= 0;
@@ -368,7 +368,8 @@ obdd*	obdd_mgr_false(obdd_mgr* mgr){ return mgr->false_obdd; }
 
 /** OBDD FUNCTIONS **/
 obdd* obdd_create(obdd_mgr* mgr, obdd_node* root){
-	obdd* new_obdd		= malloc(sizeof(obdd));
+	//obdd* new_obdd		= malloc(sizeof(obdd));
+	obdd* new_obdd		= automaton_fast_pool_get_instance(mgr->obdd_pool);
 	new_obdd->mgr		= mgr;
 	new_obdd->root_obdd	= root;
 	new_obdd->true_obdd	= mgr->true_obdd->root_obdd;
@@ -385,7 +386,8 @@ obdd_node* obdd_node_clone(obdd_mgr* mgr, obdd_node* root){
 }
 
 obdd* obdd_clone(obdd* root){
-	obdd* clone	= malloc(sizeof(obdd));
+	//obdd* clone	= malloc(sizeof(obdd));
+	obdd* clone			= automaton_fast_pool_get_instance(root->mgr->obdd_pool);
 	clone->false_obdd	= root->false_obdd;
 	clone->true_obdd	= root->true_obdd;
 	clone->mgr			= root->mgr;
@@ -396,14 +398,16 @@ obdd* obdd_clone(obdd* root){
 
 void obdd_destroy(obdd* root){
 	if(root->root_obdd != NULL){
-		obdd_node_destroy(root->root_obdd);
+		obdd_node_destroy(root->mgr, root->root_obdd);
 		root->root_obdd		= NULL;
 	}
+	obdd_mgr* mgr		= root->mgr;
 	//must not delete true and false obdd since they are being destroyed by recursive call on root
 	root->true_obdd	= NULL;
 	root->false_obdd	= NULL;
 	root->mgr			= NULL;
-	free(root);
+	//free(root);
+	automaton_fast_pool_release_instance(mgr->obdd_pool, (void*) root);
 }
 
 
@@ -517,7 +521,7 @@ void obdd_merge_redundant_nodes(obdd_mgr* mgr, obdd_node* root){
 				obdd_remove_low_succesor(to_remove->low_predecessors[i], to_remove);
 			}
 			obdd_add_high_succesor(root, to_add);
-			obdd_node_destroy(to_remove);
+			obdd_node_destroy(mgr, to_remove);
 		}
 	}
 	if(!obdd_is_constant(mgr, root->low_obdd)){
@@ -535,7 +539,7 @@ void obdd_merge_redundant_nodes(obdd_mgr* mgr, obdd_node* root){
 				obdd_remove_low_succesor(to_remove->low_predecessors[i], to_remove);
 			}
 			obdd_add_low_succesor(root, to_add);
-			obdd_node_destroy(to_remove);
+			obdd_node_destroy(mgr, to_remove);
 		}
 	}
 }
@@ -656,7 +660,8 @@ obdd* obdd_restrict_vector(obdd* root, uint32_t* var_ids, bool* values, uint32_t
 			acum_obdd	= new_obdd;
 		}else{
 			tmp_obdd	= obdd_apply_and(acum_obdd, new_obdd);
-			obdd_destroy(acum_obdd); obdd_destroy(new_obdd);
+			obdd_destroy(acum_obdd);
+			obdd_destroy(new_obdd);
 			acum_obdd	= tmp_obdd;
 		}
 	}
@@ -1281,8 +1286,7 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 }
 
 /** OBDD NODE FUNCTIONS **/
-
-void obdd_node_destroy(obdd_node* node){
+void obdd_node_destroy(obdd_mgr* mgr, obdd_node* node){
 #if DEBUG_OBDD
 		printf("(destroy)%p (ref:%d)\n", (void*)node, node->ref_count);
 #endif
@@ -1290,15 +1294,20 @@ void obdd_node_destroy(obdd_node* node){
 		if(node->high_obdd != NULL){
 			obdd_node* to_remove = node->high_obdd;
 			obdd_remove_high_succesor(node, to_remove);
-			obdd_node_destroy(to_remove);
+			obdd_node_destroy(mgr, to_remove);
 		}
 		if(node->low_obdd != NULL){
 			obdd_node* to_remove = node->low_obdd;
 			obdd_remove_low_succesor(node, to_remove);
-			obdd_node_destroy(to_remove);
+			obdd_node_destroy(mgr, to_remove);
 		}
+		free(node->high_predecessors);
+		free(node->low_predecessors);
+		node->high_predecessors	= NULL;
+		node->low_predecessors	= NULL;
 		node->var_ID	= 0;
 		node->node_ID	= 0;
-		free(node);
+		//free(node);
+		automaton_fast_pool_release_instance(mgr->nodes_pool, (void*)node);
 	}
 }

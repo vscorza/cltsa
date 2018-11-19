@@ -58,12 +58,14 @@ void automaton_fluent_copy(automaton_fluent* source, automaton_fluent* target){
 	target->name 					= malloc(sizeof(char) * (strlen(source->name) + 1));
 	strcpy(target->name, source->name);
 	target->starting_signals_count	= source->starting_signals_count;
+	if(target->starting_signals != NULL)free(target->starting_signals);
 	target->starting_signals		= malloc(sizeof(uint32_t) * target->starting_signals_count);
 	uint32_t i;
 	for(i = 0; i < target->starting_signals_count; i++){
 		target->starting_signals[i]	= source->starting_signals[i];
 	}
 	target->ending_signals_count	= source->ending_signals_count;
+	if(target->ending_signals != NULL)free(target->ending_signals);
 	target->ending_signals			= malloc(sizeof(uint32_t) * target->ending_signals_count);
 	for(i = 0; i < target->ending_signals_count; i++){
 		target->ending_signals[i]	= source->ending_signals[i];
@@ -848,15 +850,23 @@ void automaton_automaton_initialize(automaton_automaton* automaton, char* name, 
 			for(i = 0; i < automaton->context->global_fluents_count; i++){
 				automaton->inverted_valuations[i]	= automaton_bucket_list_create(FLUENT_BUCKET_SIZE);
 			}
+		}else{
+			automaton->valuations_size	= 0;
+			automaton->valuations		= NULL;
+			automaton->inverted_valuations	= NULL;
 		}
 		if(automaton->context->liveness_valuations_count > 0){
 			automaton->liveness_valuations_size			= GET_FLUENTS_ARR_SIZE(automaton->context->liveness_valuations_count, automaton->transitions_size);
 			//automaton->liveness_valuations_size			= new_size;
-			automaton->liveness_valuations 				= malloc(sizeof(uint32_t) * automaton->liveness_valuations_size);
+			automaton->liveness_valuations 				= calloc(automaton->liveness_valuations_size, sizeof(uint32_t) );
 			automaton->liveness_inverted_valuations		= malloc(sizeof(automaton_bucket_list*) * automaton->context->liveness_valuations_count);
 			for(i = 0; i < automaton->context->liveness_valuations_count; i++){
 				automaton->liveness_inverted_valuations[i]	= automaton_bucket_list_create(FLUENT_BUCKET_SIZE);
 			}
+		}else{
+			automaton->liveness_valuations_size	= 0;
+			automaton->liveness_valuations	= NULL;
+			automaton->liveness_inverted_valuations	= NULL;
 		}
 	}
 }
@@ -1086,7 +1096,7 @@ bool automaton_alphabet_add_signal_event(automaton_alphabet* alphabet, automaton
 		uint32_t new_size	= alphabet->size * LIST_INCREASE_FACTOR;
 		automaton_signal_event* new_list	= malloc(sizeof(automaton_signal_event) * new_size);
 		for(i = 0; i < old_count; i++){
-			if(signal_ordered_index <= i){
+			if(signal_ordered_index <= i && signal_ordered_index >= 0){
 				automaton_signal_event_copy(&(alphabet->list[i]), &(new_list[i+1]));
 			}else{
 				automaton_signal_event_copy(&(alphabet->list[i]), &(new_list[i]));
@@ -1784,6 +1794,7 @@ void automaton_add_unstable_predecessors(automaton_automaton* game_automaton, au
 #endif
 			//check if entry exists in the pending structure, if so update previous value
 			if(automaton_concrete_bucket_has_key(key_list, current_transition->state_from)){
+				//automaton_concrete_bucket_get_entry(key_list, current_transition->state_from);
 				existing_pending_state					= automaton_concrete_bucket_get_entry(key_list, current_transition->state_from);
 				existing_pending_state->value			= ((automaton_ranking*)automaton_concrete_bucket_get_entry(ranking[current_guarantee], current_transition->state_from))->value;
 				existing_pending_state->timestamp		= timestamp;
@@ -1791,8 +1802,8 @@ void automaton_add_unstable_predecessors(automaton_automaton* game_automaton, au
 				current_pending_state.goal_to_satisfy	= current_guarantee; current_pending_state.state = current_transition->state_from;
 				current_pending_state.value				= ((automaton_ranking*)automaton_concrete_bucket_get_entry(ranking[current_guarantee], current_transition->state_from))->value;
 				current_pending_state.timestamp			= timestamp;
-				automaton_max_heap_add_entry(pending_list, &current_pending_state);
-				automaton_concrete_bucket_add_entry(key_list, &(current_transition->state_from));
+				void* new_entry							= automaton_max_heap_add_entry(pending_list, &current_pending_state);
+				automaton_concrete_bucket_add_entry(key_list, new_entry);
 			}
 		}
 	}
@@ -1869,7 +1880,7 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 	automaton_concrete_bucket_list** ranking_list	= malloc(sizeof(automaton_concrete_bucket_list*) * guarantees_count);
 	automaton_max_heap* pending_list	= automaton_max_heap_create(sizeof(automaton_pending_state)
 			, automaton_pending_state_compare);
-	automaton_concrete_bucket_list* key_list		= automaton_concrete_bucket_list_create(RANKING_BUCKET_SIZE, automaton_int_extractor, sizeof(uint32_t));
+	automaton_concrete_bucket_list* key_list		= automaton_concrete_bucket_list_create(RANKING_BUCKET_SIZE, automaton_pending_state_extractor, sizeof(automaton_pending_state*));
 	uint32_t current_state;
 	//these are the indexes from the global fluents list, should not be used in ranking_list
 	uint32_t* assumptions_indexes				= malloc(sizeof(uint32_t) * assumptions_count);
@@ -1961,8 +1972,8 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 #endif
 							concrete_pending_state.state 	= i; concrete_pending_state.goal_to_satisfy	= j;//TODO: check this, was ...goal_to_satisfy = guarantees_indexes[j];
 							concrete_pending_state.value	= 0; concrete_pending_state.timestamp		= 0;
-							automaton_max_heap_add_entry(pending_list, &concrete_pending_state);
-							automaton_concrete_bucket_add_entry(key_list, &(i));
+							void* new_entry					= automaton_max_heap_add_entry(pending_list, &concrete_pending_state);
+							automaton_concrete_bucket_add_entry(key_list, new_entry);
 							break;
 						}
 					}
@@ -1982,12 +1993,12 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 	printf("!!STABILIZING GR1 GAME FOR %s!!\n", strategy_name);
 	automaton_automaton_print(game_automaton, false, false, true, "", "\n");
 #endif
-	uint32_t* state_location;
+	automaton_pending_state* state_location;
 	while(pending_list->count > 0){
 		//current_pending_state	= (automaton_pending_state*)automaton_ptr_bucket_pop_entry(pending_list);
 		automaton_max_heap_pop_entry(pending_list, &current_pending_state);
 
-		state_location	= (uint32_t*)automaton_concrete_bucket_get_entry(key_list, current_pending_state.state);
+		state_location	= (automaton_pending_state*)automaton_concrete_bucket_get_entry(key_list, current_pending_state.state);
 		//TODO:check, why are we getting a NULL at state location
 		if(state_location != NULL)
 			automaton_concrete_bucket_remove_entry(key_list, state_location);

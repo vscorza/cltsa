@@ -1,0 +1,17 @@
+//lift example taken from Synthesis of Reactive(1) Designs 2 floors
+set Global_Alphabet = {}
+set Controllable_Alphabet = {}
+set Global_Signals	= {b1, f1, f2}
+set Output_Signals	= {f1, f2}
+
+ltl env theta Init_Lift_e in GAME_LTL	= (b1).
+ltl sys theta Init_Lift_s in GAME_LTL	= (f1).
+ltl env rho Env_Release_B in GAME_LTL	= [](b1->b1).
+//ltl env rho Env_Release_B in GAME_LTL	= [](b1).//NOPROD
+ltl sys rho Sys_Mutex in GAME_LTL	= [](f1).
+ltl fluent Ass 				= (b1).
+ltl fluent Goal_Serve_Request_1		= (f1).
+
+|f| ENV =(GAME_LTL).
+//|gr1| <{Ass}><{Goal_Serve_Request_1}> STRAT = ENV.
+
