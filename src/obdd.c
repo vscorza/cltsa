@@ -159,12 +159,6 @@ obdd_mgr*	obdd_mgr_create(){
 	obdd_mgr* new_mgr	= malloc(sizeof(obdd_mgr));
 	new_mgr->ID			= get_new_mgr_ID();
 	//create pools
-	/*
-	 * #define OBDD_FRAGMENT_SIZE		100
-#define OBDD_FRAGMENTS_SIZE		1000
-#define OBDD_NODE_FRAGMENT_SIZE	1000
-#define OBDD_NODE_FRAGMENTS_SIZE	100
-	 * */
 	new_mgr->obdd_pool	= automaton_fast_pool_create(sizeof(obdd), OBDD_FRAGMENTS_SIZE, OBDD_FRAGMENT_SIZE);
 	new_mgr->nodes_pool	= automaton_fast_pool_create(sizeof(obdd_node), OBDD_NODE_FRAGMENTS_SIZE, OBDD_NODE_FRAGMENT_SIZE);
 	//is initialized in 1 so that we can later check for already deleted nodes
@@ -226,122 +220,14 @@ uint32_t obdd_mgr_get_next_node_ID(obdd_mgr* mgr){
 	return previous_ID;
 }
 
-void obdd_add_high_succesor(obdd_node* src, obdd_node* dst){
-	src->high_obdd	= dst;
-	uint32_t i;
-	if(dst != NULL){
-		if(dst->high_predecessors_count == dst->high_predecessors_size){
-			dst->high_predecessors_size	= dst->high_predecessors_size * LIST_INCREASE_FACTOR;
-			obdd_node** ptr	= realloc(dst->high_predecessors, sizeof(obdd_node*) * dst->high_predecessors_size);
-			if(ptr == NULL){
-				printf("Could not allocate memory\n");
-				exit(-1);
-			}else{
-				dst->high_predecessors	= ptr;
-			}
-		}
-		for(i = 0; i < dst->high_predecessors_count; i++)
-			if(dst->high_predecessors[i] == src)return;
-		dst->high_predecessors[dst->high_predecessors_count++]	= src;
-		dst->ref_count++;
-#if DEBUG_OBDD
-		printf("(++)%p -[1]-> %p (ref:%d)\n", (void*)src, (void*)dst, dst->ref_count);
-#endif
-	}else{
-#if DEBUG_OBDD
-		printf("High successor is null\n");
-#endif
-	}
-}
-void obdd_add_low_succesor(obdd_node* src, obdd_node* dst){
-	src->low_obdd	= dst;
-	uint32_t i;
-	if(dst != NULL){
-		if(dst->low_predecessors_size == dst->low_predecessors_count){
-			dst->low_predecessors_size	= dst->low_predecessors_size * LIST_INCREASE_FACTOR;
-			obdd_node** ptr	= realloc(dst->low_predecessors, sizeof(obdd_node*) * dst->low_predecessors_size);
-			if(ptr == NULL){
-				printf("Could not allocate memory\n");
-				exit(-1);
-			}else{
-				dst->low_predecessors	= ptr;
-			}
-		}
-		for(i = 0; i < dst->low_predecessors_count; i++)
-					if(dst->low_predecessors[i] == src)return;
-		dst->low_predecessors[dst->low_predecessors_count++]	= src;
-		dst->ref_count++;
-#if DEBUG_OBDD
-		printf("(++)%p -[0]-> %p (ref:%d)\n", src, dst, dst->ref_count);
-#endif
-	}else{
-#if DEBUG_OBDD
-		printf("Low successor is null\n");
-#endif
-	}
-}
-void obdd_remove_high_succesor(obdd_node* src, obdd_node* dst){
-	int32_t index	= -1;
-	int32_t i;
-	src->high_obdd	= NULL;
-	if(dst != NULL){
-		for(i = 0; i < (int32_t)dst->high_predecessors_count; i++)
-			if(dst->high_predecessors[i] == src){
-				index = i;
-				break;
-			}
-		if(index == -1){
-			printf("succ not found\n");
-			exit(-1);
-		}
-		for(i = index; i < (int32_t)(dst->high_predecessors_count - 1); i++){
-			dst->high_predecessors[i]	= dst->high_predecessors[i+ 1];
-		}
-		dst->high_predecessors_count--;
-		dst->ref_count--;
-#if DEBUG_OBDD
-		printf("(--)%p -[1]-> %p (ref:%d)\n", src, dst, dst->ref_count);
-#endif
-	}
-}
-void obdd_remove_low_succesor(obdd_node* src, obdd_node* dst){
-	int32_t index	= -1;
-	int32_t i;
-	src->low_obdd	= NULL;
-	if(dst != NULL){
-		for(i = 0; i < (int32_t)dst->low_predecessors_count; i++)
-			if(dst->low_predecessors[i] == src){
-				index = i;
-				break;
-			}
-		if(index == -1){
-			printf("succ not found\n");
-			exit(-1);
-		}
-		for(i = index; i < (int32_t)(dst->low_predecessors_count - 1); i++){
-			dst->low_predecessors[i]	= dst->low_predecessors[i+ 1];
-		}
-		dst->low_predecessors_count--;
-		dst->ref_count--;
-#if DEBUG_OBDD
-		printf("(--)%p -[0]-> %p (ref:%d)\n", src, dst, dst->ref_count);
-#endif
-	}
-}
 obdd_node* obdd_mgr_mk_node(obdd_mgr* mgr, char* var, obdd_node* high, obdd_node* low){
 	uint32_t var_ID		= dictionary_add_entry(mgr->vars_dict, var);
 	//obdd_node* new_node	= malloc(sizeof(obdd_node));
 	obdd_node* new_node	= automaton_fast_pool_get_instance(mgr->nodes_pool);
 	new_node->var_ID	= var_ID;
 	new_node->node_ID	= obdd_mgr_get_next_node_ID(mgr);
-	new_node->high_predecessors_count	= 0;
-	new_node->high_predecessors_size	= OBDD_NODE_LIST_SIZE;
-	new_node->high_predecessors			= malloc(sizeof(obdd_node*) * new_node->high_predecessors_size);
-	new_node->low_predecessors_count	= 0;
-	new_node->low_predecessors_size		= OBDD_NODE_LIST_SIZE;
-	new_node->low_predecessors			= malloc(sizeof(obdd_node*) * new_node->low_predecessors_size);
-	obdd_add_high_succesor(new_node, high);
-	obdd_add_low_succesor(new_node, low);
+	obdd_add_high_successor(new_node, high);
+	obdd_add_low_successor(new_node, low);
 	new_node->ref_count	= 0;
 #if DEBUG_OBDD
 		printf("(create)%p <%s>\n", (void*)new_node, var);
@@ -410,6 +296,51 @@ void obdd_destroy(obdd* root){
 	automaton_fast_pool_release_instance(mgr->obdd_pool, (void*) root);
 }
 
+void obdd_add_high_successor(obdd_node* src, obdd_node* dst){
+	src->high_obdd	= dst;
+	if(dst != NULL){
+		dst->ref_count++;
+#if DEBUG_OBDD
+		printf("(++)%p -[1]-> %p (ref:%d)\n", (void*)src, (void*)dst, dst->ref_count);
+#endif
+	}else{
+#if DEBUG_OBDD
+		printf("High successor is null\n");
+#endif
+	}
+}
+void obdd_add_low_successor(obdd_node* src, obdd_node* dst){
+	src->low_obdd	= dst;
+	if(dst != NULL){
+		dst->ref_count++;
+#if DEBUG_OBDD
+		printf("(++)%p -[0]-> %p (ref:%d)\n", src, dst, dst->ref_count);
+#endif
+	}else{
+#if DEBUG_OBDD
+		printf("Low successor is null\n");
+#endif
+	}
+}
+void obdd_remove_high_successor(obdd_node* src, obdd_node* dst){
+	src->high_obdd	= NULL;
+	if(dst != NULL){
+		dst->ref_count--;
+#if DEBUG_OBDD
+		printf("(--)%p -[1]-> %p (ref:%d)\n", src, dst, dst->ref_count);
+#endif
+	}
+}
+void obdd_remove_low_successor(obdd_node* src, obdd_node* dst){
+	src->low_obdd	= NULL;
+	if(dst != NULL){
+		dst->ref_count--;
+#if DEBUG_OBDD
+		printf("(--)%p -[0]-> %p (ref:%d)\n", src, dst, dst->ref_count);
+#endif
+	}
+}
+
 
 bool obdd_apply_equals_fkt(bool left, bool right)	{ 	return left == right;	}
 bool obdd_apply_xor_fkt(bool left, bool right)	{	return left ^ right;	}
@@ -464,15 +395,15 @@ void obdd_remove_duplicated_terminals(obdd_mgr* mgr, obdd_node* root, obdd_node*
 			if(*true_node == NULL){
 				*true_node	= root->high_obdd;
 			}else{
-				obdd_remove_high_succesor(root, root->high_obdd);
-				obdd_add_high_succesor(root, *(true_node));
+				obdd_remove_high_successor(root, root->high_obdd);
+				obdd_add_high_successor(root, *(true_node));
 			}
 		}else{
 			if(*false_node == NULL){
 				*false_node	= root->high_obdd;
 			}else{
-				obdd_remove_high_succesor(root, root->high_obdd);
-				obdd_add_high_succesor(root, *(false_node));
+				obdd_remove_high_successor(root, root->high_obdd);
+				obdd_add_high_successor(root, *(false_node));
 			}
 		}
 	}else{
@@ -483,15 +414,15 @@ void obdd_remove_duplicated_terminals(obdd_mgr* mgr, obdd_node* root, obdd_node*
 			if(*true_node == NULL){
 				*true_node	= root->low_obdd;
 			}else{
-				obdd_remove_low_succesor(root, root->low_obdd);
-				obdd_add_low_succesor(root, *(true_node));
+				obdd_remove_low_successor(root, root->low_obdd);
+				obdd_add_low_successor(root, *(true_node));
 			}
 		}else{
 			if(*false_node == NULL){
 				*false_node	= root->low_obdd;
 			}else{
-				obdd_remove_low_succesor(root, root->low_obdd);
-				obdd_add_low_succesor(root, *(false_node));
+				obdd_remove_low_successor(root, root->low_obdd);
+				obdd_add_low_successor(root, *(false_node));
 			}
 		}
 	}else{
@@ -510,17 +441,9 @@ void obdd_merge_redundant_nodes(obdd_mgr* mgr, obdd_node* root){
 		if(root->high_obdd->high_obdd->node_ID == root->high_obdd->low_obdd->node_ID){
 			obdd_node* to_remove	= root->high_obdd;
 			obdd_node* to_add		= root->high_obdd->high_obdd;
-			obdd_remove_high_succesor(root->high_obdd, root->high_obdd->high_obdd);
-			obdd_remove_low_succesor(root->high_obdd, root->high_obdd->low_obdd);
-			for(i = to_remove->high_predecessors_count - 1; i >= 0; i--){
-				obdd_add_high_succesor(to_remove->high_predecessors[i], to_add);
-				obdd_remove_high_succesor(to_remove->high_predecessors[i], to_remove);
-			}
-			for(i = to_remove->low_predecessors_count - 1; i >= 0; i--){
-				obdd_add_low_succesor(to_remove->low_predecessors[i], to_add);
-				obdd_remove_low_succesor(to_remove->low_predecessors[i], to_remove);
-			}
-			obdd_add_high_succesor(root, to_add);
+			obdd_remove_high_successor(root->high_obdd, root->high_obdd->high_obdd);
+			obdd_remove_low_successor(root->high_obdd, root->high_obdd->low_obdd);
+			obdd_add_high_successor(root, to_add);
 			obdd_node_destroy(mgr, to_remove);
 		}
 	}
@@ -528,17 +451,9 @@ void obdd_merge_redundant_nodes(obdd_mgr* mgr, obdd_node* root){
 		if(root->low_obdd->high_obdd->node_ID == root->low_obdd->low_obdd->node_ID){
 			obdd_node* to_remove	= root->low_obdd;
 			obdd_node* to_add		= root->low_obdd->low_obdd;
-			obdd_remove_high_succesor(root->low_obdd, root->low_obdd->high_obdd);
-			obdd_remove_low_succesor(root->low_obdd, root->low_obdd->low_obdd);
-			for(i = to_remove->high_predecessors_count - 1; i >= 0; i--){
-				obdd_add_high_succesor(to_remove->high_predecessors[i], to_add);
-				obdd_remove_high_succesor(to_remove->high_predecessors[i], to_remove);
-			}
-			for(i = to_remove->low_predecessors_count - 1; i >= 0; i--){
-				obdd_add_low_succesor(to_remove->low_predecessors[i], to_add);
-				obdd_remove_low_succesor(to_remove->low_predecessors[i], to_remove);
-			}
-			obdd_add_low_succesor(root, to_add);
+			obdd_remove_high_successor(root->low_obdd, root->low_obdd->high_obdd);
+			obdd_remove_low_successor(root->low_obdd, root->low_obdd->low_obdd);
+			obdd_add_low_successor(root, to_add);
 			obdd_node_destroy(mgr, to_remove);
 		}
 	}
@@ -884,8 +799,209 @@ obdd_node** obdd_get_obdd_nodes(obdd_mgr* mgr, obdd* root, uint32_t* nodes_count
 	return nodes;
 }
 bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count, uint32_t* valuation_img, uint32_t img_count){
+	int32_t i, j, dont_cares_count, variable_index;
+	uint32_t nodes_count;
+	//build predecessors if needed
+	//gets a list of the obdd nodes
+	obdd_node** nodes	= obdd_get_obdd_nodes(mgr, root, &nodes_count);
+	*valuations_count			= 0;
+	uint32_t valuations_size	= LIST_INITIAL_SIZE;
+	uint32_t variables_count	= mgr->vars_dict->size - 2;
+	int32_t last_bit_index		= -1;
+	bool* valuations			= calloc(img_count * valuations_size, sizeof(bool));
+	bool* dont_care_list		= malloc(sizeof(bool) * variables_count);
+	for( i = 0; i < (int32_t)variables_count; i++)
+		dont_care_list[i]		= true;
+	bool* partial_valuation		= calloc(variables_count, sizeof(bool));
+	bool* initialized_values	= calloc(variables_count, sizeof(bool));
+	for( i = 0; i < (int32_t)variables_count; i++)
+			partial_valuation[i]= false;
+	bool* valuation_set			= malloc(sizeof(bool) * img_count);
+	//keeps a stack of visited nodes
+	obdd_node** last_nodes		= malloc(sizeof(obdd_node*) * variables_count);
+	//keeps a stack of predecessors as track of the path taken
+	int32_t* last_succ_index	= malloc(sizeof(int32_t) * variables_count);
+	int32_t last_node_index	= 0;
+	//starts from the TRUE leaf and keeps backtracking
+	obdd_node* current_node		= root->root_obdd;
+	obdd_node* last_node;
+
+	int32_t current_index		= 0;
+	int32_t next_index			= 0;
+	bool taking_high			= false;
+	bool found_node_to_expand	= false;
+
+	//update the current branch list
+	last_nodes[current_index]	= current_node;
+
+	while(partial_valuation[current_index] != true){
+		if(!initialized_values[current_index]){
+			initialized_values[current_index]	= true;
+			taking_high	= false;
+		}else{
+			partial_valuation[current_index]	= true;
+			taking_high	= true;
+		}
+		dont_care_list[current_index]	= false;
+
+		if(taking_high)current_node		= current_node->high_obdd;
+		else	current_node			= current_node->low_obdd;
+
+		if(current_node->var_ID > 1){
+			next_index					= current_node->var_ID - 2;
+			//update range of variables not fixed by current branch
+			for(i = (current_index + 1); i < (next_index - 1); i++)
+				dont_care_list[i]		= true;
+			current_index				= next_index;
+			last_nodes[current_index]	= current_node;
+		}else{
+			//update range of variables not fixed by current branch
+			for(i = (current_index + 1); i < (int32_t)variables_count; i++)
+				dont_care_list[i]		= true;
+			if(current_node->var_ID == mgr->false_obdd->root_obdd->var_ID){//wrong branch
+				//?
+			}else if(current_node->var_ID == mgr->true_obdd->root_obdd->var_ID){//found terminal
+				//add valuations
+				dont_cares_count	= 1;
+				//count dont cares to get number of new valuations (only for variables belonging to the image)
+				for(i = 0; i < (int32_t)variables_count; i++){
+					if(dont_care_list[i]){
+						variable_index	= -1;
+						for(j = 0; j < (int32_t)img_count; j++)
+							if(valuation_img[j] == (uint32_t)i + 2){
+								variable_index	= valuation_img[j] - 2;
+								break;
+							}
+						if(variable_index >= 0)
+							dont_cares_count *= 2;
+					}
+				}
+				//get new valuations according to dont care list
+				uint32_t new_size	= *valuations_count + dont_cares_count;
+				if(new_size >= valuations_size){
+					bool* ptr	= realloc(valuations, sizeof(bool) * img_count * new_size);
+					if(ptr == NULL){
+						printf("Could not reallocate valuations array\n");
+						exit(-1);
+					}
+					valuations	= ptr;
+					valuations_size	= new_size;
+				}
+				uint32_t modulo	= dont_cares_count;
+
+				#if DEBUG_OBDD_VALUATIONS
+								printf("[T]erminals on node: %d (%d:%s) :\n", last_node_index, last_nodes[last_node_index]->var_ID,dictionary_key_for_value(mgr->vars_dict,last_nodes[last_node_index]->var_ID));
+
+								printf("last_pred_index[%d]:%d\t<", last_node_index, last_succ_index[last_node_index]);
+								for(i = 0; i <= (int32_t)last_node_index; i++)
+									printf("%s", dont_care_list[i]? "?" : (partial_valuation[i]? "1" : "0"));
+								for(i = variables_count - 1; i > last_node_index; i--)
+									printf("x");
+								printf(">\n");
+								printf("Partial Valuation\t<");
+								for(i = 0; i < (int32_t)variables_count; i++)
+									printf("%s", partial_valuation[i]? "1" : "0");
+								printf(">\n");
+								printf("Dont care list\t<");
+								for(i = 0; i < (int32_t)variables_count; i++){
+									variable_index	= -1;
+									for(j = 0; j < (int32_t)img_count; j++){
+										if(valuation_img[j] == (uint32_t)i + 2){
+											variable_index	= valuation_img[j] - 2;
+											break;
+										}
+									}
+									printf("%s", dont_care_list[i]? (variable_index > -1 ? "?" : "_") : "0");
+								}
+								printf("> count:%d\n", dont_cares_count);
+				#endif
+
+				uint32_t k;
+				uint32_t img_index;
+				for(k = 0; k < (uint32_t)dont_cares_count; k++){
+					for(i = 0; i < (int32_t)img_count; i++)
+						valuation_set[i] = false;
+					last_bit_index = -1;
+					for(i = 0; i < (int32_t)variables_count; i++){
+						variable_index	= -1;
+						//only setting odd variables
+						for(j = 0; j < (int32_t)img_count && variable_index < 0; j++){
+							if(valuation_img[j] == (uint32_t)i + 2){
+								variable_index	= valuation_img[j] - 2;
+								img_index		= j;
+								valuation_set[j]	= true;
+							}
+						}
+
+						if(variable_index >= 0){
+							if(dont_care_list[variable_index]){
+								last_bit_index++;
+								//set according to modulo division if current position was set to dont care
+								GET_VAR_IN_VALUATION(valuations, img_count, *valuations_count + k, img_index)	= (k & (0x1 << last_bit_index)) != 0;
+							}else{
+								//set to predefined value for this search
+								GET_VAR_IN_VALUATION(valuations, img_count, *valuations_count + k, img_index)	= partial_valuation[variable_index];
+							}
+						}
+					}
+					for(j = 0; j < (int32_t)img_count; j++){
+						if(!valuation_set[j]){
+							printf("Value not set for %s on valuation %d\n", dictionary_key_for_value(mgr->vars_dict, valuation_img[j]), *valuations_count + k );
+							exit(-1);
+						}
+					}
+#if DEBUG_OBDD_VALUATIONS
+					printf("[");
+					for(i = 0; i < (int32_t)img_count; i++){
+						bool value = GET_VAR_IN_VALUATION(valuations, img_count, *valuations_count + k, i);
+						bool care_for_value = dont_care_list[valuation_img[i] - 2];
+						printf("%s", value ? (care_for_value ? "i" : "1") : (care_for_value ? "o" : "0"));
+					}
+					printf("]\n");
+#endif
+				}
+
+
+				*valuations_count	+= dont_cares_count;
+			}//ADD VALUATIONS
+
+			//fire backtrack, check if a node needs to be expanded
+			found_node_to_expand	= false;
+			while(!found_node_to_expand){
+				while(current_index > 0 && (partial_valuation[current_index] == true || dont_care_list[current_index])){
+					current_index--;
+				}
+				//if while backtracking the initial node was exhausted then the job is done
+				if(current_index == 0 && partial_valuation[0]){
+					break;
+				}else{
+					//check if node belongs to the image, if it does not then keep backtracking
+					//since it will not produce new valuations when projected to image
+					for(i = 0; i < (int32_t)img_count; i++){
+						if(valuation_img[i] == (current_index + 2)){
+							found_node_to_expand	= true;
+							current_node			= last_nodes[current_index];
+							break;
+						}
+					}
+				}
+			}
+		}
+	}
+
+
+	free(valuation_set);
+	free(nodes);
+	free(last_nodes);
+	free(dont_care_list);
+	free(partial_valuation);
+	return valuations;
+}
+/*
+bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count, uint32_t* valuation_img, uint32_t img_count){
 	int32_t i, j, dont_cares_count;
 	uint32_t nodes_count;
+	//build predecessors if needed
 	//gets a list of the obdd nodes
 	obdd_node** nodes	= obdd_get_obdd_nodes(mgr, root, &nodes_count);
 	*valuations_count			= 0;
@@ -903,7 +1019,7 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 	//keeps a stack of visited nodes
 	obdd_node** last_nodes		= malloc(sizeof(obdd_node*) * variables_count);
 	//keeps a stack of predecessors as track of the path taken
-	int32_t* last_pred_index	= malloc(sizeof(int32_t) * variables_count);
+	int32_t* last_succ_index	= malloc(sizeof(int32_t) * variables_count);
 	int32_t last_node_index	= 0;
 	int32_t max_pred_index	= 0;
 	int32_t min_var_ID		= mgr->vars_dict->size - 3;
@@ -913,7 +1029,7 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 	obdd_node* last_node;
 
 	last_nodes[last_node_index]	= current_node;
-	last_pred_index[last_node_index]	= 0;
+	last_succ_index[last_node_index]	= 0;
 	bool belongs, through_high, has_no_pred;
 	bool at_least_one_node_expanded		= true;
 #if DEBUG_OBDD_VALUATIONS
@@ -927,7 +1043,7 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 	printf("High pred. count: %d \tLow pred.count: %d\n", last_nodes[last_node_index]->high_predecessors_count, last_nodes[last_node_index]->low_predecessors_count);
 #endif
 	//perform dfs exploration of obdd
-	while(last_pred_index[last_node_index] != -1){
+	while(last_succ_index[last_node_index] != -1){
 		last_node	= last_nodes[last_node_index];
 		if((last_node->var_ID - 2) < (int32_t)min_var_ID){
 					min_var_ID	= last_node->var_ID - 2;
@@ -939,7 +1055,7 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 		if((int32_t)(last_node->high_predecessors_count + last_node->low_predecessors_count) == 0){
 			has_no_pred	= true;
 		}
-		if(has_no_pred || last_pred_index[last_node_index] <
+		if(has_no_pred || last_succ_index[last_node_index] <
 				(int32_t)(last_node->high_predecessors_count + last_node->low_predecessors_count)){//check if we can still explore the current node
 			//get current predecessor
 			//if this is the last node we should check that only current-obdd predecessors are take into account, since many obdds share TRUE/FALSE leaves
@@ -947,18 +1063,18 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 				if(last_node_index == 0){
 					belongs	= false;
 					while(!belongs){
-						if(last_pred_index[last_node_index] < (int32_t)last_node->high_predecessors_count){
+						if(last_succ_index[last_node_index] < (int32_t)last_node->high_predecessors_count){
 							//backtrack through high pred.
-							current_predecessor	= last_node->high_predecessors[last_pred_index[last_node_index]];
+							current_predecessor	= last_node->high_predecessors[last_succ_index[last_node_index]];
 							through_high		= true;
-						}else if(last_pred_index[last_node_index] <
+						}else if(last_succ_index[last_node_index] <
 								(int32_t)(last_node->high_predecessors_count + last_node->low_predecessors_count)){
 							//backtrack through low pred.
-							current_predecessor	= last_node->low_predecessors[last_pred_index[last_node_index]  - last_node->high_predecessors_count];
+							current_predecessor	= last_node->low_predecessors[last_succ_index[last_node_index]  - last_node->high_predecessors_count];
 							through_high		= false;
 						}else{
 							//should only happen after exhaustive backtrack
-							last_pred_index[last_node_index]	= -1;
+							last_succ_index[last_node_index]	= -1;
 	#if DEBUG_OBDD_VALUATIONS
 								printf("NF.exit\n");
 	#endif
@@ -975,7 +1091,7 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 						}
 						//keep looking for proper pred.
 						if(!belongs){
-							last_pred_index[last_node_index]++;
+							last_succ_index[last_node_index]++;
 	#if DEBUG_OBDD_VALUATIONS
 							printf("NF.");
 	#endif
@@ -984,19 +1100,19 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 					//should only happen after exhaustive backtrack
 					if(!belongs)break;
 				}else{
-					if(last_pred_index[last_node_index] < (int32_t)last_node->high_predecessors_count){
+					if(last_succ_index[last_node_index] < (int32_t)last_node->high_predecessors_count){
 						//backtrack through high pred.
-						current_predecessor	= last_node->high_predecessors[last_pred_index[last_node_index]];
+						current_predecessor	= last_node->high_predecessors[last_succ_index[last_node_index]];
 						through_high		= true;
-					}else if(last_pred_index[last_node_index] <
+					}else if(last_succ_index[last_node_index] <
 							(int32_t)(last_node->high_predecessors_count + last_node->low_predecessors_count)){
 						//backtrack through low pred.
-						current_predecessor	= last_node->low_predecessors[last_pred_index[last_node_index]  - last_node->high_predecessors_count];
+						current_predecessor	= last_node->low_predecessors[last_succ_index[last_node_index]  - last_node->high_predecessors_count];
 						through_high		= false;
 					}
 				}
 				//updates structures and keep exploring
-				if(last_pred_index[last_node_index] > -1){
+				if(last_succ_index[last_node_index] > -1){
 					partial_valuation[current_predecessor->var_ID - 2]	= through_high;
 					dont_care_list[current_predecessor->var_ID - 2]		= false;
 					if((current_predecessor->var_ID - 2) < (int32_t)min_var_ID){
@@ -1008,20 +1124,20 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 					//update dont care list for nodes skipped due to obdd reduction
 					for(i = (int32_t)(current_predecessor->var_ID - 2)+ 1; i < (int32_t)(last_node->var_ID - 2); i++)
 						dont_care_list[i]	= true;
-					last_pred_index[last_node_index]++;
+					last_succ_index[last_node_index]++;
 					at_least_one_node_expanded		= true;
 #if DEBUG_OBDD_VALUATIONS
 					printf("E[X]panded %d\n", last_node_index);
 #endif
 				}
 			}else{//had no pred
-				last_pred_index[last_node_index]	= -1;
+				last_succ_index[last_node_index]	= -1;
 				current_predecessor	= last_node;
 			}
 			int32_t variable_index;
 
 #if DEBUG_OBDD_VALUATIONS
-			printf("last_pred_index[%d]:%d\t<", last_node_index, last_pred_index[last_node_index]);
+			printf("last_pred_index[%d]:%d\t<", last_node_index, last_succ_index[last_node_index]);
 			for(i = 0; i <= (int32_t)last_node_index; i++)
 				printf("%s", dont_care_list[i]? "?" : (partial_valuation[i]? "1" : "0"));
 			for(i = variables_count - 1; i > last_node_index; i--)
@@ -1050,10 +1166,6 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 					&& at_least_one_node_expanded){//terminal case, add valuation
 				dont_cares_count	= 1;
 				//set unexplored variables as dont care
-				/*
-				for(i = max_pred_index + 1; i < (int32_t)variables_count; i++)
-					dont_care_list[i]	= true;
-					*/
 				if(min_var_ID > 0){
 					for(i = min_var_ID - 1; i >= 0; i--)
 							dont_care_list[i]	= true;
@@ -1087,7 +1199,7 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 #if DEBUG_OBDD_VALUATIONS
 				printf("[T]erminals on node: %d (%d:%s) :\n", last_node_index, last_nodes[last_node_index]->var_ID,dictionary_key_for_value(mgr->vars_dict,last_nodes[last_node_index]->var_ID));
 
-				printf("last_pred_index[%d]:%d\t<", last_node_index, last_pred_index[last_node_index]);
+				printf("last_pred_index[%d]:%d\t<", last_node_index, last_succ_index[last_node_index]);
 				for(i = 0; i <= (int32_t)last_node_index; i++)
 					printf("%s", dont_care_list[i]? "?" : (partial_valuation[i]? "1" : "0"));
 				for(i = variables_count - 1; i > last_node_index; i--)
@@ -1160,9 +1272,9 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 				*valuations_count	+= dont_cares_count;
 			}
 			//all options have been taken for last_node
-			if(last_pred_index[last_node_index] >=
+			if(last_succ_index[last_node_index] >=
 					(int32_t)(last_node->high_predecessors_count + last_node->low_predecessors_count)){
-				last_pred_index[last_node_index]	= -1;
+				last_succ_index[last_node_index]	= -1;
 				at_least_one_node_expanded			= false;
 #if DEBUG_OBDD_VALUATIONS
 				printf("[E]xhausted node: %d (%s) -1 \n", last_node_index, dictionary_key_for_value(mgr->vars_dict,last_nodes[last_node_index]->var_ID));
@@ -1185,7 +1297,7 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 					}
 				}
 				last_nodes[last_node_index]			= current_predecessor;
-				last_pred_index[last_node_index]	= 0;
+				last_succ_index[last_node_index]	= 0;
 #if DEBUG_OBDD_VALUATIONS
 				printf("[N]ow on node: %d (%d:%s) \n", last_node_index, last_nodes[last_node_index]->var_ID,dictionary_key_for_value(mgr->vars_dict,last_nodes[last_node_index]->var_ID));
 				printf("High pred. count: %d \tLow pred.count: %d\n", last_nodes[last_node_index]->high_predecessors_count, last_nodes[last_node_index]->low_predecessors_count);
@@ -1196,7 +1308,7 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 				dont_care_list[last_node_index]	= true;
 				while(--last_node_index > 0){//firing backtrack can avoid terminals
 					dont_care_list[last_node_index]	= true;
-					if(last_pred_index[last_node_index] != -1)
+					if(last_succ_index[last_node_index] != -1)
 						break;
 				}
 				max_pred_index	= 0;
@@ -1208,7 +1320,7 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 		}else{
 			printf("Should not have reached this point\n");
 			printf("[W]as on node: %d (%s) %d\n", last_node_index, dictionary_key_for_value(mgr->vars_dict,last_nodes[last_node_index]->var_ID)
-					,last_pred_index[last_node_index]);
+					,last_succ_index[last_node_index]);
 			break;
 		}
 	}
@@ -1279,11 +1391,12 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 	free(valuation_set);
 	free(nodes);
 	free(last_nodes);
-	free(last_pred_index);
+	free(last_succ_index);
 	free(dont_care_list);
 	free(partial_valuation);
 	return valuations;
 }
+*/
 
 /** OBDD NODE FUNCTIONS **/
 void obdd_node_destroy(obdd_mgr* mgr, obdd_node* node){
@@ -1293,18 +1406,14 @@ void obdd_node_destroy(obdd_mgr* mgr, obdd_node* node){
 	if(node->ref_count == 0){
 		if(node->high_obdd != NULL){
 			obdd_node* to_remove = node->high_obdd;
-			obdd_remove_high_succesor(node, to_remove);
+			obdd_remove_high_successor(node, to_remove);
 			obdd_node_destroy(mgr, to_remove);
 		}
 		if(node->low_obdd != NULL){
 			obdd_node* to_remove = node->low_obdd;
-			obdd_remove_low_succesor(node, to_remove);
+			obdd_remove_low_successor(node, to_remove);
 			obdd_node_destroy(mgr, to_remove);
 		}
-		free(node->high_predecessors);
-		free(node->low_predecessors);
-		node->high_predecessors	= NULL;
-		node->low_predecessors	= NULL;
 		node->var_ID	= 0;
 		node->node_ID	= 0;
 		//free(node);

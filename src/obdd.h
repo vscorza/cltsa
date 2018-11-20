@@ -62,12 +62,6 @@ typedef struct obdd_node_t{
 	uint32_t		ref_count;
 	struct obdd_node_t*	high_obdd;
 	struct obdd_node_t*	low_obdd;
-	uint32_t high_predecessors_count;
-	uint32_t high_predecessors_size;
-	struct obdd_node_t** high_predecessors;
-	uint32_t low_predecessors_count;
-	uint32_t low_predecessors_size;
-	struct obdd_node_t** low_predecessors;
 }obdd_node;
 
 typedef struct obdd_t{
@@ -122,10 +116,10 @@ obdd* obdd_create(obdd_mgr* mgr, obdd_node* root);
 obdd_node* obdd_node_clone(obdd_mgr* mgr, obdd_node* root);
 obdd* obdd_clone(obdd* root);
 void obdd_destroy(obdd* root);
-void obdd_add_high_succesor(obdd_node* src, obdd_node* dst);
-void obdd_add_low_succesor(obdd_node* src, obdd_node* dst);
-void obdd_remove_high_succesor(obdd_node* src, obdd_node* dst);
-void obdd_remove_low_succesor(obdd_node* src, obdd_node* dst);
+void obdd_add_high_successor(obdd_node* src, obdd_node* dst);
+void obdd_add_low_successor(obdd_node* src, obdd_node* dst);
+void obdd_remove_high_successor(obdd_node* src, obdd_node* dst);
+void obdd_remove_low_successor(obdd_node* src, obdd_node* dst);
 
 /** CORE COMPUTATION **/
 obdd* obdd_restrict(obdd* root, char* var, bool value);

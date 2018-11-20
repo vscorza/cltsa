@@ -1907,6 +1907,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 
 	env_sys_theta_composed				= obdd_apply_and(env_theta_composed, sys_theta_composed);
 	env_sys_rho_composed				= obdd_apply_and(env_rho_composed, sys_rho_composed);
+
 	/**
 	 * BEHAVIOUR CONSTRUCTION (RHO AND THETA)
 	 */
