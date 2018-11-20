@@ -2431,7 +2431,7 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 					game_automaton->inverted_valuations[j]	= game_automaton->liveness_inverted_valuations[j - old_fluents_count];
 				}
 				for(j = 0; j < (int32_t)game_automaton->transitions_count; j++){
-					for(k = 0; j < old_fluents_count; k++){
+					for(k = 0; k < old_fluents_count; k++){
 						fluent_index		= GET_STATE_FLUENT_INDEX(old_fluents_count, j, k);
 						other_fluent_index	= GET_STATE_FLUENT_INDEX(ctx->global_fluents_count, j, k);
 						if(TEST_FLUENT_BIT(old_valuations, fluent_index)){

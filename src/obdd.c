@@ -989,7 +989,8 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 		}
 	}
 
-
+	free(initialized_values);
+	free(last_succ_index);
 	free(valuation_set);
 	free(nodes);
 	free(last_nodes);
