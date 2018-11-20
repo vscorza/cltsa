@@ -762,7 +762,7 @@ void automaton_automata_context_initialize(automaton_automata_context* ctx, char
 	strcpy(ctx->name, name);
 	ctx->global_alphabet		= automaton_alphabet_clone(alphabet);
 	ctx->global_fluents_count	= fluents_count;
-	ctx->global_fluents			= malloc(sizeof(automaton_fluent) * ctx->global_fluents_count);
+	ctx->global_fluents			= calloc(ctx->global_fluents_count, sizeof(automaton_fluent));
 	uint32_t i;
 	for(i = 0; i < ctx->global_fluents_count; i++){
 		automaton_fluent_copy(fluents[i], &(ctx->global_fluents[i]));
@@ -845,7 +845,7 @@ void automaton_automaton_initialize(automaton_automaton* automaton, char* name, 
 	if(is_game){
 		if(automaton->context->global_fluents_count > 0){
 			automaton->valuations_size			= GET_FLUENTS_ARR_SIZE(automaton->context->global_fluents_count, automaton->transitions_size);
-			automaton->valuations 				= malloc(sizeof(uint32_t) * automaton->valuations_size);
+			automaton->valuations 				= calloc(automaton->valuations_size, sizeof(uint32_t));
 			automaton->inverted_valuations		= malloc(sizeof(automaton_bucket_list*) * automaton->context->global_fluents_count);
 			for(i = 0; i < automaton->context->global_fluents_count; i++){
 				automaton->inverted_valuations[i]	= automaton_bucket_list_create(FLUENT_BUCKET_SIZE);

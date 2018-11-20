@@ -43,11 +43,11 @@ ltl sys rho G_9_2 in GENBUF				=
 ltl sys rho G_10 in GENBUF				= [](X(deq) -> ((!X(rToB_ACK_0) && rToB_ACK_0) || (!X(rToB_ACK_1) && rToB_ACK_1))).
 ltl sys rho G_11_1 in GENBUF			= []((full && !deq)-> !enq).
 ltl sys rho G_11_2 in GENBUF			= [](empty-> !deq).
-ltl env rho A_5_1 in GENBUF				= []((deq <-> enq) -> (empty && !X(empty))).
-ltl env rho A_5_2 in GENBUF				= []((deq <-> enq) -> (full && !X(full))).
+ltl env rho A_5_1 in GENBUF				= []((deq <-> enq) -> (empty <-> !X(empty))).
+ltl env rho A_5_2 in GENBUF				= []((deq <-> enq) -> (full <-> !X(full))).
 ltl env rho A_5_3 in GENBUF				= []((enq && !deq) -> !X(empty)).
 ltl env rho A_5_4 in GENBUF				= []((deq && !enq) -> !X(full)).
-ltl env rho A_13 in GENBUF				= []((!full && (sToB_REQ_0 || sToB_REQ_1 || sToB_REQ_2 || sToB_REQ_3)) -> (enq || !X(enq))).
+ltl env rho A_13 in GENBUF				= []((!full && (sToB_REQ_0 || sToB_REQ_1 || sToB_REQ_2 || sToB_REQ_3)) -> (enq || X(enq))).
 
 //G_12 was turned into a fluent
 fluent F_Goal_12 = <deq.on, empty.off> initially 1
@@ -63,5 +63,7 @@ ltl fluent A_2_sndr_3		= (bToR_REQ_3 <-> rToB_ACK_3).
 
 
 |f| ENV =(GENBUF ||_c G_7_ROUND_ROBIN).
+/*
 |gr1| <{A_2_sndr_0, A_2_sndr_1, A_2_sndr_2, A_2_sndr_3}><{F_Goal_12, G_1_2_sndr_0, G_1_2_sndr_1, G_1_2_sndr_2, G_1_2_sndr_3}> STRAT = ENV.
+*/
 

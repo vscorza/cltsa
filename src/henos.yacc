@@ -240,8 +240,8 @@ compositionExp2:
 	|index indexes ':' t_UPPER_IDENT		{$$ = automaton_component_syntax_create($4, NULL, $1, $2);free($4);}
 	;
 compositionType:
-	t_CONCURRENT							{$$ = CONCURRENT_AUT;}
-	|t_SYNCH								{$$ = SYNCH_AUT;}
+	t_CONCURRENT							{$$ = CONCURRENT_AUT;free($1);}
+	|t_SYNCH								{$$ = SYNCH_AUT; free($1);}
 	| 										{$$ = ASYNCH_AUT;}
 	;
 ltlFluent:

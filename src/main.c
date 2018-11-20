@@ -53,7 +53,8 @@ void run_obdd_valuations(){
 
 	obdd_mgr_print(new_mgr);
 	uint32_t valuations_count;
-	bool* valuations;
+	uint32_t valuations_size	= LIST_INITIAL_SIZE * new_mgr->vars_dict->size;
+	bool* valuations			= calloc(sizeof(bool), valuations_size);
 
 	uint32_t img_count;
 	uint32_t* total_img;
@@ -64,16 +65,15 @@ void run_obdd_valuations(){
 	total_img	= malloc(sizeof(uint32_t) * img_count);
 	for(i = 0; i < img_count; i++)
 		total_img[i]	= (i * 2) + 2;
-	valuations	= obdd_get_valuations(new_mgr, not_x1_and_not_x2_obdd, &valuations_count, total_img, img_count);
+	obdd_get_valuations(new_mgr, not_x1_and_not_x2_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count);
 	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count);
-	free(valuations);
 	free(total_img);
 
 	printf("!X1 && !X2 over x1\n");
 	img_count	= 1;
 	total_img	= malloc(sizeof(uint32_t) * img_count);
 	total_img[0]= 2;
-	valuations	= obdd_get_valuations(new_mgr, not_x1_and_not_x2_obdd, &valuations_count, total_img, img_count);
+	obdd_get_valuations(new_mgr, not_x1_and_not_x2_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count);
 	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count);
 	free(valuations);
 	free(total_img);
@@ -102,10 +102,12 @@ void run_small_obdd_tests(){
 	uint32_t img_count	= new_mgr->vars_dict->size - 2;
 	uint32_t* total_img	= malloc(sizeof(uint32_t) * img_count);
 	uint32_t i;
+	uint32_t valuations_size	= LIST_INITIAL_SIZE * new_mgr->vars_dict->size;
+	bool* valuations			= calloc(sizeof(bool), valuations_size);
 
 	for(i = 0; i < img_count; i++)
 		total_img[i]	= i + 2;
-	bool* valuations	= obdd_get_valuations(new_mgr, x1_then_x2_obdd, &valuations_count, total_img, img_count);
+	obdd_get_valuations(new_mgr, x1_then_x2_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count);
 	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count);
 	free(valuations);
 	free(total_img);
@@ -160,7 +162,9 @@ void run_obdd_tests(){
 
 	obdd_mgr_print(new_mgr);
 	uint32_t valuations_count;
-	bool* valuations;
+
+	uint32_t valuations_size	= LIST_INITIAL_SIZE * new_mgr->vars_dict->size;
+	bool* valuations			= calloc(sizeof(bool), valuations_size);
 
 	uint32_t img_count	= new_mgr->vars_dict->size - 3;
 	uint32_t* total_img	= malloc(sizeof(uint32_t) * img_count);
@@ -171,24 +175,21 @@ void run_obdd_tests(){
 
 	printf("X1 && X2\n");
 	obdd_print(x1_and_x2_obdd);
-	valuations	= obdd_get_valuations(new_mgr, x1_and_x2_obdd, &valuations_count, total_img, img_count);
+	obdd_get_valuations(new_mgr, x1_and_x2_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count);
 	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count);
-	free(valuations);
 
 	printf("X1 & X2 && X3\n");
 	obdd_print(x1_and_x2_and_x3_obdd);
-	valuations	= obdd_get_valuations(new_mgr, x1_and_x2_and_x3_obdd, &valuations_count, total_img, img_count);
+	obdd_get_valuations(new_mgr, x1_and_x2_and_x3_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count);
 	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count);
-	free(valuations);
 
 	printf("X1 || X2\n");
 	obdd_print(x1_or_x2_obdd);
-	valuations	= obdd_get_valuations(new_mgr, x1_or_x2_obdd, &valuations_count, total_img, img_count);
+	obdd_get_valuations(new_mgr, x1_or_x2_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count);
 	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count);
-	free(valuations);
 	printf("X1 || X2 || X3\n");
 	obdd_print(x1_or_x2_or_x3_obdd);
-	valuations	= obdd_get_valuations(new_mgr, x1_or_x2_or_x3_obdd, &valuations_count, total_img, img_count);
+	obdd_get_valuations(new_mgr, x1_or_x2_or_x3_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count);
 	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count);
 	free(valuations);
 	free(total_img);
@@ -619,12 +620,13 @@ int main (void){
 	//run_parse_test("tests/test23.fsp", "test23");
 	//run_parse_test("tests/test26.fsp", "test26");
 	//run_parse_test("tests/test27.fsp", "test27");
-	//run_parse_test("tests/test28.fsp", "test28");
-	//run_parse_test("tests/test29.fsp", "test29");
-	//run_parse_test("tests/test30.fsp", "test30");
-	run_parse_test("tests/test31.fsp", "test31");
+	//run_parse_test("tests/test28.fsp", "test28");//mixed model 3 signals 2 labels
+	//run_parse_test("tests/test29.fsp", "test29");//lift 3 floors
+	//run_parse_test("tests/test30.fsp", "test30");//lift 2 floors
+	run_parse_test("tests/test31.fsp", "GenBuf 4 sndrs");//GENBUF 4 sndrs
 	//run_parse_test("tests/test32.fsp", "test32");
 	//run_parse_test("tests/test34.fsp", "test34");
+	//run_parse_test("tests/test35.fsp", "GenBuf 2 sndrs");//GENBUF 2 Sndrs
 	return 0;    
 }
 

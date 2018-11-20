@@ -798,17 +798,15 @@ obdd_node** obdd_get_obdd_nodes(obdd_mgr* mgr, obdd* root, uint32_t* nodes_count
 
 	return nodes;
 }
-bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count, uint32_t* valuation_img, uint32_t img_count){
+void obdd_get_valuations(obdd_mgr* mgr, obdd* root, bool** valuations, uint32_t* valuations_size, uint32_t* valuations_count, uint32_t* valuation_img, uint32_t img_count){
 	int32_t i, j, dont_cares_count, variable_index;
 	uint32_t nodes_count;
 	//build predecessors if needed
 	//gets a list of the obdd nodes
 	obdd_node** nodes	= obdd_get_obdd_nodes(mgr, root, &nodes_count);
 	*valuations_count			= 0;
-	uint32_t valuations_size	= LIST_INITIAL_SIZE;
 	uint32_t variables_count	= mgr->vars_dict->size - 2;
 	int32_t last_bit_index		= -1;
-	bool* valuations			= calloc(img_count * valuations_size, sizeof(bool));
 	bool* dont_care_list		= malloc(sizeof(bool) * variables_count);
 	for( i = 0; i < (int32_t)variables_count; i++)
 		dont_care_list[i]		= true;
@@ -820,7 +818,7 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 	//keeps a stack of visited nodes
 	obdd_node** last_nodes		= malloc(sizeof(obdd_node*) * variables_count);
 	//keeps a stack of predecessors as track of the path taken
-	int32_t* last_succ_index	= malloc(sizeof(int32_t) * variables_count);
+	int32_t* last_succ_index	= calloc(sizeof(int32_t), variables_count);
 	int32_t last_node_index	= 0;
 	//starts from the TRUE leaf and keeps backtracking
 	obdd_node* current_node		= root->root_obdd;
@@ -877,15 +875,15 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 					}
 				}
 				//get new valuations according to dont care list
-				uint32_t new_size	= *valuations_count + dont_cares_count;
-				if(new_size >= valuations_size){
-					bool* ptr	= realloc(valuations, sizeof(bool) * img_count * new_size);
+				uint32_t new_size	= *valuations_count + (dont_cares_count);
+				if((new_size * mgr->vars_dict->size * 2) >= *valuations_size){
+					bool* ptr	= realloc(*valuations, sizeof(bool) * (new_size * mgr->vars_dict->size * 2));
 					if(ptr == NULL){
 						printf("Could not reallocate valuations array\n");
 						exit(-1);
 					}
-					valuations	= ptr;
-					valuations_size	= new_size;
+					*valuations	= ptr;
+					*valuations_size	= (new_size * mgr->vars_dict->size * 2);
 				}
 				uint32_t modulo	= dont_cares_count;
 
@@ -937,10 +935,10 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 							if(dont_care_list[variable_index]){
 								last_bit_index++;
 								//set according to modulo division if current position was set to dont care
-								GET_VAR_IN_VALUATION(valuations, img_count, *valuations_count + k, img_index)	= (k & (0x1 << last_bit_index)) != 0;
+								GET_VAR_IN_VALUATION((*valuations), img_count, *valuations_count + k, img_index)	= (k & (0x1 << last_bit_index)) != 0;
 							}else{
 								//set to predefined value for this search
-								GET_VAR_IN_VALUATION(valuations, img_count, *valuations_count + k, img_index)	= partial_valuation[variable_index];
+								GET_VAR_IN_VALUATION((*valuations), img_count, *valuations_count + k, img_index)	= partial_valuation[variable_index];
 							}
 						}
 					}
@@ -953,7 +951,7 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 #if DEBUG_OBDD_VALUATIONS
 					printf("[");
 					for(i = 0; i < (int32_t)img_count; i++){
-						bool value = GET_VAR_IN_VALUATION(valuations, img_count, *valuations_count + k, i);
+						bool value = GET_VAR_IN_VALUATION((*valuations), img_count, *valuations_count + k, i);
 						bool care_for_value = dont_care_list[valuation_img[i] - 2];
 						printf("%s", value ? (care_for_value ? "i" : "1") : (care_for_value ? "o" : "0"));
 					}
@@ -984,6 +982,11 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 							break;
 						}
 					}
+					if(current_index == 0){
+						current_node			= last_nodes[current_index];
+						break;
+					}
+					current_index--;
 				}
 			}
 		}
@@ -996,7 +999,6 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 	free(last_nodes);
 	free(dont_care_list);
 	free(partial_valuation);
-	return valuations;
 }
 /*
 bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count, uint32_t* valuation_img, uint32_t img_count){
