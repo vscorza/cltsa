@@ -965,6 +965,7 @@ void obdd_get_valuations(obdd_mgr* mgr, obdd* root, bool** valuations, uint32_t*
 
 			//fire backtrack, check if a node needs to be expanded
 			found_node_to_expand	= false;
+			uint32_t previous_index	= current_index;
 			while(!found_node_to_expand){
 				while(current_index > 0 && (partial_valuation[current_index] == true || dont_care_list[current_index])){
 					current_index--;
@@ -988,6 +989,12 @@ void obdd_get_valuations(obdd_mgr* mgr, obdd* root, bool** valuations, uint32_t*
 					}
 					current_index--;
 				}
+			}
+			//reset backtracked values
+			for(i = current_index + 1; i <= previous_index; i++){
+				dont_care_list[i]		= false;
+				partial_valuation[i]	= false;
+				initialized_values[i]	= false;
 			}
 		}
 	}
