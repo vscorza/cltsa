@@ -122,6 +122,7 @@ bool automaton_fast_pool_release_instance(automaton_fast_pool* pool, void* insta
 				if(pool->next_free_element_fragment_index == i)
 					pool->next_free_element	= (void*)pool->fragments_last_free_element[i];
 			}
+			pool->composite_count--;
 			return true;
 		}
 	}

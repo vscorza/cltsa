@@ -154,7 +154,8 @@ bool obdd_is_constant(obdd_mgr* mgr, obdd_node* root);						//checks if represen
 bool obdd_is_tautology(obdd_mgr* mgr, obdd_node* root);						//checks if representation is always true
 bool obdd_is_sat(obdd_mgr* mgr, obdd_node* root);							//checks if representation is satisfiable
 void obdd_print_valuations(obdd_mgr* mgr, bool* valuations, uint32_t valuations_count, uint32_t* valuation_img, uint32_t img_count);
-void obdd_get_valuations(obdd_mgr* mgr, obdd* root, bool** valuations, uint32_t* valuations_size, uint32_t* valuations_count, uint32_t* valuation_img, uint32_t img_count);
+void obdd_get_valuations(obdd_mgr* mgr, obdd* root, bool** valuations, uint32_t* valuations_size, uint32_t* valuations_count, uint32_t* valuation_img, uint32_t img_count
+		, bool* dont_care_list, bool* partial_valuation, bool* initialized_values, bool* valuation_set, obdd_node** last_nodes, int32_t* last_succ_index);
 void obdd_node_get_obdd_nodes(obdd_mgr* mgr, obdd_node* root, obdd_node*** nodes, uint32_t* nodes_count, uint32_t* nodes_size);
 obdd_node** obdd_get_obdd_nodes(obdd_mgr* mgr, obdd* root, uint32_t* nodes_count);
 #endif

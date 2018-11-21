@@ -1942,8 +1942,20 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	 * THETA INITIAL CONDITION
 	 */
 	//add initial env valuations
+	//structs needed for get_valuations
+	uint32_t variables_count	= mgr->vars_dict->size - 2;
+	bool* dont_care_list		= malloc(sizeof(bool) * variables_count);
+	bool* partial_valuation		= calloc(variables_count, sizeof(bool));
+	bool* initialized_values	= calloc(variables_count, sizeof(bool));
+	bool* valuation_set			= malloc(sizeof(bool) * variables_count);
+	//keeps a stack of visited nodes
+	obdd_node** last_nodes		= malloc(sizeof(obdd_node*) * variables_count);
+	//keeps a stack of predecessors as track of the path taken
+	int32_t* last_succ_index	= calloc(sizeof(int32_t), variables_count);
+
 	printf("Building theta valuations\n");
-	obdd_get_valuations(mgr, env_theta_composed, &valuations, &valuations_size, &current_valuations_count, x_alphabet, x_count);
+	obdd_get_valuations(mgr, env_theta_composed, &valuations, &valuations_size, &current_valuations_count, x_alphabet, x_count
+			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
 #if DEBUG_LTL_AUTOMATON
 	int32_t state_counter = 0;
 	printf("Init env valuations\n");
@@ -1976,7 +1988,8 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 
 #if DEBUG_LTL_AUTOMATON
 	state_counter = 0;
-	current_valuations	= obdd_get_valuations(mgr, env_sys_theta_composed, &current_valuations_count, x_y_alphabet, x_y_count);
+	current_valuations	= obdd_get_valuations(mgr, env_sys_theta_composed, &current_valuations_count, x_y_alphabet, x_y_count
+			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
 	printf("Init sys valuations\n");
 	obdd_print_valuations(mgr, current_valuations, current_valuations_count, x_y_alphabet, x_y_count);
 	free(current_valuations);
@@ -1994,7 +2007,8 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 		do{
 			automaton_concrete_bucket_pop_entry(theta_env_bucket_list, env_state);
 			obdd_current_state	= obdd_restrict_vector(env_sys_theta_composed, x_alphabet_o, env_state->valuation, x_count);
-			obdd_get_valuations(mgr, obdd_current_state, &valuations, &valuations_size, &current_valuations_count, x_y_alphabet, x_y_count);
+			obdd_get_valuations(mgr, obdd_current_state, &valuations, &valuations_size, &current_valuations_count, x_y_alphabet, x_y_count
+					, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
 #if DEBUG_LTL_AUTOMATON
 			printf("%d-[", sys_state->state);
 			for(j = 0; j < x_y_count; j++)
@@ -2046,13 +2060,16 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	 * and then ask for S_j = obdd_get_valuations, we build and add the transition between s_e and each s_j in S_j
 	 * once rho_env_bucket_list is empty we start again with rho_bucket_list until both lists are empty
 	 */
+#define CNTR_LIMIT 2
+	printf("[#obdd nodes:val.size:val.count]\n");
 	uint32_t rho_counter = 0, skipped = 0, evaluated = 0;
 	do{
+		printf("\nsys.");
 		if(rho_sys_bucket_list->composite_count > 0){
 			do{
 				rho_counter++;
-				if(rho_counter == 200){
-					printf(".");
+				if(rho_counter == CNTR_LIMIT){
+					printf("[%d:%d:%d]", mgr->nodes_pool->composite_count, valuations_size, current_valuations_count);
 					fflush(stdout);
 #if DEBUG_LTL_AUTOMATON
 					printf("evaluated|processed|skipped:\t%d\t%d\t%d\t||\t", evaluated, rho_sys_processed_bucket_list->composite_count + rho_env_processed_bucket_list->composite_count, skipped);
@@ -2065,7 +2082,8 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 				automaton_concrete_bucket_add_entry(rho_sys_processed_bucket_list, sys_state);
 				for(i = 0; i < x_y_count; i++)env_state->valuation[i]	= sys_state->valuation[i];
 				obdd_current_state	= obdd_restrict_vector(env_rho_composed, x_y_alphabet_o, sys_state->valuation, x_y_count);
-				obdd_get_valuations(mgr, obdd_current_state, &valuations, &valuations_size, &current_valuations_count, x_y_x_p_alphabet, x_y_x_p_count);
+				obdd_get_valuations(mgr, obdd_current_state, &valuations, &valuations_size, &current_valuations_count, x_y_x_p_alphabet, x_y_x_p_count
+						, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
 #if DEBUG_LTL_AUTOMATON
 				printf("XY->X'\n");
 				obdd_print_valuations(mgr, valuations, current_valuations_count, x_y_x_p_alphabet, x_y_x_p_count);
@@ -2101,11 +2119,12 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 				obdd_destroy(obdd_current_state);
 			}while(rho_sys_bucket_list->composite_count > 0);
 		}
+		printf("\nenv.");
 		if(rho_env_bucket_list->composite_count > 0){
 			do{
 				rho_counter++;
-				if(rho_counter == 500){
-					printf(".");
+				if(rho_counter == CNTR_LIMIT){
+					printf("[%d:%d:%d]", mgr->nodes_pool->composite_count, valuations_size, current_valuations_count);
 					fflush(stdout);
 #if DEBUG_LTL_AUTOMATON
 
@@ -2117,7 +2136,8 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 				automaton_concrete_bucket_pop_entry(rho_env_bucket_list, env_state);
 				automaton_concrete_bucket_add_entry(rho_env_processed_bucket_list, env_state);
 				obdd_current_state	= obdd_restrict_vector(env_sys_rho_composed, x_y_x_p_alphabet, env_state->valuation, x_y_x_p_count);
-				obdd_get_valuations(mgr, obdd_current_state, &valuations, &valuations_size, &current_valuations_count, signals_alphabet, signals_count);
+				obdd_get_valuations(mgr, obdd_current_state, &valuations, &valuations_size, &current_valuations_count, signals_alphabet, signals_count
+						, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
 #if DEBUG_LTL_AUTOMATON
 				for(j = 0; j < x_y_x_p_count; j++)
 					printf("\t%s", env_state->valuation[j] ? "1" : "0");
@@ -2158,6 +2178,12 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 			}while(rho_env_bucket_list->composite_count > 0);
 		}
 	}while(rho_sys_bucket_list->composite_count > 0);
+	free(initialized_values);
+	free(last_succ_index);
+	free(valuation_set);
+	free(last_nodes);
+	free(dont_care_list);
+	free(partial_valuation);
 
 	printf("\nOBDD->Automaton done\n");
 

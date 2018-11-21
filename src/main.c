@@ -60,12 +60,23 @@ void run_obdd_valuations(){
 	uint32_t* total_img;
 	uint32_t i;
 
+	uint32_t variables_count	= new_mgr->vars_dict->size - 2;
+	bool* dont_care_list		= malloc(sizeof(bool) * variables_count);
+	bool* partial_valuation		= calloc(variables_count, sizeof(bool));
+	bool* initialized_values	= calloc(variables_count, sizeof(bool));
+	bool* valuation_set			= malloc(sizeof(bool) * variables_count);
+	//keeps a stack of visited nodes
+	obdd_node** last_nodes		= malloc(sizeof(obdd_node*) * variables_count);
+	//keeps a stack of predecessors as track of the path taken
+	int32_t* last_succ_index	= calloc(sizeof(int32_t), variables_count);
+
 	printf("!X1 && !X2 over x1,x2\n");
 	img_count	= (new_mgr->vars_dict->size - 2) / 2;
 	total_img	= malloc(sizeof(uint32_t) * img_count);
 	for(i = 0; i < img_count; i++)
 		total_img[i]	= (i * 2) + 2;
-	obdd_get_valuations(new_mgr, not_x1_and_not_x2_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count);
+	obdd_get_valuations(new_mgr, not_x1_and_not_x2_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count
+			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
 	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count);
 	free(total_img);
 
@@ -73,10 +84,17 @@ void run_obdd_valuations(){
 	img_count	= 1;
 	total_img	= malloc(sizeof(uint32_t) * img_count);
 	total_img[0]= 2;
-	obdd_get_valuations(new_mgr, not_x1_and_not_x2_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count);
+	obdd_get_valuations(new_mgr, not_x1_and_not_x2_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count
+			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
 	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count);
 	free(valuations);
 	free(total_img);
+	free(initialized_values);
+	free(last_succ_index);
+	free(valuation_set);
+	free(last_nodes);
+	free(dont_care_list);
+	free(partial_valuation);
 
 	obdd_destroy(x1_obdd);
 	obdd_destroy(x2_obdd);
@@ -104,13 +122,29 @@ void run_small_obdd_tests(){
 	uint32_t i;
 	uint32_t valuations_size	= LIST_INITIAL_SIZE * new_mgr->vars_dict->size;
 	bool* valuations			= calloc(sizeof(bool), valuations_size);
+	uint32_t variables_count	= new_mgr->vars_dict->size - 2;
+	bool* dont_care_list		= malloc(sizeof(bool) * variables_count);
+	bool* partial_valuation		= calloc(variables_count, sizeof(bool));
+	bool* initialized_values	= calloc(variables_count, sizeof(bool));
+	bool* valuation_set			= malloc(sizeof(bool) * variables_count);
+	//keeps a stack of visited nodes
+	obdd_node** last_nodes		= malloc(sizeof(obdd_node*) * variables_count);
+	//keeps a stack of predecessors as track of the path taken
+	int32_t* last_succ_index	= calloc(sizeof(int32_t), variables_count);
 
 	for(i = 0; i < img_count; i++)
 		total_img[i]	= i + 2;
-	obdd_get_valuations(new_mgr, x1_then_x2_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count);
+	obdd_get_valuations(new_mgr, x1_then_x2_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count
+			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
 	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count);
 	free(valuations);
 	free(total_img);
+	free(initialized_values);
+	free(last_succ_index);
+	free(valuation_set);
+	free(last_nodes);
+	free(dont_care_list);
+	free(partial_valuation);
 	obdd_destroy(x1_obdd);
 	obdd_destroy(not_x1_obdd);
 	obdd_destroy(x2_obdd);
@@ -165,7 +199,15 @@ void run_obdd_tests(){
 
 	uint32_t valuations_size	= LIST_INITIAL_SIZE * new_mgr->vars_dict->size;
 	bool* valuations			= calloc(sizeof(bool), valuations_size);
-
+	uint32_t variables_count	= new_mgr->vars_dict->size - 2;
+	bool* dont_care_list		= malloc(sizeof(bool) * variables_count);
+	bool* partial_valuation		= calloc(variables_count, sizeof(bool));
+	bool* initialized_values	= calloc(variables_count, sizeof(bool));
+	bool* valuation_set			= malloc(sizeof(bool) * variables_count);
+	//keeps a stack of visited nodes
+	obdd_node** last_nodes		= malloc(sizeof(obdd_node*) * variables_count);
+	//keeps a stack of predecessors as track of the path taken
+	int32_t* last_succ_index	= calloc(sizeof(int32_t), variables_count);
 	uint32_t img_count	= new_mgr->vars_dict->size - 3;
 	uint32_t* total_img	= malloc(sizeof(uint32_t) * img_count);
 	uint32_t i;
@@ -175,24 +217,34 @@ void run_obdd_tests(){
 
 	printf("X1 && X2\n");
 	obdd_print(x1_and_x2_obdd);
-	obdd_get_valuations(new_mgr, x1_and_x2_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count);
+	obdd_get_valuations(new_mgr, x1_and_x2_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count
+			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
 	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count);
 
 	printf("X1 & X2 && X3\n");
 	obdd_print(x1_and_x2_and_x3_obdd);
-	obdd_get_valuations(new_mgr, x1_and_x2_and_x3_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count);
+	obdd_get_valuations(new_mgr, x1_and_x2_and_x3_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count
+			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
 	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count);
 
 	printf("X1 || X2\n");
 	obdd_print(x1_or_x2_obdd);
-	obdd_get_valuations(new_mgr, x1_or_x2_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count);
+	obdd_get_valuations(new_mgr, x1_or_x2_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count
+			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
 	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count);
 	printf("X1 || X2 || X3\n");
 	obdd_print(x1_or_x2_or_x3_obdd);
-	obdd_get_valuations(new_mgr, x1_or_x2_or_x3_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count);
+	obdd_get_valuations(new_mgr, x1_or_x2_or_x3_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count
+			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
 	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count);
 	free(valuations);
 	free(total_img);
+	free(initialized_values);
+	free(last_succ_index);
+	free(valuation_set);
+	free(last_nodes);
+	free(dont_care_list);
+	free(partial_valuation);
 	obdd_destroy(x1_obdd);
 	obdd_destroy(x2_obdd);
 	obdd_destroy(x3_obdd);
@@ -620,13 +672,13 @@ int main (void){
 	//run_parse_test("tests/test23.fsp", "test23");
 	//run_parse_test("tests/test26.fsp", "test26");
 	//run_parse_test("tests/test27.fsp", "test27");
-	//run_parse_test("tests/test28.fsp", "mixed model 3 signals 2 labels");//mixed model 3 signals 2 labels
+	run_parse_test("tests/test28.fsp", "mixed model 3 signals 2 labels");//mixed model 3 signals 2 labels
 	//run_parse_test("tests/test29.fsp", "lift 3 floors");//lift 3 floors
 	//run_parse_test("tests/test30.fsp", "lift 2 floors");//lift 2 floors
 	//run_parse_test("tests/test31.fsp", "GenBuf 4 sndrs");//GENBUF 4 sndrs
 	//run_parse_test("tests/test32.fsp", "test32");
 	//run_parse_test("tests/test34.fsp", "test34");
-	run_parse_test("tests/test35.fsp", "GenBuf 2 sndrs");//GENBUF 2 Sndrs
+	//run_parse_test("tests/test35.fsp", "GenBuf 2 sndrs");//GENBUF 2 Sndrs
 	return 0;    
 }
 
