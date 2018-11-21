@@ -888,10 +888,10 @@ void obdd_get_valuations(obdd_mgr* mgr, obdd* root, bool** valuations, uint32_t*
 				uint32_t modulo	= dont_cares_count;
 
 				#if DEBUG_OBDD_VALUATIONS
-								printf("[T]erminals on node: %d (%d:%s) :\n", last_node_index, last_nodes[last_node_index]->var_ID,dictionary_key_for_value(mgr->vars_dict,last_nodes[last_node_index]->var_ID));
+								printf("[T]erminals on node: %d (%d:%s) :\n", last_node_index, last_nodes[current_index]->var_ID,dictionary_key_for_value(mgr->vars_dict,last_nodes[current_index]->var_ID));
 
-								printf("last_pred_index[%d]:%d\t<", last_node_index, last_succ_index[last_node_index]);
-								for(i = 0; i <= (int32_t)last_node_index; i++)
+								printf("last_succ_index[%d]:%d\t<", last_node_index, last_succ_index[current_index]);
+								for(i = 0; i <= (int32_t)current_index; i++)
 									printf("%s", dont_care_list[i]? "?" : (partial_valuation[i]? "1" : "0"));
 								for(i = variables_count - 1; i > last_node_index; i--)
 									printf("x");
@@ -987,7 +987,8 @@ void obdd_get_valuations(obdd_mgr* mgr, obdd* root, bool** valuations, uint32_t*
 						current_node			= last_nodes[current_index];
 						break;
 					}
-					current_index--;
+					if(!found_node_to_expand)
+						current_index--;
 				}
 			}
 			//reset backtracked values

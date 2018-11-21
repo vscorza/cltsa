@@ -14,10 +14,10 @@
 #define DEBUG_OBDD_VALUATIONS	0
 #define DEBUG_OBDD_STATE_TREE	0
 
-#define OBDD_FRAGMENT_SIZE		100
-#define OBDD_FRAGMENTS_SIZE		1000
-#define OBDD_NODE_FRAGMENT_SIZE	1000
-#define OBDD_NODE_FRAGMENTS_SIZE	1000
+#define OBDD_FRAGMENT_SIZE		1000
+#define OBDD_FRAGMENTS_SIZE		100
+#define OBDD_NODE_FRAGMENT_SIZE	10000
+#define OBDD_NODE_FRAGMENTS_SIZE	100
 #define OBDD_NODE_LIST_SIZE		64
 
 #define GET_VAR_INDEX(variable_count, valuation_index, variable_index) ((((variable_count) * (valuation_index) + (variable_index)) * sizeof(bool)))
