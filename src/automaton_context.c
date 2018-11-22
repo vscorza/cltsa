@@ -1858,6 +1858,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	obdd* env_rho_composed				= NULL;
 	obdd* sys_rho_composed				= NULL;
 	obdd* env_sys_rho_composed			= NULL;
+	printf(ANSI_COLOR_RED);
 	printf("Composing env/sys theta functions\n");
 	for(i = 0; i < env_theta_count; i++){
 		if(i == 0){ env_theta_composed	= env_theta_obdd[i];
@@ -1903,7 +1904,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	}
 	printf("\n");
 	fflush(stdout);
-
+	printf(ANSI_COLOR_RESET);
 
 	env_sys_theta_composed				= obdd_apply_and(env_theta_composed, sys_theta_composed);
 	env_sys_rho_composed				= obdd_apply_and(env_rho_composed, sys_rho_composed);
@@ -1953,7 +1954,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	//keeps a stack of predecessors as track of the path taken
 	int32_t* last_succ_index	= calloc(sizeof(int32_t), variables_count);
 
-	printf("Building theta valuations\n");
+	printf(ANSI_COLOR_RED "Building theta valuations\n" ANSI_COLOR_RESET);
 	obdd_get_valuations(mgr, env_theta_composed, &valuations, &valuations_size, &current_valuations_count, x_alphabet, x_count
 			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
 #if DEBUG_LTL_AUTOMATON
@@ -2043,7 +2044,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 			obdd_destroy(obdd_current_state);
 		}while(theta_env_bucket_list->composite_count > 0);
 	}
-	printf("Building rho valuations\n");
+	printf(ANSI_COLOR_RED "Building rho valuations\n" ANSI_COLOR_RESET);
 #if DEBUG_LTL_AUTOMATON
 	printf("Rho relation building\n");
 #endif
@@ -2060,7 +2061,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	 * and then ask for S_j = obdd_get_valuations, we build and add the transition between s_e and each s_j in S_j
 	 * once rho_env_bucket_list is empty we start again with rho_bucket_list until both lists are empty
 	 */
-#define CNTR_LIMIT 2
+#define CNTR_LIMIT 1
 	printf("[#obdd nodes:val.size:val.count]\n");
 	uint32_t rho_counter = 0, skipped = 0, evaluated = 0;
 	do{
@@ -2069,7 +2070,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 			do{
 				rho_counter++;
 				if(rho_counter == CNTR_LIMIT){
-					printf("[%d:%d:%d]", mgr->nodes_pool->composite_count, valuations_size, current_valuations_count);
+					printf(ANSI_COLOR_BLUE"[%d:%d:%d]"ANSI_COLOR_RESET, mgr->nodes_pool->composite_count, valuations_size, current_valuations_count);
 					fflush(stdout);
 #if DEBUG_LTL_AUTOMATON
 					printf("evaluated|processed|skipped:\t%d\t%d\t%d\t||\t", evaluated, rho_sys_processed_bucket_list->composite_count + rho_env_processed_bucket_list->composite_count, skipped);
@@ -2124,7 +2125,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 			do{
 				rho_counter++;
 				if(rho_counter == CNTR_LIMIT){
-					printf("[%d:%d:%d]", mgr->nodes_pool->composite_count, valuations_size, current_valuations_count);
+					printf(ANSI_COLOR_BLUE"[%d:%d:%d]"ANSI_COLOR_RESET, mgr->nodes_pool->composite_count, valuations_size, current_valuations_count);
 					fflush(stdout);
 #if DEBUG_LTL_AUTOMATON
 

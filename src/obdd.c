@@ -230,7 +230,7 @@ obdd_node* obdd_mgr_mk_node(obdd_mgr* mgr, char* var, obdd_node* high, obdd_node
 	obdd_add_low_successor(new_node, low);
 	new_node->ref_count	= 0;
 #if DEBUG_OBDD
-		printf("(create)%p <%s>\n", (void*)new_node, var);
+		printf("(create)[%d]%p <%s>\n",new_node->var_ID, (void*)new_node, var);
 #endif
 	return new_node;
 }
@@ -301,7 +301,7 @@ void obdd_add_high_successor(obdd_node* src, obdd_node* dst){
 	if(dst != NULL){
 		dst->ref_count++;
 #if DEBUG_OBDD
-		printf("(++)%p -[1]-> %p (ref:%d)\n", (void*)src, (void*)dst, dst->ref_count);
+		printf("(++)[%d]%p -{1}-> [%d]%p (ref:%d)\n", src->var_ID, (void*)src, dst->var_ID,(void*)dst, dst->ref_count);
 #endif
 	}else{
 #if DEBUG_OBDD
@@ -314,7 +314,7 @@ void obdd_add_low_successor(obdd_node* src, obdd_node* dst){
 	if(dst != NULL){
 		dst->ref_count++;
 #if DEBUG_OBDD
-		printf("(++)%p -[0]-> %p (ref:%d)\n", src, dst, dst->ref_count);
+		printf("(++)[%d]%p -{0}-> [%d]%p (ref:%d)\n", src->var_ID, (void*)src, dst->var_ID,(void*)dst, dst->ref_count);
 #endif
 	}else{
 #if DEBUG_OBDD
@@ -327,7 +327,7 @@ void obdd_remove_high_successor(obdd_node* src, obdd_node* dst){
 	if(dst != NULL){
 		dst->ref_count--;
 #if DEBUG_OBDD
-		printf("(--)%p -[1]-> %p (ref:%d)\n", src, dst, dst->ref_count);
+		printf("(--)[%d]%p -{1}-> [%d]%p (ref:%d)\n", src->var_ID, (void*)src, dst->var_ID, (void*)dst, dst->ref_count);
 #endif
 	}
 }
@@ -336,7 +336,7 @@ void obdd_remove_low_successor(obdd_node* src, obdd_node* dst){
 	if(dst != NULL){
 		dst->ref_count--;
 #if DEBUG_OBDD
-		printf("(--)%p -[0]-> %p (ref:%d)\n", src, dst, dst->ref_count);
+		printf("(--)[%d]%p -{0}-> [%d]%p (ref:%d)\n", src->var_ID, (void*)src, dst->var_ID, (void*)dst, dst->ref_count);
 #endif
 	}
 }
@@ -737,6 +737,7 @@ bool obdd_is_sat(obdd_mgr* mgr, obdd_node* root){
 
 void obdd_print_valuations(obdd_mgr* mgr, bool* valuations, uint32_t valuations_count, uint32_t* valuation_img, uint32_t img_count){
 	uint32_t i, j;
+	printf(ANSI_COLOR_GREEN);
 	for(i = 0; i < img_count; i++){
 		printf("%s\t", mgr->vars_dict->entries[valuation_img[i]].key);
 	}
@@ -752,6 +753,7 @@ void obdd_print_valuations(obdd_mgr* mgr, bool* valuations, uint32_t valuations_
 		}
 		printf("\n");
 	}
+	printf(ANSI_COLOR_RESET);
 }
 
 void obdd_node_get_obdd_nodes(obdd_mgr* mgr, obdd_node* root, obdd_node*** nodes, uint32_t* nodes_count, uint32_t* nodes_size){
@@ -819,7 +821,9 @@ void obdd_get_valuations(obdd_mgr* mgr, obdd* root, bool** valuations, uint32_t*
 	int32_t next_index			= 0;
 	bool taking_high			= false;
 	bool found_node_to_expand	= false;
-
+#if DEBUG_OBDD_VALUATIONS
+	printf(ANSI_COLOR_GREEN);
+#endif
 	//update the current branch list
 	last_nodes[current_index]	= current_node;
 
@@ -990,6 +994,9 @@ void obdd_get_valuations(obdd_mgr* mgr, obdd* root, bool** valuations, uint32_t*
 			}
 		}
 	}
+#if DEBUG_OBDD_VALUATIONS
+	printf(ANSI_COLOR_RESET);
+#endif
 }
 /*
 bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count, uint32_t* valuation_img, uint32_t img_count){
@@ -1395,7 +1402,7 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 /** OBDD NODE FUNCTIONS **/
 void obdd_node_destroy(obdd_mgr* mgr, obdd_node* node){
 #if DEBUG_OBDD
-		printf("(destroy)%p (ref:%d)\n", (void*)node, node->ref_count);
+		printf("(destroy)[%d]%p (ref:%d)\n",node->var_ID, (void*)node, node->ref_count);
 #endif
 	if(node->ref_count == 0){
 		if(node->high_obdd != NULL){
