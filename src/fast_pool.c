@@ -20,10 +20,10 @@ automaton_fast_pool* automaton_fast_pool_create(size_t sizeof_element, uint32_t 
 
 	uint32_t i;
 	for(i = 0; i < pool->size; i++){
-		pool->fragments[i]		= calloc(pool->fragment_size, pool->sizeof_element);
+		pool->fragments[i]		= (uintptr_t)calloc(pool->fragment_size, pool->sizeof_element);
 		pool->fragments_last_free_element[i]	= pool->fragments[i];
 	}
-	pool->next_free_element		= pool->fragments[0];
+	pool->next_free_element		= (uintptr_t)pool->fragments[0];
 	pool->next_free_element_fragment_index	= 0;
 	return pool;
 }
@@ -43,14 +43,14 @@ void automaton_fast_pool_destroy(automaton_fast_pool* pool){
 void* automaton_fast_pool_get_instance(automaton_fast_pool* pool){
 	//check if pool is full
 	uint32_t i;
-	uintptr_t value	= NULL;
+	uintptr_t value	= (uintptr_t)NULL;
 	if(pool->next_free_element == NULL){
 		uint32_t new_size	= ++(pool->size);
 		uintptr_t* ptr	= realloc(pool->fragments, new_size * sizeof(uintptr_t));
 		if(ptr!= NULL){
 			pool->fragments	= ptr;
 			pool->size	= new_size;
-			pool->fragments[pool->size - 1]	= calloc(pool->fragment_size, pool->sizeof_element);
+			pool->fragments[pool->size - 1]	= (uintptr_t)calloc(pool->fragment_size, pool->sizeof_element);
 		}else{
 			printf("Could not get new instance from pool\n"); exit(-1);
 		}
@@ -75,10 +75,10 @@ void* automaton_fast_pool_get_instance(automaton_fast_pool* pool){
 		}else{
 			printf("Could not get new instance from pool\n"); exit(-1);
 		}
-		pool->next_free_element	= pool->fragments[pool->size - 1];
+		pool->next_free_element	= (uintptr_t)pool->fragments[pool->size - 1];
 		pool->next_free_element_fragment_index	= pool->size - 1;
 	}
-	value	= pool->next_free_element;
+	value	= (uintptr_t)pool->next_free_element;
 	//update structures
 	pool->fragments_count[pool->next_free_element_fragment_index]++;
 	pool->fragments_last_free_element[pool->next_free_element_fragment_index]	= (pool->fragments_last_free_element[pool->next_free_element_fragment_index] + (uintptr_t)pool->sizeof_element);
@@ -100,6 +100,9 @@ void* automaton_fast_pool_get_instance(automaton_fast_pool* pool){
 			pool->next_free_element = NULL;
 		}
 	}
+#if DEBUG_POOL
+	printf(ANSI_COLOR_GREEN"%p[++](pool)\n"ANSI_COLOR_RESET, value);
+#endif
 	pool->composite_count++;
 	return value;
 }
@@ -122,6 +125,9 @@ bool automaton_fast_pool_release_instance(automaton_fast_pool* pool, void* insta
 				if(pool->next_free_element_fragment_index == i)
 					pool->next_free_element	= (void*)pool->fragments_last_free_element[i];
 			}
+#if DEBUG_POOL
+			printf(ANSI_COLOR_RED"%p[XX](pool)\n"ANSI_COLOR_RESET, instance);
+#endif
 			pool->composite_count--;
 			return true;
 		}

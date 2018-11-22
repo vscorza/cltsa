@@ -2061,7 +2061,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	 * and then ask for S_j = obdd_get_valuations, we build and add the transition between s_e and each s_j in S_j
 	 * once rho_env_bucket_list is empty we start again with rho_bucket_list until both lists are empty
 	 */
-#define CNTR_LIMIT 1
+#define CNTR_LIMIT 200
 	printf("[#obdd nodes:val.size:val.count]\n");
 	uint32_t rho_counter = 0, skipped = 0, evaluated = 0;
 	do{

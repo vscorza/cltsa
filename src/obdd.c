@@ -443,6 +443,7 @@ void obdd_merge_redundant_nodes(obdd_mgr* mgr, obdd_node* root){
 			obdd_node* to_add		= root->high_obdd->high_obdd;
 			obdd_remove_high_successor(root->high_obdd, root->high_obdd->high_obdd);
 			obdd_remove_low_successor(root->high_obdd, root->high_obdd->low_obdd);
+			obdd_remove_high_successor(root, to_remove);
 			obdd_add_high_successor(root, to_add);
 			obdd_node_destroy(mgr, to_remove);
 		}
@@ -453,6 +454,7 @@ void obdd_merge_redundant_nodes(obdd_mgr* mgr, obdd_node* root){
 			obdd_node* to_add		= root->low_obdd->low_obdd;
 			obdd_remove_high_successor(root->low_obdd, root->low_obdd->high_obdd);
 			obdd_remove_low_successor(root->low_obdd, root->low_obdd->low_obdd);
+			obdd_remove_low_successor(root, to_remove);
 			obdd_add_low_successor(root, to_add);
 			obdd_node_destroy(mgr, to_remove);
 		}
@@ -1402,18 +1404,25 @@ bool* obdd_get_valuations(obdd_mgr* mgr, obdd* root, uint32_t* valuations_count,
 /** OBDD NODE FUNCTIONS **/
 void obdd_node_destroy(obdd_mgr* mgr, obdd_node* node){
 #if DEBUG_OBDD
-		printf("(destroy)[%d]%p (ref:%d)\n",node->var_ID, (void*)node, node->ref_count);
+		printf("(destroy)[%d]%p (ref:%d)",node->var_ID, (void*)node, node->ref_count);
+	if(node->ref_count > 0)
+		printf("\n");
 #endif
 	if(node->ref_count == 0){
+#if DEBUG_OBDD
+		printf(ANSI_COLOR_RED"[XX]\n"ANSI_COLOR_RESET);
+#endif
 		if(node->high_obdd != NULL){
 			obdd_node* to_remove = node->high_obdd;
 			obdd_remove_high_successor(node, to_remove);
 			obdd_node_destroy(mgr, to_remove);
+			node->high_obdd = NULL;
 		}
 		if(node->low_obdd != NULL){
 			obdd_node* to_remove = node->low_obdd;
 			obdd_remove_low_successor(node, to_remove);
 			obdd_node_destroy(mgr, to_remove);
+			node->low_obdd = NULL;
 		}
 		node->var_ID	= 0;
 		node->node_ID	= 0;
