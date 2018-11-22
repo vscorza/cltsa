@@ -1409,6 +1409,13 @@ bool automaton_automaton_has_transition(automaton_automaton* current_automaton, 
 			}else{
 				for(j = 0; j < transition->signals_count; j++){
 					found_signal = false;
+					signal_t sig_j	= j < FIXED_SIGNALS_COUNT? transition->signals[j] : transition->other_signals[j-FIXED_SIGNALS_COUNT];
+					signal_t sig_k	= j < FIXED_SIGNALS_COUNT? current_transitions[i].signals[j] : current_transitions[i].other_signals[j - FIXED_SIGNALS_COUNT];
+					if(sig_j != sig_k)return false;
+				}
+				/*
+				for(j = 0; j < transition->signals_count; j++){
+					found_signal = false;
 					for(k = 0; k < current_transitions[i].signals_count; k++){
 						signal_t sig_j	= j < FIXED_SIGNALS_COUNT? transition->signals[j] : transition->other_signals[j-FIXED_SIGNALS_COUNT];
 						signal_t sig_k	= k < FIXED_SIGNALS_COUNT? current_transitions[i].signals[k] : current_transitions[i].other_signals[k - FIXED_SIGNALS_COUNT];
@@ -1419,6 +1426,7 @@ bool automaton_automaton_has_transition(automaton_automaton* current_automaton, 
 					}
 					if(!found_signal)return false;
 				}
+				*/
 				return true;
 			}
 		}
