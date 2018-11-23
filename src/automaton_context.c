@@ -2062,7 +2062,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	 * once rho_env_bucket_list is empty we start again with rho_bucket_list until both lists are empty
 	 */
 #define CNTR_LIMIT 200
-	printf("[#obdd nodes:val.size:val.count]\n");
+	printf("[#obdd nodes:val.size:val.count:bucket_count]\n");
 	uint32_t rho_counter = 0, skipped = 0, evaluated = 0;
 	do{
 		printf("\nsys.");
@@ -2070,7 +2070,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 			do{
 				rho_counter++;
 				if(rho_counter == CNTR_LIMIT){
-					printf(ANSI_COLOR_BLUE"[%d:%d:%d]"ANSI_COLOR_RESET, mgr->nodes_pool->composite_count, valuations_size, current_valuations_count);
+					printf(ANSI_COLOR_BLUE"[%d:%d:%d:%d]"ANSI_COLOR_RESET, mgr->nodes_pool->composite_count, valuations_size, current_valuations_count, rho_sys_bucket_list->composite_count);
 					fflush(stdout);
 #if DEBUG_LTL_AUTOMATON
 					printf("evaluated|processed|skipped:\t%d\t%d\t%d\t||\t", evaluated, rho_sys_processed_bucket_list->composite_count + rho_env_processed_bucket_list->composite_count, skipped);
@@ -2125,7 +2125,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 			do{
 				rho_counter++;
 				if(rho_counter == CNTR_LIMIT){
-					printf(ANSI_COLOR_BLUE"[%d:%d:%d]"ANSI_COLOR_RESET, mgr->nodes_pool->composite_count, valuations_size, current_valuations_count);
+					printf(ANSI_COLOR_BLUE"[%d:%d:%d:%d]"ANSI_COLOR_RESET, mgr->nodes_pool->composite_count, valuations_size, current_valuations_count, rho_env_bucket_list->composite_count);
 					fflush(stdout);
 #if DEBUG_LTL_AUTOMATON
 
