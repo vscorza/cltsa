@@ -1,0 +1,26 @@
+//lift example taken from Synthesis of Reactive(1) Designs 5 floors
+set Global_Alphabet = {}
+set Controllable_Alphabet = {}
+
+set Global_Signals	= {b1, b2, b3, b4, b5, b6, f1, f2, f3, f4, f5}
+set Output_Signals	= {f1, f2, f3, f4, f5}
+
+ltl env theta Init_Lift_e in GAME_LTL	= (!b1 && !b2 && !b3 && !b4 && !b5).
+ltl sys theta Init_Lift_s in GAME_LTL	= (f1 && !f2 && !f3 && !f4 && !f5).
+ltl env rho Env_Release_B in GAME_LTL	= [](((b1 && f1)-> X(!b1)) &&((b2 && f2)-> X(!b2)) &&((b3 && f3)-> X(!b3))).
+ltl env rho Env_Keep_B in GAME_LTL		= [](((b1 && !f1)-> X(b1)) &&((b2 && !f2)-> X(b2)) &&((b3 && !f3)-> X(b3))).
+ltl sys rho Sys_Mutex in GAME_LTL		= [](!(f1 && f2) && !(f2 && f3) && !(f1 && f3)).
+ltl sys rho Sys_Mutex_X in GAME_LTL		= [](X(!(f1 && f2) && !(f2 && f3) && !(f1 && f3))).
+ltl sys rho Sys_Adj_Floors in GAME_LTL	= []((f1 -> X(f1 || f2)) && (f2 -> X(f1 || f2 || f3)) && (f3 -> X(f3 || f2))).
+ltl sys rho Sys_Move_Iff_B in GAME_LTL	= [](((f1 && X(f2)) || (f2 && X(f3)))->(b1 || b2 || b3)).
+
+
+ltl fluent Ass = (b1 || !b1).
+ltl fluent Goal_Back_To_Ground			= (f1 || (b1 || b2 || b3)).
+ltl fluent Goal_Serve_Request_1			= ((b1->f1)).
+ltl fluent Goal_Serve_Request_2			= ((b2->f2)).
+ltl fluent Goal_Serve_Request_3			= ((b3->f3)).
+
+|f| ENV =(GAME_LTL).
+|gr1| <{Ass}><{Goal_Serve_Request_1,Goal_Serve_Request_2,Goal_Serve_Request_3}> STRAT = ENV.
+
