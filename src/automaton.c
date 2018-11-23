@@ -1137,8 +1137,12 @@ signal_t automaton_alphabet_get_signal_index(automaton_alphabet* alphabet, autom
 }
 /** TRANSITION **/
 bool automaton_transition_has_signal_event(automaton_transition* transition, automaton_automata_context* ctx, automaton_signal_event* signal_event){ 
-	uint32_t i;
 	uint32_t signal_index	= automaton_alphabet_get_signal_index(ctx->global_alphabet, signal_event);
+	return automaton_transition_has_signal_event_ID(transition, ctx, signal_index);
+}
+
+bool automaton_transition_has_signal_event_ID(automaton_transition* transition, automaton_automata_context* ctx, uint32_t signal_index){
+	uint32_t i;
 	for(i = 0; i < transition->signals_count; i++){
 		if( i < FIXED_SIGNALS_COUNT){
 			if(transition->signals[i] == signal_index)
@@ -1151,15 +1155,21 @@ bool automaton_transition_has_signal_event(automaton_transition* transition, aut
 	return false;
 }
 
+
 bool automaton_transition_add_signal_event(automaton_transition* transition, automaton_automata_context* ctx, automaton_signal_event* signal_event){ 
-	if(automaton_transition_has_signal_event(transition, ctx, signal_event))
+	uint32_t signal_index	= automaton_alphabet_get_signal_index(ctx->global_alphabet, signal_event);
+	return automaton_transition_add_signal_event_ID(transition, ctx, signal_index, signal_event->type);
+}
+
+bool automaton_transition_add_signal_event_ID(automaton_transition* transition, automaton_automata_context* ctx, uint32_t signal_index, automaton_signal_type signal_type){
+	if(automaton_transition_has_signal_event_ID(transition, ctx, signal_index))
 		return true;
-	if(signal_event->type == INPUT_SIG)
+	if(signal_type == INPUT_SIG)
 		transition->is_input	= true;
 	//signals should preserve order within the transition
 	int32_t i, signal_ordered_index	= -1;
 	int32_t old_count	= (int32_t)transition->signals_count;
-	uint32_t signal_index	= automaton_alphabet_get_signal_index(ctx->global_alphabet, signal_event);
+
 	for(i = 0; i < old_count; i++){
 		if(i < FIXED_SIGNALS_COUNT){
 			if(signal_index < transition->signals[i]){

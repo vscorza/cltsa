@@ -1535,13 +1535,12 @@ void automaton_set_composed_valuation(bool* valuation, bool* partial_valuation, 
 	for(i = 0; i < var_count; i++)valuation[left_offset + i]	= partial_valuation[offset_size * valuation_offset + right_offset + i];
 }
 bool automaton_add_transition_from_valuations(obdd_mgr* mgr, automaton_automaton* automaton, uint32_t from_state, uint32_t to_state, bool* from_valuation,
-		bool* to_valuation, bool is_initial, bool is_input, uint32_t x_count, uint32_t y_count, char** obdd_on_indexes, char** obdd_off_indexes,
+		bool* to_valuation, bool is_initial, bool is_input, uint32_t x_count, uint32_t y_count, uint32_t* obdd_on_indexes, uint32_t* obdd_off_indexes,
 		uint32_t* x_y_alphabet, uint32_t* x_y_x_p_alphabet){
 	uint32_t i, fluent_index, fluent_count	= automaton->context->liveness_valuations_count;
 	automaton_transition* transition		= automaton_transition_create(from_state, to_state);
 	//if is-input set the transition type for non-labelled transitions
 	transition->is_input					= is_input;
-	automaton_signal_event* signal_event	= automaton_signal_event_create("", INPUT_SIG);
 	char signal_name[255];
 	//TODO: optimize alphabet indexes computation
 #if DEBUG_LTL_AUTOMATON
@@ -1552,7 +1551,7 @@ bool automaton_add_transition_from_valuations(obdd_mgr* mgr, automaton_automaton
 		printf("%s", from_valuation[i]?"1":"0");
 	printf("):%d-[", from_state);
 #endif
-	char* signal_dict_name;
+	uint32_t signal_dict_index;
 	uint32_t var_count = is_input ? x_count : y_count;
 	uint32_t left_offset	= is_input ? 0 : x_count;
 	uint32_t right_offset	= is_input ? (is_initial? 0 : x_count + y_count) : x_count;
@@ -1567,11 +1566,8 @@ bool automaton_add_transition_from_valuations(obdd_mgr* mgr, automaton_automaton
 				has_action 	= true;
 #endif
 				take_on				= from_valuation[left_offset + i]; //is_input? from_valuation[left_offset + i] : !from_valuation[left_offset + i];
-				signal_dict_name	= (take_on? obdd_off_indexes[left_offset + i]: obdd_on_indexes[left_offset + i]);
-				strcpy(signal_name, signal_dict_name);
-				free(signal_event->name); signal_event->name	= NULL;
-				aut_dupstr(&(signal_event->name), signal_name);
-				automaton_transition_add_signal_event(transition, automaton->context, signal_event);
+				signal_dict_index	= (take_on? obdd_off_indexes[left_offset + i]: obdd_on_indexes[left_offset + i]);
+				automaton_transition_add_signal_event_ID(transition, automaton->context, signal_dict_index, INPUT_SIG);
 #if DEBUG_LTL_AUTOMATON
 				printf("%s%s", signal_name, i < var_count - 1 ? "," : "");
 #endif
@@ -1582,11 +1578,8 @@ bool automaton_add_transition_from_valuations(obdd_mgr* mgr, automaton_automaton
 #endif
 			take_on		= to_valuation[right_offset + i];
 			if(take_on){
-				signal_dict_name	= (take_on? obdd_on_indexes[right_offset + i]: obdd_off_indexes[right_offset + i]);
-				strcpy(signal_name, signal_dict_name);
-				free(signal_event->name); signal_event->name	= NULL;
-				aut_dupstr(&(signal_event->name), signal_name);
-				automaton_transition_add_signal_event(transition, automaton->context, signal_event);
+				signal_dict_index	= (take_on? obdd_on_indexes[right_offset + i]: obdd_off_indexes[right_offset + i]);
+				automaton_transition_add_signal_event_ID(transition, automaton->context, signal_dict_index, INPUT_SIG);
 #if DEBUG_LTL_AUTOMATON
 				printf("%s%s", signal_name, i < var_count - 1 ? "," : "");
 #endif
@@ -1600,7 +1593,6 @@ bool automaton_add_transition_from_valuations(obdd_mgr* mgr, automaton_automaton
 		printf("%s", to_valuation[i]?"1":"0");
 	printf(")%d",to_state);
 #endif
-	automaton_signal_event_destroy(signal_event, true);
 	bool has_transition = automaton_automaton_has_transition(automaton, transition);
 	if(!has_transition){
 		automaton_automaton_add_transition(automaton, transition);
@@ -1667,8 +1659,8 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	bool is_primed;
 	char current_key[255];
 	bool is_input;
-	char** obdd_on_signals_indexes	= malloc(sizeof(char*) * ((mgr->vars_dict->size - 2)/2));
-	char** obdd_off_signals_indexes	= malloc(sizeof(char*) * ((mgr->vars_dict->size - 2))/2);
+	uint32_t* obdd_on_signals_indexes	= malloc(sizeof(uint32_t) * ((mgr->vars_dict->size - 2)/2));
+	uint32_t* obdd_off_signals_indexes	= malloc(sizeof(uint32_t) * ((mgr->vars_dict->size - 2))/2);
 	uint32_t obdd_on_count  = 0, obdd_off_count = 0;
 	/**
 	 * BUILD LOCAL ALPHABET
@@ -1763,11 +1755,9 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 			x_y_x_p_alphabet[x_y_x_p_count++] = i;
 			signals_alphabet[signals_count++]	= i;
 			strcpy(current_dict_entry, mgr->vars_dict->entries[i].key);	strcat(current_dict_entry, SIGNAL_ON_SUFFIX);
-			obdd_on_signals_indexes[obdd_on_count]			= malloc(sizeof(char) * (strlen(current_dict_entry) + 1));
-			strcpy(obdd_on_signals_indexes[obdd_on_count], current_dict_entry);obdd_on_count++;
+			obdd_on_signals_indexes[obdd_on_count++]			= dictionary_value_for_key(mgr->vars_dict, current_dict_entry);
 			strcpy(current_dict_entry, mgr->vars_dict->entries[i].key);	strcat(current_dict_entry, SIGNAL_OFF_SUFFIX);
-			obdd_off_signals_indexes[obdd_off_count]		= malloc(sizeof(char) * (strlen(current_dict_entry) + 1));
-			strcpy(obdd_off_signals_indexes[obdd_off_count], current_dict_entry);obdd_off_count++;
+			obdd_off_signals_indexes[obdd_off_count++]		= dictionary_value_for_key(mgr->vars_dict, current_dict_entry);
 		}
 	}
 	for(i = 0; i < mgr->vars_dict->size; i++){//Y
@@ -1785,11 +1775,9 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 				x_y_x_p_alphabet[x_y_x_p_count++] = i;
 				signals_alphabet[signals_count++]	= i;
 				strcpy(current_dict_entry, mgr->vars_dict->entries[i].key);	strcat(current_dict_entry, SIGNAL_ON_SUFFIX);
-				obdd_on_signals_indexes[obdd_on_count]		= malloc(sizeof(char) * (strlen(current_dict_entry) + 1));
-				strcpy(obdd_on_signals_indexes[obdd_on_count], current_dict_entry);obdd_on_count++;
+				obdd_on_signals_indexes[obdd_on_count++]		= dictionary_value_for_key(mgr->vars_dict, current_dict_entry);
 				strcpy(current_dict_entry, mgr->vars_dict->entries[i].key);	strcat(current_dict_entry, SIGNAL_OFF_SUFFIX);
-				obdd_off_signals_indexes[obdd_off_count]		= malloc(sizeof(char) * (strlen(current_dict_entry) + 1));
-				strcpy(obdd_off_signals_indexes[obdd_off_count], current_dict_entry);obdd_off_count++;
+				obdd_off_signals_indexes[obdd_off_count++]		= dictionary_value_for_key(mgr->vars_dict, current_dict_entry);
 			}
 		}
 	for(i = 0; i < mgr->vars_dict->size; i++){//X'
@@ -2199,8 +2187,6 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	if(sys_rho_count > 1)obdd_destroy(sys_rho_composed);
 	obdd_destroy(env_sys_theta_composed); obdd_destroy(env_sys_rho_composed);
 	free(env_state); free(sys_state); free(tmp_state_valuation);
-	for(i = 0; i < obdd_on_count; i++)free(obdd_on_signals_indexes[i]);
-	for(i = 0; i < obdd_off_count; i++)free(obdd_off_signals_indexes[i]);
 	free(obdd_on_signals_indexes); free(obdd_off_signals_indexes);
 	automaton_concrete_bucket_destroy(theta_env_bucket_list);automaton_concrete_bucket_destroy(theta_sys_bucket_list);
 	automaton_concrete_bucket_destroy(rho_env_bucket_list);automaton_concrete_bucket_destroy(rho_sys_bucket_list);

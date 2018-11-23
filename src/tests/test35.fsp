@@ -15,7 +15,8 @@ ltl sys rho G_3_sndr_0 in GENBUF		= []((!bToS_ACK_0 && X(bToS_ACK_0)) -> sToB_RE
 ltl sys rho G_3_sndr_1 in GENBUF		= []((!bToS_ACK_1 && X(bToS_ACK_1)) -> sToB_REQ_1).
 ltl sys rho G_4_sndr_0 in GENBUF		= []((bToS_ACK_0 && sToB_REQ_0) -> X(bToS_ACK_0)).
 ltl sys rho G_4_sndr_1 in GENBUF		= []((bToS_ACK_1 && sToB_REQ_1) -> X(bToS_ACK_1)).
-ltl sys rho G_5 in GENBUF				= [](!(bToS_ACK_0 && bToS_ACK_1)).
+ltl sys rho G_5 in GENBUF			= [](!(bToS_ACK_0 && bToS_ACK_1)).
+ltl sys rho G_5_X in GENBUF			= [](X(!(bToS_ACK_0 && bToS_ACK_1))).
 ltl sys rho G_6_1_rcvr_0 in GENBUF		= []((bToR_REQ_0 && !rToB_ACK_0) -> X(bToR_REQ_0)).
 ltl sys rho G_6_1_rcvr_1 in GENBUF		= []((bToR_REQ_1 && !rToB_ACK_1) -> X(bToR_REQ_1)).
 ltl sys rho G_6_2_rcvr_0 in GENBUF		= [](rToB_ACK_0 -> X(!bToR_REQ_0)).
@@ -26,8 +27,9 @@ ltl sys rho G_9_1 in GENBUF				= [](X(enq) <-> ((!bToS_ACK_0 && X(bToS_ACK_0)) |
 ltl sys rho G_9_2 in GENBUF				= [](((!bToS_ACK_0 && X(bToS_ACK_0)) -> (!X(slc_0))) && ((!bToS_ACK_1 && X(bToS_ACK_1)) -> (X(slc_0)))).
 ltl sys rho G_10 in GENBUF				= [](X(deq) -> ((!X(rToB_ACK_0) && rToB_ACK_0) || (!X(rToB_ACK_1) && rToB_ACK_1))).
 ltl sys rho G_11_1 in GENBUF			= []((full && !deq)-> !enq).
-ltl sys rho G_11_2 in GENBUF			= [](empty -> !deq).
-
+ltl sys rho G_11_1_X in GENBUF			= [](X((full && !deq)-> !enq)).
+ltl sys rho G_11_2 in GENBUF			= [](empty-> !deq).
+ltl sys rho G_11_2_X in GENBUF			= [](X(empty-> !deq)).
 ltl env rho A_1_1_sndr_0 in GENBUF		= []((sToB_REQ_0 && !bToS_ACK_0) -> X(sToB_REQ_0)).
 ltl env rho A_1_1_sndr_1 in GENBUF		= []((sToB_REQ_1 && !bToS_ACK_1) -> X(sToB_REQ_1)).
 ltl env rho A_1_2_sndr_0 in GENBUF		= [](bToS_ACK_0 -> X(!sToB_REQ_0)).
@@ -51,7 +53,5 @@ ltl fluent A_2_sndr_0		= (bToR_REQ_0 <-> rToB_ACK_0).
 ltl fluent A_2_sndr_1		= (bToR_REQ_1 <-> rToB_ACK_1).
 
 |f| ENV =(GENBUF ||_c G_7_ROUND_ROBIN).
-/*
 |gr1| <{A_2_sndr_0, A_2_sndr_1}><{F_Goal_12, G_1_2_sndr_0, G_1_2_sndr_1}> STRAT = ENV.
-*/
 

@@ -103,11 +103,14 @@ void obdd_mgr_print(obdd_mgr* mgr);
 obdd* 	obdd_mgr_true(obdd_mgr* mgr);
 obdd* 	obdd_mgr_false(obdd_mgr* mgr);
 obdd*	obdd_mgr_not_var(obdd_mgr* mgr, char* name);
+obdd*	obdd_mgr_not_var_ID(obdd_mgr* mgr, uint32_t var_ID);
 obdd*	obdd_mgr_var(obdd_mgr* mgr, char* name);
+obdd*	obdd_mgr_var_ID(obdd_mgr* mgr, uint32_t var_ID);
 bool obdd_mgr_equals(obdd_mgr* mgr, obdd* left, obdd* right);
 
 uint32_t obdd_mgr_get_next_node_ID(obdd_mgr* mgr);
 obdd_node* obdd_mgr_mk_node(obdd_mgr* mgr, char* var, obdd_node* high, obdd_node* low);
+obdd_node* obdd_mgr_mk_node_ID(obdd_mgr* mgr, uint32_t var_ID, obdd_node* high, obdd_node* low);
 void obdd_node_destroy(obdd_mgr* mgr, obdd_node* root);
 /** OBDD **/
 obdd_node* obdd_node_get_false_node(obdd_mgr* mgr, obdd_node* node);
@@ -123,7 +126,8 @@ void obdd_remove_low_successor(obdd_node* src, obdd_node* dst);
 
 /** CORE COMPUTATION **/
 obdd* obdd_restrict(obdd* root, char* var, bool value);
-obdd_node* obdd_node_restrict(obdd_mgr* mgr, obdd_node* root, char* var, uint32_t var_ID, bool value);
+obdd* obdd_restrict_ID(obdd* root, uint32_t var_ID, bool value);
+obdd_node* obdd_node_restrict(obdd_mgr* mgr, obdd_node* root, uint32_t var_ID, bool value);
 obdd* obdd_restrict_vector(obdd* root, uint32_t* var_ids, bool* values, uint32_t count);
 obdd_node* obdd_node_restrict_vector(obdd_mgr* mgr, obdd_node* root, uint32_t* var_ids, bool* values, uint32_t current_index, uint32_t count);
 obdd* obdd_exists(obdd* root, char* var);					//apply reduction based on shannon

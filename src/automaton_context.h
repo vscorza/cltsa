@@ -102,7 +102,7 @@ automaton_fluent* automaton_fluent_create_from_syntax(automaton_parsing_tables* 
 void automaton_index_syntax_get_range(automaton_parsing_tables* tables, automaton_index_syntax* index, int32_t *lower_index, int32_t *upper_index);
 void automaton_indexes_syntax_eval_strings(automaton_parsing_tables* tables, automaton_indexes_valuation* valuation, char*** a, int32_t* a_count, automaton_indexes_syntax* indexes);
 bool automaton_add_transition_from_valuations(obdd_mgr* mgr, automaton_automaton* automaton, uint32_t from_state, uint32_t to_state, bool* from_valuation,
-		bool* to_valuation, bool is_initial, bool is_input, uint32_t x_count, uint32_t y_count, char** obdd_on_indexes, char** obdd_off_indexes
+		bool* to_valuation, bool is_initial, bool is_input, uint32_t x_count, uint32_t y_count, uint32_t* obdd_on_indexes, uint32_t* obdd_off_indexes
 		,uint32_t* x_y_alphabet, uint32_t* x_y_x_p_alphabet);
 void automaton_set_composed_valuation(bool* valuation, bool* partial_valuation, uint32_t valuation_offset, bool is_initial, bool is_input, uint32_t* var_ids
 		, uint32_t x_count, uint32_t y_count);

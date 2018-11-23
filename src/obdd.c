@@ -222,6 +222,10 @@ uint32_t obdd_mgr_get_next_node_ID(obdd_mgr* mgr){
 
 obdd_node* obdd_mgr_mk_node(obdd_mgr* mgr, char* var, obdd_node* high, obdd_node* low){
 	uint32_t var_ID		= dictionary_add_entry(mgr->vars_dict, var);
+	return obdd_mgr_mk_node_ID(mgr, var_ID, high, low);
+}
+
+obdd_node* obdd_mgr_mk_node_ID(obdd_mgr* mgr, uint32_t var_ID, obdd_node* high, obdd_node* low){
 	//obdd_node* new_node	= malloc(sizeof(obdd_node));
 	obdd_node* new_node	= automaton_fast_pool_get_instance(mgr->nodes_pool);
 	new_node->var_ID	= var_ID;
@@ -236,15 +240,25 @@ obdd_node* obdd_mgr_mk_node(obdd_mgr* mgr, char* var, obdd_node* high, obdd_node
 }
 
 obdd*	obdd_mgr_var(obdd_mgr* mgr, char* name){
+	uint32_t var_ID		= dictionary_add_entry(mgr->vars_dict, name);
+	return obdd_mgr_var_ID(mgr, var_ID);
+}
+
+obdd*	obdd_mgr_var_ID(obdd_mgr* mgr, uint32_t var_ID){
 	obdd* var_obdd	= obdd_create(mgr, NULL);
-	var_obdd->root_obdd= obdd_mgr_mk_node(mgr, name
+	var_obdd->root_obdd= obdd_mgr_mk_node_ID(mgr, var_ID
 		, var_obdd->true_obdd, var_obdd->false_obdd);
 	return var_obdd;	
 }
 
 obdd*	obdd_mgr_not_var(obdd_mgr* mgr, char* name){
+	uint32_t var_ID		= dictionary_add_entry(mgr->vars_dict, name);
+	return obdd_mgr_not_var_ID(mgr, var_ID);
+}
+
+obdd*	obdd_mgr_not_var_ID(obdd_mgr* mgr, uint32_t var_ID){
 	obdd* var_obdd	= obdd_create(mgr, NULL);
-	var_obdd->root_obdd= obdd_mgr_mk_node(mgr, name
+	var_obdd->root_obdd= obdd_mgr_mk_node_ID(mgr, var_ID
 		, var_obdd->false_obdd, var_obdd->true_obdd);
 	return var_obdd;
 }
@@ -484,9 +498,6 @@ obdd_node* obdd_node_apply(bool (*apply_fkt)(bool,bool), obdd_mgr* mgr, obdd_nod
 	uint32_t left_var_ID	=  left_node->var_ID;
 	uint32_t right_var_ID	=  right_node->var_ID;
 
-	char* left_var			= dictionary_key_for_value(mgr->vars_dict,left_var_ID);
-	char* right_var			= dictionary_key_for_value(mgr->vars_dict,right_var_ID);
-
 	bool is_left_constant		= obdd_is_constant(mgr, left_node);
 	bool is_right_constant		= obdd_is_constant(mgr, right_node);
 
@@ -501,23 +512,23 @@ obdd_node* obdd_node_apply(bool (*apply_fkt)(bool,bool), obdd_mgr* mgr, obdd_nod
 	obdd_node* applied_node;
 
 	if(is_left_constant){
-		applied_node 	= obdd_mgr_mk_node(mgr, right_var, 
+		applied_node 	= obdd_mgr_mk_node_ID(mgr, right_var_ID,
 			obdd_node_apply(apply_fkt, mgr, left_node, right_node->high_obdd), 
 			obdd_node_apply(apply_fkt, mgr, left_node, right_node->low_obdd));
 	}else if(is_right_constant){
-		applied_node 	= obdd_mgr_mk_node(mgr, left_var, 
+		applied_node 	= obdd_mgr_mk_node_ID(mgr, left_var_ID,
 			obdd_node_apply(apply_fkt, mgr, left_node->high_obdd, right_node), 
 			obdd_node_apply(apply_fkt, mgr, left_node->low_obdd, right_node));
 	}else if(left_var_ID == right_var_ID){
-		applied_node 	= obdd_mgr_mk_node(mgr, left_var, 
+		applied_node 	= obdd_mgr_mk_node_ID(mgr, left_var_ID,
 			obdd_node_apply(apply_fkt, mgr, left_node->high_obdd, right_node->high_obdd), 
 			obdd_node_apply(apply_fkt, mgr, left_node->low_obdd, right_node->low_obdd));
 	}else if(left_var_ID < right_var_ID){
-		applied_node 	= obdd_mgr_mk_node(mgr, left_var, 
+		applied_node 	= obdd_mgr_mk_node_ID(mgr, left_var_ID,
 			obdd_node_apply(apply_fkt, mgr, left_node->high_obdd, right_node), 
 			obdd_node_apply(apply_fkt, mgr, left_node->low_obdd, right_node));
 	}else{
-		applied_node 	= obdd_mgr_mk_node(mgr, right_var, 
+		applied_node 	= obdd_mgr_mk_node_ID(mgr, right_var_ID,
 			obdd_node_apply(apply_fkt, mgr, left_node, right_node->high_obdd), 
 			obdd_node_apply(apply_fkt, mgr, left_node, right_node->low_obdd));
 	}
@@ -527,12 +538,16 @@ obdd_node* obdd_node_apply(bool (*apply_fkt)(bool,bool), obdd_mgr* mgr, obdd_nod
 
 obdd* obdd_restrict(obdd* root, char* var, bool value){
 	uint32_t var_ID	=  dictionary_value_for_key(root->mgr->vars_dict, var);
-	obdd_node* restricted_node	= obdd_node_restrict(root->mgr, root->root_obdd, var, var_ID, value);
+	return obdd_restrict_ID(root, var_ID, value);
+}
+
+obdd* obdd_restrict_ID(obdd* root, uint32_t var_ID, bool value){
+	obdd_node* restricted_node	= obdd_node_restrict(root->mgr, root->root_obdd, var_ID, value);
 
 	return (obdd_create(root->mgr, restricted_node));
 }
 
-obdd_node* obdd_node_restrict(obdd_mgr* mgr, obdd_node* root, char* var, uint32_t var_ID, bool value){
+obdd_node* obdd_node_restrict(obdd_mgr* mgr, obdd_node* root, uint32_t var_ID, bool value){
 	bool is_root_constant	= obdd_is_constant(mgr, root);
 	uint32_t root_var_ID	= root->var_ID;
 	char* root_var		= dictionary_key_for_value(mgr->vars_dict,root_var_ID);
@@ -544,9 +559,6 @@ obdd_node* obdd_node_restrict(obdd_mgr* mgr, obdd_node* root, char* var, uint32_
 	uint32_t low_var_ID	=  root->low_obdd->var_ID;
 	uint32_t high_var_ID	=  root->high_obdd->var_ID;
 
-	char* low_var			= dictionary_key_for_value(mgr->vars_dict,low_var_ID);
-	char* high_var			= dictionary_key_for_value(mgr->vars_dict,high_var_ID);
-
 	bool is_low_constant		= obdd_is_constant(mgr, root->low_obdd);
 	bool is_high_constant		= obdd_is_constant(mgr, root->high_obdd);
 
@@ -554,16 +566,16 @@ obdd_node* obdd_node_restrict(obdd_mgr* mgr, obdd_node* root, char* var, uint32_
 
 	if(root_var_ID == var_ID){
 		if(value){
-			applied_node 	= obdd_mgr_mk_node(mgr, high_var
+			applied_node 	= obdd_mgr_mk_node_ID(mgr, high_var_ID
 				, root->high_obdd->high_obdd, root->high_obdd->low_obdd); 
 		}else{
-			applied_node 	= obdd_mgr_mk_node(mgr, low_var
+			applied_node 	= obdd_mgr_mk_node_ID(mgr, low_var_ID
 				, root->low_obdd->high_obdd, root->low_obdd->low_obdd);  
 		}
 	}else{
-		applied_node 	= obdd_mgr_mk_node(mgr, root_var
-			, obdd_node_restrict(mgr, root->high_obdd, var, var_ID, value)
-			, obdd_node_restrict(mgr, root->low_obdd, var, var_ID, value));  	
+		applied_node 	= obdd_mgr_mk_node_ID(mgr, root_var_ID
+			, obdd_node_restrict(mgr, root->high_obdd, var_ID, value)
+			, obdd_node_restrict(mgr, root->low_obdd, var_ID, value));
 	}
 	return applied_node;	
 }
