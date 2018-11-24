@@ -62,6 +62,7 @@ typedef struct obdd_node_t{
 	uint32_t		ref_count;
 	struct obdd_node_t*	high_obdd;
 	struct obdd_node_t*	low_obdd;
+	uint32_t 		fragment_ID;
 }obdd_node;
 
 typedef struct obdd_t{
@@ -69,6 +70,7 @@ typedef struct obdd_t{
 	struct obdd_node_t*	root_obdd;
 	struct obdd_node_t* true_obdd;
 	struct obdd_node_t* false_obdd;
+	uint32_t 		fragment_ID;
 }obdd;
 /*
 typedef struct obdd_partial_automaton_t{
@@ -125,6 +127,8 @@ void obdd_remove_high_successor(obdd_node* src, obdd_node* dst);
 void obdd_remove_low_successor(obdd_node* src, obdd_node* dst);
 
 /** CORE COMPUTATION **/
+obdd* obdd_exists_vector(obdd* root, uint32_t* var_ids, uint32_t count);
+obdd_node* obdd_exists_vector_node(obdd_mgr* mgr, obdd_node* root, uint32_t* var_ids, uint32_t count);
 obdd* obdd_restrict(obdd* root, char* var, bool value);
 obdd* obdd_restrict_ID(obdd* root, uint32_t var_ID, bool value);
 obdd_node* obdd_node_restrict(obdd_mgr* mgr, obdd_node* root, uint32_t var_ID, bool value);

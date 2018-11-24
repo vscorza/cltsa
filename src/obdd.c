@@ -169,19 +169,22 @@ obdd_mgr*	obdd_mgr_create(){
 	new_mgr->vars_dict		= dictionary_create();
 	
 	//create constant obdds for true and false values
-	obdd* true_obdd		= automaton_fast_pool_get_instance(new_mgr->obdd_pool);//malloc(sizeof(obdd));
+	uint32_t fragment_ID;
+	obdd* true_obdd		= automaton_fast_pool_get_instance(new_mgr->obdd_pool, &fragment_ID);//malloc(sizeof(obdd));
 	true_obdd->root_obdd= obdd_mgr_mk_node(new_mgr, TRUE_VAR, NULL, NULL);
 	true_obdd->root_obdd->ref_count++;
 	true_obdd->mgr		= new_mgr;
 	true_obdd->true_obdd	= NULL;
 	true_obdd->false_obdd	= NULL;
+	true_obdd->fragment_ID	= fragment_ID;
 	new_mgr->true_obdd	= true_obdd;
-	obdd* false_obdd	= automaton_fast_pool_get_instance(new_mgr->obdd_pool);//malloc(sizeof(obdd));
+	obdd* false_obdd	= automaton_fast_pool_get_instance(new_mgr->obdd_pool, &fragment_ID);//malloc(sizeof(obdd));
 	false_obdd->root_obdd= obdd_mgr_mk_node(new_mgr, FALSE_VAR, NULL, NULL);
 	false_obdd->root_obdd->ref_count++;
 	false_obdd->mgr		= new_mgr;
 	false_obdd->true_obdd	= NULL;
 	false_obdd->false_obdd	= NULL;
+	false_obdd->fragment_ID	= fragment_ID;
 	new_mgr->false_obdd	= false_obdd;
 	return new_mgr;
 }
@@ -227,12 +230,14 @@ obdd_node* obdd_mgr_mk_node(obdd_mgr* mgr, char* var, obdd_node* high, obdd_node
 
 obdd_node* obdd_mgr_mk_node_ID(obdd_mgr* mgr, uint32_t var_ID, obdd_node* high, obdd_node* low){
 	//obdd_node* new_node	= malloc(sizeof(obdd_node));
-	obdd_node* new_node	= automaton_fast_pool_get_instance(mgr->nodes_pool);
+	uint32_t fragment_ID;
+	obdd_node* new_node	= automaton_fast_pool_get_instance(mgr->nodes_pool, &fragment_ID);
 	new_node->var_ID	= var_ID;
 	new_node->node_ID	= obdd_mgr_get_next_node_ID(mgr);
 	obdd_add_high_successor(new_node, high);
 	obdd_add_low_successor(new_node, low);
 	new_node->ref_count	= 0;
+	new_node->fragment_ID = fragment_ID;
 #if DEBUG_OBDD
 		printf("(create)[%d]%p <%s>\n",new_node->var_ID, (void*)new_node, var);
 #endif
@@ -269,11 +274,13 @@ obdd*	obdd_mgr_false(obdd_mgr* mgr){ return mgr->false_obdd; }
 /** OBDD FUNCTIONS **/
 obdd* obdd_create(obdd_mgr* mgr, obdd_node* root){
 	//obdd* new_obdd		= malloc(sizeof(obdd));
-	obdd* new_obdd		= automaton_fast_pool_get_instance(mgr->obdd_pool);
+	uint32_t fragment_ID;
+	obdd* new_obdd		= automaton_fast_pool_get_instance(mgr->obdd_pool, &fragment_ID);
 	new_obdd->mgr		= mgr;
 	new_obdd->root_obdd	= root;
 	new_obdd->true_obdd	= mgr->true_obdd->root_obdd;
 	new_obdd->false_obdd= mgr->false_obdd->root_obdd;
+	new_obdd->fragment_ID	= fragment_ID;
 	return new_obdd;
 }
 
@@ -287,11 +294,13 @@ obdd_node* obdd_node_clone(obdd_mgr* mgr, obdd_node* root){
 
 obdd* obdd_clone(obdd* root){
 	//obdd* clone	= malloc(sizeof(obdd));
-	obdd* clone			= automaton_fast_pool_get_instance(root->mgr->obdd_pool);
+	uint32_t fragment_ID;
+	obdd* clone			= automaton_fast_pool_get_instance(root->mgr->obdd_pool, &fragment_ID);
 	clone->false_obdd	= root->false_obdd;
 	clone->true_obdd	= root->true_obdd;
 	clone->mgr			= root->mgr;
 	clone->root_obdd	= obdd_node_clone(root->mgr, root->root_obdd);
+	clone->fragment_ID	= fragment_ID;
 	obdd_reduce(clone);
 	return clone;
 }
@@ -307,7 +316,7 @@ void obdd_destroy(obdd* root){
 	root->false_obdd	= NULL;
 	root->mgr			= NULL;
 	//free(root);
-	automaton_fast_pool_release_instance(mgr->obdd_pool, (void*) root);
+	automaton_fast_pool_release_instance(mgr->obdd_pool, root->fragment_ID);
 }
 
 void obdd_add_high_successor(obdd_node* src, obdd_node* dst){
@@ -535,7 +544,33 @@ obdd_node* obdd_node_apply(bool (*apply_fkt)(bool,bool), obdd_mgr* mgr, obdd_nod
 
 	return applied_node;	
 }
+obdd* obdd_exists_vector(obdd* root, uint32_t* var_ids, uint32_t count){
+	return obdd_create(root->mgr, obdd_exists_vector_node(root->mgr, root->root_obdd, var_ids, count));
+}
 
+obdd_node* obdd_exists_vector_node(obdd_mgr* mgr, obdd_node* root, uint32_t* var_ids, uint32_t count){
+	int32_t i;
+	obdd_node* true_node;
+	obdd_node* false_node;
+
+	obdd_node* current_node = root;
+	obdd_node* tmp_node		= NULL;
+
+	for(i = 0; i < count; i++){
+		true_node	= obdd_node_restrict(mgr, current_node, 0, true);
+		false_node	= obdd_node_restrict(mgr, current_node, 0, false);
+
+		tmp_node	= current_node;
+
+		current_node	= obdd_node_apply(&obdd_apply_or_fkt, mgr, true_node, false_node);
+
+		if(tmp_node != NULL && tmp_node != root) obdd_node_destroy(mgr, tmp_node);
+		obdd_node_destroy(mgr, true_node);
+		obdd_node_destroy(mgr, false_node);
+	}
+
+	return current_node;
+}
 obdd* obdd_restrict(obdd* root, char* var, bool value){
 	uint32_t var_ID	=  dictionary_value_for_key(root->mgr->vars_dict, var);
 	return obdd_restrict_ID(root, var_ID, value);
@@ -975,33 +1010,11 @@ void obdd_get_valuations(obdd_mgr* mgr, obdd* root, bool** valuations, uint32_t*
 			}//ADD VALUATIONS
 
 			//fire backtrack, check if a node needs to be expanded
-			found_node_to_expand	= false;
 			uint32_t previous_index	= current_index;
-			while(!found_node_to_expand){
-				while(current_index > 0 && (partial_valuation[current_index] == true || dont_care_list[current_index])){
-					current_index--;
-				}
-				//if while backtracking the initial node was exhausted then the job is done
-				if(current_index == 0 && partial_valuation[0]){
-					break;
-				}else{
-					//check if node belongs to the image, if it does not then keep backtracking
-					//since it will not produce new valuations when projected to image
-					for(i = 0; i < (int32_t)img_count; i++){
-						if(valuation_img[i] == (current_index + 2)){
-							found_node_to_expand	= true;
-							current_node			= last_nodes[current_index];
-							break;
-						}
-					}
-					if(current_index == 0){
-						current_node			= last_nodes[current_index];
-						break;
-					}
-					if(!found_node_to_expand)
-						current_index--;
-				}
+			while(current_index > 0 && (partial_valuation[current_index] == true || dont_care_list[current_index])){
+				current_index--;
 			}
+			current_node				= last_nodes[current_index];
 			//reset backtracked values
 			for(i = current_index + 1; i <= previous_index; i++){
 				dont_care_list[i]		= false;
@@ -1441,6 +1454,6 @@ void obdd_node_destroy(obdd_mgr* mgr, obdd_node* node){
 		node->var_ID	= 0;
 		node->node_ID	= 0;
 		//free(node);
-		automaton_fast_pool_release_instance(mgr->nodes_pool, (void*)node);
+		automaton_fast_pool_release_instance(mgr->nodes_pool, node->fragment_ID);
 	}
 }

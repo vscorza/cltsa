@@ -70,6 +70,25 @@ void run_obdd_valuations(){
 	//keeps a stack of predecessors as track of the path taken
 	int32_t* last_succ_index	= calloc(sizeof(int32_t), variables_count);
 
+	printf("!X1 over x2\n");
+	img_count	= 1;
+	total_img	= malloc(sizeof(uint32_t) * img_count);
+	total_img[0]	= 2 + 2;
+	obdd_get_valuations(new_mgr, not_x1_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count
+			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
+	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count);
+	free(total_img);
+
+	printf("!X1 over x1, x2\n");
+	img_count	= 2;
+	total_img	= malloc(sizeof(uint32_t) * img_count);
+	total_img[0]	= 2;
+	total_img[1]	= 2 + 2;
+	obdd_get_valuations(new_mgr, not_x1_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count
+			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
+	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count);
+	free(total_img);
+
 	printf("!X1 && !X2 over x1,x2\n");
 	img_count	= (new_mgr->vars_dict->size - 2) / 2;
 	total_img	= malloc(sizeof(uint32_t) * img_count);
@@ -592,6 +611,8 @@ void run_fast_pool_tests(){
 	size_t item_size	= sizeof(test_item_pool);
 	test_item_pool** pool_ref1	= malloc(MAX_POOL_COUNT * sizeof(test_item_pool*));
 	test_item_pool** pool_ref2	= malloc(MAX_POOL_COUNT * sizeof(test_item_pool*));
+	test_item_pool** pool_frag1	= malloc(MAX_POOL_COUNT * sizeof(uint32_t));
+	test_item_pool** pool_frag2	= malloc(MAX_POOL_COUNT * sizeof(uint32_t));
 
 
 
@@ -600,11 +621,11 @@ void run_fast_pool_tests(){
 
 	uint32_t i;
 	for(i = 0; i < MAX_POOL_COUNT/2; i++){
-		test_item_pool* item	= automaton_fast_pool_get_instance(pool1);
+		test_item_pool* item	= automaton_fast_pool_get_instance(pool1, &(pool_frag1[i]));
 		item->a		= i;
 		item->name[0]	= 'h';item->name[1]	= 'i';item->name[2]	= '!';item->name[3]	= '\0';
 		pool_ref1[i]	= item;
-		item	= automaton_fast_pool_get_instance(pool1);
+		item	= automaton_fast_pool_get_instance(pool2, &(pool_frag2[i]));
 		item->a		= i;
 		item->name[0]	= 'h';item->name[1]	= 'i';item->name[2]	= '!';item->name[3]	= '\0';
 		pool_ref2[i]	= item;
@@ -622,15 +643,15 @@ void run_fast_pool_tests(){
 	}
 	printf("\n");
 	for(i = 0; i < MAX_POOL_COUNT/2; i++){
-		automaton_fast_pool_release_instance(pool1, pool_ref1[i]);
-		automaton_fast_pool_release_instance(pool2, pool_ref2[i]);
+		automaton_fast_pool_release_instance(pool1, pool_frag1[i]);
+		automaton_fast_pool_release_instance(pool2, pool_frag2[i]);
 	}
 	for(i = 0; i < MAX_POOL_COUNT; i++){
-		test_item_pool* item	= automaton_fast_pool_get_instance(pool1);
+		test_item_pool* item	= automaton_fast_pool_get_instance(pool1, &(pool_frag1[i]));
 		item->a		= i;
 		item->name[0]	= 'h';item->name[1]	= 'i';item->name[2]	= '!';item->name[3]	= '\0';
 		pool_ref1[i]	= item;
-		item	= automaton_fast_pool_get_instance(pool1);
+		item	= automaton_fast_pool_get_instance(pool2, &(pool_frag2[i]));
 		item->a		= i;
 		item->name[0]	= 'h';item->name[1]	= 'i';item->name[2]	= '!';item->name[3]	= '\0';
 		pool_ref2[i]	= item;
@@ -640,7 +661,7 @@ void run_fast_pool_tests(){
 	printf("\n");
 	automaton_fast_pool_destroy(pool1);
 	automaton_fast_pool_destroy(pool2);
-
+	free(pool_frag1);free(pool_frag2);
 	free(pool_ref1);free(pool_ref2);
 }
 void run_all_tests(){

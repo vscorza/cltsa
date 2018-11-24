@@ -40,7 +40,7 @@ void automaton_fast_pool_destroy(automaton_fast_pool* pool){
 	free(pool);
 }
 
-void* automaton_fast_pool_get_instance(automaton_fast_pool* pool){
+void* automaton_fast_pool_get_instance(automaton_fast_pool* pool, uint32_t* fragment_ID){
 	//check if pool is full
 	uint32_t i;
 	uintptr_t value	= (uintptr_t)NULL;
@@ -78,7 +78,8 @@ void* automaton_fast_pool_get_instance(automaton_fast_pool* pool){
 		pool->next_free_element	= (uintptr_t)pool->fragments[pool->size - 1];
 		pool->next_free_element_fragment_index	= pool->size - 1;
 	}
-	value	= (uintptr_t)pool->next_free_element;
+	value			= (uintptr_t)pool->next_free_element;
+	*fragment_ID	= pool->next_free_element_fragment_index;
 	//update structures
 	pool->fragments_count[pool->next_free_element_fragment_index]++;
 	pool->fragments_last_free_element[pool->next_free_element_fragment_index]	= (pool->fragments_last_free_element[pool->next_free_element_fragment_index] + (uintptr_t)pool->sizeof_element);
@@ -106,35 +107,26 @@ void* automaton_fast_pool_get_instance(automaton_fast_pool* pool){
 	pool->composite_count++;
 	return value;
 }
-bool automaton_fast_pool_release_instance(automaton_fast_pool* pool, void* instance){
-	//check void as address in range of fragment, if so decrement count, if count == 0 set last_index to 0
-	uintptr_t base_addr, top_addr, range = (uintptr_t)pool->fragment_size * (uintptr_t)pool->sizeof_element, addr	= (uintptr_t)instance;
-	uint32_t i;
-	for(i = 0; i < pool->size; i++){
-		base_addr	= (uintptr_t)pool->fragments[i];
-		top_addr	= base_addr + range;
-		if(addr >= base_addr && addr < top_addr){
-			if(pool->fragments_count[i] == 0){
-				printf("Releasing on empty bucket\n");
-				exit(-1);
-			}
-			pool->fragments_count[i]--;
-			if(pool->fragments_count[i] == 0){//if no element reset last index
-				pool->fragments_last_index[i]	= 0;
-				pool->fragments_last_free_element[i]	= pool->fragments[i];
-				if(pool->next_free_element_fragment_index == i)
-					pool->next_free_element	= (void*)pool->fragments_last_free_element[i];
-			}
-#if DEBUG_POOL
-			printf(ANSI_COLOR_RED"%p[XX](pool)\n"ANSI_COLOR_RESET, instance);
-#endif
-			pool->composite_count--;
-			return true;
-		}
+bool automaton_fast_pool_release_instance(automaton_fast_pool* pool, uint32_t fragment_ID){
+	if(pool->fragment_size <= fragment_ID){
+		printf("Fragment ID out of bounds\n");
+		exit(-1);
 	}
-	//not found
-	printf("Instance not found\n");
-	exit(-1);
-	return false;
+	if(pool->fragments_count[fragment_ID] == 0){
+		printf("Releasing on empty bucket\n");
+		exit(-1);
+	}
+	pool->fragments_count[fragment_ID]--;
+	if(pool->fragments_count[fragment_ID] == 0){//if no element reset last index
+		pool->fragments_last_index[fragment_ID]	= 0;
+		pool->fragments_last_free_element[fragment_ID]	= pool->fragments[fragment_ID];
+		if(pool->next_free_element_fragment_index == fragment_ID)
+			pool->next_free_element	= (void*)pool->fragments_last_free_element[fragment_ID];
+	}
+#if DEBUG_POOL
+	printf(ANSI_COLOR_RED"%p[XX](pool)\n"ANSI_COLOR_RESET, instance);
+#endif
+	pool->composite_count--;
+	return true;
 }
 

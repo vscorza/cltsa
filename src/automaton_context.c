@@ -1528,11 +1528,15 @@ automaton_fluent* automaton_fluent_create_from_syntax(automaton_parsing_tables* 
 void automaton_set_composed_valuation(bool* valuation, bool* partial_valuation, uint32_t valuation_offset, bool is_initial, bool is_input, uint32_t* var_ids
 		, uint32_t x_count, uint32_t y_count){
 	uint32_t i;
+	/*
 	uint32_t offset_size	= (is_initial) ? (is_input? x_count : x_count + y_count) : (is_input? x_count * 2 + y_count : (x_count + y_count) * 2);
 	uint32_t var_count		= (is_initial) ? (is_input? x_count : x_count + y_count) : (is_input? x_count * 2 + y_count : x_count + y_count);
 	uint32_t right_offset	= is_initial ? 0 : (is_input? 0 : x_count + y_count);
-	uint32_t left_offset	= 0;
 	for(i = 0; i < var_count; i++)valuation[left_offset + i]	= partial_valuation[offset_size * valuation_offset + right_offset + i];
+	*/
+	uint32_t offset_size	= (is_initial) ? (is_input? x_count : x_count + y_count) : (is_input? x_count : y_count);
+	uint32_t left_offset	= is_initial? 0 : (is_input? x_count + y_count: 0);
+	for(i = 0; i < offset_size; i++)valuation[left_offset + i]	= partial_valuation[offset_size * valuation_offset + i];
 }
 bool automaton_add_transition_from_valuations(obdd_mgr* mgr, automaton_automaton* automaton, uint32_t from_state, uint32_t to_state, bool* from_valuation,
 		bool* to_valuation, bool is_initial, bool is_input, uint32_t x_count, uint32_t y_count, uint32_t* obdd_on_indexes, uint32_t* obdd_off_indexes,
@@ -1653,7 +1657,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	char current_dict_entry[255];
 	parser_get_primed_variables();
 
-	uint32_t x_count = 0, y_count = 0, x_p_count = 0, y_p_count = 0, x_y_count = 0, x_y_x_p_count = 0, x_p_y_p_count = 0, signals_count = 0;
+	uint32_t x_count = 0, y_count = 0, x_p_count = 0, y_p_count = 0, x_y_count = 0, x_y_x_p_count = 0, x_p_y_p_count = 0, signals_count = 0, not_x_p_count = 0, not_y_p_count =0;
 	uint32_t alphabet_element_index;
 	int32_t global_index;
 	bool is_primed;
@@ -1694,6 +1698,9 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 		strcat(current_dict_entry, SIGNAL_OFF_SUFFIX);
 		local_alphabet[current_element++]	= automaton_alphabet_get_value_index(ctx->global_alphabet, current_dict_entry);
 	}
+
+	not_x_p_count = signals_count - x_p_count;
+	not_y_p_count = signals_count - y_p_count;
 	/**
 	 * get x, y, x', y' alphabets
 	 */
@@ -1705,6 +1712,8 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	uint32_t* y_p_alphabet	= malloc(sizeof(uint32_t) * y_p_count);
 	uint32_t* x_p_y_p_alphabet	= malloc(sizeof(uint32_t) * (y_p_count + x_p_count));
 	uint32_t* signals_alphabet	= malloc(sizeof(uint32_t) * signals_count);
+	uint32_t* not_x_p_alphabet	= malloc(sizeof(uint32_t) * not_x_p_count);
+	uint32_t* not_y_p_alphabet	= malloc(sizeof(uint32_t) * not_y_p_count);
 	//set of duplicated alphabets respecting obdd original ordering for usage within the restrict function
 	uint32_t* x_alphabet_o	= malloc(sizeof(uint32_t) * x_count);
 	uint32_t* y_alphabet_o	= malloc(sizeof(uint32_t) * y_count);
@@ -1714,7 +1723,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	uint32_t* y_p_alphabet_o	= malloc(sizeof(uint32_t) * y_p_count);
 	uint32_t* x_p_y_p_alphabet_o	= malloc(sizeof(uint32_t) * (y_p_count + x_p_count));
 	uint32_t* signals_alphabet_o	= malloc(sizeof(uint32_t) * signals_count);
-	x_count = 0, y_count = 0, x_p_count = 0, y_p_count = 0,signals_count = 0, x_y_count = 0, x_y_x_p_count = 0;
+	x_count = 0, y_count = 0, x_p_count = 0, y_p_count = 0,signals_count = 0, x_y_count = 0, x_y_x_p_count = 0, not_x_p_count = 0, not_y_p_count = 0;
 	for(i = 0; i < mgr->vars_dict->size; i++){//X
 		//avoid searching for the true/false variables
 		if((strcmp(mgr->vars_dict->entries[i].key, TRUE_VAR) == 0) || (strcmp(mgr->vars_dict->entries[i].key, FALSE_VAR) == 0))	continue;
@@ -1733,6 +1742,8 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 		}
 		if(!(is_primed && !is_input))x_y_x_p_alphabet_o[x_y_x_p_count++] = i;
 		signals_alphabet_o[signals_count++]	= i;
+		if(!is_primed || !is_input)not_x_p_alphabet[not_x_p_count++] = i;
+		if(!is_primed || is_input)not_x_p_alphabet[not_y_p_count++] = i;
 	}
 	x_count = 0, y_count = 0, x_p_count = 0, y_p_count = 0,signals_count = 0, x_y_count = 0, x_y_x_p_count = 0;
 	//this code seems repeated but should be kept this way since enforces
@@ -1809,6 +1820,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 			signals_alphabet[signals_count++]	= i;
 		}
 	}
+
 #if DEBUG_LTL_AUTOMATON
 	printf("X alphabet\n[");
 	for(i = 0; i < x_count; i++)
@@ -1991,6 +2003,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	//obdd_node* obdd_node_restrict_vector(obdd_mgr* mgr, obdd_node* root, uint32_t* var_ids, bool* values, uint32_t count);
 	uint32_t state_ptr = 0;
 	obdd* obdd_current_state	= NULL;
+	obdd* obdd_restricted_state	= NULL;
 
 	if(theta_env_bucket_list->composite_count > 0){
 		do{
@@ -2071,14 +2084,21 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 				automaton_concrete_bucket_add_entry(rho_sys_processed_bucket_list, sys_state);
 				for(i = 0; i < x_y_count; i++)env_state->valuation[i]	= sys_state->valuation[i];
 				obdd_current_state	= obdd_restrict_vector(env_rho_composed, x_y_alphabet_o, sys_state->valuation, x_y_count);
+				obdd_restricted_state	= obdd_exists_vector(obdd_current_state, not_x_p_alphabet, not_x_p_count);
+				obdd_get_valuations(mgr, obdd_restricted_state, &valuations, &valuations_size, &current_valuations_count, x_p_alphabet, x_p_count
+										, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
+				/*
 				obdd_get_valuations(mgr, obdd_current_state, &valuations, &valuations_size, &current_valuations_count, x_y_x_p_alphabet, x_y_x_p_count
 						, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
+						*/
 #if DEBUG_LTL_AUTOMATON
 				printf("XY->X'\n");
-				obdd_print_valuations(mgr, valuations, current_valuations_count, x_y_x_p_alphabet, x_y_x_p_count);
+				//obdd_print_valuations(mgr, valuations, current_valuations_count, x_y_x_p_alphabet, x_y_x_p_count);
+				obdd_print_valuations(mgr, valuations, current_valuations_count, x_p_alphabet, x_p_count);
 #endif
 				for(i = 0; i < current_valuations_count; i++){
-					automaton_set_composed_valuation(env_state->valuation, valuations, i, false, true, x_y_x_p_alphabet, x_count, y_count);
+					//automaton_set_composed_valuation(env_state->valuation, valuations, i, false, true, x_y_x_p_alphabet, x_count, y_count);
+					automaton_set_composed_valuation(env_state->valuation, valuations, i, false, true, x_p_alphabet, x_count, y_count);
 					env_state->state		= obdd_state_tree_get_key(obdd_state_map, env_state->valuation, x_y_x_p_count);
 					has_transition	= automaton_add_transition_from_valuations(mgr, ltl_automaton, sys_state->state, env_state->state
 							, sys_state->valuation, env_state->valuation, false, true
@@ -2105,6 +2125,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 					evaluated++;
 #endif
 				}
+				obdd_destroy(obdd_restricted_state);
 				obdd_destroy(obdd_current_state);
 			}while(rho_sys_bucket_list->composite_count > 0);
 		}
@@ -2125,17 +2146,27 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 				automaton_concrete_bucket_pop_entry(rho_env_bucket_list, env_state);
 				automaton_concrete_bucket_add_entry(rho_env_processed_bucket_list, env_state);
 				obdd_current_state	= obdd_restrict_vector(env_sys_rho_composed, x_y_x_p_alphabet, env_state->valuation, x_y_x_p_count);
+				obdd_restricted_state	= obdd_exists_vector(obdd_current_state, not_y_p_alphabet, not_y_p_count);
+				obdd_get_valuations(mgr, obdd_restricted_state, &valuations, &valuations_size, &current_valuations_count, y_p_alphabet, y_p_count
+										, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
+				/*
 				obdd_get_valuations(mgr, obdd_current_state, &valuations, &valuations_size, &current_valuations_count, signals_alphabet, signals_count
 						, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
+						*/
 #if DEBUG_LTL_AUTOMATON
 				for(j = 0; j < x_y_x_p_count; j++)
 					printf("\t%s", env_state->valuation[j] ? "1" : "0");
 				printf("\n");
 				printf("X'->X'Y'\n");
-				obdd_print_valuations(mgr, valuations, current_valuations_count, signals_alphabet, signals_count);
+				//obdd_print_valuations(mgr, valuations, current_valuations_count, signals_alphabet, signals_count);
+				obdd_print_valuations(mgr, valuations, current_valuations_count, y_p_alphabet, y_p_count);
 #endif
 				for(i = 0; i < current_valuations_count; i++){
-					automaton_set_composed_valuation(sys_state->valuation, valuations, i, false, false, signals_alphabet, x_count, y_count);
+					//automaton_set_composed_valuation(sys_state->valuation, valuations, i, false, false, signals_alphabet, x_count, y_count);
+					//move X'->X
+					for(j =0; j < x_count; j++)sys_state->valuation[j] = env_state->valuation[x_count + y_count + j];
+					//move Y'->XY
+					automaton_set_composed_valuation(sys_state->valuation, valuations, i, false, false, x_p_alphabet, x_count, y_count);
 					//before getting state for sys_valuation copy X' part form env state into X part of sys state
 					//for(j = 0; j < x_count; j++)sys_state->valuation[j]	= env_state->valuation[x_y_count + j];
 					sys_state->state		= obdd_state_tree_get_key(obdd_state_map, sys_state->valuation, x_y_count);
@@ -2163,6 +2194,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 					evaluated++;
 #endif
 				}
+				obdd_destroy(obdd_restricted_state);
 				obdd_destroy(obdd_current_state);
 			}while(rho_env_bucket_list->composite_count > 0);
 		}
@@ -2192,6 +2224,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	automaton_concrete_bucket_destroy(rho_env_bucket_list);automaton_concrete_bucket_destroy(rho_sys_bucket_list);
 	automaton_concrete_bucket_destroy(rho_env_processed_bucket_list);automaton_concrete_bucket_destroy(rho_sys_processed_bucket_list);
 	free(x_alphabet); free(y_alphabet); free(x_p_alphabet); free(y_p_alphabet);free(x_y_alphabet); free(x_y_x_p_alphabet); free(x_p_y_p_alphabet); free(signals_alphabet);
+	free(not_x_p_alphabet); free(not_y_p_alphabet);
 	free(x_alphabet_o); free(y_alphabet_o); free(x_p_alphabet_o); free(y_p_alphabet_o);free(x_y_alphabet_o); free(x_y_x_p_alphabet_o); free(x_p_y_p_alphabet_o); free(signals_alphabet_o);
 	free(valuations);
 	free(local_alphabet);

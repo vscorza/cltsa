@@ -27,7 +27,7 @@ typedef struct automaton_fast_pool_str {
 
 automaton_fast_pool* automaton_fast_pool_create(size_t sizeof_element, uint32_t initial_size, uint32_t fragment_size);
 void automaton_fast_pool_destroy(automaton_fast_pool* pool);
-void* automaton_fast_pool_get_instance(automaton_fast_pool* pool);
-bool automaton_fast_pool_release_instance(automaton_fast_pool* pool, void* instance);
+void* automaton_fast_pool_get_instance(automaton_fast_pool* pool, uint32_t *fragment_ID);
+bool automaton_fast_pool_release_instance(automaton_fast_pool* pool, uint32_t fragment_ID);
 
 #endif /* SRC_FAST_POOL_H_ */
