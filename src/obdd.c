@@ -729,8 +729,10 @@ bool obdd_is_true(obdd_mgr* mgr, obdd_node* root){
 	return (root->var_ID == mgr->true_obdd->root_obdd->var_ID);
 }
 bool obdd_is_constant(obdd_mgr* mgr, obdd_node* root){
+	return root->var_ID < 2;
+	/*
 	return ((root->var_ID == mgr->true_obdd->root_obdd->var_ID) 
-		|| (root->var_ID == mgr->false_obdd->root_obdd->var_ID));
+		|| (root->var_ID == mgr->false_obdd->root_obdd->var_ID));*/
 }
 
 bool obdd_is_tautology(obdd_mgr* mgr, obdd_node* root){
