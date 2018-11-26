@@ -61,8 +61,6 @@ ltl fluent G_1_2_sndr_2		= (sToB_REQ_2 <-> bToS_ACK_2).
 ltl fluent G_1_2_sndr_3		= (sToB_REQ_3 <-> bToS_ACK_3).
 ltl fluent A_2_sndr_0		= (bToR_REQ_0 <-> rToB_ACK_0).
 ltl fluent A_2_sndr_1		= (bToR_REQ_1 <-> rToB_ACK_1).
-ltl fluent A_2_sndr_2		= (bToR_REQ_2 <-> rToB_ACK_2).
-ltl fluent A_2_sndr_3		= (bToR_REQ_3 <-> rToB_ACK_3).
 
 
 |f| ENV =(GENBUF ||_c G_7_ROUND_ROBIN).

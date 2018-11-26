@@ -744,7 +744,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 												}
 											}
 											if(element_global_index == -1){
-												//TODO: report local element not found
+												printf("Element global index not found %s\n", element_to_find);
 												exit(-1);
 											}
 											for(m = 0; m < (int32_t)local_alphabet_count; m++){
@@ -782,7 +782,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 											}
 										}
 										if(element_global_index == -1){
-											//TODO: report local element not found
+											printf("Element global index not found %s\n", element_to_find);
 											exit(-1);
 										}
 										for(m = 0; m < (int32_t)local_alphabet_count; m++){
@@ -1743,7 +1743,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 		if(!(is_primed && !is_input))x_y_x_p_alphabet_o[x_y_x_p_count++] = i;
 		signals_alphabet_o[signals_count++]	= i;
 		if(!is_primed || !is_input)not_x_p_alphabet[not_x_p_count++] = i;
-		if(!is_primed || is_input)not_x_p_alphabet[not_y_p_count++] = i;
+		if(!is_primed || is_input)not_y_p_alphabet[not_y_p_count++] = i;
 	}
 	x_count = 0, y_count = 0, x_p_count = 0, y_p_count = 0,signals_count = 0, x_y_count = 0, x_y_x_p_count = 0;
 	//this code seems repeated but should be kept this way since enforces
@@ -1766,9 +1766,9 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 			x_y_x_p_alphabet[x_y_x_p_count++] = i;
 			signals_alphabet[signals_count++]	= i;
 			strcpy(current_dict_entry, mgr->vars_dict->entries[i].key);	strcat(current_dict_entry, SIGNAL_ON_SUFFIX);
-			obdd_on_signals_indexes[obdd_on_count++]			= dictionary_value_for_key(mgr->vars_dict, current_dict_entry);
+			obdd_on_signals_indexes[obdd_on_count++]			= automaton_alphabet_get_value_index(ctx->global_alphabet, current_dict_entry);//dictionary_value_for_key(mgr->vars_dict, current_dict_entry);
 			strcpy(current_dict_entry, mgr->vars_dict->entries[i].key);	strcat(current_dict_entry, SIGNAL_OFF_SUFFIX);
-			obdd_off_signals_indexes[obdd_off_count++]		= dictionary_value_for_key(mgr->vars_dict, current_dict_entry);
+			obdd_off_signals_indexes[obdd_off_count++]		= automaton_alphabet_get_value_index(ctx->global_alphabet, current_dict_entry);//dictionary_value_for_key(mgr->vars_dict, current_dict_entry);
 		}
 	}
 	for(i = 0; i < mgr->vars_dict->size; i++){//Y
@@ -1786,9 +1786,9 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 				x_y_x_p_alphabet[x_y_x_p_count++] = i;
 				signals_alphabet[signals_count++]	= i;
 				strcpy(current_dict_entry, mgr->vars_dict->entries[i].key);	strcat(current_dict_entry, SIGNAL_ON_SUFFIX);
-				obdd_on_signals_indexes[obdd_on_count++]		= dictionary_value_for_key(mgr->vars_dict, current_dict_entry);
+				obdd_on_signals_indexes[obdd_on_count++]		= automaton_alphabet_get_value_index(ctx->global_alphabet, current_dict_entry);//dictionary_value_for_key(mgr->vars_dict, current_dict_entry);
 				strcpy(current_dict_entry, mgr->vars_dict->entries[i].key);	strcat(current_dict_entry, SIGNAL_OFF_SUFFIX);
-				obdd_off_signals_indexes[obdd_off_count++]		= dictionary_value_for_key(mgr->vars_dict, current_dict_entry);
+				obdd_off_signals_indexes[obdd_off_count++]		= automaton_alphabet_get_value_index(ctx->global_alphabet, current_dict_entry);//dictionary_value_for_key(mgr->vars_dict, current_dict_entry);
 			}
 		}
 	for(i = 0; i < mgr->vars_dict->size; i++){//X'
@@ -2218,16 +2218,33 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	if(env_rho_count > 1)obdd_destroy(env_rho_composed);
 	if(sys_rho_count > 1)obdd_destroy(sys_rho_composed);
 	obdd_destroy(env_sys_theta_composed); obdd_destroy(env_sys_rho_composed);
+
+
 	free(env_state); free(sys_state); free(tmp_state_valuation);
 	free(obdd_on_signals_indexes); free(obdd_off_signals_indexes);
 	automaton_concrete_bucket_destroy(theta_env_bucket_list);automaton_concrete_bucket_destroy(theta_sys_bucket_list);
 	automaton_concrete_bucket_destroy(rho_env_bucket_list);automaton_concrete_bucket_destroy(rho_sys_bucket_list);
 	automaton_concrete_bucket_destroy(rho_env_processed_bucket_list);automaton_concrete_bucket_destroy(rho_sys_processed_bucket_list);
 	free(x_alphabet); free(y_alphabet); free(x_p_alphabet); free(y_p_alphabet);free(x_y_alphabet); free(x_y_x_p_alphabet); free(x_p_y_p_alphabet); free(signals_alphabet);
+
+	printf("freeing alphabets\n");fflush(stdout);
+
 	free(not_x_p_alphabet); free(not_y_p_alphabet);
+
+	printf("freeing alphabets\n");fflush(stdout);
+
 	free(x_alphabet_o); free(y_alphabet_o); free(x_p_alphabet_o); free(y_p_alphabet_o);free(x_y_alphabet_o); free(x_y_x_p_alphabet_o); free(x_p_y_p_alphabet_o); free(signals_alphabet_o);
+
+	printf("freeing alphabets\n");fflush(stdout);
+
 	free(valuations);
+
+	printf("freeing alphabets\n");fflush(stdout);
+
 	free(local_alphabet);
+
+	printf("destroying state maps\n"); fflush(stdout);
+
 	obdd_state_tree_destroy(state_map);
 	obdd_state_tree_destroy(obdd_state_map);
 	//TODO:remove this

@@ -54,8 +54,8 @@ bool automaton_ptr_bucket_remove_entry(automaton_ptr_bucket_list* list, void* en
 void automaton_ptr_bucket_reset(automaton_ptr_bucket_list* list);
 void automaton_ptr_bucket_destroy(automaton_ptr_bucket_list* list);
 
-#define GET_CONCRETE_BUCKET_LIST_ENTRY(list, bucket_index, index)	((void*)(((char*)list->buckets[bucket_index]) + (index * list->sizeof_element)))
-#define GET_CONCRETE_BUCKET_SINGLE_ENTRY(list, bucket, index)	((void*)(((char*)bucket) + (index * list->sizeof_element)))
+#define GET_CONCRETE_BUCKET_LIST_ENTRY(list, bucket_index, index)	((void*)(((uintptr_t)(list->buckets[bucket_index])) + (uintptr_t)((index) * list->sizeof_element)))
+#define GET_CONCRETE_BUCKET_SINGLE_ENTRY(list, bucket, index)	((void*)(((uintptr_t)bucket) + (uintptr_t)((index) * list->sizeof_element)))
 
 typedef struct automaton_concrete_bucket_list_str{
 	uint32_t composite_count;
