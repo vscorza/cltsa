@@ -1698,6 +1698,8 @@ automaton_ranking* automaton_state_best_successor_ranking(automaton_automaton* g
 		to_state	= game_automaton->transitions[state][i].state_to;
 		//if(to_state == state)continue;
 		current_value	= ((automaton_ranking*)automaton_concrete_bucket_get_entry(ranking[j], to_state));
+		//TODO:check this next line, is it right to retrive NULL when initializing [Deadlock]?
+		if(current_value == NULL)continue;
 		if(min_ranking == NULL){
 			min_value = max_value = current_value->value;
 			min_ranking = max_ranking = current_value;
