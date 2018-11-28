@@ -1535,7 +1535,7 @@ void automaton_set_composed_valuation(bool* valuation, bool* partial_valuation, 
 	for(i = 0; i < var_count; i++)valuation[left_offset + i]	= partial_valuation[offset_size * valuation_offset + right_offset + i];
 	*/
 	uint32_t offset_size	= (is_initial) ? (is_input? x_count : x_count + y_count) : (is_input? x_count : y_count);
-	uint32_t left_offset	= is_initial? 0 : (is_input? x_count + y_count: 0);
+	uint32_t left_offset	= is_initial? 0 : (is_input? x_count + y_count: x_count);
 	for(i = 0; i < offset_size; i++)valuation[left_offset + i]	= partial_valuation[offset_size * valuation_offset + i];
 }
 bool automaton_add_transition_from_valuations(obdd_mgr* mgr, automaton_automaton* automaton, uint32_t from_state, uint32_t to_state, bool* from_valuation,
@@ -1545,7 +1545,6 @@ bool automaton_add_transition_from_valuations(obdd_mgr* mgr, automaton_automaton
 	automaton_transition* transition		= automaton_transition_create(from_state, to_state);
 	//if is-input set the transition type for non-labelled transitions
 	transition->is_input					= is_input;
-	char signal_name[255];
 	//TODO: optimize alphabet indexes computation
 #if DEBUG_LTL_AUTOMATON
 	uint32_t to_state_size	= is_input? (is_initial? x_count : x_count * 2 + y_count) : (x_count + y_count);
@@ -1573,7 +1572,8 @@ bool automaton_add_transition_from_valuations(obdd_mgr* mgr, automaton_automaton
 				signal_dict_index	= (take_on? obdd_off_indexes[left_offset + i]: obdd_on_indexes[left_offset + i]);
 				automaton_transition_add_signal_event_ID(transition, automaton->context, signal_dict_index, INPUT_SIG);
 #if DEBUG_LTL_AUTOMATON
-				printf("%s%s", signal_name, i < var_count - 1 ? "," : "");
+				printf("(%d:%s:%s)%s", signal_dict_index, automaton->context->global_alphabet->list[signal_dict_index].name,
+						take_on? "OFF" : "ON", i < var_count - 1 ? "," : "");
 #endif
 			}
 		}else{
@@ -1585,7 +1585,8 @@ bool automaton_add_transition_from_valuations(obdd_mgr* mgr, automaton_automaton
 				signal_dict_index	= (take_on? obdd_on_indexes[right_offset + i]: obdd_off_indexes[right_offset + i]);
 				automaton_transition_add_signal_event_ID(transition, automaton->context, signal_dict_index, INPUT_SIG);
 #if DEBUG_LTL_AUTOMATON
-				printf("%s%s", signal_name, i < var_count - 1 ? "," : "");
+				printf("(%d:%s:%s)%s", signal_dict_index, automaton->context->global_alphabet->list[signal_dict_index].name,
+						take_on? "ON" : "OFF", i < var_count - 1 ? "," : "");
 #endif
 			}
 
@@ -1664,7 +1665,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	char current_key[255];
 	bool is_input;
 	uint32_t* obdd_on_signals_indexes	= malloc(sizeof(uint32_t) * ((mgr->vars_dict->size - 2)/2));
-	uint32_t* obdd_off_signals_indexes	= malloc(sizeof(uint32_t) * ((mgr->vars_dict->size - 2))/2);
+	uint32_t* obdd_off_signals_indexes	= malloc(sizeof(uint32_t) * ((mgr->vars_dict->size - 2)/2));
 	uint32_t obdd_on_count  = 0, obdd_off_count = 0;
 	/**
 	 * BUILD LOCAL ALPHABET
@@ -1839,10 +1840,10 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 		printf("%s%s", mgr->vars_dict->entries[signals_alphabet[i]].key, i == signals_count - 1 ? "" : ",");
 	printf("]\nObdd on alphabet\n[");
 	for(i = 0; i < obdd_on_count; i++)
-		printf("%s%s", obdd_on_signals_indexes[i], i == obdd_on_count - 1 ? "" : ",");
+		printf("%d%s", obdd_on_signals_indexes[i], i == obdd_on_count - 1 ? "" : ",");
 	printf("]\nObdd off alphabet\n[");
 		for(i = 0; i < obdd_off_count; i++)
-			printf("%s%s", obdd_off_signals_indexes[i], i == obdd_off_count - 1 ? "" : ",");
+			printf("%d%s", obdd_off_signals_indexes[i], i == obdd_off_count - 1 ? "" : ",");
 	printf("]\n");
 #endif
 	//get automaton
@@ -1960,7 +1961,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 #if DEBUG_LTL_AUTOMATON
 	int32_t state_counter = 0;
 	printf("Init env valuations\n");
-	obdd_print_valuations(mgr, current_valuations, current_valuations_count, x_alphabet, x_count);
+	obdd_print_valuations(mgr, valuations, current_valuations_count, x_alphabet, x_count);
 #endif
 	bool* tmp_state_valuation = calloc((x_count * 2 + y_count), sizeof(bool));
 	bool has_transition;
@@ -1989,11 +1990,10 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 
 #if DEBUG_LTL_AUTOMATON
 	state_counter = 0;
-	current_valuations	= obdd_get_valuations(mgr, env_sys_theta_composed, &current_valuations_count, x_y_alphabet, x_y_count
+	obdd_get_valuations(mgr, env_sys_theta_composed, &valuations, &valuations_size, &current_valuations_count, x_y_alphabet, x_y_count
 			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
 	printf("Init sys valuations\n");
-	obdd_print_valuations(mgr, current_valuations, current_valuations_count, x_y_alphabet, x_y_count);
-	free(current_valuations);
+	obdd_print_valuations(mgr, valuations, current_valuations_count, x_y_alphabet, x_y_count);
 #endif
 	/**
 	 * We restrict robdd(theta_env && theta_sys) with the valuation for each pending state s_i in bucket_list
@@ -2008,7 +2008,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	if(theta_env_bucket_list->composite_count > 0){
 		do{
 			automaton_concrete_bucket_pop_entry(theta_env_bucket_list, env_state);
-			obdd_current_state	= obdd_restrict_vector(env_sys_theta_composed, x_alphabet_o, env_state->valuation, x_count);
+			obdd_current_state	= obdd_restrict_vector(env_sys_theta_composed, x_alphabet, env_state->valuation, x_count);
 			obdd_get_valuations(mgr, obdd_current_state, &valuations, &valuations_size, &current_valuations_count, x_y_alphabet, x_y_count
 					, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
 #if DEBUG_LTL_AUTOMATON
@@ -2083,7 +2083,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 				automaton_concrete_bucket_pop_entry(rho_sys_bucket_list, sys_state);
 				automaton_concrete_bucket_add_entry(rho_sys_processed_bucket_list, sys_state);
 				for(i = 0; i < x_y_count; i++)env_state->valuation[i]	= sys_state->valuation[i];
-				obdd_current_state	= obdd_restrict_vector(env_rho_composed, x_y_alphabet_o, sys_state->valuation, x_y_count);
+				obdd_current_state	= obdd_restrict_vector(env_rho_composed, x_y_alphabet, sys_state->valuation, x_y_count);
 				obdd_restricted_state	= obdd_exists_vector(obdd_current_state, not_x_p_alphabet, not_x_p_count);
 				obdd_get_valuations(mgr, obdd_restricted_state, &valuations, &valuations_size, &current_valuations_count, x_p_alphabet, x_p_count
 										, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
