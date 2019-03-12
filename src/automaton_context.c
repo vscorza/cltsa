@@ -466,6 +466,42 @@ automaton_alphabet* automaton_parsing_tables_get_global_alphabet(automaton_parsi
 			controllable_values	= automaton_set_syntax_evaluate(tables, ((automaton_set_def_syntax*)tables->set_entries[output_signals_index]->value)->set
 					, &controllable_count, ((automaton_set_def_syntax*)tables->set_entries[output_signals_index]->value)->name);
 		}
+		// add obdd variables in order to improve structure size X < Y < X' < Y'
+		char prime_name[255];
+		for(i = 0; i < global_count; i++){//X
+			is_controllable	= false;
+			for(j = 0; j < controllable_count; j++){
+				if(strcmp(global_values[i], controllable_values[j]) == 0){is_controllable	= true;break;}
+			}
+			if(is_controllable)continue;
+			dictionary_add_entry(parser_get_obdd_mgr()->vars_dict, global_values[i]);
+		}
+		for(i = 0; i < global_count; i++){//Y
+			is_controllable	= false;
+			for(j = 0; j < controllable_count; j++){
+				if(strcmp(global_values[i], controllable_values[j]) == 0){is_controllable	= true;break;}
+			}
+			if(!is_controllable)continue;
+			dictionary_add_entry(parser_get_obdd_mgr()->vars_dict, global_values[i]);
+		}
+		for(i = 0; i < global_count; i++){//X'
+			is_controllable	= false;
+			for(j = 0; j < controllable_count; j++){
+				if(strcmp(global_values[i], controllable_values[j]) == 0){is_controllable	= true;break;}
+			}
+			if(is_controllable)continue;
+			strcpy(signal_name, global_values[i]);strcat(signal_name, SIGNAL_PRIME_SUFFIX);
+			parser_add_primed_variables(dictionary_add_entry(parser_get_obdd_mgr()->vars_dict, signal_name));
+		}
+		for(i = 0; i < global_count; i++){//Y'
+			is_controllable	= false;
+			for(j = 0; j < controllable_count; j++){
+				if(strcmp(global_values[i], controllable_values[j]) == 0){is_controllable	= true;break;}
+			}
+			if(!is_controllable)continue;
+			strcpy(signal_name, global_values[i]);strcat(signal_name, SIGNAL_PRIME_SUFFIX);
+			parser_add_primed_variables(dictionary_add_entry(parser_get_obdd_mgr()->vars_dict, signal_name));
+		}
 		for(i = 0; i < global_count; i++){
 				is_controllable	= false;
 				for(j = 0; j < controllable_count; j++){
@@ -1929,9 +1965,9 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	automaton_concrete_bucket_list* rho_sys_bucket_list	= automaton_concrete_bucket_list_create(
 			LTL_BUCKET_SIZE, obdd_composite_state_extractor, sizeof(uint32_t) + sizeof(bool) * (x_count + y_count));
 	automaton_concrete_bucket_list* rho_env_processed_bucket_list	= automaton_concrete_bucket_list_create(
-			LTL_BUCKET_SIZE, obdd_composite_state_extractor, sizeof(uint32_t) + sizeof(bool) * (x_count * 2 + y_count) );
+			LTL_PROCESSED_BUCKET_SIZE, obdd_composite_state_extractor, sizeof(uint32_t) + sizeof(bool) * (x_count * 2 + y_count) );
 	automaton_concrete_bucket_list* rho_sys_processed_bucket_list	= automaton_concrete_bucket_list_create(
-			LTL_BUCKET_SIZE, obdd_composite_state_extractor, sizeof(uint32_t) + sizeof(bool) * (x_count + y_count));
+			LTL_PROCESSED_BUCKET_SIZE, obdd_composite_state_extractor, sizeof(uint32_t) + sizeof(bool) * (x_count + y_count));
 	sys_state->state		= 0;//obdd_state_tree_get_key(obdd_state_map, sys_state->valuation, x_y_count);
 	automaton_automaton_add_initial_state(ltl_automaton, sys_state->state);
 	/*

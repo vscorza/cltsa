@@ -20,6 +20,7 @@
 #define DEBUG_PARSE_STATES 0
 #define DEBUG_LTL_AUTOMATON 0
 #define LTL_BUCKET_SIZE	10000
+#define LTL_PROCESSED_BUCKET_SIZE 100000
 #if DEBUG_PARSE_STATES
 #define aut_context_log(format, ...) printf(format, ##__VA_ARGS__ )
 #else

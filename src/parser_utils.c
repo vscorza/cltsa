@@ -573,7 +573,7 @@ void parser_add_primed_variables(uint32_t primed_variable){
 		if(parser_primed_variables[i] < primed_variable)last_less_than	= i;
 		if(parser_primed_variables[i] == primed_variable)	return;
 	}
-	if(parser_primed_variables_count == parser_primed_variables_size){
+	if((parser_primed_variables_count + 1) == parser_primed_variables_size){
 		uint32_t new_size		= parser_primed_variables_size * LIST_INCREASE_FACTOR;
 		uint32_t* ptr	= realloc(parser_primed_variables, new_size);
 		if(ptr == NULL){
@@ -583,7 +583,7 @@ void parser_add_primed_variables(uint32_t primed_variable){
 		parser_primed_variables			= ptr;
 		parser_primed_variables_size	= new_size;
 	}
-	for(i = parser_primed_variables_count - 1; i > last_less_than && i > 0; i--){
+	for(i = parser_primed_variables_count; i > last_less_than && i > 0; i--){
 		parser_primed_variables[i]		= parser_primed_variables[i - 1];
 	}
 	parser_primed_variables[last_less_than + 1]	= primed_variable;
