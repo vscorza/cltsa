@@ -1741,10 +1741,19 @@ bool automaton_state_is_stable(automaton_automaton* game_automaton, uint32_t sta
 		, uint32_t current_guarantee, uint32_t guarantee_count, uint32_t assumptions_count
 		, uint32_t* guarantees_indexes, uint32_t* assumptions_indexes, int32_t first_assumption_index){
 	uint32_t i, j, to_state;
+	automaton_ranking concrete_ranking;
 	/**
 	 * r_j(v)
 	 */
 	automaton_ranking*	current_ranking	= ((automaton_ranking*)automaton_concrete_bucket_get_entry(ranking[current_guarantee], state));
+	//TODO: check if this fix is hiding an error
+	if(current_ranking == NULL){
+		printf("[%d]!! had no ranking defined for %d, set as INF.\n", state, current_guarantee);
+		concrete_ranking.state	= state; concrete_ranking.assumption_to_satisfy	= 0;
+		concrete_ranking.value	= RANKING_INFINITY;
+		automaton_concrete_bucket_add_entry(ranking[current_guarantee], &concrete_ranking);
+		current_ranking			= ((automaton_ranking*)automaton_concrete_bucket_get_entry(ranking[current_guarantee], state));
+	}
 	/**
 	 * v in Q_j
 	 */
