@@ -466,6 +466,7 @@ automaton_alphabet* automaton_parsing_tables_get_global_alphabet(automaton_parsi
 			controllable_values	= automaton_set_syntax_evaluate(tables, ((automaton_set_def_syntax*)tables->set_entries[output_signals_index]->value)->set
 					, &controllable_count, ((automaton_set_def_syntax*)tables->set_entries[output_signals_index]->value)->name);
 		}
+		/*
 		// add obdd variables in order to improve structure size X < Y < X' < Y'
 		char prime_name[255];
 		for(i = 0; i < global_count; i++){//X
@@ -474,6 +475,8 @@ automaton_alphabet* automaton_parsing_tables_get_global_alphabet(automaton_parsi
 				if(strcmp(global_values[i], controllable_values[j]) == 0){is_controllable	= true;break;}
 			}
 			if(is_controllable)continue;
+			printf("[%d]:%s\n",dictionary_add_entry(parser_get_obdd_mgr()->vars_dict, global_values[i])
+					, global_values[i]);
 			dictionary_add_entry(parser_get_obdd_mgr()->vars_dict, global_values[i]);
 		}
 		for(i = 0; i < global_count; i++){//Y
@@ -482,6 +485,8 @@ automaton_alphabet* automaton_parsing_tables_get_global_alphabet(automaton_parsi
 				if(strcmp(global_values[i], controllable_values[j]) == 0){is_controllable	= true;break;}
 			}
 			if(!is_controllable)continue;
+			printf("[%d]:%s\n",dictionary_add_entry(parser_get_obdd_mgr()->vars_dict, global_values[i])
+								, global_values[i]);
 			dictionary_add_entry(parser_get_obdd_mgr()->vars_dict, global_values[i]);
 		}
 		for(i = 0; i < global_count; i++){//X'
@@ -492,6 +497,8 @@ automaton_alphabet* automaton_parsing_tables_get_global_alphabet(automaton_parsi
 			if(is_controllable)continue;
 			strcpy(signal_name, global_values[i]);strcat(signal_name, SIGNAL_PRIME_SUFFIX);
 			parser_add_primed_variables(dictionary_add_entry(parser_get_obdd_mgr()->vars_dict, signal_name));
+			printf("[%d]:%s\n",dictionary_add_entry(parser_get_obdd_mgr()->vars_dict, signal_name)
+								, signal_name);
 		}
 		for(i = 0; i < global_count; i++){//Y'
 			is_controllable	= false;
@@ -501,7 +508,16 @@ automaton_alphabet* automaton_parsing_tables_get_global_alphabet(automaton_parsi
 			if(!is_controllable)continue;
 			strcpy(signal_name, global_values[i]);strcat(signal_name, SIGNAL_PRIME_SUFFIX);
 			parser_add_primed_variables(dictionary_add_entry(parser_get_obdd_mgr()->vars_dict, signal_name));
+			printf("[%d]:%s\n",dictionary_add_entry(parser_get_obdd_mgr()->vars_dict, signal_name)
+											, signal_name);
 		}
+		printf("==========\n");
+		//print vars
+		for(i = 0; i < parser_get_obdd_mgr()->vars_dict->size;i++){
+			printf("[%d]:%s\n", parser_get_obdd_mgr()->vars_dict->entries[i].value,
+					parser_get_obdd_mgr()->vars_dict->entries[i].key);
+		}
+*/
 		for(i = 0; i < global_count; i++){
 				is_controllable	= false;
 				for(j = 0; j < controllable_count; j++){

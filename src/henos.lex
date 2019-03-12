@@ -22,7 +22,7 @@ number 		0{octalDigit}*|{decDigit}+|{hex}+
 ident 		{lower}{lowerIdentChars}*
 upperIdent 	{upper}{identChars}*
 string 		\"(\\.|[^"\\])*\"
-keyword		set|range|const|\.\.|when|\|f\||\|\||\|gr1\|initially|ltl|env|sys|rho|theta|in
+keyword		set|range|const|\.\.|when|\|f\||\|\||\|gr1\|initially|ltl|env|sys|rho|theta|in|order
 %{
 #include <stdlib.h>
 void yyerror(char*);
@@ -133,6 +133,15 @@ ltl				{
 					yylval.text=p;
 					return(t_LTL);
 				}
+order			{
+					p=(char *)calloc(strlen(yytext)+1,sizeof(char));
+					strcpy(p,yytext);
+					#if DEBUG_LEX
+					printf("[keyword: <%s>]", yytext);
+					#endif
+					yylval.text=p;
+					return(t_ORDER);
+				}				
 env				{
 					p=(char *)calloc(strlen(yytext)+1,sizeof(char));
 					strcpy(p,yytext);

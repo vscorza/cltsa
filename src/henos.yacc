@@ -37,7 +37,7 @@ automaton_program_syntax* parsed_program = NULL;
 	ltl_fluent_syntax*				ltl_fluent;
 	automaton_synchronization_type_syntax composition_type;
 };
-%token	t_INTEGER t_IDENT t_UPPER_IDENT t_STRING t_CONST t_RANGE t_SET t_FLUENT t_DOTS t_WHEN t_GAME_COMPOSE t_PARALLEL t_GR_1 t_INITIALLY t_LTL t_ENV t_SYS t_RHO t_THETA t_IN t_THEN t_IFF t_AND t_NEXT t_CONCURRENT t_SYNCH
+%token	t_INTEGER t_IDENT t_UPPER_IDENT t_STRING t_CONST t_RANGE t_SET t_FLUENT t_DOTS t_WHEN t_GAME_COMPOSE t_PARALLEL t_GR_1 t_INITIALLY t_LTL t_ENV t_SYS t_RHO t_THETA t_IN t_THEN t_IFF t_AND t_NEXT t_CONCURRENT t_SYNCH t_ORDER
 %left '+' '-' ','
 %left '*' '/'
 
@@ -83,6 +83,7 @@ statement:
 	|rangeDef								{$$ = automaton_statement_syntax_create(RANGE_AUT, NULL, $1, NULL, NULL, NULL, NULL, NULL, NULL);}
 	|fluentDef								{$$ = automaton_statement_syntax_create(FLUENT_AUT, NULL, NULL, NULL, $1, NULL, NULL, NULL, NULL);}
 	|setDef									{$$ = automaton_statement_syntax_create(SET_AUT, NULL, NULL, NULL, NULL, $1, NULL, NULL, NULL);}
+	|orderDef								{automaton_program_add_obdd_primed_variables();}
 	|compositionDef							{$$ = automaton_statement_syntax_create(COMPOSITION_AUT, $1, NULL, NULL, NULL, NULL, NULL, NULL, NULL);}
 	|gr1									{$$ = automaton_statement_syntax_create(GR_1_AUT, NULL, NULL, NULL, NULL, NULL, $1, NULL, NULL);}
 	|ltlAutRule								{$$ = automaton_statement_syntax_create(LTL_RULE_AUT, NULL, NULL, NULL, NULL, NULL, NULL, $1, NULL);}
@@ -105,6 +106,17 @@ concurrentLabel:
 concurrentLabels:
 	concurrentLabels ',' t_IDENT			{$$ = automaton_set_syntax_concat_concurrent($1, $3);free($3);}
 	|t_IDENT								{$$ = automaton_set_syntax_create_concurrent($1);free($1);}
+	;
+orderDef:
+	t_ORDER '=' orderExp					{}
+	;
+orderExp:
+	'{' orderedVariables '}'				{}
+	;
+orderedVariables:
+	t_IDENT '<' orderedVariables			{dictionary_add_entry(parser_get_obdd_mgr()->vars_dict, $1);free($1);}											
+	|t_IDENT								{dictionary_add_entry(parser_get_obdd_mgr()->vars_dict, $1);free($1);}
+	|										{}
 	;
 setDef:
 	t_SET t_UPPER_IDENT '=' setExp			{$$ = automaton_set_def_syntax_create($4, $2);free($1); free($2);}

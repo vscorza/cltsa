@@ -38,6 +38,16 @@ automaton_set_syntax* automaton_set_syntax_create(bool is_ident, uint32_t count,
 	aut_dupstr(&(set->string_terminal), string_terminal);
 	return set;
 }
+void automaton_program_add_obdd_primed_variables(){
+	dictionary *dict	= parser_get_obdd_mgr()->vars_dict;
+	int32_t i, old_size = dict->size;
+	char prime_name[255];
+	for (i = 0; i < old_size; i++){
+		strcpy(prime_name, dict->entries[i].key);
+		strcat(prime_name, SIGNAL_PRIME_SUFFIX);
+		parser_add_primed_variables(dictionary_add_entry(dict, prime_name));
+	}
+}
 automaton_set_syntax* automaton_set_syntax_create_concurrent(char* string_terminal){
 	automaton_set_syntax* set	= malloc(sizeof(automaton_set_syntax));
 	set->is_ident	= false;

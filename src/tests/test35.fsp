@@ -4,6 +4,7 @@ set Controllable_Alphabet = {}
 
 set Global_Signals	= {sToB_REQ_0, sToB_REQ_1, bToS_ACK_0, bToS_ACK_1, bToR_REQ_0, bToR_REQ_1, rToB_ACK_0, rToB_ACK_1, enq, deq, full, empty, slc_0}
 set Output_Signals	= {bToS_ACK_0, bToS_ACK_1, bToR_REQ_0, bToR_REQ_1, enq, deq}
+order			= {sToB_REQ_0 < sToB_REQ_1 < rToB_ACK_0 < rToB_ACK_1 < full < empty < slc_0 < bToS_ACK_0 < bToS_ACK_1 < bToR_REQ_0 < bToR_REQ_1 < enq < deq}
 
 //G_7 was turned into an automaton
 G_7_ROUND_ROBIN	= (bToR_REQ_0.on -> bToR_REQ_1.on -> G_7_ROUND_ROBIN).
