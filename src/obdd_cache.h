@@ -16,6 +16,7 @@ typedef uintptr_t ptruint;
 #define DD_P2			4256249
 #define DD_P3			741457
 #define DD_P4			1618033999
+#define DD_MAX_CACHE_TO_SLOTS_RATIO 4
 
 #if SIZEOF_VOID_P == 8 && SIZEOF_INT == 4
 #define ddHash(f,g,s) \
@@ -26,15 +27,7 @@ typedef uintptr_t ptruint;
 ((((unsigned)(f) * DD_P1 + (unsigned)(g)) * DD_P2) >> (s))
 #endif
 
-
-/**
-  @brief Hash function for the cache.
-
-  @sideeffect none
-
-  @see ddHash ddCHash2
-
-*/
+//	Hash function for the cache.
 #if SIZEOF_VOID_P == 8 && SIZEOF_INT == 4
 #define ddCHash(o,f,g,h,s) \
 ((((((unsigned)(ptruint)(f) + (unsigned)(ptruint)(o)) * DD_P1 + \
@@ -46,15 +39,7 @@ typedef uintptr_t ptruint;
    (unsigned)(h)) * DD_P3) >> (s))
 #endif
 
-
-/**
-  @brief Hash function for the cache for functions with two operands.
-
-  @sideeffect none
-
-  @see ddHash ddCHash
-
-*/
+//	Hash function for the cache for functions with two operands.
 #if SIZEOF_VOID_P == 8 && SIZEOF_INT == 4
 #define ddCHash2(o,f,g,s) \
 (((((unsigned)(ptruint)(f) + (unsigned)(ptruint)(o)) * DD_P1 + \
@@ -64,6 +49,35 @@ typedef uintptr_t ptruint;
 (((((unsigned)(f) + (unsigned)(o)) * DD_P1 + (unsigned)(g)) * DD_P2) >> (s))
 #endif
 
+typedef struct obdd_cache_item_str{
+	obdd_node *f, *g;
+	uintptr_t h;
+	obdd_node *data;
+}obdd_cache_item;
 
+typedef struct obdd_cache_str{
+	obdd_cache_item *cache_items;
+	uint32_t cache_slots;
+	int32_t cache_shift;
+	double cache_misses;
+	double cache_hits;
+	double cache_collisions;
+	double cache_inserts;
+	double min_hits;
+	int32_t cache_slack;
+	uint32_t max_cache_hard;
+}obdd_cache;
+
+obdd_cache* obdd_cache_create(uint32_t cache_size, uint32_t cache_max_size);
+void obdd_cache_insert(obdd_cache *cache, uintptr_t op, obdd_node *f, obdd_node *g, obdd_node *h, obdd_node *data);
+void obdd_cache_insert2(obdd_cache *cache, uintptr_t op, obdd_node *f, obdd_node *g, obdd_node *data);
+void obdd_cache_insert1(obdd_cache *cache, uintptr_t op, obdd_node *f, obdd_node *data);
+obdd_node* obdd_cache_lookup(obdd_cache *cache, uintptr_t op, obdd_node *f, obdd_node *g, obdd_node *h);
+obdd_node* obdd_cache_lookup2(obdd_cache *cache, uintptr_t op, obdd_node *f, obdd_node *g);
+obdd_node* obdd_cache_lookup1(obdd_cache *cache, uintptr_t op, obdd_node *f);
+obdd_node* obdd_cache_constant_lookup(obdd_cache *cache, uintptr_t op, obdd_node *f, obdd_node *g, obdd_node *h);
+void obdd_cache_resize(obdd_cache *cache);
+void obdd_cache_flush(obdd_cache *cache);
+void obdd_cache_destroy(obdd_cache *cache);
 
 #endif /* SRC_OBDD_CACHE_H_ */
