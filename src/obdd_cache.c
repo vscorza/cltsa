@@ -34,11 +34,12 @@ void obdd_cache_insert(obdd_cache *cache, uintptr_t op, obdd_node *f, obdd_node 
 	ug	= (uintptr_t) g | (op >> 4);
 	uh	= (uintptr_t) h;
 
-	cache->cache_collisions	+= item->data != NULL;
-	cache->cache_inserts++;
 
 	pos	= ddCHash2(uh, uf, ug, cache->cache_shift);
 	item= &(cache->cache_items[pos]);
+
+	cache->cache_collisions	+= item->data != NULL;
+	cache->cache_inserts++;
 
 	item->f	= (obdd_node*) uf;
 	item->g	= (obdd_node*) ug;
@@ -50,14 +51,15 @@ void obdd_cache_insert2(obdd_cache *cache, uintptr_t op, obdd_node *f, obdd_node
 	obdd_cache_item *item;
 	uintptr_t uf, ug;
 
-	cache->cache_collisions	+= item->data != NULL;
-	cache->cache_inserts++;
 
 	pos	= ddCHash2(op, f, g, cache->cache_shift);
 	item= &(cache->cache_items[pos]);
 
-	item->f	= (obdd_node*) uf;
-	item->g	= (obdd_node*) ug;
+	cache->cache_collisions	+= item->data != NULL;
+	cache->cache_inserts++;
+
+	item->f	= f;
+	item->g	= g;
 	item->h	= op;
 	item->data	= data;
 }
@@ -66,11 +68,11 @@ void obdd_cache_insert1(obdd_cache *cache, uintptr_t op, obdd_node *f, obdd_node
 	int32_t pos;
 	obdd_cache_item *item;
 
-	cache->cache_collisions	+= item->data != NULL;
-	cache->cache_inserts++;
-
 	pos	= ddCHash2(op, f, f, cache->cache_shift);
 	item= &(cache->cache_items[pos]);
+
+	cache->cache_collisions	+= item->data != NULL;
+	cache->cache_inserts++;
 
 	item->f	= f;
 	item->g	= f;
@@ -197,7 +199,7 @@ void obdd_cache_resize(obdd_cache *cache){
 }
 void obdd_cache_flush(obdd_cache *cache){
 	int32_t i	= 0;
-	for(i = 0; i < cache->cache_slots; i++)cache->cache_items[i].data	= NULL;
+	for(i = 0; (uint32_t)i < cache->cache_slots; i++)cache->cache_items[i].data	= NULL;
 }
 void obdd_cache_destroy(obdd_cache *cache){
 	obdd_cache_flush(cache);

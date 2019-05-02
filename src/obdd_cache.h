@@ -46,7 +46,7 @@ typedef uintptr_t ptruint;
    (unsigned)(ptruint)(g)) * DD_P2) >> (s))
 #else
 #define ddCHash2(o,f,g,s) \
-(((((unsigned)(f) + (unsigned)(o)) * DD_P1 + (unsigned)(g)) * DD_P2) >> (s))
+(((((uint64_t)(f) + (uint64_t)(o)) * DD_P1 + (uint64_t)(g)) * DD_P2) >> (s))
 #endif
 
 typedef struct obdd_cache_item_str{

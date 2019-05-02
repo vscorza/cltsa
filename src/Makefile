@@ -15,7 +15,7 @@ YACCFLAGS =
 
 all: main
 
-main: main.c parser_utils_c.o y.tab.o lex.yy.o automaton_c.o automaton_utils_c.o automaton_context_c.o  bucket_list_c.o automaton_mu_calculus_c.o ordered_list_c.o max_heap_c.o obdd_c.o dictionary_c.o fast_pool_c.o
+main: main.c parser_utils_c.o y.tab.o lex.yy.o automaton_c.o automaton_utils_c.o automaton_context_c.o  bucket_list_c.o automaton_mu_calculus_c.o ordered_list_c.o max_heap_c.o obdd_c.o obdd_cache_c.o dictionary_c.o fast_pool_c.o
 	$(CC) $(CFLAGS) $^ -o $@
 
 automaton_utils_c.o: automaton_utils.c
@@ -42,6 +42,9 @@ ordered_list_c.o: ordered_list.c automaton_utils_c.o parser_utils_c.o
 
 obdd_c.o: obdd.c automaton_utils_c.o
 	$(CC) $(CFLAGS) -c $< -o $@
+	
+obdd_cache_c.o: obdd_cache.c obdd_c.o
+	$(CC) $(CFLAGS) -c $< -o $@	
 
 max_heap_c.o: max_heap.c automaton_utils_c.o parser_utils_c.o
 	$(CC) $(CFLAGS) -c $< -o $@
