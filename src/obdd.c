@@ -186,6 +186,7 @@ obdd_mgr*	obdd_mgr_create(){
 	false_obdd->false_obdd	= NULL;
 	false_obdd->fragment_ID	= fragment_ID;
 	new_mgr->false_obdd	= false_obdd;
+	new_mgr->cache		= obdd_cache_create(OBDD_CACHE_SIZE, OBDD_CACHE_MAX_SIZE);
 	return new_mgr;
 }
 
@@ -204,6 +205,8 @@ void obdd_mgr_destroy(obdd_mgr* mgr){
 	automaton_fast_pool_destroy(mgr->nodes_pool);
 	mgr->obdd_pool	= NULL;
 	mgr->nodes_pool	= NULL;
+	obdd_cache_destroy(mgr->cache);
+	mgr->cache		= NULL;
 	free(mgr);	
 }
 
@@ -228,7 +231,7 @@ obdd_node* obdd_mgr_mk_node(obdd_mgr* mgr, char* var, obdd_node* high, obdd_node
 	return obdd_mgr_mk_node_ID(mgr, var_ID, high, low);
 }
 
-obdd_node* obdd_mgr_mk_node_ID(obdd_mgr* mgr, uint32_t var_ID, obdd_node* high, obdd_node* low){
+obdd_node* obdd_mgr_mk_node_ID(obdd_mgr* mgr, obdd_var_size_t var_ID, obdd_node* high, obdd_node* low){
 	//obdd_node* new_node	= malloc(sizeof(obdd_node));
 	uint32_t fragment_ID;
 	obdd_node* new_node	= automaton_fast_pool_get_instance(mgr->nodes_pool, &fragment_ID);
@@ -249,7 +252,7 @@ obdd*	obdd_mgr_var(obdd_mgr* mgr, char* name){
 	return obdd_mgr_var_ID(mgr, var_ID);
 }
 
-obdd*	obdd_mgr_var_ID(obdd_mgr* mgr, uint32_t var_ID){
+obdd*	obdd_mgr_var_ID(obdd_mgr* mgr, obdd_var_size_t var_ID){
 	obdd* var_obdd	= obdd_create(mgr, NULL);
 	var_obdd->root_obdd= obdd_mgr_mk_node_ID(mgr, var_ID
 		, var_obdd->true_obdd, var_obdd->false_obdd);
@@ -261,7 +264,7 @@ obdd*	obdd_mgr_not_var(obdd_mgr* mgr, char* name){
 	return obdd_mgr_not_var_ID(mgr, var_ID);
 }
 
-obdd*	obdd_mgr_not_var_ID(obdd_mgr* mgr, uint32_t var_ID){
+obdd*	obdd_mgr_not_var_ID(obdd_mgr* mgr, obdd_var_size_t var_ID){
 	obdd* var_obdd	= obdd_create(mgr, NULL);
 	var_obdd->root_obdd= obdd_mgr_mk_node_ID(mgr, var_ID
 		, var_obdd->false_obdd, var_obdd->true_obdd);
@@ -504,8 +507,8 @@ obdd* obdd_apply(bool (*apply_fkt)(bool,bool), obdd *left, obdd* right){
 
 obdd_node* obdd_node_apply(bool (*apply_fkt)(bool,bool), obdd_mgr* mgr, obdd_node* left_node, obdd_node* right_node){
 
-	uint32_t left_var_ID	=  left_node->var_ID;
-	uint32_t right_var_ID	=  right_node->var_ID;
+	obdd_var_size_t left_var_ID	=  left_node->var_ID;
+	obdd_var_size_t right_var_ID	=  right_node->var_ID;
 
 	bool is_left_constant		= obdd_is_constant(mgr, left_node);
 	bool is_right_constant		= obdd_is_constant(mgr, right_node);

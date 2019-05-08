@@ -4,7 +4,7 @@
  *  Created on: Mar 28, 2019
  *      Author: mariano
  */
-#include "obdd_cache.h"
+#include "obdd.h"
 
 obdd_cache* obdd_cache_create(uint32_t cache_size, uint32_t cache_max_size){
 	obdd_cache* cache	= calloc(1, sizeof(obdd_cache));
@@ -22,8 +22,13 @@ obdd_cache* obdd_cache_create(uint32_t cache_size, uint32_t cache_max_size){
 	cache->cache_hits	= 0;
 	cache->cache_collisions	= 0;
 	cache->cache_inserts	= 0;
+	cache->vars_size	= LIST_INITIAL_SIZE;
+	cache->cache_vars	= calloc(cache->vars_size, sizeof(obdd_node*));
+	cache->cache_neg_vars	= calloc(cache->vars_size, sizeof(obdd_node*));
 	return cache;
 }
+
+
 
 void obdd_cache_insert(obdd_cache *cache, uintptr_t op, obdd_node *f, obdd_node *g, obdd_node *h, obdd_node *data){
 	int32_t pos;
@@ -79,6 +84,55 @@ void obdd_cache_insert1(obdd_cache *cache, uintptr_t op, obdd_node *f, obdd_node
 	item->h	= op;
 	item->data	= data;
 }
+
+obdd_node* obdd_cache_insert_var(obdd_cache *cache, obdd_mgr *mgr, obdd_var_size_t var_id){
+	if((var_id + 1) > cache->vars_size){
+		cache->vars_size = var_id + 1;
+		obdd_node** ptr	= realloc(cache->cache_vars, sizeof(obdd_node*) * (cache->vars_size));
+		if(ptr == NULL){
+			printf("Could not allocate memory\n");
+			exit(-1);
+		}else{
+			cache->cache_vars	= ptr;
+		}
+		ptr	= realloc(cache->cache_neg_vars, sizeof(obdd_node*) * (cache->vars_size));
+		if(ptr == NULL){
+			printf("Could not allocate memory\n");
+			exit(-1);
+		}else{
+			cache->cache_neg_vars	= ptr;
+		}
+	}
+	if(cache->cache_vars[var_id] == NULL){
+		cache->cache_vars[var_id] = obdd_mgr_mk_node_ID(mgr, var_id, mgr->true_obdd, mgr->false_obdd);
+	}
+	return cache->cache_vars[var_id];
+}
+
+obdd_node* obdd_cache_insert_neg_var(obdd_cache *cache, obdd_mgr *mgr, obdd_var_size_t var_id){
+	if((var_id + 1) > cache->vars_size){
+		cache->vars_size = var_id + 1;
+		obdd_node** ptr	= realloc(cache->cache_vars, sizeof(obdd_node*) * (cache->vars_size));
+		if(ptr == NULL){
+			printf("Could not allocate memory\n");
+			exit(-1);
+		}else{
+			cache->cache_vars	= ptr;
+		}
+		ptr	= realloc(cache->cache_neg_vars, sizeof(obdd_node*) * (cache->vars_size));
+		if(ptr == NULL){
+			printf("Could not allocate memory\n");
+			exit(-1);
+		}else{
+			cache->cache_neg_vars	= ptr;
+		}
+	}
+	if(cache->cache_neg_vars[var_id] == NULL){
+		cache->cache_neg_vars[var_id] = obdd_mgr_mk_node_ID(mgr, var_id, mgr->false_obdd, mgr->true_obdd);
+	}
+	return cache->cache_neg_vars[var_id];
+}
+
 obdd_node* obdd_cache_lookup(obdd_cache *cache, uintptr_t op, obdd_node *f, obdd_node *g, obdd_node *h){
 	obdd_cache_item *item;
 	obdd_node *data;
@@ -169,6 +223,18 @@ obdd_node* obdd_cache_constant_lookup(obdd_cache *cache, uintptr_t op, obdd_node
 		obdd_cache_resize(cache);
 	return NULL;
 }
+
+obdd_node* obdd_cache_lookup_var(obdd_cache *cache, uint32_t var_id){
+	if((var_id + 1) > cache->vars_size)
+		return NULL;
+	return cache->cache_vars[var_id];
+}
+obdd_node* obdd_cache_lookup_neg_var(obdd_cache *cache, uint32_t var_id){
+	if((var_id + 1) > cache->vars_size)
+		return NULL;
+	return cache->cache_neg_vars[var_id];
+}
+
 void obdd_cache_resize(obdd_cache *cache){
 	obdd_cache_item *items_old, *current_item, *new_item;
 	int32_t i, pos, shift = --(cache->cache_shift);
@@ -200,12 +266,20 @@ void obdd_cache_resize(obdd_cache *cache){
 void obdd_cache_flush(obdd_cache *cache){
 	int32_t i	= 0;
 	for(i = 0; (uint32_t)i < cache->cache_slots; i++)cache->cache_items[i].data	= NULL;
+	for(i = 0; (uint32_t)i < cache->vars_size; i++){
+		cache->cache_vars[i]	= NULL;
+		cache->cache_neg_vars[i]= NULL;
+	}
 }
 void obdd_cache_destroy(obdd_cache *cache){
 	obdd_cache_flush(cache);
 	if(cache->cache_items != NULL)
 		free(cache->cache_items);
 	cache->cache_items	= NULL;
+	free(cache->cache_vars);
+	cache->cache_vars	= NULL;
+	free(cache->cache_neg_vars);
+	cache->cache_neg_vars	= NULL;
 }
 
 

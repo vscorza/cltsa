@@ -20,6 +20,52 @@
 #define OBDD_NODE_FRAGMENTS_SIZE	100
 #define OBDD_NODE_LIST_SIZE		64
 
+#define OBDD_CACHE_SIZE			262144
+#define OBDD_CACHE_MAX_SIZE		0
+
+typedef uintptr_t ptruint;
+
+typedef uint16_t obdd_var_size_t;
+typedef uint16_t obdd_ref_count_size_t;
+
+/* Primes for cache hash functions. */
+#define DD_P1			12582917
+#define DD_P2			4256249
+#define DD_P3			741457
+#define DD_P4			1618033999
+#define DD_MAX_CACHE_TO_SLOTS_RATIO 4
+
+#if SIZEOF_VOID_P == 8 && SIZEOF_INT == 4
+#define ddHash(f,g,s) \
+((((unsigned)(ptruint)(f) * DD_P1 + \
+   (unsigned)(ptruint)(g)) * DD_P2) >> (s))
+#else
+#define ddHash(f,g,s) \
+((((unsigned)(f) * DD_P1 + (unsigned)(g)) * DD_P2) >> (s))
+#endif
+
+//	Hash function for the cache.
+#if SIZEOF_VOID_P == 8 && SIZEOF_INT == 4
+#define ddCHash(o,f,g,h,s) \
+((((((unsigned)(ptruint)(f) + (unsigned)(ptruint)(o)) * DD_P1 + \
+    (unsigned)(ptruint)(g)) * DD_P2 + \
+   (unsigned)(ptruint)(h)) * DD_P3) >> (s))
+#else
+#define ddCHash(o,f,g,h,s) \
+((((((unsigned)(f) + (unsigned)(o)) * DD_P1 + (unsigned)(g)) * DD_P2 + \
+   (unsigned)(h)) * DD_P3) >> (s))
+#endif
+
+//	Hash function for the cache for functions with two operands.
+#if SIZEOF_VOID_P == 8 && SIZEOF_INT == 4
+#define ddCHash2(o,f,g,s) \
+(((((unsigned)(ptruint)(f) + (unsigned)(ptruint)(o)) * DD_P1 + \
+   (unsigned)(ptruint)(g)) * DD_P2) >> (s))
+#else
+#define ddCHash2(o,f,g,s) \
+(((((uint64_t)(f) + (uint64_t)(o)) * DD_P1 + (uint64_t)(g)) * DD_P2) >> (s))
+#endif
+
 #define GET_VAR_INDEX(variable_count, valuation_index, variable_index) ((((variable_count) * (valuation_index) + (variable_index)) * sizeof(bool)))
 #define GET_VAR_IN_VALUATION(arr, variable_count, valuation_index, variable_index)	(arr[GET_VAR_INDEX(variable_count, valuation_index, variable_index)])
 
@@ -54,12 +100,13 @@ typedef struct obdd_mgr_t {
 	dictionary*		vars_dict;
 	automaton_fast_pool*	obdd_pool;
 	automaton_fast_pool*	nodes_pool;
+	struct obdd_cache_t*		cache;
 }obdd_mgr;
 
 typedef struct obdd_node_t{
-	uint32_t 		var_ID;
+	obdd_var_size_t 		var_ID;
 	uint32_t		node_ID;
-	uint32_t		ref_count;
+	obdd_ref_count_size_t		ref_count;
 	struct obdd_node_t*	high_obdd;
 	struct obdd_node_t*	low_obdd;
 	uint32_t 		fragment_ID;
@@ -72,6 +119,29 @@ typedef struct obdd_t{
 	struct obdd_node_t* false_obdd;
 	uint32_t 		fragment_ID;
 }obdd;
+
+typedef struct obdd_cache_item_str{
+	obdd_node *f, *g;
+	uintptr_t h;
+	obdd_node *data;
+}obdd_cache_item;
+
+typedef struct obdd_cache_str{
+	obdd_cache_item *cache_items;
+	uint32_t cache_slots;
+	int32_t cache_shift;
+	double cache_misses;
+	double cache_hits;
+	double cache_collisions;
+	double cache_inserts;
+	double min_hits;
+	int32_t cache_slack;
+	uint32_t max_cache_hard;
+
+	uint32_t vars_size;
+	obdd_node **cache_vars, **cache_neg_vars;
+}obdd_cache;
+
 /*
 typedef struct obdd_partial_automaton_t{
 	uint32_t			initial_state;
@@ -105,14 +175,14 @@ void obdd_mgr_print(obdd_mgr* mgr);
 obdd* 	obdd_mgr_true(obdd_mgr* mgr);
 obdd* 	obdd_mgr_false(obdd_mgr* mgr);
 obdd*	obdd_mgr_not_var(obdd_mgr* mgr, char* name);
-obdd*	obdd_mgr_not_var_ID(obdd_mgr* mgr, uint32_t var_ID);
+obdd*	obdd_mgr_not_var_ID(obdd_mgr* mgr, obdd_var_size_t var_ID);
 obdd*	obdd_mgr_var(obdd_mgr* mgr, char* name);
-obdd*	obdd_mgr_var_ID(obdd_mgr* mgr, uint32_t var_ID);
+obdd*	obdd_mgr_var_ID(obdd_mgr* mgr, obdd_var_size_t var_ID);
 bool obdd_mgr_equals(obdd_mgr* mgr, obdd* left, obdd* right);
 
 uint32_t obdd_mgr_get_next_node_ID(obdd_mgr* mgr);
 obdd_node* obdd_mgr_mk_node(obdd_mgr* mgr, char* var, obdd_node* high, obdd_node* low);
-obdd_node* obdd_mgr_mk_node_ID(obdd_mgr* mgr, uint32_t var_ID, obdd_node* high, obdd_node* low);
+obdd_node* obdd_mgr_mk_node_ID(obdd_mgr* mgr, obdd_var_size_t var_ID, obdd_node* high, obdd_node* low);
 void obdd_node_destroy(obdd_mgr* mgr, obdd_node* root);
 /** OBDD **/
 obdd_node* obdd_node_get_false_node(obdd_mgr* mgr, obdd_node* node);
@@ -166,4 +236,21 @@ void obdd_get_valuations(obdd_mgr* mgr, obdd* root, bool** valuations, uint32_t*
 		, bool* dont_care_list, bool* partial_valuation, bool* initialized_values, bool* valuation_set, obdd_node** last_nodes, int32_t* last_succ_index);
 void obdd_node_get_obdd_nodes(obdd_mgr* mgr, obdd_node* root, obdd_node*** nodes, uint32_t* nodes_count, uint32_t* nodes_size);
 obdd_node** obdd_get_obdd_nodes(obdd_mgr* mgr, obdd* root, uint32_t* nodes_count);
+
+/** CACHE **/
+obdd_cache* obdd_cache_create(uint32_t cache_size, uint32_t cache_max_size);
+void obdd_cache_insert(obdd_cache *cache, uintptr_t op, obdd_node *f, obdd_node *g, obdd_node *h, obdd_node *data);
+void obdd_cache_insert2(obdd_cache *cache, uintptr_t op, obdd_node *f, obdd_node *g, obdd_node *data);
+void obdd_cache_insert1(obdd_cache *cache, uintptr_t op, obdd_node *f, obdd_node *data);
+obdd_node* obdd_cache_insert_var(obdd_cache *cache, obdd_mgr *mgr, obdd_var_size_t var_id);
+obdd_node* obdd_cache_insert_neg_var(obdd_cache *cache, obdd_mgr *mgr, obdd_var_size_t var_id);
+obdd_node* obdd_cache_lookup(obdd_cache *cache, uintptr_t op, obdd_node *f, obdd_node *g, obdd_node *h);
+obdd_node* obdd_cache_lookup2(obdd_cache *cache, uintptr_t op, obdd_node *f, obdd_node *g);
+obdd_node* obdd_cache_lookup1(obdd_cache *cache, uintptr_t op, obdd_node *f);
+obdd_node* obdd_cache_constant_lookup(obdd_cache *cache, uintptr_t op, obdd_node *f, obdd_node *g, obdd_node *h);
+obdd_node* obdd_cache_lookup_var(obdd_cache *cache, uint32_t var_id);
+obdd_node* obdd_cache_lookup_neg_var(obdd_cache *cache, uint32_t var_id);
+void obdd_cache_resize(obdd_cache *cache);
+void obdd_cache_flush(obdd_cache *cache);
+void obdd_cache_destroy(obdd_cache *cache);
 #endif
