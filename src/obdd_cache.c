@@ -6,8 +6,9 @@
  */
 #include "obdd.h"
 
-obdd_cache* obdd_cache_create(uint32_t cache_size, uint32_t cache_max_size){
+obdd_cache* obdd_cache_create(obdd_mgr *mgr, uint32_t cache_size, uint32_t cache_max_size){
 	obdd_cache* cache	= calloc(1, sizeof(obdd_cache));
+	cache->mgr			= mgr;
 	uint32_t log_size	= 0;
 	uint32_t size_copy	= cache_size;
 	while(size_copy > 1){log_size++; size_copy >>= 1;}
@@ -46,6 +47,13 @@ void obdd_cache_insert(obdd_cache *cache, uintptr_t op, obdd_node *f, obdd_node 
 	cache->cache_collisions	+= item->data != NULL;
 	cache->cache_inserts++;
 
+	if(item->data != NULL){
+		item->data->ref_count--;
+		if(item->data->ref_count == 0)
+			obdd_node_destroy(cache->mgr, item->data);
+	}
+	item->data->ref_count++;
+
 	item->f	= (obdd_node*) uf;
 	item->g	= (obdd_node*) ug;
 	item->h	= uh;
@@ -63,6 +71,13 @@ void obdd_cache_insert2(obdd_cache *cache, uintptr_t op, obdd_node *f, obdd_node
 	cache->cache_collisions	+= item->data != NULL;
 	cache->cache_inserts++;
 
+	if(item->data != NULL){
+		item->data->ref_count--;
+		if(item->data->ref_count == 0)
+			obdd_node_destroy(cache->mgr, item->data);
+	}
+	item->data->ref_count++;
+
 	item->f	= f;
 	item->g	= g;
 	item->h	= op;
@@ -79,13 +94,20 @@ void obdd_cache_insert1(obdd_cache *cache, uintptr_t op, obdd_node *f, obdd_node
 	cache->cache_collisions	+= item->data != NULL;
 	cache->cache_inserts++;
 
+	if(item->data != NULL){
+		item->data->ref_count--;
+		if(item->data->ref_count == 0)
+			obdd_node_destroy(cache->mgr, item->data);
+	}
+	data->ref_count++;
+
 	item->f	= f;
 	item->g	= f;
 	item->h	= op;
 	item->data	= data;
 }
 
-obdd_node* obdd_cache_insert_var(obdd_cache *cache, obdd_mgr *mgr, obdd_var_size_t var_id){
+obdd_node* obdd_cache_insert_var(obdd_cache *cache, obdd_var_size_t var_id){
 	if((var_id + 1) > cache->vars_size){
 		cache->vars_size = var_id + 1;
 		obdd_node** ptr	= realloc(cache->cache_vars, sizeof(obdd_node*) * (cache->vars_size));
@@ -104,12 +126,13 @@ obdd_node* obdd_cache_insert_var(obdd_cache *cache, obdd_mgr *mgr, obdd_var_size
 		}
 	}
 	if(cache->cache_vars[var_id] == NULL){
-		cache->cache_vars[var_id] = obdd_mgr_mk_node_ID(mgr, var_id, mgr->true_obdd, mgr->false_obdd);
+		cache->cache_vars[var_id] = obdd_mgr_mk_node_ID(cache->mgr, var_id, cache->mgr->true_obdd, cache->mgr->false_obdd);
+		cache->cache_vars[var_id]->ref_count++;
 	}
 	return cache->cache_vars[var_id];
 }
 
-obdd_node* obdd_cache_insert_neg_var(obdd_cache *cache, obdd_mgr *mgr, obdd_var_size_t var_id){
+obdd_node* obdd_cache_insert_neg_var(obdd_cache *cache, obdd_var_size_t var_id){
 	if((var_id + 1) > cache->vars_size){
 		cache->vars_size = var_id + 1;
 		obdd_node** ptr	= realloc(cache->cache_vars, sizeof(obdd_node*) * (cache->vars_size));
@@ -128,7 +151,8 @@ obdd_node* obdd_cache_insert_neg_var(obdd_cache *cache, obdd_mgr *mgr, obdd_var_
 		}
 	}
 	if(cache->cache_neg_vars[var_id] == NULL){
-		cache->cache_neg_vars[var_id] = obdd_mgr_mk_node_ID(mgr, var_id, mgr->false_obdd, mgr->true_obdd);
+		cache->cache_neg_vars[var_id] = obdd_mgr_mk_node_ID(cache->mgr, var_id, cache->mgr->false_obdd, cache->mgr->true_obdd);
+		cache->cache_neg_vars[var_id]->ref_count++;
 	}
 	return cache->cache_neg_vars[var_id];
 }
@@ -265,8 +289,26 @@ void obdd_cache_resize(obdd_cache *cache){
 }
 void obdd_cache_flush(obdd_cache *cache){
 	int32_t i	= 0;
-	for(i = 0; (uint32_t)i < cache->cache_slots; i++)cache->cache_items[i].data	= NULL;
+	for(i = 0; (uint32_t)i < cache->cache_slots; i++){
+		if(cache->cache_items[i].data	!= NULL){
+			cache->cache_items[i].data->ref_count--;
+			if(cache->cache_items[i].data->ref_count == 0){
+				obdd_node_destroy(cache->mgr, cache->cache_items[i].data);
+			}
+		}
+		cache->cache_items[i].data	= NULL;
+	}
 	for(i = 0; (uint32_t)i < cache->vars_size; i++){
+		if(cache->cache_vars[i] != NULL){
+			cache->cache_vars[i]->ref_count--;
+			if(cache->cache_vars[i]->ref_count == 0)
+				obdd_node_destroy(cache->mgr, cache->cache_vars[i]);
+		}
+		if(cache->cache_neg_vars[i] != NULL){
+			cache->cache_neg_vars[i]->ref_count--;
+			if(cache->cache_neg_vars[i]->ref_count == 0)
+				obdd_node_destroy(cache->mgr, cache->cache_neg_vars[i]);
+		}
 		cache->cache_vars[i]	= NULL;
 		cache->cache_neg_vars[i]= NULL;
 	}
@@ -280,6 +322,7 @@ void obdd_cache_destroy(obdd_cache *cache){
 	cache->cache_vars	= NULL;
 	free(cache->cache_neg_vars);
 	cache->cache_neg_vars	= NULL;
+	cache->mgr			= NULL;
 }
 
 

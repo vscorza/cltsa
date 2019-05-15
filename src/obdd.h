@@ -120,13 +120,14 @@ typedef struct obdd_t{
 	uint32_t 		fragment_ID;
 }obdd;
 
-typedef struct obdd_cache_item_str{
+typedef struct obdd_cache_item_t{
 	obdd_node *f, *g;
 	uintptr_t h;
 	obdd_node *data;
 }obdd_cache_item;
 
-typedef struct obdd_cache_str{
+typedef struct obdd_cache_t{
+	obdd_mgr *mgr;
 	obdd_cache_item *cache_items;
 	uint32_t cache_slots;
 	int32_t cache_shift;
@@ -238,12 +239,12 @@ void obdd_node_get_obdd_nodes(obdd_mgr* mgr, obdd_node* root, obdd_node*** nodes
 obdd_node** obdd_get_obdd_nodes(obdd_mgr* mgr, obdd* root, uint32_t* nodes_count);
 
 /** CACHE **/
-obdd_cache* obdd_cache_create(uint32_t cache_size, uint32_t cache_max_size);
+obdd_cache* obdd_cache_create(obdd_mgr *mgr, uint32_t cache_size, uint32_t cache_max_size);
 void obdd_cache_insert(obdd_cache *cache, uintptr_t op, obdd_node *f, obdd_node *g, obdd_node *h, obdd_node *data);
 void obdd_cache_insert2(obdd_cache *cache, uintptr_t op, obdd_node *f, obdd_node *g, obdd_node *data);
 void obdd_cache_insert1(obdd_cache *cache, uintptr_t op, obdd_node *f, obdd_node *data);
-obdd_node* obdd_cache_insert_var(obdd_cache *cache, obdd_mgr *mgr, obdd_var_size_t var_id);
-obdd_node* obdd_cache_insert_neg_var(obdd_cache *cache, obdd_mgr *mgr, obdd_var_size_t var_id);
+obdd_node* obdd_cache_insert_var(obdd_cache *cache, obdd_var_size_t var_id);
+obdd_node* obdd_cache_insert_neg_var(obdd_cache *cache, obdd_var_size_t var_id);
 obdd_node* obdd_cache_lookup(obdd_cache *cache, uintptr_t op, obdd_node *f, obdd_node *g, obdd_node *h);
 obdd_node* obdd_cache_lookup2(obdd_cache *cache, uintptr_t op, obdd_node *f, obdd_node *g);
 obdd_node* obdd_cache_lookup1(obdd_cache *cache, uintptr_t op, obdd_node *f);

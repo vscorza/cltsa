@@ -186,7 +186,7 @@ obdd_mgr*	obdd_mgr_create(){
 	false_obdd->false_obdd	= NULL;
 	false_obdd->fragment_ID	= fragment_ID;
 	new_mgr->false_obdd	= false_obdd;
-	new_mgr->cache		= obdd_cache_create(OBDD_CACHE_SIZE, OBDD_CACHE_MAX_SIZE);
+	new_mgr->cache		= obdd_cache_create(new_mgr, OBDD_CACHE_SIZE, OBDD_CACHE_MAX_SIZE);
 	return new_mgr;
 }
 
@@ -254,8 +254,11 @@ obdd*	obdd_mgr_var(obdd_mgr* mgr, char* name){
 
 obdd*	obdd_mgr_var_ID(obdd_mgr* mgr, obdd_var_size_t var_ID){
 	obdd* var_obdd	= obdd_create(mgr, NULL);
-	var_obdd->root_obdd= obdd_mgr_mk_node_ID(mgr, var_ID
-		, var_obdd->true_obdd, var_obdd->false_obdd);
+	if(mgr->cache->cache_vars[var_ID] != NULL){
+		var_obdd->root_obdd = mgr->cache->cache_vars[var_ID];
+	}else{
+		var_obdd->root_obdd = obdd_cache_insert_var(mgr->cache, var_ID);
+	}
 	return var_obdd;	
 }
 
@@ -266,8 +269,11 @@ obdd*	obdd_mgr_not_var(obdd_mgr* mgr, char* name){
 
 obdd*	obdd_mgr_not_var_ID(obdd_mgr* mgr, obdd_var_size_t var_ID){
 	obdd* var_obdd	= obdd_create(mgr, NULL);
-	var_obdd->root_obdd= obdd_mgr_mk_node_ID(mgr, var_ID
-		, var_obdd->false_obdd, var_obdd->true_obdd);
+	if(mgr->cache->cache_neg_vars[var_ID] != NULL){
+		var_obdd->root_obdd = mgr->cache->cache_neg_vars[var_ID];
+	}else{
+		var_obdd->root_obdd = obdd_cache_insert_neg_var(mgr->cache, var_ID);
+	}
 	return var_obdd;
 }
 
