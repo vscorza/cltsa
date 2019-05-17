@@ -202,6 +202,7 @@ void obdd_mgr_destroy(obdd_mgr* mgr){
 	obdd_destroy(mgr->false_obdd);
 	mgr->false_obdd	= NULL;
 	obdd_cache_destroy(mgr->cache);
+	free(mgr->cache);
 	mgr->cache		= NULL;
 	automaton_fast_pool_destroy(mgr->obdd_pool);
 	automaton_fast_pool_destroy(mgr->nodes_pool);
@@ -259,6 +260,7 @@ obdd*	obdd_mgr_var_ID(obdd_mgr* mgr, obdd_var_size_t var_ID){
 	}else{
 		var_obdd->root_obdd = obdd_cache_insert_var(mgr->cache, var_ID);
 	}
+	var_obdd->root_obdd->ref_count++;
 	return var_obdd;	
 }
 
@@ -274,6 +276,7 @@ obdd*	obdd_mgr_not_var_ID(obdd_mgr* mgr, obdd_var_size_t var_ID){
 	}else{
 		var_obdd->root_obdd = obdd_cache_insert_neg_var(mgr->cache, var_ID);
 	}
+	var_obdd->root_obdd->ref_count++;
 	return var_obdd;
 }
 
@@ -287,6 +290,8 @@ obdd* obdd_create(obdd_mgr* mgr, obdd_node* root){
 	obdd* new_obdd		= automaton_fast_pool_get_instance(mgr->obdd_pool, &fragment_ID);
 	new_obdd->mgr		= mgr;
 	new_obdd->root_obdd	= root;
+	if(root!= NULL)
+		root->ref_count++;
 	new_obdd->true_obdd	= mgr->true_obdd->root_obdd;
 	new_obdd->false_obdd= mgr->false_obdd->root_obdd;
 	new_obdd->fragment_ID	= fragment_ID;
@@ -316,6 +321,7 @@ obdd* obdd_clone(obdd* root){
 
 void obdd_destroy(obdd* root){
 	if(root->root_obdd != NULL){
+		root->root_obdd->ref_count--;
 		obdd_node_destroy(root->mgr, root->root_obdd);
 		root->root_obdd		= NULL;
 	}
@@ -399,7 +405,7 @@ obdd_node* obdd_node_apply_next(obdd_mgr* mgr, obdd_node* value){
 				obdd_node_apply_next(mgr, value->high_obdd) : value->high_obdd;
 	obdd_node *low_value	= (value->low_obdd != NULL && !obdd_is_constant(mgr, value->low_obdd))?
 					obdd_node_apply_next(mgr, value->low_obdd) : value->low_obdd;
-	obdd_node *next_value	= 	obdd_mgr_mk_node(mgr, var_ID
+	obdd_node *next_value	= 	obdd_mgr_mk_node(mgr, var_next
 			, high_value, low_value);
 
 	obdd_cache_insert1(mgr->cache, obdd_node_apply_next, value, next_value);

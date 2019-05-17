@@ -21,6 +21,7 @@ obdd_cache* obdd_cache_create(obdd_mgr *mgr, uint32_t cache_size, uint32_t cache
 	cache->cache_slack	= cache_max_size;
 	cache->cache_misses	= (double)(int32_t)(cache_size * .3f + 1);
 	cache->cache_hits	= 0;
+	cache->min_hits		= .3f;
 	cache->cache_collisions	= 0;
 	cache->cache_inserts	= 0;
 	cache->vars_size	= LIST_INITIAL_SIZE;
@@ -285,7 +286,7 @@ void obdd_cache_resize(obdd_cache *cache){
 	}
 
 	free(items_old);
-	cache->cache_misses	= cache->cache_misses - ((double)(int32_t)(cache_slots * .3f + 1));
+	cache->cache_misses	= ((double)(int32_t)(cache_slots * cache->min_hits + 1));
 	cache->cache_hits	= 0;
 }
 void obdd_cache_flush(obdd_cache *cache){

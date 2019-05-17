@@ -132,6 +132,11 @@ void run_small_obdd_tests(){
 	obdd* not_x1_obdd	= obdd_apply_not(x1_obdd);
 	obdd* x2_obdd		= obdd_mgr_var(new_mgr, "x2");
 	obdd* x1_or_x2_obdd	= obdd_apply_or(x1_obdd, x2_obdd);
+	obdd* x1_and_x2_obdd	= obdd_apply_and(x1_obdd, x2_obdd);
+	obdd* x1_and_x2_obdd_bis= obdd_apply_and(x1_obdd, x2_obdd);
+	obdd* x1_or_x1_and_x2_obdd	= obdd_apply_or(x1_obdd, x1_and_x2_obdd);
+	obdd* x1_or_x1_and_x2_obdd_bis= obdd_apply_or(x1_obdd, x1_and_x2_obdd);
+
 	obdd* x1_then_x2_obdd	= obdd_apply_or(not_x1_obdd, x2_obdd);
 	printf("X1 -> X2\n");
 	obdd_print(x1_then_x2_obdd);
@@ -168,6 +173,10 @@ void run_small_obdd_tests(){
 	obdd_destroy(not_x1_obdd);
 	obdd_destroy(x2_obdd);
 	obdd_destroy(x1_or_x2_obdd);
+	obdd_destroy(x1_and_x2_obdd);
+	obdd_destroy(x1_and_x2_obdd_bis);
+	obdd_destroy(x1_or_x1_and_x2_obdd);
+	obdd_destroy(x1_or_x1_and_x2_obdd_bis);
 	obdd_destroy(x1_then_x2_obdd);
 	obdd_mgr_destroy(new_mgr);
 }
@@ -678,7 +687,7 @@ int main (void){
 	*/
 	//run_obdd_tree_tests();
 	//run_small_obdd_tests();
-	run_obdd_tests();
+	//run_obdd_tests();
 	//run_obdd_valuations();
 	//run_concrete_bucket_list_tests();
 	//run_ordered_list_tests();
@@ -696,7 +705,7 @@ int main (void){
 	//run_parse_test("tests/test28.fsp", "mixed model 3 signals 2 labels");//mixed model 3 signals 2 labels
 	//run_parse_test("tests/test29.fsp", "lift 3 floors");//lift 3 floors
 	//run_parse_test("tests/test30.fsp", "lift 2 floors");//lift 2 floors
-	//run_parse_test("tests/test31.fsp", "GenBuf 4 sndrs");//GENBUF 4 sndrs
+	run_parse_test("tests/test31.fsp", "GenBuf 4 sndrs");//GENBUF 4 sndrs
 	//run_parse_test("tests/test32.fsp", "test32");
 	//run_parse_test("tests/test34.fsp", "test34");
 	//run_parse_test("tests/test35.fsp", "GenBuf 2 sndrs");//GENBUF 2 Sndrs
