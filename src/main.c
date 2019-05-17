@@ -678,7 +678,7 @@ int main (void){
 	*/
 	//run_obdd_tree_tests();
 	//run_small_obdd_tests();
-	//run_obdd_tests();
+	run_obdd_tests();
 	//run_obdd_valuations();
 	//run_concrete_bucket_list_tests();
 	//run_ordered_list_tests();
@@ -699,7 +699,7 @@ int main (void){
 	//run_parse_test("tests/test31.fsp", "GenBuf 4 sndrs");//GENBUF 4 sndrs
 	//run_parse_test("tests/test32.fsp", "test32");
 	//run_parse_test("tests/test34.fsp", "test34");
-	run_parse_test("tests/test35.fsp", "GenBuf 2 sndrs");//GENBUF 2 Sndrs
+	//run_parse_test("tests/test35.fsp", "GenBuf 2 sndrs");//GENBUF 2 Sndrs
 	//run_parse_test("tests/test36.fsp", "lift 5 floors");//lift 5 floors
 	return 0;    
 }

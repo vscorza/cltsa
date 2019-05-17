@@ -16,7 +16,7 @@ obdd_cache* obdd_cache_create(obdd_mgr *mgr, uint32_t cache_size, uint32_t cache
 	cache_size			= 1U << log_size;
 	cache->cache_items	= calloc(cache_size + 1, sizeof(obdd_cache_item));
 	cache->cache_slots	= cache_size;
-	cache->cache_shift	= sizeof(int32_t) * 8 - log_size;
+	cache->cache_shift	= sizeof(int64_t) * 8 - log_size;
 	cache->max_cache_hard	= cache_max_size;
 	cache->cache_slack	= cache_max_size;
 	cache->cache_misses	= (double)(int32_t)(cache_size * .3f + 1);
@@ -52,12 +52,12 @@ void obdd_cache_insert(obdd_cache *cache, uintptr_t op, obdd_node *f, obdd_node 
 		if(item->data->ref_count == 0)
 			obdd_node_destroy(cache->mgr, item->data);
 	}
-	item->data->ref_count++;
 
 	item->f	= (obdd_node*) uf;
 	item->g	= (obdd_node*) ug;
 	item->h	= uh;
 	item->data	= data;
+	item->data->ref_count++;
 }
 void obdd_cache_insert2(obdd_cache *cache, uintptr_t op, obdd_node *f, obdd_node *g, obdd_node *data){
 	int32_t pos;
@@ -76,12 +76,12 @@ void obdd_cache_insert2(obdd_cache *cache, uintptr_t op, obdd_node *f, obdd_node
 		if(item->data->ref_count == 0)
 			obdd_node_destroy(cache->mgr, item->data);
 	}
-	item->data->ref_count++;
 
 	item->f	= f;
 	item->g	= g;
 	item->h	= op;
 	item->data	= data;
+	item->data->ref_count++;
 }
 
 void obdd_cache_insert1(obdd_cache *cache, uintptr_t op, obdd_node *f, obdd_node *data){
@@ -99,12 +99,12 @@ void obdd_cache_insert1(obdd_cache *cache, uintptr_t op, obdd_node *f, obdd_node
 		if(item->data->ref_count == 0)
 			obdd_node_destroy(cache->mgr, item->data);
 	}
-	data->ref_count++;
 
 	item->f	= f;
 	item->g	= f;
 	item->h	= op;
 	item->data	= data;
+	data->ref_count++;
 }
 
 obdd_node* obdd_cache_insert_var(obdd_cache *cache, obdd_var_size_t var_id){
@@ -126,7 +126,7 @@ obdd_node* obdd_cache_insert_var(obdd_cache *cache, obdd_var_size_t var_id){
 		}
 	}
 	if(cache->cache_vars[var_id] == NULL){
-		cache->cache_vars[var_id] = obdd_mgr_mk_node_ID(cache->mgr, var_id, cache->mgr->true_obdd, cache->mgr->false_obdd);
+		cache->cache_vars[var_id] = obdd_mgr_mk_node_ID(cache->mgr, var_id, cache->mgr->true_obdd->root_obdd, cache->mgr->false_obdd->root_obdd);
 		cache->cache_vars[var_id]->ref_count++;
 	}
 	return cache->cache_vars[var_id];
@@ -151,7 +151,7 @@ obdd_node* obdd_cache_insert_neg_var(obdd_cache *cache, obdd_var_size_t var_id){
 		}
 	}
 	if(cache->cache_neg_vars[var_id] == NULL){
-		cache->cache_neg_vars[var_id] = obdd_mgr_mk_node_ID(cache->mgr, var_id, cache->mgr->false_obdd, cache->mgr->true_obdd);
+		cache->cache_neg_vars[var_id] = obdd_mgr_mk_node_ID(cache->mgr, var_id, cache->mgr->false_obdd->root_obdd, cache->mgr->true_obdd->root_obdd);
 		cache->cache_neg_vars[var_id]->ref_count++;
 	}
 	return cache->cache_neg_vars[var_id];
@@ -184,10 +184,11 @@ obdd_node* obdd_cache_lookup(obdd_cache *cache, uintptr_t op, obdd_node *f, obdd
 obdd_node* obdd_cache_lookup2(obdd_cache *cache, uintptr_t op, obdd_node *f, obdd_node *g){
 	obdd_cache_item *item;
 	obdd_node *data;
-	int32_t pos;
+	uint64_t pos;
 	uintptr_t uf, ug, uh;
 
 	pos	= ddCHash2(op, f, g, cache->cache_shift);
+
 	item= &(cache->cache_items[pos]);
 
 	if(item->data != NULL && item->f==f && item->g==g && item->h == op){
@@ -291,7 +292,8 @@ void obdd_cache_flush(obdd_cache *cache){
 	int32_t i	= 0;
 	for(i = 0; (uint32_t)i < cache->cache_slots; i++){
 		if(cache->cache_items[i].data	!= NULL){
-			cache->cache_items[i].data->ref_count--;
+			obdd_node *current_node = cache->cache_items[i].data;
+			current_node->ref_count--;
 			if(cache->cache_items[i].data->ref_count == 0){
 				obdd_node_destroy(cache->mgr, cache->cache_items[i].data);
 			}

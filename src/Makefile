@@ -1,8 +1,8 @@
 #CC=gcc
 CC=gcc-8
-#CFLAGS= -Wall -Wextra -pedantic -g -lm -Wno-unused-variable -Wno-unused-parameter -O0
+CFLAGS= -Wall -Wextra -pedantic -g -lm -Wno-unused-variable -Wno-unused-parameter -O0
 #CFLAGS= -Wall -Wextra -pedantic -lm -Wno-unused-variable -Wno-unused-parameter -O3
-CFLAGS= -Wall -Wextra -pedantic -lm -Wno-unused-variable -Wno-unused-parameter -Ofast
+#CFLAGS= -Wall -Wextra -pedantic -lm -Wno-unused-variable -Wno-unused-parameter -Ofast
 #CFLAGS= -Wall -Wextra -pedantic -g -lm -lasan -Wno-unused-variable -Wno-unused-parameter -fsanitize=address -fno-omit-frame-pointer -fuse-ld=gold -O0
 NASM=nasm
 NASMFLAGS=-f elf64 -g -F DWARF
@@ -13,7 +13,9 @@ YACC = yacc -d
 #YACCFLAGS = -Wconflicts-sr -Wconflicts-rr --debug
 YACCFLAGS = 
 
+
 all: main
+
 
 main: main.c parser_utils_c.o y.tab.o lex.yy.o automaton_c.o automaton_utils_c.o automaton_context_c.o  bucket_list_c.o automaton_mu_calculus_c.o ordered_list_c.o max_heap_c.o obdd_c.o obdd_cache_c.o dictionary_c.o fast_pool_c.o
 	$(CC) $(CFLAGS) $^ -o $@
@@ -70,6 +72,7 @@ y.tab.o: y.tab.c
 lex.yy.c: henos.lex
 	$(LEX) henos.lex
 
+.PHONY: clean
 clean:
 	rm -f *.o
 	rm -f main 

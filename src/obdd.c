@@ -201,12 +201,12 @@ void obdd_mgr_destroy(obdd_mgr* mgr){
 	mgr->false_obdd->root_obdd->ref_count--;
 	obdd_destroy(mgr->false_obdd);
 	mgr->false_obdd	= NULL;
+	obdd_cache_destroy(mgr->cache);
+	mgr->cache		= NULL;
 	automaton_fast_pool_destroy(mgr->obdd_pool);
 	automaton_fast_pool_destroy(mgr->nodes_pool);
 	mgr->obdd_pool	= NULL;
 	mgr->nodes_pool	= NULL;
-	obdd_cache_destroy(mgr->cache);
-	mgr->cache		= NULL;
 	free(mgr);	
 }
 
@@ -388,12 +388,22 @@ obdd_node* obdd_node_apply_next(obdd_mgr* mgr, obdd_node* value){
 	char var_next[200];
 	strcpy(var_next, dictionary_key_for_value(dict, value->var_ID));
 	strcat(var_next, VAR_NEXT_SUFFIX);
+
+	obdd_node *cached_node	= obdd_cache_lookup1(mgr->cache, obdd_node_apply_next, value);
+
+	if(cached_node != NULL)
+		return cached_node;
+
 	uint32_t var_ID		= dictionary_add_entry(dict,  var_next);
-	value->var_ID		= var_ID;
-	if(value->high_obdd != NULL && !obdd_is_constant(mgr, value->high_obdd))
-		obdd_node_apply_next(mgr, value->high_obdd);
-	if(value->low_obdd != NULL && !obdd_is_constant(mgr, value->low_obdd))
-		obdd_node_apply_next(mgr, value->low_obdd);
+	obdd_node *high_value	= (value->high_obdd != NULL && !obdd_is_constant(mgr, value->high_obdd))?
+				obdd_node_apply_next(mgr, value->high_obdd) : value->high_obdd;
+	obdd_node *low_value	= (value->low_obdd != NULL && !obdd_is_constant(mgr, value->low_obdd))?
+					obdd_node_apply_next(mgr, value->low_obdd) : value->low_obdd;
+	obdd_node *next_value	= 	obdd_mgr_mk_node(mgr, var_ID
+			, high_value, low_value);
+
+	obdd_cache_insert1(mgr->cache, obdd_node_apply_next, value, next_value);
+
 	return value;
 }
 
@@ -506,8 +516,16 @@ obdd* obdd_apply(bool (*apply_fkt)(bool,bool), obdd *left, obdd* right){
 #if DEBUG_OBDD
 		printf("(apply)%p (%p) %p\n", (void*)left, (void*)apply_fkt, (void*)right);
 #endif
+	obdd_node* cached_node	= obdd_cache_lookup2(left->mgr->cache, apply_fkt, left->root_obdd, right->root_obdd);
+
+	if(cached_node != NULL)
+		return obdd_create(left->mgr,cached_node);
+
 	obdd* applied_obdd	= obdd_create(left->mgr, obdd_node_apply(apply_fkt, left->mgr, left->root_obdd, right->root_obdd));
 	obdd_reduce(applied_obdd);
+
+	obdd_cache_insert2(left->mgr->cache, apply_fkt, left->root_obdd, right->root_obdd, applied_obdd->root_obdd);
+
 	return applied_obdd;
 }	
 
