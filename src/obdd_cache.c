@@ -110,13 +110,17 @@ void obdd_cache_insert1(obdd_cache *cache, uintptr_t op, obdd_node *f, obdd_node
 
 obdd_node* obdd_cache_insert_var(obdd_cache *cache, obdd_var_size_t var_id){
 	if((var_id + 1) > cache->vars_size){
-		cache->vars_size = var_id + 1;
+		uint32_t i, old_size	= cache->vars_size;
+		cache->vars_size = var_id * LIST_INCREASE_FACTOR;
 		obdd_node** ptr	= realloc(cache->cache_vars, sizeof(obdd_node*) * (cache->vars_size));
 		if(ptr == NULL){
 			printf("Could not allocate memory\n");
 			exit(-1);
 		}else{
 			cache->cache_vars	= ptr;
+			for(i = old_size; i < cache->vars_size; i++){
+				cache->cache_vars[i]	= NULL;
+			}
 		}
 		ptr	= realloc(cache->cache_neg_vars, sizeof(obdd_node*) * (cache->vars_size));
 		if(ptr == NULL){
@@ -124,6 +128,9 @@ obdd_node* obdd_cache_insert_var(obdd_cache *cache, obdd_var_size_t var_id){
 			exit(-1);
 		}else{
 			cache->cache_neg_vars	= ptr;
+			for(i = old_size; i < cache->vars_size; i++){
+				cache->cache_neg_vars[i]	= NULL;
+			}
 		}
 	}
 	if(cache->cache_vars[var_id] == NULL){
@@ -135,13 +142,17 @@ obdd_node* obdd_cache_insert_var(obdd_cache *cache, obdd_var_size_t var_id){
 
 obdd_node* obdd_cache_insert_neg_var(obdd_cache *cache, obdd_var_size_t var_id){
 	if((var_id + 1) > cache->vars_size){
-		cache->vars_size = var_id + 1;
+		uint32_t i, old_size	= cache->vars_size;
+		cache->vars_size = var_id  * LIST_INCREASE_FACTOR;
 		obdd_node** ptr	= realloc(cache->cache_vars, sizeof(obdd_node*) * (cache->vars_size));
 		if(ptr == NULL){
 			printf("Could not allocate memory\n");
 			exit(-1);
 		}else{
 			cache->cache_vars	= ptr;
+			for(i = old_size; i < cache->vars_size; i++){
+				cache->cache_vars[i]	= NULL;
+			}
 		}
 		ptr	= realloc(cache->cache_neg_vars, sizeof(obdd_node*) * (cache->vars_size));
 		if(ptr == NULL){
@@ -149,6 +160,9 @@ obdd_node* obdd_cache_insert_neg_var(obdd_cache *cache, obdd_var_size_t var_id){
 			exit(-1);
 		}else{
 			cache->cache_neg_vars	= ptr;
+			for(i = old_size; i < cache->vars_size; i++){
+				cache->cache_neg_vars[i]	= NULL;
+			}
 		}
 	}
 	if(cache->cache_neg_vars[var_id] == NULL){
