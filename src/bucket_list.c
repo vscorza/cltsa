@@ -15,9 +15,9 @@ automaton_bucket_list* automaton_bucket_list_create(uint32_t count){
 	uint32_t i;
 	bucket->composite_count			= 0;
 	bucket->count					= count;
-	bucket->bucket_count			= malloc(sizeof(uint32_t) * count);
+	bucket->buckets				= malloc(sizeof(uint32_t*) * count);
 	bucket->bucket_size				= malloc(sizeof(uint32_t) * count);
-	bucket->buckets					= malloc(sizeof(uint32_t*) * count);
+	bucket->bucket_count			= malloc(sizeof(uint32_t) * count);
 	for(i = 0; i < count; i++){
 		bucket->bucket_count[i]		= 0;
 		bucket->bucket_size[i]		= 0;

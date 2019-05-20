@@ -4,6 +4,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include "automaton_context.h"
+#include "minuint.h"
 
 typedef struct yy_buffer_state * YY_BUFFER_STATE;
 extern int yyparse();
@@ -178,6 +179,62 @@ void run_small_obdd_tests(){
 	obdd_destroy(x1_or_x1_and_x2_obdd);
 	obdd_destroy(x1_or_x1_and_x2_obdd_bis);
 	obdd_destroy(x1_then_x2_obdd);
+	obdd_mgr_destroy(new_mgr);
+}
+
+void run_next_obdd_tests(){
+	obdd_mgr* new_mgr	= obdd_mgr_create();
+	//compare x1 & !(x2 | x3) == x1 & !x2 & !x3
+	obdd* x1_obdd		= obdd_mgr_var(new_mgr, "x1");
+	obdd* not_x1_obdd	= obdd_apply_not(x1_obdd);
+	obdd* x2_obdd		= obdd_mgr_var(new_mgr, "x2");
+	obdd* x1_or_x2_obdd	= obdd_apply_or(x1_obdd, x2_obdd);
+	obdd* next_x1_obdd	= obdd_apply_next(x1_obdd);
+	obdd* next_x2_obdd	= obdd_apply_next(x2_obdd);
+
+	obdd* not_x1_then_next_x2_obdd	= obdd_apply_or(x1_obdd, next_x2_obdd);
+	printf("!X1");
+	obdd_print(not_x1_obdd);
+	printf("X(X2)");
+	obdd_print(next_x2_obdd);
+	printf("!X1 -> X(X2)\n");
+	obdd_print(not_x1_then_next_x2_obdd);
+	uint32_t valuations_count;
+	uint32_t img_count	= new_mgr->vars_dict->size - 2;
+	uint32_t* total_img	= malloc(sizeof(uint32_t) * img_count);
+	uint32_t i;
+	uint32_t valuations_size	= LIST_INITIAL_SIZE * new_mgr->vars_dict->size;
+	bool* valuations			= calloc(sizeof(bool), valuations_size);
+	uint32_t variables_count	= new_mgr->vars_dict->size - 2;
+	bool* dont_care_list		= malloc(sizeof(bool) * variables_count);
+	bool* partial_valuation		= calloc(variables_count, sizeof(bool));
+	bool* initialized_values	= calloc(variables_count, sizeof(bool));
+	bool* valuation_set			= malloc(sizeof(bool) * variables_count);
+	//keeps a stack of visited nodes
+	obdd_node** last_nodes		= malloc(sizeof(obdd_node*) * variables_count);
+	//keeps a stack of predecessors as track of the path taken
+	int32_t* last_succ_index	= calloc(sizeof(int32_t), variables_count);
+
+	for(i = 0; i < img_count; i++)
+		total_img[i]	= i + 2;
+	obdd_get_valuations(new_mgr, not_x1_then_next_x2_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count
+			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
+	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count);
+	free(valuations);
+	free(total_img);
+	free(initialized_values);
+	free(last_succ_index);
+	free(valuation_set);
+	free(last_nodes);
+	free(dont_care_list);
+	free(partial_valuation);
+	obdd_destroy(x1_obdd);
+	obdd_destroy(not_x1_obdd);
+	obdd_destroy(x2_obdd);
+	obdd_destroy(x1_or_x2_obdd);
+	obdd_destroy(next_x1_obdd);
+	obdd_destroy(next_x2_obdd);
+	obdd_destroy(not_x1_then_next_x2_obdd);
 	obdd_mgr_destroy(new_mgr);
 }
 
@@ -687,6 +744,7 @@ int main (void){
 	*/
 	//run_obdd_tree_tests();
 	//run_small_obdd_tests();
+	//run_next_obdd_tests();
 	//run_obdd_tests();
 	//run_obdd_valuations();
 	//run_concrete_bucket_list_tests();
@@ -705,10 +763,10 @@ int main (void){
 	//run_parse_test("tests/test28.fsp", "mixed model 3 signals 2 labels");//mixed model 3 signals 2 labels
 	//run_parse_test("tests/test29.fsp", "lift 3 floors");//lift 3 floors
 	//run_parse_test("tests/test30.fsp", "lift 2 floors");//lift 2 floors
-	run_parse_test("tests/test31.fsp", "GenBuf 4 sndrs");//GENBUF 4 sndrs
+	//run_parse_test("tests/test31.fsp", "GenBuf 4 sndrs");//GENBUF 4 sndrs
 	//run_parse_test("tests/test32.fsp", "test32");
 	//run_parse_test("tests/test34.fsp", "test34");
-	//run_parse_test("tests/test35.fsp", "GenBuf 2 sndrs");//GENBUF 2 Sndrs
+	run_parse_test("tests/test35.fsp", "GenBuf 2 sndrs");//GENBUF 2 Sndrs
 	//run_parse_test("tests/test36.fsp", "lift 5 floors");//lift 5 floors
 	return 0;    
 }

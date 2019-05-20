@@ -1983,8 +1983,6 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 #if DEBUG_SYNTHESIS
 	printf("[Deadlock] Adding unstable pred for %d\n", i);
 #endif
-				automaton_add_unstable_predecessors(game_automaton, pending_list, key_list, i, ranking_list, /*guarantees_indexes[j] <- WAS*/ j, guarantees_count
-						, assumptions_count, guarantees_indexes, assumptions_indexes, assumptions_indexes[first_assumption_index], pending_processed);
 			}else{
 				//rank_g(state) = (0, 1)
 				concrete_ranking.state	= i; concrete_ranking.assumption_to_satisfy	= 0;
@@ -2011,6 +2009,17 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 		}
 
 	}
+	//add unstable pred.
+	for(i = 0; i < game_automaton->transitions_count; i++){
+		for(j = 0; j < guarantees_count; j++){
+			if(game_automaton->out_degree[i] == 0){
+				automaton_add_unstable_predecessors(game_automaton, pending_list, key_list, i, ranking_list, /*guarantees_indexes[j] <- WAS*/ j, guarantees_count
+						, assumptions_count, guarantees_indexes, assumptions_indexes, assumptions_indexes[first_assumption_index], pending_processed);
+			}
+		}
+	}
+
+
 
 	char strategy_name[255];
 	sprintf(strategy_name, "%s_strategy", game_automaton->name);

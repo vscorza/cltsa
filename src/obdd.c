@@ -255,6 +255,14 @@ obdd*	obdd_mgr_var(obdd_mgr* mgr, char* name){
 
 obdd*	obdd_mgr_var_ID(obdd_mgr* mgr, obdd_var_size_t var_ID){
 	obdd* var_obdd	= obdd_create(mgr, NULL);
+	if(var_ID < 0){
+		printf("[obdd_mgr_var_ID] var_ID out of bounds");
+		exit(-1);
+	}
+	if(var_ID >= mgr->cache->vars_size){
+		obdd_cache_insert_var(mgr->cache, var_ID);
+		obdd_cache_insert_neg_var(mgr->cache, var_ID);
+	}
 	if(mgr->cache->cache_vars[var_ID] != NULL){
 		var_obdd->root_obdd = mgr->cache->cache_vars[var_ID];
 	}else{
@@ -271,6 +279,14 @@ obdd*	obdd_mgr_not_var(obdd_mgr* mgr, char* name){
 
 obdd*	obdd_mgr_not_var_ID(obdd_mgr* mgr, obdd_var_size_t var_ID){
 	obdd* var_obdd	= obdd_create(mgr, NULL);
+	if(var_ID < 0){
+		printf("[obdd_mgr_var_ID] var_ID out of bounds");
+		exit(-1);
+	}
+	if(var_ID >= mgr->cache->vars_size){
+		obdd_cache_insert_var(mgr->cache, var_ID);
+		obdd_cache_insert_neg_var(mgr->cache, var_ID);
+	}
 	if(mgr->cache->cache_neg_vars[var_ID] != NULL){
 		var_obdd->root_obdd = mgr->cache->cache_neg_vars[var_ID];
 	}else{
@@ -390,6 +406,8 @@ obdd* obdd_apply_not(obdd* value){
 }
 
 obdd_node* obdd_node_apply_next(obdd_mgr* mgr, obdd_node* value){
+	if(obdd_is_constant(mgr, value))
+		return value;
 	dictionary* dict	= mgr->vars_dict;
 	char var_next[200];
 	strcpy(var_next, dictionary_key_for_value(dict, value->var_ID));
@@ -410,13 +428,12 @@ obdd_node* obdd_node_apply_next(obdd_mgr* mgr, obdd_node* value){
 
 	obdd_cache_insert1(mgr->cache, obdd_node_apply_next, value, next_value);
 
-	return value;
+	return next_value;
 }
 
 
 obdd* obdd_apply_next(obdd* value){
-	obdd_node_apply_next(value->mgr, value->root_obdd);
-	return value;
+	return  obdd_create(value->mgr, obdd_node_apply_next(value->mgr, value->root_obdd));
 }
 
 obdd* obdd_apply_equals(obdd* left, obdd* right){
