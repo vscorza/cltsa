@@ -4,7 +4,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include "automaton_context.h"
-#include "minuint.h"
+//#include "minuint.h"
 
 typedef struct yy_buffer_state * YY_BUFFER_STATE;
 extern int yyparse();
@@ -766,8 +766,8 @@ int main (void){
 	//run_parse_test("tests/test31.fsp", "GenBuf 4 sndrs");//GENBUF 4 sndrs
 	//run_parse_test("tests/test32.fsp", "test32");
 	//run_parse_test("tests/test34.fsp", "test34");
-	run_parse_test("tests/test35.fsp", "GenBuf 2 sndrs");//GENBUF 2 Sndrs
-	//run_parse_test("tests/test36.fsp", "lift 5 floors");//lift 5 floors
+	//run_parse_test("tests/test35.fsp", "GenBuf 2 sndrs");//GENBUF 2 Sndrs
+	run_parse_test("tests/test36.fsp", "lift 5 floors");//lift 5 floors
 	return 0;    
 }
 

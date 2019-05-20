@@ -10,7 +10,7 @@ ltl sys theta Init_Lift_s in GAME_LTL	= (f1 && !f2 && !f3).
 ltl env rho Env_Release_B in GAME_LTL	= [](((b1 && f1)-> X(!b1)) &&((b2 && f2)-> X(!b2)) &&((b3 && f3)-> X(!b3))).
 ltl env rho Env_Keep_B in GAME_LTL		= [](((b1 && !f1)-> X(b1)) &&((b2 && !f2)-> X(b2)) &&((b3 && !f3)-> X(b3))).
 ltl sys rho Sys_Mutex in GAME_LTL		= [](!(f1 && f2) && !(f2 && f3) && !(f1 && f3)).
-ltl sys rho Sys_Mutex_X in GAME_LTL		= [](X(!(f1 && f2) && !(f2 && f3) && !(f1 && f3))).
+ltl sys rho Sys_Mutex_X in GAME_LTL		= []((!(X(f1) && X(f2)) && !(X(f2) && X(f3)) && !(X(f1) && X(f3)))).
 ltl sys rho Sys_Adj_Floors in GAME_LTL	= []((f1 -> X(f1 || f2)) && (f2 -> X(f1 || f2 || f3)) && (f3 -> X(f3 || f2))).
 ltl sys rho Sys_Move_Iff_B in GAME_LTL	= [](((f1 && X(f2)) || (f2 && X(f3)))->(b1 || b2 || b3)).
 

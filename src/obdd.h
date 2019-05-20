@@ -20,7 +20,7 @@
 #define OBDD_NODE_FRAGMENTS_SIZE	100
 #define OBDD_NODE_LIST_SIZE		64
 
-#define OBDD_CACHE_SIZE			262144
+#define OBDD_CACHE_SIZE			16//262144
 #define OBDD_CACHE_MAX_SIZE		0
 
 typedef uintptr_t ptruint;
