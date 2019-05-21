@@ -2453,10 +2453,14 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 	printf("Building LTL automata\n");
 	fflush(stdout);
 	//build automata from ltl
+	automaton_automaton* obdd_automaton;
 	for(i = 0; i < ltl_automata_count; i++){
-		automaton_build_automaton_from_obdd(ctx, ltl_automata_names[i], env_theta_obdd[i], env_theta_count[i], sys_theta_obdd[i], sys_theta_count[i],
+		obdd_automaton	= automaton_build_automaton_from_obdd(ctx, ltl_automata_names[i], env_theta_obdd[i], env_theta_count[i], sys_theta_obdd[i], sys_theta_count[i],
 				env_rho_obdd[i], env_rho_count[i], sys_rho_obdd[i], sys_rho_count[i], tables);
 		printf(".");
+#if DEBUG_OBBD_DEADLOCK
+		automaton_automaton_print_traces_to_deadlock(obdd_automaton, DEADLOCK_TRACE_COUNT);
+#endif
 		fflush(stdout);
 	}
 

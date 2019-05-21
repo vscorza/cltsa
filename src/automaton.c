@@ -2215,6 +2215,117 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 	return strategy;
 }
 
+void automaton_automaton_print_traces_to_deadlock(automaton_automaton* automaton, uint32_t max_traces){
+	uint32_t count;
+	uint32_t printed_traces = 0;
+	uint32_t *sizes;
+	uint32_t **traces	= automaton_automaton_traces_to_deadlock(automaton, automaton->initial_states[0], &count, &sizes);
+	uint32_t i, j, k,l;
+	uint32_t current_state, next_state;
+	automaton_transition *current_transition;
+	if(count > 0){
+		printf("Traces to deadlock in %s\n==============\n", automaton->name);
+		for(i = 0; i < count; i++){
+			for(j = 0; j < sizes[i]; j++){
+				current_state	= traces[i][j];
+				if(j < (sizes[i] - 1)){
+					printf("[%d]<", current_state);
+					next_state	= traces[i][j + 1];
+					for(k = 0; k < automaton->out_degree[current_state]; k++){
+						current_transition	= &(automaton->transitions[current_state][k]);
+						if(current_transition->state_to == next_state){
+							for(l = 0; l < current_transition->signals_count; l++){
+								signal_t sig = l < FIXED_SIGNALS_COUNT ? current_transition->signals[l] : current_transition->other_signals[l-FIXED_SIGNALS_COUNT];
+								printf("%s%s", automaton->context->global_alphabet->list[sig].name, (l < (current_transition->signals_count -1)? "," : ""));
+							}
+						}
+					}
+					printf(">");
+				}else{
+					printf("[%d](x)\n", current_state);
+				}
+			}
+			printed_traces++;
+			if(printed_traces > max_traces && max_traces != 0)
+				break;
+		}
+	}
+	free(sizes);
+	for(i = 0; i < count; i++)free(traces[i]);
+	free(traces);
+}
+
+uint32_t** automaton_automaton_traces_to_deadlock(automaton_automaton* automaton, uint32_t initial_state, uint32_t *count, uint32_t **sizes){
+	*count 				= 0;
+	uint32_t* distances	= calloc(automaton->transitions_count, sizeof(uint32_t));
+	bool* visited		= calloc(automaton->transitions_count, sizeof(bool));
+	uint32_t* visited_through = calloc(automaton->transitions_count, sizeof(uint32_t));
+	uint32_t* deadlocks = calloc(automaton->transitions_count, sizeof(uint32_t));
+	automaton_concrete_bucket_list* pending_list		= automaton_concrete_bucket_list_create(DISTANCE_BUCKET_SIZE, automaton_int_extractor, sizeof(uint32_t));
+	int32_t i, j;
+	uint32_t min_distance;
+	automaton_transition* current_transition;
+	uint32_t current_state;
+	//add initial states (excluding incoming state)
+	visited[initial_state]		= true;
+	for(i = 0; i < automaton->out_degree[initial_state]; i++){
+		current_transition	= &(automaton->transitions[initial_state][i]);
+		if(current_transition->state_to != initial_state && !visited[current_transition->state_to]){
+			automaton_concrete_bucket_add_entry(pending_list, &(current_transition->state_to));
+			visited_through[current_transition->state_to]	= initial_state;
+		}
+	}
+	//update distances
+	while(pending_list->composite_count > 0){
+		automaton_concrete_bucket_pop_entry(pending_list, &current_state);
+		if(visited[current_state])continue;
+		visited[current_state]	= true;
+		min_distance			= 0;
+		for(i = 0; i < automaton->in_degree[current_state]; i++){
+			current_transition	= &(automaton->inverted_transitions[current_state][i]);
+			if(!visited[current_transition->state_from])continue;
+			if(min_distance == 0 || (current_transition->state_from + 1 < min_distance))min_distance	= distances[current_transition->state_from] + 1;
+		}
+		distances[current_state]	= min_distance;
+		if(automaton->out_degree[current_state] == 0){
+			deadlocks[*count]	= current_state;
+			*count += 1;
+		}
+		for(i = 0; i < automaton->out_degree[current_state]; i++){
+			current_transition	= &(automaton->transitions[current_state][i]);
+			if(!visited[current_transition->state_to]){
+				automaton_concrete_bucket_add_entry(pending_list, &(current_transition->state_to));
+				visited_through[current_transition->state_to]	= current_state;
+			}
+		}
+
+	}
+
+	automaton_concrete_bucket_destroy(pending_list);
+
+	uint32_t **deadlock_traces = calloc(*count, sizeof(uint32_t*));
+	uint32_t *local_sizes	= calloc(*count,sizeof(uint32_t));
+	uint32_t current_length;
+	uint32_t last_state;
+	for(i = 0; i < *count; i++){
+		current_length	= distances[deadlocks[i]] + 1;
+		local_sizes[i] 	= current_length;
+		last_state		= deadlocks[i];
+		deadlock_traces[i]	= calloc((current_length), sizeof(uint32_t));
+		deadlock_traces[i][current_length - 1]	= last_state;
+		for(j = current_length - 2; j >= 0 ; j--){
+			last_state = deadlock_traces[i][j]	=  visited_through[last_state];
+		}
+	}
+	free(visited);
+	free(visited_through);
+	free(deadlocks);
+	free(distances);
+	*sizes	= local_sizes;
+	return deadlock_traces;
+}
+
+
 uint32_t* automaton_automaton_distance_to_state(automaton_automaton* automaton, uint32_t state){
 	uint32_t* distances	= calloc(automaton->transitions_count, sizeof(uint32_t));
 	bool* visited		= calloc(automaton->transitions_count, sizeof(bool));
