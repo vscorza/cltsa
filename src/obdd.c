@@ -58,8 +58,10 @@ obdd_state_tree* obdd_state_tree_create(uint32_t key_length){
 }
 int32_t obdd_state_tree_entry_get_from_pool(obdd_state_tree* tree){
 	if(tree->entries_count >= tree->entries_size){
-
 		uint32_t new_size			= tree->entries_size * LIST_INCREASE_FACTOR;
+#if DEBUG_OBDD
+		printf("Resizing obdd state tree from %d entries to %d entries\n", tree->entries_size, new_size);
+#endif
 		obdd_state_tree_entry* ptr	= realloc(tree->entries_pool, sizeof(obdd_state_tree_entry) * new_size);
 		if(ptr == NULL){
 			printf("Could not allocate memory\n");
@@ -607,8 +609,8 @@ obdd_node* obdd_exists_vector_node(obdd_mgr* mgr, obdd_node* root, uint32_t* var
 	obdd_node* tmp_node		= NULL;
 
 	for(i = 0; i < count; i++){
-		true_node	= obdd_node_restrict(mgr, current_node, 0, true);
-		false_node	= obdd_node_restrict(mgr, current_node, 0, false);
+		true_node	= obdd_node_restrict(mgr, current_node, var_ids[i], true);
+		false_node	= obdd_node_restrict(mgr, current_node, var_ids[i], false);
 
 		tmp_node	= current_node;
 
@@ -867,6 +869,9 @@ void obdd_node_get_obdd_nodes(obdd_mgr* mgr, obdd_node* root, obdd_node*** nodes
 		}
 	if(!found){
 		if(*nodes_count >= *nodes_size){
+#if DEBUG_OBDD
+		printf("Resizing obdd nodes size from %d to %d \n", *nodes_size, (*nodes_size) * LIST_INCREASE_FACTOR);
+#endif
 			*nodes_size	= (*nodes_size) * LIST_INCREASE_FACTOR;
 			obdd_node** ptr	= realloc(*nodes, sizeof(obdd_node*) * (*nodes_size));
 			if(ptr == NULL){
@@ -938,9 +943,10 @@ void obdd_get_valuations(obdd_mgr* mgr, obdd* root, bool** valuations, uint32_t*
 		}
 		dont_care_list[current_index]	= false;
 
-		if(taking_high)current_node		= current_node->high_obdd;
-		else	current_node			= current_node->low_obdd;
-
+		if(current_node->var_ID > 1){
+			if(taking_high)current_node		= current_node->high_obdd;
+			else	current_node			= current_node->low_obdd;
+		}
 		if(current_node->var_ID > 1){
 			next_index					= current_node->var_ID - 2;
 			//update range of variables not fixed by current branch

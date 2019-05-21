@@ -2148,7 +2148,16 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 				//obdd_print_valuations(mgr, valuations, current_valuations_count, x_y_x_p_alphabet, x_y_x_p_count);
 				obdd_print_valuations(mgr, valuations, current_valuations_count, x_p_alphabet, x_p_count);
 #endif
+#if DEBUG_OBDD_DEADLOCK
+				if(current_valuations_count == 0){
+					printf("Deadlock found for (SYS) %d-[", sys_state->state);
+					for(j = 0; j < x_y_count; j++)
+						printf("%s.", sys_state->valuation[j] ? mgr->vars_dict->entries[x_y_alphabet[j]].key : "");
+					printf("])\n");
+				}
+#endif
 				for(i = 0; i < current_valuations_count; i++){
+
 					//automaton_set_composed_valuation(env_state->valuation, valuations, i, false, true, x_y_x_p_alphabet, x_count, y_count);
 					automaton_set_composed_valuation(env_state->valuation, valuations, i, false, true, x_p_alphabet, x_count, y_count);
 					env_state->state		= obdd_state_tree_get_key(obdd_state_map, env_state->valuation, x_y_x_p_count);
@@ -2212,6 +2221,14 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 				printf("X'->X'Y'\n");
 				//obdd_print_valuations(mgr, valuations, current_valuations_count, signals_alphabet, signals_count);
 				obdd_print_valuations(mgr, valuations, current_valuations_count, y_p_alphabet, y_p_count);
+#endif
+#if DEBUG_OBDD_DEADLOCK
+				if(current_valuations_count == 0){
+					printf("Deadlock found for (ENV) %d-[", env_state->state);
+					for(j = 0; j < x_y_x_p_count; j++)
+						printf("%s.", env_state->valuation[j] ? mgr->vars_dict->entries[x_y_x_p_alphabet[j]].key : "");
+					printf("])\n");
+				}
 #endif
 				for(i = 0; i < current_valuations_count; i++){
 					//automaton_set_composed_valuation(sys_state->valuation, valuations, i, false, false, signals_alphabet, x_count, y_count);
@@ -2458,7 +2475,7 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 		obdd_automaton	= automaton_build_automaton_from_obdd(ctx, ltl_automata_names[i], env_theta_obdd[i], env_theta_count[i], sys_theta_obdd[i], sys_theta_count[i],
 				env_rho_obdd[i], env_rho_count[i], sys_rho_obdd[i], sys_rho_count[i], tables);
 		printf(".");
-#if DEBUG_OBBD_DEADLOCK
+#if DEBUG_OBDD_DEADLOCK
 		automaton_automaton_print_traces_to_deadlock(obdd_automaton, DEADLOCK_TRACE_COUNT);
 #endif
 		fflush(stdout);

@@ -276,6 +276,7 @@ obdd_node* obdd_cache_lookup_neg_var(obdd_cache *cache, uint32_t var_id){
 }
 
 void obdd_cache_resize(obdd_cache *cache){
+
 	obdd_cache_item *items_old, *current_item, *new_item;
 	int32_t i, pos, shift = --(cache->cache_shift);
 	uint32_t cache_slots, cache_old_slots;
@@ -284,6 +285,10 @@ void obdd_cache_resize(obdd_cache *cache){
 	items_old		= cache->cache_items;
 	cache_old_slots	= cache->cache_slots;
 	cache_slots		= cache->cache_slots	= cache_old_slots << 1;
+#if OBDD_CACHE_DEBUG
+	printf("Resizing cache from %d to %d slots\n", cache_old_slots, cache_slots);
+#endif
+
 
 	cache->cache_items	= calloc(cache->cache_slots + 1, sizeof(obdd_cache_item));
 
