@@ -2,17 +2,20 @@
 set Global_Alphabet = {}
 set Controllable_Alphabet = {}
 
-set Global_Signals	= {b1, b2, b3, b4, b5, f1, f2, f3, f4, f5}
-set Output_Signals	= {f1, f2, f3, f4, f5}
+set Global_Signals	= {b1, b2, b3, b4, b5, f1, f2, f3, f4, f5, a1, a2, a3, a4, a5, a6, a7, a8, a9}
+set Output_Signals	= {f1, f2, f3, f4, f5, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10}
 
 ltl env theta Init_Lift_e in GAME_LTL	= (!b1 && !b2 && !b3 && !b4 && !b5).
-ltl sys theta Init_Lift_s in GAME_LTL	= (f1 && !f2 && !f3 && !f4 && !f5).
+ltl sys theta Init_Lift_s in GAME_LTL	= (f1 && !f2 && !f3 && !f4 && !f5 && a1 && !a2 && !a3 && !a5 && !a6 && !a7 && !a8 && !a9).
 ltl env rho Env_Release_B in GAME_LTL	= [](((b1 && f1)-> X(!b1)) &&((b2 && f2)-> X(!b2)) &&((b3 && f3)-> X(!b3)) &&((b4 && f4)-> X(!b4)) &&((b5 && f5)-> X(!b5))).
 ltl env rho Env_Keep_B in GAME_LTL		= [](((b1 && !f1)-> X(b1)) &&((b2 && !f2)-> X(b2)) &&((b3 && !f3)-> X(b3)) &&((b4 && !f4)-> X(b4)) &&((b5 && !f5)-> X(b5))).
 ltl sys rho Sys_Mutex in GAME_LTL		= [](!(f1 && f2) && !(f1 && f3) && !(f1 && f4) && !(f1 && f5) && !(f2 && f3) && !(f2 && f4) && !(f2 && f5) && !(f3 && f4) && !(f3 && f5) && !(f4 && f5)).
 ltl sys rho Sys_Mutex_X in GAME_LTL		= []((!(X(f1) && X(f2)) && !(X(f1) && X(f3)) && !(X(f1) && X(f4)) && !(X(f1) && X(f5)) && !(X(f2) && X(f3)) && !(X(f2) && X(f4)) && !(X(f2) && X(f5)) && !(X(f3) && X(f4)) && !(X(f3) && X(f5)) && !(X(f4) && X(f5)))).
 ltl sys rho Sys_Adj_Floors in GAME_LTL	= []((f1 -> X(f1 || f2)) && (f2 -> X(f1 || f2 || f3)) && (f3 -> X(f2 || f3 || f4)) && (f4 -> X(f3 || f4 || f5)) && (f5 -> X(f4 || f5))).
 ltl sys rho Sys_Move_Iff_B in GAME_LTL	= [](((f1 && X(f2)) || (f2 && X(f3)) || (f3 && X(f4)) || (f4 && X(f5)))->(b1 || b2 || b3 || b4 || b5)).
+
+//CHECK this, once added over restricts rho
+//ltl sys rho Sys_Extra_Vars_Cycle in GAME_LTL	= []((a1 -> X(a2)) &&(a2 -> X(a3)) &&(a3 -> X(a4)) &&(a4 -> X(a5)) &&(a5 -> X(a6)) &&(a6 -> X(a7)) &&(a7 -> X(a8)) &&(a8 -> X(a9)) &&(a9 -> X(a1))).
 
 
 ltl fluent Ass = (b1 || !b1).
@@ -24,5 +27,5 @@ ltl fluent Goal_Serve_Request_4			= ((b4->f4)).
 ltl fluent Goal_Serve_Request_5			= ((b5->f5)).
 
 |f| ENV =(GAME_LTL).
-|gr1| <{Ass}><{Goal_Serve_Request_1,Goal_Serve_Request_2,Goal_Serve_Request_3,Goal_Serve_Request_4,Goal_Serve_Request_5}> STRAT = ENV.
+|gr1| <{Ass}><{Goal_Serve_Request_1,Goal_Serve_Request_2,Goal_Serve_Request_3,Goal_Serve_Request_4,Goal_Serve_Request_5,Goal_Back_To_Ground}> STRAT = ENV.
 
