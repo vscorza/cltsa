@@ -2266,7 +2266,7 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 	automaton_concrete_bucket_destroy(key_list);
 	free(assumptions_indexes);
 	free(guarantees_indexes);
-	//automaton_automaton_remove_unreachable_states(strategy);
+	automaton_automaton_remove_unreachable_states(strategy);
 #if DEBUG_STRATEGY_BUILD
 	printf("Game\n=====\n");
 	automaton_automaton_print(game_automaton, false, false, false, "", "\n");
