@@ -913,6 +913,7 @@ int main (void){
 	//run_parse_test("tests/test36.fsp", "lift 5 floors");//lift 5 floors
 
 	//IN PROGRESS
+	//run_parse_test("tests/test40.fsp", "compositions type");
 	//run_parse_test("tests/test39.fsp", "lift 7 floors");//lift 7 floors
 	//run_parse_test("tests/test38.fsp", "lift 5 floors + 10 variables");//lift 5 floors + 10 variables
 	//run_parse_test("tests/test31.fsp", "GenBuf 4 sndrs");//GENBUF 4 sndrs
