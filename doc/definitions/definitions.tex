@@ -1,0 +1,80 @@
+\documentclass{article}
+%Packages being imported that add functionality to LaTeX.
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+\usepackage{amssymb,amsmath,amsthm,mathtools,bussproofs,turnstile}
+
+\usepackage{enumerate}
+
+%Theorem Environments
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+\newtheorem{corollary}[theorem]{Corollary}
+
+\newcommand{\automaton}[1]{$#1 = (S_{#1}, \Sigma_{#1}, \Delta_{#1}, s_{0}^{#1})$}
+\newcommand{\ltsComposition}[3]{$#1 \parallel_{#3} #2 = (S_{#1}\times S_{#2}, \Sigma_{#1} \cup \Sigma_{#2}, \Delta, (s_{0}^{#1},s_{0}^{#2}))$}
+
+\title{Concurrent LTS parallel composition} %Change this to the appropriate number.
+\author{-} %Change this to your name.
+\date{}
+
+\begin{document}
+
+\maketitle
+
+%Counters for setting the appropriate numbering.
+\setcounter{section}{1} %This gives the chapter number.
+\setcounter{theorem}{1} %This gives the item number.
+%Note that the item number should be one less than you desire..
+
+\begin{definition} 
+Let \automaton{M},\automaton{N}, with $\Delta_M : S_M \times l \subseteq \Sigma_M \times S_M$, be two LTS instances, then LTS sequential parallel composition is defined as \ltsComposition{M}{N}{s} where $\Sigma$ is the smallest relation s.t:
+\begin{center}
+	\begin{equation}
+		\AxiomC{$(s, l_m, s') \in \Sigma_m $}\RightLabel{$l_m \cap \Sigma_n = \emptyset$}
+		\UnaryInfC{$((s,t),l_m,(s',t))$}
+		\DisplayProof
+		\quad\quad
+		\AxiomC{$(t, l_n, t') \in \Sigma_n $}\RightLabel{$l_n \cap \Sigma_m = \emptyset$}
+		\UnaryInfC{$((s,t),l_n,(s,t'))$}
+		\DisplayProof
+	\end{equation}
+	\begin{equation}
+		\AxiomC{$(s, l_m, s') \in \Sigma_m,(t, l_n, t') \in \Sigma_n  $}\RightLabel{$l_m \cap \Sigma_n = l_n \cap \Sigma_m \neq \emptyset$}
+		\UnaryInfC{$((s,t),l_m \cup l_n,(s',t'))$}
+		\DisplayProof
+	\end{equation}	
+\end{center}
+\end{definition}
+\begin{definition} 
+	Let \automaton{M},\automaton{N}, with $\Delta_M : S_M \times l \subseteq \Sigma_M \times S_M$, be two LTS instances, then LTS concurrent parallel composition is defined as \ltsComposition{M}{N}{c} where $\Sigma$ is the smallest relation s.t:
+	\begin{center}
+		\begin{equation}
+		\AxiomC{$(s, l_m, s') \in \Sigma_m,(t, l_n, t') \in \Sigma_n  $}\RightLabel{$l_m \cap \Sigma_n = l_n \cap \Sigma_m$}
+		\UnaryInfC{$((s,t),l_m \cup l_n,(s',t'))$}
+		\DisplayProof
+		\end{equation}	
+	\end{center}
+\end{definition}
+\begin{definition} 
+	Let \automaton{M},\automaton{N}, with $\Delta_M : S_M \times l \subseteq \Sigma_M \times S_M$, be two LTS instances, then LTS parallel composition is defined as \ltsComposition{M}{N}{} where $\Sigma$ is the smallest relation s.t:
+	\begin{center}
+		\begin{equation}
+			\AxiomC{$(s, l_m, s') \in \Sigma_m $}\RightLabel{$l_m \cap \Sigma_n = \emptyset$}
+			\UnaryInfC{$((s,t),l_m,(s',t))$}
+			\DisplayProof
+			\quad\quad
+			\AxiomC{$(t, l_n, t') \in \Sigma_n $}\RightLabel{$l_n \cap \Sigma_m = \emptyset$}
+			\UnaryInfC{$((s,t),l_n,(s,t'))$}
+			\DisplayProof
+		\end{equation}		
+		\begin{equation}
+		\AxiomC{$(s, l_m, s') \in \Sigma_m,(t, l_n, t') \in \Sigma_n  $}\RightLabel{$l_m \cap \Sigma_n = l_n \cap \Sigma_m$}
+		\UnaryInfC{$((s,t),l_m \cup l_n,(s',t'))$}
+		\DisplayProof
+		\end{equation}	
+	\end{center}
+\end{definition}
+\end{document}
