@@ -30,7 +30,7 @@
 %Note that the item number should be one less than you desire..
 
 \begin{definition} 
-Let \automaton{M},\automaton{N}, with $\Delta_M : S_M \times l \subseteq \Sigma_M \times S_M$, be two CLTS instances, then CLTS sequential parallel composition is defined as \ltsComposition{M}{N}{s} where $\Sigma$ is the smallest relation s.t:
+Let \automaton{M},\automaton{N}, with $\Delta_M : S_M \times l \subseteq \Sigma_M \times S_M$, be two CLTS instances, then CLTS sequential parallel composition is defined as \ltsComposition{M}{N}{s} where $\Delta$ is the smallest relation s.t:
 \begin{center}
 	\begin{equation}
 		\AxiomC{$(s, l_m, s') \in \Sigma_m $}\RightLabel{$l_m \cap \Sigma_n = \emptyset$}
@@ -49,17 +49,17 @@ Let \automaton{M},\automaton{N}, with $\Delta_M : S_M \times l \subseteq \Sigma_
 \end{center}
 \end{definition}
 \begin{definition} 
-	Let \automaton{M},\automaton{N}, with $\Delta_M : S_M \times l \subseteq \Sigma_M \times S_M$, be two CLTS instances, then CLTS concurrent parallel composition is defined as \ltsComposition{M}{N}{c} where $\Sigma$ is the smallest relation s.t:
+	Let \automaton{M},\automaton{N}, with $\Delta_M : S_M \times l \subseteq \Sigma_M \times S_M$, be two CLTS instances, then CLTS concurrent parallel composition is defined as \ltsComposition{M}{N}{c} where $\Delta$ is the smallest relation s.t:
 	\begin{center}
 		\begin{equation}
-		\AxiomC{$(s, l_m, s') \in \Sigma_m,(t, l_n, t') \in \Sigma_n  $}\RightLabel{$l_m \cap \Sigma_n = l_n \cap \Sigma_m$}
+		\AxiomC{$(s, l_m, s') \in \Sigma_m,(t, l_n, t') \in \Sigma_n  $}\RightLabel{$l_m \cap \Sigma_n = l_n \cap \Delta_m$}
 		\UnaryInfC{$((s,t),l_m \cup l_n,(s',t'))$}
 		\DisplayProof
 		\end{equation}	
 	\end{center}
 \end{definition}
 \begin{definition} 
-	Let \automaton{M},\automaton{N}, with $\Delta_M : S_M \times l \subseteq \Sigma_M \times S_M$, be two CLTS instances, then CLTS parallel composition is defined as \ltsComposition{M}{N}{} where $\Sigma$ is the smallest relation s.t:
+	Let \automaton{M},\automaton{N}, with $\Delta_M : S_M \times l \subseteq \Sigma_M \times S_M$, be two CLTS instances, then CLTS parallel composition is defined as \ltsComposition{M}{N}{} where $\Delta$ is the smallest relation s.t:
 	\begin{center}
 		\begin{equation}
 			\AxiomC{$(s, l_m, s') \in \Sigma_m $}\RightLabel{$l_m \cap \Sigma_n = \emptyset$}
