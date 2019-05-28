@@ -33,17 +33,17 @@
 Let \automaton{M},\automaton{N}, with $\Delta_M : S_M \times l \subseteq \Sigma_M \times S_M$, be two CLTS instances, then CLTS sequential parallel composition is defined as \ltsComposition{M}{N}{s} where $\Delta$ is the smallest relation s.t:
 \begin{center}
 	\begin{equation}
-		\AxiomC{$(s, l_m, s') \in \Sigma_m $}\RightLabel{$l_m \cap \Sigma_n = \emptyset$}
-		\UnaryInfC{$((s,t),l_m,(s',t))$}
+		\AxiomC{$(s, l_M, s') \in \Sigma_M $}\RightLabel{$l_M \cap \Sigma_N = \emptyset$}
+		\UnaryInfC{$((s,t),l_M,(s',t))$}
 		\DisplayProof
 		\quad\quad
-		\AxiomC{$(t, l_n, t') \in \Sigma_n $}\RightLabel{$l_n \cap \Sigma_m = \emptyset$}
-		\UnaryInfC{$((s,t),l_n,(s,t'))$}
+		\AxiomC{$(t, l_N, t') \in \Sigma_N $}\RightLabel{$l_N \cap \Sigma_M = \emptyset$}
+		\UnaryInfC{$((s,t),l_N,(s,t'))$}
 		\DisplayProof
 	\end{equation}
 	\begin{equation}
-		\AxiomC{$(s, l_m, s') \in \Sigma_m,(t, l_n, t') \in \Sigma_n  $}\RightLabel{$l_m \cap \Sigma_n = l_n \cap \Sigma_m \neq \emptyset$}
-		\UnaryInfC{$((s,t),l_m \cup l_n,(s',t'))$}
+		\AxiomC{$(s, l_M, s') \in \Sigma_M,(t, l_N, t') \in \Sigma_N  $}\RightLabel{$l_M \cap \Sigma_N = l_N \cap \Sigma_M \neq \emptyset$}
+		\UnaryInfC{$((s,t),l_M \cup l_N,(s',t'))$}
 		\DisplayProof
 	\end{equation}	
 \end{center}
@@ -52,8 +52,18 @@ Let \automaton{M},\automaton{N}, with $\Delta_M : S_M \times l \subseteq \Sigma_
 	Let \automaton{M},\automaton{N}, with $\Delta_M : S_M \times l \subseteq \Sigma_M \times S_M$, be two CLTS instances, then CLTS concurrent parallel composition is defined as \ltsComposition{M}{N}{c} where $\Delta$ is the smallest relation s.t:
 	\begin{center}
 		\begin{equation}
-		\AxiomC{$(s, l_m, s') \in \Sigma_m,(t, l_n, t') \in \Sigma_n  $}\RightLabel{$l_m \cap \Sigma_n = l_n \cap \Delta_m$}
-		\UnaryInfC{$((s,t),l_m \cup l_n,(s',t'))$}
+			\AxiomC{$(s, l_M, s') \in \Sigma_M $}\RightLabel{$l_M \cap \Sigma_M = \emptyset \wedge \nexists( l_N, t': (t,l_N,t') \in \Delta_N)$}
+			\UnaryInfC{$((s,t),l_M,(s',t))$}
+			\DisplayProof
+		\end{equation}			
+		\begin{equation}
+			\AxiomC{$(t, l_N, t') \in \Sigma_N $}\RightLabel{$l_N \cap \Sigma_M = \emptyset \wedge \nexists( l_M, s': s.t. (s,l_M,s') \in \Delta_M)$}
+			\UnaryInfC{$((s,t),l_N,(s,t'))$}
+			\DisplayProof
+		\end{equation}			
+		\begin{equation}
+		\AxiomC{$(s, l_M, s') \in \Sigma_M,(t, l_N, t') \in \Sigma_N  $}\RightLabel{$l_M \cap \Sigma_N = l_N \cap \Sigma_M$}
+		\UnaryInfC{$((s,t),l_M \cup l_N,(s',t'))$}
 		\DisplayProof
 		\end{equation}	
 	\end{center}
@@ -62,17 +72,17 @@ Let \automaton{M},\automaton{N}, with $\Delta_M : S_M \times l \subseteq \Sigma_
 	Let \automaton{M},\automaton{N}, with $\Delta_M : S_M \times l \subseteq \Sigma_M \times S_M$, be two CLTS instances, then CLTS parallel composition is defined as \ltsComposition{M}{N}{} where $\Delta$ is the smallest relation s.t:
 	\begin{center}
 		\begin{equation}
-			\AxiomC{$(s, l_m, s') \in \Sigma_m $}\RightLabel{$l_m \cap \Sigma_n = \emptyset$}
-			\UnaryInfC{$((s,t),l_m,(s',t))$}
+			\AxiomC{$(s, l_M, s') \in \Sigma_M $}\RightLabel{$l_M \cap \Sigma_N = \emptyset$}
+			\UnaryInfC{$((s,t),l_M,(s',t))$}
 			\DisplayProof
 			\quad\quad
-			\AxiomC{$(t, l_n, t') \in \Sigma_n $}\RightLabel{$l_n \cap \Sigma_m = \emptyset$}
-			\UnaryInfC{$((s,t),l_n,(s,t'))$}
+			\AxiomC{$(t, l_N, t') \in \Sigma_N $}\RightLabel{$l_N \cap \Sigma_M = \emptyset$}
+			\UnaryInfC{$((s,t),l_N,(s,t'))$}
 			\DisplayProof
 		\end{equation}		
 		\begin{equation}
-		\AxiomC{$(s, l_m, s') \in \Sigma_m,(t, l_n, t') \in \Sigma_n  $}\RightLabel{$l_m \cap \Sigma_n = l_n \cap \Sigma_m$}
-		\UnaryInfC{$((s,t),l_m \cup l_n,(s',t'))$}
+		\AxiomC{$(s, l_M, s') \in \Sigma_M,(t, l_N, t') \in \Sigma_N  $}\RightLabel{$l_M \cap \Sigma_N = l_N \cap \Sigma_M$}
+		\UnaryInfC{$((s,t),l_M \cup l_N,(s',t'))$}
 		\DisplayProof
 		\end{equation}	
 	\end{center}
