@@ -2488,7 +2488,7 @@ void automaton_automata_add_ordered_union_of_signals(automaton_automata_context*
 	}
 }
 
-automaton_automaton* automaton_automata_compose(automaton_automaton** automata, uint32_t automata_count, automaton_synchronization_type type, bool is_game){
+automaton_automaton* automaton_automata_compose(automaton_automaton** automata, automaton_synchronization_type* synch_type, uint32_t automata_count, bool is_game){
 	clock_t begin = clock();
 	uint32_t transitions_added_count	= 0;
 	uint32_t i, j, k, l, m, n, o;
@@ -2804,7 +2804,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 					/***********************
 					 * for every other asynch transition add posible combination if applicable
 					 ***********************/
-					if(type == CONCURRENT){
+					if(synch_type[k] == CONCURRENT){
 						if(pending_asynch_count > 0){
 #if DEBUG_COMPOSITION
 							printf("\t<PUSH asynch>(no overlap*) [");

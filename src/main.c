@@ -29,9 +29,8 @@ void run_parse_test(char* test_file, char* test_name){
     //printf("\n\n%d\n\n\n", parsed_program->count);
 	char buf[255];
 	sprintf(buf, "results/%s", test_name);
-	bool FIRST_IS_CONCURRENT	= false;
 	bool PRINT_FSP				= true;
-	automaton_automata_context* ctx		= automaton_automata_context_create_from_syntax(parsed_program, buf, FIRST_IS_CONCURRENT, PRINT_FSP);
+	automaton_automata_context* ctx		= automaton_automata_context_create_from_syntax(parsed_program, buf, PRINT_FSP);
     automaton_automata_context_destroy(ctx);
     automaton_program_syntax_destroy(parsed_program);
 	obdd_mgr* mgr	= parser_get_obdd_mgr();
@@ -905,7 +904,7 @@ int main (void){
 
 	//SHOWCASE
 	//run_parse_test("tests/test21.fsp", "test21");
-	run_parse_test("tests/test23.fsp", "biscotti");
+	//run_parse_test("tests/test23.fsp", "biscotti");
 	//run_parse_test("tests/test37.fsp", "lts load test 1");
 	//run_parse_test("tests/test28.fsp", "mixed model 3 signals 2 labels");//mixed model 3 signals 2 labels
 	//run_parse_test("tests/test30.fsp", "lift 2 floors");//lift 2 floors
@@ -913,7 +912,7 @@ int main (void){
 	//run_parse_test("tests/test36.fsp", "lift 5 floors");//lift 5 floors
 
 	//IN PROGRESS
-	//run_parse_test("tests/test40.fsp", "compositions type");
+	run_parse_test("tests/test40.fsp", "compositions type");
 	//run_parse_test("tests/test39.fsp", "lift 7 floors");//lift 7 floors
 	//run_parse_test("tests/test38.fsp", "lift 5 floors + 10 variables");//lift 5 floors + 10 variables
 	//run_parse_test("tests/test31.fsp", "GenBuf 4 sndrs");//GENBUF 4 sndrs

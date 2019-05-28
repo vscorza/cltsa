@@ -1,10 +1,11 @@
-set Global_Alphabet = {a,b,c,d}
+set Global_Alphabet = {a,b,c,d,e,f,g}
 set Controllable_Alphabet = {a,b}
 
-A = (<a,b> -> d -> A | d -> A).
-B = ( c -> B | <b> ->B).
+A = (<a,b> -> e -> A ).
+B = ( c -> e ->B).
+C = (<f,g> -> e -> C ).
 
-|f| INTERLEAVED = (A || B).
-|f| CONCURRENT = (A ||_c B).
-|f| SEQUENTIAL = (A ||_s B).
+|f| INTERLEAVED = (A || B || C).
+|f| CONCURRENT = (A ||_c B ||_c C).
+|f| SEQUENTIAL = (A ||_s B ||_s C).
 

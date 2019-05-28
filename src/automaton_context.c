@@ -583,7 +583,7 @@ automaton_indexes_valuation* automaton_indexes_valuation_create_from_indexes(aut
 }
 
 bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, automaton_composition_syntax* composition_syntax
-		, automaton_parsing_tables* tables, bool is_synchronous){
+		, automaton_parsing_tables* tables){
 	int32_t main_index, index, i, j, k, l, m, n, o, p, r, s;
 	main_index						= automaton_parsing_tables_get_entry_index(tables, COMPOSITION_ENTRY_AUT, composition_syntax->name);
 	if(main_index >= 0)if(tables->composition_entries[main_index]->solved)	return false;
@@ -600,33 +600,41 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 		}
 		//build composition and add to table
 		automaton_automaton** automata	= malloc(sizeof(automaton_automaton*) * composition_syntax->count);
+		automaton_synchronization_type* synch_type	= malloc(sizeof(automaton_synchronization_type) * composition_syntax->count);
 		for(i = 0; i < (int32_t)composition_syntax->count; i++){
 			//TODO: update transitions with prefixes/indexes
 			index						= automaton_parsing_tables_get_entry_index(tables, COMPOSITION_ENTRY_AUT, composition_syntax->components[i]->ident);
 			automata[i]					= tables->composition_entries[index]->valuation.automaton_value;
+			synch_type[i]				= composition_syntax->components[i]->synch_type;
 		}
 		//if is game build fluents and add to automata
 		uint32_t composition_count	= composition_syntax->count;
 		if(composition_syntax->is_game){
 			uint32_t new_composition_count		= composition_count + ctx->global_fluents_count;
 			automaton_automaton** new_automata	= malloc(sizeof(automaton_automaton*) * new_composition_count);
+			automaton_synchronization_type* new_synch_type = malloc(sizeof(automaton_synchronization_type) * new_composition_count);
 			for(i = 0; i < (int32_t)composition_count; i++){
 				new_automata[i]	= automata[i];
+				new_synch_type[i]	= synch_type[i];
 			}
 			//build fluent automata
 			for(i = 0; i < (int32_t)ctx->global_fluents_count; i++){
 				new_automata[i + composition_count]	= automaton_fluent_build_automaton(ctx, i);
+				//TODO: check which composition type should work for fluents
+				new_synch_type[i + composition_count]	= CONCURRENT;
 				char buf[255];
 				//automaton_automaton_print(tables->composition_entries[i]->valuation.automaton_value, true, true, true, "*\t", "*\t");
-				sprintf(buf, "%s_%d_fluent_%s.fsp", ctx->name, i + composition_count, is_synchronous? "synch": "asynch");
+				sprintf(buf, "%s_%d_fluent.fsp", ctx->name, i + composition_count);
 				automaton_automaton_print_fsp(new_automata[i + composition_count], buf);
 			}
 			free(automata);
+			free(synch_type);
 			automata							= new_automata;
+			synch_type							= new_synch_type;
 			composition_count					= new_composition_count;
 		}
 		aut_context_log("composing.\n");
-		automaton_automaton* automaton	= automaton_automata_compose(automata, composition_count, is_synchronous? CONCURRENT : ASYNCHRONOUS, composition_syntax->is_game);//SYNCHRONOUS);
+		automaton_automaton* automaton	= automaton_automata_compose(automata, synch_type, composition_count, composition_syntax->is_game);//SYNCHRONOUS);
 		if(composition_syntax->is_game)
 			for(i = 0; i < (int32_t)ctx->global_fluents_count; i++)
 				automaton_automaton_destroy(automata[composition_count - i - 1]);
@@ -635,6 +643,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 		tables->composition_entries[main_index]->valuation.automaton_value	= automaton;
 		aut_context_log("done, %d states\n", automaton->transitions_count);
 		free(automata);
+		free(synch_type);
 		return false;
 	}else{//SINGLE COMPONENT (AUTOMATON)
 		aut_context_log("single component.%s\n", composition_syntax->name);
@@ -2324,7 +2333,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	return ltl_automaton;
 }
 
-automaton_automata_context* automaton_automata_context_create_from_syntax(automaton_program_syntax* program, char* ctx_name, bool is_synchronous, bool print_fsp){
+automaton_automata_context* automaton_automata_context_create_from_syntax(automaton_program_syntax* program, char* ctx_name, bool print_fsp){
 	automaton_parsing_tables* tables	= automaton_parsing_tables_create();
 	automaton_automata_context* ctx		= malloc(sizeof(automaton_automata_context));
 
@@ -2501,7 +2510,7 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 		pending_statements	= false;
 		for(i = 0; i < program->count; i++){
 			if(program->statements[i]->type == COMPOSITION_AUT){
-				pending_statements = automaton_statement_syntax_to_automaton(ctx, program->statements[i]->composition_def, tables, is_synchronous) || pending_statements;
+				pending_statements = automaton_statement_syntax_to_automaton(ctx, program->statements[i]->composition_def, tables) || pending_statements;
 				printf(".");
 				fflush(stdout);
 			}
@@ -2594,9 +2603,9 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 				char buf[150];
 				char cmd[350];
 				//automaton_automaton_print(tables->composition_entries[i]->valuation.automaton_value, true, true, true, "*\t", "*\t");
-				sprintf(buf, "%s_%d_strat_%s.fsp", ctx_name, i, is_synchronous? "synch": "asynch");
+				sprintf(buf, "%s_%d_strat.fsp", ctx_name, i);
 				automaton_automaton_print_fsp(winning_region_automaton, buf);
-				sprintf(buf, "%s_%d_strat_%s.rep", ctx_name, i, is_synchronous? "synch": "asynch");
+				sprintf(buf, "%s_%d_strat.rep", ctx_name, i);
 				automaton_automaton_print_report(winning_region_automaton, buf);
 				/*
 				sprintf(buf, "%s_%d_strat_%s.dot", ctx_name, i, is_synchronous? "synch": "asynch");
@@ -2638,9 +2647,9 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 		for(i = 0; i < tables->composition_count; i++){
 			if(tables->composition_entries[i]->solved){
 				//automaton_automaton_print(tables->composition_entries[i]->valuation.automaton_value, true, true, true, "*\t", "*\t");
-				sprintf(buf, "%s_%d_result_%s.fsp", ctx_name, i, is_synchronous? "synch": "asynch");
+				sprintf(buf, "%s_%d_result.fsp", ctx_name, i);
 				automaton_automaton_print_fsp(tables->composition_entries[i]->valuation.automaton_value, buf);
-				sprintf(buf, "%s_%d_result_%s.rep", ctx_name, i, is_synchronous? "synch": "asynch");
+				sprintf(buf, "%s_%d_result.rep", ctx_name, i);
 				automaton_automaton_print_report(tables->composition_entries[i]->valuation.automaton_value, buf);
 				/*
 				sprintf(buf, "%s_%d_result_%s.dot", ctx_name, i, is_synchronous? "synch": "asynch");
