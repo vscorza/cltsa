@@ -2491,7 +2491,7 @@ void automaton_automata_add_ordered_union_of_signals(automaton_automata_context*
 automaton_automaton* automaton_automata_compose(automaton_automaton** automata, automaton_synchronization_type* synch_type, uint32_t automata_count, bool is_game){
 	clock_t begin = clock();
 	uint32_t transitions_added_count	= 0;
-	uint32_t i, j, k, l, m, n, o;
+	uint32_t i, j, k, l, m, n, o, p;
 	uint32_t alphabet_count, fluents_count, alphabet_size;
 	uint32_t* alphabet;
 	alphabet_count	= 0;
@@ -2747,7 +2747,8 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 				}
 			}
 		}
-		for(k = 0; k < automata_count; k++){
+		for(p = 0; p < (automata_count + 1); p++){
+			k = p % automata_count;
 #if DEBUG_COMPOSITION
 			printf("WILL EVALUATE AGAINST %dth automaton\n", k);
 #endif
@@ -2811,7 +2812,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 							for(n = 0; n < automata_count; n++){
 									printf("%d,", current_from_state[n]);
 							}
-							printf("]{");
+							printf("][");
 #endif
 							int32_t m;
 							for(m = (pending_asynch_count - 1); m >= 0; m--){
@@ -2997,38 +2998,38 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 #if DEBUG_COMPOSITION
 			printf("\n");
 #endif
-			/***********************
-			 * move asynch to pending
-			 * handle next automaton transitions
-			 ***********************/
-#if DEBUG_COMPOSITION
-			printf("<MOV asynch>pending>");
-#endif
-			uint32_t asynch_index;
-			for(i = 0; i < pending_asynch_count; i++){
-				asynch_index	= pending_count;
-				pending[asynch_index]	= pending_asynch[i];
-#if DEBUG_COMPOSITION
-				printf("->[");
-#endif
-				for(n = 0; n < automata_count; n++){
-					partial_states[asynch_index * automata_count + n]	= asynch_partial_states[i * automata_count + n];
-					partial_set_states[asynch_index * automata_count + n]	= asynch_partial_set_states[i * automata_count + n];
-#if DEBUG_COMPOSITION
-					printf("%d,",asynch_partial_states[i * automata_count + n]);
-#endif
-				}
-#if DEBUG_COMPOSITION
-				printf("]");
-#endif
-				pending_count++;
-			}
-			pending_asynch_count	= 0;
-#if DEBUG_COMPOSITION
-			printf("\n");
-#endif
-		}//ENDFOR automata encapsulating pending
 
+		}//ENDFOR automata encapsulating pending
+		/***********************
+		 * move asynch to pending
+		 * handle next automaton transitions
+		 ***********************/
+#if DEBUG_COMPOSITION
+		printf("<MOV asynch>pending>");
+#endif
+		uint32_t asynch_index;
+		for(i = 0; i < pending_asynch_count; i++){
+			asynch_index	= pending_count;
+			pending[asynch_index]	= pending_asynch[i];
+#if DEBUG_COMPOSITION
+			printf("->[");
+#endif
+			for(n = 0; n < automata_count; n++){
+				partial_states[asynch_index * automata_count + n]	= asynch_partial_states[i * automata_count + n];
+				partial_set_states[asynch_index * automata_count + n]	= asynch_partial_set_states[i * automata_count + n];
+#if DEBUG_COMPOSITION
+				printf("%d,",asynch_partial_states[i * automata_count + n]);
+#endif
+			}
+#if DEBUG_COMPOSITION
+			printf("]");
+#endif
+			pending_count++;
+		}
+		pending_asynch_count	= 0;
+#if DEBUG_COMPOSITION
+		printf("\n");
+#endif
 		/***********************
 		 * add processed transitions
 		 * from pending list
