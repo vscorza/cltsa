@@ -2944,7 +2944,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 						printf("}->[");
 #endif
 						for(n = 0; n < automata_count; n++){
-							if(n == k){
+							if(n == (automata_count - 1) && k == (automata_count - 1)){
 								processed_partial_states[processed_count * automata_count + n]	= current_other_transition->state_to;
 								processed_partial_set_states[processed_count * automata_count + n]	= true;
 #if DEBUG_COMPOSITION
