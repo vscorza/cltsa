@@ -3,8 +3,8 @@
 \usepackage[utf8]{inputenc}
 \usepackage{geometry}
 \usepackage{amssymb,amsmath,amsthm,mathtools,bussproofs,turnstile}
-
 \usepackage{enumerate}
+\usepackage{listings}
 
 %Theorem Environments
 \newtheorem{theorem}{Theorem}[section]
@@ -98,4 +98,12 @@ Let \automaton{M},\automaton{N}, with $\Delta_M : S_M \times l \subseteq \Sigma_
 		\end{equation}		
 	\end{center}
 \end{definition}
+
+\begin{figure}[ht]
+	\begin{center}
+		\input{compositionCode} 
+		\caption{Minimization Algorithm}
+		\label{fig:dfs-code}
+	\end{center}
+\end{figure}
 \end{document}

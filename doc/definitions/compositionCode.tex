@@ -1,0 +1,26 @@
+\renewcommand{\ttdefault}{pcr}
+\begin{lstlisting}[escapeinside={[*}{*]},basicstyle=\scriptsize\ttfamily,columns=flexible,frame=lines,mathescape=true,xleftmargin=3.0ex,keywordstyle=\textbf,morekeywords={if,while,do,else,fork,int,null, algorithm, is, input, output, return},numbers=left,numberstyle=\scriptsize]
+algorithm dfs_min is
+	input: $E$ the LTS representing the original plant
+	output: $E'$ the LTS that satisfies the problem statement
+	$E$ = $E$.prune_mixed_states()
+	$E_{new}$ = $E'$ = $E$ 
+	$\mathcal{T}_u$ = $E$.non_controllable_transitions() 
+	to_remove = []
+	while(|$\mathcal{T}_u$| > 0)
+		$t$ = $\mathcal{T}_u$.pop()
+		while($\neg E'$.contains($t$) or $d_{out}$($E'$,t.from) == 1)
+			if (|$\mathcal{T}_u$| == 0)
+				return $E$
+			$t$ = $\mathcal{T}_u$.pop() 
+		to_remove.add($t$)
+		$E_{new}$ = $E$.remove(to_remove)
+		
+		is_realizable = $E_{new}$.realizable() 
+		
+		if ($\neg$ is_realizable):
+			$E'$ = $E_{new}$
+		else
+			to_remove.remove($t$) 
+	return $E'$  
+\end{lstlisting}
