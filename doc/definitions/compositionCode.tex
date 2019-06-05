@@ -1,26 +1,56 @@
 \renewcommand{\ttdefault}{pcr}
 \begin{lstlisting}[escapeinside={[*}{*]},basicstyle=\scriptsize\ttfamily,columns=flexible,frame=lines,mathescape=true,xleftmargin=3.0ex,keywordstyle=\textbf,morekeywords={if,while,do,else,fork,int,null, algorithm, is, input, output, return},numbers=left,numberstyle=\scriptsize]
-algorithm dfs_min is
-	input: $E$ the LTS representing the original plant
-	output: $E'$ the LTS that satisfies the problem statement
-	$E$ = $E$.prune_mixed_states()
-	$E_{new}$ = $E'$ = $E$ 
-	$\mathcal{T}_u$ = $E$.non_controllable_transitions() 
-	to_remove = []
-	while(|$\mathcal{T}_u$| > 0)
-		$t$ = $\mathcal{T}_u$.pop()
-		while($\neg E'$.contains($t$) or $d_{out}$($E'$,t.from) == 1)
-			if (|$\mathcal{T}_u$| == 0)
-				return $E$
-			$t$ = $\mathcal{T}_u$.pop() 
-		to_remove.add($t$)
-		$E_{new}$ = $E$.remove(to_remove)
-		
-		is_realizable = $E_{new}$.realizable() 
-		
-		if ($\neg$ is_realizable):
-			$E'$ = $E_{new}$
-		else
-			to_remove.remove($t$) 
-	return $E'$  
+algorithm compose_automata is
+	input: $A:A_1 \ldots A_N$  the set of CLTS automata to be composed
+	input: $type$ an element of $\{synch,asynch,concurrent\}$ the type of composition to be applied
+	output: $E$ the CLTS automaton that results from applying $\parallel_{type}$ to $A$
+	$s_0$ = $(s^1_{0},\ldots,s^N_{0})$
+	$frontier$ = [$s_0$]
+	$A$ = create_automaton($s_0$)
+	$visited$ = $[]$
+	while(|$frontier$| > 0)
+		$\Delta_{union}$ = $\emptyset$
+		$\Sigma_{union}$ = $\emptyset$		
+		$s$ = $frontier$.pop()
+		$visited$.push($s$)
+		$\Delta_{partial}$ = []
+		for $s_i \in s$ 
+			if $\Sigma_i \cap \Sigma_{union} = \emptyset$
+				$\Delta_{partial}$ = $\Delta$_cross_product($\Delta_{union}$, $\Delta_i$)
+			else
+				$\Delta_{partial}$ = $\Delta$_partial_composition($\Delta_{union}$, $\Delta_i$, $\Sigma_{union}$, $type$)
+			$\Sigma_{union}$ = $\Sigma_{union} \cup \Sigma_i$
+		if $type$ == $synch$
+			$\Delta$_remove_redundant($\Delta_{partial}$)
+		$\Delta_{union}$ $\Delta_{union} \cup \Delta_{partial}$ 
+		$\Delta$_expand_frontier($frontier$,$\Delta_{partial}$, $visited$)				
+		add_transitions($A$, $\Delta_{partial}$)
+	return $A$
+
+algorithm $\Delta$_cross_product is
+	input: $\Delta$ the composite set of transitions already computed for a given state
+	input: $\Delta_{i}$ the local set of transitions for a given state $s$ at automaton $A_i$
+	output: $\Delta'$ the cross product of the computed set $\Delta$ with $\Delta_{i}$
+	$\Delta'$ = $\emptyset$
+	for $d \in \Delta$
+		for $d' \in \Delta_{i}$
+			$\Delta'$ = $\Delta' \cup$ {$s(d)$,($label(d) \cup label(d')$,($t(d)_1, \ldots, t(d')_i, \ldots, t(d)_N$))}
+	return $\Delta \cup \Delta' \cup \Delta_{i}$
+	
+algorithm $\Delta$_partial_composition is
+	input: $\Delta$ the composite set of transitions already computed for a given state
+	input: $\Delta_{i}$ the local set of transitions for a given state $s$ at automaton $A_i$
+	input: $\Sigma$ the composite set of labels already computed for a given state		
+	input: $type$ an element of $\{synch,asynch,concurrent\}$ the type of composition to be applied
+	output: $\Delta'$ the partial composition of the computed set $\Delta$ with $\Delta_{i}$ according to $type$
+	$\Delta'$ = $\emptyset$
+	for $d \in \Delta$
+		for $d' \in \Delta_{i}$
+			if $\Sigma \cap label(d') = \Sigma_i \cap label(d)$
+				$\Delta'$ = $\Delta' \cup$ {$s(d)$,($label(d) \cup label(d')$,($t(d)_1, \ldots, t(d')_i, \ldots, t(d)_N$))}
+	return $\Delta \cup \Delta'$	
+	
+algorithm $\Delta$_remove_redundant is
+	input: $\Delta$ the composite set of transitions already computed for a given state
+	output: $\Delta'$ the transitive reduction of $\Delta$ as defined by label inclusion
 \end{lstlisting}
