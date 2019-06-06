@@ -21,8 +21,8 @@ algorithm compose_automata is
 				$\Delta_{partial}$ = $\Delta$_partial_composition($\Delta_{union}$, $\Delta_i$, $\Sigma_{union}$, $type$)
 			$\Sigma_{union}$ = $\Sigma_{union} \cup \Sigma_i$
 		if $type$ == $synch$
-			$\Delta$_remove_redundant($\Delta_{partial}$)
-		$\Delta_{union}$ $\Delta_{union} \cup \Delta_{partial}$ 
+			$\Delta$_transitive_reduction($\Delta_{partial}$)
+		$\Delta_{union}$ = $\Delta_{union} \cup \Delta_{partial}$ 
 		$\Delta$_expand_frontier($frontier$,$\Delta_{partial}$, $visited$)				
 		add_transitions($A$, $\Delta_{partial}$)
 	return $A$
@@ -50,7 +50,7 @@ algorithm $\Delta$_partial_composition is
 				$\Delta'$ = $\Delta' \cup$ {$s(d)$,($label(d) \cup label(d')$,($t(d)_1, \ldots, t(d')_i, \ldots, t(d)_N$))}
 	return $\Delta \cup \Delta'$	
 	
-algorithm $\Delta$_remove_redundant is
+algorithm $\Delta$_transitive_reduction is
 	input: $\Delta$ the composite set of transitions already computed for a given state
 	output: $\Delta'$ the transitive reduction of $\Delta$ as defined by label inclusion
 \end{lstlisting}
