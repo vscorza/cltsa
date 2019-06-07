@@ -1,0 +1,96 @@
+This is BibTeX, Version 0.99d (TeX Live 2013/Debian)
+Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
+The top-level auxiliary file: behaviourminimization.aux
+The style file: ACM-Reference-Format.bst
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
+Database file #1: bibliography.bib
+Warning--I'm ignoring :/content/journals/10.1049/ip-e.1983.0001's extra "author" field
+--line 359 of file bibliography.bib
+Warning--I'm ignoring :/content/journals/10.1049/ip-e.1983.0001's extra "author" field
+--line 360 of file bibliography.bib
+Warning--I'm ignoring :/content/journals/10.1049/ip-e.1983.0001's extra "author" field
+--line 361 of file bibliography.bib
+Warning--I didn't find a database entry for "shahar"
+Warning--no key, author in DBLP:conf/hvc/2010
+Warning--no key, author in DBLP:conf/hvc/2010
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Warning--empty address in DBLP:conf/fmcad/AlurMT13
+Warning--empty publisher in beer1996rulebase
+Warning--empty address in beer1996rulebase
+Warning--empty address in DBLP:conf/cav/BloemCGHKRSS10
+Warning--empty publisher in DBLP:conf/tacas/CavezzaA17
+Warning--empty address in DBLP:conf/tacas/CavezzaA17
+Warning--empty address in DBLP:conf/emsoft/CernyGHRT12
+Warning--empty publisher in chockler2001practical
+Warning--empty address in chockler2001practical
+Warning--empty publisher in chockler2001coverage
+Warning--empty address in chockler2001coverage
+Warning--no number and no volume in daniele:2000
+Warning--page numbers missing in both pages and numpages fields in daniele:2000
+Warning--empty address in DBLP:conf/sigsoft/AlfaroH01
+Warning--empty address in DBLP:conf/kbse/DegiovanniRACA16
+Warning--empty address in DBLP:conf/icse/DIppolitoBPU11
+Warning--empty address in DBLP:conf/kbse/DIppolitoFCU08
+Warning--empty address in DBLP:conf/sigsoft/GiannakopoulouM03
+Warning--empty address in DBLP:conf/kbse/HagiharaESY14
+Warning--require articleno with numpages field in Hoare:1983
+Warning--require articleno with numpages field in Jackson:1995
+Warning--require articleno with numpages field in Keller:1976
+Warning--empty address in DBLP:conf/icra/KimF13
+Warning--empty address in DBLP:conf/icra/KimFS12
+Warning--empty address in DBLP:conf/fmcad/KonighoferHB09
+Warning--empty address in DBLP:conf/sigsoft/KuventMR17
+Warning--empty address in Letier:2013:RMS
+Warning--page numbers missing in both pages and numpages fields in Letier:2013:RMS
+Warning--require articleno with numpages field in Letier:2002
+Warning--empty address in DBLP:conf/memocode/LiDS11
+Warning--empty address in DBLP:conf/sigsoft/MaozR16
+Warning--empty address in Maoz:2014
+Warning--empty address in DBLP:conf/vmcai/PitermanPS06
+Warning--empty address in DBLP:conf/popl/PnueliR89
+Warning--require articleno with numpages field in Torlak:2008
+Warning--empty address in DBLP:conf/sigsoft/UchitelCKM04
+Warning--require articleno with numpages field in vanLamsweerde:2000
+You've used 49 entries,
+            5551 wiz_defined-function locations,
+            1791 strings with 31936 characters,
+and the built_in function-call counts, 57730 in all, are:
+= -- 7180
+> -- 2208
+< -- 0
++ -- 670
+- -- 1010
+* -- 4452
+:= -- 6243
+add.period$ -- 245
+call.type$ -- 49
+change.case$ -- 338
+chr.to.int$ -- 46
+cite$ -- 90
+duplicate$ -- 4511
+empty$ -- 3203
+format.name$ -- 896
+if$ -- 13438
+int.to.chr$ -- 4
+int.to.str$ -- 0
+missing$ -- 214
+newline$ -- 514
+num.names$ -- 418
+pop$ -- 1625
+preamble$ -- 1
+purify$ -- 580
+quote$ -- 0
+skip$ -- 1313
+stack$ -- 0
+substring$ -- 5281
+swap$ -- 502
+text.length$ -- 536
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 677
+warning$ -- 39
+while$ -- 436
+width$ -- 0
+write$ -- 1011
+(There were 43 warnings)

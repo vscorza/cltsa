@@ -1,0 +1,58 @@
+Proof for Lemma~\ref{theorem:alternating-sub-game}
+
+
+\textbf{HAY QUE REVER ESTA PORQUE CAMBIO LA DEFINICI‰ON DE SUBLTS}
+\begin{proof}
+$\mathcal{I}_1$ and $\mathcal{I}_2$ share the same winning condition
+so they also share fluents definition.  Since
+$E_2 \sublts E_1$ implies $E_2 \subseteq E_1$ we know that
+$S_2 \subseteq S_1$ and then for every state in the game constructed from
+the control problem holds that $S_2 \times \Pi_{i=0}^{k}\{true,false\}$
+$\subseteq$ $S_1 \times \Pi_{i=0}^{k}\{true,false\}$ implying
+that $S_{g_2}$ $\subseteq$ $S_{g_1}$.  
+We can see that following the definition of the
+game $G(\mathcal{I}_1)$ constructed from $\mathcal{I}_1$ if
+$\Delta_2 \subseteq \Delta_1$ and 
+$s_{g_1} = (s_e,\alpha_1,\ldots,\alpha_k)$ $\in S_{g_1}$
+for all $(s_e, l, s'_e) \in \Delta_1$ the transition
+$(s_{g_1},(s'_e,\alpha'_1,\ldots,\alpha'_k))$ will be added
+to $\Gamma^{+}_1$ if $l \in \mathcal{C}$ or to $\Gamma^{-}_1$
+if $l \in \mathcal{U}$.  Since $S_{g_2} \subseteq$ $S_{g_1}$ and 
+$\Delta_2 \subseteq$ $\Delta_1$ it holds that
+$\Gamma^{+}_2 \cup \Gamma^{-}_2$ $\subseteq$
+$\Gamma^{+}_1 \cup \Gamma^{-}_1$. This far we have proven
+$G(\mathcal{I}_2) \subseteq G(\mathcal{I}_1)$.  Now, if 
+$E_2 \sublts E_1$ we know, starting with pure states, that 
+for all $s \in S_2, \Delta_1(s)\cap \mathcal{U} = \emptyset$, $l \in \mathcal{C}$ if
+$(s,l,s')\in \Delta_1$ then $(s,l,s') \in \Delta_2$ and
+also for every state $s_{g_1}$ related to $s$ in the game: $s_{g_1}$ $\in$ $s \times \Pi_{i=0}^{k}\{true,false\}$ and
+for all $l \in \mathcal{C}$ such that 
+$(s, l, s') \in \Delta_1$, $(s,l,s') \in \Delta_2$ and for
+$s'_{g_1}= (s', \alpha'_1. \ldots, \alpha'_k)$, 
+$(s_{g_1}, s'_{g_1})$$\in \Gamma^{+}_1$ and $(s_{g_1}, s'_{g_1})$$\in \Gamma^{+}_2$
+hold,
+thus implying $\Gamma^{+}_1(s_{g_1})$$=$$\Gamma^{+}_2(s_{g_1})$. 
+If $s$ is a mixed state in $E_1$, following the construction of 
+$G(\mathcal{I}_1)$ we know that
+$\Gamma^{+}(s, \alpha_1^{\prime} \ldots \alpha_k^{\prime}) = \emptyset$,
+from the definition of Sub-LTS $s$ will be a mixed state in
+$E_2$ and $\Gamma^{+ \prime}$
+$(\alpha_1^{\prime} \ldots \alpha_k^{\prime}) = \emptyset$ implies that
+$\Gamma^{+}(s_g)=\Gamma ^{+ \prime}(s_g)$.
+If $s$ is not a mixed
+state and non controllable for all $s \in S_2$ if there exists an
+$l \in \mathcal{U}$ such that
+$(s,l,s')\in \Delta_1$ then from $E_2 \sublts E_1$ it must exists an 
+$l' \in \mathcal{U}$ such $(s,l',s'') \in \Delta_2$.  
+With $s_{g_1}$ $\in$ $s \times \Pi_{i=0}^{k}\{true,false\}$, $l$, 
+and $s'_{g_1}= (s', \alpha'_1. \ldots, \alpha'_k)$
+we have $(s_{g_1}, s'_{g_1})$$\in \Gamma^{-}_1$ and for $l'$ in $\Delta_2$,
+let $s''_{g_1}= (s'', \alpha''_1. \ldots, \alpha''_k)$, we have
+ $(s_{g_1}, s''_{g_1})$$\in \Gamma^{-}_2$ implying $\Gamma^{-}_1(s_{g_1})$ $ \neq \emptyset$ $\rightarrow$ $\Gamma^{-}_2(s_{g_1}) \neq \emptyset$. 
+ If $s$ is a mixed state there exists $l' \in \mathcal{U}$ s.t. 
+ $(s,l', s'') \in \Delta_1$ and then it holds that 
+ $(s_{g_1}, s'_{g_1}) \in \Gamma_1^{-}$.
+ Following Sub-LTS definition there must exist $l'' \in \mathcal{U}$
+ s.t. $(s, l'',s'') \in \Delta_2$ implying the existence of 
+ $(s_{g_1},s_{g''_1}) \in \Gamma_{2}^{-}$.
+\end{proof}

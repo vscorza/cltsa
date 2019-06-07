@@ -1,0 +1,60 @@
+If we go back to the
+planar robot example to apply the translation presented in appendix
+\ref{appendix:cp2gs} we get the requirements related to state 4
+as depicted in table \ref{table:state-4-translation}.
+
+\begin{center}
+\begin{table}[h]
+  \begin{tabular}{ l  c  l }
+	Name & Type & Requirement \\
+    \hline
+    3-4 $enable_e$ & $\rho_e$ & $\square(s=3 \wedge get.GPS.location = 1 \rightarrow$\\
+    &&$\Circle(((data.rcvd = 1 \wedge timeout = 0)$\\
+    &&$\vee(data.rcvd=0 \wedge timeout = 1)$\\
+    &&$\wedge sensor.disabled = 0$\\
+    &&$\wedge sensor.enabled = 0)))$\\
+    3-4 $enable_s$ & $\rho_s$ & $\square(s=3 \wedge get.GPS.location = 1 \rightarrow$\\
+        &&$\Circle(get.GPS.location = 0 $\\
+        &&$\wedge get.SLAM.location = 0$\\
+        &&$\wedge update.direction = 0))$\\
+    3-4 $update_s$ & $\rho_s$ & $\square(s=3 \wedge get.GPS.location = 1 \rightarrow$\\
+        &&$\Circle(s = 4))$\\        
+  \end{tabular}
+  \caption{Planar robot state 4 requirements}
+  \label{table:state-4-translation}
+ \end{table}
+\end{center}
+
+We can see that the choices taken for every run in our plant are
+restricted by both the system and the environment.  This might not be
+the usual way to write signal-based specifications but is the way event
+based models are specified.  If we were to achieve behavior minimization
+we would expect to change the specification when disabling the event $data.rcvd$
+at state 4 (as depicted in table \ref{table:state-4-translation-updated}).
+
+\begin{center}
+\begin{table}[h]
+  \begin{tabular}{ l  c  l }
+	Name & Type & Requirement \\
+    \hline
+    \textbf{3-4 $enable_e$} & $\rho_e$ & $\square(s=3 \wedge get.GPS.location = 1 \rightarrow$\\
+    &&$\Circle(data.rcvd=0 \wedge timeout = 1$\\
+    &&$\wedge sensor.disabled = 0$\\
+    &&$\wedge sensor.enabled = 0))$\\
+    3-4 $enable_s$ & $\rho_s$ & $\square(s=3 \wedge get.GPS.location = 1 \rightarrow$\\
+        &&$\Circle(get.GPS.location = 0 $\\
+        &&$\wedge get.SLAM.location = 0$\\
+        &&$\wedge update.direction = 0))$\\
+  \end{tabular}
+  \caption{Planar robot state 4 updated requirements}
+  \label{table:state-4-translation-updated}
+ \end{table}
+\end{center}
+
+The requirements related to transitions (1, $sensor.enabled$, 2),
+(2, $get.SLAM.location$, 5),(5, $update.direction$, 1)
+and (4, $data.rcvd$, 5) were removed by our technique and 
+the ones related to (3, $get.$$GPS.$ $location$, 4) were modified.
+We have introduced changes to both sides of the specification and not only
+by adding or removing requirements, rendering the Cimatti et al. characterization
+orthogonal.\\

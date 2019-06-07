@@ -1,0 +1,142 @@
+\section{Behavior Minimization Feedback}
+
+In this section we formalise the problem of minimising behaviour while preserving unrealizability. In the next section we define a minimisation procedure.
+
+Assume an unrealizable specification of the form $\mathcal{I} = <E, \mathcal{C}, \varphi>$. Our aim is to automatically produce an unrealizable specification $\mathcal{I'} = <E', \mathcal{C}, \varphi>$ where $E'$ has less behaviour than $E$ and the witnesses for the unrealizablity of $\mathcal{I'}$ (i.e., the counter strategies) are also witnesses for the unrealizability of $\mathcal{I}$.  Furthermore, we aim for $E'$ to minimal in the sense that it cannot be further reduced while having its associated counter strategies preserved in  $\mathcal{I}$.
+Thus, an engineer focusing on why  $\mathcal{I'}$ is unrealizable can gain insight on why $\mathcal{I}$ is unrealizable. 
+
+
+\begin{definition}\label{}\emph{(Unrealizability Preservation)}
+Given an unrealizable control problem $\mathcal{I} = <E, \mathcal{C}, \varphi>$ we say
+that $\mathcal{I'} = <E', \mathcal{C}, \varphi>$ preserves unrealizability
+ if for all  winning strategy \counterS for
+the environment in $G(\mathcal{I}_P)$ 
+then $f_1^{\neg \varphi}$ is winning for the environment in
+$G(\mathcal{I}_M)$.
+\end{definition}
+
+
+In this section we define a minimization procedure that preserves unrealizability. We do this by defining a notion of alternating sub-LTS that preserves counter strategies and forms a semi-lattice that can be used to incrementally minimise a non-realizable specification. 
+
+%\textbf{
+%CREO QUE HAY QUE BORRAR ESTE PARRAFO
+%}In ~\cite{DBLP:phd/ethos/DIppolito13} the author shows that
+%a control problem is realizable if and only if there is a winning strategy
+%for the system in the game constructed following the conversion
+%proposed in definition \ref{def:lts-2-game}.  The same work shows that GR(1) games 
+%are determined, meaning that a control problem is unrealizable if
+%and only if there exists a winning strategy for the environment.
+%We will refer to the latter as the \emph{counter strategy}.
+%
+%\textbf{Y ESTE TAMBIEN}
+%Formally, we aim to build a minimal unrealizable specification $\mathcal{I'} = <E', \mathcal{C}, \varphi>$ such that any counter strategy in $G(\mathcal{I'})$ is also a counter strategy in $G(\mathcal{I})$. 
+
+%If $\mathcal{I} = <E, \mathcal{C}, \varphi>$ is a non realizable control problem then there is no LTS $M$ that is a legal and deadlock-free environment with respect to $E$ such that $E || X \models \varphi$. 
+
+
+To define alternating sub-LTSs we first define a sub-LTS relation.  A sub-LTS is simply achieved by removing states and transitions from an LTS while keeping its initial state.
+%~\ref{XXX}
+
+\begin{definition}\label{def:lts-inclusion}\emph{(Sub-LTS)}
+Given $M = (S_M, \Sigma_M, \Delta_M, s_{M_0})$ and
+ $P =$ $(S_P,\Sigma_P,\Delta_P,s_{P_0})$ LTSs, 
+we say that $P$ is a sub-LTS of $M$ (noted $P \subseteq M$) if $S_P \subseteq S_M$,
+$s_{M_0} = s_{P_0}$, $\Sigma_P \subseteq \Sigma_M$ and $\Delta_P \subseteq \Delta_M$.
+\end{definition}
+
+
+%We define an unrealizability preserving control problem as follows:
+
+%\subsection{Behavior Minimization}
+%  We expect our minimization to be sound, which means that
+%for every counter strategy winning for the
+%environment in $E_{\kappa}$ it must also be winning for the environment
+%in $E$. To formalize the notion of soundness of
+%our minimization procedure $min(\mathcal{I})$ we
+%expect the resulting control problem $\mathcal{I}_{\kappa}$
+%to preserve non realizability, to allow every winning (counter) strategy
+%for the environment in $E_{\kappa}$ to hold in $E$ and
+%to be minimal in terms of retained behavior.
+
+To preserve unrealizability, the alternating sub-LTS definition refines that of sub-LTS by restricting some of the original LTS transitions. 
+These restrictions consider controllability. 
+
+%In order to define when a minimized plant $E_{\kappa}$ preserves
+%a counter strategy w.r.t. to an original plant $E$ and a controllable set
+%$\mathcal{C}$ we introduce the following definitions:
+
+
+\begin{definition}\label{def:nonreal-legalEnvironment}\emph{(Alternating Sub-LTS)}
+Given $M = (S_M, \Sigma, \Delta_M, s_{M_0})$ and
+ $P =$ $(S_P,\Sigma,\Delta_P,s_{P_0})$ LTSs, 
+where $\Sigma =\mathcal{C}\cup \mathcal{U}$ and $\mathcal{C}\cap
+\mathcal{U}=\emptyset$. We say that $P$ is a alternating
+ sub-LTS of $M$, noted as $P \sublts_{\mathcal{C},\mathcal{U}} M$, if  $P \subseteq M$  and $\forall s \in S_{P}$ the following holds:
+ \begin{itemize}
+\item If $s$ is a pure controllable state then $\Delta_{P}(s) \cap \mathcal{C} = \Delta_{M}(s) \cap \mathcal{C} $
+\item If $s$ is not a pure controllable state then  
+%$\Delta_{M}(s)\neq\emptyset \rightarrow \Delta_{P}(s)\neq\emptyset$
+%\item 
+%$(\Delta_{M}(s) \cap \mathcal{C} \neq \emptyset$ $ \wedge $ $\Delta_{M}(s) \cap \mathcal{U} \neq \emptyset)$ $\rightarrow$
+$\Delta_{P}(s) \cap \mathcal{U} \neq \emptyset$.
+ \end{itemize}
+ 
+We shall omit $\mathcal{C}$ and $\mathcal{U}$ in $\sublts_{\mathcal{C},\mathcal{U}}$ when the context is clear. 
+ \end{definition}
+
+The definition above introduces  restrictions on transitions of alternating sub-LTSs. 
+First, in states where all outgoing transitions are controllable, all transitions must be preserved. 
+If this were not the case, then a counter strategy in $P$ with $P \sublts M$ may not work in $M$ because the controller in $M$ has more controllable actions that the counter strategy in $P$ does not account for. 
+The second restriction states that in all states in which there is at least one uncontrollable action, then at least one uncontrollable action must be preserved. This is because for pure uncontrollable states, if this were not the case, a new deadlock in $P$ would be introduced. This would mean that an environment strategy could win by forcing that deadlock in $P$, however the same strategy when applied in $M$ would reach a non-deadlocking state and hence would not be winning. In mixed states, removing all uncontrolled transitions would allow a counter strategy in $P$ that relies, on reaching such state, to force the controller to move (as not doing so would result in a deadlock). However a strategy in $P$ exploiting this would not work in $M$ because reaching the same state, now a mixed state, the controller may defeat the same environment strategy by not picking any controlled action; the environment is obliged to progress in this case. 
+
+An informal justification for the definition of Alternating Sub-LTSs can be proved by showing that  given two unrealizable control problems $\mathcal{I} = <E, \mathcal{C}, \varphi>$ and $\mathcal{I'} = <E', \mathcal{C}, \varphi>$ with $E' \sublts E$ then any counter strategy for the game $G(\mathcal{I'})$ is also a counter strategy for $G(\mathcal{I})$. For this we first show that there is a corresponding notion of Alternating Sub-Game and then use this to show that, indeed, the Alternating Sub-LTS relation preserves counter strategies.  
+
+
+\begin{definition}\label{def:sub-game}\emph{(Sub-Game)}
+Given $G = (S_g, \Gamma^{-},$ $\Gamma^{+},$ $s_{g_{0}}$$,$ $\varphi)$ and
+$G' = (S'_g, \Gamma^{-\prime}, \Gamma^{+\prime},s'_{g_{0}}, \psi)$ two-player games, we say that $G'$ is a sub-game of $G$, noted
+$G' \subgame G$, if $S'_g \subseteq S_g$, $s'_{g_{0}}=s_{g_{0}}$, $\psi = \varphi$, $\Gamma^{-\prime}\subseteq \Gamma^{-}$ and
+$\Gamma^{+\prime}\subseteq \Gamma^{+}$.
+\end{definition}
+
+\begin{definition}\label{def:alternating-sub-game}\emph{(Alternating Sub-Game)}
+Given $G = (S_g, \Gamma^{-}, \Gamma^{+},$ $s_{g_{0}}, \varphi)$ and
+$G' = (S'_g, \Gamma^{-\prime}, \Gamma^{+\prime},s'_{g_{0}}, \psi)$ both two-player games such that $G' \subgame G$, we say that $G'$ is a alternating sub-game of $G$, noted
+$G'\altsubgame G$, if the following holds: $\forall s'_g \in S'_g:$ 
+$\Gamma^{+}(s'_g)=\Gamma^{+\prime}(s'_g)$ and $\Gamma^{-}(s'_g)\neq \emptyset$ $\rightarrow$ $\Gamma^{-\prime}(s'_g) \neq \emptyset$. 
+\end{definition}
+
+\begin{lemma}\emph{(Alternating Sub-LTS implies Alternating Sub-Game)}\label{theorem:alternating-sub-game}
+Let $\mathcal{I}_1 = \langle E_1, \mathcal{C}, \varphi \rangle$ and
+$\mathcal{I}_2 = \langle E_2, \mathcal{C}, \varphi \rangle$ be two
+control problems, then if $E_2 \sublts E_1$ implies $G(\mathcal{I}_2)$
+$\altsubgame$ $G(\mathcal{I}_1)$.
+\end{lemma}
+
+%\input{Proof_SubLTS_SubGame}
+
+The following Theorem states that removing transitions in the environment description of an unrealizable control problem, while preserving an Alternating Sub-LTS relation, yields a new unrealizable control problem in which all its counter strategies are also counter strategies of the original control problem. Thus inspecting the behaviour of the smaller environment description provides insights on the causes for unrealizability of the larger one.  
+
+\begin{theorem}\emph{(Alternating Sub-LTS preserves counter strategy)}\label{theorem:theo.preserves-non-realizability}
+Let $P$ and $M$ be two LTSs s.t. $P \sublts M$, 
+$\mathcal{I}_P = \lbrace P, \mathcal{C}, \varphi \rbrace$,
+$\mathcal{I}_M = \lbrace M, \mathcal{C}, \varphi \rbrace$
+two control problems, if
+ \counterS is a winning strategy for
+the environment in $G(\mathcal{I}_P)$ 
+then $f_1^{\neg \varphi}$ is winning for the environment in
+$G(\mathcal{I}_M)$.
+\end{theorem}
+
+
+%\input{Proof_CS_Preservation}
+
+We formally define the problem we solve as follows.
+
+\begin{definition}\label{def:ProblemStatement}\emph{(Problem Statement)}
+Given a unrealizable control problem $\mathcal{I} = <E, \mathcal{C}, \varphi>$, find an unrealizable control problem $\mathcal{I'} = <E', \mathcal{C}, \varphi>$ such that $E' \sublts E$, $\mathcal{I'}$ is unrealizable $\mathcal{I}$, and that there is no $\mathcal{I''} = <E'', \mathcal{C}, \varphi>$ such that $E' \sublts E''$ and $\mathcal{I''}$ is unrealizable. We refer to $\mathcal{I'}$ as a minimal unrealizable control problem.
+\end{definition}
+
+%From lemma ~\ref{theorem:theo.preserves-non-realizability}
+%alternating sub-LTSs preserve counter strategies we know that any
+%counter strategy in $G(\mathcal{I'})$ will hold in $G(\mathcal{I})$.

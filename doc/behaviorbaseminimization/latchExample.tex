@@ -1,0 +1,185 @@
+To exemplify the difference, and the complementation between the model-based
+and the behavior-based minimization we introduce a synthetic case where an engineer
+wants to specify a zero triggered latch mechanism. The initial specification
+involves only two signals: $x$ representing a single boolean input and $y$ the only
+boolean output.  The idea is that the output should be kept constantly up 
+once a zero boolean value has been fed to the system.
+Before this $y$ must remain as a zero.  
+The specification is written as the conjunction of four \texttt{LTL} \cite{pnueli1977temporal}
+formulas as presented in table \ref{table:d-ff-spec}. 
+Following the definitions from \cite{DBLP:conf/vmcai/PitermanPS06} $\theta_s$ stands for
+an initial system formula, $\rho_s$ for a safety system formula and 
+$\varphi_s$ for a system liveness formula.
+The \textit{Initial condition} formula 
+fixes the initial value for the output signal,
+\textit{Wait for negative trigger} keeps the value of $y$ down as long as the input
+is up and the output value has not yet been raised, \textit{Latch} keeps the 
+output up after the initial raise and the \texttt{GR(1)} \textit{Goal} is to 
+always eventually produce an output ($\square\Diamond(y)$).  After running our automated
+translation we produced the \texttt{LTS} representation of the \textit{Game Structure}
+definition.  We get the behavior depicted in Figure \ref{fig:fig.neg-trigger-latch-behavior},
+where again solid lines indicate monitored events and dashed lines indicate controlled events.
+The $\uparrow$ suffix after a signal name means the the value is being raised ($x\uparrow$),
+$\downarrow$ consequently means that value is being lowered ($x\downarrow$).  A $tick$ event
+is added to show when the values could be kept constant at the current time step.
+\begin{center}
+\begin{table}[h]
+  \begin{tabular}{ l  c  l }
+	Name & Type & Requirement \\
+    \hline
+    Initial condition & $\theta_s$ & $y = 0$\\
+    Wait for negative trigger & $\rho_s$ &$\square((x \wedge \neg y) \rightarrow \Circle(\neg y) )$ \\
+    Latch & $\rho_s$ &$\square (y \rightarrow \Circle(y))$ \\   
+    Goal &  $\varphi_s$ & $\square\Diamond(y)$\\
+  \end{tabular}
+  \caption{Zero triggered latch specification}
+  \label{table:d-ff-spec}
+ \end{table}
+\end{center}
+We wrote this specification in \texttt{RATSY}, run the minimization presented in
+\cite{DBLP:conf/hvc/KonighoferHB10} (where the \textit{Latch} requirement was
+considered irrelevant and removed) and then translated the minimized specification
+to produce the \texttt{LTS} depicted in Figure 
+\ref{fig:fig.neg-trigger-latch-behavior-formula-minimization}.  Understanding the specification
+in terms of the conjunction of formulas we can see that the $Latch$ requirement is irrelevant
+to the unrealizability cause since even if we allow the plant to lower $y$ after its initial
+raise, no output would be produced if the input is kept up.  Removing a formula is, in fact,
+relaxing the behavior, this is expressed in the double lined states and transitions 
+present in Figure \ref{fig:fig.neg-trigger-latch-behavior-formula-minimization}.  
+We can see that the transitions added express the new behavior where the plant is allowed
+to lower $y$ after being raised.  Let us note that removing a formula means relaxing, 
+thus augmenting, the behavior of the plant.
+\begin{figure}[bt]
+\centering
+\SmallPicture
+%\ShowFrame
+\VCDraw{
+    \begin{VCPicture}{(-4,-5)(4,4)}
+        \SetEdgeLabelScale{1.4}
+        \State[1]{(0,3)}{1}
+        \State[2]{(-3,2)}{2}        
+        \State[3]{(-3,0)}{3}
+        \State[4]{(3,-2)}{4}        
+        \State[5]{(-3,-2)}{5}                
+        \State[6]{(-3,-4)}{6}                        
+        \State[7]{(3,2)}{7}                                
+        \State[8]{(3,0)}{8}                                        
+		\Initial[n]{1}
+		\EdgeL{1}{2}{$x$\downarrow}
+		\EdgeR{1}{7}{$x$\uparrow}		
+		\EdgeR{8}{3}{$x$\downarrow}								
+		\LoopW{3}{$tick$}
+		\LoopE{8}{$tick$}		
+		\LoopW{6}{$tick$}		
+		\EdgeR{3}{4}{$x$\uparrow}
+		\ArcR{5}{6}{$x$\uparrow}
+		\ArcR{6}{5}{$x$\downarrow}		
+        \ChgEdgeLineStyle{dashed} 
+		\EdgeR{4}{6}{$y$\uparrow}		
+		\EdgeL{2}{3}{$y$\downarrow}				
+		\EdgeL{7}{8}{$y$\downarrow}						
+		\EdgeR{3}{5}{$y$\uparrow}
+		\EdgeR{4}{8}{$tick$}		
+    \end{VCPicture}
+}
+\vspace*{-2mm}
+\caption{Zero triggered latch behavior.}
+\label{fig:fig.neg-trigger-latch-behavior}
+\vspace*{-4mm}
+\MediumPicture
+\end{figure}
+
+\begin{figure}[bt]
+\centering
+\SmallPicture
+%\ShowFrame
+\VCDraw{
+    \begin{VCPicture}{(-4,-6)(4,5)}
+        \SetEdgeLabelScale{1.4}
+        \State[1]{(0,3)}{1}
+        \State[2]{(-3,2)}{2}        
+        \State[3]{(-3,0)}{3}
+        \State[4]{(1,-1)}{4}        
+        \State[5]{(-3,-2)}{5}                
+        \State[6]{(-3,-4)}{6}                        
+        \State[7]{(3,2)}{7}                                
+        \State[8]{(3,0)}{8}                                        
+        \StateLineDouble
+		\State[9]{(1,-2.5)}{9}                         
+        \State[10]{(-1,-2.5)}{10}                             
+		\Initial[n]{1}
+		\EdgeL{1}{2}{$x$\downarrow}
+		\EdgeR{1}{7}{$x$\uparrow}		
+		\ArcR{8}{3}{$x$\downarrow}								
+		\LoopW{3}{$tick$}
+		\LoopE{8}{$tick$}		
+		\EdgeL[.8]{3}{4}{$x$\uparrow}
+		\ArcR{5}{6}{$x$\uparrow}
+		\ArcR{6}{5}{$x$\downarrow}	
+		\EdgeLineDouble		
+		\LoopS{9}{$tick$}	
+		\ArcR[.3]{6}{9}{$tick$}
+		\EdgeR{9}{10}{$x$\downarrow}
+		\EdgeLineSimple
+        \ChgEdgeLineStyle{dashed} 
+		\EdgeL{2}{3}{$y$\downarrow}				
+		\EdgeL{7}{8}{$y$\downarrow}						
+		\ArcR{3}{5}{$y$\uparrow}
+		\EdgeL{4}{8}{$tick$}		
+		\EdgeLineDouble
+		\EdgeR{10}{5}{$tick$}		
+		\ArcR[.2]{10}{3}{$y$\downarrow}						
+		\ArcR{4}{9}{$y$\uparrow}		
+		\ArcR{9}{8}{$y$\downarrow}		
+		\ArcR{5}{3}{$y$\downarrow}
+		\VArcR{arcangle=-60,ncurv=1}{6}{8}{$y$\downarrow}				
+    \end{VCPicture}
+}
+\vspace*{-2mm}
+\caption{Zero trig. latch formula based minimization.}
+\label{fig:fig.neg-trigger-latch-behavior-formula-minimization}
+\vspace*{-4mm}
+\MediumPicture
+\end{figure}
+This comparison may seem unfair, and to some extent it is, if one
+forgets that we are looking at the same problem expressed in two
+quite different ways.  One of our claims is that our approach is in
+fact complimentary to that of the model-based minimization.
+Our minimization produces the plant depicted in Figure 
+\ref{fig:fig.neg-trigger-latch-behavior-minimization}, where it
+shows that the environment can easily win by playing to keep
+$x$ up.  
+It is important to note that when minimizing the plant we must
+keep it unrealizable while allowing the environment to have
+a winning strategy that works in both the minimized and the original
+plant.
+\begin{figure}[bt]
+\centering
+\SmallPicture
+%\ShowFrame
+\VCDraw{
+    \begin{VCPicture}{(-5,-2)(5,2)}
+        \SetEdgeLabelScale{1.4}
+        \State[1]{(-3,0)}{1}
+        \State[2]{(0,0)}{2}        
+        \State[3]{(3,0)}{3}
+		\Initial[w]{1}
+		\EdgeL{1}{2}{$x$\uparrow}
+		\LoopE{3}{$tick$}		
+        \ChgEdgeLineStyle{dashed} 
+		\EdgeL{2}{3}{$y$\downarrow}				
+    \end{VCPicture}
+}
+\vspace*{-2mm}
+\caption{Zero trig. latch behavior based minimization.}
+\label{fig:fig.neg-trigger-latch-behavior-minimization}
+\vspace*{-4mm}
+\MediumPicture
+\end{figure}
+In the model-based and the behavior-based approaches the
+idea is that we are aiding the engineer in understanding the
+cause on unrealizability.  If we think in terms of specification repair,
+in this particular case if she were to add
+a new assumption (\textit{input will eventually fall}), either as
+$\square\Diamond(\neg x)$ or $\Diamond(\neg x)$ the specification
+will become realizable.

@@ -1,0 +1,22 @@
+\renewcommand{\ttdefault}{pcr}
+\begin{lstlisting}[escapeinside={[*}{*]},basicstyle=\scriptsize\ttfamily,columns=flexible,frame=lines,mathescape=true,xleftmargin=3.0ex,keywordstyle=\textbf,morekeywords={if,while,do,else,fork,int,null},numbers=left,numberstyle=\scriptsize]
+build_representatives($\mathcal{I} = <E, \mathcal{C}, \varphi>$):
+	candidates = $E$.get_monitored_transitions() [*\listRef{A}*]
+	representatives = []
+	while candidates != $\emptyset$
+		$t$ = candidates.pop() [*\listRef{B}*]
+		head = $t$
+		tail = $t$
+		representatives.push($t$)
+		while $d_{in}$(head.from_state) == 1 
+			or $d_{out}$(tail.to_state) == 1:
+			if $d_{in}$(head.from_state) == 1: [*\listRef{C}*]
+				if head.action $\not\in \mathcal{C}$:
+					candidates.remove(head) [*\listRef{D}*]
+				head = head.predecessor
+			if $d_{out}$(tail.to_state) == 1: [*\listRef{E}*]
+				if tail.action $\not\in \mathcal{C}$:
+					candidates.remove(tail)
+				tail = tail.successor
+	return representatives
+\end{lstlisting}

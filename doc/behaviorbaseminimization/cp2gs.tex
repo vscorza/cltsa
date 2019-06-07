@@ -1,0 +1,314 @@
+We propose a translation from control problems to game structures in order
+to reason about our behavior based specifications in terms of existing 
+work from the literature.  
+Our goal is to get a game structure that properly emulates the meaning
+of the source control problem.  The idea is that both structures should
+satisfy equivalent sets of LTL formulas.  We show that given the proper
+transformation from control problems to game structures this equivalence 
+is quite straightforward.\\
+The translation can be explained as follows:
+we encode the automaton state space through a set of boolean system variables
+that will express the binary representation of each particular state.  The 
+target specification will have a boolean variable (or signal) for each source
+event.  Monitored events from the source specification will be 
+represented through environment variables ($\mathcal{X}$) and
+controlled events through system variables ($\mathcal{Y}$).  
+Suppose that we have the following control problem $\mathcal{L}=\langle E, H, L_c\rangle$,
+with plant $E$ described as the LTKS $E = (S, L,\Delta, v:S \rightarrow 2^{\mathcal{F}} ,s_0)$, $\mathcal{F}=\{f_1, f_2 \}$ and where
+$a,b,c \in L$, $c \in L_c$, $v(s_i)=\{ f_1 \}, v(s_j)=\{f_2\}$ and
+$(s_i, a, s_j)$,
+$(s_j, a, s_k)$,
+$(s_j,b,s_l)$,
+$(s_j, c, s_m) \in \Delta$.
+Each transition from the source automaton is translated into three 
+different formulas, two standing for enabling requirements:
+One for the environment ($env.enable_{i,a} \in \rho_e$) as an implication from current state 
+and currently selected action into a disjunction of mutually exclusive conjunction 
+of monitored event related signals declaring the set of next-step enabled
+environment actions. Suppose that $s, act_c \in \mathcal{Y}$
+and $act_a, act_b \in \mathcal{X}$.
+\[
+\square(s = i \wedge act_a \rightarrow \Circle((\neg act_a \wedge act_b)\vee(act_a \wedge \neg act_b) \vee (\neg act_a \wedge \neg act_b)))\]
+One for the system ($sys.enable_{i,a} \in \rho_s$) as an implication from current state
+and currently selected action into another implication 
+from the negation of all monitored events to the
+disjunction of mutually exclusive conjunction of controlled
+event related signals declaring the set of next-step enabled
+system actions.
+\[
+\square(s = i \wedge act_a \rightarrow \Circle((\neg act_a \wedge \neg act_b)\rightarrow (act_c)))\]
+The third transition requirement ($s.update_{i,a} \in \rho_s$) is the one 
+effectively updating the automaton state representation.
+\[
+\square(s = i \wedge act_a \rightarrow \Circle(s = j))\]
+Initial conditions ($\theta_s, \theta_e$) are set according to the initial state 
+$s_0$ in the automaton and initially enabled actions.
+The LTKS valuations, that predicate over the set $\mathcal{F}$ of 
+fluents, is translated in with the proper system safety requirement.
+We will present some basic definitions to simplify the translation:
+\[
+\square(s = i \rightarrow (f_1 \wedge \neg f_2))\]
+\begin{definition}\label{def:state-u-events}\emph{(Monitored events per state)}
+In the context of a control problem, let $s \in S$ be any given state 
+\[u(s) = \{ u: \exists s' s.t. (s,u,s') \in \Delta \wedge u \in \Sigma \setminus \mathcal{C} \}\]
+\end{definition}
+
+\begin{definition}\label{def:state-c-events}\emph{(Controlled events per state)}
+In the context of a control problem, let $s \in S$ be any given state 
+\[c(s) = \{ c: \exists s' s.t. (s,u,s') \in \Delta \wedge u \in \mathcal{C} \}\]
+\end{definition}
+
+When not explicitly stated we will
+assume that there is a control problem $\mathcal{I}= <E, \mathcal{C}, \varphi>$ with
+$E = (S, \Sigma, \Delta, s_{M_0})$ and 
+$\varphi = (\bigwedge_{i \in [1 \ldots n]} \phi_i \rightarrow \bigwedge_{j \in [1\ldots m]}\gamma_i)$.
+The following equivalences will hold for every fluent
+$f = <I_f, T_f>_{intially_f}$ and every $a \in \Sigma$:
+\[
+\begin{array}{r c l}
+var(f) &=& \{ var(i) : i \in I_f \cup T_f \}\\
+var(a) &=& 
+\begin{cases}
+x(a) \quad \text{if } a \in \Sigma \setminus \mathcal{C}\\
+y(a) \quad \text{if } a \in \mathcal{C}\\
+\end{cases}
+\end{array}
+\]
+
+To represent the states of the automaton in the game structure
+we will assume the existence of a mapping $index : S \rightarrow \{ 0 \ldots |S| -1 \}$.
+
+\begin{definition}\label{def:state-encoding}\emph{(Automaton state encoding)}
+Assume that $bit(i, v)$ gives the i-th boolean value of 
+the binary representation of the integer $v$:
+\[encode(s) = \bigwedge_{i=0}^{|S|-1} bit(i, index(s)) \]
+\end{definition}
+
+
+
+LTL formulas have to be adjusted by replacing control
+problem fluent variables with their game structures counterparts.
+Since propositions will predicate over different sets of variable
+we proceed to define the \texttt{adequate} function.
+Remember that (F)LTL formulas are constructed as follows:
+\[\varphi ::= p | \neg \varphi | \varphi \vee \varphi | \Circle \varphi | \varphi \mathcal{U} \varphi\]
+\begin{definition}\label{def:ltl-adequate}\emph{(FLTL to LTL formula translation)}
+Let $\mathcal{F}$ be the set of fluents for the control problem 
+$\mathcal{I}$ where each fluent can be described as the tuple
+$fl = <I_{fl}, T_{fl}>_{initially_{fl}}$ and 
+$y:FLTL \rightarrow \mathcal{Y}$ is a function mapping
+control problem's fluents into game structure's system variables,
+we introduce  $adequate:FLTL \rightarrow LTL$ a
+translation from FLTL formulas into LTL formulas:
+\[
+\begin{array}{r c l}
+adequate(\neg \varphi) &=& \neg adequate(\varphi)\\
+adequate(\varphi \vee \psi) &=& adequate(\varphi) \vee adequate(\psi)\\
+adequate(\Circle \varphi) &=& \Circle adeaquate(\varphi)\\
+adequate(\varphi \mathcal{U} \psi) &=& adequate(\varphi) \mathcal{U} adequate(\psi)\\
+adequate(fl) &=& y(fl)\\
+\end{array}
+\]
+\end{definition}
+
+We define the mutually exclusive conjunction of signals
+as it conveniently simplifies other safety formulas.
+
+\begin{definition}\label{def:mutex-signal}\emph{(Mutually exclusive conjunction of signals)}
+Let $\sigma \subseteq \Sigma$:
+\[mutex(\sigma) = \bigvee_{a \in \sigma} var(a) \wedge \bigwedge_{a' \in \sigma, a \neq a'} \neg var(a')\]
+\end{definition}
+
+Next we define the safety enabling conditions and requirements.
+
+\begin{definition}\label{def:env-enabling-condition}\emph{(Environment enabling condition)}
+Let $\sigma \subseteq \Sigma \setminus \mathcal{C}$ we define an environment enabling condition $enableCond_e(\sigma)$ for purely monitored states in $\mathcal{I}$ and 
+$enableCond'_e(\sigma)$ for mixed states:
+\[
+\begin{array}{r c l}
+enableCond_e(\sigma) &=& mutex(\sigma)\\
+enableCond'_e(\sigma) &=& mutex(\sigma) \vee \bigwedge_{a \in \sigma} \neg var(a)\\
+\end{array}
+\]
+\end{definition}
+
+
+\begin{definition}\label{def:sys-enabling-condition}\emph{(System enabling condition)}
+Let $\sigma \subseteq \mathcal{C}$ we define a system enabling condition $enableCond_s(\sigma)$ for controllable or mixed states in $\mathcal{I}$:
+\[
+enableCond_s(\sigma) = mutex(\sigma) \rightarrow \bigwedge_{u \in \Sigma \setminus \mathcal{C}}\neg var(u)
+\]
+\end{definition}
+
+\begin{definition}\label{def:state-upadting-requirement}\emph{(State Updating Requirement)}
+We define a state updating requirement $update_s(s,a,s')$ for states $s, s' \in S$ and event $a \in \Sigma$ in $\mathcal{I}$:
+\begin{footnotesize}
+\[
+\begin{array}{r c l}
+update_s(s, a, s') &=& 
+\square(encode(s) \wedge var(a) \rightarrow \Circle(encode(s')))\\
+\end{array}
+\]
+\end{footnotesize}
+\end{definition}
+
+\begin{definition}\label{def:env-enabling-requirement}\emph{(Environment enabling requirement)}
+We define an environment enabling requirement $enable_e(s, a, s')$ for monitored states $s, s' \in S$ and event $a \in \Sigma \setminus \mathcal{C}$ in $\mathcal{I}$:
+\begin{footnotesize}
+\[
+\begin{array}{r c l}
+enable_e(s, a, s') &=& 
+\begin{cases}
+\square(encode(s) \wedge var(a) \rightarrow \Circle(enableCond_e(u(s'')))) 
+\\
+\quad \quad |c(s')| = 0\\
+\square(encode(s) \wedge var(a) \rightarrow \Circle(enableCond'_e(u(s')))) 
+\\
+\quad \quad otherwise\\
+\end{cases}
+\\
+\end{array}
+\]
+\end{footnotesize}
+\end{definition}
+
+\begin{definition}\label{def:system-enablig-requirement}\emph{(System Enabling Requirement)}
+We define a system enabling requirement $enable_s(s, a, s')$ for states $s, s' \in S$ and event $a \in \Sigma$ in $\mathcal{I}$:
+\begin{footnotesize}
+\[
+\begin{array}{r c l}
+enable_s(s, a, s') &=& 
+\square(encode(s) \wedge var(a) \rightarrow \Circle(enableCond_s(c(s'))))\\
+\end{array}
+\]
+\end{footnotesize}
+\end{definition}
+
+To represent that a deadlock will falsify the formula
+we need to introduce a new requirement for every deadlock state
+in the source automaton.
+
+\begin{definition}\label{def:deadlock-state}\emph{(Deadlock requirement)}
+\[deadlock(s) = \square(encode(s) \rightarrow \Circle(false)) \]
+\end{definition}
+
+In order to keep the atomic propositions of the formulas consistent
+we need set the value of the fluent-related signals in the
+same way they do in the control problem.
+
+\begin{definition}\label{def:fluent-set}\emph{(Set Fluent requirement)}\\
+\[fluent_s(s) = \square(encode(s) \rightarrow \bigwedge_{f \in v(s)} y(f) \wedge \bigwedge_{f \in \mathcal{F} \setminus v(s)}\neg y(f)) \]
+
+\end{definition}
+
+\begin{definition}\label{def:cp2gs}\emph{(Control Problem to Games Structure Translation)}
+For a control problem $\mathcal{I}= <E, \mathcal{C}, \varphi>$ with
+$E = (S, \Sigma, \Delta, s_{M_0})$ and 
+$\varphi = (\bigwedge_{i \in [1 \ldots n]} \phi_i \rightarrow \bigwedge_{j \in [1\ldots m]}\gamma_i)$, we define a control problem to game structure translation as:
+\[
+gs(<E,\mathcal{C},\varphi>) = \{\mathcal{V},\mathcal{X},\mathcal{Y},\theta_e, \theta_s,\rho_e,\rho_s, \varphi_e, \varphi_s\}\]
+With the following auxiliary definitions:
+\[
+\begin{array}{r c l}
+init_e(\mathcal{I},s) &=&
+\begin{cases}
+enabledCond_e(u(s)) \quad |c(s)| = 0\\
+enabledCond'_e(u(s)) \quad otherwise\\
+\end{cases}\\
+
+init_s(\mathcal{I},s) &=& enabled_s(c(s)) \cup \{ encode(s_0) \}\\
+init_{fl}(\mathcal{I}, f) &=& 
+\begin{cases}
+y(f)  \quad initially_f = true\\
+\neg y(f)  \quad otherwise\\
+\end{cases}\\
+fluents_s(\mathcal{I}) &=& \bigwedge_{s \in S} fluents_s(s)\\
+deadlocks(\mathcal{I}) &=& \bigwedge_{s \in S, |\Delta(s)| = 0} deadlock(s)\\
+enable_e(\mathcal{I}) &=& \{ \bigwedge_{(s, a, s') \in \Delta \wedge a \in \Sigma \setminus \mathcal{C}} enable_e(\mathcal{I}, s, a, s') \}\\
+enable_s(\mathcal{I}) &=& \{ \bigwedge_{(s, a, s') \in \Delta \wedge a \in \mathcal{C}} enable_s(\mathcal{I}, s, a, s') \}\\
+update_s(\mathcal{I}) &=& \{ \bigwedge_{(s, a, s') \in \Delta} update_s(\mathcal{I}, s, a, s') \}\\
+\end{array}
+\]
+We decompose the variables and the assertions in the games structure as follows:
+\[
+\begin{array}{r c l}
+\mathcal{V} &=& \mathcal{X} \cup \mathcal{Y}\\
+\mathcal{X} &=& \{ x(u) : u \in \Sigma \setminus \mathcal{C} \}\\
+\mathcal{Y} &=& Y_c \cup Y_s \cup Y_f \\
+Y_c &=& \{y(c) : c \in \mathcal{C}\} \\
+Y_s &=& \{s_i : i \in [0\ldots \lceil log_2(|S|) \rceil ] \\
+Y_f &=& \{ y(f) : f \in \mathcal{F} \}\\
+\theta_e &=& \{ init_e(\mathcal{I}, s_0) \}\\
+\theta_s &=& \{ init_s(\mathcal{I}, s_0) \cup \{ \bigwedge_{f \in \mathcal{F}} init_{fl}(\mathcal{I}, f)  \}\\
+\rho_e &=& enable_e(\mathcal{I})\\
+\rho_s &=& enable_s(\mathcal{I}) \cup update_s(\mathcal{I}) 
+\cup fluents_s(\mathcal{I}) \\
+&& \cup enable_{fl}(\mathcal{I}) \cup deadlocks(\mathcal{I})\\
+\varphi_e &=& adequate(\bigwedge_{i \in [1 \ldots n]} \phi_i)\\
+\varphi_s &=& adequate(\bigwedge_{i \in [1 \ldots m]} \gamma_i)\\
+\end{array}
+\]
+
+\end{definition}
+EXPLAIN NO CONTRADICTION IN FORMULAS\\
+EXPLAIN $\varphi$ PREDICATE OVER $y(fl)$\\
+EXPLAIN ONLY ONE EVENT PICKED AT EACH TRANS\\
+We need to show that the translation preserves the semantic of
+the model.  In order to do this we need to compare satisfaction of
+LTL formulas in the control problem against the constructed
+game structure.  Let $\mathcal{I} = <E, \mathcal{C}, \varphi>$
+be our source control problem and $\mathcal{G} = gs(\mathcal{I})$ be our target
+game structure. We will suppose, w.l.o.g that $E$ is a LTKS where the
+valuation for each state holds the value of the fluents involved in
+$\varphi$, if the structure of the initial LTS could not assign
+a unique fluent value to each state we can always apply the parallel
+composition of the original automaton with the induced automata for
+the fluents, and then assign the a unique valuation to the resulting
+states.\\
+We will use this property to define a relation 
+$\mathcal{Z} \subseteq S \times S'$ where $S'$ is the set of state
+system variables in $\mathcal{G}$ used to encode the value of each
+particular source state.  We define the relation as:
+\[ \mathcal{Z} : {\forall s \in S : (s, encode(s))} \]
+We proceed now to prove that $\mathcal{Z}$ is a bisimulation relation,
+since for every $(s, s') \in \mathcal{Z}$ the following holds:
+\begin{itemize}
+	\item [(prop)] $\forall f \in \mathcal{F}: s \models f \iff s' \models y(f)$ 
+	\item[(forth)] \[
+		\begin{array}{l}
+			\forall a,t s.t. (s,a,t) \in \Delta: \exists t' \in S', v',w' \in \mathcal{V}\setminus S' \text{s.t.}:\\
+			(s' \wedge v',t' \wedge w') \in \rho
+			\wedge (t, t') \in \mathcal{Z} 
+		\end{array}	
+		\]
+	\item[(back)] \[
+		\begin{array}{l}
+			\forall v,w \in \mathcal{V} \setminus S' s.t. (s \wedge v,t \wedge w) \in \rho:\\
+			\exists t' \in S, a \in \Sigma \text{s.t.}:
+			(s',a,t') \in \Delta
+			\wedge (t, t') \in \mathcal{Z} 
+		\end{array}	
+		\]		
+\end{itemize}
+\begin{proof}{(prop)}
+Since $fluents_s(s) \in \rho_s$ we know that \[encode(s) \rightarrow \bigwedge_{f \in v(s)} y(f) \wedge \bigwedge_{f \in \mathcal{F} \setminus v(s)}\neg y(f) \]
+But then is easy to see that:
+\[s' \models y(f) \iff \bigwedge_{f' \in v(s)} y(f') \models y(f) \iff f \in v(s)  \]
+Which is the definition of $s \models f$
+\end{proof}
+\begin{proof}{(forth)}
+Since the safety requirements are defined for all pairs of states in $\Delta$
+we can assume that $t' = encode(t)$ thus ensuring $(t,t') \in \mathcal{Z}$.
+In order to find $v',w'$ satisfying $(s' \wedge v',t' \wedge w') \in \rho$ we
+set $v'$ as $v_1 \wedge fluents_s(s')$ where
+$v_1 = var(a) \wedge \bigwedge_{a'\in \Sigma, a' \neq a}\neg var(a)$, that holds since $enabling_{\sigma}(s) \in \rho$, $enabling_s{\sigma}(s) $ $\models v_1$. 
+And we set $w'$ in the same fashion according to the safety restrictions for
+$t'$ in $fluents_s(t')$ and pick any mutex conjunct satisfying $enable_\sigma(t')$.
+\end{proof}
+\begin{proof}{(back)}
+Again we can assume that $t' = encode(t)$.
+Since we are working with deterministic automaton we know that
+for any given pair $v,w$ s.t. $(s' \wedge v', t' \wedge w') \in \rho$
+we can pick a unique $a \in \Sigma$ s.t. $(s, a, t) \in \Delta$ since
+$update_s(s,a,t) \in \rho_s$.
+\end{proof}

@@ -1,0 +1,10 @@
+A : preservar defs. con estrategia, tomando de non-anomalous y borel determinacy
+	A.0 - tomar traducción de E a juego
+	A.1 - tomar soundness completeness entre existencia de controlador y existencia de estrategia
+	A.2 - exponer determinancia de juegos GR(1) (citamos borel determinacy) (ltl está determinado)
+	A.3 - de A.0..A.3 implicar que existe contraestrategia
+	A.4 - en las pruebas hablar de contraestrategia en los juegos que son traducción de los E, E_1, E_kappa
+
+B : cambiar las demos a autómatas
+	B.0 - agregar definición de controlador para el ambiente
+	B.1 - cambiar demos para que hablen de este controlador en lugar de estrategias

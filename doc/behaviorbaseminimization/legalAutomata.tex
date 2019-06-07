@@ -1,0 +1,206 @@
+
+
+The following definitions are based on those presented in~\cite{alfaro01}.
+
+\begin{definition}\label{def:IA}\emph{(Interface Automata~\cite{alfaro01})}
+An \emph{Interface Automata} (IA) is $P=\langle V, V^{init}, \mathcal{A}^I, \mathcal{A}^O, \mathcal{A}^H, \mathcal{T} \rangle$ where,
+\begin{itemize}
+  \item $V$ is a set of states
+  \item $V^{init} \subseteq V$ is a set of initial states, with
+      $|V^{init}| \leq 1$.
+  \item $\mathcal{A}^I$, $\mathcal{A}^O$ and $\mathcal{A}^H$
+      are mutually disjoint sets of input, output and internal
+      actions. $\mathcal{A}=\mathcal{A}^I \cup \mathcal{A}^O
+      \cup \mathcal{A}^H$ denotes the set of all actions.
+  \item $\mathcal{T} \subseteq V \times \mathcal{A} \times V$
+      is the set of transitions.
+\end{itemize}
+\end{definition}
+
+If $a\in \mathcal{A}^I$ (resp. $a\in \mathcal{A}^O$, $a\in
+\mathcal{A}^H$), then $(v, a, v')$ is called an input (resp.
+output, internal) transition. $\mathcal{T}^I$ (resp.
+$\mathcal{T}^O$, $\mathcal{T}^H$) denotes the set of input (resp.
+output, internal) transitions. We say that an interface automaton
+$P$ is \emph{closed} if it only has internal actions (i.e.
+$\mathcal{A}^I = \mathcal{A}^O = \emptyset$); otherwise, we say
+that $P$ is \emph{open}. An action $a$ is \emph{enabled} at a state
+$v\in V$ if there exists a $v'\in V$ such that
+$(v,a,v')\in\mathcal{T}$. The sets $\mathcal{A}^I(v)$,
+$\mathcal{A}^O(v)$ and $\mathcal{A}^H(v)$ denote the set of input,
+output and internal actions that are enabled from state $v$, and
+$\mathcal{A}(v)=\mathcal{A}^I(v) \cup \mathcal{A}^O(v)\cup
+\mathcal{A}^H(v)$ is the set of all enabled actions from state $v$.
+As an example consider the drill modelled with the IA automata in
+Figure~\ref{fig:drillIA}. Whenever the drill receives a product to
+be processed ($put$) it signals an actuator to start processing the
+product ($process$). Afterwards, the sensors signal if the product
+has been successfully processed ($processOk$) or not
+($processFail$). If the processing was successful, the drill
+informs that the product is now ready ($ack$) and can be picked up
+($get$); or report an error ($nack$) and waits for the product to
+be discarded ($discard$) otherwise.
+
+
+\begin{definition}\label{def:composable}\emph{(Composable)}
+Two interface automata $P=\langle V_P, V_P^{init}, \mathcal{A}_P^I,
+\mathcal{A}_P^O, $ $\mathcal{A}_P^H, \mathcal{T}_P \rangle$ and
+$Q=\langle V_Q, V_Q^{init}, \mathcal{A}_Q^I, \mathcal{A}_Q^O,
+\mathcal{A}_Q^H, \mathcal{T}_Q \rangle$ are \emph{composable} if
+\begin{center}
+\begin{displaymath}
+    \begin{array}{cc}
+     \mathcal{A}_P^H \cap \mathcal{A}_Q = \emptyset & \mathcal{A}_P^I \cap \mathcal{A}_Q^I = \emptyset \\
+     \mathcal{A}_P^O \cap \mathcal{A}_Q^O = \emptyset & \mathcal{A}_Q^H \cap \mathcal{A}_P = \emptyset
+    \end{array}
+\end{displaymath}
+\end{center}
+Let $shared(P, Q)= \mathcal{A}_P \cap \mathcal{A}_Q$.
+\end{definition}
+
+The composition of IAs $P$ and $Q$ is defined in stages. First, the
+product automaton $P\otimes Q$, which coincides with the
+composition of I/O automata~\cite{Lynch:1987:HCP:41840.41852},
+except that since $P$ and $Q$ are not necessarily input-enabled,
+some transitions present in $P$ or $Q$ may not be present in the
+product.
+
+\begin{definition}\label{def:ia-product}\emph{(Product)}
+Given $P=\langle V_P, V_P^{init}, \mathcal{A}_P^I, \mathcal{A}_P^O, \mathcal{A}_P^H, \mathcal{T}_P \rangle$ and $Q=\langle V_Q, V_Q^{init}, \mathcal{A}_Q^I, \mathcal{A}_Q^O, \mathcal{A}_Q^H, \mathcal{T}_Q \rangle$ composable interface automata, their product is the interface automaton $P\otimes Q=\langle V_{P\otimes Q}, V_{P\otimes Q}^{init}, \mathcal{A}_{P\otimes Q}^I, \mathcal{A}_{P\otimes Q}^O, \mathcal{A}_{P\otimes Q}^H, \mathcal{T}_{P\otimes Q} \rangle$, where:\\
+\begin{eqnarray*}
+  V_{P\otimes Q} &=& V_P \times V_Q \nonumber\\
+  V_{P\otimes Q}^{init} &=& V_{P}^{init} \times V_{Q}^{init} \nonumber\\
+  \mathcal{A}_{P\otimes Q}^I &=& (\mathcal{A}_{P}^I \cup \mathcal{A}_{Q}^I)\setminus shared(P,Q)\nonumber\\
+  \mathcal{A}_{P\otimes Q}^O &=& (\mathcal{A}_{P}^O \cup \mathcal{A}_{Q}^O)\setminus shared(P,Q)\nonumber\\
+  \mathcal{A}_{P\otimes Q}^H &=& (\mathcal{A}_{P}^H \cup \mathcal{A}_{Q}^H)\cup shared(P,Q)\nonumber
+\end{eqnarray*}
+The transition relation is defined as follows:
+\begin{eqnarray*}
+% \nonumber to remove numbering (before each equation)
+  \mathcal{T}_{P\otimes Q} &=& \set{((u,v),a,(u,v')) | (v,a,v')\in\mathcal{T}_{P} \wedge a\notin shared(P,Q) \wedge u\in V_Q} \nonumber\\
+      &\cup & \set{((u,v),a,(u',v)) | (u,a,u')\in\mathcal{T}_{Q} \wedge a\notin shared(P,Q) \wedge v\in V_P} \nonumber\\
+      &\cup& \set{((u,v),a,(u',v')) | (v,a,v')\in\mathcal{T}_{P} \wedge (u,a,u')\in\mathcal{T}_{Q} \wedge a\in shared(P,Q)} \nonumber
+\end{eqnarray*}
+\end{definition}
+
+Recall that interface automata do not require input-enabledness.
+Therefore given the product $P\otimes Q$ of two interface automata
+$P$ and $Q$, may have states in which one of them produces an
+output action that is input action for the other but it is not
+enabled in that state, hence it is not accepted. Such a state is
+called an \emph{Illegal} state. $Illegal(P,Q)$ denotes the set of
+illegal states in the product $P\otimes Q$. In
+Figure~\ref{fig:armIA} we present a robotic arm that places
+products in the drill ($put$), waits for the drill to finish
+($ack$) and finally picks the resulting product up ($get$). The
+robotic arm assumes that once products have been placed in the
+drill, they will be successfully processed. Hence, it cannot handle
+failures. The IA $\drill \otimes \arm$ is shown in
+Figure~\ref{fig:IAproduct}. As in the case of LTS parallel
+composition, each state in $\drill \otimes \arm$ consists of a
+state of $\drill$ together with a state of $\arm$, and each
+transition represents either a joint step on both $\drill$ and
+$\arm$ processes or an individual step on one of them. Consider the
+following scenario, the arm places a product in the drill ($put$),
+the drill starts processing ($process$) and its sensors signal a
+failure ($processFail$). This sequence lead us to state $5$ of
+$\drill \otimes \arm$, which corresponds to state $5$ of $\drill$
+and $1$ of $\arm$. In state $5$, the sensors are signalling the
+drill that something went wrong while processing the current
+product, but the $\arm$ is not prepared to handle such situation.
+Such state is called $illegal$ in $\drill\otimes\arm$.
+
+\begin{definition}\label{def:illegalStates}\emph{(Illegal States)}
+Given two composable interface automata $P$ and $Q$, the set of
+$Illegal(P,Q)\subseteq V_P \times V_Q$ of illegal states of
+$P\otimes Q$ is defined as follows:
+
+\begin{eqnarray*}
+    Illegal(P, Q) &=& \set{(v,u)\in V_P\times V_Q | \exists a \in shared(P,Q) \cdot \\
+        & & ((a\in\mathcal{A}_P^O(v) \wedge a\notin\mathcal{A}_Q^I(u)) \vee (a\in\mathcal{A}_Q^O(u) \wedge a\notin\mathcal{A}_P^I(v)))}
+\end{eqnarray*}
+\end{definition}
+
+If the product $P\otimes Q$ is closed, $P$ and $Q$ are said to be
+\emph{compatible} if no illegal state of $P\otimes Q$ is reachable.
+If $P\otimes Q$ is open, the fact that a states is in
+$Illegal(P,Q)$ is reachable does not necessarily indicate an
+incompatibility, because by generating appropriate inputs, the
+environment of $P\otimes Q$ may be able to ensure that no state in
+$Illegal(P,Q)$ is visited. Such an environment is called a
+\emph{legal environment}. The existence of legal environment
+indicates that there is a way to use the interfaces $P$ and $Q$
+together without giving rise to incompatibilities. A legal
+environment for $R$ needs to satisfy the following side conditions.
+
+\begin{definition}\label{def:IAlegalEnvironment}\emph{(Legal Environment)}
+An environment for an interface automaton $R$ is an interface
+automaton $E$ such that, (i) $E$ is composable with $R$, (ii) $E$
+is nonempty, (iii) $\mathcal{A}_E^I=\mathcal{A}_R^O$, and (iv)
+$Illegal(R,E)=\emptyset$.
+\end{definition}
+
+\begin{definition}\label{def:IAComposition}\emph{(IA Composition)}
+The composition of two interface automata is obtained by
+restricting the product of the two automata to the set of
+compatible states, which are the states from which the environment
+can prevent \emph{illegal states} being visited.
+\end{definition}
+
+
+\begin{definition} \label{def:comp-states}\emph{(Compatible States)}
+Consider two composable interface automata $P$ and $Q$. A pair $(v,
+u)\in V_P\times V_Q$ of states is compatible if there is an
+environment $E$ for $P\otimes Q$ such that no state in
+$Illegal(P\otimes Q)\times V_E$ is reachable in $(P\otimes Q)\times
+V_E$ from the state $\set{(v,u)}\times V_E^{init}$.
+\end{definition}
+
+According to the definitions above, the IAs presented in
+Figures~\ref{fig:drillIA} and~\ref{fig:armIA} are compatible.
+Hence, there exists an environment that in which there are no
+reachable \emph{illegal} states. For instance, an environment that
+never fails ensures that the illegal state $5$ in
+$\drill\otimes\arm$ is not reachable. In
+Figure~\ref{fig:IAcomposition}, we show the composition
+$\drill\|\arm$, obtained by restricting $\drill\otimes\arm$ to its
+compatible states, which corresponds to the composition between
+$\drill$, $\arm$ and an environment which never lets the drill to
+fail processing products.
+
+\begin{figure}[bt]
+\centering
+    \VCDraw{
+%        \ShowFrame
+        \begin{VCPicture}{(-10,-1)(10,5)}
+        \State[0]{(-5,0)}{0}
+        \Initial{0}
+        \State[1]{(0,0)}{1}
+        \State[2]{(5,0)}{2}
+        \State[3]{(5,3.5)}{3}
+        \State[4]{(-5,3.5)}{4}
+        \EdgeL{0}{1}{put?}
+        \EdgeL{1}{2}{process!}
+        \EdgeL{2}{3}{processOk?}
+        \EdgeR{3}{4}{ack!}
+        \EdgeL{4}{0}{get?}
+        \end{VCPicture}
+    }
+\caption{$\drill \| \arm$.}
+\label{fig:IAcomposition}
+\end{figure}
+
+Based on the definitions above we define the notion of \emph{LTS
+legal environment} which will be used in future definitions.
+
+\begin{definition}\label{def:ltslegalEnvironment}
+\emph{(LTS Legal Environment)} Given $M = (S_M, $ $ L_M, \Delta_M,
+s_{M_0})$ and $P =$ $(S_P,L_P,\Delta_P,s_{P_0})$ LTSs, where $L_M$
+$=L_{M_c}\sqcup L_{M_u}$ and $L_P=L_{P_c}\sqcup L_{P_u}$. We say
+that $M$ is an \emph{LTS legal environment} for $P$ with controlled
+actions $L_{M_c}$, if the interface automaton $M'=\langle S_M,
+\set{s_{M_0}}, L_{M_u}, L_{M_c}, \emptyset, \Delta_M \rangle$ is a
+\emph{legal environment} for the interface automaton $P'=\langle
+S_P, \set{s_{P_0}},$ $L_{P_u}, L_{P_c}, \emptyset, \Delta_P
+\rangle$.
+\end{definition}

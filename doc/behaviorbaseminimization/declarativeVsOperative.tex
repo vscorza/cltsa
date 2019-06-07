@@ -1,0 +1,118 @@
+\subsection{On The Declarative vs Operational Approach}
+To the best of our knowledge,
+ previous work on the minimization of unrealizable
+specifications has been focused on reducing the set of requirements expressed as LTL formulas.  
+This is the approach taken in \cite{DBLP:conf/hvc/KonighoferHB10} and the
+initial inspiration for our work.  Könighoefer et al. built their framework
+from what was presented in \cite{DBLP:conf/vmcai/CimattiRST08} and in
+\cite{DBLP:conf/vmcai/2008} where they took the \textit{delta debugging}
+algorithm as a cost-effective minimization technique.\\
+Even though the kind of properties being satisfied is the same, we differ
+not only in the formalism under use but also in the nature of our minimization,
+since we are not reducing the set of formulas but the explicit behavior expressed
+as an automaton.\\
+To clarify the difference we apply an automated translation
+scheme to transform our operational control problem  into
+a declarative specification.
+The later is written as the conjunction of four \texttt{LTL} \cite{pnueli1977temporal}
+formulas as presented in Table \ref{table:planar-robot-declarative-spec}. 
+We follow the definitions from \cite{DBLP:conf/vmcai/PitermanPS06}. Our goal is to get a game structure that properly emulates the semantics
+of the source control problem.  The idea is that both structures should
+satisfy equivalent sets of LTL formulas.\\
+The translation can be explained as follows:
+we encode the automaton state space through a set of boolean system variables
+that will express the binary representation at each particular state.  The 
+target specification will have a boolean variable (or signal) for each source
+event.  Monitored events from the source specification will be 
+represented through environment variables ($\mathcal{X}$) and
+controlled events through system variables ($\mathcal{Y}$).  
+Suppose that we have the following control problem $\mathcal{I}=\langle E, \mathcal{C}, \varphi \rangle$,
+with plant $E$ described as the LTKS $E = (S, \Sigma,\Delta, v:S \rightarrow 2^{\mathcal{F}} ,s_0)$, $\mathcal{F}=\{f_1, f_2 \}$ and where
+$a,b,c \in \Sigma$, $c \in \mathcal{C}$, $v(s_i)=\{ f_1 \}, v(s_j)=\{f_2\}$ and
+$(s_i, a, s_j)$,
+$(s_j, a, s_k)$,
+$(s_j,b,s_l)$,
+$(s_j, c, s_m) \in \Delta$.
+Each transition from the source automaton is translated into three 
+different formulas ($enable_{sys}$, $enable_{env}$, $update$), two standing for enabling requirements:\\
+\textbf{[$enable_{sys}$]}One for the environment ($env.enable_{i,a} \in \rho_e$) as an implication from current state 
+and currently selected action into a disjunction of mutually exclusive conjunction 
+of monitored event related signals declaring the set of next-step enabled
+environment actions. Suppose that $s, act_c \in \mathcal{Y}$
+and $act_a, act_b \in \mathcal{X}$.
+\[
+\square(s = i \wedge act_a \rightarrow \Circle((\neg act_a \wedge act_b)\vee(act_a \wedge \neg act_b) \vee (\neg act_a \wedge \neg act_b)))\]
+\textbf{[$enable_{env}$]} One for the system ($sys.enable_{i,a} \in \rho_s$) as an implication from current state
+and currently selected action into another implication 
+from the negation of all monitored events to the
+disjunction of mutually exclusive conjunction of controlled
+event related signals declaring the set of next-step enabled
+system actions.
+\[
+\square(s = i \wedge act_a \rightarrow \Circle((\neg act_a \wedge \neg act_b)\rightarrow (act_c)))\]
+\textbf{[$update$]} The third transition requirement ($s.update_{i,a} \in \rho_s$) is the one 
+effectively updating the automaton state representation.
+\[
+\square(s = i \wedge act_a \rightarrow \Circle(s = j))\]
+Initial conditions ($\theta_s, \theta_e$) are set according to the initial state 
+$s_0$ in the automaton and initially enabled actions.
+The LTKS valuations, that predicate over the set $\mathcal{F}$ of 
+fluents, is translated in with the proper system safety requirement.\\
+Following this translation and starting with
+the control problem presented for the planar robot
+we get an equivalent game structure shown (abbreviated
+leaving only formulas relevant to state $4$) in 
+Table \ref{table:planar-robot-declarative-spec}.
+\begin{center}
+\begin{table}[h]
+  \begin{tabular}{ L{2cm} c L{5cm} }
+  \toprule
+	Name  && Requirement \\
+    Init. env.  &($\theta_e$) & $(sensor.disabled \veebar sensor.enabled)$ $ \wedge \neg timeout \wedge \neg data.rcvd$\\    
+    Init. sys. &($\theta_s$) & $s = 0 \wedge \neg update.direction \wedge$ $\neg get.SLAM.location \wedge \neg get.GPS.location$\\
+    
+    \ldots  && \ldots \\
+    
+    $_{4 \rightarrow 3}$ $timeout$ &($\rho_s$)
+    &$\square((s=4 \wedge timeout)\rightarrow \Circle(s=3))$ \\
+    
+    $_{4 \rightarrow 5}$ $data.rcvd$ &($\rho_s$)
+    &$\square((s=4 \wedge data.rcvd)\rightarrow \Circle(s=5))$ \\
+    
+    \ldots  && \ldots \\
+    
+    $_{4\rightarrow 5}$ $data.rcvd$ enable$_{sys}$ &($\rho_s$)
+    &$\square((s=4 \wedge data.rcvd)\rightarrow \Circle(update.direction \wedge \neg get.SLAM.location \wedge \neg get.GPS.location))$ \\    
+    
+    $_{4\rightarrow 5}$ $data.rcvd$ enable$_{env}$ &($\rho_e$)
+    &$\square((s=4 \wedge data.rcvd)\rightarrow \Circle(\neg timeout \wedge \neg sensor.enabled \wedge \neg sensor.disabled \wedge \neg data.rcvd))$ \\        
+    
+    \ldots  && \ldots \\
+    Goal   &($\varphi_s$) & $\square\Diamond(update.direction)$\\
+    \bottomrule
+  \end{tabular}
+  \caption{Planar Robot Equivalent Game Structure}
+  \label{table:planar-robot-declarative-spec}
+ \end{table}
+\end{center}
+The Könighoefer et al. technique removes system requirements
+only.  After applying their minimization the 
+$_{4 \rightarrow 5} data.rcvd$ and $_{4 \rightarrow 5}$ $data.rcvd$ enable$_{sys}$ requirements are removed,
+since relaxing the system this way does not affect 
+the environment winning strategy.  The syntactic 
+simplification actually augments the system transition
+relation $\rho_{s}$ for the case where
+$s=4 \wedge data.rcvd$ holds, implicitly adding a
+$data.rcvd$ transition to every other state.  This
+is feasible since the environment will always pick
+$timeout$ over $data.rcvd$ when reaching state $4$. 
+Aforementioned requirements 
+($_{4 \rightarrow 5} data.rcvd$ and $_{4 \rightarrow 5}
+data.rcvd$ enable$_{sys}$) are irrelevant to the 
+non realizability cause, but removing them 
+bloats the specification in terms of explicit behavior
+since it adds more transitions.  We want to
+improve the understanding of the problem by way
+of simplification, this adds another point in favor
+o a novel minimization technique, designed specifically
+for behavior based (or operational) specifications.

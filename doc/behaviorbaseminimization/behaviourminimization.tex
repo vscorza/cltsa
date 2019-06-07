@@ -1,0 +1,140 @@
+\documentclass[sigconf,review, anonymous]{acmart}
+\usepackage{etex}
+\usepackage{booktabs} % For formal tables
+\usepackage[utf8]{inputenc}
+\usepackage{xspace}
+\usepackage{enumerate}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{amsopn}
+\usepackage{vaucanson-g}
+\usepackage{numprint}
+%\usepackage[toc,page]{appendix}
+\usepackage{booktabs} % Required for the top and bottom rules in the table
+\usepackage{float} % Required for specifying the exact location of a figure or table 
+\usepackage{enumitem}
+\usepackage{placeins}
+\usepackage{graphicx} % Required for including images
+\usepackage{lipsum} % Used for inserting dummy 'Lorem ipsum' text into the template
+\usepackage{amssymb}
+\usepackage{rotating}
+\usepackage{tikz}
+\usetikzlibrary{automata,positioning}
+\usepackage{verbatim}
+\usepackage{xypic}
+\usepackage{wasysym}
+\usepackage{listings}
+\usepackage{calc}
+\usepackage{changes}
+
+\newlength\mylength
+\setlength\mylength{(\widthof{long long long long long}-\widthof{short})/2}
+\setlength\arraycolsep{2pt}
+% Copyright
+%\setcopyright{none}
+%\setcopyright{acmcopyright}
+%\setcopyright{acmlicensed}
+%\setcopyright{rightsretained}
+%\setcopyright{usgov}
+%\setcopyright{usgovmixed}
+%\setcopyright{cagov}
+%\setcopyright{cagovmixed}
+\usepackage{booktabs}
+\usepackage{array}
+\newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+%\ifCLASSOPTIONcompsoc
+%  % IEEE Computer Society needs nocompress option
+%  % requires cite.sty v4.0 or later (November 2003)
+%  \usepackage[nocompress]{cite}
+%\else
+%  % normal IEEE
+%  \usepackage{cite}
+%\fi
+
+% DOI
+%\acmDOI{10.475/123_4}
+
+% ISBN
+%\acmISBN{123-4567-24-567/08/06}
+
+%Conference
+%\acmConference[ESEC/FSE'17]{ESEC/FSE Conference}{September 2017}{Paderborn, Germany} 
+%\acmYear{2017}
+%\copyrightyear{2017}
+
+%\acmPrice{15.00}
+\acmYear{2018}
+\acmConference[ESEC/FSE 2018]{The 26th ACM Joint European Software Engineering Conference and Symposium on the Foundations of Software Engineering}{4–9 November, 2018}{Lake Buena Vista, Florida, United States}
+
+
+
+\begin{document}
+
+% author names and affiliations
+% use a multiple column layout for up to three different
+% affiliations
+
+\title{Behavior Minimization Feedback for Unrealizable Specifications }
+
+
+\author{
+%M. Cerrutti$^+$, V. Braberman$^+$, N. D'Ippolito$^+$, S. Uchitel$^+$$^\dagger$\\
+%
+%\IEEEauthorblockA{$^+$Departamento de Computaci\'{o}n, FCEN, Universidad de Buenos Aires, Argentina\\
+%$^\dagger$Departament of Computing, Imperial College, London}
+}
+%\renewcommand{\shortauthors}{M. Cerrutti et. al.}
+
+\input{macros}
+
+\begin{abstract}
+At their early stages system specifications are usually unrealizable, in
+other words, there is no system that can be built to satisfy its goals under
+the assumed environment conditions. The cause for unrealizability can be
+boiled down to the fact that stated goals are too strong, the assumptions are
+too weak, or (commonly) a subtle combination of both.  Providing engineers
+feedback that allows to understand the cause for unrealizability is
+necessary if specifications are to be evolved into realizable ones.
+
+In this paper, we propose a technique that minimizes the behavior of an
+unrealizable \gr specification while preserving non-realizability, thus allowing
+engineers to focus on core behavior that causes unrealizability. The technique assumes an automata-based description of the environment 
+%and 
+%This is the first technique that is designed to be used to provide feedback for \gr synthesis problems in which the environment is described as an automaton and the goals as liveness LTL formulas. 
+%differs from existing feedback techniques as it reduces (rather than augmenting) allowable behavior while preserving unrealizability. 
+and returns a model that preserves the cause for unrealizability in the sense that the environment's strategy for beating the system in the minimized model is also a winning strategy in the original model. 
+
+%The technique has also the potential to complement existing techniques that assume a specification only in LTL form and that work by syntactic, rather than semantic, minimization.
+\end{abstract}
+
+\maketitle
+%\IEEEpeerreviewmaketitle
+% We no longer use \terms command
+%\terms{Theory}
+
+%\keywords{Unrealizability, Debugging, Formal Specifications}
+
+
+
+
+\input{introduction}
+\input{motivatingExample}
+\input{background}
+\input{extension}
+\input{problemStatement}
+\input{solution}
+\input{validation}
+\input{discussion}
+\input{conclusion}
+\bibliographystyle{ACM-Reference-Format}
+%\bibliographystyle{ACM-Reference-Format}
+%\bibliography{sigproc} 
+%\bibliographystyle{IEEEtran}
+%\newpage
+\bibliography{bibliography}
+\input{Appendix}
+%\input{appendixes}
+\end{document}

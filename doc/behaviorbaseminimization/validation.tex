@@ -1,0 +1,457 @@
+ 
+\section{Validation}
+
+The validation reported in this section is guided by two main concerns.  This first is the degree to which the initial control problem is reduced and the computational cost involved. The second is if the minimization offers insight into non realizability causes.
+In order to avoid bias, we prioritized using third-party developed unrealizable specifications that include explanations for the causes of unrealizability.
+Unfortunately, third party controller synthesis problems that are found in the literature are typically realizable. The only sources we found were from ~\cite{DBLP:conf/hvc/KonighoferHB10,DBLP:conf/kbse/DegiovanniRACA16,DBLP:conf/fmcad/AlurMT13}. More specifically, we used Generalized Buffer case study from~\cite{DBLP:conf/hvc/KonighoferHB10}, the Lift Controller case study from ~\cite{DBLP:conf/fmcad/AlurMT13} and the Mine Pump case study from~\cite{DBLP:conf/kbse/DegiovanniRACA16}.
+The case studies taken from~\cite{DBLP:conf/hvc/KonighoferHB10,DBLP:conf/kbse/DegiovanniRACA16,DBLP:conf/fmcad/AlurMT13} all have  the specification of the control problem  provided as a set of LTL formulas rather than automata. Hence, they required a translation of the safety formulae of these specifications into LTS. To complete our validation, we also included a series of case studies that were provided in their original formulation as a composition of automata: the t-strong fairness case study from \cite{DBLP:conf/icse/DIppolitoBPU11}, a game of tic-tac-toe. For these we were forced to manually seed unrealizability causes. Finally, we were provided an unrealizable specification for the CTvPlatform Controller~\cite{DBLP:journals/computer/OmmeringLKM00} which we analyzed. 
+In the following we report quantitatively on all case studies to show the degree to which the initial control problem is reduced and the computational cost involved. We also report qualitatively on the case studies taken from ~\cite{DBLP:conf/hvc/KonighoferHB10,DBLP:conf/kbse/DegiovanniRACA16,DBLP:conf/fmcad/AlurMT13} as they provide an unbiased basis against to which it is possible to evaluate the insight into non realizability causes that our technique provides. 
+
+%The case study described here comes
+%from automata based specifications and shows 
+%the existence of relatively simple
+%problems when highly modular specifications are involved.\\
+
+All case studies were run using an extension of the MTSA tool \cite{DBLP:conf/kbse/DIppolitoFCU08}. MTSA natively supports specification of LTS \cite{DBLP:journals/cacm/Keller76} and properties using
+ a textual, process algebraic notation and linear temporal logic.  The tool supports synthesis of controllers for GR(1) control problems where the safety part of the problem can be specified as an composition of LTS, and the liveness goals and assumptions are provided using temporal logic.   
+ %Prior to this work the only feedback given to the user  when specifying an unrealizable problem was a legend  reading that \textit{there was no controller for the given
+ %specification}.  
+  The extension builds a minimized unrealizable version of the environment that can then be inspected through various methods including animations and visualization of the state space.
+  
+%\subsection{Quantitative Evaluation}
+
+
+  
+  
+The quantitative results of our experiments are shown in table 
+\ref{table:quantitative-results} and were run on an 
+\texttt{Intel\textsuperscript{\textregistered} Core\textsuperscript{\texttrademark}
+ i7-4790} CPU with 8 processors of 3.60GHz frequency
+16 Gb of RAM memory and \texttt{ubuntu 14.04} as the operating system.
+Total time taken by the algorithm is measured in milliseconds and
+labeled as \emph{Time}, $|S_e|$ and $|S_{e\kappa}|$ stand for
+the size of the original and minimized LTSs in terms of states,
+\emph{State Reduction} is the reduction percentage of these.  
+$|\Delta_e|$ and $|\Delta_{e\kappa}|$ stand for
+the size of the original and minimized LTSs in terms of edges,
+\emph{Transition Reduction} is the reduction percentage of the later two.  
+%$Time/S_e$ is the relative measure of time taken per state.
+$steps$ reports how many iterations the algorithm needed before finding
+the first Minimal Alternating Sub-LTS. \emph{Edges Explored} reports the percentage of
+edges the algorithm needed to explore before finding the first
+conflict.
+ 
+\begin{table*}
+\centering
+  \begin{tabular}{ | l | c | c | c | c | c | c | c | c | c | }
+    \hline
+ & Time & &  &State&  & &Transition&&Edge\\
+Case & (ms) & $|S_e|$ & $|S_{e\kappa}|$ &Reduction& $|\Delta_e|$ & $|\Delta_{e\kappa}|$ &Reduction&steps&Explored\\
+    \hline
+t strong fairness&10.65&7&4&57.14\%&9&4&44.44\%&3&33.33\%\\
+%t strong fairness b &15&7&5&71.43\%&9&6&66.67\%&5&55.56\%\\
+mine pump &8.7&14&5&35.71\%&20&5&25.00\%&6&30.00\%\\
+lift controller&121&95&43&45.26\%&130&50&38.46\%&35&26.92\%\\
+Tv controller&11031&218&8&3.67\%&1416&21&1.48\%&43&3.04\%\\
+%tictactoe3 &66054&4658&176&3.78\%&18561&354&1.91\%&414&2.23\%\\
+%tictactoe4 &70896&4696&236&5.03\%&18647&472&2.53\%&529&2.84\%\\
+%tictactoe5 &69738&4696&236&5.03\%&18647&472&2.53\%&529&2.84\%\\
+tictactoe&75279&4696&236&5.03\%&18647&472&2.53\%&529&2.84\%\\
+%tictactoe2&65449&4590&184&4.01\%&19241&420&2.18\%&418&2.17\%\\
+gen buf (miss. assumpt.)&6688142&10964&2235&20.38\%&14894&2963&19.89\%&1093&7.34\%\\
+gen buf (added goal)&7882862&10964&850&7.75\%&14894&1139&7.64\%&646&4.33\%\\
+gen buf (added restr.)&73&39&26&66.66\%&47&28&59.57\%&10&21.27\%\\
+\hline    
+  \end{tabular}
+  \vspace*{2mm}
+  \caption{Quantitative results for minimized plants}
+  \label{table:quantitative-results}
+ \end{table*}
+
+%DD complexity, DFS reduction
+
+%\subsection{Optimization}
+%\subsection{Test Cases}
+%\subsection{Experimental Framework}
+%\subsection{Results}
+
+From the results it is possible to argue that the minimization technique can be applied to control problems of similar size to those reported in the literature. 
+%In addition, it is possible to observe, as expected, that the  that spatial and temporal limitation behave linearly with respect to the realizability query. 
+In addition, it can be seen that the technique can achieve a significant reduction in terms of states and transitions.
+
+
+\subsection{CTvPlatform Controller}\label{section:validation-ctv}
+In \cite{DBLP:journals/computer/OmmeringLKM00} the authors
+introduce a modular specification for a TV System using
+their Koala model. At the time of this writing  
+another member of our group was working on a 
+specification inspired in this particular system
+and introducing some abstractions, such as the user 
+module, from \cite{DBLP:conf/sigsoft/UchitelCKM04}.
+As in the original scenario the specification was decoupled
+in several modules to achieve cohesion.  
+Relevant to this case study is the
+TV set that can display random noise while
+tuning, set the output to the specified channel afterwards
+or eventually reset the channel selection and
+go blank. The other modules describe the
+behavior of the user (selecting a particular channel), 
+the tuning sub-system (linking user selection with
+frequency filtering) and the screen driver (that outputs
+the corresponding image, be it a channel, random noise
+or simply nothing when going blank). 
+The goal was to synthesize a 
+controller for a TV that must satisfy the following
+liveness requirement: $\square \Diamond (select.i \implies display.i)$. 
+In this example we found that 
+compositionality trades cohesion for behavioral abstraction.
+This means that even when the behavior of each component is fairly simple their concurrent interaction is difficult to
+grasp.  Applying our minimization technique to several ongoing
+specifications within our group we found that even though
+the automaton exposed a complex potential behavior (in terms
+of its state space) unrealizability could be explained without going too far away from the starting point.
+The first CTvPlatform TV Controller diagnosis, as depicted in figure
+\ref{fig:tv-controller-minimization} showed that the tuner
+introduced a non controllable self loop where the environment
+could flood the execution with incoming tuning signals ($signal.i$) and that
+even if a controllable action was allowed to escape the
+looping state the screen was allowed to produce 
+the $blank$ action indefinitely. \\
+\begin{figure}[bt]
+\centering
+\SmallPicture
+%\ShowFrame
+\VCDraw{
+    \begin{VCPicture}{(-4,-4)(4,4)}
+        \SetEdgeLabelScale{1.4}
+        \State[1]{(-4,0)}{1}
+        \State[2]{(0,0)}{2}
+        \State[3]{(4,0)}{3}              
+        \State[4]{(2,-3)}{4}
+		\Initial[w]{1}
+		\LoopN{1}{signal.1}
+		\LoopN{2}{signal.1}		
+		\ArcR{2}{3}{blank}				
+		\LoopN{3}{blank}								
+		\ArcR{2}{4}{unblank}
+		\ArcR[.75]{4}{3}{blank}		
+		\ArcR[.6]{3}{4}{unblank}				
+        \ChgEdgeLineStyle{dashed} 
+		\EdgeL{1}{2}{tick}		
+		\ArcR{3}{2}{tick}						        
+    \end{VCPicture}
+}
+\vspace*{-2mm}
+\caption{CTvPlatform TV Controller minimization.}
+\label{fig:tv-controller-minimization}
+\vspace*{-4mm}
+\MediumPicture
+\end{figure}
+
+\subsection{Mine Pump Controller (MPC)}
+%introduce translation for GS specs
+The Mine Pump Controller (MPC)
+ originally presented in
+\cite{:/content/journals/10.1049/ip-e.1983.0001} describes a controller that should
+drain water from a mine whenever its level surpassed
+a certain threshold, with the restriction that it should
+stop the pump if the sensors indicated that a high level
+of methane was present due to the risk of ignition.\\
+
+We used the variant specification of the problem provided  in \cite{DBLP:conf/kbse/DegiovanniRACA16}
+where they highlight that two safety goals ($\square(methane.hi \implies \Circle(\neg running))$
+and $\square(water.hi \implies \Circle(running))$) are logically consistent but there is a \textit{boundary condition} 
+that if true, makes the conjunction of the two safety goals impossible. The GR(1) liveness requirement states that the
+ water level to be kept within reasonable limits infinitely often ($\square \Diamond \neg water.Hi$).
+ %, as
+ %already stated in \cite{:/content/journals/10.1049/ip-e.1983.0001}
+ %when expecting that \emph{“the pump
+ %shall be on when the water level is above the high threshold”}.
+
+
+We applied our minimization on the translated specification from \cite{DBLP:conf/kbse/DegiovanniRACA16}
+to get the LTS depicted in Figure
+ \ref{fig:mine-pump-minimization}.  We can see here that
+ the minimization properly slices the LTS to expose what
+ is characterized
+ as the boundary condition $(\Diamond hw \wedge m)$ and in our
+ case is preventing the system from achieving its goal.
+ \\
+
+ 
+ This slice should lead the engineer towards adding
+ the missing assumption $\square \Diamond (\neg methane.hi \wedge \neg water.hi)$.
+ If the original problem and the implementation proposed in 
+the appendix from \cite{:/content/journals/10.1049/ip-e.1983.0001}
+are expected to be deployed, this assumption should be added for
+the problem to be realizable.\\
+
+
+Now we explain the behavior depicted in Figure \ref{fig:mine-pump-minimization}.
+ After the initial condition is met (between states 1 and 
+ 5) the environment can then raise the water level (transition
+ from state 6 to 7) forcing the system to start the pump
+ (transition from state 7 to 8) but then raise the
+ methane level (transition from 8 to 9) giving to option
+ to the system but to turn off the pump (transition 9
+ to 10).  After this the environment can keep the
+ signals constant denying the system the opportunity
+ to satisfy its goal.\\
+ 
+%This example shows the relevance of behavior base minimization
+%for unrealizable specifications initially described as
+%a set of LTL formulae over boolean variables.  This is
+%an explicit representation of the unrealizability cause
+%that gives immediate feedback about the interaction
+%of the system and the environment that leads to the
+%violation of the liveness guarantee.
+\begin{figure}[bt]
+\centering
+\SmallPicture
+%\ShowFrame
+\VCDraw{
+    \begin{VCPicture}{(-6,-3)(6,3)}
+        \SetEdgeLabelScale{1.4}
+        \State[1]{(-6,2)}{1}
+        \State[2]{(-2,2)}{2}
+        \State[3]{(2,2)}{3}
+        \State[4]{(6,2)}{4}
+        \State[5]{(6,0)}{5}        
+        \State[6]{(2,0)}{6}        
+        \State[7]{(-2,0)}{7}        
+        \State[8]{(-6,-2)}{8}        
+        \State[9]{(-2,-2)}{9}        
+        \State[10]{(2,-2)}{10}        
+		\Initial[w]{1}
+        \EdgeL{1}{2}{methane.hi \downarrow}		
+        \EdgeL{2}{3}{water.lo \downarrow}		        
+        \EdgeL{3}{4}{water.hi \downarrow}		                
+        \EdgeR{5}{6}{water.lo \uparrow}
+        \EdgeR{6}{7}{water.hi \uparrow}        
+        \EdgeL{8}{9}{methane.hi \uparrow}                        
+        \LoopE{10}{tick}                                
+        \ChgEdgeLineStyle{dashed} %\EdgeLineDouble
+        \EdgeL{9}{10}{running \downarrow}                        
+        \EdgeR{4}{5}{running \downarrow}		                
+        \ArcR{7}{8}{running \uparrow}                        
+    \end{VCPicture}
+}
+\vspace*{-2mm}
+\caption{Mine Pump Controller (MPC) minimization.}
+\label{fig:mine-pump-minimization}
+\vspace*{-4mm}
+\MediumPicture
+\end{figure} 
+\subsection{Modified Lift Controller}
+Another example that has been evaluated is that
+of the Modified Lift Controller from 
+\cite{DBLP:conf/fmcad/AlurMT13} first presented in
+its realizable version in 
+\cite{DBLP:journals/jcss/BloemJPPS12}.
+In the original version a lift controller should serve
+several floors.  It has a button sensor for each floor 
+controlled by the environment.  There is an additional 
+restriction that allows the lift to move up only if there
+is a pending request in one of the floors 
+($\square \Diamond (b_j \implies f_j)$), and another that
+forces the system to visit the first floor infinitely
+often if no button was pressed.\\
+In the modified version from ~\cite{DBLP:conf/fmcad/AlurMT13} a new set of system liveness 
+requirements is added, where the system should 
+visit each floor infinitely often ($\square \Diamond f_j$).
+
+
+The problem here is that this requirement collides with
+the restriction that the lift will not move up if there
+is no pending request.\\
+We run the minimization over a simplified two floors
+specifications and produced the LTS depicted in Figure
+\ref{fig:lift-controller-minimization}.
+It shows that after initial variable setting on behalf of the
+environment (states 1 to 3) the system is free to choose 
+opposite values for the initial floor (either start at
+floor 1, states 3 to 5, or start at the second floor,
+states 3 to 8), if it chooses to start at the first floor
+the environment leaves the $b1, b2$ signals down, falsifying
+the $\square \Diamond f_j$ requirement, since it cannot 
+go up to visit the second floor unless $b2$ is up.  On the
+other hand if the system chooses the second floor as the
+initial configuration the environment keeps waiting until
+the lift descends to win by letting the signals down.
+The system is forced to descend eventually to satisfy
+the restriction that it should visit the first floor when
+$b1$ and $b2$ are down.  In this example we have to do
+some more interpretation after the LTS has been minimized,
+but we think this is a reasonable expectation.  The minimization removed 
+84 states out of the 95 in the original specification, so
+even if the engineer has to correlate liveness assumptions
+with the minimized LTS 
+the technique proves itself helpful by hiding
+irrelevant behavior.\\
+Going back to \cite{DBLP:conf/fmcad/AlurMT13} we see that our
+slice is consistent with the diagnosis presented by the authors
+where they say that \emph{(\ldots)A counter-strategy for the
+environment is to always keep all $b_i$'s low(\ldots)}.
+Indeed, this counter strategy is captured by the minimized 
+LTS depicted in Figures~\ref{fig:lift-controller-minimization}.
+% strategy for the environment can be expressed
+%n this case as $f_{1}^{\neg \varphi}(s_1)= b1 \downarrow$,
+% $f_{1}^{\neg \varphi}(s_2)= b2 \downarrow$.
+\begin{figure}[bt]
+\centering
+\SmallPicture
+%\ShowFrame
+\VCDraw{
+    \begin{VCPicture}{(-6,-3.5)(6,3.5)}
+        \SetEdgeLabelScale{1.4}
+        \State[1]{(-6,2)}{1}
+        \State[2]{(-2,2)}{2}
+        \State[3]{(2,2)}{3}
+        \State[6]{(6,2)}{6}
+        \State[4]{(-2,0)}{4}        
+        \State[5]{(-6,-2)}{5}        
+        \State[8]{(2,-2)}{8}        
+        \State[7]{(6,-2)}{7}        
+		\Initial[w]{1}
+        \EdgeL{1}{2}{b1 \downarrow}		
+        \EdgeL{2}{3}{b2 \downarrow}		        
+		\LoopW{5}{tick}                
+		\LoopE{7}{tick}                
+        \ChgEdgeLineStyle{dashed} %\EdgeLineDouble		
+        \EdgeL{3}{6}{f1 \downarrow}		                
+        \EdgeR{3}{4}{f1 \uparrow}		                       
+        \EdgeR{4}{5}{f2 \downarrow}                               	
+		\EdgeL{6}{7}{f2 \uparrow}                		
+		\EdgeR{7}{8}{f1 \uparrow}         		
+		\EdgeR{8}{5}{f2 \downarrow}         				
+    \end{VCPicture}
+}
+\vspace*{-2mm}
+\caption{Modified Lift Controller minimization.}
+\label{fig:lift-controller-minimization}
+\vspace*{-4mm}
+\MediumPicture
+\end{figure}
+%system allows noncontrollable cycle to avoid deadlock
+%\input{t_strong_fairness_validation}
+
+\subsection{Generalized Buffer (GenBuf)}
+Non realizable specifications of the Generalized Buffer Case Study~\cite{DBLP:journals/entcs/BloemGJPPW07} were studied in~\cite{DBLP:conf/fmcad/KonighoferHB09}.  
+%Original LTL specifications were automatically translated to produce the expected LTS input.  
+The original specification was introduced by 
+IBM with their Rulebase verification tool~\cite{beer1996rulebase}.
+It describes a family of buffers that transmit data from $n$ senders
+$Sender_0,Sender_1$$,\ldots$ $,Sender_n$ to two receivers $Receiver_0$ and
+$Receiver_1$.  Data is received from senders in a random order and should be
+delivered to the receivers in round-robin order.  
+It contains a handshake protocol to communicate with each sender/receiver device
+by exchanging $StoB\_REQ(i) \leftrightarrow BtoS\_ACK(i)$ messages on the senders side
+and $BtoR\_REQ(j) \leftrightarrow RtoB\_ACK(j)$ on the receivers.  
+A controller should arbitrate between the senders and the receivers to
+accomplish proper communication through a four slot FIFO queue.
+Several restrictions and assumptions are declared in order
+to ensure consistent behavior (e.g. \emph{G2: No request should be immediately
+acknowledged since it is valid at least one step 
+after the assertion of request}).\\
+
+\begin{figure}[bt]
+\centering
+\SmallPicture
+%\ShowFrame
+\VCDraw{
+    \begin{VCPicture}{(-6,-3.5)(6,3.5)}
+        \SetEdgeLabelScale{1.4}
+        \State[1]{(-7.5,0)}{1}
+        \State[80]{(3,2)}{80}
+        \State[79]{(6,2)}{79}
+        \State[81]{(1.5,0)}{81}        
+        \State[82]{(3,-2)}{82}        
+        \State[83]{(6,-2)}{83}        
+        \State[78]{(7.5,0)}{78}                
+		\Initial[w]{1}
+        \ArcR{81}{82}{tick\_e}		
+        \ArcR{78}{79}{tick\_e}		                                        
+        \ChgEdgeLineStyle{dashed} %\EdgeLineDouble				
+        \ArcR{82}{83}{SLC0\uparrow}		                
+        \ArcR{83}{78}{tick\_s}		                        
+        \ArcR{79}{78}{tick\_s}		                                
+        \ArcR{79}{80}{SLC0\downarrow}		                                      
+        \ArcR{82}{81}{tick\_s}		        
+        \ArcR[.35]{80}{81}{tick\_s}        
+        \ZZEdgeL{1}{81}{\ldots StoB\_REQ0\uparrow \ldots BtoR\_REQ0\uparrow \ldots}	        
+    \end{VCPicture}
+}
+\vspace*{-2mm}
+\caption{GenBuf (missing assumption) Terminal Set.}
+\label{fig:genbuf-terminal-set}
+\vspace*{-4mm}
+\MediumPicture
+\end{figure}
+
+We studied the three non-realizable specifications of GenBuf discussed in~\cite{DBLP:conf/fmcad/KonighoferHB09}. 
+The goal is captured by the LTL formula $\square\Diamond($ $StoB\_REQ0  \leftrightarrow$ $BtoS\_ACK0))$.
+ In the first the authors consider removing the assumption 
+that expresses that always eventually if a request to read data
+has been sent from the controller to $Receiver_0$ ($BtoR\_REQ0$) then
+an acknowledge will be issued ($RtoB\_ACK0$).  
+The minimized environment decreased 80\%
+(from 10964 to 2235 states) and, amongst other things, excluded all actions related with $Receiver_1$,
+since they are irrelevant to the environment's strategy.
+In the minimized LTS we identified one terminal set
+depicted in Figure~\ref{fig:genbuf-terminal-set} in which one guarantee is being 
+neglected infinitely often: 
+  In the trace leading to the terminal set
+the buffer sends \\$BtoR\_REQ0$ message to $Receiver_0$ but
+never gets the expected acknowledge ($RtoB\_ACK0$), thus
+not being able to produce an acknowledge for the sender.  This
+diagnosis should point the engineer in the direction to
+enforce the specification by restricting the environment to always
+eventually produce an acknowledge message for each requirement
+sent to the receivers.\\
+The second variation studied in~\cite{DBLP:conf/fmcad/KonighoferHB09}  incorporated the goal 
+$\square \Diamond$ $(\neg EMPTY$ $\wedge$ $\neg DEQ)$.
+The minimized environment decreased 92\%
+(from 10964 to 850 states)
+with only one strongly connected component at which point the buffer remains empty and the environment keeps exchanging the value of the
+signal $SLC$ and never requests the bus ($StoB\_REQ(i)$), thus preventing the controller to achieve the new goal. This tells us that the problem is the lack of an assumption that states that the environment must always eventually achieve $ENQ$ thus lowering the $EMTPY$ signal. 
+\\
+The final variation analyzed in ~\cite{DBLP:conf/fmcad/KonighoferHB09} restricts specification by
+adding a new safety requirement $\square \neg ENQ$. This already reduces the size of the 
+problem significantly (39 states) leaving little room for minimization (resulting in 26 states). Indeed, in both the original and minimized environment LTS it is straightforward to visualize the deadlock state which is reached after the first
+$BtoS\_ACK(i)$ message. This acknowledgement is required to be followed by raising the $ENQ$ signal which would violate the new requirement. 
+
+%\begin{figure}[bt]
+%\centering
+%\SmallPicture
+%%\ShowFrame
+%\VCDraw{
+%    \begin{VCPicture}{(-4,-2)(4,2)}
+%        \SetEdgeLabelScale{1.4}
+%        \LargeState\FinalState[\neg s]{(-4,0)}{1}
+%        \LargeState\State[s]{(4,0)}{2}
+%		\Initial[w]{1}
+%		\LoopN[.5]{1}{EMPTY \vee DEQ}
+%		\LoopN[.5]{2}{\neg DEQ}		
+%		\ArcL[.5]{1}{2}{\neg EMPTY \vee \neg DEQ}				
+%		\ArcL[.5]{2}{1}{DEQ}						
+%    \end{VCPicture}
+%}
+%\vspace*{-2mm}
+%\caption{Monitor for Guarantee 12.}
+%\label{fig:genbuf_g12}
+%\vspace*{-4mm}
+%\MediumPicture
+%\end{figure}
+
+%\subsection{Tic Tac Toe}
+
+%introduce optimizations
+
+%brief explanation of examples
+
+%explanation of representative minimizations
+
+%table: time, sizes
+
+%table explanation
+

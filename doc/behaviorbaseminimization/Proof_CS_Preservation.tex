@@ -1,0 +1,41 @@
+Proof for Theorem\ref{theorem:theo.preserves-non-realizability}
+
+\textbf{HAY QUE REVER ESTA PORQUE CAMBIO LA DEFINICI‰ON DE SUBLTS}
+\begin{proof}
+By way of contradiction suppose that 
+$P$ is Alternating Sub-LTS of $M$ and $\mathcal{C}$ and that there
+exists a counter strategy in $G(\mathcal{I}_P)$ that loses
+$G(\mathcal{I}_M)$.
+ Let $\pi$ be a play 
+$s_0 s_1 \ldots$ consistent under non controllability with
+the counter strategy that wins in $G(\mathcal{I}_P)$ but loses in $G(\mathcal{I}_M)$. 
+$\pi$ leading to a finite win in $G(\mathcal{I}_P)$ at $s_{\bot}$
+(not a finite state in $M$) will be prevented by the
+alternation requirement where 
+$\forall s_P \in S_P: |\Delta_M(s_p)| > 0 \rightarrow |\Delta_P(s_p)| > 0$ 
+(implying $\forall s_P\prime=(s_P,\alpha_1,\ldots,\alpha_k) \in S_{G_P}: |\Gamma^{\beta}_M(s_p\prime)| > 0 \rightarrow |\Gamma^{\beta}_P(s_p\prime)| > 0$ ).  
+If the environment has an infinite
+win in $G(\mathcal{I}_P)$ not feasible in $G(\mathcal{I}_M)$ and since $G(\mathcal{I}_P) \subseteq G(\mathcal{I}_M)$
+it follows that the system was able to take the play
+out of the domain of the counter strategy.  In order
+to accomplish this a state $s_a$ must be reached in
+$\pi = s_0  \ldots s_a  \ldots$ where the environment
+can no longer play according to the counter strategy.
+The offending move has to be performed by the system, since
+the environment would otherwise play according to his
+winning strategy.
+If $s_a \in S_P$ and $s_a$ is controllable we know that
+under alternation $\Gamma^{+}_P(s_a) = \Gamma^{+}_M(s_a)$, i.e., all controllable options are
+preserved at $s_a$.  If this is the case the strategy should
+hold since it wins in $P$ against every system choice for
+the preserved states.  
+If $s_a \in S_{G_M} \setminus S_{G_P}$ there should exist $s_b$ 
+the last state before $s_a$ ($\pi = s_0 \ldots s_b \ldots s_a \ldots$)
+where the play stepped out of $S_{G_P}$.  If $s_b$ is non controllable
+it would keep playing according to the counter strategy, 
+so we can assume that $s_b$ is controllable, but if this is
+the case, again, since all the controllable options are
+preserved in $G(\mathcal{I}_P)$ and the winning strategy holds, by definition,
+against every system choice, the environment should be able
+to keep playing accordingly, not stepping out of $G(\mathcal{I}_P)$.  
+\end{proof}

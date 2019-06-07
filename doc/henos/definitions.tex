@@ -1,0 +1,20 @@
+\section{Definitions}
+
+\begin{definition}
+\label{def:multi-parallel-asynch-composition} \emph{(Multiple Labels Asynchronous Parallel Composition)} 
+Given the processes $P_1 \ldots P_k$ where
+$P_i = \langle S_i, \Sigma_i, \Delta_i, s_{0_i} \rangle$ we define the 
+parallel composition over multiple labels $\parallel_{i=1}^{k}P_i$ as
+\[P_1\parallel \ldots \parallel P_k = \langle \prod_{i=1}^{k} S_i, \bigcup_{i=1}^{k}\Sigma_i, \Delta, (s_{0_1}, \ldots ,s_{0_k}) \rangle \] 
+Where $\Delta$ is the smallest relation satisfying:\\
+
+\twocolumn{
+\inference[(no synch.)]{P_j\xrightarrow[]{l}P_j^{\prime}, \forall l_a \in l: l_a \notin \bigcup_{i\neq j}\Sigma_i}{\parallel_{i=1}^{k} P_i \xrightarrow[]{l}
+\parallel_{i=1, i\neq j}^{k} P_j^{\prime}}
+\inference[(synch.)]{P_{j_1}\xrightarrow{l_1}P^{\prime}_{j_1}, \ldots, P_{j_n}\xrightarrow{l_n}P^{\prime}_{j_n}, l = \bigcup_{r=1}^{n}l_r, \bigcap_{r=1}^{n} \neq \emptyset,l = l_s \sqcup l_{\overline{s}},\\
+l_a \in l_{\overline{s}} \iff (l_a \in \Sigma_i \rightarrow l_a \notin \Sigma_{j, j\neq i})
+l_a \in l_s \iff (l_a \in \Sigma_i  \rightarrow \exists l:( l_a \in l \wedge P_i \xrightarrow{l}))}{\parallel_{i=1}^{k} P_i \xrightarrow[]{l}
+\parallel_{i=1, i\neq j}^{k} P_j^{\prime}}
+}
+
+\end{definition}

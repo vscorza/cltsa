@@ -1,0 +1,298 @@
+\section{Discussion and Related Work}
+
+Various approaches to providing feadback from unrealizable specifications exist. In~\cite{DBLP:conf/fmcad/KonighoferHB09} authors provide a technique that reduces the specification while preserving non-realizability. The specification is provided as a set of LTL formulas and the feedback is a minimal subset of the formulas that continues to be unrealizable. Other approaches that follow this form of minimisation include~\cite{DBLP:journals/scp/Schuppan12}.
+ 
+The approach presented in this paper differs feedback for specifications described using automata with an asynchronous execution semantics while in \cite{DBLP:conf/fmcad/KonighoferHB09} the environment and system execute synchronously (i.e., in lockstep). It is possible to model the same problem in one setting or the other, or translate specifications from one to another, however problems in different domains can  be more naturally described into one or the other setting.
+
+However, a more fundamental difference between this work and that of \cite{DBLP:conf/fmcad/KonighoferHB09,shahar} is that here we minimise behaviour rather than specification. Reducing an LTL specification by removing transition means that there are more behaviours that the environment can exhibit. Indeed, an engineer inspecting a winning environment strategy for a reduced specification as in \cite{DBLP:conf/fmcad/KonighoferHB09} may be reasoning about behaviour that is not allowed in the original specification.  
+
+To exemplify this difference we took the Bus Access example depicted in Figure~\ref{fig:req_grant} and encoded it into LTL formulas for the Ratsy tool~\cite{DBLP:conf/cav/BloemCGHKRSS10}. The LTL encoding of the LTS we used follows that used in the Reactive Synthesis Competition (\url{http://www.syntcomp.org}). In Figure~\ref{fig:ltl_minimization} we depict (part of) the LTS described by the subset of formulas that Ratsy identifies as a core unrealizable specification. The behaviour allowed by the resulting specification has grown with respect to the original (Figure~\ref{fig:req_grant}) while the technique presented herein reduces the behaviour (Figure~\ref{fig:req_grant_sub_1}).
+
+%
+%\small
+%\begin{center}
+% %\vspace*{-4mm}
+%\begin{table}[h]
+%  \begin{tabular}{ l  m{5cm} }
+%	Name & Requirement \\
+%    \hline
+%    \rule{0pt}{3ex}  
+%    S2 $\overline{grant}$ trans. & $\square (S=2 \wedge \overline{grant} \rightarrow \bigcirc(S=5))$ \\
+%    S3 $hready$ trans. & $\square (S=3 \wedge hready \rightarrow \bigcirc(S=4))$ \\    
+%    S4 $process$ trans. & $\square (S=4 \wedge process \rightarrow \bigcirc(S=1))$ \\            
+%    S5 $hready$ trans. & $\square (S=5 \wedge hready \rightarrow \bigcirc(S=1))$ \\        
+%    S2 $\overline{grant}$ sys. enabling. & $\square (S=2 \wedge \overline{grant} \rightarrow \bigcirc(\neg process \wedge \neg reset \wedge \neg req))$ \\   
+%    S3 $hready$ sys. enabling. & $\square (S=3 \wedge hready \rightarrow \bigcirc(process \wedge \neg reset \wedge \neg req))$ \\    
+%    S4 $process$ sys. enabling. & $\square (S=4 \wedge process \rightarrow \bigcirc(\neg process \wedge \neg reset \wedge req))$ \\            
+%    S5 $hready$ sys. enabling. & $\square (S=5 \wedge hready \rightarrow \bigcirc(\neg process \wedge \neg reset \wedge req))$ \\           
+%  \end{tabular}
+%  \caption{Removed Requirements}
+%  \label{table:removed-requirements}
+% \end{table}
+% %\vspace*{-12mm}
+%\end{center}
+%\normalsize
+\begin{figure}[bt]
+\centering
+\SmallPicture
+%\ShowFrame
+\VCDraw{
+    \begin{VCPicture}{(-4,-0.5)(4,10)}
+    \renewcommand{\ArrowOnMediumState}{1}
+	    \MediumState
+        \SetEdgeLabelScale{1.2}
+        \State[1]{(-3,7)}{1}
+        \State[2]{(0,7)}{2}
+        \State[3]{(3,8)}{3}
+        \State[6]{(0,8.5)}{6}   
+    %    \StateLineDouble             
+        \State[1_2]{(-6,0)}{1_2}
+        \State[2_2]{(-4,0)}{2_2}
+        \State[3_2]{(-2,0)}{3_2}
+        \State[4_2]{(0,0)}{4_2}        
+        \State[5_2]{(2,0)}{5_2}                
+        \State[6_2]{(4,0)}{6_2}                        
+        \State[7_2]{(6,0)}{7_2}
+        \StateLineSimple          
+%        \State[1_F]{(-6,-4.5)}{1_F}
+%        \State[2_F]{(-4,-4.5)}{2_F}
+%        \State[3_F]{(-2,-4.5)}{3_F}
+%        \State[4_F]{(0,-4.5)}{4_F}        
+%        \State[5_F]{(2,-4.5)}{5_F}   
+%        \State[6_F]{(4,-4.5)}{6_F}                        
+%        \State[7_F]{(6,-4.5)}{7_F}        
+		\Initial[w]{1}
+      %  \ChgEdgeLineStyle{dashed} %\EdgeLineDouble
+        %\ChgEdgeLineWidth{1.5}
+        \EdgeL{1}{2}{req}
+        \ArcR[.3]{6}{1}{reset}        
+        %\RstEdgeLineWidth{1}
+      % \DimEdge
+    %    \EdgeLineDouble
+     %   \ChgEdgeLineStyle{dashed}        
+        \ArcR{2}{2_2}{}        
+        \ArcR{2}{3_2}{}
+        \EdgeL{2}{4_2}{}
+        \ArcL{2}{5_2}{}
+        \ArcL{2}{6_2}{}
+        \VArcR[.0]{arcangle=-37,ncurv=1}{2}{1_2}{}
+        \LabelL[.5]{\overline{grant}}                
+        \VArcL[.02]{arcangle=37,ncurv=1}{2}{7_2}{}
+        \LabelR[.5]{\overline{grant}}   
+             
+       % \EdgeR{1_2}{1_F}{}
+	%	\EdgeR{1_2}{2_F}{}        
+     %   \ArcR{1_2}{3_F}{}
+     %   \ArcR{1_2}{4_F}{}
+     %   \ArcR{1_2}{5_F}{}
+        %\ArcR{1_2}{6_F}{}
+        %\ArcR{1_2}{7_F}{}
+        %\VArcR[.0]{arcangle=-7,ncurv=1}{1_2}{6_F}{}                             
+        %\VArcR[.0]{arcangle=-2,ncurv=1}{1_2}{7_F}{}                                
+        %\LabelL[.7]{\StackTwoLabels{hready}{process...}}                
+		\Initial[n]{1}        
+		\Initial[n]{3}        		
+		\Initial[n]{6} 
+		\Final[e]{3}       				
+		\Final[ne]{3}		
+		\Final[se]{3}	
+				\Final[s]{1_2}				
+				\Final[sw]{1_2}				
+				\Final[se]{1_2}		
+		\Final[s]{2_2}				
+		\Final[sw]{2_2}				
+		\Final[se]{2_2}	
+		\Final[s]{3_2}				
+		\Final[sw]{3_2}				
+		\Final[se]{3_2}	
+		\Final[s]{4_2}				
+		\Final[sw]{4_2}				
+		\Final[se]{4_2}	
+		\Final[s]{5_2}				
+		\Final[sw]{5_2}				
+		\Final[se]{5_2}	
+		\Final[s]{6_2}				
+		\Final[sw]{6_2}				
+		\Final[se]{6_2}									
+		\Final[s]{7_2}				
+		\Final[sw]{7_2}				
+		\Final[se]{7_2}	
+%		\Final[s]{1_F}				
+%		\Final[sw]{1_F}				
+%		\Final[se]{1_F}				
+%		\Final[s]{2_F}				
+%		\Final[sw]{2_F}				
+%		\Final[se]{2_F}				
+%		\Final[s]{3_F}				
+%		\Final[sw]{3_F}				
+%		\Final[se]{3_F}				
+%		\Final[s]{4_F}				
+%		\Final[sw]{4_F}				
+%		\Final[se]{4_F}				
+%		\Final[s]{5_F}				
+%		\Final[sw]{5_F}				
+%		\Final[se]{5_F}				
+%		\Final[s]{6_F}				
+%		\Final[sw]{6_F}				
+%		\Final[se]{6_F}				
+%		\Final[s]{7_F}				
+%		\Final[sw]{7_F}				
+%		\Final[se]{7_F}																
+        \RstEdge
+        \RstEdgeLineStyle %\EdgeLineSimple        
+        \ArcR[.7]{3}{6}{timeout}
+        \EdgeL{2}{3}{grant}        
+	%	\EdgeLineDouble					
+        \VArcR{arcangle=5,ncurv=1}{1_2}{2}{}\LabelL[.2]{\StackThreeLabels{req,}{hready}{process,...}}
+        \EdgeL[.5]{4_2}{1}{} \LabelL[.4]{\StackThreeLabels{process,}{hready}{req, ...}}       
+       \VArcR{arcangle=-20,ncurv=1}{5_2}{1}{}\LabelL[.3]{\StackThreeLabels{hready}{process}{reset,...}} 
+        \VArcR{arcangle=-15,ncurv=1}{6_2}{1}{}\LabelR[.15]{\StackThreeLabels{hready}{reset}{process,...}}                
+
+        
+    \end{VCPicture}
+}
+\caption{Behaviour of the Bus Access minimized LTL specification (snippet)}
+\label{fig:ltl_minimization}
+%\vspace*{-4mm}
+\MediumPicture
+\end{figure}
+
+
+An alternative approach to providing unrealizability is to allow inspecting counter strategies. 
+ In \cite{DBLP:conf/emsoft/CernyGHRT12} an interactive play-out for scenario-based specifications is presented.  If the specifications is unrealizable an interactive game is presented to the user in order to expose the cause of non realizability.  It is built following \cite{DBLP:conf/hvc/KonighoferHB10} counter-strategy and it is restricted to scenario-based specifications that essentially encode LTL formulas.
+ In \cite{DBLP:conf/sigsoft/KuventMR17} the authors present
+ justice violation transition systems for LTL specifications as a way to abstract
+ and simplify the winning strategy for the environment.
+ States in the JVTSs are labeled with invariants, since
+ they  collapse states of the counter strategy
+ in order to expose relevant environmental decisions.
+Inspection of counter strategies that build on minimization of LTL specifications~\cite{DBLP:conf/emsoft/CernyGHRT12,DBLP:conf/sigsoft/KuventMR17} the fact that the behaviour of the specification being analysed has increased. Thus, the inspection of the counter strategy may lead an engineer to reasoning about behaviour that is not allowed in the original specification. 
+
+  
+
+ Note that our approach also differs from depicting as an LTS the winning strategy for the environment. In Figure ~\ref{fig:req_grant_counter} we show the counter strategy for the environment description $E$ depicted in Figure~\ref{fig:req_grant}. The LTS modelling the counter strategy is not a sub-LTS of $E$ as the strategy must remember which assumption was the last to be satisfied. In general, the worst case is that the strategy of the environment will have $n$ times more states than the minimal subLTS that can be used to generate it, where $n$ is the number of liveness assumptions that the environment must satisfy. Furthermore, the sub-LTS we produce can allow for more than one counter strategy and hence provide insight to more than one problem with the original specification. 
+ %Our setting (and our search space characterization) allows us
+ %to provide conflicts in an enumerative fashion by exhaustively exploring the induced semi-lattice.  This differs considerably to the single conflict diagnosis provided by executing a counter-strategy bounded by its implementation to a particular conflict.
+ 
+ %The approach we present also differs from counter strategy as feedback for two reasons, it is not bounded to the particular implementation of
+ %the counter strategy (potentially providing the user all non realizability causes by exploring the induced semi lattice) and it is not
+ %affected by the counter strategy memory that will cause a mismatch with the original plant's states due to unfolding.  
+ 
+ \begin{figure}[bt]
+ \centering
+ \SmallPicture
+ %\ShowFrame
+ \VCDraw{
+     \begin{VCPicture}{(-4,-2)(4,2.5)}
+         \SetEdgeLabelScale{1.4}
+         \State[1]{(-3,0)}{1}
+         \State[2]{(-1.3,-1.2)}{2}
+         \State[3]{(1.3,-1.2)}{3}
+         \State[6]{(3,0)}{6}        
+         \State[1']{(1.8,1.2)}{1'}
+         \State[2']{(0,1.5)}{2'}
+         \State[5]{(-1.8,1.2)}{5}        
+ 		\Initial[w]{1} 
+         \ArcR{2}{3}{grant}        		
+         \ArcR{3}{6}{timeout}        		
+         \ArcR{2'}{5}{\overline{grant}}        		        
+         \ArcR{5}{1}{hready}        
+         \ChgEdgeLineStyle{dashed} %\EdgeLineDouble
+         \ArcR{1}{2}{req}        		
+         \ArcR{6}{1'}{reset}        		
+         \ArcR{1'}{2'}{req}        		
+     \end{VCPicture}
+ }
+ \caption{Bus Access counter strategy.}
+ \label{fig:req_grant_counter}
+ %\vspace*{-4mm}
+ \MediumPicture
+ \end{figure} 
+
+
+
+% The problem as a subset of the initially provided LTL formulas, the elimination of irrelevant
+%output variables and a counter strategy (counter trace) that can be explored interactively.
+%In terms of minimization our technique is behavior-based as opposed to theirs being declarative, this allows for a canonical minimization
+%not attached to the granularity of the formulas provided as individual requirements (as already pointed out by \cite{DBLP:journals/scp/Schuppan12}).
+%Both minimization techniques are general since they use a realizability oracle to perform the exploration of the search space.
+
+
+
+
+%One could be tempted to translate an operational specification into a set of LTL formulas and then apply
+%the minimization presented in \cite{DBLP:conf/fmcad/KonighoferHB09}.  Such
+%a declarative minimization will in fact increase the behavior of the plant since removal of constituent %subformulas relaxes the transition relation
+%allowing for more interaction that originally specified.\\
+
+%\cite{DBLP:journals/scp/Schuppan12} presents a simplification of declarative specifications
+%(expressed through LTL formulas) by computing the unrealizability cores (UCs)  
+%a canonical representation of LTL formulas for unsatisfiability and unrealizability computation of a potentially finer grain than \cite{DBLP:conf/fmcad/KonighoferHB09}. 
+%The authors take a declarative approach when simplifying a formula by over or under
+%approximating of its components, clearly different from our behavior-based approach.\\
+
+
+The idea of \cite{DBLP:conf/icra/KimFS12} is to look for the closest \textit{satisfiable} specification with respect to the initial specification, which is known as the minimal revision problem (\texttt{MRP}).  The search space induced by the relation of closest specification is quite similar, in structural terms, to ours. Besides looking for the closest satisfiable approximation (as opposed to a minimal non realizability preserving representation in our case) the relaxation in this work is performed over the labels consisting each in a conjunction of literals and their relaxation being weaker sub formulas of these.  This concept was revisited later in \cite{DBLP:conf/icra/KimF13} for weighted transition systems.
+% It is clear that MRP is not a non realizability diagnosis but instead tackles the problem of finding one the closest satisfiable representations.\\
+
+
+
+The problems an engineer can face when writing the specification
+of an open system can be characterized in other ways, for instance, 
+when dealing with a design by contract type of specification, a set of assumptions is defined that has to be met
+if we expect to accomplish our goals, and
+if they are not, the specification is vacuously satisfied.
+This has been presented in \cite{kupferman2003vacuity}
+for CTL* specifications, in \cite{DBLP:conf/hvc/KleinP10} for the
+GR(1)\cite{DBLP:conf/vmcai/PitermanPS06} subset, further explored in \cite{DBLP:conf/sigsoft/MaozR16}
+for the declarative version and in \cite{DBLP:phd/ethos/DIppolito13}
+for the generative one.  
+The problem of completeness (where the idea is to find sets of formulas
+irrelevant to the realization of the goals) has been
+developed in \cite{chockler2001practical} and \cite{chockler2001coverage},
+amongst others.
+There are two different although related problems when it comes to 
+the non satisfaction of the expected properties, namely
+ realizability and satisfiability.
+ These are directly related to the difference
+between open systems and closed systems.  
+Since 
+we are working with open system specifications we will reason about in terms of
+realizability.  Here we try to obtain the 
+satisfaction of a certain set of goals against a
+potentially antagonistic environment (presented as the Skolem paradigm in 
+\cite{DBLP:conf/popl/PnueliR89}), as opposed to satisfiability, where
+the question to be answered is if it exists a cooperation between 
+the environment and the system that satisfies the goals.
+
+
+In \cite{DBLP:conf/kbse/DegiovanniRACA16} the authors compute boundary conditions over LTL for specifications that can be initially satisfied but will eventually diverge.  A boundary condition is such that, while consistent, when added to a conjunction with the set of domain assumptions and system guarantees can not be satisfied.
+In \cite{DBLP:conf/kbse/HagiharaESY14} strongly
+unsatisfiable subsets of reactive specifications are defined and computed in this work, strong satisfiability is studied for its simplicity and since it is a necessary precondition for non realizability. These two approaches are different to ours since they do not, nor intend to, treat the non realizability problem.\\
+\cite{DBLP:conf/fmcad/AlurMT13}, \cite{DBLP:conf/memocode/LiDS11} and
+\cite{DBLP:conf/tacas/CavezzaA17} deal with the problem of automatically producing 
+(mining) assumptions for non realizable specifications.  This is related to out technique since it works with non realizable specification
+but has a very different intention which is  repair-based rather than diagnosis-based.
+\cite{DBLP:conf/fmcad/AlurMT13} initially tries to correct an unrealizable specification by adding assumptions.  They use the counter strategy to build new assumptions following predefined patterns.  User interaction is needed to identify underspecified variables.
+In \cite{DBLP:conf/memocode/LiDS11}, the authors propose mining assumptions out of an unrealizable GR(1) specification through the use of a counter strategy from \cite{DBLP:conf/hvc/KonighoferHB10}. Again, a template based approach is used.
+In \cite{DBLP:conf/tacas/CavezzaA17} an assumption computing technique is presented based in Craig's interpolants is presented.  It obtains refinements by negating plays of the counter-strategy.\\
+%In \cite{DBLP:conf/emsoft/CernyGHRT12} the authors offer a flexible framework for quantifying how well an implementation comes to satisfy initially incompatible requirements.  This is achieved by defining a solution distance metric parametrized by an error model.\\
+%\cite{DBLP:journals/corr/EhlersR14} introduces a report-based 
+%debugging technique that computes statistics, positional information for the counter strategy, detecting superfluous assumptions and analyzing error-resilience against violations of the environment assumptions.\\
+%There has been some interesting applications of non realizability diagnosis over different domains, in \cite{DBLP:journals/fac/BarnatBBBBK16} the authors
+%use the notion of sanity checking of requirements for avionics systems.  This sanity checking is composed by
+%consistency checking, redundancy checking and completeness of the requirements.  Is worth noting that this is a model-free approach. 
+%\cite{DBLP:journals/corr/DokhanchiHF16} applies the debugging of formal requirements for \texttt{MITL} and \texttt{STL} specifications.
+%In \cite{DBLP:conf/fmcad/KonighoferB11} imperative programs are processed to get diagnostic data, analyze non realizability causes and then implement template-based corrections.
+
+
+
+%In \cite{DBLP:journals/taosd/MaozS13} two-way traceability for AspectLTL specifications is defined in order to link each allowed or forbidden transition in the generated program
+%with the aspect justifying its presence or elimination, for unrealizable specifications an interactive game is provided to explain the cause of non realizability.\\
+%Several works have used mobile robotics examples as motivation.  Non realizability diagnosis has been applied to this domain in \cite{DBLP:conf/icra/RamanK12}
+%and \cite{DBLP:conf/cav/RamanK11}.\\
+%In \cite{DBLP:conf/icfem/XingSLD11} an approach to compute differences between LTSs
+%is introduced in the context of evolving behaviors.  This is slightly related with our
+%work in the sense that it copes with the potential divergence between the current
+%model and the initial user intent. 
+

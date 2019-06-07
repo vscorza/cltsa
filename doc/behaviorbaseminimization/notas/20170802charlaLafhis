@@ -1,0 +1,46 @@
+Gerva
+=====
+- Que pasa con los demás conflictos? devuelve sólo uno?
+Alexis
+======
+- Tiene pinta de slicer.
+Leandro
+=======
+- El abstract tira términos como LTL y GR(1) sin introducirlos, se puede hacer una brevísima explicación
+- Falta contar algunos ejemplos en la tabla de validación
+Guido
+=====
+- Desde afuera parece complejo
+- Si no sos del palo podrías tirarlo
+	- porque la introducción no ayuda, se pierde el foco en definiciones y no deja claro(pronto) el aporte
+	- por qué es fundamental debuggear estas especificaciones?
+Charly
+======
+- ¿Por qué no lo mandan a TACAS?
+Fernán
+======
+- el ejemplo motivacional esta bien.
+- yo entiendo que es el framework con el que trabaja el grupo, pero xq es necesario FLTL? xq no alcanza con LTL? 
+- Definition IV.4. (Alternating Sub-LTS), si se mantiene lo siguiente (.....), se me complico seguir la formula sin una explicacion. y todo lo que sigue asume que lo entendi bien.
+- Table I no me transmitio nada. Remarcaria resultados sobre esos datos.
+	- Gerva propuso hacer un summary, interpretar los resultados
+typos
+from Property ?? (pag 4 antes de Definition IV.1)
+B. brehavior Minimisation
+ref 18 y 39 estan repetidas?
+- para qué se introduce FLTL si la técnica parece agnóstica al tema?
+Daniel
+======
+- En el problem statement dani pensó que se estaba buscando un núcleo no realizable maximal
+- en related work no queda claro donde se diferencia/se asemeja a otras técnicas
+- idem a lo del 4.4 y resultados de fernán
+Diego
+=====
+- Es de nicho, pero se puede defender, análogo a Guido
+- La intro es muy defensiva
+- el 4.4 es complicado
+Iván
+====
+- Intro defensiva
+- Buena motivación
+- Validación ¿cuál es el límite de la técnica, donde puedo, no puedo usarla?

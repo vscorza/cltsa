@@ -1,0 +1,11 @@
+No me gusta que el problem statement y behavior minimization estén en "III. Preliminaries". Para mi son de otra sección con aportes originales
+
+Def III3. (legal environment). No parece ser, como dice, la de Interface Automata [23]. Es asimétrica a diferencia de la de [23]
+
+Definición III5. (strategy with memory) . Muy raro: t(w,s) parece ester incluido en las controlables pero ser igual a las no controlables del estado?. 
+
+No esté definido qué es una maximal trace. Qué pasa si hay deadlocks? y bloqueos? No es un tema menor por lo que viene abajo
+
+Importante:
+Hay una desconexión notable entre control problem y winning strategy. En particular la desconexión que importa es la ausencia de un teorema que vincule no-realizabilidad y la existencia de winning strategy del ambiente. Hay un frase que no compila: "Which means that (from property ??) there is a winning strategy S_E for the environment such that there is no M legal with respect to E that can achieve Phi": Por un lado se olvida de deadlock freeness, por otro, qué es exactamente que un M (legal o no) logra una propiedad en una estrategia del ambiente?
+De hecho, si como lector niego la definición no-realizabilidad llego a  que dado un M arbitrario a) o no es legal, o bien, b) introduce un deadlock o, c) la composición no satisface el goal. De ahí a hablar de winning strategy del ambiente como síntoma de la no realizabilidad es un salto que requiere bastante más elaboración (ej. qué pasa con los puntos a)y b)? porqué hay al menos una winning strategy que explica como el ambiente hace que cualquier M con el que se lo componga viole el goal?, etc..). O sea, falta algún lema o teorema que permita hablar de unrealizability preservation en términos de winning strategy preservation). 

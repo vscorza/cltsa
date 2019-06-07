@@ -1,0 +1,23 @@
+Proof for Lemma \ref{def:induction-preserves}
+
+
+\textbf{HAY QUE REVER ESTA PORQUE CAMBIO LA DEFINICI‰ON DE SUBLTS}
+\begin{proof}
+If the system has a winning strategy in $G(\mathcal{I}_1)$ but no
+winning strategy in $G(\mathcal{I}_2)$, this would imply that
+the environment is able to either take the play into a deadlock state
+or a $\sigma$-trap that always falsifies the property $\varphi$. 
+Suppose that the system is able to play according to the strategy up
+to state $s_i$ in $G(\mathcal{I}_2)$, after this point, for every choice the
+system makes the environment has a way to construct a play
+$\pi$ that is winning for him, either finitely or infinitely.
+The departure at state $s_i$ must have been introduced by 
+restricting the system choice, removing a controllable transition
+which is not allowed for Alternating Sub-Games, or giving the environment
+more power, by adding a non controllable transition or removing all of them
+at a non controllable state thus introducing a deadlock which is also
+forbidden since by Alternating Sub-Game definition
+inclusion is satisfied.  Is proven by contradiction
+that realizability is preserved between Alternating Sub-LTSs.
+\end{proof}
+

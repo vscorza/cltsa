@@ -1,0 +1,46 @@
+\renewcommand{\ttdefault}{pcr}
+\begin{lstlisting}[escapeinside={[*}{*]},basicstyle=\scriptsize\ttfamily,columns=flexible,frame=lines,mathescape=true,xleftmargin=5.0ex,keywordstyle=\textbf,morekeywords={if,while,do,else,fork,int,null},numbers=left,numberstyle=\scriptsize]
+
+dd_min($E$):
+	$\mathcal{T}_u$ = $E$.get_monitored_transitions()
+	return dd_min'($\mathcal{T}_u$, $[ ]$, 2, $E$) [*\listRef{A}*]
+dd_min'($\mathcal{T}_{u}$, $\mathcal{T}_{r}$, $n$, $E$):
+	if $n$ <= $|\mathcal{T}_{u}|$:
+		res = dd_subsets($\mathcal{T}_{u}$, $\mathcal{T}_{r}$, $n$, $E$, $\bot$)
+		if res != $None$:
+			return res
+		if $n$ > 2:
+			res = dd_subsets($\mathcal{T}_{u}$, $\mathcal{T}_{r}$, $n$, $E$, $\top$)
+			if res != $None$:
+				return res		
+		if $n$ < $|\mathcal{T}_{u}|$:
+			$n'$ = min($|\mathcal{T}_{u}|$, 2 * $n$)
+			return dd_min'($\mathcal{T}_{u}$, $\mathcal{T}_{r}$, $n'$, $E$)
+	$E_{new}$ = $E$.clone()	
+	for $t$ in $\mathcal{T}_{u}$:
+		$E_{new}$ = $E_{new}$.remove($t$)
+	$E_{new}$.get_legal_reduction() [*\listRef{B}*]
+	$\mathcal{T}'_u$ = $E_{new}$.get_monitored_transitions()	
+	return $E_{new}$
+dd_subsets($\mathcal{T}_{u}$, $\mathcal{T}_{r}$, $n$, $E$, check_complement):
+	step = $\lfloor \frac{|\mathcal{T}_{u}|}{n}\rfloor$ [*\listRef{A}*]
+	rem = $|\mathcal{T}_{u}| \% n$
+	first = 0, last = -1
+	for $i$ in $[0\ldots n-1]$:
+		first = last + 1
+		last = first + step - 1
+		if rem > 0:
+			last += 1
+			rem -= 1
+		if check_complement:
+			$\mathcal{T}'_{u}$ = $\mathcal{T}_{u} \setminus \mathcal{T}_{u}[first\ldots last]$
+			$\mathcal{T}'_{r}$ = $\mathcal{T}_{r} \cup (\mathcal{T}_{u} \setminus \mathcal{T}'_{u})$
+			$n'$ = max(2, $n$ -1)
+		else:
+			$\mathcal{T}'_{u}$ = $\mathcal{T}_{u}[first\ldots last]$
+			$\mathcal{T}'_{r}$ = $\mathcal{T}_{r} \cup (\mathcal{T}_{u} \setminus \mathcal{T}'_{u})$
+			$n'$ = 2
+		if test_subset($\mathcal{T}'_{r}$) == $\bot$:
+			return dd_min'($\mathcal{T}'_{u}$, $\mathcal{T}'_{r}$, $n'$, $E$)						
+	return $None$
+\end{lstlisting}

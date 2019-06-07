@@ -1,0 +1,101 @@
+%optimizations
+\subsection{Strip Representatives}
+We introduce now two different optimizations.  The first
+takes advantage of the nature of induced plants.  
+No new deadlock can be introduced when searching for induced plants
+(since it will violate the non realizability legal property), 
+this leads to an optimization where we can take a representative 
+for every strip within the
+automaton that contains a monitored transition.
+
+\begin{definition}\label{def:strip}\emph{(Strip)}
+Given $M = (S_M, L, \Delta_M, s_{M_0})$ an LTS and 
+$\mathcal{C}$ a set of controllable actions, 
+$\varpi \in \Delta_M*$ and $\varpi_i = (s_i, a_i, t_i)$ stand for
+the transition at position $i$ within the sequence, we will
+say that $\varpi$ is a strip if the following holds: 
+\[
+\begin{matrix}{r l}
+\forall i \in 1 \ldots |\varphi| - 1:& \varpi_i = (s_i,a_i,t_i), \varphi_{i+1} = (s_{i+1} = t_i, a_{i+1}, t_{i+1})\\
+& d_{out}(t_i) = 1\\
+\exists i \in 1 \ldots |\varphi| - 1: & a_i \not\in \mathcal{C}\\
+\end{matrix}
+\]
+\end{definition}
+
+We want to identify these strips since taking any monitored transition
+from the strip out the plant and then reducing will lead to same
+induced plant.  It is clear to see that under the non realizability
+legal reduction it is equivalent to remove any subset of monitored transitions
+within the strip since the algorithm will keep removing them until
+no new deadlock is found, and since the strip has outgoing degree $=1$
+all the way through, if we were to remove an element of $\varpi$ we will
+be forced to remove all of them.\\
+This optimization gains relevance since the complexity of our minimization
+is driven by the number of monitored transitions to check.
+W.l.o.g we can pick any monitored transition for each strip and use them
+as the set of elements to check for minimization.
+We can build this set as explained in the algorithm from Figure
+\ref{fig:strip-code}.
+\begin{figure}[ht]
+  \begin{center}
+    \input{stripcode} 
+    \caption{Strip representatives computation}
+    \label{fig:strip-code}
+  \end{center}
+\end{figure}
+The set of monitored transitions is taken as the initial candidates
+\listRef{A} and then checks what we could call the strip closure
+for the remaining elements \listRef{B} by adding them to the representatives
+array. Then it recursively picks the preceding transition whenever
+the source state has an incoming degree of 1 \listRef{C}, it removes
+monitored transitions found this way \listRef{D}.  The same procedure
+is performed onwards for target states with an outgoing degree of 1
+\listRef{E}. We can see that the set of representatives is constructed 
+this way after a linear scan of a collection of size at most $|\Delta|$.
+
+\subsection{Radial Approximation}
+Under the hypothesis that for certain scenarios (see section
+\ref{section:validation-ctv}) counterstragies
+ can be built over a set of states close to $s_0$ it is tempting
+ to perform what we will call a radial approximation 
+ of $E$ when checking for a minimal induced plant.
+
+\begin{figure}[ht]
+  \begin{center}
+    \input{kapproxcode} 
+    \caption{Binary approximation computation}
+    \label{fig:kapprox-code}
+  \end{center}
+\end{figure}
+
+For the approximation described in Figure \ref{fig:kapprox-code}
+we use the distance of any state to $s_0$ (\texttt{max\_d}) to guide the binary search of (non minimal) induced plant.  We will prune $E$ removing states
+at distances greater than $k$ from $s_0$ performing a non realizability legal
+reduction and the checking for realizability.
+This approximation can be regarded as a pre processing of the plant, since it
+will (hopefully) perform a faster legal reduction by sacrificing minimality.
+It computes $k$ by performing a binary search over the distance at which the
+plant will be pruned and reduced.  The algorithm starts by assigning the
+value $\lfloor \frac{hi}{2}\rfloor$ \listRef{A} for $k$ 
+and then it keeps pruning \listRef{B}, reducing \listRef{C} and checking
+for realizability \listRef{D} as long as the search can continue.  The search
+range is updated by raising the lower bound if the check yielded a positive 
+value \listRef{E} or lowering the upper bound if the check informed that the
+problem was unrealizable \listRef{F}.  The last non realizable plant is updated 
+in this case since the reduction ensures legality while preserving 
+non realizability.  $K$ is consequently updated \listRef{H} and the search
+carries on until the boundaries converge.  This procedure will perform
+up to $log_2(|\Delta|)$ checks to yield an approximated induced plant, which
+may not be minimal but can still be given to one of the other minimization
+techniques to achieve a minimal induced plant.
+
+
+
+%\begin{figure}[ht]
+%  \begin{center}
+%    \input{ddcode} 
+%    \caption{DD exploration code}
+%    \label{fig:dd-code}
+%  \end{center}
+%\end{figure}

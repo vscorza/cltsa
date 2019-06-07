@@ -1,0 +1,26 @@
+\renewcommand{\ttdefault}{pcr}
+\begin{lstlisting}[escapeinside={[*}{*]},basicstyle=\scriptsize\ttfamily,columns=flexible,frame=lines,mathescape=true,xleftmargin=5.0ex,keywordstyle=\textbf,morekeywords={if,while,do,else,fork,int,null},numbers=left,numberstyle=\scriptsize]
+exh_min($E$):
+	$\mathcal{T}_u$ = $E$.get_monitored_transitions() [*\listRef{A}*]
+	$key$ = get_binary_key($\mathcal{T}_u$)
+	candidates = [$E$] [*\listRef{B}*]
+	
+	while $key$ != 0:
+		$key$.decrement() [*\listRef{C}*]
+		$E_{new}$ = $E$.clone()
+		$\mathcal{T}'_u$ = get_transitions($\mathcal{T}_u$, $key$) [*\listRef{D}*]
+		$\mathcal{T}_r$ = $\mathcal{T}_u \setminus \mathcal{T}'_u$ 
+		for $t$ in $\mathcal{T}_r$:
+			$E_{new}$ = $E_{new}$.remove($t$) [*\listRef{E}*]
+		$E_{new}$.get_legal_reduction($E$)
+		is_realizable = check($E_{new}$) [*\listRef{F}*]
+		if is_realizable = $\bot$:		
+			candidates.push($E_{new}$)
+	
+	for $E_i$ in candidates:
+		for $E_j$ in candidates:
+			if $i$ != $j$:
+				if is_induced_from($E_j$,$E_i$): [*\listRef{G}*]
+					candidates.remove($E_i$)
+	return candidates
+\end{lstlisting}

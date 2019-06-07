@@ -1,0 +1,111 @@
+\newpage
+\begin{figure}[bt]
+\centering
+\SmallPicture
+%\ShowFrame
+\VCDraw{
+    \begin{VCPicture}{(-4,-1.5)(4,2.7)}
+        \SetEdgeLabelScale{1.4}
+        \State[1]{(-3,0)}{1}
+        \State[2]{(0,-1)}{2}
+        \State[3]{(-1,1)}{3}
+        \State[4]{(1,1)}{4}        
+        \State[5]{(3,0)}{5}
+		\Initial[w]{1}
+		\ArcL{1}{3}{$sensor.disabled$}				\ArcR{1}{2}{$sensor.enabled$}		
+		\ArcL{4}{3}{$timeout$}					
+		\ArcL{4}{5}{$data.rcvd$}		
+        \ChgEdgeLineStyle{dashed} 
+		\ArcL{3}{4}{$get.GPS.location$}			
+		\ArcR{2}{5}{$get.SLAM.location$}
+		\EdgeL{5}{1}{$update.direction$}
+    \end{VCPicture}
+}
+\label{fig:slice-1}\\
+\vspace*{6mm}
+$\downarrow E_1 = reduce(E\setminus {sensor.enabled})$
+\vspace*{-4mm}
+\MediumPicture
+\end{figure}
+\begin{figure}[bt]
+\centering
+\SmallPicture
+%\ShowFrame
+\VCDraw{
+    \begin{VCPicture}{(-4,-1)(4,2.5)}
+        \SetEdgeLabelScale{1.4}
+        \State[1]{(-3,0)}{1}
+        \State[3]{(-1,0.8)}{3}
+        \State[4]{(1,0.8)}{4}        
+        \State[5]{(3,0)}{5}
+		\Initial[w]{1}
+		\ArcL{1}{3}{$sensor.disabled$}				
+		\ArcL{4}{3}{$timeout$}					
+		\ArcL{4}{5}{$data.rcvd$}		
+        \ChgEdgeLineStyle{dashed} 
+		\ArcL{3}{4}{$get.GPS.location$}			
+		\ArcL{5}{1}{$update.direction$}
+    \end{VCPicture}
+}
+\vspace*{-2mm}
+\label{fig:slice-2}\\
+\vspace*{6mm}
+$\downarrow E_{\kappa} = reduce(E_1\setminus {data.rcvd})$
+\vspace*{-4mm}
+\MediumPicture
+\end{figure}
+
+\begin{figure}[bt]
+\centering
+\SmallPicture
+%\ShowFrame
+\VCDraw{
+    \begin{VCPicture}{(-4,-1.5)(4,2.3)}
+        \SetEdgeLabelScale{1.4}
+        \State[1]{(-4,0)}{1}
+        \State[3]{(-0,0)}{3}
+        \State[4]{(4,0)}{4}        
+		\Initial[w]{1}
+		\EdgeL{1}{3}{$sensor.disabled$}				
+		\ArcL{4}{3}{$timeout$}							
+        \ChgEdgeLineStyle{dashed} 
+		\ArcL{3}{4}{$get.GPS.location$}			
+    \end{VCPicture}
+}
+\vspace*{-2mm}
+\label{fig:slice-3}
+\vspace*{-4mm}
+\MediumPicture
+\end{figure}
+
+\begin{figure}[bt]
+\centering
+\SmallPicture
+%\ShowFrame
+\VCDraw{
+    \begin{VCPicture}{(-4,-4)(4,4)}
+        \SetEdgeLabelScale{1.4}
+        \State[E]{(0,2)}{1}
+        \State[E_1]{(2,0.5)}{3}
+        \State[E_2]{(-2,0.5)}{4}   
+        \StateLineDouble             
+        \State[E_{\kappa}]{(-2,-1.5)}{5}                
+        \StateLineSimple        
+        \ChgStateLineStyle{dashed}         
+        \State[E_{\chi}]{(-2,-3.5)}{6} 
+        \State[E_{\chi}]{(2,-1.5)}{7}         
+		\Initial[n]{1}                       
+		\EdgeL{1}{3}{\overline{sensor.enabled}}				
+		\EdgeR{1}{4}{\overline{data.rcvd}}						
+		\EdgeR{4}{5}{\overline{sensor.enabled}}				
+		\LArcL{3}{5}{}\LabelR[.45]{\overline{data.rcvd}}								
+        \ChgEdgeLineStyle{dashed} 		
+		\EdgeL{5}{6}{\overline{timeout}}						
+		\EdgeL{3}{7}{\overline{timeout}}								
+    \end{VCPicture}
+}
+\vspace*{-2mm}
+\label{fig:slice-4}
+\vspace*{-4mm}
+\MediumPicture
+\end{figure}

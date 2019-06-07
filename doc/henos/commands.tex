@@ -1,0 +1,261 @@
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+
+\newenvironment{proof}[1][Proof]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+\newenvironment{definition}[1][Definition]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+\newenvironment{remark}[1][Remark]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+
+\newcommand{\qed}{\nobreak \ifvmode \relax \else
+      \ifdim\lastskip<1.5em \hskip-\lastskip
+      \hskip1.5em plus0em minus0.5em \fi \nobreak
+      \vrule height0.75em width0.5em depth0.25em\fi}
+
+%----------------------------
+% BASIC MATH DEFINITIONS
+%----------------------------
+
+\newcommand{\impls}[1]{I\lbrack #1 \rbrack}
+\newcommand{\detimpls}[1]{I^{det}\lbrack #1 \rbrack}
+\newcommand{\true}{$true$}
+\newcommand{\false}{$false$}
+\newcommand{\fluentp}[1]{\dot{#1}}
+\newcommand{\X}{\mathrm{X}}
+\newcommand{\U}{\mathrm{U}}
+\newcommand{\F}{\mathrm{F}}
+\newcommand{\G}{\mathrm{G}}
+\newcommand{\lts}[1]{$lts(#1)$}
+\newcommand{\fsp}[1]{$fsp(#1)$}
+\newcommand{\mtsa}{\texttt{MTSA}\xspace}
+\newcommand{\mtsaKeyword}[1]{$#1$}
+\newcommand{\transitionTo}[1]{\ensuremath{\mathrel{\mathop{\rightarrow}^{\mathrm{#1}}}}\xspace}
+\newcommand{\noTransitionTo}[1]{\ensuremath{\mathrel{\mathop{\not\rightarrow}^{\mathrm{#1}}}}\xspace}
+
+%----------------------------
+% BASIC NOMINAL DEFINITIONS
+%----------------------------
+
+\newcommand{\originalEnv}{\ensuremath{E}\xspace}
+\newcommand{\compositionalEnv}{\ensuremath{\originalEnv_{1}\parallel\ldots\parallel \originalEnv_{k}}\xspace}
+\newcommand{\controllableActions}{\ensuremath{A_{c}}\xspace}
+\newcommand{\goalFormula}{\ensuremath{\varphi}\xspace}
+%\newcommand{\avoidSet}{\ensuremath{Avd}\xspace}
+\newcommand{\avoidSet}{\ensuremath{\Lambda}\xspace}
+\newcommand{\originalController}{\ensuremath{M}\xspace}
+\newcommand{\retainSimulation}{\ensuremath{\mathbb{R}_{\retainSet}}\xspace}
+\newcommand{\deadlockState}{\ensuremath{s_{d}}\xspace}
+\newcommand{\winningRegion}{\ensuremath{\mathbb{W}_{0}}\xspace}
+\newcommand{\ProblemGameName}{\ensuremath{\mathbb{G}}\xspace}
+\newcommand{\problemGameName}{\ensuremath{g}\xspace}
+\newcommand{\problemGame}{\ensuremath{\ProblemGameName = (V_{0},V_{1},E,Win)}\xspace}
+\newcommand{\BuiltProblemGameName}{\ensuremath{\ProblemGameName_{0}^{\originalProblemName}}\xspace}
+\newcommand{\builtProblemGameName}{\ensuremath{\problemGameName_{0}^{\originalProblemName}}\xspace}
+\newcommand{\builtProblemGame}{\ensuremath{\BuiltProblemGameName = (V_{0},V_{1},E,Win_{\goalFormula})}\xspace}
+\newcommand{\BuiltProblemDualGameName}{\ensuremath{\ProblemGameName_{1}^{\originalProblemName}}\xspace}
+\newcommand{\builtProblemDualGameName}{\ensuremath{\problemGameName_{1}^{\originalProblemName}}\xspace}
+\newcommand{\builtProblemDualGame}{\ensuremath{\BuiltProblemDualGameName = (V'_{0},V'_{1},E,Win_{\neg\goalFormula})}\xspace}
+\newcommand{\initialState}{\ensuremath{v_{0}}\xspace}
+\newcommand{\finalState}{\ensuremath{v_{f}}\xspace}
+\newcommand{\gameGenericSet}{\ensuremath{\mathbb{A}}\xspace}
+\newcommand{\gameAvoidSet}{\ensuremath{\mathbb{\overline{W}}}\xspace}
+\newcommand{\distilledGameAvoidSet}{\ensuremath{\mathbb{D}(\gameAvoidSet)}\xspace}
+\newcommand{\retainGameAvoidSet}{\ensuremath{\overline{\gameAvoidSet}}\xspace}
+\newcommand{\RetainProblemGameName}{\ensuremath{\ProblemGameName_{\retainGameAvoidSet}}\xspace}
+\newcommand{\retainProblemGameName}{\ensuremath{\problemGameName_{\retainGameAvoidSet}}\xspace}
+\newcommand{\retainProblemGame}{\ensuremath{\RetainProblemGameName = ((V_{0}\setminus \gameAvoidSet) \cup \{\trapState\},V_{1}\setminus \gameAvoidSet,E_{\gameAvoidSet}, Win_{\goalFormula})}\xspace}
+\newcommand{\gameStrategy}{\ensuremath{f_{0}}\xspace}
+\newcommand{\gameTransitionFunction}{\ensuremath{\delta}\xspace}
+\newcommand{\gameMemoryFunction}{\ensuremath{u}\xspace}
+\newcommand{\gameMemoryDomain}{\ensuremath{\Omega}\xspace}
+\newcommand{\zeroGameStrategy}{\ensuremath{f_{0}}\xspace}
+\newcommand{\oneGameStrategy}{\ensuremath{f_{1}}\xspace}
+
+%----------------------------
+% GAME RELATED DEFINITIONS
+%----------------------------
+
+\newcommand{\eloise}{\ensuremath{\exists}\xspace}%the system
+\newcommand{\abelard}{\ensuremath{\forall}\xspace}%the environment
+\newcommand{\losingRegion}{\ensuremath{\overline{\winningRegion}}\xspace}
+\newcommand{\zeroWinningRegion}{\ensuremath{\mathbb{W}_{0}}\xspace}
+\newcommand{\oneWinningRegion}{\ensuremath{\mathbb{W}_{1}}\xspace}
+\newcommand{\playToTraceName}{\ensuremath{trace}\xspace}
+\newcommand{\traceToPlayName}{\ensuremath{play}\xspace}
+\newcommand{\selectiveness}{\ensuremath{h_{sel.}}\xspace}
+
+%----------------------------
+% GAME FORMULA DEFINITIONS
+%----------------------------
+
+\newcommand{\playToTrace}[1]{\ensuremath{\playToTraceName({#1})}\xspace}
+\newcommand{\traceToPlay}[1]{\ensuremath{\traceToPlayName({#1})}\xspace}
+\newcommand{\formulaWinningRegion}[1]{\ensuremath{\winningRegion{#1}}\xspace}
+\newcommand{\formulaLosingRegion}[1]{\ensuremath{\overline{W_{0,#1}}}\xspace}
+\newcommand{\FormulaLosingRegion}[1]{\ensuremath{W_{1,#1}}\xspace}
+\newcommand{\FormulaProblemGameName}[1]{\ensuremath{\mathbb{G}^{#1}}\xspace}
+\newcommand{\formulaProblemGameName}[1]{\ensuremath{g^{#1}}\xspace}
+\newcommand{\formulaProblemGame}[1]{\ensuremath{\FormulaProblemGameName{#1} = (V_{0},V_{1},E,Win_{#1})}\xspace}
+\newcommand{\TwoFormulaProblemGameName}[2]{\ensuremath{\mathbb{G}_{\overline{#1}}^{#2}}\xspace}
+\newcommand{\twoFormulaProblemGameName}[2]{\ensuremath{g_{\overline{#1}}^{#2}}\xspace}
+\newcommand{\twoFormulaProblemGame}[2]{\ensuremath{\TwoFormulaProblemGameName{#1}{#2} = ((V_{0}\setminus #1) \cup \{\trapState\},V_{1}\setminus #1,E_{\overline{#1}}, Win_{#2\overline{#1}})}\xspace}
+\newcommand{\FormulaZeroProblemGameName}[1]{\ensuremath{\mathbb{G}_{0}^{#1}}\xspace}
+\newcommand{\formulaZeroProblemGameName}[1]{\ensuremath{g^{#1}}\xspace}
+\newcommand{\formulaZeroProblemGame}[1]{\ensuremath{\FormulaZeroProblemGameName{#1} = (V_{0},V_{1},E,Win_{#1})}\xspace}
+\newcommand{\TwoFormulaZeroProblemGameName}[2]{\ensuremath{\mathbb{G}_{0,\overline{#1}}^{#2}}\xspace}
+\newcommand{\twoFormulaZeroProblemGameName}[2]{\ensuremath{g_{\overline{#1}}^{#2}}\xspace}
+\newcommand{\twoFormulaZeroProblemGame}[2]{\ensuremath{\TwoFormulaZeroProblemGameName{#1}{#2} = ((V_{0}\setminus #1) \cup \{\trapState\},V_{1}\setminus #1,E_{\overline{#1}}, Win_{#2\overline{#1}})}\xspace}
+\newcommand{\FormulaOneProblemGameName}[1]{\ensuremath{\mathbb{G}_{1}^{#1}}\xspace}
+\newcommand{\formulaOneProblemGameName}[1]{\ensuremath{g^{#1}}\xspace}
+\newcommand{\formulaOneProblemGame}[1]{\ensuremath{\FormulaOneProblemGameName{#1} = (V_{0},V_{1},E,Win_{#1})}\xspace}
+\newcommand{\TwoFormulaOneProblemGameName}[2]{\ensuremath{\mathbb{G}_{1,\overline{#1}}^{#2}}\xspace}
+\newcommand{\twoFormulaOneProblemGameName}[2]{\ensuremath{g_{\overline{#1}}^{#2}}\xspace}
+\newcommand{\twoFormulaOneProblemGame}[2]{\ensuremath{\TwoFormulaOneProblemGameName{#1}{#2} = ((V_{0}\setminus #1) \cup \{\trapState\},V_{1}\setminus #1,E_{\overline{#1}}, Win_{#2\overline{#1}})}\xspace}
+
+
+\newcommand{\formulaGameAvoidSet}[1]{\ensuremath{\gameAvoidSet_{#1}}\xspace}
+\newcommand{\formulaRetainGameAvoidSet}[1]{\ensuremath{\overline{\formulaGameAvoidSet{#1}}}\xspace}
+\newcommand{\formulaGameStrategy}[1]{\ensuremath{\gameStrategy^{#1}}\xspace}
+\newcommand{\formulaZeroGameStrategy}[1]{\ensuremath{\zeroGameStrategy^{#1}}\xspace}
+\newcommand{\formulaOneGameStrategy}[1]{\ensuremath{\oneGameStrategy^{#1}}\xspace}
+
+\newcommand{\twoFormulaGameStrategy}[2]{\ensuremath{f^{#2}_{\sigma,\formulaRetainGameAvoidSet{#1}}}\xspace}
+\newcommand{\twoFormulaZeroGameStrategy}[2]{\ensuremath{f_{0,\formulaRetainGameAvoidSet{#1}}^{#2}}\xspace}
+\newcommand{\twoFormulaOneGameStrategy}[2]{\ensuremath{f_{1,\formulaRetainGameAvoidSet{#1}}^{#2}}\xspace}
+
+
+\newcommand{\builtGameStrategy}[1]{\ensuremath{\gameStrategy(#1)}\xspace}
+\newcommand{\builtZeroGameStrategy}[1]{\ensuremath{\zeroGameStrategy(#1)}\xspace}
+\newcommand{\builtOneGameStrategy}[1]{\ensuremath{\oneGameStrategy(#1)}\xspace}
+\newcommand{\formulaBuiltGameStrategy}[2]{\ensuremath{\gameStrategy(#1)^{#2}}\xspace}
+\newcommand{\formulaBuiltZeroGameStrategy}[2]{\ensuremath{\zeroGameStrategy(#1)^{#2}}\xspace}
+\newcommand{\formulaBuiltOneGameStrategy}[2]{\ensuremath{\oneGameStrategy(#1)^{#2}}\xspace}
+\newcommand{\builtController}[1]{\ensuremath{\originalController(#1)}\xspace}
+\newcommand{\formulaBuiltController}[2]{\ensuremath{\originalController(#1)^{#2}}\xspace}
+
+%----------------------------
+% PARTIAL GAME DEFINITIONS
+%----------------------------
+\newcommand{\labelledZeroStates}[1]{\ensuremath{V_{0}^{#1}}\xspace}
+\newcommand{\labelledOneStates}[1]{\ensuremath{V_{1}^{#1}}\xspace}
+\newcommand{\labelledStates}[1]{\ensuremath{V^{#1}}\xspace}
+\newcommand{\labelledZeroAlphabet}[1]{\ensuremath{\Sigma_{0}^{#1}}\xspace}
+\newcommand{\labelledOneAlphabet}[1]{\ensuremath{\Sigma_{1}^{#1}}\xspace}
+\newcommand{\labelledAlphabet}[1]{\ensuremath{\Sigma^{#1}}\xspace}
+\newcommand{\labelledZeroEdges}[1]{\ensuremath{E_{0}^{#1}}\xspace}
+\newcommand{\labelledOneEdges}[1]{\ensuremath{E_{1}^{#1}}\xspace}
+\newcommand{\labelledEdges}[1]{\ensuremath{E^{#1}}\xspace}
+\newcommand{\labelledInitialState}[1]{\ensuremath{v_{0}^{#1}}\xspace}
+\newcommand{\labelledFluent}[2]{\ensuremath{fl^{#1}_{#2}}\xspace}
+\newcommand{\labelledFluents}[1]{\ensuremath{Fl^{#1}}\xspace}
+\newcommand{\labelledValuation}[1]{\ensuremath{\mathcal{V}^{#1}}\xspace}
+\newcommand{\labelledPropositions}[1]{\ensuremath{\mathcal{P}^{#1}}\xspace}
+\newcommand{\labelledProposition}[2]{\ensuremath{p^{#1}_{#2}}\xspace}
+\newcommand{\labelledDomain}{\ensuremath{2}\xspace}
+
+\newcommand{\labelledGameName}[1]{\ensuremath{\mathbb{G}^{#1}}\xspace}
+\newcommand{\labelledGame}[1]{\ensuremath{\labelledGameName{#1}=<\labelledZeroStates{#1},\labelledOneStates{#1},\labelledZeroAlphabet{#1},\labelledOneAlphabet{#1},\labelledZeroEdges{#1},\labelledOneEdges{#1},\labelledInitialState{#1},\labelledValuation{#1}, \labelledPropositions{#1}>}\xspace}
+
+\newcommand{\gameCompo}{\ensuremath{\otimes}\xspace}
+
+\newcommand{\tournamentName}{\ensuremath{\mathbb{T}}\xspace}
+\newcommand{\tournamentGamesName}{\ensuremath{\mathbb{B}}\xspace}
+\newcommand{\tournamentGames}{\ensuremath{\tournamentGamesName=(\labelledGameName{1}\ldots\labelledGameName{k})}\xspace}
+\newcommand{\tournament}{\ensuremath{\tournamentName=<\tournamentGamesName,\varphi,\labelledPropositions{}>}\xspace}
+\newcommand{\tournamentCompositionName}{\ensuremath{\otimes\tournamentGamesName}\xspace}
+\newcommand{\tournamentComposition}{\ensuremath{\tournamentCompositionName=\bigotimes_{i=1}^{|\tournamentGamesName|}\labelledGameName{i}=<\labelledZeroStates{},\labelledOneStates{},\labelledZeroAlphabet{},\labelledOneAlphabet{},\labelledZeroEdges{},\labelledOneEdges{},\labelledInitialState{},\labelledFluents{},\labelledValuation{}>}\xspace}
+\newcommand{\projectedGameName}[1]{\ensuremath{\tournamentCompositionName\Downarrow_{\labelledGameName{#1}}}\xspace}
+\newcommand{\projectedGame}[1]{\ensuremath{\projectedGameName{#1}=<\labelledZeroStates{#1\prime},\labelledOneStates{#1\prime},\labelledZeroAlphabet{#1\prime},\labelledOneAlphabet{#1\prime},\labelledZeroEdges{#1\prime},\labelledOneEdges{#1\prime},\labelledInitialState{#1\prime},\labelledFluents{#1},\labelledValuation{#1\prime}>}\xspace}
+\newcommand{\relaxedGameName}[1]{\ensuremath{\labelledGameName{#1+}}\xspace}
+\newcommand{\relaxedGame}[1]{\ensuremath{\relaxedGameName{#1}=<\labelledZeroStates{#1+},\labelledOneStates{#1+},\labelledZeroAlphabet{#1+},\labelledOneAlphabet{#1+},\labelledZeroEdges{#1+},\labelledOneEdges{#1+},\labelledInitialState{#1},\labelledValuation{#1},\labelledPropositions{#1}>}\xspace}
+\newcommand{\formulaProjection}[2]{\ensuremath{(#1)\Downarrow_{#2}}\xspace}
+\newcommand{\unknownFluent}{\ensuremath{\epsilon}\xspace}
+\newcommand{\formulaSubset}{\ensuremath{\mathbb{R}}\xspace}
+
+\newcommand{\strategyProjection}[1]{\ensuremath{\gameStrategy\Downarrow_{#1}}\xspace}
+\newcommand{\playProjection}[1]{\ensuremath{\pi\Downarrow_{#1}}\xspace}
+%----------------------------
+% BASIC COMPOSED DEFINITIONS
+%----------------------------
+
+\newcommand{\multipleCompo}{\ensuremath{(M_1 \parallel \ldots \parallel M_i \parallel \ldots \parallel M_k)}\xspace}
+\newcommand{\envActions}{\ensuremath{A_{\originalEnv}}\xspace}
+\newcommand{\retainSet}{\ensuremath{\overline{\avoidSet}}\xspace}
+\newcommand{\retainEnv}{\ensuremath{\originalEnv_{\retainSet}}\xspace}
+\newcommand{\retainDelta}{\ensuremath{\Delta_{\retainEnv}}\xspace}
+\newcommand{\retainController}{\ensuremath{\originalController_{\retainSet}}\xspace}
+\newcommand{\retainCompo}{\ensuremath{(\retainController \parallel \retainEnv)}\xspace}
+\newcommand{\retainCompoProjection}{\ensuremath{\retainCompo\Downarrow_{\originalEnv}}\xspace}
+\newcommand{\originalCompo}{\ensuremath{(\originalController \parallel \originalEnv)}\xspace}
+\newcommand{\originalCompoProjection}{\ensuremath{\originalCompo\Downarrow_{\originalEnv}}\xspace}
+\newcommand{\completeCompo}{\ensuremath{(\originalController \parallel \retainEnv)}\xspace}
+\newcommand{\effectiveCompo}{\ensuremath{(\retainController \parallel \originalEnv)}\xspace}
+\newcommand{\effectiveCompoProjection}{\ensuremath{\effectiveCompo\Downarrow_{\originalEnv}}\xspace}
+\newcommand{\trapState}{\ensuremath{s_{\bot}}\xspace}
+\newcommand{\originalProblemName}{\ensuremath{\mathcal{I}}\xspace}
+\newcommand{\originalProblem}{\ensuremath{\originalProblemName=<\originalEnv, \goalFormula, \controllableActions>}\xspace}
+\newcommand{\retainProblemName}{\ensuremath{\mathcal{I}_{\retainSet}}\xspace}
+\newcommand{\retainProblem}{\ensuremath{\retainProblemName=<\retainEnv, \goalFormula, \controllableActions>}\xspace}
+
+%----------------------------
+% COMMON FORMULAS AND CONTROL PROBLEMS
+%----------------------------
+
+\newcommand{\achieveGoalFormulaName}{\ensuremath{\Diamond G}\xspace}
+\newcommand{\achieveGoalFormula}{\ensuremath{\bigwedge_{j=1}^{m}\Diamond \phi_{j}}\xspace}
+\newcommand{\achieveGoalProblemName}{\ensuremath{\mathcal{I}^{\achieveGoalFormulaName}}\xspace}
+\newcommand{\achieveGoalProblem}{\ensuremath{\achieveGoalProblemName=<\originalEnv, \achieveGoalFormulaName, \controllableActions>}\xspace}
+\newcommand{\safetyFormulaName}{\ensuremath{\square\rho}\xspace}
+\newcommand{\safetyFormula}{\ensuremath{\square\rho}\xspace}
+\newcommand{\safetyProblemName}{\ensuremath{\mathcal{I}^{\safetyFormulaName}}\xspace}
+\newcommand{\safetyProblem}{\ensuremath{\safetyProblemName=<\originalEnv, \safetyFormulaName, \controllableActions>}\xspace}
+\newcommand{\sgrProblemName}{\ensuremath{\mathcal{I}^{\sgrFormulaName}}\xspace}
+\newcommand{\sgrProblem}{\ensuremath{\sgrProblemName=<\originalEnv, \sgrFormulaName, \controllableActions>}\xspace}
+\newcommand{\grFormulaName}{\ensuremath{gr1}\xspace}
+\newcommand{\grFormula}{\ensuremath{\bigwedge_{i=1}^{n}\square \Diamond \gamma_{i} \implies \bigwedge_{j=1}^{m}\square \Diamond \phi_{j}}\xspace}
+\newcommand{\sgrFormulaName}{\ensuremath{sgr_{1}}\xspace}
+\newcommand{\sgrFormula}{\ensuremath{\safetyFormula \wedge \grFormula}\xspace}
+\newcommand{\refinedCutFormulaName}{\ensuremath{As\achieveGoalFormulaName}\xspace}
+\newcommand{\refinedCutFormula}{\ensuremath{\bigwedge_{i=1}^{n}\square \Diamond \gamma_{i} \implies \bigwedge_{j=1}^{m} \Diamond \phi_{j}}\xspace}
+\newcommand{\grProblemName}{\ensuremath{\mathcal{I}^{\grFormulaName}}\xspace}
+\newcommand{\grProblem}{\ensuremath{\grProblemName=<\originalEnv, \grFormulaName, \controllableActions>}\xspace}
+\newcommand{\grRetainProblemName}{\ensuremath{\mathcal{I}^{\grFormulaName}_{\retainSet}}\xspace}
+\newcommand{\grRetainProblem}{\ensuremath{\grRetainProblemName=<\retainEnv, \goalFormula, \controllableActions>}\xspace}
+\newcommand{\refinedCutProblemName}{\ensuremath{\mathcal{I}^{\refinedCutFormulaName}}\xspace}
+\newcommand{\refinedCutProblem}{\ensuremath{\refinedCutProblemName=<\originalEnv, \refinedCutFormulaName, \controllableActions>}\xspace}
+\newcommand{\alwaysGoalFormulaName}{\ensuremath{\square_{\phi}}\xspace}
+\newcommand{\alwaysGoalFormula}{\ensuremath{\bigwedge_{i=1}^{n}\square \Diamond \gamma_{i} \implies \bigwedge_{j=1}^{m}\square \phi_{j}}\xspace}
+\newcommand{\alwaysGoalProblemName}{\ensuremath{\mathcal{I}^{\alwaysGoalFormulaName}}\xspace}
+\newcommand{\alwaysGoalProblem}{\ensuremath{\alwaysGoalProblemName=<\originalEnv, \alwaysGoalFormulaName, \controllableActions>}\xspace}
+\newcommand{\boundedLivenessFormulaName}{\ensuremath{As\square\Diamond_{k}\Diamond\phi}\xspace}
+\newcommand{\boundedLivenessFormula}{\ensuremath{\bigwedge_{i=1}^{n}\square \Diamond \gamma_{i} \implies \bigwedge_{j=1}^{m} \square\Diamond_{k} \phi_{j}}\xspace}
+
+
+%----------------------------
+% FORMULA PARAMETRIZED COMMANDS
+%----------------------------
+\newcommand{\formulaAvoidSet}[1]{\ensuremath{\avoidSet_{#1}}\xspace}
+\newcommand{\formulaRetainSet}[1]{\ensuremath{\overline{\avoidSet_{#1}}}\xspace}
+\newcommand{\formulaRetainEnv}[1]{\ensuremath{\originalEnv_{\formulaRetainSet{#1}}}\xspace}
+\newcommand{\formulaRetainControlProblemName}[1]{\ensuremath{\mathcal{I}_{#1}}\xspace}
+\newcommand{\formulaRetainControlProblem}[1]{\ensuremath{\formulaRetainControlProblemName{#1}=<\formulaRetainEnv{#1}, #1, \controllableActions>}\xspace}
+\newcommand{\formulaControlProblemName}[1]{\ensuremath{\mathcal{I}^{#1}}\xspace}
+\newcommand{\formulaControlProblem}[1]{\ensuremath{\formulaControlProblemName{#1}=<\originalEnv, #1, \controllableActions>}\xspace}
+\newcommand{\formulaRetainController}[1]{\ensuremath{\originalController^{#1}}\xspace}
+\newcommand{\formulaEffectiveCompo}[1]{\ensuremath{(\formulaRetainController{#1} \parallel \originalEnv)}\xspace}
+
+\newcommand{\twoFormulaRetainController}[2]{\ensuremath{\originalController^{#2}_{\formulaRetainSet{#1}}}\xspace}
+\newcommand{\twoFormulaEffectiveCompo}[2]{\ensuremath{(\twoFormulaRetainController{#1}{#2} \parallel \originalEnv)}\xspace}
+\newcommand{\twoFormulaCrossedCompo}[2]{\ensuremath{(\formulaRetainController{#1} \parallel \formulaRetainEnv{#2})}\xspace}
+\newcommand{\twoFormulaRetainCompo}[2]{\ensuremath{(\twoFormulaRetainController{#1}{#2} \parallel \formulaRetainEnv{#1})}\xspace}
+\newcommand{\twoFormulaControlProblemName}[2]{\ensuremath{\mathcal{I}_{#1}^{#2}}\xspace}
+\newcommand{\twoFormulaControlProblem}[2]{\ensuremath{\twoFormulaControlProblemName{#1}{#2}=<\formulaRetainEnv{#1}, #2, \controllableActions>}\xspace}
+\newcommand{\formulaRetainSimulation}[1]{\ensuremath{\mathbb{R}_{\formulaRetainSet{#1}}}\xspace}
+\newcommand{\formulaEnv}[1]{\ensuremath{\originalEnv_{#1}}\xspace}
+\newcommand{\formulaCompositionalEnv}[1]{\ensuremath{(\originalEnv_{1}\parallel\ldots\parallel\formulaEnv{#1}\parallel\ldots\parallel \originalEnv_{k})}\xspace}
+\newcommand{\formulaCompositionalControlProblemName}[2]{\ensuremath{\mathcal{I}_{#1}^{#2}}\xspace}
+\newcommand{\formulaCompositionalControlProblem}[2]{\ensuremath{\formulaCompositionalControlProblemName{#1}{#2}=<\formulaEnv{\formulaRetainSet{#1}}, #2, \controllableActions>}\xspace}
+

@@ -1,0 +1,421 @@
+
+----------------------- REVIEW 1 ---------------------
+PAPER: 249
+TITLE: Behavior Minimization Feedback for Unrealizable Specifications
+AUTHORS: Mariano Cerrutti, Victor Braberman, Nicolás D'Ippolito and Sebastián Uchitel
+
+Your overall evaluation of the paper: -1 (weak reject)
+
+----------- Summary of the paper -----------
+Given an environment that accepts commands and outputs events, and is
+specified as an automaton, and an LTL specification of a desired property
+to be obeyed by traces of the environment, the overall goal is to output a
+controller that interacts with the environment, controls its transitions,
+and ensures the satisfaction of the property. However, for the given
+environment and LTL property, no controller may exist. This means this pair
+of environment and property is *unrealizable*. In this case, users would
+like to get feedback about the reasons for the unreliazability, so that
+they can tune the assumptions on the environment so that the controller
+becomes realizable. The key contribution of this paper is an algorithm to
+minimize the given environment to preserve unrealizability. The idea is
+that the thus minimized environment will be understood better by users.
+
+The approach proposed involves simplifying the given environment step by
+step, all the while retaining unrealizability. When no more simplification
+can be done in this way, the environment is emitted. This is a form of
+local minimization.
+
+The authors have implemented their approach. They describe case studies on
+a few example systems.
+
+----------- Detailed evaluation -----------
+The main strength of the paper is that it follows a simple, yet
+interesting approach to the problem. The approach appears novel.
+
+However, I find that many many key aspects of this paper are
+unsatisfactory. I will categorize these aspects, and present them below.
+
+INCOMPLETE FORMALISM
+
+This paper is a formal methods paper. Given this, formal definitions of all
+structures that are relevant to the problem, and of the problem statement,
+would be expected. But  Sec. 3 (preliminaries) out-sources most of the
+definitions to other papers. This paper is therefore not
+self-contained. Key  assumptions and design decisions become obscure
+because of the missing definitions. Here are some examples of missing or
+unclear definitions:
+
+a.  The paper assumes that properties are given as FLTL properties. ("F"
+    for "fluents"?) But the semantics of FLTL is omitted from the
+    paper. The authors simply say that  "Formula satisfaction for
+    FLTL is standard and omitted". I have reasonable background knowledge
+    regarding LTL, regarding LTL synthesis, etc. I have never come across
+    FLTL, and I don't think it is "standard". The subsequent contributions
+    of this paper become fuzzy due to this omission.
+
+b.  It is not explained intuitively what a fluent is, and why fluents are
+    used instead of normal propositions.
+
+c.  The definition of legal environments, which is also key to the paper,
+    is incomplete because "illegal states" are not defined. The reader is
+    expected to look up paper [13] to figure this out.
+
+    Similarly, the definition of "interface automaton" is not given.
+
+    And the meaning of the union-like operator with a "+" inside it is
+    never mentioned anywhere.
+
+All these shortcomings would have been at least partially mitigated had the
+authors included intuitive explanations and illustrations in Sec. 3. But
+there are none.
+
+INSUFFICIENT MOTIVATION
+
+There is related work on minimization where the environment is specified
+using  LTL. The only difference in this paper is that the environment
+is allowed to be specified as an automaton. Now, I do know that automatons
+are more general than LTL formulas. Nonetheless, the authors never
+justify why this matters in practice. The most unsatisfying part  is
+that in their evaluation, they take environments that originally specified
+as LTL formulas, and then translate them to automatons. So why would users
+not directly want to use the LTL-based approaches?!
+
+The authors also keep saying that their approach performs "semantic
+minimization", while previous approaches perform "syntactic
+minimization". However, nowhere do the authors explain technically what
+this distinction is, or why it is important in theory or in practice.
+
+IMPROPER EVALUATION
+
+The empirical evaluation of the work has the following limitations.
+
+a.  The usefulness of the minimization is evaluated subjectively by the
+    authors themselves. Ideally this should be done by 3rd party users.
+
+b.  There is no comparison with other tools, or with any baselines.
+
+c.  The interpretation of the numbers varies from place to place within the
+    paper. This causes much confusion. For instance, is S_{eK} the
+    reduction in the number of states, or the number of states in the
+    minimized auomaton? Both interpretations exist in the paper. For
+    instance, for "gen buf (added goal)", Table 1 says that "state
+    reduction" is 7.75%. But in the text of the paper, for the same row, it
+    is mentioned that "the minimized environment decreased by 92%" (i.e.,
+    100% - 7.75%). Such discrepancies and confusions cause the key message
+    of the evaluation to get lost.
+
+TYPOS
+
+There is a very large number of typos, missing full stops, and poor grammatical
+structures throughout the paper. In some instances these distract from the
+core message of the paper.
+
+Other detailed comments:
+
+1. Page 2: The second-last paragraph in Sec. 2 is not clear at all.
+
+2. Page 3:
+
+   a. "if and only if one of the following conditions holds"
+
+       Exactly one of the conditions, or one or both of the conditions?
+
+       Why there is a small dash "-" before the first condition but not
+       before the second condition?
+
+   b.  Not clear what "propostional FLTL formulae" means
+
+   c.  What is an interface automaton?
+
+   d.  What is the "set of controllable actions C"? Is C a subset of Sigma?
+
+   e.  Definition of legal environment not clear.
+
+   f.  "M is a legal environment for E". Should it be "E is a legal
+        environment for M"?
+
+   g.  What is the difference between events and actions?
+
+   h.  Not clear what a "mixed state" is
+
+   i.  "work with plants". But plants have not been introduced at all in
+       the paper.
+
+   j.  "notion inspired from sub-graph.". Typo?
+
+   k.  "constructed following [15] conversion". Meaning??
+
+3. Page 4:
+
+   a. How to represent strategies? What is the definition of a strategy?
+
+   b. In Definition 4.5, it says "E' \subseteq E'' ". Should that have been
+      "E' \sqsubset_{(C)} E'' "
+
+   c. "we expect our procedure to incrementally reduce". I don't think you
+      *expect* your procedure to do this. You are designing it that way.
+
+   d. A sample synthesized controller (when the specification is
+      realizable) should have been shown.
+
+4. Fig. 8:
+
+   What is a d_out(E',t). Never explained in the text. Is this the deadlock
+   detection?
+
+   E_K in Line 11 seems wrong. Should it have been E'?
+
+5. "At each cycle, the set is updated". Which cycle?
+
+6. The three case studies are unconvincing. It is not clear how the authors
+   obtained the insights from the minimized environments. This part should
+   have been done using a controlled human study, with one group using the
+   minimized environments and the other group using the unminimized
+   environments. After all, even the minimized environments are large (have
+   hundreds or thousands of states in certain cases), It is hard to believe
+   that users can quickly understand such complex systems. It is also not
+   clear that users will not be able to obtain the same insights from the
+   full systems themselves (without any minimization).
+
+7. Related work:
+
+   a. The first paragraph should belong to the Introduction, and not here.
+
+   b. Not clear why minimizing the whole automaton could be better than
+      just showing a counter strategy.
+
+      And the description about "counter strategy memory" is not clear at
+      all.
+
+   c. Not clear how syntactic minimization will increase the behavior of
+      the plant.
+
+      And what does "plant" mean, anyway? Is it being used interchangeably
+      with "environment"?
+
+   d. Why isn't repair necessarily better than just minimization of the
+      unreliazable specification? Isn't repair the eventual goal, anyway?
+
+   e. "built following [31] counter-strategy". Means what?
+
+      "restricted to scenario-based specifications domain". Means what?
+
+----------- Questions to the authors -----------
+1. Can you illustrate using a short example the difference between
+   syntactic and semantic minimization, and argue which one is better?
+
+2. Can you justify using a small example why allowing automatons as
+   environments has advantages over environments specified using LTL?
+
+3. Since your case studies were anyway originally specified using LTL, why
+   did you not empirically compare your tool with the LTL-formula
+   based minimization tools?
+
+----------- Summary of main points for/against the paper -----------
+For the paper:
+
++ Simple, Interesting and cute approach
+
+Against the paper:
+
+- Important formal definitions missing. Thus, the problem statement, as
+  well as results achieved, are fuzzy.
+
+- Evaluation is based on a subjective study by the authors themselves.
+
+  Also, no baselines, and no comparison with other tools.
+
+- Significance of this work over related work is not clear.
+
+- Too many typos.
+
+
+----------------------- REVIEW 2 ---------------------
+PAPER: 249
+TITLE: Behavior Minimization Feedback for Unrealizable Specifications
+AUTHORS: Mariano Cerrutti, Victor Braberman, Nicolás D'Ippolito and Sebastián Uchitel
+
+Your overall evaluation of the paper: -1 (weak reject)
+
+----------- Summary of the paper -----------
+The authors present an automata minimization procedure with the aim of pinpointing
+the behavior that makes it unrealizable, in the sense that when put in composition
+with another automaton (representing the environment) they fail to satisfy a GR(1)
+formula. This allows one to focus on the core behavior that causes unrealizability
+in the form of an automaton that contains the relevant part of the behavior of the
+original automaton. This is a nice and original idea, the contribution seems to be
+sound (only proof sketches are given), and the validation is definitely promising,
+but the presentation leaves much to be desired.
+
+----------- Detailed evaluation -----------
+The authors present an automata minimization procedure with the aim of pinpointing
+the behavior that makes it unrealizable, in the sense that when put in composition
+with another automaton (representing the environment) they fail to satisfy a GR(1)
+formula. This allows one to focus on the core behavior that causes unrealizability
+in the form of an automaton that contains the relevant part of the behavior of the
+original automaton. This is a nice and original idea, the contribution seems to be
+sound (only proof sketches are given), and the validation is definitely promising,
+but the presentation leaves much to be desired.
+
+The practical applicability may be limited unless implemented in a high-level tool
+that abstracts from the underlying automata. The authors' assumption that feedback
+of their approach can be used by engineers to understand causes of unrealizability
+assumes that engineers design and understand automata-based system specifications.
+This is controversial. Nevertheless, I appreciate the theoretical contribution. Do
+the authors foresee practical applicability that I fail to see?
+
+However, the presentation does not "meet [the] high standards
+of presentation, including adequate use of the English language":
+- American and British English are mixed continuously
+see for instance "minimized" vs. "minimised" only 3 lines apart on page 6
+- Spellchecking apparently was not applied
+see for instance "remeber" and "bellow"
+- A good proofreading neither
+see for instance "a automata", "its" instead of "it is", "y" instead of "and",
+"inspired in", "sub-LTS" vs. "subLTS" vs. "sub LTS", "this sections", "it will noted",
+"a unrealizable", "picture" instead of "figure", "against to which", "can specified",
+"an composition", "later two" instead of "latter two", "giving to option" instead of
+"giving no option", "Figures 10", "one the closest" instead of "one of the closest",
+"out technique" instead of "our technique", "the specifications is", etc.
+- The references contain two occurrences of the same paper appearing consecutively
+see [6] and [7] as well as [25] and [26]
+
+Several notions are not well explained or not explained at all (more below):
+- GR(1)
+- plant
+- SGR(1)
+- JVTSs
+
+The authors claim that their technique also has the potential to complement
+existing techniques that work by syntactic rather than semantic minimization,
+but do not support this claim with any evidence or further explanation. Can
+the authors expand on this?
+
+The authors omit FLTL formula satisfaction claiming that it is standard, while
+they do include the standard parallel composition of two LTSs. The definition of
+Interface Automata is omitted, but this would be rather useful to understand
+Def.3.3 of a legal environment. In Def.3.3, the specific subset symbol should be
+defined and the subscripts "c" and "u" as well. I assume that these stand for
+"controllable" and "uncontrollable", respectively, but not all readers might get
+this (in particular because "monitored" is used instead of "uncontrollable"
+in this paper). The same holds for deadlock-freeness in Def.3.4: define what it
+means. Also, please remove "if" at the end of Def.3.4, which creates confusion.
+Moreover, I would prefer the formal Def.3.4 and its repetition at the end of the
+first paragraph of Sect.4 to match, i.e. decide whether or not to quantify over
+traces. Finally, note that it should be "E||M" instead of "E||X".
+
+The authors follow the assumption from [15], which is apparently their own work,
+that does not allow automata with so-called mixed states, in which both controlled
+and uncontrolled transitions are enabled. This seems a rather strong assumption.
+Could the authors explain the (technical) need for this assumption and discuss its
+(practical) consequences?
+
+Also Def.4.3 leaves it up to the reader to understand that the set U stands for
+monitored actions. Then why not use a calligraphic M rather than a calligraphic U
+given that uncontrollable actions are called monitored in this paper? Given the
+earlier cases of \Sigma_{M_u} in Def.3.3 and E||X vs. E||M (Def.3.4 and intro of
+Sect.4) and the case described next (notation of next operator), this gives me
+the impression that many definitions have been carelessly copied from other work
+by the authors.
+
+The FLTL syntax is defined with X denoting the "next" operator, while later in
+the paper the open circle notation is used (p.6, Sect.6.1).
+
+The meaning of the up and down arrows used as action suffixes in Figures 9-11 are
+never explained.
+
+The authors do not provide any information in the paper concerning replicability,
+even though the call for papers clearly states that "The evaluation of submissions
+will take into account the extent to which sufficient information is available to
+support the full or partial independent replication of the claimed findings."
+
+Finally, some detailed comments, in addition to the ones listed above:
+- p.1, Intro: "goals[24,35]" -> "goals [24,35]"
+- p.3, Def.3.1: "its" -> "it is"; and what about finite traces?
+- p.3, l.1 below Def.3.1: "is that it" ???
+- p.3, l.3 below Def.3.1: "flis" -> "fl is"
+- p.3, middle of right column: "The same work shows ... are determined" ???
+- p.3, bottom of right column: "[15] conversion" ?
+- p.3, bottom of right column: S_M,\Delta_P -> S_M$ and $\Delta_P
+- p.4, Def.4.5: I' is unrealizable I ???
+- p.5, l.9 below Fig.8: "picture 8" -> Figure 8"
+- p.6, l.4 of right column: "water level to be kept" -> "water level is to be kept"
+- p.7, l.5 of Sect.6.3: the comma should be on the line above
+- p.8, l.7 of Sect.7: "GR(1)[42]" -> "GR(1) [42]"
+- p.8, bottom of right column: remove one of the occurrences of "is presented" in
+"In [8] an assumption computing technique is presented based in Craig’s interpolants
+is presented."
+- p.8, l.-7: "[31] counter-strategy" -> "the counter-strategy of [31]"; "its" -> "it is"
+- p.9, l.-6: "minimisation Future work" -> "minimisation. Future work"
+
+----------- Questions to the authors -----------
+Q1 The practical applicability may be limited unless implemented in a high-level tool
+that abstracts from the underlying automata. The authors' assumption that feedback
+of their approach can be used by engineers to understand causes of unrealizability
+assumes that engineers design and understand automata-based system specifications.
+This is controversial. Nevertheless, I appreciate the theoretical contribution. Do
+the authors foresee practical applicability that I fail to see?
+
+Q2 The authors claim that their technique also has the potential to complement
+existing techniques that work by syntactic rather than semantic minimization,
+but do not support this claim with any evidence or further explanation. Can
+the authors expand on this?
+
+Q3 The authors follow the assumption from [15], which is apparently their own work,
+that does not allow automata with so-called mixed states, in which both controlled
+and uncontrolled transitions are enabled. This seems a rather strong assumption.
+Could the authors explain the (technical) need for this assumption and discuss its
+(practical) consequences?
+
+----------- Summary of main points for/against the paper -----------
++ This is a nice and original idea
++ The contribution seems to be sound (only proof sketches are given)
++ The validation is definitely promising
++ I appreciate the theoretical contribution
+
+- The presentation leaves much to be desired
+- The practical applicability may be limited
+- Several notions are not well explained or not explained at all
+- The authors do not provide any information in the paper concerning replicability
+
+
+----------------------- REVIEW 3 ---------------------
+PAPER: 249
+TITLE: Behavior Minimization Feedback for Unrealizable Specifications
+AUTHORS: Mariano Cerrutti, Victor Braberman, Nicolás D'Ippolito and Sebastián Uchitel
+
+Your overall evaluation of the paper: -1 (weak reject)
+
+----------- Summary of the paper -----------
+The paper discusses the problem of preserving unrealizability of specifications under minimization. The problem is presented as important in the requirement engineering phase and it proposes an automatic minimization strategy for unrealizable specifications formaly carried out in a control problem setting.
+The specification is based on LTS models for the environment and LTL for assumptions and guarantees.
+The approach is formaly described and it is demonstrated on a set of case studies provided in the literature.
+
+----------- Detailed evaluation -----------
+The paper addresses a very specific problem, proposing a new solution that exploits the notion of Alternating sub-LTS. The paper is well written and does its best to make all the introduced notions digestable.  The approach aims at minimizing the specification still mantaining unrealizability. One question that comes to my mind is what happens if there are more causes for unrealizability. The construction will provide one but there might exist more in the partially ordered search space that may or may not be of the same degree of minimality.
+It would be useful if the authors might add some comment on this.
+The way I better understand the approach is by looking at the proposed technique as a way to debug the original specification, in this respect it would be useful to see the technique as a step of a process that might eventually converge on a realizable specification.
+I am not familiar with all the literature referenced in the paper but I understand that the authors claim that the fact of working with an operational specification, i.e. LTS rather than with only logic formulas is a distinctive feature of the proposed approach. Honestly I cannot see the problem here, given that I imagine that a developer will possibly work neither with LTS or with LTL but with suitably packaged tools that hide internal details and can perform all kind of transformations in a black box fashion.
+
+Summarizing there is a technical result here but I am not convinced about its relevance.
+
+----------- Questions to the authors -----------
+1) what happens if there is more than one cause of unreliability?
+
+----------- Summary of main points for/against the paper -----------
++ new technical solution
+- very specific problem
+- the problem is quite artificial and not current practice
+
+
+-------------------------  METAREVIEW  ------------------------
+PAPER: 249
+TITLE: Behavior Minimization Feedback for Unrealizable Specifications
+
+The reviewers find the work intellectually interesting and novel. However, they unanimously agree that the paper, in its current form, is not ready for publication.
+
+The reviewers provide significant feedback in their reviews. But in summary, the overriding reasons that they recommend rejection have to do with (1) the paper’s presentation and (2) problems with the evaluation.
+
+Presentation: There are incomplete definitions and missing background sections (e.g., FLTL). The incomplete definitions obscure key assumptions and design decisions, making it impossible for reviewers to fully review and evaluate the technical contributions and the soundness of the approach. For example, a main thrust of the paper — that the approach is a semantic minimization as opposed to a syntactic minimization — is still not clear.
+
+Evaluation: The usefulness of the work is evaluated by the authors themselves, thereby introducing a strong potential for bias. Second, the evaluation’s research questions are too narrow. If the work is motivated as a debugging tool, then its evaluation needs to assess its value as a debugging tool. (E.g., a user study to evaluate the understandability of the unrealized core.)

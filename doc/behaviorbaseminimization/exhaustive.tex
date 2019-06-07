@@ -1,0 +1,39 @@
+For the exploration criterion we evaluated a version of Delta Debugging
+that was adapted to our technique, a DFS search algorithm
+and then an exhaustive first search approach that looks for all the
+minimal induced plants.\\
+We introduce the exhaustive exploration algorithm first,
+we will use a mapping between the superset
+of monitored transitions $\mathcal{T}_u$ in $E$ to the natural numbers.  
+It allows to order the search by scanning the range 
+$r_u = [0\ldots 2^{|\mathcal{T}_u|}-1]$ incrementally.  The elements
+of $r_u$ encode members of the superset $\mathcal{P}(\mathcal{T}_u)$
+as follows, let $\mathcal{T}'_u \subseteq \mathcal{T}_u$:
+\[
+get\_binary\_key(\mathcal{T}'_u, \mathcal{T}_u) = 
+\sum\limits_{i \in [0\ldots 2^{|\mathcal{T}_u|}-1], \mathcal{T}'_u[i] \in \mathcal{T}_u}2^i
+\]
+The dual function $get\_transitions:\mathbb{N} \rightarrow \mathcal{P}(\mathcal{T}_u)$ will retrieve the pre image of $get\_binary\_key$.
+The overview is linked to the pseudocode
+in Figure \ref{fig:exhaustive-code} representing the runtime behavior of the
+algorithm by means of the \listRef{A} \ldots \listRef{G} markers to aid the reader.
+The algorithm starts by getting the set of monitored transitions as 
+candidates to be removed from the plant \listRef{A} and then computing the 
+binary representation for the whole set.  The set \texttt{candidates} of
+induced plants is initialized containing the original automaton $E$ \listRef{B}.
+The algorithm then proceeds to explore the search space by decrementing the 
+\texttt{key} \listRef{C} and computing its pre image \listRef{D}.  
+The automaton under observation is the updated according to the current
+$\mathcal{T}'_u$ set \listRef{E}, reduced to its closest induced representation
+and checked for realizability \listRef{F}.  If the automaton happens to be 
+unrealizable it is added to the collected candidates list.  We then proceed
+to get the minimal induced plants by removing any candidate that has an 
+unrealizable induced plant \listRef{G}.  The remaining members of the list
+are returned as the set of conflicts found for $E$.
+\begin{figure}[ht]
+  \begin{center}
+    \input{exhaustivecode} 
+    \caption{Exhaustive exploration code}
+    \label{fig:exhaustive-code}
+  \end{center}
+\end{figure}

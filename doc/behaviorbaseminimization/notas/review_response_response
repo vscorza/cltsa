@@ -1,0 +1,15 @@
+Thanks for the in-depth analysis and comments on the paper, next I will try to reply to your questions:
+
+Reviewer 1. 
+Q1) With respect to the difference between syntactic and semantic minimization, if you look at the example from figure 1 to 3 a syntactic approach would have removed safety restrictions (as [] ltl formulas) encoding the transitions irrelevant to the unrealizability cause, this will produce a diagnostic automata where the label on the removed transition will lead to any other state.  Both minization work on different views of the problem, syntactic minization helps when looking at relevant formulas and semantic minimization should lead to understand the behavior that is rendering the problem unrealizable.
+Q2) To the best of our understanding, there is no clear advantage on the best way to describe the environment, with hardware specifications both ltl formulas and ltl-encoded automata are used, but in the field of supervisory control automata are the de facto approach when writing specifications.  That is one of the main reasons for us to claim that the technique is complimentary to syntactic minimization, because it allows the engineer to understand the same problem under different views.
+Q3) Regarding the validation we could have modify examples from supervisory controls to our advantage, or even produce new ones but we decided to try our technique against published cases.  It is thus difficult to empirically compare our technique, that works over explicit behavior with the ones that work originally over set of ltl-formulas.
+
+Reviewer 2.
+Q1) We share the opinion that the tecnique would benefit from a high-level tool that can extract the underlying automata from an operational specification, minimize it and then provide feedback in the original language.
+Q2) We simply say that any non-trivial alternative way of providing feedback for operational specifications can be useful and has the potential to give more insight on the same unrealizable problem.
+Q3) We omitted mixed states in order to simplify the presentation of our work.  It is possible to translate a specification with mixed states into one wihtout them that will preserve (non)realizability.
+
+Reviewer 3.
+Q1) We expect the technique to allow the engineer to incrementally fix the specification, thus if there are several causes on non realizability the user will be able to discover and solve them one by one.
+

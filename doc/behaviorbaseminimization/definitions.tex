@@ -1,0 +1,84 @@
+%===========================
+% ENVIRONMENT CUT
+%===========================
+
+\begin{definition} \label{def:envcut} \emph{Environment Cut w.r.t \originalEnv and \avoidSet}\\
+An environment cut w.r.t an LTS $\originalEnv = (S_{\originalEnv}, \envActions, \Delta_{\originalEnv}, s_{0})$, 
+and a cutting set $\avoidSet \subseteq S_{\originalEnv}$ is the LTS described as follows:
+\begin{minipage}[t]{.5\textwidth}
+\begin{center}
+\[\retainEnv = ((S_{\originalEnv}\setminus \avoidSet)\cup \{ \trapState \}, \envActions, \retainDelta, s_{0})\]
+where $\retainDelta$ is defined as:
+\[\forall s,a: s \in (S_{\originalEnv}\setminus \avoidSet)\cup \{ \trapState \}, a \in \envActions\]
+\[
+  (s,a,s') \in \retainDelta \iff \left\{\def\arraystretch{1.2}%
+  \begin{array}{@{}c@{}}
+    ((s,a,s') \in \Delta_{\originalEnv} \\
+    \wedge \nexists s'' \in \avoidSet \text{ s.t } (s,a,s'') \in \Delta_{\originalEnv})\\
+    \vee \\
+    s' = \trapState \wedge \exists s'' \in \avoidSet: (s, a, s'') \in \Delta_{\originalEnv}\\
+  \end{array}\right.
+\]
+\end{center}
+\end{minipage}
+\end{definition}
+
+%===========================
+% STATE DOWN PROJECTION
+%===========================
+
+\begin{definition} \label{def:downProjectionState} \emph{Down projection of a single state}\\
+\begin{minipage}[t]{.5\textwidth}
+\[\text{Suppose }\multipleCompo = (S, A, \Delta, s_0)\]
+Let $(e_1,\ldots,e_i,\ldots,e_k) \in S_{\multipleCompo}$ the projection of a composed state over an automaton is defined as: 
+\[(e_1,\ldots,e_i,\ldots,e_k)\Downarrow_{M_i}=e_i\]
+\end{minipage}
+\end{definition}
+
+%===========================
+% AUTOMATA DOWN PROJECTION
+%===========================
+
+\begin{definition} \label{def:downProjectionAutomata} \emph{Down projection of composed automata}\\
+Here we define the projection of several composed automata over one of them as follows: 
+\begin{minipage}[t]{.5\textwidth}
+\begin{center}
+\[\text{Suppose} \multipleCompo = (S, A, \Delta, s_0)\]
+Then the down projection will be:
+\[\multipleCompo\Downarrow_{M_i}=\{S\Downarrow_{M_i}, A,\Delta\Downarrow_{M_i},s_0\}\]
+with
+\[S\Downarrow_{M_i}=\{s\Downarrow_{M_i}: s \in S\}\]
+\[(s,a,s') \in \Delta\Downarrow_{M_i} \iff (s,a,s') \in \Delta \wedge s' \in S\Downarrow_{M_i}\}\]\\
+\end{center}
+\end{minipage}
+\end{definition}
+
+%===========================
+% AVOID SET
+%===========================
+
+\begin{definition} \label{def:avoidSet} \emph{Avoid set w.r.t. \originalProblem}\\
+Given $E$ an LTS for the environment, $\controllableActions \subseteq \envActions$ a set of controllable actions and $\goalFormula$ an 
+FLTL formula, the avoid set \avoidSet with respect to control problem \originalProblem is defined as:
+\begin{minipage}[t]{.5\textwidth}
+\[\avoidSet = \{s \in S_{E} : \forall M \text{ s.t. $M$ is a solution to } \originalProblemName, s \not\in S_{\originalCompoProjection}\}\]\\
+\end{minipage}
+\end{definition}
+
+%===========================
+% SOUND SET
+%===========================
+
+\begin{definition} \label{def:soundSet} \emph{Sound set w.r.t. \originalProblem}\\
+We say that $\avoidSet \subseteq S_{\originalEnv}$ is a sound set w.r.t. \originalProblem 
+ if $\forall M$ s.t. $M$ is a solution to \retainProblem then $M$ is a solution to \originalProblemName.
+\end{definition}
+
+%===========================
+% COMPLETE SET
+%===========================
+
+\begin{definition} \label{def:completeSet} \emph{Complete set w.r.t \originalProblem}\\
+We say that $\avoidSet \subseteq S_{\originalEnv}$ is a complete set w.r.t. \originalProblem 
+if  $\forall M$ s.t. $M$ is a solution to \originalProblemName then $M$ is a solution to \retainProblem
+\end{definition}

@@ -1,0 +1,52 @@
+
+\begin{definition}\label{def:fulfillable}\emph{((un)fulfillable, (in)sufficient)}
+Let $\mathcal{A}$ be a set of available assuptions, let $\mathcal{G}$ be a set of available
+guarantees, and let $A \subseteq \mathcal{A}$ and $G \subseteq \mathcal{G}$.\\
+If a specification $<A,G>$ is realizable, we say that $G$ is fulfillable w.r.t. $A$,
+and, conversely, $A$ is sufficient w.r.t. G. Otherwise, $G$ is unfulfillable w.r.t. 
+$A$, and $A$ is insufficient w.r.t. G, respectively.\\
+$G$ is minimally unfulfillable w.r.t.
+$A$ iff $<A,G>$ is unrealizable and removal of any element of $G$ leads to realizability:
+$\forall g \in \mathcal{G}. <A, G \setminus {g}>$ is realizable.\\
+$G$ is maximally fulfillable w.r.t. $A$ in $\mathcal{G}$ iff $<A,G>$ is realizable and addition
+of any element of $G$ leads to unrealizability: 
+$\forall g \in \mathcal{G} \setminus G. <A, G \cup {g}>$ is unrealizable.\\
+$A$ is minimally sufficient w.r.t. $G$ iff $<A,G>$ is realizable and removal of any element
+of $A$ leads to unrealizability: $\forall a \in A. <A\setminus {a},G>$ is unrealizable.\\
+$A$ is maximally insufficient w.r.t. $G$ in $\mathcal{A}$ iff $<A,G>$ is unrealizable and addition
+of any element of $\mathcal{A}\setminus A$ leads to realizability: 
+$\forall a \in \mathcal{A}\setminus A.<A \cup {a},G>$ is realizable.
+\end{definition}
+\begin{definition}\label{def:helpful}\emph{((un)helpful)}
+Let $<A,G>$ be a specification. \\
+An assumption $a \in A$ is unhelpful if:\\
+$\forall G' \subseteq G. (<A,G'> \text{is realizable} \iff <A\setminus {a},G'> \text{is realizable})$.\\
+A guarantee $g \in G$ is unhelpful if:\\ $\forall A' \subseteq A. (<A',G> \text{is realizable} \iff <A', G \setminus {g}> \text{is realizable})$.\\
+An assumption or a guarantee is helpful iff is not unhelpful.
+\end{definition}
+\begin{definition}\label{def:ddmin}\emph{Minimizing Delta Debugging algorithm}
+Let $C$ be a set, and $test:2^C\rightarrow \{\times, \checkmark, ?\}$ such that
+$test(\emptyset)=\checkmark$ and $test(C)=\times$ holds.  The minimizing Delta
+Debugging algorithm $ddmin(c)$ is:
+\begin{footnotesize}
+\[
+\begin{array}{r c l}
+ddmin(c_\checkmark) & = & ddmin_2(c_\times , 2) \textbf{ where}\\
+ddmin_2(c'_\times, n) & = & 
+  \begin{cases}
+  ddmin_2(\Delta_i, 2) \text{ ("reduce to subset")}\\
+  \quad \text{if } \exists i \in \{1,\ldots,n\}.test(\Delta_i) = \times \\
+  ddmin_2(\nabla_i, max(n-1, 2)) \text{ ("reduce to complement")}\\
+  \quad \text{else if } \exists i \in \{1,\ldots,n\}.test(\nabla_i) = \times \\  
+  ddmin_2(c'_\times, min(|c'_\times|, 2n)) \text{ ("increase granularity")}\\
+  \quad \text{else if } n < |c'_\times|\\    
+  c'_\times \text{otherwise ("done")}\\    
+  \end{cases}
+\end{array}  
+\]\\
+\end{footnotesize}
+Where $\nabla_i = c'_\times - \Delta_i$, $c'_\times = \Delta_1 \cup \ldots \cup \Delta_n$, all
+$\Delta_i$ are pairwise disjoint, and $\forall \Delta_i. |\Delta_i| \approx |c'_\times|/n$ holds.
+The recursion invariant (and thus precondition) for $ddmin_2$ is $test(c'_\times) = \times$
+and $n \leq |c'_\times|$.
+\end{definition}

@@ -1,0 +1,26 @@
+\renewcommand{\ttdefault}{pcr}
+\begin{lstlisting}[escapeinside={[*}{*]},basicstyle=\scriptsize\ttfamily,columns=flexible,frame=lines,mathescape=true,xleftmargin=3.0ex,keywordstyle=\textbf,morekeywords={if,while,do,else,fork,int,null},numbers=left,numberstyle=\scriptsize]
+smallest_non_realizable_approximation($E$):
+	max_d = $E$.get_maximum_distance()
+	low = 0
+	hi = max_d
+	$k$ = $\lfloor \frac{hi}{2}\rfloor$ [*\listRef{A}*]
+	$E_{old}$ = $E$
+	$E_{new}$ = $E$
+	while $k$ != -1:
+		if hi - low < 1:
+			return $E_{old}$
+		$E_{new}$ = $E$.clone()
+		$E_{new}$.prune_at($k$) [*\listRef{B}*]
+		$E_{new}$.get_legal_reduction($E$)[*\listRef{C}*]
+		is_realizable = check($E_{new}$)[*\listRef{D}*]
+		if is_realizable:
+			low = $k$ [*\listRef{E}*]
+		else:
+			hi = $k$ [*\listRef{F}*]
+			$E_{old}$ = $E_{new}$ [*\listRef{G}*]
+		$k$ = low + $\lfloor \frac{hi - low}{2}\rfloor$ [*\listRef{H}*]
+		if $k$ <= 1:
+			return $E_{old}$
+	return $E_{old}$
+\end{lstlisting}
