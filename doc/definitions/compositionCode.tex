@@ -11,18 +11,17 @@ algorithm compose_automata is
 	while(|$frontier$| > 0)
 		$\Delta_{union}$ = $\emptyset$
 		$\Sigma_{union}$ = $\emptyset$		
+		
 		$s$ = $frontier$.pop()
 		$visited$.push($s$)
-		$\Delta_{partial}$ = []
 		for $s_i \in s$ 
-			if $\Sigma_i \cap \Sigma_{union} = \emptyset$
-				$\Delta_{partial}$ = $\Delta$_cross_product($\Delta_{union}$, $\Delta_i$)
+			if $\Sigma_i \cap \Sigma_{union} = \emptyset$		
+				if $type$ = $synch$
+					$\Delta_{union}$ = $\Delta_{union} \cup \Delta_i$
+				else
+					$\Delta_{union}$ = $\Delta$_cross_product($\Delta_{union}$, $\Delta_i$, $type$)
 			else
-				$\Delta_{partial}$ = $\Delta$_partial_composition($\Delta_{union}$, $\Delta_i$, $\Sigma_{union}$, $type$)
-			$\Sigma_{union}$ = $\Sigma_{union} \cup \Sigma_i$
-		if $type$ == $synch$
-			$\Delta$_transitive_reduction($\Delta_{partial}$)
-		$\Delta_{union}$ = $\Delta_{union} \cup \Delta_{partial}$ 
+				$\Delta_{union}$ = $\Delta$_partial_composition($\Delta_{union}$, $\Delta_i$, $\Sigma_{union}$, $type$)
 		$\Delta$_expand_frontier($frontier$,$\Delta_{partial}$, $visited$)				
 		add_transitions($A$, $\Delta_{partial}$)
 	return $A$
@@ -30,12 +29,16 @@ algorithm compose_automata is
 algorithm $\Delta$_cross_product is
 	input: $\Delta$ the composite set of transitions already computed for a given state
 	input: $\Delta_{i}$ the local set of transitions for a given state $s$ at automaton $A_i$
+	input: $type$ an element of $\{synch,asynch,concurrent\}$ the type of composition to	
 	output: $\Delta'$ the cross product of the computed set $\Delta$ with $\Delta_{i}$
 	$\Delta'$ = $\emptyset$
 	for $d \in \Delta$
 		for $d' \in \Delta_{i}$
 			$\Delta'$ = $\Delta' \cup$ {$s(d)$,($label(d) \cup label(d')$,($t(d)_1, \ldots, t(d')_i, \ldots, t(d)_N$))}
-	return $\Delta \cup \Delta' \cup \Delta_{i}$
+	if $type \neq synch$
+		return $\Delta \cup \Delta' \cup \Delta_{i}$
+	else
+		return $\Delta'$
 	
 algorithm $\Delta$_partial_composition is
 	input: $\Delta$ the composite set of transitions already computed for a given state
@@ -48,9 +51,10 @@ algorithm $\Delta$_partial_composition is
 		for $d' \in \Delta_{i}$
 			if $\Sigma \cap label(d') = \Sigma_i \cap label(d)$
 				$\Delta'$ = $\Delta' \cup$ {$s(d)$,($label(d) \cup label(d')$,($t(d)_1, \ldots, t(d')_i, \ldots, t(d)_N$))}
-	return $\Delta \cup \Delta'$	
-	
-algorithm $\Delta$_transitive_reduction is
-	input: $\Delta$ the composite set of transitions already computed for a given state
-	output: $\Delta'$ the transitive reduction of $\Delta$ as defined by label inclusion
+	if $type \neq synch$
+		return $\Delta \cup \Delta'$	
+	else
+		return $\Delta'$
+				
+
 \end{lstlisting}
