@@ -1,9 +1,9 @@
 \renewcommand{\ttdefault}{pcr}
 \begin{lstlisting}[escapeinside={[*}{*]},basicstyle=\scriptsize\ttfamily,columns=flexible,frame=lines,mathescape=true,xleftmargin=3.0ex,keywordstyle=\textbf,morekeywords={if,while,do,else,fork,int,null, algorithm, is, input, output, return},numbers=left,numberstyle=\scriptsize]
 algorithm compose_automata is
-	input: $A:A_1 \ldots A_N$  the set of CLTS automata to be composed
+	input: $A_1 \ldots A_N$  the set of CLTS automata to be composed
 	input: $type$ an element of $\{synch,asynch,concurrent\}$ the type of composition to be applied
-	output: $E$ the CLTS automaton that results from applying $\parallel_{type}$ to $A$
+	output: $A$ the CLTS automaton that results from applying $\parallel_{type}$ to $A$
 	$s_0$ = $(s^1_{0},\ldots,s^N_{0})$
 	$frontier$ = [$s_0$]
 	$A$ = create_automaton($s_0$)
@@ -16,13 +16,13 @@ algorithm compose_automata is
 		$visited$.push($s$)
 		for $s_i \in s$ 
 			if $\Sigma_i \cap \Sigma_{union} = \emptyset$		
-				if $type$ = $synch$
+				if $type$ = $asynch$
 					$\Delta_{union}$ = $\Delta_{union} \cup \Delta_i$
 				else
 					$\Delta_{union}$ = $\Delta$_cross_product($\Delta_{union}$, $\Delta_i$, $type$)
 			else
-				$\Delta_{union}$ = $\Delta$_partial_composition($\Delta_{union}$, $\Delta_i$, $\Sigma_{union}$, $type$)
-		$\Delta$_expand_frontier($frontier$,$\Delta_{partial}$, $visited$)				
+				$\Delta_{union}$ = $\Delta$_partial_composition($\Delta_{union}$, $\Delta_i$, $\Sigma_{union}$)
+		$\Delta$_expand_frontier($frontier$,$\Delta_{union}$, $visited$)				
 		add_transitions($A$, $\Delta_{partial}$)
 	return $A$
 
@@ -44,17 +44,13 @@ algorithm $\Delta$_partial_composition is
 	input: $\Delta$ the composite set of transitions already computed for a given state
 	input: $\Delta_{i}$ the local set of transitions for a given state $s$ at automaton $A_i$
 	input: $\Sigma$ the composite set of labels already computed for a given state		
-	input: $type$ an element of $\{synch,asynch,concurrent\}$ the type of composition to be applied
 	output: $\Delta'$ the partial composition of the computed set $\Delta$ with $\Delta_{i}$ according to $type$
 	$\Delta'$ = $\emptyset$
 	for $d \in \Delta$
 		for $d' \in \Delta_{i}$
 			if $\Sigma \cap label(d') = \Sigma_i \cap label(d)$
 				$\Delta'$ = $\Delta' \cup$ {$s(d)$,($label(d) \cup label(d')$,($t(d)_1, \ldots, t(d')_i, \ldots, t(d)_N$))}
-	if $type \neq synch$
-		return $\Delta \cup \Delta'$	
-	else
-		return $\Delta'$
+	return $\Delta'$
 				
 
 \end{lstlisting}
