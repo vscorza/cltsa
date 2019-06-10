@@ -2691,7 +2691,6 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 #endif
 		for(i = 0; i < automata_count; i++){
 			current_state[i] 		= frontier[(frontier_count - 1) * automata_count + i];
-			current_out_degree		= automata[i]->out_degree[current_state[i]];
 #if DEBUG_COMPOSITION
 			printf("%d,", current_state[i]);
 #endif
@@ -2805,7 +2804,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 					/***********************
 					 * for every other asynch transition add posible combination if applicable
 					 ***********************/
-					if(synch_type[k] == CONCURRENT){
+					if(synch_type[k] != ASYNCHRONOUS){
 						if(pending_asynch_count > 0){
 #if DEBUG_COMPOSITION
 							printf("\t<PUSH asynch>(no overlap*) [");
@@ -2851,6 +2850,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 						}
 					}
 					pending_asynch[pending_asynch_count]	= current_transition;
+					//TODO: if not synch should add current partial transition
 #if DEBUG_COMPOSITION
 					printf("\t<PUSH asynch>(no overlap) [");
 					for(n = 0; n < automata_count; n++){
