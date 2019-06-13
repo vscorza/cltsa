@@ -2850,7 +2850,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 						}
 					}
 					pending_asynch[pending_asynch_count]	= current_transition;
-					//TODO: if not synch should add current partial transition
+
 #if DEBUG_COMPOSITION
 					printf("\t<PUSH asynch>(no overlap) [");
 					for(n = 0; n < automata_count; n++){
