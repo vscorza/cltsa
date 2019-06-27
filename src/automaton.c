@@ -2488,45 +2488,21 @@ void automaton_automata_add_ordered_union_of_signals(automaton_automata_context*
 	}
 }
 
-automaton_automaton* automaton_automata_compose(automaton_automaton** automata, automaton_synchronization_type* synch_type, uint32_t automata_count, bool is_game){
-	clock_t begin = clock();
-	uint32_t transitions_added_count	= 0;
-	uint32_t i, j, k, l, m, n, o, p;
-	uint32_t alphabet_count, fluents_count, alphabet_size;
-	uint32_t* alphabet;
-	alphabet_count	= 0;
-	alphabet_size	= 0;
-	/***********************
-	 * get union of alphabets
-	 * check ctx and compute alphabet size
-	 ***********************/
-#if DEBUG_COMPOSITION
-	if(is_game){
-		printf("!!COMPOSING GAME!!\n");
-	}else{
-		printf("!!COMPOSING AUTOMATON!!\n");
-	}
-	printf("Automata:[");
-	for(i =0; i < automata_count; i++){
-		printf("%s,", automata[i]->name);
-	}
-	printf("]\n");
-#endif
-	automaton_automata_context* ctx	= NULL;
+uint32_t* automaton_automata_get_union_alphabet(automaton_automata_context **ctx, automaton_automaton** automata, uint32_t automata_count, uint32_t *alphabet_count){
+	uint32_t alphabet_size	= 0;
+	uint32_t i, j, k;
 	for(i = 0; i < automata_count; i++){
 		if(automata[i]->initial_states_count != 1)
 			return NULL;
-		if(ctx == NULL){
-			ctx = automata[i]->context;
-		}else if(ctx != automata[i]->context){
+		if(*ctx == NULL){
+			*ctx = automata[i]->context;
+		}else if(*ctx != automata[i]->context){
 			return NULL;
 		}
 		alphabet_size += automata[i]->local_alphabet_count;
 	}
-	alphabet	= malloc(sizeof(uint32_t) * alphabet_size);
-	/***********************
-	 * alphabet <- Union of alphabets
-	 ***********************/
+	uint32_t *alphabet	= malloc(sizeof(uint32_t) * alphabet_size);
+	// alphabet <- Union of alphabets
 	int32_t new_index	= -1;
 	uint32_t current_entry;
 	for(i = 0; i < automata_count; i++){
@@ -2534,7 +2510,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 			new_index	= -1;
 			bool found	= false;
 			current_entry	= automata[i]->local_alphabet[j];
-			for(k = 0; k < alphabet_count; k++){
+			for(k = 0; k < *alphabet_count; k++){
 				if(alphabet[k] == current_entry){
 					found	= true;
 					break;
@@ -2546,32 +2522,25 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 			}
 			//keep global alphabet ordered
 			if(new_index > -1 && !found){
-				for(k = (alphabet_count); k > (uint32_t)new_index; k--){
+				for(k = (*alphabet_count); k > (uint32_t)new_index; k--){
 					alphabet[k]	= alphabet[k - 1];
 				}
 			}else{
-				new_index	= alphabet_count;
+				new_index	= *alphabet_count;
 			}
 			if(!found){
 				alphabet[new_index]	= current_entry;
-				alphabet_count++;
+				(*alphabet_count)++;
 			}
 			//test for alphabet ordering
-#if DEBUG_COMPOSITION
-			for(k = 0; k < alphabet_count; k++){printf("%d.", alphabet[k]);	}printf("\n");
-#endif
 		}
 	}
-	/***********************
-	 * create automaton
-	 ***********************/
-	automaton_automaton* composition;
-	if(is_game){
-		composition = automaton_automaton_create("Game", ctx, alphabet_count, alphabet, true, false);
-	}else{
-		composition = automaton_automaton_create("Composition", ctx, alphabet_count, alphabet, false, false);
-	}
-	/** get signal to automata list structure **/
+	return alphabet;
+}
+
+bool **automaton_automata_get_signal_to_automata(automaton_automaton **automata, uint32_t automata_count, uint32_t *alphabet, uint32_t alphabet_count){
+	uint32_t i, j, k;
+	// get signal to automata list structure
 	bool** signal_to_automata	= malloc(sizeof(bool*) * alphabet_count);
 	for(i = 0; i < alphabet_count; i++){
 		bool* automata_having_signal	= malloc(sizeof(bool) * automata_count);
@@ -2586,16 +2555,62 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 		}
 		signal_to_automata[i]	= automata_having_signal;
 	}
-	/** create key tree **/
+	return signal_to_automata;
+}
+
+void automaton_automata_add_pending_transitions(automaton_automaton **automata, uint32_t automata_count, uint32_t from_state, uint32_t *partial_states, bool *partial_set_states
+	, uint32_t *current_state, automaton_transition** pending, uint32_t *pending_count, uint32_t max_degree_sum){
+	uint32_t i, j, k;
+	uint32_t current_out_degree			= 0;
+	for(i = 0; i < automata_count; i++){
+		current_out_degree		= automata[i]->out_degree[current_state[i]];
+		for(j = 0; j < current_out_degree; j++){
+			//add new transition to p_sigs and partial_state
+			automaton_transition* starting_transition					= automaton_transition_clone(&(automata[i]->transitions[current_state[i]][j]));
+			starting_transition->state_from								= from_state;
+			for(k = 0; k < automata_count; k++){
+				if(k == i){
+					partial_states[*pending_count * automata_count + k]	= starting_transition->state_to;
+					partial_set_states[*pending_count * automata_count + k]	= true;
+				}else{
+					partial_states[*pending_count * automata_count + k]	= current_state[k];
+					partial_set_states[*pending_count * automata_count + k]	= false;
+				}
+			}
+			pending[(*pending_count)++]			= starting_transition;
+			if(*pending_count >= max_degree_sum){
+				printf("[FATAL ERROR] WRONG BOUNDARY AT PENDING COUNT\n");
+				exit(-1);
+			}
+		}
+	}
+}
+
+automaton_automaton* automaton_automata_compose(automaton_automaton** automata, automaton_synchronization_type* synch_type, uint32_t automata_count, bool is_game){
+	clock_t begin = clock();
+	uint32_t transitions_added_count	= 0;
+	uint32_t i, j, k, l, m, n, o, p;
+	uint32_t alphabet_count, fluents_count;	uint32_t* alphabet;
+	alphabet_count	= 0;
+	// get union of alphabets check ctx and compute alphabet size
+	automaton_automata_context* ctx	= NULL;
+
+	alphabet = automaton_automata_get_union_alphabet(&ctx, automata, automata_count, &alphabet_count);
+
+	// create automaton
+	automaton_automaton* composition;
+	if(is_game){
+		composition = automaton_automaton_create("Game", ctx, alphabet_count, alphabet, true, false);
+	}else{
+		composition = automaton_automaton_create("Composition", ctx, alphabet_count, alphabet, false, false);
+	}
+	// get signal to automata list structure
+	bool** signal_to_automata	= automaton_automata_get_signal_to_automata(automata, automata_count, alphabet, alphabet_count);
+	// create key tree,frontier bucket list, get current state transitions list harness
 	automaton_composite_tree* tree	= automaton_composite_tree_create(automata_count);
-	/** frontier bucket list **/
 	automaton_bucket_list* bucket_list	= automaton_bucket_list_create(BUCKET_SIZE);
-	/** get current state transitions list harness **/
-	uint32_t max_degree_sum		= 0;
-	uint32_t max_signals_count	= 0;
-	/***********************
-	 * compute max_signals_count
-	 ***********************/
+	uint32_t max_degree_sum		= 0;	uint32_t max_signals_count	= 0;
+	// compute max_signals_count
 	for(i = 0; i < automata_count; i++){
 		max_degree_sum	+= (automata[i]->max_out_degree) * (automata[i]->max_concurrent_degree);
 		if(automata[i]->local_alphabet_count > max_signals_count)
@@ -2614,53 +2629,44 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 	bool*	processed_partial_set_states= malloc(sizeof(bool) * automata_count * max_degree_sum);
 	automaton_transition** processed	= malloc(sizeof(automaton_transition*) * max_degree_sum);
 	uint32_t processed_count			= 0;
-	uint32_t current_out_degree			= 0;
+
 	uint32_t current_other_out_degree	= 0;
 	automaton_transition* current_transition		= NULL;
 	automaton_transition* current_other_transition	= NULL;
 	uint32_t* current_to_state			= malloc(sizeof(int32_t) * automata_count);
-	bool* current_to_set_state				= malloc(sizeof(bool) * automata_count);
+	bool* current_to_set_state			= malloc(sizeof(bool) * automata_count);
 	uint32_t* current_merged_to_state		= malloc(sizeof(int32_t) * automata_count);
 	bool* current_merged_to_set_state		= malloc(sizeof(bool) * automata_count);
 	uint32_t* current_from_state			= malloc(sizeof(int32_t) * automata_count);
-	bool* current_from_set_state		= malloc(sizeof(bool) * automata_count);
+	bool* current_from_set_state			= malloc(sizeof(bool) * automata_count);
 	/** compose transition relation **/
 	uint32_t frontier_size			= LIST_INITIAL_SIZE;//TODO: check this number is fixed
 	uint32_t frontier_count			= 1;
-	uint32_t* frontier				= malloc(sizeof(uint32_t) * automata_count * frontier_size);
-	uint32_t* composite_frontier	= malloc(sizeof(uint32_t) * frontier_size);
+	uint32_t* frontier			= malloc(sizeof(uint32_t) * automata_count * frontier_size);
+	uint32_t* composite_frontier		= malloc(sizeof(uint32_t) * frontier_size);
 	uint32_t* current_state			= malloc(sizeof(uint32_t) * automata_count);
 	bool* current_set_state			= malloc(sizeof(bool) * automata_count);
-	uint32_t from_state;
-	uint32_t to_state;
-	bool overlaps;
-	bool shared_equals;
+	uint32_t from_state;	uint32_t to_state;	bool overlaps;	bool shared_equals;
 	uint32_t* signals_union			= malloc(sizeof(uint32_t) * max_degree_sum);
 	uint32_t signals_union_count	= 0;
-	uint32_t* current_local_alphabet;
-	uint32_t current_local_alphabet_count;
+	uint32_t* current_local_alphabet;	uint32_t current_local_alphabet_count;
 	uint32_t* current_overlapping_signals		= malloc(sizeof(uint32_t) * max_signals_count);
 	uint32_t current_overlapping_signals_count	= 0;
 	uint32_t* current_other_overlapping_signals		= malloc(sizeof(uint32_t) * max_signals_count);
 	uint32_t current_other_overlapping_signals_count	= 0;
 
-	int32_t last_char	= -1;
-	signal_t current_signal, current_other_signal;
-	long int found_hits	= 0;
-	long int found_misses	= 0;
-	//set initial state
+	int32_t last_char	= -1;	signal_t current_signal, current_other_signal;
+	long int found_hits	= 0;	long int found_misses	= 0;	//set initial state
 	for(i = 0; i < automata_count; i++){
 		frontier[i]	= automata[i]->initial_states[0];
 	}
 	uint32_t composite_initial_state	= automaton_composite_tree_get_key(tree, frontier);
-	composite_frontier[0]				= composite_initial_state;
+	composite_frontier[0]			= composite_initial_state;
 	automaton_bucket_add_entry(bucket_list, composite_initial_state);
 	automaton_automaton_add_initial_state(composition, composite_initial_state);
-	uint32_t fluent_count				= ctx->global_fluents_count;
+	uint32_t fluent_count			= ctx->global_fluents_count;
 	uint32_t liveness_valuations_count	= ctx->liveness_valuations_count;
-	/***********************
-	 * set initial state valuation
-	 ***********************/
+	// set initial state valuation
 	if(is_game){
 		uint32_t fluent_index;
 		for(i = 0; i < fluent_count; i++){
@@ -2674,9 +2680,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 			CLEAR_FLUENT_BIT(composition->liveness_valuations, fluent_index);
 		}
 	}
-	/***********************
-	 * POP from frontier
-	 ***********************/
+	// POP from frontier
 	while(frontier_count > 0){
 		from_state	= composite_frontier[frontier_count - 1];
 		automaton_bucket_remove_entry(bucket_list, from_state);
@@ -2686,109 +2690,31 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 			continue;
 		}
 		//pop a state
-#if DEBUG_COMPOSITION
-		printf("<POP frontier>[");
-#endif
 		for(i = 0; i < automata_count; i++){
 			current_state[i] 		= frontier[(frontier_count - 1) * automata_count + i];
-#if DEBUG_COMPOSITION
-			printf("%d,", current_state[i]);
-#endif
 			current_from_state[i]	= current_state[i];
 		}
-#if DEBUG_COMPOSITION
-		printf("]\n");
-#endif
 		frontier_count--;
-		//see if the transition needs to be added
-		/***********************
-		 * add pending transitions from outgoing transitions in current_state
-		 ***********************/
-		for(i = 0; i < automata_count; i++){
-			current_out_degree		= automata[i]->out_degree[current_state[i]];
-			for(j = 0; j < current_out_degree; j++){
-				//add new transition to p_sigs and partial_state
-				automaton_transition* starting_transition					= automaton_transition_clone(&(automata[i]->transitions[current_state[i]][j]));
-				starting_transition->state_from								= from_state;
-				for(k = 0; k < automata_count; k++){
-					if(k == i){
-						partial_states[pending_count * automata_count + k]	= starting_transition->state_to;
-						partial_set_states[pending_count * automata_count + k]	= true;
-					}else{
-						partial_states[pending_count * automata_count + k]	= current_state[k];
-						partial_set_states[pending_count * automata_count + k]	= false;
-					}
-				}
-				pending[pending_count++]			= starting_transition;
-#if DEBUG_COMPOSITION
-				printf("\t<PUSH pending>[");
-				for(m = 0; m < automata_count; m++){
-						printf("%d,", current_from_state[m]);
-				}
-				printf("]");
-				printf("{");
-				for(m = 0; m < pending[pending_count-1]->signals_count; m++){
-						printf("%s,", ctx->global_alphabet->list[pending[pending_count-1]->signals[m]].name);
-				}
-				printf("}->");
-				printf("[");
-				for(m = 0; m < automata_count; m++){
-					if(!partial_set_states[(pending_count-1) * automata_count + m])
-						printf("%d,", partial_states[(pending_count-1) * automata_count + m]);
-					else
-						printf("%d^,", partial_states[(pending_count-1) * automata_count + m]);
-				}
-				printf("]\n");
-#endif
-				if(pending_count >= max_degree_sum){
-					printf("[FATAL ERROR] WRONG BOUNDARY AT PENDING COUNT\n");
-					exit(-1);
-				}
-			}
-		}
+		//see if the transition needs to be added, add pending transitions from outgoing transitions in current_state
+		automaton_automata_add_pending_transitions(automata, automata_count, from_state, partial_states, partial_set_states
+				, current_state, pending, &pending_count, max_degree_sum);
+
 		for(p = 0; p < (automata_count + 1); p++){
 			k = p % automata_count;
-#if DEBUG_COMPOSITION
-			printf("WILL EVALUATE AGAINST %dth automaton\n", k);
-#endif
-			/***********************
-			 * POP from pending transitions
-			 ***********************/
+			// POP from pending transitions
 			while(pending_count > 0){
 
+//******** >>>
 				for(m = 0; m < automata_count; m++){
 					current_to_state[m]			= partial_states[(pending_count-1) * automata_count + m];
 					current_to_set_state[m]		= partial_set_states[(pending_count-1) * automata_count + m];
 				}
 				current_transition				= pending[pending_count-1];
 				pending_count--;
-#if DEBUG_COMPOSITION
-				printf("\t<POP pending>[");
-				for(m = 0; m < automata_count; m++){
-						printf("%d,", current_from_state[m]);
-				}
-				printf("]");
-				printf("{");
-				for(m = 0; m < pending[pending_count]->signals_count; m++){
-						printf("%s,", ctx->global_alphabet->list[pending[pending_count]->signals[m]].name);
-				}
-				printf("}->");
-				printf("[");
-				for(m = 0; m < automata_count; m++){
-					if(!current_to_set_state[m])
-						printf("%d,", partial_states[(pending_count) * automata_count + m]);
-					else
-						printf("%d^,", partial_states[(pending_count) * automata_count + m]);
-				}
-				printf("]\n");
-#endif
-
 				current_local_alphabet			= automata[k]->local_alphabet;
 				current_local_alphabet_count	= automata[k]->local_alphabet_count;
 				overlaps						= false;
-				/***********************
-				 * check if current transition synchronizes with other automata
-				 ***********************/
+				// check if current transition synchronizes with other automata
 				for(m = 0; m < current_transition->signals_count; m++){
 					for(n = 0; n < current_local_alphabet_count; n++){
 						signal_t sig	= m < FIXED_SIGNALS_COUNT ? current_transition->signals[m] : current_transition->other_signals[m-FIXED_SIGNALS_COUNT];
@@ -2801,18 +2727,9 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 				}
 				//if does not overlap pass forward
 				if(!overlaps){
-					/***********************
-					 * for every other asynch transition add posible combination if applicable
-					 ***********************/
+					// for every other asynch transition add posible combination if applicable
 					if(synch_type[k] != ASYNCHRONOUS){
 						if(pending_asynch_count > 0){
-#if DEBUG_COMPOSITION
-							printf("\t<PUSH asynch>(no overlap*) [");
-							for(n = 0; n < automata_count; n++){
-									printf("%d,", current_from_state[n]);
-							}
-							printf("][");
-#endif
 							int32_t m;
 							for(m = (pending_asynch_count - 1); m >= 0; m--){
 								/***********************
@@ -2834,13 +2751,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 								for(n = 0; n < automata_count; n++){
 									asynch_partial_states[pending_asynch_count * automata_count + n]	= current_merged_to_state[n];
 									asynch_partial_set_states[pending_asynch_count * automata_count + n]	= current_merged_to_set_state[n];
-#if DEBUG_COMPOSITION
-									printf("%d,", asynch_partial_states[pending_asynch_count * automata_count + n]);
-#endif
 								}
-#if DEBUG_COMPOSITION
-								printf("]\n");
-#endif
 								pending_asynch_count++;
 								if(pending_asynch_count >= max_degree_sum){
 									printf("[FATAL ERROR] WRONG BOUNDARY AT PENDING ASYNCH COUNT\n");
@@ -2851,30 +2762,10 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 					}
 					pending_asynch[pending_asynch_count]	= current_transition;
 
-#if DEBUG_COMPOSITION
-					printf("\t<PUSH asynch>(no overlap) [");
-					for(n = 0; n < automata_count; n++){
-							printf("%d,", current_from_state[n]);
-					}
-					printf("]{");
-					for(n = 0; n < current_transition->signals_count; n++){
-							printf("%s,", ctx->global_alphabet->list[current_transition->signals[n]].name);
-					}
-					printf("}->[");
-#endif
 					for(n = 0; n < automata_count; n++){
 						asynch_partial_states[pending_asynch_count * automata_count + n]	= current_to_state[n];
 						asynch_partial_set_states[pending_asynch_count * automata_count + n]	= current_to_set_state[n];
-#if DEBUG_COMPOSITION
-						if(!current_to_set_state[n])
-							printf("%d,", asynch_partial_states[pending_asynch_count * automata_count + n]);
-						else
-							printf("%d^,", asynch_partial_states[pending_asynch_count * automata_count + n]);
-#endif
 					}
-#if DEBUG_COMPOSITION
-					printf("]\n");
-#endif
 					pending_asynch_count++;
 					if(pending_asynch_count >= max_degree_sum){
 						printf("[FATAL ERROR] WRONG BOUNDARY AT PENDING ASYNCH COUNT\n");
@@ -2882,9 +2773,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 					}
 					continue;
 				}//ENDIF !overlaps
-				/***********************
-				 * if it synchronizes continues
-				 ***********************/
+				// if it synchronizes continues
 				current_other_out_degree	= automata[k]->out_degree[current_state[k]];
 				for(m = 0; m < current_other_out_degree; m++){
 					current_other_transition	= &(automata[k]->transitions[current_state[k]][m]);
@@ -2909,11 +2798,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 							}
 						}
 					}
-					/***********************
-					 * check if shared alphabet is equal
-					 * first checks size, then proper signals
-					 * (remember that local alphabets are ordered)
-					 ***********************/
+					// check if shared alphabet is equal, first checks size, then proper signals (local alphabets are ordered)
 					shared_equals	= current_overlapping_signals_count == current_other_overlapping_signals_count;
 					if(shared_equals){
 						for(n = 0; n < current_other_overlapping_signals_count; n++){
@@ -2924,116 +2809,52 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 						}
 					}
 					if(shared_equals){
-						/***********************
-						 * should add new transition to processed list
-						 * first create ordered union of signals
-						 ***********************/
+						// should add new transition to processed list, first create ordered union of signals
+						 /***********************/
 						automaton_transition* new_transition	= automaton_transition_create(current_transition->state_from
 														, current_transition->state_to);
 						automaton_automata_add_ordered_union_of_signals(ctx, signals_union, &signals_union_count, current_transition, current_other_transition, new_transition);
 						processed[processed_count]	= new_transition;
-#if DEBUG_COMPOSITION
-						printf("\t<PUSH processed> [");
-						for(n = 0; n < automata_count; n++){
-								printf("%d,", current_from_state[n]);
-						}
-						printf("]{");
-						for(n = 0; n < signals_union_count; n++){
-								printf("%s,", ctx->global_alphabet->list[signals_union[n]].name);
-						}
-						printf("}->[");
-#endif
 						for(n = 0; n < automata_count; n++){
 							if(n == (automata_count - 1) && k == (automata_count - 1)){
 								processed_partial_states[processed_count * automata_count + n]	= current_other_transition->state_to;
 								processed_partial_set_states[processed_count * automata_count + n]	= true;
-#if DEBUG_COMPOSITION
-								printf("%d*,", processed_partial_states[processed_count * automata_count + n]);
-#endif
 							}else{
 								processed_partial_states[processed_count * automata_count + n]	= current_to_state[n];
 								processed_partial_set_states[processed_count * automata_count + n]	= current_to_set_state[n];
-#if DEBUG_COMPOSITION
-								if(!current_to_set_state[n])
-									printf("%d,", processed_partial_states[processed_count * automata_count + n]);
-								else
-									printf("%d^,", processed_partial_states[processed_count * automata_count + n]);
-#endif
 							}
 
 						}
-#if DEBUG_COMPOSITION
-						printf("]\n");
-#endif
 						processed_count++;
 					}//ENDIF shared_equals
 				}
 				automaton_transition_destroy(current_transition, true);
 			}//ENDWHILE (pending_count > 0)
-			/***********************
-			 * move processed to pending to
-			 * handle next automaton transitions
-			 ***********************/
-#if DEBUG_COMPOSITION
-			printf("<MOV processed>pending>");
-#endif
+			// move processed to pending to handle next automaton transitions
 			for(i = 0; i < processed_count; i++){
 				pending[i]	= processed[i];
-#if DEBUG_COMPOSITION
-				printf("->[");
-#endif
 				for(n = 0; n < automata_count; n++){
 					partial_states[i * automata_count + n]	= processed_partial_states[i * automata_count + n];
 					partial_set_states[i * automata_count + n]	= processed_partial_set_states[i * automata_count + n];
-#if DEBUG_COMPOSITION
-					printf("%d,",processed_partial_states[i * automata_count + n]);
-#endif
 				}
-#if DEBUG_COMPOSITION
-				printf("]");
-#endif
 			}
 			pending_count	= processed_count;
 			processed_count	= 0;
-#if DEBUG_COMPOSITION
-			printf("\n");
-#endif
 
 		}//ENDFOR automata encapsulating pending
-		/***********************
-		 * move asynch to pending
-		 * handle next automaton transitions
-		 ***********************/
-#if DEBUG_COMPOSITION
-		printf("<MOV asynch>pending>");
-#endif
+		// move asynch to pending, handle next automaton transitions
 		uint32_t asynch_index;
 		for(i = 0; i < pending_asynch_count; i++){
 			asynch_index	= pending_count;
 			pending[asynch_index]	= pending_asynch[i];
-#if DEBUG_COMPOSITION
-			printf("->[");
-#endif
 			for(n = 0; n < automata_count; n++){
 				partial_states[asynch_index * automata_count + n]	= asynch_partial_states[i * automata_count + n];
 				partial_set_states[asynch_index * automata_count + n]	= asynch_partial_set_states[i * automata_count + n];
-#if DEBUG_COMPOSITION
-				printf("%d,",asynch_partial_states[i * automata_count + n]);
-#endif
 			}
-#if DEBUG_COMPOSITION
-			printf("]");
-#endif
 			pending_count++;
 		}
 		pending_asynch_count	= 0;
-#if DEBUG_COMPOSITION
-		printf("\n");
-#endif
-		/***********************
-		 * add processed transitions
-		 * from pending list
-		 ***********************/
+		// add processed transitions from pending list
 		while(pending_count > 0){
 			pending_count--;
 			for(n = 0; n < automata_count; n++){
@@ -3044,23 +2865,8 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 			current_transition				= pending[pending_count];
 			uint32_t composite_to			= automaton_composite_tree_get_key(tree, current_to_state);
 			current_transition->state_to	= composite_to;
-#if DEBUG_COMPOSITION
-			printf("<TRANS add>[%d]{", current_transition->state_from);
-			for(n = 0; n < current_transition->signals_count; n++){
-				printf("%s,", ctx->global_alphabet->list[current_transition->signals[n]].name);
-				if(n > 0)
-					printf(".");
-			}
-			printf("}->[");
-			for(n = 0; n < automata_count; n++){
-				printf("%d,", current_to_state[n]);
-			}
-			printf("](%d)\n", composite_to);
-#endif
 			automaton_automaton_add_transition(composition, current_transition);
-			/***********************
-			 * set state valuation
-			 ***********************/
+			// set state valuation
 			if(is_game){
 				uint32_t fluent_index;
 				uint32_t fluent_automata_index;
@@ -3073,7 +2879,6 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 					if(current_to_state[fluent_automata_index] == 1){
 						//Check if it should be added to the inverted valuation list
 						state_found		= automaton_bucket_has_entry(composition->inverted_valuations[i], composite_to);
-						//
 						if(!state_found){
 							automaton_bucket_add_entry(composition->inverted_valuations[i], composite_to);
 						}
@@ -3107,35 +2912,16 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 				}
 			}
 			transitions_added_count++;
-#if PRINT_PARTIAL_COMPOSITION
-			if((transitions_added_count % 300000) == 0){
-				/* here, do your time-consuming job */
-				printf("Partial Composition has [%09d] states and [%09d] transitions, frontier is of size [%09d] running for [%08f]s\n", tree->max_value, composition->transitions_composite_count, frontier_count, (double)(clock() - begin) / CLOCKS_PER_SEC);
-
-			}
-#endif
 			automaton_transition_destroy(current_transition, true);
-			/***********************
-			 * expand frontier
-			 ***********************/
+			// expand frontier
 			bool found = automaton_bucket_has_entry(bucket_list, composite_to);
 			if(found){found_hits++;}else{found_misses++;}
 			if(!found){
 				composite_frontier[frontier_count]	= composite_to;
 				automaton_bucket_add_entry(bucket_list, composite_to);
-#if DEBUG_COMPOSITION
-				printf("<PUSH frontier> [");
-#endif
 				for(n = 0; n < automata_count; n++){
-#if DEBUG_COMPOSITION
-					printf("%d,", current_to_state[n]);
-#endif
-
 					frontier[frontier_count * automata_count + n]	= current_to_state[n];
 				}
-#if DEBUG_COMPOSITION
-				printf("]\n");
-#endif
 				frontier_count++;
 				if(frontier_count >= (frontier_size - 1)){
 					uint32_t new_size	= frontier_size * LIST_INCREASE_FACTOR;
@@ -3197,6 +2983,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 	free(alphabet);	alphabet	= NULL;
 	return composition;
 }
+
 bool automaton_automaton_check_invariant(automaton_automaton* current_automaton){ return false; }
 bool automaton_automaton_update_valuation(automaton_automaton* current_automaton){ return false; }
 void automaton_automaton_minimize(automaton_automaton* current_automaton){ return;}
