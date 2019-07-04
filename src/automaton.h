@@ -47,7 +47,7 @@
 #define SET_FLUENT_BIT(arr,index)     ( arr[(index/FLUENT_ENTRY_SIZE)] |= (1 << (index%FLUENT_ENTRY_SIZE)) )
 #define CLEAR_FLUENT_BIT(arr,index)   ( arr[(index/FLUENT_ENTRY_SIZE)] &= ~(1 << (index%FLUENT_ENTRY_SIZE)) )
 #define TEST_FLUENT_BIT(arr,index)    ( arr[(index/FLUENT_ENTRY_SIZE)] & (1 << (index%FLUENT_ENTRY_SIZE)) )
-#define GET_TRANSITION_SIGNAL (t, i)  (((i) < FIXED_SIGNALS_COUNT ? (t)->signals[(i)] : (t)->other_signals[(i)-FIXED_SIGNALS_COUNT]))
+#define GET_TRANSITION_SIGNAL(t, i)  (((i) < FIXED_SIGNALS_COUNT ? (t)->signals[(i)] : (t)->other_signals[(i)-FIXED_SIGNALS_COUNT]))
 
 #define AUT_SER_OBJ_START "<"
 #define AUT_SER_OBJ_END ">"
