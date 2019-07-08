@@ -22,6 +22,7 @@ algorithm compose_automata is
 					$\Delta_{union}$ = $\Delta$_cross_product($\Delta_{union}$, $\Delta_i(s)$, $type$)
 			else
 				$\Delta_{union}$ = $\Delta$_partial_composition($\Delta_{union}$, $\Delta_i(s)$, $\Sigma_{union}$)
+		$\Sigma_{union}$ = $\Sigma_{union} \cup \Sigma_i$
 		$\Delta$_expand_frontier($frontier$,$\Delta_{union}$, $visited$)				
 		add_transitions($A$, $\Delta_{partial}$)
 	return $A$
