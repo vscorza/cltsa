@@ -2658,8 +2658,6 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 			max_signals_count	= automata[i]->local_alphabet_count;
 	}
 	max_degree_sum							*= max_degree_sum; //check this boundary
-	uint32_t*	partial_states			= calloc(automata_count * max_degree_sum, sizeof(uint32_t));
-	bool*	partial_set_states		= malloc(sizeof(bool) * automata_count * max_degree_sum);
 	automaton_transition** pending		= malloc(sizeof(automaton_transition*) * max_degree_sum);
 	uint32_t pending_count				= 0;
 	automaton_transition** local_pending		= calloc(max_degree_sum, sizeof(automaton_transition*));
@@ -2674,6 +2672,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 	automaton_transition* current_other_transition	= NULL;
 	uint32_t* current_to_state			= malloc(sizeof(int32_t) * automata_count);
 	uint32_t* pending_to_state			= calloc(automata_count * max_degree_sum, sizeof(int32_t));
+	uint32_t* local_pending_to_state			= calloc(automata_count * max_degree_sum, sizeof(int32_t));
 	bool* pending_alphabet				= calloc(alphabet_count * max_degree_sum, sizeof(bool));
 	bool* local_pending_alphabet				= calloc(alphabet_count * max_degree_sum, sizeof(bool));
 	bool* pending_label				= calloc(alphabet_count, sizeof(bool));
@@ -2792,6 +2791,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 								}else{
 									current_to_state[l]	= starting_transition->state_to;
 								}
+								local_pending_to_state[local_pending_count * automata_count + l]	= current_to_state[l];
 							}
 							for( l = 0; l < alphabet_count; l++)
 								pending_label[l]				= pending_alphabet[j *  alphabet_count + l];
@@ -2815,6 +2815,12 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 						}
 						pending_count = 0;
 						for(j = 0; j < local_pending_count; j++){
+							for(k = 0; k < alphabet_count; k++){
+								pending_alphabet[pending_count * alphabet_count + k]	= local_pending_alphabet[j * alphabet_count + k];
+							}
+							for(k = 0; k < automata_count; k++){
+								pending_to_state[pending_count * automata_count + k]	= local_pending_to_state[j * automata_count + k];
+							}
 							pending[pending_count++] = local_pending[j];
 						}
 						local_pending_count = 0;
@@ -2822,7 +2828,10 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 						//pending should be local pending + pending + delta_i(s)
 						for(j = 0; j < local_pending_count; j++){
 							for(k = 0; k < alphabet_count; k++){
-							pending_alphabet[pending_count * alphabet_count + k]	= local_pending_alphabet[j * alphabet_count + k];
+								pending_alphabet[pending_count * alphabet_count + k]	= local_pending_alphabet[j * alphabet_count + k];
+							}
+							for(k = 0; k < automata_count; k++){
+								pending_to_state[pending_count * automata_count + k]	= local_pending_to_state[j * automata_count + k];
 							}
 							pending[pending_count++] = local_pending[j];
 						}
@@ -2847,6 +2856,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 							}else{
 								current_to_state[l]	= starting_transition->state_to;
 							}
+							local_pending_to_state[local_pending_count * automata_count + l]	= current_to_state[l];
 						}
 						for( l = 0; l < alphabet_count; l++){
 							pending_label[l]				= pending_alphabet[j *  alphabet_count + l];
@@ -2875,8 +2885,12 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 				pending_count = 0;
 				for(j = 0; j < local_pending_count; j++){
 					for(k = 0; k < alphabet_count; k++){
-					pending_alphabet[pending_count * alphabet_count + k]	= local_pending_alphabet[j * alphabet_count + k];
+						pending_alphabet[pending_count * alphabet_count + k]	= local_pending_alphabet[j * alphabet_count + k];
 					}
+					for(k = 0; k < automata_count; k++){
+						pending_to_state[pending_count * automata_count + k]	= local_pending_to_state[j * automata_count + k];
+					}
+
 					pending[pending_count++] = local_pending[j];
 				}
 				local_pending_count = 0;
@@ -2891,8 +2905,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 		while(pending_count > 0){
 			pending_count--;
 			for(n = 0; n < automata_count; n++){
-				current_to_state[n]	= partial_states[pending_count * automata_count + n];
-				current_to_set_state[n]	= partial_set_states[pending_count * automata_count + n];
+				current_to_state[n]	= pending_to_state[pending_count * automata_count + n];
 			}
 
 			current_transition				= pending[pending_count];
@@ -2985,6 +2998,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 	free(signals_union);  signals_union	= NULL;
 	free(current_to_state); current_to_state	= NULL;
 	free(pending_to_state); pending_to_state	= NULL;
+	free(local_pending_to_state); local_pending_to_state	= NULL;
 	free(pending_alphabet); pending_alphabet	= NULL;
 	free(local_pending_alphabet); local_pending_alphabet	= NULL;
 	free(local_pending); local_pending = NULL;
@@ -2998,8 +3012,6 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 	free(current_from_set_state); current_from_set_state	= NULL;
 	free(processed_partial_states); processed_partial_states	= NULL;
 	free(processed_partial_set_states); processed_partial_set_states	= NULL;
-	free(partial_states); partial_states	= NULL;
-	free(partial_set_states); partial_set_states	= NULL;
 	for(i = 0; i < pending_count; i++) automaton_transition_destroy(pending[i], true);
 	free(pending); pending	= NULL;
 	for(i = 0; i < processed_count; i++) automaton_transition_destroy(processed[i], true);
