@@ -5,7 +5,7 @@ A = (<a,b> -> e -> A ).
 B = ( c -> e ->B).
 C = (<f,g> -> e -> C ).
 
-//|f| INTERLEAVED = (A || B || C).
-|f| CONCURRENT = (C ||_c B ||_c A).
+|f| INTERLEAVED = (A || B || C).
+//|f| CONCURRENT = (C ||_c B ||_c A).
 //|f| SEQUENTIAL = (A ||_s B ||_s C).
 

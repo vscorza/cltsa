@@ -15,7 +15,9 @@ algorithm compose_automata is
 		$s$ = $frontier$.pop()
 		$visited$.push($s$)
 		for $s_i \in s$ 
-			if $\Delta_i(s) \cap \Sigma_{union} = \emptyset$		
+			if $\Delta_{union} = \emptyset$
+				$\Delta_{union}$ = $\Delta_i(s)$
+			else if $\Delta_i(s) \cap \Sigma_{union} = \emptyset$		
 				if $type$ = $asynch$
 					$\Delta_{union}$ = $\Delta_{union} \cup \Delta_i(s)$
 				else
