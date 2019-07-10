@@ -605,7 +605,11 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 			//TODO: update transitions with prefixes/indexes
 			index						= automaton_parsing_tables_get_entry_index(tables, COMPOSITION_ENTRY_AUT, composition_syntax->components[i]->ident);
 			automata[i]					= tables->composition_entries[index]->valuation.automaton_value;
-			synch_type[i]				= composition_syntax->components[i]->synch_type;
+			switch(composition_syntax->components[i]->synch_type){
+				case CONCURRENT_AUT: synch_type[i]	= CONCURRENT;break;
+				case SYNCH_AUT: synch_type[i]		= SYNCHRONOUS;break;
+				default: synch_type[i]				= ASYNCHRONOUS;break;
+			}
 		}
 		//if is game build fluents and add to automata
 		uint32_t composition_count	= composition_syntax->count;

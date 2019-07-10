@@ -13,47 +13,30 @@ algorithm compose_automata is
 		$\Sigma_{union}$ = $\emptyset$		
 		
 		$s$ = $frontier$.pop()
+		if $s \in visited$
+			continue
 		$visited$.push($s$)
 		for $s_i \in s$ 
 			if $\Delta_{union} = \emptyset$
 				$\Delta_{union}$ = $\Delta_i(s)$
-			else if $\Delta_i(s) \cap \Sigma_{union} = \emptyset$		
-				if $type$ = $asynch$
-					$\Delta_{union}$ = $\Delta_{union} \cup \Delta_i(s)$
-				else
-					$\Delta_{union}$ = $\Delta$_cross_product($\Delta_{union}$, $\Delta_i(s)$, $type$)
-			else
-				$\Delta_{union}$ = $\Delta$_partial_composition($\Delta_{union}$, $\Delta_i(s)$, $\Sigma_{union}$)
-		$\Sigma_{union}$ = $\Sigma_{union} \cup \Sigma_i$
+			else 
+				$\Delta'$ = $\emptyset$
+				$\Delta''$ = $\emptyset$
+				for $d \in \Delta_{union}$
+					for $d' \in \Delta_{i}(s)$
+						if $\Sigma \cap label(d') = \Sigma_i \cap label(d)$
+							$\Delta'$ = $\Delta' \cup$ {($s$,$label(d) \cup label(d')$,$t(d)_1, \ldots, (t(d')_i, \ldots, t(d)_N$))}
+						if $\Sigma \cap label(d') = \Sigma_i \cap label(d) = \emptyset$
+							$\Delta''$ = $\Delta'' \cup$ {$(s$,$label(d)$,($t(d)_1, \ldots, t(d)_N$))}							
+							$\Delta''$ = $\Delta'' \cup$ {$(s$,$label(d')$,($s(d)_1, \ldots, t(d')_i, \ldots, s(d)_N$))}
+				if $type = synch$
+					$\Delta_{union}$ = $\Delta'$
+				if $type = concurrent$
+					$\Delta_{union}$ = $\Delta' \cup \Delta''$					
+				if $type = asynch$
+					$\Delta_{union}$ = $\Delta''$					
 		$\Delta$_expand_frontier($frontier$,$\Delta_{union}$, $visited$)				
 		add_transitions($A$, $\Delta_{partial}$)
 	return $A$
-
-algorithm $\Delta$_cross_product is
-	input: $\Delta$ the composite set of transitions already computed for a given state
-	input: $\Delta_{i}(s)$ the local set of transitions for a given state $s$ at automaton $A_i$
-	input: $type$ an element of $\{synch,asynch,concurrent\}$ the type of composition to	
-	output: $\Delta'$ the cross product of the computed set $\Delta$ with $\Delta_{i}(s)$
-	$\Delta'$ = $\emptyset$
-	for $d \in \Delta$
-		for $d' \in \Delta_{i}(s)$
-			$\Delta'$ = $\Delta' \cup$ {$s(d)$,($label(d) \cup label(d')$,($t(d)_1, \ldots, t(d')_i, \ldots, t(d)_N$))}
-	if $type \neq synch$
-		return $\Delta \cup \Delta' \cup \Delta_{i}(s)$
-	else
-		return $\Delta'$
-	
-algorithm $\Delta$_partial_composition is
-	input: $\Delta$ the composite set of transitions already computed for a given state
-	input: $\Delta_{i}(s)$ the local set of transitions for a given state $s$ at automaton $A_i$
-	input: $\Sigma$ the composite set of labels already computed for a given state		
-	output: $\Delta'$ the partial composition of the computed set $\Delta$ with $\Delta_{i}$ according to $type$
-	$\Delta'$ = $\emptyset$
-	for $d \in \Delta$
-		for $d' \in \Delta_{i}(s)$
-			if $\Sigma \cap label(d') = \Sigma_i \cap label(d)$
-				$\Delta'$ = $\Delta' \cup$ {$s(d)$,($label(d) \cup label(d')$,($t(d)_1, \ldots, t(d')_i, \ldots, t(d)_N$))}
-	return $\Delta'$
-				
 
 \end{lstlisting}
