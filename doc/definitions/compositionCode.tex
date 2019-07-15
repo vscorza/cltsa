@@ -3,41 +3,44 @@
 algorithm compose_automata is
 	input: $A_1 \ldots A_N$  the set of CLTS automata to be composed
 	input: $type$ an element of $\{synch,asynch,concurrent\}$ the type of composition to be applied
-	output: $A$ the CLTS automaton that results from applying $\parallel_{type}$ to $A$
+	output: $A$ the CLTS automaton that results from applying $\parallel_{type}$ to $A_1 \ldots A_N$
 	$s_0$ = $(s^1_{0},\ldots,s^N_{0})$
 	$frontier$ = [$s_0$]
 	$A$ = create_automaton($s_0$)
 	$visited$ = $[]$
 	while(|$frontier$| > 0)
-		$\Delta_{union}$ = $\emptyset$
-		$\Sigma_{union}$ = $\emptyset$		
+		$\Delta_{\cup}$ = $\emptyset$
+		$\Sigma_{\cup}$ = $\emptyset$		
 		$s$ = $frontier$.pop()
 		if $s \in visited$
 			continue
 		$visited$.push($s$)
 		for $s_i \in s$ 
-			if $\Delta_{union} = \emptyset$
-				$\Delta_{union}$ = $\Delta_i(s)$
+			if $\Delta_{\cup} = \emptyset$
+				$\Delta_{\cup}$ = $\Delta_i(s)$
 			else 
 				$\Delta$ = $\emptyset$
-				$\Delta'$ = $\emptyset$
-				$\Delta''$ = $\emptyset$
-				for $d \in \Delta_{union}$
+				$\Delta_{+}$ = $\emptyset$
+				$\Delta_{\oplus}$ = $\emptyset$
+				for $d \in \Delta_{\cup}$
 					for $d' \in \Delta_{i}(s)$
-						if $\Sigma \cap label(d') = \Sigma_i \cap label(d) \wedge \Sigma_i \cap label(d) \neq \emptyset $
+						if $\Sigma_{\cup} \cap label(d') = \Sigma_i \cap label(d) \wedge \Sigma_i \cap label(d) \neq \emptyset $
 							$\Delta$ = $\Delta \cup$ {($s$,$label(d) \cup label(d')$,$t(d)_1, \ldots, (t(d')_i, \ldots, t(d)_N$))}
-						if $\Sigma \cap label(d') = \Sigma_i \cap label(d) \wedge \Sigma_i \cap label(d) = \emptyset$
-							$\Delta'$ = $\Delta' \cup$ {($s$,$label(d) \cup label(d')$,$t(d)_1, \ldots, (t(d')_i, \ldots, t(d)_N$))}
-							$\Delta''$ = $\Delta'' \cup$ {$(s$,$label(d)$,($t(d)_1, \ldots, t(d)_N$))} 
+						if $\Sigma_{\cup} \cap label(d') = \Sigma_i \cap label(d) \wedge \Sigma_i \cap label(d) = \emptyset$
+							$\Delta_{+}$ = $\Delta_{+} \cup$ {($s$,$label(d) \cup label(d')$,$t(d)_1, \ldots, (t(d')_i, \ldots, t(d)_N$))}
+							$\Delta_{\oplus}$ = $\Delta_{\oplus} \cup$ {$(s$,$label(d)$,($t(d)_1, \ldots, t(d)_N$))} 
 								$\cup$ {$(s$,$label(d')$,($s(d)_1, \ldots, t(d')_i, \ldots, s(d)_N$))}
 				if $type = synch$
-					$\Delta_{union}$ = $\Delta \cup \Delta'$
+					$\Delta_{\cup}$ = $\Delta \cup \Delta_{+}$
 				if $type = concurrent$
-					$\Delta_{union}$ = $\Delta \cup \Delta' \cup \Delta''$					
+					$\Delta_{\cup}$ = $\Delta \cup \Delta_{+} \cup \Delta_{\oplus}$					
 				if $type = asynch$
-					$\Delta_{union}$ = $\Delta \cup \Delta''$					
-		$\Delta$_expand_frontier($frontier$,$\Delta_{union}$, $visited$)				
-		add_transitions($A$, $\Delta_{partial}$)
+					$\Delta_{\cup}$ = $\Delta \cup \Delta_{\oplus}$					
+			$\Sigma_{\cup}$ = $\Sigma_{\cup} \cup \Sigma_i$
+		for $d:(s,l,t) \in \Delta_{\cup}$
+			if $t \notin visited \wedge t \notin frontier$ 
+				 $frontier$.push($t$)
+			add_transition($A$, $d$)			
 	return $A$
 
 \end{lstlisting}
