@@ -11,7 +11,6 @@ algorithm compose_automata is
 	while(|$frontier$| > 0)
 		$\Delta_{union}$ = $\emptyset$
 		$\Sigma_{union}$ = $\emptyset$		
-		
 		$s$ = $frontier$.pop()
 		if $s \in visited$
 			continue
@@ -20,21 +19,23 @@ algorithm compose_automata is
 			if $\Delta_{union} = \emptyset$
 				$\Delta_{union}$ = $\Delta_i(s)$
 			else 
+				$\Delta$ = $\emptyset$
 				$\Delta'$ = $\emptyset$
 				$\Delta''$ = $\emptyset$
 				for $d \in \Delta_{union}$
 					for $d' \in \Delta_{i}(s)$
-						if $\Sigma \cap label(d') = \Sigma_i \cap label(d)$
+						if $\Sigma \cap label(d') = \Sigma_i \cap label(d) \wedge \Sigma_i \cap label(d) \neq \emptyset $
+							$\Delta$ = $\Delta \cup$ {($s$,$label(d) \cup label(d')$,$t(d)_1, \ldots, (t(d')_i, \ldots, t(d)_N$))}
+						if $\Sigma \cap label(d') = \Sigma_i \cap label(d) \wedge \Sigma_i \cap label(d) = \emptyset$
 							$\Delta'$ = $\Delta' \cup$ {($s$,$label(d) \cup label(d')$,$t(d)_1, \ldots, (t(d')_i, \ldots, t(d)_N$))}
-						if $\Sigma \cap label(d') = \Sigma_i \cap label(d) = \emptyset$
-							$\Delta''$ = $\Delta'' \cup$ {$(s$,$label(d)$,($t(d)_1, \ldots, t(d)_N$))}							
-							$\Delta''$ = $\Delta'' \cup$ {$(s$,$label(d')$,($s(d)_1, \ldots, t(d')_i, \ldots, s(d)_N$))}
+							$\Delta''$ = $\Delta'' \cup$ {$(s$,$label(d)$,($t(d)_1, \ldots, t(d)_N$))} 
+								$\cup$ {$(s$,$label(d')$,($s(d)_1, \ldots, t(d')_i, \ldots, s(d)_N$))}
 				if $type = synch$
-					$\Delta_{union}$ = $\Delta'$
+					$\Delta_{union}$ = $\Delta \cup \Delta'$
 				if $type = concurrent$
-					$\Delta_{union}$ = $\Delta' \cup \Delta''$					
+					$\Delta_{union}$ = $\Delta \cup \Delta' \cup \Delta''$					
 				if $type = asynch$
-					$\Delta_{union}$ = $\Delta''$					
+					$\Delta_{union}$ = $\Delta \cup \Delta''$					
 		$\Delta$_expand_frontier($frontier$,$\Delta_{union}$, $visited$)				
 		add_transitions($A$, $\Delta_{partial}$)
 	return $A$
