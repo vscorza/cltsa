@@ -1,0 +1,37 @@
+\renewcommand{\ttdefault}{pcr}
+\begin{lstlisting}[escapeinside={[*}{*]},basicstyle=\scriptsize\ttfamily,columns=flexible,frame=lines,mathescape=true,xleftmargin=3.0ex,keywordstyle=\textbf,morekeywords={if,while,do,else,fork,int,null, algorithm, is, input, output, return},numbers=left,numberstyle=\scriptsize]
+algorithm compose_automata is
+	input: $A_1 \ldots A_N$  the set of CLTS automata to be composed
+	input: $type$ an element of $\{synch,asynch,concurrent\}$ the type of composition to be applied
+	output: $A$ the CLTS automaton that results from applying $\parallel_{type}$ to $A_1 \ldots A_N$
+	$s_0$ = $(s^1_{0},\ldots,s^N_{0})$
+	$frontier$ = [$s_0$]
+	$A$ = create_automaton($s_0$)
+	$visited$ = $[]$
+	while(|$frontier$| > 0)
+		$\Delta_{a}$ = $\emptyset$
+		$\Sigma_{a}$ = $\emptyset$		
+		$s$ = $frontier$.pop()
+		if $s \in visited$
+			continue
+		$visited$.push($s$)
+		$\Delta_{a}$ = $\Delta_0(s)$
+		for $s_{i > 0} \in s$ 
+			for $d:(s,l,t) \in \Delta_{\cup}$
+				for $d':(s',l',t') \in \Delta_{i}(s)$
+					if $\Sigma_{a} \cap l' = \Sigma_i \cap l \wedge \Sigma_i \cap l \neq \emptyset $
+						$\Delta_{a}$ = $\Delta_{a} \cup$ {($s$,$l \cup l'$,($t_1, \ldots, t\prime_i, \ldots, t_N$))}
+					if $\Sigma_{a} \cap l' = \Sigma_i \cap l \wedge \Sigma_i \cap l = \emptyset$
+						if $type \neq asynch$
+							$\Delta_{a}$ = $\Delta_{a} \cup$ {($s$,$l \cup l'$,($t_1, \ldots, t\prime_i, \ldots, t_N$))}
+						if $type \neq synch$							
+							$\Delta_{a}$ = $\Delta_{a} \cup$ {$(s$,$l$,($t_1, \ldots, t_N$))} 
+								$\cup$ {$(s$,$l'$,($s_1, \ldots, t'_i, \ldots, s_N$))}
+		$\Sigma_{a}$ = $\Sigma_{a} \cup \Sigma_i$
+		for $d:(s,l,t) \in \Delta_{a}$
+			if $t \notin visited \wedge t \notin frontier$ 
+				 $frontier$.push($t$)
+			add_transition($A$, $d$)			
+	return $A$
+
+\end{lstlisting}
