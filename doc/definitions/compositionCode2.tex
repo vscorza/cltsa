@@ -9,15 +9,16 @@ algorithm compose_automata is
 	$A$ = create_automaton($s_0$)
 	$visited$ = $[]$
 	while(|$frontier$| > 0)
+		$\Delta_{I}$ = $\emptyset$
 		$\Delta_{a}$ = $\emptyset$
 		$\Sigma_{a}$ = $\emptyset$		
 		$s$ = $frontier$.pop()
 		if $s \in visited$
 			continue
 		$visited$.push($s$)
-		$\Delta_{a}$ = $\Delta_0(s)$
+		$\Delta_{I}$ = $\Delta_0(s)$
 		for $s_{i > 0} \in s$ 
-			for $d:(s,l,t) \in \Delta_{\cup}$
+			for $d:(s,l,t) \in \Delta_{I}$
 				for $d':(s',l',t') \in \Delta_{i}(s)$
 					if $\Sigma_{a} \cap l' = \Sigma_i \cap l \wedge \Sigma_i \cap l \neq \emptyset $
 						$\Delta_{a}$ = $\Delta_{a} \cup$ {($s$,$l \cup l'$,($t_1, \ldots, t\prime_i, \ldots, t_N$))}
@@ -27,8 +28,10 @@ algorithm compose_automata is
 						if $type \neq synch$							
 							$\Delta_{a}$ = $\Delta_{a} \cup$ {$(s$,$l$,($t_1, \ldots, t_N$))} 
 								$\cup$ {$(s$,$l'$,($s_1, \ldots, t'_i, \ldots, s_N$))}
-		$\Sigma_{a}$ = $\Sigma_{a} \cup \Sigma_i$
-		for $d:(s,l,t) \in \Delta_{a}$
+			$\Delta_{I} = \Delta_{a}$						
+			$\Delta_{a} = \emptyset$						
+			$\Sigma_{a}$ = $\Sigma_{a} \cup \Sigma_i$
+		for $d:(s,l,t) \in \Delta_{I}$
 			if $t \notin visited \wedge t \notin frontier$ 
 				 $frontier$.push($t$)
 			add_transition($A$, $d$)			
