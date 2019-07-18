@@ -28,6 +28,11 @@ algorithm compose_automata is
 						if $type \neq synch$							
 							$\Delta_{a}$ = $\Delta_{a} \cup$ {$(s$,$l$,($t_1, \ldots, t_N$))} 
 								$\cup$ {$(s$,$l'$,($s_1, \ldots, t'_i, \ldots, s_N$))}
+					if $l \cap l' = \emptyset$
+						if $\Sigma_a \cap l' = \emptyset \wedge \Sigma_i \cap l \neq \emptyset$
+							$\Delta_{a}$ = $\Delta_{a} \cup$ {$(s$,$l'$,($s_1, \ldots, t'_i, \ldots, s_N$))} 
+						if $\Sigma_a \cap l' \neq \emptyset \wedge \Sigma_i \cap l = \emptyset$
+							$\Delta_{a}$ = $\Delta_{a} \cup$ {$(s$,$l$,($t_1, \ldots,  t_N$))} 							
 			$\Delta_{I} = \Delta_{a}$						
 			$\Delta_{a} = \emptyset$						
 			$\Sigma_{a}$ = $\Sigma_{a} \cup \Sigma_i$

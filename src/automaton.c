@@ -2623,16 +2623,12 @@ void automaton_automata_bool_to_transition_alphabet(bool *tmp_alphabet, automato
 
 }
 
-bool automaton_automata_cannot_merge_transition(bool *pending_label, bool *current_label, uint32_t *independencies, uint32_t alphabet_count, bool *keep_pending){
+bool automaton_automata_cannot_merge_transition(bool *pending_label, bool *current_label, uint32_t *independencies, uint32_t *dependencies, uint32_t alphabet_count
+		, bool *pending_overlaps_current, bool *current_overlaps_pending){
 	uint32_t i;
-	*keep_pending = true;
-	for(i = 0; i < alphabet_count; i++){
-		//if at least one dependant label was set the transitions are no longer elegible for asynch splitting
-		if(independencies[i] > 1 && pending_label[i] && !current_label[i]){
-			*keep_pending = false;
-			break;
-		}
-	}
+	*pending_overlaps_current = false;
+	*current_overlaps_pending = false;
+	//TODO solve overlaping
 	for(i = 0; i < alphabet_count; i++){
 			//independencies[i] > 1 implies i appears in more than one automaton
 			//independencies[i] == true implies i has appeared in an already processed automaton
@@ -2660,6 +2656,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 	}
 
 	alphabet_count += 2;
+	uint32_t 	*alphabet_dependency	= calloc(alphabet_count, sizeof(uint32_t));
 	uint32_t 	*alphabet_independency	= calloc(alphabet_count, sizeof(uint32_t));
 	//get set of independent signals
 	for(j = 0; j < automata_count; j++){
@@ -2816,7 +2813,9 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 #endif
 			automaton_automata_transition_alphabet_to_bool(&(delta_union_alphabet[delta_union_count * alphabet_count]), starting_transition, alphabet_count);
 			delta_union[(delta_union_count)++]		= starting_transition;
-
+			for(k = 0; k < automata[0]->local_alphabet_count; k++){
+				alphabet_dependency[automata[0]->local_alphabet[k]] = true;
+			}
 			if(delta_union_count >= max_degree_sum){
 				printf("[FATAL ERROR] WRONG BOUNDARY AT PENDING COUNT\n");
 				exit(-1);
@@ -2850,9 +2849,10 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 					}
 					automaton_automata_transition_alphabet_to_bool(current_label, starting_transition, alphabet_count);
 					//check if transition doesn't block automaton_automata_tmp_transition_blocks
-					bool keep_pending;
-					if(!automaton_automata_cannot_merge_transition(pending_label, current_label, alphabet_independency, alphabet_count, &keep_pending)){
-						if(!keep_pending || (keep_pending && (current_type != ASYNCHRONOUS))){//if cant split or can split and type not asynch add to delta_union
+					bool pending_overlaps_current, current_overlaps_pending;
+					if(!automaton_automata_cannot_merge_transition(pending_label, current_label, alphabet_independency, alphabet_dependency, alphabet_count
+							, &pending_overlaps_current, &current_overlaps_pending)){
+						if(!pending_overlaps_current || (pending_overlaps_current && (current_type != ASYNCHRONOUS))){//if cant split or can split and type not asynch add to delta_union
 							automaton_automata_merge_transition_alphabet_into_bool(pending_label, starting_transition, alphabet_count);
 							automaton_automata_bool_to_transition_alphabet(pending_label, starting_transition, alphabet_count);
 #if DEBUG_COMPOSITION
@@ -2991,7 +2991,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 
 #endif
 						//if more automata are still to be processed, keep the pending transition
-						if(keep_pending){
+						if(pending_overlaps_current){
 								//Delta_union trans
 								if(!pending_added){
 									pending_added 						= true;
@@ -3032,6 +3032,10 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 			delta_union_alphabet = delta_union_p_alphabet; delta_union_to_state = delta_union_p_to_state;
 			delta_union_p = delta_union_tmp; delta_union_p_count = delta_union_tmp_count;
 			delta_union_p_alphabet = delta_union_tmp_alphabet; delta_union_p_to_state = delta_union_tmp_to_state;
+
+			for(k = 0; k < automata[i]->local_alphabet_count; k++){
+				alphabet_dependency[automata[i]->local_alphabet[k]] = true;
+			}
 		}
 		// add processed transitions from delta_union list
 		while(delta_union_count > 0){
