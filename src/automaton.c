@@ -2992,7 +2992,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 							}
 						}
 					}
-					else{
+					if(!labels_overlap && synch_type[i] != SYNCHRONOUS){
 #if DEBUG_COMPOSITION
 
 						printf("\t\t[t] Pending trans.: %d {", from_state);
@@ -3016,42 +3016,41 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 
 #endif
 						//if more automata are still to be processed, keep the pending transition
-						if(!labels_overlap && synch_type[i] != SYNCHRONOUS){
-							//add independent labels
-							if(!pending_added && !pending_overlaps_current){
-								pending_added 						= true;
-								starting_transition					= automaton_transition_clone(delta_union[j]);
-								automaton_automata_bool_to_transition_alphabet(pending_label, starting_transition, alphabet_count);
-								automaton_automata_transition_alphabet_to_bool(&(delta_union_p_alphabet[delta_union_p_count * alphabet_count]), starting_transition, alphabet_count);
-								for(l = 0; l < automata_count; l++){
-									if(l != i){
-										current_to_state[l]	= current_state[l];
-									}else{
-										printf("*");
-										current_to_state[l]	= starting_transition->state_to;
-									}
-									delta_union_p_to_state[delta_union_p_count * automata_count + l]	= current_to_state[l];
+
+						//add independent labels
+						if(!pending_added && !pending_overlaps_current){
+							pending_added 						= true;
+							starting_transition					= automaton_transition_clone(delta_union[j]);
+							automaton_automata_bool_to_transition_alphabet(pending_label, starting_transition, alphabet_count);
+							automaton_automata_transition_alphabet_to_bool(&(delta_union_p_alphabet[delta_union_p_count * alphabet_count]), starting_transition, alphabet_count);
+							for(l = 0; l < automata_count; l++){
+								if(l != i){
+									current_to_state[l]	= current_state[l];
+								}else{
+									printf("*");
+									current_to_state[l]	= starting_transition->state_to;
 								}
-								starting_transition->state_from		= from_state;
-								starting_transition->state_to		= automaton_composite_tree_get_key(tree, current_to_state);
-#if DEBUG_COMPOSITION
-								printf(" KEPT");
-#endif
-								delta_union_p[(delta_union_p_count)++]			= starting_transition;
+								delta_union_p_to_state[delta_union_p_count * automata_count + l]	= current_to_state[l];
 							}
-							if(!current_overlaps_pending){
-								starting_transition					= automaton_transition_clone(&(automata[i]->transitions[current_state[i]][k]));
-								automaton_automata_transition_alphabet_to_bool(&(delta_union_p_alphabet[delta_union_p_count * alphabet_count]), starting_transition, alphabet_count);
-								for(l = 0; l < automata_count; l++){
-									current_to_state[l]	= delta_union_to_state[j * automata_count + l];
-									delta_union_p_to_state[delta_union_p_count * automata_count + l]	= current_to_state[l];
-								}
-								starting_transition->state_from		= from_state;
-								starting_transition->state_to		= automaton_composite_tree_get_key(tree, current_to_state);
+							starting_transition->state_from		= from_state;
+							starting_transition->state_to		= automaton_composite_tree_get_key(tree, current_to_state);
 #if DEBUG_COMPOSITION
-								printf(" KEPT");
+							printf(" KEPT");
 #endif
+							delta_union_p[(delta_union_p_count)++]			= starting_transition;
+						}
+						if(!current_overlaps_pending){
+							starting_transition					= automaton_transition_clone(&(automata[i]->transitions[current_state[i]][k]));
+							automaton_automata_transition_alphabet_to_bool(&(delta_union_p_alphabet[delta_union_p_count * alphabet_count]), starting_transition, alphabet_count);
+							for(l = 0; l < automata_count; l++){
+								current_to_state[l]	= delta_union_to_state[j * automata_count + l];
+								delta_union_p_to_state[delta_union_p_count * automata_count + l]	= current_to_state[l];
 							}
+							starting_transition->state_from		= from_state;
+							starting_transition->state_to		= automaton_composite_tree_get_key(tree, current_to_state);
+#if DEBUG_COMPOSITION
+							printf(" KEPT");
+#endif
 						}
 #if DEBUG_COMPOSITION
 						printf("\n");
