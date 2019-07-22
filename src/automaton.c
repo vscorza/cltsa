@@ -2623,40 +2623,48 @@ void automaton_automata_bool_to_transition_alphabet(bool *tmp_alphabet, automato
 
 }
 
-bool automaton_automata_cannot_merge_transition(bool *pending_label, bool *current_label, uint32_t *independencies, uint32_t *dependencies, uint32_t alphabet_count
+bool automaton_automata_transition_mismatch(bool *pending_label, bool *current_label, uint32_t *independencies, uint32_t *dependencies, uint32_t alphabet_count
 		, uint32_t *local_alphabet, uint32_t local_alphabet_count
-		, bool *labels_overlap, bool *pending_overlaps_current, bool *current_overlaps_pending){
+		, bool *labels_overlap, bool *pending_overlaps_current, bool *current_overlaps_pending, bool *empty_intersection){
 	uint32_t i;
 	*pending_overlaps_current = false;
 	*current_overlaps_pending = false;
 	*labels_overlap = false;
+	*empty_intersection = true;
 	for(i = 0; i < alphabet_count; i++){
-		if(pending_label[i] && pending_label[i] == current_label[i]){
+		if(pending_label[i] && (pending_label[i] == current_label[i])){
 			*labels_overlap = true;
 			*pending_overlaps_current = true;
 			*current_overlaps_pending = true;
 			break;
 		}
 	}
-	if(!labels_overlap){
+	if(!*labels_overlap){
 		for(i = 0; i < local_alphabet_count; i++){
 			if(pending_label[local_alphabet[i]]){
-				pending_overlaps_current = true;
+				*pending_overlaps_current = true;
 				break;
 			}
 		}
 		for(i = 0; i < alphabet_count; i++){
-			if(current_label[i] && dependencies[i]){
-				current_overlaps_pending = true;
+			if(current_label[i] && independencies[i] > 1){
+				*current_overlaps_pending = true;
 				break;
 			}
 		}
 	}
 
+
 	for(i = 0; i < alphabet_count; i++){
 			//independencies[i] > 1 implies i appears in more than one automaton
-			//independencies[i] == true implies i has appeared in an already processed automaton
-			if(independencies[i] > 1 && (pending_label[i] != current_label[i])) return true;
+			//dependencies[i] == true implies i has appeared in an already processed automaton
+			if(independencies[i] > 1){
+				if(pending_label[i] != current_label[i]){
+					return true;
+				}else if (pending_label[i]){
+					*empty_intersection = false;
+				}
+			}
 	}
 	return false;
 }
@@ -2679,7 +2687,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 		composition = automaton_automaton_create("Composition", ctx, alphabet_count, alphabet, false, false);
 	}
 
-	alphabet_count += 2;
+	alphabet_count = ctx->global_alphabet->count;
 	uint32_t 	*alphabet_dependency	= calloc(alphabet_count, sizeof(uint32_t));
 	uint32_t 	*alphabet_independency	= calloc(alphabet_count, sizeof(uint32_t));
 	//get set of independent signals
@@ -2868,20 +2876,29 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 #endif
 					//add new transition to p_sigs and partial_state
 					automaton_transition* starting_transition					= automaton_transition_clone(&(automata[i]->transitions[current_state[i]][k]));
+#if DEBUG_COMPOSITION
+							printf("\t\t[P] Popping trans.: %d {", starting_transition->state_from);
+							for(m = 0; m < starting_transition->signals_count; m++){
+								printf("%s%s", m > 0 ? "," : ""
+										, automata[i]->context->global_alphabet->list[GET_TRANSITION_SIGNAL(starting_transition, m)].name);
+							}
+							printf("}->[%d]\n", starting_transition->state_to);
+#endif
 					for( l = 0; l < alphabet_count; l++){
 						pending_label[l]				= delta_union_alphabet[j *  alphabet_count + l];
 					}
+					bool was_set = false;
 					automaton_automata_transition_alphabet_to_bool(current_label, starting_transition, alphabet_count);
 					//check if transition doesn't block automaton_automata_tmp_transition_blocks
-					bool pending_overlaps_current, current_overlaps_pending, labels_overlap;
-					if(!automaton_automata_cannot_merge_transition(pending_label, current_label, alphabet_independency, alphabet_dependency, alphabet_count, automata[i]->local_alphabet
+					bool pending_overlaps_current, current_overlaps_pending, labels_overlap, empty_intersection;
+					if(!automaton_automata_transition_mismatch(pending_label, current_label, alphabet_independency, alphabet_dependency, alphabet_count, automata[i]->local_alphabet
 							, automata[i]->local_alphabet_count
-							, &labels_overlap, &pending_overlaps_current, &current_overlaps_pending)){
-						if(!pending_overlaps_current || (pending_overlaps_current && (current_type != ASYNCHRONOUS))){//if cant split or can split and type not asynch add to delta_union
+							, &labels_overlap, &pending_overlaps_current, &current_overlaps_pending, &empty_intersection)){
+						if((current_type != ASYNCHRONOUS) || !empty_intersection){//merge transitions if needed
 							automaton_automata_merge_transition_alphabet_into_bool(pending_label, starting_transition, alphabet_count);
 							automaton_automata_bool_to_transition_alphabet(pending_label, starting_transition, alphabet_count);
 #if DEBUG_COMPOSITION
-							printf("\t\t[t] Pending trans.: %d {", from_state);
+							printf("\t\t[M]erge pending trans.: %d {", from_state);
 							for(m = 0; m < starting_transition->signals_count; m++){
 								printf("%s%s", m > 0 ? "," : ""
 										, automata[i]->context->global_alphabet->list[GET_TRANSITION_SIGNAL(starting_transition, m)].name);
@@ -2915,12 +2932,16 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 #endif
 							automaton_automata_transition_alphabet_to_bool(&(delta_union_p_alphabet[delta_union_p_count * alphabet_count]), starting_transition, alphabet_count);
 							delta_union_p[(delta_union_p_count)++]			= starting_transition;
-						}else if(current_type != SYNCHRONOUS){//if can split and type not synch add to delta union both original transitions
+							was_set = true;
+						}
+						if(current_type != SYNCHRONOUS && empty_intersection){//if can split and type not synch add to delta union both original transitions
 							//Delta_i trans
 							if(!delta_i_set[k]){
 								delta_i_set[k]	= true;
+								if(was_set)
+									starting_transition					= automaton_transition_clone(&(automata[i]->transitions[current_state[i]][k]));
 #if DEBUG_COMPOSITION
-								printf("\t\t[t] Delta i trans.: %d {", from_state);
+								printf("\t\t[t] Delta i non merged trans.: %d {", from_state);
 								for(m = 0; m < starting_transition->signals_count; m++){
 									printf("%s%s", m > 0 ? "," : ""
 											, automata[i]->context->global_alphabet->list[GET_TRANSITION_SIGNAL(starting_transition, m)].name);
@@ -2954,15 +2975,18 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 #endif
 								automaton_automata_transition_alphabet_to_bool(&(delta_union_p_alphabet[delta_union_p_count * alphabet_count]), starting_transition, alphabet_count);
 								delta_union_p[(delta_union_p_count)++]			= starting_transition;
+								was_set = true;
 							}
 							//Delta_union trans
 							if(!pending_added){
 								pending_added 						= true;
+								if(!was_set)
+									automaton_transition_destroy(starting_transition, true);
 								starting_transition					= automaton_transition_clone(delta_union[j]);
-								automaton_automata_bool_to_transition_alphabet(pending_label, starting_transition, alphabet_count);
-								automaton_automata_transition_alphabet_to_bool(&(delta_union_p_alphabet[delta_union_p_count * alphabet_count]), starting_transition, alphabet_count);
+								//automaton_automata_bool_to_transition_alphabet(pending_label, starting_transition, alphabet_count);
+								//automaton_automata_transition_alphabet_to_bool(&(delta_union_p_alphabet[delta_union_p_count * alphabet_count]), starting_transition, alphabet_count);
 #if DEBUG_COMPOSITION
-								printf("\t\t[t] Pending trans.: %d {", from_state);
+								printf("\t\t[t] Pending non merged trans.: %d {", from_state);
 								for(m = 0; m < starting_transition->signals_count; m++){
 									printf("%s%s", m > 0 ? "," : ""
 											, automata[i]->context->global_alphabet->list[GET_TRANSITION_SIGNAL(starting_transition, m)].name);
@@ -2987,15 +3011,15 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 								}
 								printf("\n");
 #endif
-
+								automaton_automata_transition_alphabet_to_bool(&(delta_union_p_alphabet[delta_union_p_count * alphabet_count]), starting_transition, alphabet_count);
 								delta_union_p[(delta_union_p_count)++]			= starting_transition;
+								was_set = true;
 							}
 						}
-					}
-					if(!labels_overlap && synch_type[i] != SYNCHRONOUS){
+					}else if(!labels_overlap){
 #if DEBUG_COMPOSITION
 
-						printf("\t\t[t] Pending trans.: %d {", from_state);
+						printf("\t\t[B] Pending trans.: %d {", from_state);
 						for(m = 0; m < starting_transition->signals_count; m++){
 							printf("%s%s", m > 0 ? "," : ""
 									, automata[i]->context->global_alphabet->list[GET_TRANSITION_SIGNAL(starting_transition, m)].name);
@@ -3010,54 +3034,76 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 							}
 							printf("%d%s", current_to_state[l], l < automata_count -1 ? "," : "");
 						}
-						starting_transition->state_from		= from_state;
-						starting_transition->state_to		= automaton_composite_tree_get_key(tree, current_to_state);
-						printf("]:%d blocks", starting_transition->state_to);
+						printf("]:%d mismatches shared alphabet\n", starting_transition->state_to);
 
 #endif
-						//if more automata are still to be processed, keep the pending transition
-
-						//add independent labels
-						if(!pending_added && !pending_overlaps_current){
-							pending_added 						= true;
-							starting_transition					= automaton_transition_clone(delta_union[j]);
-							automaton_automata_bool_to_transition_alphabet(pending_label, starting_transition, alphabet_count);
-							automaton_automata_transition_alphabet_to_bool(&(delta_union_p_alphabet[delta_union_p_count * alphabet_count]), starting_transition, alphabet_count);
+						if(!delta_i_set[k] && !current_overlaps_pending){
+							delta_i_set[k]	= true;
+#if DEBUG_COMPOSITION
+							printf("\t\t[B] Delta i non merged trans.: %d {", from_state);
+							for(m = 0; m < starting_transition->signals_count; m++){
+								printf("%s%s", m > 0 ? "," : ""
+										, automata[i]->context->global_alphabet->list[GET_TRANSITION_SIGNAL(starting_transition, m)].name);
+							}
+							printf("}->[");
+#endif
 							for(l = 0; l < automata_count; l++){
 								if(l != i){
 									current_to_state[l]	= current_state[l];
 								}else{
+#if DEBUG_COMPOSITION
 									printf("*");
+#endif
 									current_to_state[l]	= starting_transition->state_to;
 								}
+#if DEBUG_COMPOSITION
+								printf("%d%s", current_to_state[l], l < automata_count -1 ? "," : "");
+#endif
 								delta_union_p_to_state[delta_union_p_count * automata_count + l]	= current_to_state[l];
 							}
 							starting_transition->state_from		= from_state;
 							starting_transition->state_to		= automaton_composite_tree_get_key(tree, current_to_state);
 #if DEBUG_COMPOSITION
-							printf(" KEPT");
+							printf("]:%d KEPT \n", starting_transition->state_to);
 #endif
-							delta_union_p[(delta_union_p_count)++]			= starting_transition;
-						}
-						if(!current_overlaps_pending){
-							starting_transition					= automaton_transition_clone(&(automata[i]->transitions[current_state[i]][k]));
 							automaton_automata_transition_alphabet_to_bool(&(delta_union_p_alphabet[delta_union_p_count * alphabet_count]), starting_transition, alphabet_count);
+							delta_union_p[(delta_union_p_count)++]			= starting_transition;
+							was_set = true;
+						}
+						//add independent labels
+						if(!pending_added && !pending_overlaps_current){
+							pending_added 						= true;
+							if(!was_set)
+								automaton_transition_destroy(starting_transition, true);
+							starting_transition					= automaton_transition_clone(delta_union[j]);
+
+#if DEBUG_COMPOSITION
+
+							printf("\t\t[B] Pending non merged trans.: %d {", from_state);
+							for(m = 0; m < starting_transition->signals_count; m++){
+								printf("%s%s", m > 0 ? "," : ""
+										, automata[i]->context->global_alphabet->list[GET_TRANSITION_SIGNAL(starting_transition, m)].name);
+							}
+							printf("}->[");
+#endif
 							for(l = 0; l < automata_count; l++){
 								current_to_state[l]	= delta_union_to_state[j * automata_count + l];
+#if DEBUG_COMPOSITION
+								printf("%d%s", current_to_state[l], l < automata_count -1 ? "," : "");
+#endif
 								delta_union_p_to_state[delta_union_p_count * automata_count + l]	= current_to_state[l];
 							}
+#if DEBUG_COMPOSITION
+							printf("]:%d KEPT\n", starting_transition->state_to);
+#endif
 							starting_transition->state_from		= from_state;
-							starting_transition->state_to		= automaton_composite_tree_get_key(tree, current_to_state);
-#if DEBUG_COMPOSITION
-							printf(" KEPT");
-#endif
+							automaton_automata_transition_alphabet_to_bool(&(delta_union_p_alphabet[delta_union_p_count * alphabet_count]), starting_transition, alphabet_count);
+							delta_union_p[(delta_union_p_count)++]			= starting_transition;
+							was_set = true;
 						}
-#if DEBUG_COMPOSITION
-						printf("\n");
-#endif
-
 					}
-
+					if(!was_set)
+						automaton_transition_destroy(starting_transition, true);
 				}
 			}
 #if DEBUG_COMPOSITION
@@ -3191,12 +3237,14 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 	free(delta_union_alphabet); delta_union_alphabet	= NULL;
 	for(i = 0; i < delta_union_count; i++) automaton_transition_destroy(delta_union[i], true);
 	free(delta_union); delta_union	= NULL;
-
+	free(delta_union_p_to_state); delta_union_p_to_state	= NULL;
+	free(delta_union_p_alphabet); delta_union_p_alphabet	= NULL;
+	for(i = 0; i < delta_union_p_count; i++) automaton_transition_destroy(delta_union_p[i], true);
+	free(delta_union_p); delta_union_p	= NULL;
 	free(pending_label); pending_label	= NULL;
 	free(current_label); current_label	= NULL;
 	free(tmp_transition_alphabet); tmp_transition_alphabet = NULL;
-
-
+	free(delta_i_set);
 	free(pending_added);
 	for(i = 0; i < processed_count; i++) automaton_transition_destroy(processed[i], true);
 	free(processed); processed	= NULL;
@@ -3206,6 +3254,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 	free(current_set_state); current_set_state = NULL;
 	free(alphabet);	alphabet	= NULL;
 	free(alphabet_independency);
+	free(alphabet_dependency);
 	return composition;
 }
 

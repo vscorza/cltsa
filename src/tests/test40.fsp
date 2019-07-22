@@ -5,6 +5,14 @@ A = (<a,b> -> e -> A ).
 B = ( c -> e ->B).
 C = (<f,g> -> e -> C ).
 
+//|f| CONCURRENT = (A ||_c B).
+//|f| CONCURRENT = (A ||_c C).
+//|f| CONCURRENT = (C ||_c B).
+//|f| CONCURRENT = (B ||_c A).
+//|f| CONCURRENT = (A ||_c A).
+//|f| CONCURRENT = (C ||_c B).
+//|f| CONCURRENT = (A ||_c B ||_c C).
+
 |f| ASYNCHRONOUS = (A || B || C).
-//|f| CONCURRENT = (C ||_c B ||_c A).
-//|f| SYNCHRONOUS = (A ||_s B ||_s C).
+|f| CONCURRENT = (A ||_c B ||_c C).
+|f| SYNCHRONOUS = (A ||_s B ||_s C).
