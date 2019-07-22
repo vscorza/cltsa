@@ -30,9 +30,14 @@
 %Note that the item number should be one less than you desire..
 
 \begin{definition} 
-Let \automaton{M},\automaton{N}, with $\Delta_M : S_M \times l \subseteq \Sigma_M \times S_M$, be two CLTS instances, then CLTS sequential parallel composition is defined as \ltsComposition{M}{N}{s} where $\Delta$ is the smallest relation s.t:
-\begin{center}
-	\begin{equation}
+	Let \automaton{M},\automaton{N}, with $\Delta_M : S_M \times \mathcal{P}(\Sigma_M) \times S_M$, be two CLTS instances, then CLTS concurrent parallel composition is defined as \ltsComposition{M}{N}{c} where $\Delta$ is the smallest relation s.t:
+	\begin{center}
+		\begin{equation}
+		\AxiomC{$(s, l_M, s') \in \Sigma_M,(t, l_N, t') \in \Sigma_N  $}\RightLabel{$l_M \cap \Sigma_N = l_N \cap \Sigma_M$}
+		\UnaryInfC{$((s,t),l_M \cup l_N,(s',t')) \in \Delta$}
+		\DisplayProof
+		\end{equation}	
+		\begin{equation}
 		\AxiomC{$(s, l_M, s') \in \Sigma_M $}\RightLabel{$l_M \cap \Sigma_N = \emptyset$}
 		\UnaryInfC{$((s,t),l_M,(s',t))$}
 		\DisplayProof
@@ -40,72 +45,59 @@ Let \automaton{M},\automaton{N}, with $\Delta_M : S_M \times l \subseteq \Sigma_
 		\AxiomC{$(t, l_N, t') \in \Sigma_N $}\RightLabel{$l_N \cap \Sigma_M = \emptyset$}
 		\UnaryInfC{$((s,t),l_N,(s,t'))$}
 		\DisplayProof
-	\end{equation}
-	\begin{equation}
+		\end{equation}
+	\end{center}
+\end{definition}
+
+\begin{definition} 
+	Let \automaton{M},\automaton{N}, with $\Delta_M : S_M \times \mathcal{P}(\Sigma_M) \times S_M$, be two CLTS instances, then CLTS asynchronous parallel composition is defined as \ltsComposition{M}{N}{a} where $\Delta$ is the smallest relation s.t:
+	\begin{center}
+		\begin{equation}
 		\AxiomC{$(s, l_M, s') \in \Sigma_M,(t, l_N, t') \in \Sigma_N  $}\RightLabel{$l_M \cap \Sigma_N = l_N \cap \Sigma_M \neq \emptyset$}
-		\UnaryInfC{$((s,t),l_M \cup l_N,(s',t'))$}
-		\DisplayProof
-	\end{equation}	
-\end{center}
-\end{definition}
-\begin{definition} 
-	Let \automaton{M},\automaton{N}, with $\Delta_M : S_M \times l \subseteq \Sigma_M \times S_M$, be two CLTS instances, then CLTS concurrent parallel composition is defined as \ltsComposition{M}{N}{c} where $\Delta$ is the smallest relation s.t:
-	\begin{center}
-		\begin{equation}
-			\AxiomC{$(s, l_M, s') \in \Sigma_M $}\RightLabel{$l_M \cap \Sigma_M = \emptyset \wedge \nexists( l_N, t': (t,l_N,t') \in \Delta_N)$}
-			\UnaryInfC{$((s,t),l_M,(s',t))$}
-			\DisplayProof
-		\end{equation}			
-		\begin{equation}
-			\AxiomC{$(t, l_N, t') \in \Sigma_N $}\RightLabel{$l_N \cap \Sigma_M = \emptyset \wedge \nexists( l_M, s': s.t. (s,l_M,s') \in \Delta_M)$}
-			\UnaryInfC{$((s,t),l_N,(s,t'))$}
-			\DisplayProof
-		\end{equation}			
-		\begin{equation}
-		\AxiomC{$(s, l_M, s') \in \Sigma_M,(t, l_N, t') \in \Sigma_N  $}\RightLabel{$l_M \cap \Sigma_N = l_N \cap \Sigma_M$}
-		\UnaryInfC{$((s,t),l_M \cup l_N,(s',t'))$}
+		\UnaryInfC{$((s,t),l_M \cup l_N,(s',t')) \in \Delta$}
 		\DisplayProof
 		\end{equation}	
+		\begin{equation}
+		\AxiomC{$(s, l_M, s') \in \Sigma_M $}\RightLabel{$l_M \cap \Sigma_N = \emptyset$}
+		\UnaryInfC{$((s,t),l_M,(s',t))$}
+		\DisplayProof
+		\quad\quad
+		\AxiomC{$(t, l_N, t') \in \Sigma_N $}\RightLabel{$l_N \cap \Sigma_M = \emptyset$}
+		\UnaryInfC{$((s,t),l_N,(s,t'))$}
+		\DisplayProof
+		\end{equation}
 	\end{center}
 \end{definition}
+
 \begin{definition} 
-	Let \automaton{M},\automaton{N}, with $\Delta_M : S_M \times l \subseteq \Sigma_M \times S_M$, be two CLTS instances, then CLTS parallel composition is defined as \ltsComposition{M}{N}{} where $\Delta$ is the smallest relation s.t:
+	Let \automaton{M},\automaton{N}, with $\Delta_M : S_M \times \mathcal{P}(\Sigma_M) \times S_M$, be two CLTS instances, then CLTS synchronous parallel composition is defined as \ltsComposition{M}{N}{s} where $\Delta$ is the smallest relation s.t:
 	\begin{center}
 		\begin{equation}
-			\AxiomC{$(s, l_M, s') \in \Sigma_M $}\RightLabel{$l_M \cap \Sigma_N = \emptyset$}
-			\UnaryInfC{$((s,t),l_M,(s',t))$}
-			\DisplayProof
-			\quad\quad
-			\AxiomC{$(t, l_N, t') \in \Sigma_N $}\RightLabel{$l_N \cap \Sigma_M = \emptyset$}
-			\UnaryInfC{$((s,t),l_N,(s,t'))$}
-			\DisplayProof
-		\end{equation}		
-		\begin{equation}
 		\AxiomC{$(s, l_M, s') \in \Sigma_M,(t, l_N, t') \in \Sigma_N  $}\RightLabel{$l_M \cap \Sigma_N = l_N \cap \Sigma_M$}
-		\UnaryInfC{$((s,t),l_M \cup l_N,(s',t'))$}
+		\UnaryInfC{$((s,t),l_M \cup l_N,(s',t')) \in \Delta$}
 		\DisplayProof
 		\end{equation}	
 	\end{center}
 \end{definition}
 
-\begin{definition} 
-	Let $M_1 \ldots M_N$ be CLTS instances s.t. $M_i= (S_{i}, \Sigma_{i}, \Delta_{i}, s_{0}^{i})$ with $\Delta_i : S_i \times l \subseteq \Sigma_i \times S_i$, the concurrent parallel composition \ltsComposition{}{M_i}{} where $\Delta_i$ is the smallest relation s.t:
-	\begin{center}
-		\begin{equation}
-		\AxiomC{$\forall i,j \in 1 \ldots N, i \neq j: ((s_i, l_i, t_i) \in \Delta_i \wedge \forall a \in l_i : a \in (\Sigma_i \cap \Sigma_j) \rightarrow (a \in l_i \wedge a \in l_j)) \vee (l_i = \emptyset \wedge t_i = s_i)$}
-		\UnaryInfC{$((s_1 \ldots s_N),\cup_{i=1}^{N}l_i,(t_1 \ldots t_N)) \in \Delta$}
-		\DisplayProof
-		\end{equation}		
-	\end{center}
-\end{definition}
+%\begin{definition} 
+%	Let $M_1 \ldots M_N$ be CLTS instances s.t. $M_i= (S_{i}, \Sigma_{i}, \Delta_{i}, s_{0}^{i})$ with $\Delta_i : S_i \times l \subseteq \Sigma_i \times S_i$, the concurrent parallel composition \ltsComposition{}{M_i}{} where $\Delta_i$ is the smallest relation s.t:
+%	\begin{center}
+%		\begin{equation}
+%		\AxiomC{$\forall i,j \in 1 \ldots N, i \neq j: ((s_i, l_i, t_i) \in \Delta_i \wedge \forall a \in l_i : a \in (\Sigma_i \cap \Sigma_j) \rightarrow (a \in l_i \wedge a \in l_j)) \vee (l_i = \emptyset \wedge t_i = s_i)$}
+%		\UnaryInfC{$((s_1 \ldots s_N),\cup_{i=1}^{N}l_i,(t_1 \ldots t_N)) \in \Delta$}
+%		\DisplayProof
+%		\end{equation}		
+%	\end{center}
+%\end{definition}
 
-\begin{figure}[ht]
-	\begin{center}
-		\input{compositionCode} 
-		\caption{Concurrent Composition Algorithm}
-		\label{fig:dfs-code}
-	\end{center}
-\end{figure}
+%\begin{figure}[ht]
+%	\begin{center}
+%		\input{compositionCode} 
+%		\caption{Concurrent Composition Algorithm}
+%		\label{fig:dfs-code}
+%	\end{center}
+%\end{figure}
 \begin{figure}[ht]
 	\begin{center}
 		\input{compositionCode2} 
