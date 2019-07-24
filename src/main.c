@@ -893,26 +893,25 @@ int main (void){
 
 	//DRY TESTS
 	//run_fsp_tests(18);
-	//run_parse_test("tests/test5.fsp",  "test5");
+	run_parse_test("tests/test5.fsp",  "test5");
 	//run_parse_test("tests/test18.fsp",  "test18");
 
 	//run_parse_test("tests/test26.fsp", "test26");
 	//run_parse_test("tests/test27.fsp", "test27");
 	//run_parse_test("tests/test32.fsp", "test32");
 	//run_parse_test("tests/test34.fsp", "test34");
-
+	//run_parse_test("tests/test40.fsp", "compositions type");
 
 	//SHOWCASE
 	//run_parse_test("tests/test21.fsp", "test21");
 	//run_parse_test("tests/test23.fsp", "biscotti");
-	//run_parse_test("tests/test37.fsp", "lts load test 1");
-	//run_parse_test("tests/test28.fsp", "mixed model 3 signals 2 labels");//mixed model 3 signals 2 labels
+		//run_parse_test("tests/test28.fsp", "mixed model 3 signals 2 labels");//mixed model 3 signals 2 labels
 	//run_parse_test("tests/test30.fsp", "lift 2 floors");//lift 2 floors
 	//run_parse_test("tests/test29.fsp", "lift 3 floors");//lift 3 floors
 	//run_parse_test("tests/test36.fsp", "lift 5 floors");//lift 5 floors
 
 	//IN PROGRESS
-	run_parse_test("tests/test40.fsp", "compositions type");
+	//run_parse_test("tests/test37.fsp", "lts load test 1");
 	//run_parse_test("tests/test39.fsp", "lift 7 floors");//lift 7 floors
 	//run_parse_test("tests/test38.fsp", "lift 5 floors + 10 variables");//lift 5 floors + 10 variables
 	//run_parse_test("tests/test31.fsp", "GenBuf 4 sndrs");//GENBUF 4 sndrs

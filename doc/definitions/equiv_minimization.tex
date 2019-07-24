@@ -1,0 +1,48 @@
+\documentclass{article}
+%Packages being imported that add functionality to LaTeX.
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+\usepackage{amssymb,amsmath,amsthm,mathtools,bussproofs,turnstile}
+\usepackage{enumerate}
+\usepackage{listings}
+
+%Theorem Environments
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+\newtheorem{corollary}[theorem]{Corollary}
+
+\newcommand{\automaton}[1]{$#1 = (S_{#1}, \Sigma_{#1}, \Delta_{#1}, s_{0}^{#1})$}
+\newcommand{\ltsComposition}[3]{$#1 \parallel_{#3} #2 = (S_{#1}\times S_{#2}, \Sigma_{#1} \cup \Sigma_{#2}, \Delta, (s_{0}^{#1},s_{0}^{#2}))$}
+
+\title{CLTS equivalence check and minization} %Change this to the appropriate number.
+\author{-} %Change this to your name.
+\date{}
+
+\begin{document}
+
+\maketitle
+
+%Counters for setting the appropriate numbering.
+\setcounter{section}{1} %This gives the chapter number.
+\setcounter{theorem}{1} %This gives the item number.
+%Note that the item number should be one less than you desire..
+
+
+\begin{figure}[ht]
+	\begin{center}
+		\input{equivalence} 
+		\caption{Equivalence check algorithm}
+		\label{fig:equivalence-check}
+	\end{center}
+\end{figure}
+
+\begin{figure}[ht]
+	\begin{center}
+		\input{minimization} 
+		\caption{Minimization algorithm}
+		\label{fig:minimization}
+	\end{center}
+\end{figure}
+\end{document}

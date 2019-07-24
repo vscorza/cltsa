@@ -1,0 +1,24 @@
+\renewcommand{\ttdefault}{pcr}
+\begin{lstlisting}[escapeinside={[*}{*]},basicstyle=\scriptsize\ttfamily,columns=flexible,frame=lines,mathescape=true,xleftmargin=3.0ex,keywordstyle=\textbf,morekeywords={if,while,do,else,fork,int,null, algorithm, is, input, output, return,for},numbers=left,numberstyle=\scriptsize]
+algorithm automata_equivalence is
+	input: $A_1$, $A_2$  two deterministic CLTS automata
+	output: $true$ if both automata are equivalent, $false$ otherwise
+	$frontier$ = [$(s^{1}_0,s^{2}_0)$]
+	$visited$ = $[]$
+	while(|$frontier$| > 0)
+		$(s_1,s_2)$ = $frontier$.pop()
+		if $(s_1,s_2) \in visited$
+			continue
+		$visited$.push($(s_1,s_2)$)
+		if($|\Delta_1(s_1)| \neq |\Delta_2(s_2)|$)
+			return $false$
+		order($\Delta_1(s_1)$)
+		order($Delta_2(s_2)$)
+		for $i \in [1..|\Delta_1(s_1)|]$
+			if label($\Delta_1(s_1)[i]$) $\neq$ label($\Delta_2(s_2)[i]$)
+				return $false$
+			if (to_state($\Delta_1(s_1)[i]$),to_state($\Delta_2(s_2)[i]$) $\notin visited \cup frontier$
+			$frontier$.push((to_state($\Delta_1(s_1)[i]$),to_state($\Delta_2(s_2)[i]$))
+	return $true$
+
+\end{lstlisting}

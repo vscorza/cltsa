@@ -1,0 +1,20 @@
+\renewcommand{\ttdefault}{pcr}
+\begin{lstlisting}[escapeinside={[*}{*]},basicstyle=\scriptsize\ttfamily,columns=flexible,frame=lines,mathescape=true,xleftmargin=3.0ex,keywordstyle=\textbf,morekeywords={if,while,do,else,fork,int,null, algorithm, is, input, output, return,for},numbers=left,numberstyle=\scriptsize]
+algorithm automaton_minimization is
+	input: $A$  a deterministic CLTS automaton
+	output: $A'$  a deterministic minimized CLTS automaton
+	hash = initiliaze_$\Delta$_hash($A$)
+	do
+		changed = $false$
+		for $s \in A \wedge$ !changed
+			for $t \in \Delta(s) \wedge$ !changed
+				for $t'  \in \Delta(s) \wedge t \neq t' \wedge$ !changed
+					if hash($t$) = hash($t'$) 
+						if $t = t'$
+							if $\Delta(s(t)) = \delta(s(t'))$ 
+								merge($s(t)$,$s(t')$)
+								changed = $true$
+		
+	while changed = $true$
+	return $A$
+\end{lstlisting}
