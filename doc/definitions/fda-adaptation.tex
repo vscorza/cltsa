@@ -1,0 +1,24 @@
+\renewcommand{\ttdefault}{pcr}
+\begin{lstlisting}[escapeinside={[*}{*]},basicstyle=\scriptsize\ttfamily,columns=flexible,frame=lines,mathescape=true,xleftmargin=3.0ex,keywordstyle=\textbf,morekeywords={if,while,do,else,fork,int,null, algorithm, is, input, output, return,for},numbers=left,numberstyle=\scriptsize]
+algorithm fda_minization_adapted is
+	input: $A$  a deterministic CLTS automaton
+	output: $P$  a partition of equivalent states
+	$P$ = $\{\{s_0\}, S \setminus \{s_0\}\}$
+	$W$ = $\{S \setminus \{s_0\}\}$
+	while($W \neq \emptyset$)
+		$A$ = take_one($W$)
+		$W$ = $W \setminus \{A\}$
+		for $l \in incoming(A)$
+			$X$ = $\Delta_l^{-1}(A)$
+			for $Y \in P s.t. X \cap Y = \emptyset \wedge Y \setminus X = \emptyset$
+				$P$ = $P \setminus Y$
+				$P$ = $P \cup (Y \cap X) \cup (Y \setminus X)$				
+				if $Y \in W$
+					$W$ = $W \setminus Y$				
+					$W$ = $W \cup (Y \cap X) \cup (Y \setminus X)$		
+				else if $|Y \cap X| \leq |Y \setminus X|$							
+					$W$ = $W \cup (Y \cap X)$						
+				else
+					$W$ = $W \cup (Y \setminus X)$						
+	return $P$
+\end{lstlisting}
