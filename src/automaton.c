@@ -1866,7 +1866,7 @@ void automaton_ranking_increment(automaton_automaton* game_automaton, automaton_
 	if(satisfies_assumption){
 		if(current_ranking->assumption_to_satisfy < (int32_t)(assumptions_count - 1)){
 			target_ranking->assumption_to_satisfy = current_ranking->assumption_to_satisfy + 1;
-		}else if(current_ranking->value < (int32_t)(max_delta[current_guarantee] - 1)){
+		}else if(current_ranking->value < (int32_t)(max_delta[current_guarantee])){
 			target_ranking->value++;
 		}else{
 			target_ranking->value 					= RANKING_INFINITY;
@@ -1898,7 +1898,8 @@ void automaton_ranking_update(automaton_automaton* game_automaton, automaton_con
 		current_ranking->assumption_to_satisfy	= incr_ranking.assumption_to_satisfy;
 	}
 #if DEBUG_SYNTHESIS
-	printf("[U ] %d <%d:%d, %d> update \n", current_ranking->state, current_guarantee, current_ranking->value, current_ranking->assumption_to_satisfy);
+	printf("[U ] %d <%d:%d, %d> update (incr.: <%d, %d>) \n", current_ranking->state, current_guarantee, current_ranking->value
+			, current_ranking->assumption_to_satisfy, incr_ranking.value, incr_ranking.assumption_to_satisfy);
 #endif
 }
 
@@ -2091,10 +2092,10 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 	}
 	printf("\tpending:%d\n", pending_list->count);
 #endif
-
+#if VERBOSE
 	printf("Synthesis processed [%09d] states, run for [%08f]s\n", pending_processed, (double)(clock() - begin) / CLOCKS_PER_SEC);
 	//build strategy
-
+#endif
 	strategy	= automaton_automaton_create(strategy_name, game_automaton->context, game_automaton->local_alphabet_count, game_automaton->local_alphabet, false, false);
 
 
@@ -2151,10 +2152,22 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 					//v satisfies current guarantee v in Q_j
 					may_increase	= automaton_bucket_has_entry(game_automaton->inverted_valuations[guarantees_indexes[i]], current_ranking->state);
 
-					is_controllable	= game_automaton->is_controllable[current_ranking->state];
+					//is_controllable	= game_automaton->is_controllable[current_ranking->state];
+					is_controllable = true;
 					//TODO: check, was this, but changed in order to ensure strategy swap
 					//succ_guarantee	= may_increase? ((i + 1) % guarantees_count) : i;
 					succ_guarantee	= may_increase && is_controllable ? ((i + 1) % guarantees_count) : i;
+					for(l = 0; l < game_automaton->out_degree[current_ranking->state] && is_controllable; l++){
+						current_transition	= &(game_automaton->transitions[current_ranking->state][l]);
+						for(m = 0; m < current_transition->signals_count; m++){
+							automaton_signal_event * evt =
+									&ctx->global_alphabet->list[game_automaton->local_alphabet[GET_TRANSITION_SIGNAL(current_transition,m)]];
+							if(evt->type == INPUT_SIG){
+								is_controllable = false;
+								break;
+							}
+						}
+					}
 					for(l = 0; l < game_automaton->out_degree[current_ranking->state]; l++){
 						current_transition	= &(game_automaton->transitions[current_ranking->state][l]);
 						succ_ranking		=  (automaton_ranking*)automaton_concrete_bucket_get_entry(ranking_list[succ_guarantee], current_transition->state_to);
@@ -2212,15 +2225,26 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 								strategy_maps[succ_guarantee][succ_ranking->state]	= last_strategy_state++;
 								strategy_maps_is_set[succ_guarantee][succ_ranking->state] = true;
 							}
+							bool is_input	= false;
 							automaton_transition_copy(current_transition, strategy_transition);
 							strategy_transition->state_from	= strategy_maps[i][current_ranking->state];
 							strategy_transition->state_to	= strategy_maps[succ_guarantee][succ_ranking->state];
+							/*
 							strategy_transition->signals_size	= current_transition->signals_size;
 							strategy_transition->signals_count	= current_transition->signals_count;
-							for(m = 0; m < FIXED_SIGNALS_COUNT; m++)
+							for(m = 0; m < FIXED_SIGNALS_COUNT; m++){
 								strategy_transition->signals[m]		= current_transition->signals[m];
+							}
 							strategy_transition->other_signals	= current_transition->other_signals;
-							if(succ_ranking->value != RANKING_INFINITY){
+							*/
+							for(m = 0; m < current_transition->signals_count; m++){
+								automaton_signal_event * evt = &ctx->global_alphabet->list[strategy->local_alphabet[GET_TRANSITION_SIGNAL(current_transition,m)]];
+								if(evt->type == INPUT_SIG){
+									is_input = true;
+									break;
+								}
+							}
+							if(succ_ranking->value != RANKING_INFINITY && !(!is_controllable && !is_input)){
 #if DEBUG_STRATEGY_BUILD
 								printf("(g:%d)[ADD] strategy transition: ", i);
 								automaton_transition_print(strategy_transition, strategy->context, "", "\n");

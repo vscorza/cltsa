@@ -2649,6 +2649,11 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 			guarantees		= automaton_set_syntax_evaluate(tables, gr1_game->guarantees, &guarantees_count, set_name);
 			winning_region_automaton	= automaton_get_gr1_strategy(game_automaton, assumptions, assumptions_count
 					, guarantees, guarantees_count);
+			main_index = automaton_parsing_tables_add_entry(tables, COMPOSITION_ENTRY_AUT, gr1_game->name, winning_region_automaton);
+			tables->composition_entries[main_index]->solved	= true;
+			tables->composition_entries[main_index]->valuation_count			= 1;
+			tables->composition_entries[main_index]->valuation.automaton_value	= winning_region_automaton;
+
 			if(print_fsp){
 				char buf[150];
 				char cmd[350];
@@ -2678,15 +2683,17 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 				ctx->global_fluents_count			= old_fluents_count;
 				ctx->global_fluents					= old_fluents;
 			}
-			if(winning_region_automaton != NULL)
-				automaton_automaton_destroy(winning_region_automaton);
+//			if(winning_region_automaton != NULL)
+//				automaton_automaton_destroy(winning_region_automaton);
 			for(j = 0; j < assumptions_count; j++)
 				free(assumptions[j]);
 			free(assumptions);
 			for(j = 0; j < guarantees_count; j++)
 				free(guarantees[j]);
 			free(guarantees);
+#if VERBOSE
 			printf(".");
+#endif
 			fflush(stdout);
 		}
 	}
