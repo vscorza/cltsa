@@ -3233,7 +3233,9 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 			}
 		}
 	}
+#if VERBOSE
 	printf("TOTAL Composition has [%09d] states and [%09d] transitions run for [%08f] KEY ACCESS.: [Misses:%li,hits:%li]\n", tree->max_value, composition->transitions_composite_count, (double)(clock() - begin) / CLOCKS_PER_SEC, found_misses, found_hits);
+#endif
 	/***********************
 	 * CLEANUP
 	 ***********************/

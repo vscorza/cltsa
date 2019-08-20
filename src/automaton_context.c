@@ -1759,7 +1759,9 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	/**
 	 * BUILD LOCAL ALPHABET
 	 */
+#if VERBOSE
 	printf("OBDD->Automaton\nBuilding Alphabets\n");
+#endif
 	for(i = 0; i < mgr->vars_dict->size; i++){
 		if((strcmp(mgr->vars_dict->entries[i].key, TRUE_VAR) == 0) || (strcmp(mgr->vars_dict->entries[i].key, FALSE_VAR) == 0))
 			continue;
@@ -1948,8 +1950,10 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	obdd* env_rho_composed				= NULL;
 	obdd* sys_rho_composed				= NULL;
 	obdd* env_sys_rho_composed			= NULL;
+#if VERBOSE
 	printf(ANSI_COLOR_RED);
 	printf("Composing env/sys theta functions\n");
+#endif
 	for(i = 0; i < env_theta_count; i++){
 		if(i == 0){ env_theta_composed	= env_theta_obdd[i];
 		}else{
@@ -1968,7 +1972,9 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 			if(i > 1)obdd_destroy(old_obdd);
 		}
 	}
+#if VERBOSE
 	printf("Composing env rho functions\n");
+#endif
 	for(i = 0; i < env_rho_count; i++){
 		if(i == 0){ env_rho_composed	= env_rho_obdd[i];
 		}else{
@@ -1977,10 +1983,14 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 			obdd_destroy(env_rho_obdd[i]);
 			if(i > 1)obdd_destroy(old_obdd);
 		}
+#if VERBOSE
 		printf("[%d]", env_rho_composed->mgr->nodes_pool->composite_count);
 		fflush(stdout);
+#endif
 	}
+#if VERBOSE
 	printf("\nComposing sys rho functions\n");
+#endif
 	for(i = 0; i < sys_rho_count; i++){
 		if(i == 0){ sys_rho_composed	= sys_rho_obdd[i];
 		}else{
@@ -1989,13 +1999,16 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 			obdd_destroy(sys_rho_obdd[i]);
 			if(i > 1)obdd_destroy(old_obdd);
 		}
+#if VERBOSE
 		printf("[%d]", sys_rho_composed->mgr->nodes_pool->composite_count);
 		fflush(stdout);
+#endif
 	}
+#if VERBOSE
 	printf("\n");
 	fflush(stdout);
 	printf(ANSI_COLOR_RESET);
-
+#endif
 	env_sys_theta_composed				= obdd_apply_and(env_theta_composed, sys_theta_composed);
 	env_sys_rho_composed				= obdd_apply_and(env_rho_composed, sys_rho_composed);
 
@@ -2043,8 +2056,9 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	obdd_node** last_nodes		= malloc(sizeof(obdd_node*) * variables_count);
 	//keeps a stack of predecessors as track of the path taken
 	int32_t* last_succ_index	= calloc(sizeof(int32_t), variables_count);
-
+#if VERBOSE
 	printf(ANSI_COLOR_RED "Building theta valuations\n" ANSI_COLOR_RESET);
+#endif
 	obdd_get_valuations(mgr, env_theta_composed, &valuations, &valuations_size, &current_valuations_count, x_alphabet, x_count
 			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
 #if DEBUG_LTL_AUTOMATON
@@ -2134,7 +2148,9 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 			obdd_destroy(obdd_current_state);
 		}while(theta_env_bucket_list->composite_count > 0);
 	}
+#if VERBOSE
 	printf(ANSI_COLOR_RED "Building rho valuations\n" ANSI_COLOR_RESET);
+#endif
 #if DEBUG_LTL_AUTOMATON
 	printf("Rho relation building\n");
 #endif
@@ -2364,9 +2380,9 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 automaton_automata_context* automaton_automata_context_create_from_syntax(automaton_program_syntax* program, char* ctx_name, bool print_fsp){
 	automaton_parsing_tables* tables	= automaton_parsing_tables_create();
 	automaton_automata_context* ctx		= malloc(sizeof(automaton_automata_context));
-
+#if VERBOSE
 	printf("Creating automaton %s\n", ctx_name);
-
+#endif
 	//build look up tables
 	uint32_t i;
 	int32_t j;
@@ -2503,15 +2519,18 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 	automaton_automata_context_initialize(ctx, ctx_name, global_alphabet, fluent_count, fluents, liveness_formulas_count, liveness_formulas, liveness_formulas_names);
 	free(fluents);
 	automaton_alphabet_destroy(global_alphabet);
-
+#if VERBOSE
 	printf("Building LTL automata\n");
 	fflush(stdout);
+#endif
 	//build automata from ltl
 	automaton_automaton* obdd_automaton;
 	for(i = 0; i < ltl_automata_count; i++){
 		obdd_automaton	= automaton_build_automaton_from_obdd(ctx, ltl_automata_names[i], env_theta_obdd[i], env_theta_count[i], sys_theta_obdd[i], sys_theta_count[i],
 				env_rho_obdd[i], env_rho_count[i], sys_rho_obdd[i], sys_rho_count[i], tables);
+#if VERBOSE
 		printf(".");
+#endif
 #if DEBUG_OBDD_DEADLOCK
 		automaton_automaton_print_traces_to_deadlock(obdd_automaton, DEADLOCK_TRACE_COUNT);
 #endif
@@ -2529,9 +2548,10 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 	free(sys_theta_count);		free(env_theta_count);
 	free(sys_rho_count);		free(env_rho_count);
 	free(ltl_automata_names);
-
+#if VERBOSE
 	printf("\nBuilding LTS automata\n");
 	fflush(stdout);
+#endif
 	//build automata
 	bool pending_statements	= true;
 	while(pending_statements){
@@ -2539,8 +2559,10 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 		for(i = 0; i < program->count; i++){
 			if(program->statements[i]->type == COMPOSITION_AUT){
 				pending_statements = automaton_statement_syntax_to_automaton(ctx, program->statements[i]->composition_def, tables) || pending_statements;
+#if VERBOSE
 				printf(".");
 				fflush(stdout);
+#endif
 			}
 		}
 	}
@@ -2551,10 +2573,10 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 	char **assumptions, **guarantees;
 	char set_name[255];
 	int32_t assumptions_count = 0, guarantees_count = 0;
-
+#if VERBOSE
 	printf("\nSolving GR1\n");
 	fflush(stdout);
-
+#endif
 	for(i = 0; i < program->count; i++){
 		if(program->statements[i]->type == GR_1_AUT){
 			gr1_game		= program->statements[i]->gr1_game_def;
@@ -2669,7 +2691,9 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 		}
 	}
 	//run equivalence checks
+#if VERBOSE
 	printf("==========\n TESTS \n==========\n");
+#endif
 	automaton_equivalence_check_syntax* equiv_check; int32_t left_index, right_index; automaton_automaton *left_automaton, * right_automaton;
 	for(i = 0; i < program->count; i++){
 		if(program->statements[i]->type == EQUIV_CHECK_AUT){
@@ -2688,8 +2712,18 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 				continue;
 			}
 			bool are_equivalent	= automaton_automata_are_equivalent(left_automaton, right_automaton);
-			printf("check %s (%s == %s) -> %s\n", equiv_check->name, equiv_check->left, equiv_check->right
+			printf("check %s (%s == %s) -> %s", equiv_check->name, equiv_check->left, equiv_check->right
 					, are_equivalent? "true" : "false");
+			if((strstr(equiv_check->name, "FATAL") != NULL && !are_equivalent)
+					|| (strstr(equiv_check->name, "FAIL") != NULL && are_equivalent)){
+				printf(ANSI_COLOR_RED);
+				printf("\tFAILED\n");
+				printf(ANSI_COLOR_RESET);
+			}else{
+				printf(ANSI_COLOR_GREEN);
+				printf("\tTEST PASSED\n");
+				printf(ANSI_COLOR_RESET);
+			}
 			tables->equivalence_entries[main_index]->valuation.bool_value = are_equivalent;
 			fflush(stdout);
 		}
@@ -2718,9 +2752,9 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 	automaton_parsing_tables_destroy(tables);
 
 	free(parser_primed_variables);
-
+#if VERBOSE
 	printf("\nDONE\n");
-
+#endif
 	return ctx;
 }
 

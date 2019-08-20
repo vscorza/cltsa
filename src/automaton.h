@@ -17,6 +17,8 @@
 #include "obdd.h"
 #include "y.tab.h"
 
+#define VERBOSE 0
+
 #define COMPOSE_SYNCH	1
 #define PARTIAL_SHARE	2
 #define FIXED_SIGNALS_COUNT	25

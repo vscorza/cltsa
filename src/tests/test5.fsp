@@ -23,6 +23,6 @@ D_p_2 = (input_1 -> D_p_3 | input_2 -> D_p_3 | input_3 -> D_p_3 | input_4 -> D_p
 D_p_3 = (out -> D_p_1).
 
 // tests
-equals Check_Simple_Range(A, A_p).
-equals Check_Sequential_Range(B, B_p).
-equals Check_Composition_Range(D, D_p).
+equals FATAL_Simple_Range(A, A_p).
+equals FATAL_Sequential_Range(B, B_p).
+equals FATAL_Composition_Range(D, D_p).
