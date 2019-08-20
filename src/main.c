@@ -891,8 +891,10 @@ int main (void){
 
 	//DRY TESTS
 	//run_fsp_tests(18);
-	run_parse_test("tests/test5.fsp",  "test5");
+	run_parse_test("tests/test5.fsp",  "range tests");
 	run_parse_test("tests/test40.fsp", "compositions type");
+	run_parse_test("tests/test23.fsp", "biscotti");
+	run_parse_test("tests/test30.fsp", "lift 2 floors");//lift 2 floors
 	//run_parse_test("tests/test18.fsp",  "test18");
 
 	//run_parse_test("tests/test26.fsp", "test26");
@@ -903,9 +905,9 @@ int main (void){
 
 	//SHOWCASE
 	//run_parse_test("tests/test21.fsp", "test21");
-	//run_parse_test("tests/test23.fsp", "biscotti");
+
 		//run_parse_test("tests/test28.fsp", "mixed model 3 signals 2 labels");//mixed model 3 signals 2 labels
-	//run_parse_test("tests/test30.fsp", "lift 2 floors");//lift 2 floors
+
 	//run_parse_test("tests/test29.fsp", "lift 3 floors");//lift 3 floors
 	//run_parse_test("tests/test36.fsp", "lift 5 floors");//lift 5 floors
 

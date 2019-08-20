@@ -246,6 +246,7 @@ automaton_set_syntax* automaton_set_syntax_create_from_label(automaton_label_syn
 automaton_set_syntax* automaton_set_syntax_create_from_ident(char* ident);
 automaton_set_syntax* automaton_set_syntax_concat_labels(automaton_set_syntax* set, automaton_label_syntax* label);
 automaton_label_syntax* automaton_label_syntax_create(bool is_set, automaton_set_syntax* set, char* string_terminal, automaton_indexes_syntax* indexes);
+automaton_label_syntax* automaton_label_syntax_create_empty();
 automaton_set_def_syntax* automaton_set_def_syntax_create(automaton_set_syntax* set, char* name);
 automaton_fluent_syntax* automaton_fluent_syntax_create(char* name, automaton_set_syntax* initiating_set, automaton_set_syntax* finishing_set, uint32_t initial_value);
 automaton_index_syntax* automaton_index_syntax_create(bool is_expr, bool is_range, automaton_expression_syntax* expr, char* lower_ident

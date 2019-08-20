@@ -408,6 +408,7 @@ char** automaton_set_syntax_evaluate(automaton_parsing_tables* tables, automaton
 	index						= automaton_parsing_tables_get_entry_index(tables, SET_ENTRY_AUT, set_def_key);
 	for(i = 0; i < set->count; i++)for(j = 0; j < set->labels_count[i]; j++){
 		automaton_label_syntax* label_syntax	= set->labels[i][j];
+		if(!(label_syntax->is_set) && label_syntax->string_terminal == NULL)continue;//empty label (TAU)
 		is_set		= set->labels[i][j]->is_set;
 		indexes		= set->labels[i][j]->indexes;
 		if(!is_set){//todo:solve indexes
@@ -700,6 +701,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 					for(l = 0; l < (int32_t)trace_label->count; l++){
 						trace_label_atom	= trace_label->atoms[l];
 						atom_label			= trace_label_atom->label;
+						if(!atom_label->is_set && atom_label->string_terminal == NULL)continue; //tau
 						if(!atom_label->is_set){
 
 							if(atom_label->indexes != NULL){
@@ -1099,6 +1101,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 
 								trace_label_atom	= trace_label->atoms[l];
 								atom_label			= trace_label_atom->label;
+								if(!atom_label->is_set && atom_label->string_terminal == NULL) continue;//tau
 								if(!atom_label->is_set){
 									//process set ( Alphabet -> ...)
 									if(atom_label->indexes != NULL){
@@ -2168,10 +2171,14 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	 * once rho_env_bucket_list is empty we start again with rho_bucket_list until both lists are empty
 	 */
 #define CNTR_LIMIT 200
+#if VERBOSE
 	printf("[#obdd nodes:val.size:val.count:bucket_count]\n");
+#endif
 	uint32_t rho_counter = 0, skipped = 0, evaluated = 0;
 	do{
+#if VERBOSE
 		printf("\nsys.");
+#endif
 		if(rho_sys_bucket_list->composite_count > 0){
 			do{
 				rho_counter++;
@@ -2243,7 +2250,9 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 				obdd_destroy(obdd_current_state);
 			}while(rho_sys_bucket_list->composite_count > 0);
 		}
+#if VERBOSE
 		printf("\nenv.");
+#endif
 		if(rho_env_bucket_list->composite_count > 0){
 			do{
 				rho_counter++;
@@ -2327,9 +2336,9 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	free(last_nodes);
 	free(dont_care_list);
 	free(partial_valuation);
-
+#if VERBOSE
 	printf("\nOBDD->Automaton done\n");
-
+#endif
 	int32_t main_index					= automaton_parsing_tables_add_entry(tables, COMPOSITION_ENTRY_AUT, name, ltl_automaton);
 	tables->composition_entries[main_index]->solved	= true;
 	tables->composition_entries[main_index]->valuation_count			= 1;
@@ -2348,25 +2357,10 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	automaton_concrete_bucket_destroy(rho_env_bucket_list);automaton_concrete_bucket_destroy(rho_sys_bucket_list);
 	automaton_concrete_bucket_destroy(rho_env_processed_bucket_list);automaton_concrete_bucket_destroy(rho_sys_processed_bucket_list);
 	free(x_alphabet); free(y_alphabet); free(x_p_alphabet); free(y_p_alphabet);free(x_y_alphabet); free(x_y_x_p_alphabet); free(x_p_y_p_alphabet); free(signals_alphabet);
-
-	printf("freeing alphabets\n");fflush(stdout);
-
 	free(not_x_p_alphabet); free(not_y_p_alphabet);
-
-	printf("freeing alphabets\n");fflush(stdout);
-
 	free(x_alphabet_o); free(y_alphabet_o); free(x_p_alphabet_o); free(y_p_alphabet_o);free(x_y_alphabet_o); free(x_y_x_p_alphabet_o); free(x_p_y_p_alphabet_o); free(signals_alphabet_o);
-
-	printf("freeing alphabets\n");fflush(stdout);
-
 	free(valuations);
-
-	printf("freeing alphabets\n");fflush(stdout);
-
 	free(local_alphabet);
-
-	printf("destroying state maps\n"); fflush(stdout);
-
 	obdd_state_tree_destroy(state_map);
 	obdd_state_tree_destroy(obdd_state_map);
 	//TODO:remove this

@@ -22,3 +22,36 @@ ltl fluent Goal_Serve_Request_2			= ((b2->f2)).
 |f| ENV =(GAME_LTL).
 |gr1| <{Ass}><{Goal_Serve_Request_1,Goal_Serve_Request_2}> STRAT = ENV.
 
+GAME_FSP = S_0,
+S_0 = (<>-> S_1),
+S_1 = (f1.on-> S_2),
+S_2 = (<b1.on,b2.on>-> S_6|b2.on-> S_5|b1.on-> S_4|<>-> S_3),
+S_3 = (<>-> S_2),
+S_4 = (<>-> S_7),
+S_5 = (<>-> S_23),
+S_6 = (<>-> S_19),
+S_7 = (<b1.off,b2.on>-> S_9|b1.off-> S_8),
+S_8 = (<>-> S_2|<f1.off,f2.on>-> S_10),
+S_9 = (<>-> S_23|<f1.off,f2.on>-> S_22),
+S_10 = (<b1.on,b2.on>-> S_14|b2.on-> S_13|b1.on-> S_12|<>-> S_11),
+S_11 = (<f1.on,f2.off>-> S_2|<>-> S_10),
+S_12 = (<f1.on,f2.off>-> S_7|<>-> S_15),
+S_13 = (<f1.on,f2.off>-> S_23|<>-> S_22),
+S_14 = (<f1.on,f2.off>-> S_19|<>-> S_18),
+S_15 = (b2.on-> S_17|<>-> S_16),
+S_16 = (<f1.on,f2.off>-> S_7|<>-> S_15),
+S_17 = (<f1.on,f2.off>-> S_19|<>-> S_18),
+S_18 = (b2.off-> S_20),
+S_19 = (b1.off-> S_21),
+S_20 = (<f1.on,f2.off>-> S_7|<>-> S_15),
+S_21 = (<>-> S_23|<f1.off,f2.on>-> S_22),
+S_22 = (<b1.on,b2.off>-> S_25|b2.off-> S_24),
+S_23 = (b1.on-> S_27|<>-> S_26),
+S_24 = (<f1.on,f2.off>-> S_2|<>-> S_10),
+S_25 = (<f1.on,f2.off>-> S_7|<>-> S_15),
+S_26 = (<>-> S_23|<f1.off,f2.on>-> S_22),
+S_27 = (<>-> S_19|<f1.off,f2.on>-> S_18).
+
+//TESTS
+equals FATAL_Game_Lift_2_FSP_VS_LTL(GAME_LTL, GAME_FSP).
+

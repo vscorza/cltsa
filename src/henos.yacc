@@ -104,6 +104,7 @@ labels:
 	;
 concurrentLabel:
 	'<' concurrentLabels '>' indexes		{$$ = automaton_label_syntax_create(true, $2, NULL, $4);}
+	|'<' '>'										{$$ = automaton_label_syntax_create_empty();}
 	;
 concurrentLabels:
 	concurrentLabels ',' t_IDENT			{$$ = automaton_set_syntax_concat_concurrent($1, $3);free($3);}

@@ -87,6 +87,13 @@ automaton_label_syntax* automaton_label_syntax_create(bool is_set, automaton_set
 	}
 	return label;
 }
+automaton_label_syntax* automaton_label_syntax_create_empty(){
+	automaton_label_syntax* label	= malloc(sizeof(automaton_label_syntax));
+	label->is_set	= false;
+	label->indexes	= NULL;
+	label->string_terminal = NULL;
+	return label;
+}
 automaton_set_syntax* automaton_set_syntax_create_from_label(automaton_label_syntax* label){
 	automaton_set_syntax* set	= malloc(sizeof(automaton_set_syntax));
 	set->is_ident		= false;
