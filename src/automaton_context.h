@@ -93,6 +93,7 @@ automaton_indexes_valuation* automaton_indexes_valuation_create_from_indexes(aut
 void automaton_indexes_valuation_increase(automaton_indexes_valuation* valuation);
 bool automaton_indexes_valuation_has_next(automaton_indexes_valuation* valuation);
 void automaton_indexes_valuation_set_label(automaton_indexes_valuation* valuation, char* label, char* target);
+void automaton_indexes_valuation_set_atom_label(automaton_parsing_tables* tables, automaton_indexes_valuation* valuation, automaton_indexes_syntax* atom_indexes, char* label, char* target);
 void automaton_indexes_valuation_set_to_label(automaton_parsing_tables* tables,automaton_indexes_valuation* valuation, automaton_indexes_syntax* from_indexes, automaton_indexes_syntax* to_indexes, char* label, char* target);
 void automaton_statement_syntax_to_table(automaton_statement_syntax* statement, automaton_parsing_tables* tables);
 int32_t automaton_expression_syntax_evaluate(automaton_parsing_tables* tables, automaton_expression_syntax* expr, automaton_indexes_valuation* indexes_valuation);

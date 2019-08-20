@@ -41,6 +41,7 @@ void automaton_parsing_tables_destroy(automaton_parsing_tables* tables){
 	automaton_parsing_tables_destroy_entry(tables->const_entries, tables->const_count);
 	automaton_parsing_tables_destroy_entry(tables->automaton_entries, tables->automaton_count);
 	automaton_parsing_tables_destroy_entry(tables->composition_entries, tables->composition_count);
+	automaton_parsing_tables_destroy_entry(tables->equivalence_entries, tables->equivalence_count);
 	free(tables);
 }
 automaton_parsing_table_entry* automaton_parsing_table_entry_create(automaton_parsing_table_entry_type type, char* key, void* value, int32_t index){
@@ -1163,6 +1164,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 													next_from_state			= new_next_from;
 												}
 												next_from_state[next_from_state_count++]	= to_state;
+												to_state	= (uint32_t)label_position;
 												automaton_transition_add_signal_event(current_automaton_transition[automaton_transition_count - 1], ctx, &(ctx->global_alphabet->list[element_global_index]));
 												aut_context_log(".%s", ctx->global_alphabet->list[element_global_index].name);
 												//automaton_automaton_add_transition(automaton, automaton_transition[automaton_transition_count - 1]);

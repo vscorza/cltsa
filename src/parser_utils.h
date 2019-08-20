@@ -232,6 +232,7 @@ void automaton_set_syntax_destroy(automaton_set_syntax* set);
 void automaton_set_def_syntax_destroy(automaton_set_def_syntax* set_def);
 void automaton_expression_syntax_destroy(automaton_expression_syntax* expr);
 void automaton_gr1_game_syntax_destroy(automaton_gr1_game_syntax* gr1_game);
+void automaton_equivalence_check_syntax_destroy(automaton_equivalence_check_syntax* check);
 void ltl_rule_syntax_destroy(ltl_rule_syntax* ltl_rule);
 void ltl_fluent_syntax_destroy(ltl_fluent_syntax* ltl_fluent);
 automaton_expression_syntax* automaton_expression_syntax_create(automaton_expression_type_syntax type, automaton_expression_syntax* first

@@ -418,6 +418,7 @@ void automaton_statement_syntax_destroy(automaton_statement_syntax* statement){
 	case GR_1_AUT: automaton_gr1_game_syntax_destroy(statement->gr1_game_def);break;
 	case LTL_RULE_AUT: ltl_rule_syntax_destroy(statement->ltl_rule_def);break;
 	case LTL_FLUENT_AUT: ltl_fluent_syntax_destroy(statement->ltl_fluent_def); break;
+	case EQUIV_CHECK_AUT: automaton_equivalence_check_syntax_destroy(statement->equivalence_check);break;
 	case GOAL_AUT: break;
 	}
 	free(statement);
@@ -607,6 +608,13 @@ void parser_add_primed_variables(uint32_t primed_variable){
 	}
 	parser_primed_variables[last_less_than + 1]	= primed_variable;
 	parser_primed_variables_count++;
+}
+
+void automaton_equivalence_check_syntax_destroy(automaton_equivalence_check_syntax* check){
+	if(check->name != NULL)free(check->name);
+	if(check->left != NULL)free(check->left);
+	if(check->right != NULL)free(check->right);
+	free(check);
 }
 
 void ltl_rule_syntax_destroy(ltl_rule_syntax* ltl_rule){
