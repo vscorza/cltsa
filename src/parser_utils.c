@@ -25,7 +25,7 @@ automaton_set_syntax* automaton_set_syntax_create(bool is_ident, uint32_t count,
 		for(i = 0; i < count; i++) set->labels_count[i]	= labels_count[i];
 		set->labels			= malloc(sizeof(automaton_label_syntax**) * count);
 		for(i = 0; i < count; i++){
-			set->labels[i]	= malloc(sizeof(automaton_label_syntax) * labels_count[i]);
+			set->labels[i]	= calloc(labels_count[i], sizeof(automaton_label_syntax));
 			for(j = 0; j < labels_count[i]; j++){
 				(set->labels[i])[j]	= labels[i][j];
 			}
@@ -92,6 +92,7 @@ automaton_label_syntax* automaton_label_syntax_create_empty(){
 	label->is_set	= false;
 	label->indexes	= NULL;
 	label->string_terminal = NULL;
+	label->set		= NULL;
 	return label;
 }
 automaton_set_syntax* automaton_set_syntax_create_from_label(automaton_label_syntax* label){
@@ -507,8 +508,10 @@ void automaton_trace_label_syntax_destroy(automaton_trace_label_syntax* trace_la
 	free(trace_label);
 }
 void automaton_trace_label_atom_syntax_destroy(automaton_trace_label_atom_syntax* trace_label_atom){
+	if(trace_label_atom->label != NULL || trace_label_atom->indexes != NULL){
 	if(trace_label_atom->label != NULL)automaton_label_syntax_destroy(trace_label_atom->label);
 	if(trace_label_atom->indexes != NULL)automaton_indexes_syntax_destroy(trace_label_atom->indexes);
+	}
 	free(trace_label_atom);
 }
 void automaton_label_syntax_destroy(automaton_label_syntax* label){
@@ -536,7 +539,10 @@ void automaton_fluent_syntax_destroy(automaton_fluent_syntax* fluent){
 	free(fluent);
 }
 void automaton_set_syntax_destroy(automaton_set_syntax* set){
-	if(set->string_terminal != NULL) free(set->string_terminal);
+	if(set->string_terminal != NULL){
+		free(set->string_terminal);
+		set->string_terminal = NULL;
+	}
 	uint32_t i,j;
 	for(i = 0; i < set->count; i++){
 		for(j = 0; j < set->labels_count[i]; j++)automaton_label_syntax_destroy(set->labels[i][j]);
