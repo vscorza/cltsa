@@ -3282,9 +3282,9 @@ automaton_automaton* automaton_automaton_minimize(automaton_automaton* current_a
 bool automaton_automata_are_equivalent(automaton_automaton* left_automaton, automaton_automaton* right_automaton){
 	if(left_automaton->transitions_count != right_automaton->transitions_count)
 		return false;
-	bool* processed	= calloc(left_automaton->transitions_count, sizeof(bool));
-	uint32_t* left_frontier		=  calloc(left_automaton->transitions_count, sizeof(uint32_t));
-	uint32_t* right_frontier	=  calloc(left_automaton->transitions_count, sizeof(uint32_t));
+	bool* processed	= calloc(left_automaton->transitions_count * 2, sizeof(bool));
+	uint32_t* left_frontier		=  calloc(left_automaton->transitions_count * 2, sizeof(uint32_t));
+	uint32_t* right_frontier	=  calloc(right_automaton->transitions_count * 2, sizeof(uint32_t));
 	uint32_t frontier_count	= 0;
 	left_frontier[0]	= left_automaton->initial_states[0];
 	right_frontier[0]	= right_automaton->initial_states[0];

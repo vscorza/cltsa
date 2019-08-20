@@ -931,7 +931,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 		automaton_transition** current_automaton_transition	= malloc(sizeof(automaton_transition*) * automaton_transition_size);
 		uint32_t first_state;
 		bool first_state_set	= false;
-		uint32_t added_state	= composition_syntax->count + 1;
+		uint32_t added_state	= composition_syntax->count;
 		char label_indexes[255];
 		label_indexes[0] = '\0';
 		bool first_index_set	= false;
@@ -1140,7 +1140,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 												}
 												aut_context_log("\n");
 #endif
-												to_state	= (uint32_t)label_position;
+												//to_state	= (uint32_t)label_position;
 												if(automaton_transition_count >= (automaton_transition_size - 1)){
 													uint32_t new_size	= automaton_transition_size * LIST_INCREASE_FACTOR;
 													automaton_transition** new_transitions	= malloc(sizeof(automaton_transition*) * new_size);
@@ -1163,8 +1163,6 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 													next_from_state_size	= new_size;
 													next_from_state			= new_next_from;
 												}
-												next_from_state[next_from_state_count++]	= to_state;
-												to_state	= (uint32_t)label_position;
 												automaton_transition_add_signal_event(current_automaton_transition[automaton_transition_count - 1], ctx, &(ctx->global_alphabet->list[element_global_index]));
 												aut_context_log(".%s", ctx->global_alphabet->list[element_global_index].name);
 												//automaton_automaton_add_transition(automaton, automaton_transition[automaton_transition_count - 1]);
@@ -1177,6 +1175,8 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 												exit(-1);
 											}
 										}
+										next_from_state[next_from_state_count++]	= to_state;
+										to_state	= (uint32_t)label_position;
 									}else{
 										if(!first_index_set){
 											automaton_transition_destroy(current_automaton_transition[--automaton_transition_count], true);
@@ -2669,6 +2669,7 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 		}
 	}
 	//run equivalence checks
+	printf("==========\n TESTS \n==========\n");
 	automaton_equivalence_check_syntax* equiv_check; int32_t left_index, right_index; automaton_automaton *left_automaton, * right_automaton;
 	for(i = 0; i < program->count; i++){
 		if(program->statements[i]->type == EQUIV_CHECK_AUT){
@@ -2690,7 +2691,6 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 			printf("check %s (%s == %s) -> %s\n", equiv_check->name, equiv_check->left, equiv_check->right
 					, are_equivalent? "true" : "false");
 			tables->equivalence_entries[main_index]->valuation.bool_value = are_equivalent;
-			printf(".");
 			fflush(stdout);
 		}
 	}
