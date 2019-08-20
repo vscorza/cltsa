@@ -22,6 +22,8 @@ automaton_parsing_tables* automaton_parsing_tables_create(){
 	tables->automaton_entries	= NULL;
 	tables->composition_count	= 0;
 	tables->composition_entries	= NULL;
+	tables->equivalence_count	= 0;
+	tables->equivalence_entries	= NULL;
 	return tables;
 }
 void automaton_parsing_tables_destroy_entry(automaton_parsing_table_entry** entries, uint32_t count){
@@ -185,6 +187,12 @@ int32_t automaton_parsing_tables_get_entry_index(automaton_parsing_tables* table
 				return i;
 		}
 		break;
+	case EQUIVALENCE_CHECK_ENTRY_AUT:
+		for(i = 0; i < (int32_t)tables->equivalence_count; i++){
+			if(strcmp(tables->equivalence_entries[i]->key, key) == 0)
+				return i;
+		}
+		break;
 	}
 	return current_index;
 }
@@ -231,6 +239,11 @@ int32_t automaton_parsing_tables_add_entry(automaton_parsing_tables* tables, aut
 					entry			= automaton_parsing_table_entry_create(type, key, value, current_index);
 					aut_add_ptr_list((void***)&(tables->composition_entries), (void*)entry, &(tables->composition_count));
 					break;
+	case EQUIVALENCE_CHECK_ENTRY_AUT:
+					current_index	= tables->equivalence_count;
+					entry			= automaton_parsing_table_entry_create(type, key, value, current_index);
+					aut_add_ptr_list((void***)&(tables->equivalence_entries), (void*)entry, &(tables->equivalence_count));
+					break;
 	}
 	return current_index;
 }
@@ -240,6 +253,7 @@ void automaton_statement_syntax_to_table(automaton_statement_syntax* statement, 
 	automaton_fluent_syntax* fluent_def;
 	automaton_set_def_syntax* set_def;
 	automaton_composition_syntax* composition_def;
+	automaton_equivalence_check_syntax* equivalence_def;
 	switch(statement->type){
 	case CONST_AUT:
 		 expr	= statement->const_def;
@@ -267,6 +281,12 @@ void automaton_statement_syntax_to_table(automaton_statement_syntax* statement, 
 		composition_def	= statement->composition_def;
 		if(composition_def->name != NULL){
 			automaton_parsing_tables_add_entry(tables, COMPOSITION_ENTRY_AUT, composition_def->name, (void*)composition_def);
+		}
+		break;
+	case EQUIV_CHECK_AUT:
+		equivalence_def	= statement->equivalence_check;
+		if(equivalence_def->name != NULL){
+			automaton_parsing_tables_add_entry(tables, EQUIVALENCE_CHECK_ENTRY_AUT, equivalence_def->name, (void*)equivalence_def);
 		}
 		break;
 	default: break;
@@ -1401,6 +1421,8 @@ void automaton_indexes_syntax_eval_strings(automaton_parsing_tables* tables, aut
 	uint32_t total_combinations = 1;
 
 	char buffer[INDEX_BUF_SIZE], buffer2[INDEX_BUF_SIZE];
+
+	for(i = 0; i < INDEX_BUF_SIZE; i++){buffer[i] = 0; buffer2[i] = 0;}
 
 	char** ret_value			= NULL;
 	int32_t inner_count			= 0;
@@ -2644,7 +2666,32 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 			fflush(stdout);
 		}
 	}
-
+	//run equivalence checks
+	automaton_equivalence_check_syntax* equiv_check; int32_t left_index, right_index; automaton_automaton *left_automaton, * right_automaton;
+	for(i = 0; i < program->count; i++){
+		if(program->statements[i]->type == EQUIV_CHECK_AUT){
+			equiv_check		= program->statements[i]->equivalence_check;
+			left_index		= automaton_parsing_tables_get_entry_index(tables, COMPOSITION_ENTRY_AUT, equiv_check->left);
+			right_index		= automaton_parsing_tables_get_entry_index(tables, COMPOSITION_ENTRY_AUT, equiv_check->right);
+			if(left_index < 0 || right_index < 0){
+				printf("Incorrect components for check %s (%s == %s)\n", equiv_check->name, equiv_check->left, equiv_check->right);
+				continue;
+			}
+			left_automaton	= tables->composition_entries[left_index]->valuation.automaton_value;
+			right_automaton	= tables->composition_entries[right_index]->valuation.automaton_value;
+			main_index		= automaton_parsing_tables_get_entry_index(tables, EQUIVALENCE_CHECK_ENTRY_AUT, equiv_check->name);
+			if(main_index < 0){
+				printf("Incorrect name for check %s (%s == %s)\n", equiv_check->name, equiv_check->left, equiv_check->right);
+				continue;
+			}
+			bool are_equivalent	= automaton_automata_are_equivalent(left_automaton, right_automaton);
+			printf("check %s (%s == %s) -> %s\n", equiv_check->name, equiv_check->left, equiv_check->right
+					, are_equivalent? "true" : "false");
+			tables->equivalence_entries[main_index]->valuation.bool_value = are_equivalent;
+			printf(".");
+			fflush(stdout);
+		}
+	}
 	if(print_fsp){
 		char buf[150];
 		char cmd[350];

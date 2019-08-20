@@ -331,6 +331,13 @@ automaton_components_syntax* automaton_components_syntax_add_component(automaton
 	components->components	= new_components;
 	return components;
 }
+automaton_equivalence_check_syntax* automaton_equality_check_syntax_create(char* name, char* left,char* right){
+	automaton_equivalence_check_syntax* check	= malloc(sizeof(automaton_equivalence_check_syntax));
+	aut_dupstr(&(check->name), name);
+	aut_dupstr(&(check->left), left);
+	aut_dupstr(&(check->right), right);
+	return check;
+}
 automaton_component_syntax* automaton_component_syntax_create(char* ident, char* prefix, automaton_index_syntax* index, automaton_indexes_syntax* indexes){
 	automaton_component_syntax* component	= malloc(sizeof(automaton_component_syntax));
 	aut_dupstr(&(component->ident), ident);
@@ -359,7 +366,8 @@ automaton_program_syntax* automaton_program_syntax_add_statement(automaton_progr
 }
 automaton_statement_syntax* automaton_statement_syntax_create(automaton_statement_type_syntax type, automaton_composition_syntax* composition_def,
 		automaton_expression_syntax* range_def, automaton_expression_syntax* const_def, automaton_fluent_syntax* fluent_def,
-		automaton_set_def_syntax* set_def, automaton_gr1_game_syntax* gr1_game_def, ltl_rule_syntax* ltl_rule, ltl_fluent_syntax* ltl_fluent){
+		automaton_set_def_syntax* set_def, automaton_gr1_game_syntax* gr1_game_def, ltl_rule_syntax* ltl_rule, ltl_fluent_syntax* ltl_fluent,
+		automaton_equivalence_check_syntax* equivalence_check){
 	automaton_statement_syntax* statement	= malloc(sizeof(automaton_statement_syntax));
 	statement->type	= type;
 	statement->composition_def	= composition_def;
@@ -370,6 +378,7 @@ automaton_statement_syntax* automaton_statement_syntax_create(automaton_statemen
 	statement->gr1_game_def		= gr1_game_def;
 	statement->ltl_rule_def		= ltl_rule;
 	statement->ltl_fluent_def	= ltl_fluent;
+	statement->equivalence_check	= equivalence_check;
 	return statement;
 }
 

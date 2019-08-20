@@ -1,4 +1,20 @@
+// range def.
 range R = 1..4
-set Global_Alphabet = {in[i:R],hidden,internal,out}
+
+// alphabets def.
+set Global_Alphabet = {input[i:R],hidden,internal,out}
 set Controllable_Alphabet = {out}
-A=(in[i:R]-><hidden,internal>->A).B=(hidden->out->B).||C=(A||B).
+
+// automata def.
+A=(input[i:R]-><hidden,internal>->A).
+B=(hidden->out->B).
+||C=(A||B).
+D=(input[i:R]->D).
+E=(input_1->E|input_2->E|input_3->E|input_4->E).
+F=(input_1->input_2->F).
+G=(input[i:R]->G_1),
+G_1=(<hidden,internal>->G).
+
+// tests
+equals Check_ranged_D_vs_E(D, E).
+equals Check_B_vs_E(B, E).

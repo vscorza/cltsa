@@ -2668,6 +2668,14 @@ bool automaton_automata_transition_mismatch(bool *pending_label, bool *current_l
 	}
 	return false;
 }
+/**
+ * Composes the automata according to their synchronization type.
+ * @param automata the array of pointers to automata to be composed
+ * @param synch_type the array of synchronization types to be applied sequentially and pairwise for the provided automata
+ * @param automata_count the number of automata to be composed
+ * @param is_game true if the resulting automaton will hold valuations on its states, false otherwise
+ * @return the CLTS resulting from applying the composition type according to synch_type definitions over automata
+ */
 automaton_automaton* automaton_automata_compose(automaton_automaton** automata, automaton_synchronization_type* synch_type, uint32_t automata_count, bool is_game){
 	clock_t begin = clock();
 	uint32_t transitions_added_count	= 0;
@@ -3260,7 +3268,77 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 
 bool automaton_automaton_check_invariant(automaton_automaton* current_automaton){ return false; }
 bool automaton_automaton_update_valuation(automaton_automaton* current_automaton){ return false; }
-void automaton_automaton_minimize(automaton_automaton* current_automaton){ return;}
+
+automaton_automaton* automaton_automaton_determinize(automaton_automaton* left_automaton){return NULL; }
+automaton_automaton* automaton_automaton_obs_minimize(automaton_automaton* left_automaton){ return NULL; }
+automaton_automaton* automaton_automaton_minimize(automaton_automaton* current_automaton){ return NULL; }
+
+/**
+ * Checks if two deterministic and minimized automata are equivalent.
+ * @param left_automaton the first deterministic minimal automaton to be check against equivalence
+ * @param right_automaton the second deterministic minimal automaton to be check against equivalence
+ * @return true if both automata are equivalent down to state renaming, false otherwise
+ */
+bool automaton_automata_are_equivalent(automaton_automaton* left_automaton, automaton_automaton* right_automaton){
+	if(left_automaton->transitions_count != right_automaton->transitions_count)
+		return false;
+	bool* processed	= calloc(left_automaton->transitions_count, sizeof(bool));
+	uint32_t* left_frontier		=  calloc(left_automaton->transitions_count, sizeof(uint32_t));
+	uint32_t* right_frontier	=  calloc(left_automaton->transitions_count, sizeof(uint32_t));
+	uint32_t frontier_count	= 0;
+	left_frontier[0]	= left_automaton->initial_states[0];
+	right_frontier[0]	= right_automaton->initial_states[0];
+	frontier_count++;
+
+	uint32_t left_state, right_state, i, j, k;
+	bool match_found = false, label_mismatch = false, transition_mismatch = false;
+
+	while(frontier_count > 0 && !transition_mismatch){
+		frontier_count--;
+		left_state	= left_frontier[frontier_count];
+		right_state	= right_frontier[frontier_count];
+
+		if(processed[left_state])
+			continue;
+		processed[left_state]	= true;
+
+		for(i = 0; i < left_automaton->out_degree[left_state]; i++){
+			match_found = false;
+			for(j = 0; j < right_automaton->out_degree[right_state]; j++){
+				if(left_automaton->transitions[left_state][i].signals_count
+						!= right_automaton->transitions[right_state][j].signals_count)
+					continue;
+				label_mismatch = false;
+				for(k = 0; k < left_automaton->transitions[left_state][i].signals_count; k++){
+					if(GET_TRANSITION_SIGNAL(&(left_automaton->transitions[left_state][i]), k)
+							!= GET_TRANSITION_SIGNAL(&(right_automaton->transitions[right_state][j]), k)){
+						label_mismatch = true;
+						break;
+					}
+				}
+				if(!label_mismatch){
+					match_found	= true;
+					if(!processed[left_automaton->transitions[left_state][i].state_to]){
+						left_frontier[frontier_count]	= left_automaton->transitions[left_state][i].state_to;
+						right_frontier[frontier_count]	= right_automaton->transitions[right_state][j].state_to;
+						frontier_count++;
+					}
+					break;
+				}
+			}
+			if(!match_found){
+				transition_mismatch = true;
+				break;
+			}
+		}
+	}
+
+	free(processed);
+	free(left_frontier);
+	free(right_frontier);
+	return !transition_mismatch;
+}
+
 bool automaton_automaton_check_reachability(automaton_automaton* current_automaton, automaton_valuation target){ return false; }
 bool automaton_automaton_check_liveness(automaton_automaton* current_automaton, automaton_valuation target){ return false; }
 /** COMPOSITE TREE **/

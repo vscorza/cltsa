@@ -334,7 +334,10 @@ uint32_t automaton_automata_get_composite_state(uint32_t states_count, uint32_t*
 automaton_automaton* automaton_automata_compose(automaton_automaton** automata, automaton_synchronization_type* synch_type, uint32_t automata_count, bool is_game);
 bool automaton_automaton_check_invariant(automaton_automaton* current_automaton);
 bool automaton_automaton_update_valuation(automaton_automaton* current_automaton);
-void automaton_automaton_minimize(automaton_automaton* current_automaton);
+automaton_automaton* automaton_automaton_determinize(automaton_automaton* left_automaton);
+automaton_automaton* automaton_automaton_obs_minimize(automaton_automaton* left_automaton);
+automaton_automaton* automaton_automaton_minimize(automaton_automaton* current_automaton);
+bool automaton_automata_are_equivalent(automaton_automaton* left_automaton, automaton_automaton* right_automaton);
 void automaton_automaton_print_traces_to_deadlock(automaton_automaton* automaton, uint32_t max_traces);
 uint32_t** automaton_automaton_traces_to_deadlock(automaton_automaton* automaton, uint32_t initial_state, uint32_t *count, uint32_t **sizes);
 bool automaton_automaton_check_reachability(automaton_automaton* current_automaton, automaton_valuation target);

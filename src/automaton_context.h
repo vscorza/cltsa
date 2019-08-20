@@ -41,7 +41,8 @@ typedef enum{
 	CONST_ENTRY_AUT,
 	AUTOMATON_ENTRY_AUT,
 	COMPOSITION_ENTRY_AUT,
-	LTL_RULE_ENTRY_AUT
+	LTL_RULE_ENTRY_AUT,
+	EQUIVALENCE_CHECK_ENTRY_AUT
 }automaton_parsing_table_entry_type;
 typedef struct automaton_parsing_table_entry_str{
 	automaton_parsing_table_entry_type type;
@@ -51,6 +52,7 @@ typedef struct automaton_parsing_table_entry_str{
 	bool solved;
 	int32_t valuation_count;
 	union{
+		bool bool_value;
 		char** labels_value;
 		int32_t int_value;
 		automaton_automaton* automaton_value;
@@ -73,6 +75,8 @@ typedef struct automaton_parsing_tables_str{
 	struct automaton_parsing_table_entry_str** automaton_entries;
 	uint32_t composition_count;
 	struct automaton_parsing_table_entry_str** composition_entries;
+	uint32_t equivalence_count;
+	struct automaton_parsing_table_entry_str** equivalence_entries;
 }automaton_parsing_tables;
 /****************
 ==== FUNCTIONS ====

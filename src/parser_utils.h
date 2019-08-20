@@ -67,7 +67,8 @@ typedef enum {
 	GR_1_AUT,
 	GOAL_AUT,
 	LTL_RULE_AUT,
-	LTL_FLUENT_AUT
+	LTL_FLUENT_AUT,
+	EQUIV_CHECK_AUT
 } automaton_statement_type_syntax;
 typedef enum {
 	ASYNCH_AUT,
@@ -170,6 +171,11 @@ typedef struct automaton_composition_syntax_str{
 	struct automaton_component_syntax_str** components;
 	bool is_game;
 }automaton_composition_syntax;
+typedef struct automaton_equivalence_check_syntax_str{
+	char* name;
+	char* left;
+	char* right;
+}automaton_equivalence_check_syntax;
 typedef struct automaton_gr1_game_syntax_str{
 	char* name;
 	struct automaton_set_syntax_str* assumptions;
@@ -186,6 +192,7 @@ typedef struct automaton_statement_syntax_str{
 	struct automaton_gr1_game_syntax_str* gr1_game_def;
 	struct ltl_rule_syntax_str* ltl_rule_def;
 	struct ltl_fluent_syntax_str* ltl_fluent_def;
+	struct automaton_equivalence_check_syntax_str* equivalence_check;
 }automaton_statement_syntax;
 typedef struct automaton_program_syntax_str{
 	uint32_t count;
@@ -259,6 +266,7 @@ automaton_state_syntax* automaton_state_syntax_create(bool is_ref, automaton_sta
 automaton_state_label_syntax* automaton_state_label_syntax_create(char* name, automaton_indexes_syntax* indexes);
 automaton_states_syntax* automaton_states_syntax_create(automaton_state_syntax* state);
 automaton_states_syntax* automaton_states_syntax_add_state(automaton_states_syntax* states, automaton_state_syntax* state);
+automaton_equivalence_check_syntax* automaton_equality_check_syntax_create(char* name, char* left,char* right);
 automaton_composition_syntax* automaton_composition_syntax_create_from_states(automaton_states_syntax* states);
 automaton_composition_syntax* automaton_composition_syntax_create_from_ref(char* name, automaton_components_syntax* components, bool is_game);
 automaton_gr1_game_syntax* automaton_gr1_game_syntax_create(char* name, char* composition_name, automaton_set_syntax* assumptions, automaton_set_syntax* goals);
@@ -269,7 +277,8 @@ automaton_program_syntax* automaton_program_syntax_create(automaton_statement_sy
 automaton_program_syntax* automaton_program_syntax_add_statement(automaton_program_syntax* program, automaton_statement_syntax* statement);
 automaton_statement_syntax* automaton_statement_syntax_create(automaton_statement_type_syntax type, automaton_composition_syntax* composition_def,
 		automaton_expression_syntax* range_def, automaton_expression_syntax* const_def, automaton_fluent_syntax* fluent_def,
-		automaton_set_def_syntax* set_def, automaton_gr1_game_syntax* gr1_game_def, ltl_rule_syntax* ltl_rule_def, ltl_fluent_syntax* ltl_fluent_def);
+		automaton_set_def_syntax* set_def, automaton_gr1_game_syntax* gr1_game_def, ltl_rule_syntax* ltl_rule_def, ltl_fluent_syntax* ltl_fluent_def,
+		automaton_equivalence_check_syntax* equivalence_check);
 bool automaton_syntax_is_reserved(char* token);
 ltl_rule_syntax* ltl_rule_syntax_create(bool is_theta, bool is_env, char* name, char* game_structure_name, obdd* obdd);
 ltl_fluent_syntax* automaton_ltl_fluent_syntax_create(char* name, obdd* obdd);

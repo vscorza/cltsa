@@ -35,15 +35,16 @@ automaton_program_syntax* parsed_program = NULL;
 	obdd* 							ltl_aut_expression;
 	ltl_rule_syntax*				ltl_rule;
 	ltl_fluent_syntax*				ltl_fluent;
+	automaton_equivalence_check_syntax*		equal_expression;
 	automaton_synchronization_type_syntax composition_type;
 };
-%token	t_INTEGER t_IDENT t_UPPER_IDENT t_STRING t_CONST t_RANGE t_SET t_FLUENT t_DOTS t_WHEN t_GAME_COMPOSE t_PARALLEL t_GR_1 t_INITIALLY t_LTL t_ENV t_SYS t_RHO t_THETA t_IN t_THEN t_IFF t_AND t_NEXT t_CONCURRENT t_SYNCH t_ORDER
+%token	t_INTEGER t_IDENT t_UPPER_IDENT t_STRING t_CONST t_RANGE t_SET t_FLUENT t_DOTS t_WHEN t_GAME_COMPOSE t_PARALLEL t_GR_1 t_INITIALLY t_LTL t_ENV t_SYS t_RHO t_THETA t_IN t_THEN t_IFF t_AND t_NEXT t_CONCURRENT t_SYNCH t_ORDER t_EQUALS
 %left '+' '-' ','
 %left '*' '/'
 
 
-%type<text> 				t_STRING t_IDENT t_UPPER_IDENT t_CONST t_RANGE t_SET t_FLUENT t_DOTS t_WHEN t_GAME_COMPOSE t_PARALLEL t_GR_1 t_INITIALLY t_LTL t_ENV t_SYS t_RHO t_THETA t_IN t_THEN t_IFF t_AND t_NEXT t_CONCURRENT t_SYNCH
-%type<integer>				t_INTEGER fluentInitialCondition
+%type<text> 				t_STRING t_IDENT t_UPPER_IDENT t_CONST t_RANGE t_SET t_FLUENT t_DOTS t_WHEN t_GAME_COMPOSE t_PARALLEL t_GR_1 t_INITIALLY t_LTL t_ENV t_SYS t_RHO t_THETA t_IN t_THEN t_IFF t_AND t_NEXT t_CONCURRENT t_SYNCH t_EQUALS
+%type<integer>				t_INTEGER fluentInitialCondition compositionType
 %type<expr>					exp exp2 exp3 exp4 constDef range rangeDef ltsTransitionPrefix
 %type<label>				label concurrentLabel 
 %type<set>					set setExp concurrentLabels  labels fluentSet
@@ -67,7 +68,7 @@ automaton_program_syntax* parsed_program = NULL;
 %type<ltl_aut_expression>	ltlAutExp ltlAutExp2
 %type<ltl_rule>				ltlAutRule
 %type<ltl_fluent>			ltlFluent
-%type<composition_type>		compositionType
+%type<equal_expression>		equalsExp
 %%
 program:
 	statements								{parsed_program = $1; $$ = $1;}
@@ -77,17 +78,18 @@ statements:
 	|statement								{$$ = automaton_program_syntax_create($1);}
 	;
 statement:
-	import									{$$ = automaton_statement_syntax_create(IMPORT_AUT, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);}
-	|menu									{$$ = automaton_statement_syntax_create(MENU_AUT, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);}
-	|constDef								{$$ = automaton_statement_syntax_create(CONST_AUT, NULL, NULL, $1, NULL, NULL, NULL, NULL, NULL);}
-	|rangeDef								{$$ = automaton_statement_syntax_create(RANGE_AUT, NULL, $1, NULL, NULL, NULL, NULL, NULL, NULL);}
-	|fluentDef								{$$ = automaton_statement_syntax_create(FLUENT_AUT, NULL, NULL, NULL, $1, NULL, NULL, NULL, NULL);}
-	|setDef									{$$ = automaton_statement_syntax_create(SET_AUT, NULL, NULL, NULL, NULL, $1, NULL, NULL, NULL);}
+	import									{$$ = automaton_statement_syntax_create(IMPORT_AUT, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);}
+	|menu									{$$ = automaton_statement_syntax_create(MENU_AUT, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);}
+	|constDef								{$$ = automaton_statement_syntax_create(CONST_AUT, NULL, NULL, $1, NULL, NULL, NULL, NULL, NULL, NULL);}
+	|rangeDef								{$$ = automaton_statement_syntax_create(RANGE_AUT, NULL, $1, NULL, NULL, NULL, NULL, NULL, NULL, NULL);}
+	|fluentDef								{$$ = automaton_statement_syntax_create(FLUENT_AUT, NULL, NULL, NULL, $1, NULL, NULL, NULL, NULL, NULL);}
+	|setDef									{$$ = automaton_statement_syntax_create(SET_AUT, NULL, NULL, NULL, NULL, $1, NULL, NULL, NULL, NULL);}
 	|orderDef								{automaton_program_add_obdd_primed_variables();}
-	|compositionDef							{$$ = automaton_statement_syntax_create(COMPOSITION_AUT, $1, NULL, NULL, NULL, NULL, NULL, NULL, NULL);}
-	|gr1									{$$ = automaton_statement_syntax_create(GR_1_AUT, NULL, NULL, NULL, NULL, NULL, $1, NULL, NULL);}
-	|ltlAutRule								{$$ = automaton_statement_syntax_create(LTL_RULE_AUT, NULL, NULL, NULL, NULL, NULL, NULL, $1, NULL);}
-	|ltlFluent								{$$ = automaton_statement_syntax_create(LTL_FLUENT_AUT, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $1);}
+	|compositionDef							{$$ = automaton_statement_syntax_create(COMPOSITION_AUT, $1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);}
+	|gr1									{$$ = automaton_statement_syntax_create(GR_1_AUT, NULL, NULL, NULL, NULL, NULL, $1, NULL, NULL, NULL);}
+	|ltlAutRule								{$$ = automaton_statement_syntax_create(LTL_RULE_AUT, NULL, NULL, NULL, NULL, NULL, NULL, $1, NULL, NULL);}
+	|ltlFluent								{$$ = automaton_statement_syntax_create(LTL_FLUENT_AUT, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $1, NULL);}
+	|equalsExp								{$$ = automaton_statement_syntax_create(EQUIV_CHECK_AUT, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $1);}
 	;
 label:
 	concurrentLabel							{$$ = $1;}
@@ -256,6 +258,8 @@ compositionType:
 	|t_SYNCH								{$$ = SYNCH_AUT; free($1);}
 	| 										{$$ = ASYNCH_AUT;}
 	;
+equalsExp:
+	t_EQUALS t_UPPER_IDENT '(' t_UPPER_IDENT ',' t_UPPER_IDENT ')' '.'	{$$ = automaton_equality_check_syntax_create($2,$4,$6); free($1); free($2);free($4);free($6);}
 ltlFluent:
 	t_LTL t_FLUENT t_UPPER_IDENT '=' ltlAutExp '.'	{$$ = automaton_ltl_fluent_syntax_create($3, $5);free($1); free($2);free($3);}
 ltlAutRule:
@@ -290,144 +294,6 @@ ltlAutExp2:
 	|t_NEXT ltlAutExp2						{$$ = obdd_apply_next($2);free($1);}
 	|'(' ltlAutExp ')'						{$$ = $2;}
 	;
-/*
-ltlAutExp:
-	ltlAutExp2								{$$ = $1;}
-	|ltlAutExp t_THEN ltlAutExp2			{$$ = obdd_apply_or(obdd_apply_not($1), $3);free($2);}
-	|ltlAutExp t_IFF ltlAutExp2				{$$ = obdd_apply_equals($1, $3);free($2);}
-	|ltlAutExp t_AND ltlAutExp2				{$$ = obdd_apply_and($1, $3);free($2);}
-	|ltlAutExp t_PARALLEL ltlAutExp2		{$$ = obdd_apply_or($1, $3);free($2);}
-	;
-ltlAutExp2:
-	t_IDENT									{
-												//we force the addition of the prime variable to the mgr dictionary in order to keep both orders (primed and non primed) consistent
-												//in order to then just replace the indexes when applying the next operator
-												$$ = obdd_mgr_var(parser_get_obdd_mgr(), $1);
-												char prime_name[255];
-												strcpy(prime_name, $1);
-												strcat(prime_name, SIGNAL_PRIME_SUFFIX);
-												parser_add_primed_variables(dictionary_add_entry(parser_get_obdd_mgr()->vars_dict, prime_name));
-												free($1);
-											}
-	|'!' ltlAutExp2							{$$ = obdd_apply_not($2);}
-	|'X' ltlAutExp2							{$$ = obdd_apply_next($2);}
-	|'(' ltlAutExp2 ')'						{$$ = $2;}
-	;	
-
-compositionDef:
-	compositionKind composition '.'
-	;
-compositionKind:
-	"clousure"
-	|"abstract"
-	|"deterministic"
-	|"minimal"
-	|"compose"
-	|"property"
-	|"optimistic"
-	|"pessimistic"
-	|"component"
-	|"controller"
-	|"starenv"
-	|"plant"
-	|"checkCompatibility"
-	|"probabilistic"
-	|"mdp"
-	|
-	;
-composition:
-	ltsStates
-	| "||" t_UPPER_IDENT '=' '(' compositionExp ')' compositionSuffix
-	;
-compositionSuffix:
-	'~' '{' t_UPPER_IDENT '}'
-	|'@' set
-	|
-	;                      
-compositionExp:
-	compositionExp2
-	|compositionExp '|''|' compositionExp2
-	|compositionExp "++" compositionExp2
-	|compositionExp "+ca" compositionExp2
-	|compositionExp "+cr" compositionExp2
-	;
-compositionExp2:
-	t_UPPER_IDENT
-	|t_IDENT indexes ':' t_UPPER_IDENT
-	|index indexes ':' t_UPPER_IDENT
-	;	
-*/	
-
-/*
-assertionDef:
-	assertionKind assertion
-	;
-assertionKind:
-	"assert"
-	| "constraint"
-	| "ltl_property"
-	;
-assertion:
-	t_UPPER_IDENT '=' ltlExp assertionSuffix
-	;
-assertionSuffix:
-	'+' set
-	|
-	;
-goalDef:
-	"controllerSpec" t_UPPER_IDENT '=' '{' goalBody '}'
-	;
-goalBody:
-	goalSafety goalFailure goalAssumption goalLiveness goalControllable
-	;
-goalSafety:
-	"safety" '=' goalExp
-	|
-	;
-goalFailure:
-	"failure" '=' goalExp
-	|
-	;
-goalAssumption:
-	"assumption" '=' goalExp
-	|
-	;
-goalLiveness:
-	"liveness" '=' goalExp
-	|
-	;
-goalControllable:
-	"controllable" '=' goalExp
-	;
-goalExp:
-	'{' goalExp2 '}'
-	;
-goalExp2:
-	t_UPPER_IDENT
-	| goalExp2 ',' t_UPPER_IDENT
-	|
-	;
-ltlExp:
-	ltlExp
-	|ltlExp '|''|' ltlExp2
-	|ltlExp '+''+' ltlExp2
-	|ltlExp '+''c''a' ltlExp2
-	|ltlExp '+''c''r' ltlExp2
-	|ltlExp 'U' ltlExp2
-	|ltlExp 'W' ltlExp2
-	|ltlExp '-''>' ltlExp2
-	|ltlExp '<''-''>' ltlExp2
-	|ltlExp '&''&' ltlExp2
-	;
-ltlExp2:
-	label
-	|'!' ltlExp2
-	|'X' ltlExp2
-	|'<''>' ltlExp2
-	|'['']' ltlExp2
-	|'(' ltlExp ')'
-	;
-	*/
 %%
  //int main (void) {return yyparse ( );}
 
