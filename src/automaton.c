@@ -3282,7 +3282,8 @@ automaton_automaton* automaton_automaton_minimize(automaton_automaton* current_a
  * @return true if both automata are equivalent down to state renaming, false otherwise
  */
 bool automaton_automata_are_equivalent(automaton_automaton* left_automaton, automaton_automaton* right_automaton){
-	if(left_automaton->transitions_count != right_automaton->transitions_count)
+	if(left_automaton->out_degree[left_automaton->initial_states[0]]
+								  != right_automaton->out_degree[right_automaton->initial_states[0]])
 		return false;
 	bool* processed	= calloc(left_automaton->transitions_count * 2, sizeof(bool));
 	uint32_t* left_frontier		=  calloc(left_automaton->transitions_count * 2, sizeof(uint32_t));
@@ -3321,9 +3322,14 @@ bool automaton_automata_are_equivalent(automaton_automaton* left_automaton, auto
 				if(!label_mismatch){
 					match_found	= true;
 					if(!processed[left_automaton->transitions[left_state][i].state_to]){
-						left_frontier[frontier_count]	= left_automaton->transitions[left_state][i].state_to;
-						right_frontier[frontier_count]	= right_automaton->transitions[right_state][j].state_to;
-						frontier_count++;
+						if(left_automaton->out_degree[left_automaton->transitions[left_state][i].state_to]
+													  != right_automaton->out_degree[right_automaton->transitions[right_state][j].state_to]){
+							match_found = false;
+						}else{
+							left_frontier[frontier_count]	= left_automaton->transitions[left_state][i].state_to;
+							right_frontier[frontier_count]	= right_automaton->transitions[right_state][j].state_to;
+							frontier_count++;
+						}
 					}
 					break;
 				}

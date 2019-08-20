@@ -33,8 +33,6 @@ void run_parse_test(char* test_file, char* test_name){
 	automaton_automata_context* ctx		= automaton_automata_context_create_from_syntax(parsed_program, buf, PRINT_FSP);
     automaton_automata_context_destroy(ctx);
     automaton_program_syntax_destroy(parsed_program);
-	obdd_mgr* mgr	= parser_get_obdd_mgr();
-	obdd_mgr_destroy(mgr);
     fclose(yyin);
 }
 void run_obdd_exists(){
@@ -894,6 +892,7 @@ int main (void){
 	//DRY TESTS
 	//run_fsp_tests(18);
 	run_parse_test("tests/test5.fsp",  "test5");
+	run_parse_test("tests/test40.fsp", "compositions type");
 	//run_parse_test("tests/test18.fsp",  "test18");
 
 	//run_parse_test("tests/test26.fsp", "test26");
@@ -916,7 +915,8 @@ int main (void){
 	//run_parse_test("tests/test38.fsp", "lift 5 floors + 10 variables");//lift 5 floors + 10 variables
 	//run_parse_test("tests/test31.fsp", "GenBuf 4 sndrs");//GENBUF 4 sndrs
 	//run_parse_test("tests/test35.fsp", "GenBuf 2 sndrs");//GENBUF 2 Sndrs
-
+	obdd_mgr* mgr	= parser_get_obdd_mgr();
+	obdd_mgr_destroy(mgr);
 	return 0;    
 }
 

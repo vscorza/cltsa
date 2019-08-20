@@ -2712,18 +2712,18 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 				continue;
 			}
 			bool are_equivalent	= automaton_automata_are_equivalent(left_automaton, right_automaton);
-			printf("check %s (%s == %s) -> %s", equiv_check->name, equiv_check->left, equiv_check->right
-					, are_equivalent? "true" : "false");
 			if((strstr(equiv_check->name, "FATAL") != NULL && !are_equivalent)
 					|| (strstr(equiv_check->name, "FAIL") != NULL && are_equivalent)){
 				printf(ANSI_COLOR_RED);
-				printf("\tFAILED\n");
+				printf("X");
 				printf(ANSI_COLOR_RESET);
 			}else{
 				printf(ANSI_COLOR_GREEN);
-				printf("\tTEST PASSED\n");
+				printf("■");
 				printf(ANSI_COLOR_RESET);
 			}
+			printf("\t [%s] \t (%s==%s)\n", equiv_check->name, equiv_check->left, equiv_check->right
+					, are_equivalent? "true" : "false");
 			tables->equivalence_entries[main_index]->valuation.bool_value = are_equivalent;
 			fflush(stdout);
 		}

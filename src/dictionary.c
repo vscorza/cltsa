@@ -17,11 +17,15 @@ struct dictionary_t* dictionary_create(){
 
 void dictionary_destroy(struct dictionary_t* dict){
     uint32_t i = 1;
-	for(i = 0; i < dict->size; i++){
-	   free(dict->entries[i].key);
-	}
-	free(dict->entries);
-	dict->entries	= NULL;
+    if(dict->entries != NULL){
+		for(i = 0; i < dict->size; i++){
+			if(dict->entries[i].key != NULL)
+				free(dict->entries[i].key);
+		   dict->entries[i].key	= NULL;
+		}
+		free(dict->entries);
+		dict->entries	= NULL;
+    }
 	dict->size 		= 0;
 	dict->max_size	= 0;
 	free(dict);
