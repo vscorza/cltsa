@@ -41,7 +41,7 @@
 
 #define PRINT_PARTIAL_SYNTHESIS 1
 
-#define AUT_TAU_CONSTANT	"__tau__"
+#define AUT_TAU_CONSTANT	"<>"
 
 #define FLUENT_ENTRY_SIZE	32
 #define GET_FLUENTS_ARR_SIZE(fluent_count, trans_size)	(1 + ((fluent_count * trans_size) / FLUENT_ENTRY_SIZE))

@@ -2172,7 +2172,9 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 						current_transition	= &(game_automaton->transitions[current_ranking->state][l]);
 						succ_ranking		=  (automaton_ranking*)automaton_concrete_bucket_get_entry(ranking_list[succ_guarantee], current_transition->state_to);
 						//TODO: check this condition
-						if(succ_ranking == NULL) continue;
+						if(succ_ranking == NULL){
+							continue;
+						}
 						//check if succ ranking is better than current
 						if(!is_controllable
 						||
@@ -2244,7 +2246,7 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 									break;
 								}
 							}
-							if(succ_ranking->value != RANKING_INFINITY && !(!is_controllable && !is_input)){
+							if((!is_controllable && (is_input || current_transition->is_input)) || (succ_ranking->value != RANKING_INFINITY && !(!is_controllable && !is_input))){
 #if DEBUG_STRATEGY_BUILD
 								printf("(g:%d)[ADD] strategy transition: ", i);
 								automaton_transition_print(strategy_transition, strategy->context, "", "\n");
