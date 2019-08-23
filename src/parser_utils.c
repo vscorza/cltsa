@@ -1,7 +1,7 @@
 #include "parser_utils.h"
 #include "assert.h"
 
-parser_obdd_mgr = NULL;
+static obdd_mgr* parser_obdd_mgr	= NULL;
 
 automaton_expression_syntax* automaton_expression_syntax_create(automaton_expression_type_syntax type, automaton_expression_syntax* first
 		, automaton_expression_syntax* second, char* string_terminal, int32_t integer_terminal, automaton_expression_operator_syntax op){
@@ -579,10 +579,16 @@ bool automaton_syntax_is_reserved(char* token){
 
 
 obdd_mgr* parser_get_obdd_mgr(){
-	static obdd_mgr* parser_obdd_mgr	= NULL;
 	if(parser_obdd_mgr == NULL)
 		parser_obdd_mgr	= obdd_mgr_create();
 	return parser_obdd_mgr;
+}
+
+void parser_reset_obdd_mgr(){
+	if(parser_obdd_mgr != NULL){
+		obdd_mgr_destroy(parser_obdd_mgr);
+		parser_obdd_mgr	= NULL;
+	}
 }
 
 uint32_t* parser_primed_variables	= NULL;

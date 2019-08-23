@@ -721,7 +721,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 								for(n = 0; n < count; n++){
 									element_to_find		= ret_value[n];
 									element_global_index= -1;
-									element_position	= 0;
+									element_position	= local_alphabet_count;
 									for(m = 0; m < (int32_t)ctx->global_alphabet->count; m++){
 										if(strcmp(ctx->global_alphabet->list[m].name, element_to_find) == 0){
 											element_global_index = m;
@@ -765,7 +765,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 							}else{
 								element_to_find		= atom_label->string_terminal;
 								element_global_index= -1;
-								element_position	= 0;
+								element_position	= local_alphabet_count;
 								for(m = 0; m < (int32_t)ctx->global_alphabet->count; m++){
 									if(strcmp(ctx->global_alphabet->list[m].name, element_to_find) == 0){
 										element_global_index = m;
@@ -824,7 +824,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 										for(n = 0; n < count; n++){
 											element_to_find		= ret_value[n];
 											element_global_index= -1;
-											element_position	= 0;
+											element_position	= local_alphabet_count;
 											for(m = 0; m < (int32_t)ctx->global_alphabet->count; m++){
 												if(strcmp(ctx->global_alphabet->list[m].name, element_to_find) == 0){
 													element_global_index = m;
@@ -862,7 +862,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 									}else{
 										element_to_find		= atom_label->set->labels[n][o]->string_terminal;
 										element_global_index= -1;
-										element_position	= 0;
+										element_position	= local_alphabet_count;
 										for(m = 0; m < (int32_t)ctx->global_alphabet->count; m++){
 											if(strcmp(ctx->global_alphabet->list[m].name, element_to_find) == 0){
 												element_global_index = m;
@@ -2752,7 +2752,10 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 	free(liveness_formulas); free(liveness_formulas_names);
 	automaton_parsing_tables_destroy(tables);
 
-	free(parser_primed_variables);
+	if(parser_primed_variables != NULL){
+		free(parser_primed_variables);
+		parser_primed_variables = NULL;
+	}
 #if VERBOSE
 	printf("\nDONE\n");
 #endif
