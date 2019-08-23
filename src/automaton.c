@@ -1456,7 +1456,7 @@ void automaton_automaton_resize_to_state(automaton_automaton* current_automaton,
 	uint32_t* next_in_size				= malloc(sizeof(uint32_t) * next_size);
 	automaton_transition** next_trans	= malloc(sizeof(automaton_transition*) * next_size);
 	automaton_transition** next_inv_trans= malloc(sizeof(automaton_transition*) * next_size);
-	for(i = 0; i < current_automaton->transitions_count; i++){
+	for(i = 0; i < current_automaton->transitions_size; i++){
 		next_is_controllable[i]			= current_automaton->is_controllable[i];
 		next_out_degree[i]				= current_automaton->out_degree[i];
 		next_in_degree[i]				= current_automaton->in_degree[i];
@@ -1465,7 +1465,7 @@ void automaton_automaton_resize_to_state(automaton_automaton* current_automaton,
 		next_trans[i]					= current_automaton->transitions[i];
 		next_inv_trans[i]				= current_automaton->inverted_transitions[i];
 	}
-	for(i = current_automaton->transitions_count; i < next_size; i++){
+	for(i = current_automaton->transitions_size; i < next_size; i++){
 		next_is_controllable[i]			= true;
 		next_out_degree[i]				= 0;
 		next_in_degree[i]				= 0;
@@ -1480,6 +1480,7 @@ void automaton_automaton_resize_to_state(automaton_automaton* current_automaton,
 			automaton_transition_initialize(&(next_inv_trans[i][j]), 0, 0);
 		}
 	}
+
 	free(current_automaton->is_controllable);
 	free(current_automaton->out_degree);
 	free(current_automaton->in_degree);

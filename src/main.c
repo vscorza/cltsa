@@ -6,6 +6,8 @@
 #include "automaton_context.h"
 //#include "minuint.h"
 
+#define PRINT_TEST_OUTPUT 0
+
 typedef struct yy_buffer_state * YY_BUFFER_STATE;
 extern int yyparse();
 extern YY_BUFFER_STATE yy_scan_string(char * str);
@@ -14,6 +16,47 @@ extern FILE* yyin;
 extern automaton_program_syntax* parsed_program;
 
 char* automataFile  =  "automata.txt";
+
+char* test_get_output_content(char *filename){
+	char *buffer = NULL;
+	size_t size = 0;
+
+	/* Open your_file in read-only mode */
+	FILE *fp = fopen(filename, "r");
+
+	/* Get the buffer size */
+	fseek(fp, 0, SEEK_END); /* Go to end of file */
+	size = ftell(fp); /* How many bytes did we pass ? */
+
+	/* Set position of stream to the beginning */
+	rewind(fp);
+
+	/* Allocate the buffer (no need to initialize it with calloc) */
+	buffer = malloc((size + 1) * sizeof(*buffer)); /* size + 1 byte for the \0 */
+
+	/* Read the file into the buffer */
+	fread(buffer, size, 1, fp); /* Read 1 chunk of size bytes from fp into buffer */
+
+	/* NULL-terminate the buffer */
+	buffer[size] = '\0';
+
+	/* Print it ! */
+	return buffer;
+}
+
+void print_test_result(bool passed, char* name, char* description){
+	if(!passed){
+		printf(ANSI_COLOR_RED);
+		printf("X");
+		printf(ANSI_COLOR_RESET);
+	}else{
+		printf(ANSI_COLOR_GREEN);
+		printf("■");
+		printf(ANSI_COLOR_RESET);
+	}
+	printf("\t [%s] \t (%s)\n", name, description);
+	fflush(stdout);
+}
 
 void run_parse_test(char* test_file, char* test_name){
 	FILE *fd;
@@ -49,8 +92,8 @@ void run_obdd_exists(){
 	obdd* true_obdd		= obdd_apply_or(x1_obdd, not_x1_obdd);
 	obdd* x1_and_x2_obdd	= obdd_apply_and(x1_obdd, x2_obdd);
 	obdd* x1_and_x2_and_x3_obdd	= obdd_apply_and(x1_and_x2_obdd, x3_obdd);
-
-	obdd_mgr_print(new_mgr);
+	char *buff = calloc(16384, sizeof(char));
+	obdd_mgr_print(new_mgr, buff);
 	uint32_t valuations_count;
 	uint32_t valuations_size	= LIST_INITIAL_SIZE * new_mgr->vars_dict->size;
 	bool* valuations			= calloc(sizeof(bool), valuations_size);
@@ -77,10 +120,10 @@ void run_obdd_exists(){
 	total_img[1]= 4;
 	total_img[2]= 6;
 	obdd *exists_obdd	= obdd_exists(x1_and_x2_obdd, "x1");
-	obdd_print(exists_obdd);
+	obdd_print(exists_obdd, buff);
 	obdd_get_valuations(new_mgr, exists_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count
 			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
-	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count);
+	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count, buff);
 	obdd_destroy(exists_obdd);
 	free(total_img);
 
@@ -91,10 +134,10 @@ void run_obdd_exists(){
 	total_img[1]= 4;
 	total_img[2]= 6;
 	exists_obdd	= obdd_exists(x1_and_x2_and_x3_obdd, "x2");
-	obdd_print(exists_obdd);
+	obdd_print(exists_obdd, buff);
 	obdd_get_valuations(new_mgr, exists_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count
 			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
-	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count);
+	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count, buff);
 	obdd_destroy(exists_obdd);
 	free(total_img);
 
@@ -105,10 +148,10 @@ void run_obdd_exists(){
 	total_img[1]= 4;
 	total_img[2]= 6;
 	exists_obdd	= obdd_exists_vector(x1_and_x2_and_x3_obdd, total_img, 2);
-	obdd_print(exists_obdd);
+	obdd_print(exists_obdd, buff);
 	obdd_get_valuations(new_mgr, exists_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count
 			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
-	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count);
+	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count, buff);
 	obdd_destroy(exists_obdd);
 
 	free(valuations);
@@ -119,6 +162,7 @@ void run_obdd_exists(){
 	free(last_nodes);
 	free(dont_care_list);
 	free(partial_valuation);
+	free(buff);
 
 	obdd_destroy(x1_obdd);
 	obdd_destroy(x2_obdd);
@@ -148,9 +192,10 @@ void run_obdd_valuations(){
 	obdd* true_obdd		= obdd_apply_or(x1_obdd, not_x1_obdd);
 
 
-	obdd_print(not_x1_and_not_x2_obdd);
+	char *buff = calloc(16384, sizeof(char));
+	obdd_print(not_x1_and_not_x2_obdd, buff);
 
-	obdd_mgr_print(new_mgr);
+	obdd_mgr_print(new_mgr, buff);
 	uint32_t valuations_count;
 	uint32_t valuations_size	= LIST_INITIAL_SIZE * new_mgr->vars_dict->size;
 	bool* valuations			= calloc(sizeof(bool), valuations_size);
@@ -175,7 +220,7 @@ void run_obdd_valuations(){
 	total_img[0]	= 2 + 2;
 	obdd_get_valuations(new_mgr, not_x1_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count
 			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
-	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count);
+	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count, buff);
 	free(total_img);
 
 	printf("!X1 over x1, x2\n");
@@ -185,7 +230,7 @@ void run_obdd_valuations(){
 	total_img[1]	= 2 + 2;
 	obdd_get_valuations(new_mgr, not_x1_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count
 			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
-	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count);
+	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count, buff);
 	free(total_img);
 
 	printf("!X1 && !X2 over x1,x2\n");
@@ -195,7 +240,7 @@ void run_obdd_valuations(){
 		total_img[i]	= (i * 2) + 2;
 	obdd_get_valuations(new_mgr, not_x1_and_not_x2_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count
 			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
-	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count);
+	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count, buff);
 	free(total_img);
 
 	printf("!X1 && !X2 over x1\n");
@@ -204,8 +249,8 @@ void run_obdd_valuations(){
 	total_img[0]= 2;
 	obdd_get_valuations(new_mgr, not_x1_and_not_x2_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count
 			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
-	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count);
-	obdd_print(not_x2_obdd);
+	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count, buff);
+	obdd_print(not_x2_obdd, buff);
 	free(total_img);
 
 	printf("!X2 over x1, x2, x3\n");
@@ -216,7 +261,7 @@ void run_obdd_valuations(){
 	total_img[2]	= 6;
 	obdd_get_valuations(new_mgr, not_x2_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count
 			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
-	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count);
+	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count, buff);
 	free(total_img);
 
 	printf("!X1 && !X2 over x1, x2, x3\n");
@@ -227,7 +272,7 @@ void run_obdd_valuations(){
 	total_img[2]	= 6;
 	obdd_get_valuations(new_mgr, not_x1_and_not_x2_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count
 			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
-	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count);
+	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count, buff);
 	free(total_img);
 
 	printf("true over x1, x2, x3\n");
@@ -238,7 +283,7 @@ void run_obdd_valuations(){
 	total_img[2]	= 6;
 	obdd_get_valuations(new_mgr, true_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count
 			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
-	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count);
+	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count, buff);
 	free(total_img);
 
 	free(valuations);
@@ -249,6 +294,7 @@ void run_obdd_valuations(){
 	free(last_nodes);
 	free(dont_care_list);
 	free(partial_valuation);
+	free(buff);
 
 	obdd_destroy(x1_obdd);
 	obdd_destroy(x2_obdd);
@@ -275,8 +321,17 @@ void run_small_obdd_tests(){
 	obdd* x1_or_x1_and_x2_obdd_bis= obdd_apply_or(x1_obdd, x1_and_x2_obdd);
 
 	obdd* x1_then_x2_obdd	= obdd_apply_or(not_x1_obdd, x2_obdd);
+#if PRINT_TEST_OUTPUT
 	printf("X1 -> X2\n");
-	obdd_print(x1_then_x2_obdd);
+#endif
+	char *buff = calloc(16384, sizeof(char));
+	obdd_print(x1_then_x2_obdd, buff);
+	char * expected = test_get_output_content("tests/expected_output/run_small_obdd_tests.exp");
+	bool txt_cmp = strcmp(buff, expected) == 0;
+	print_test_result(txt_cmp, "SMALL OBDD", "small obdd test");
+
+	free(expected);
+
 	uint32_t valuations_count;
 	uint32_t img_count	= new_mgr->vars_dict->size - 2;
 	uint32_t* total_img	= malloc(sizeof(uint32_t) * img_count);
@@ -297,7 +352,7 @@ void run_small_obdd_tests(){
 		total_img[i]	= i + 2;
 	obdd_get_valuations(new_mgr, x1_then_x2_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count
 			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
-	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count);
+	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count, buff);
 	free(valuations);
 	free(total_img);
 	free(initialized_values);
@@ -306,6 +361,7 @@ void run_small_obdd_tests(){
 	free(last_nodes);
 	free(dont_care_list);
 	free(partial_valuation);
+	free(buff);
 	obdd_destroy(x1_obdd);
 	obdd_destroy(not_x1_obdd);
 	obdd_destroy(x2_obdd);
@@ -330,11 +386,12 @@ void run_next_obdd_tests(){
 
 	obdd* not_x1_then_next_x2_obdd	= obdd_apply_or(x1_obdd, next_x2_obdd);
 	printf("!X1");
-	obdd_print(not_x1_obdd);
+	char *buff = calloc(16384, sizeof(char));
+	obdd_print(not_x1_obdd, buff);
 	printf("X(X2)");
-	obdd_print(next_x2_obdd);
+	obdd_print(next_x2_obdd, buff);
 	printf("!X1 -> X(X2)\n");
-	obdd_print(not_x1_then_next_x2_obdd);
+	obdd_print(not_x1_then_next_x2_obdd, buff);
 	uint32_t valuations_count;
 	uint32_t img_count	= new_mgr->vars_dict->size - 2;
 	uint32_t* total_img	= malloc(sizeof(uint32_t) * img_count);
@@ -355,7 +412,7 @@ void run_next_obdd_tests(){
 		total_img[i]	= i + 2;
 	obdd_get_valuations(new_mgr, not_x1_then_next_x2_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count
 			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
-	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count);
+	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count, buff);
 	free(valuations);
 	free(total_img);
 	free(initialized_values);
@@ -364,6 +421,7 @@ void run_next_obdd_tests(){
 	free(last_nodes);
 	free(dont_care_list);
 	free(partial_valuation);
+	free(buff);
 	obdd_destroy(x1_obdd);
 	obdd_destroy(not_x1_obdd);
 	obdd_destroy(x2_obdd);
@@ -394,28 +452,28 @@ void run_obdd_tests(){
 
 	obdd* x2_eq_fallacy_obdd= obdd_apply_equals(x2_obdd, x1_and_not_x1_obdd);
 	obdd* exists_obdd	= obdd_exists(x2_eq_fallacy_obdd, "x2");
-
-	obdd_print(x1_or_x2_obdd);
+	char *buff = calloc(16384, sizeof(char));
+	obdd_print(x1_or_x2_obdd, buff);
 	printf("x1 || x2 sat? : %s \n", obdd_is_sat(new_mgr, x1_or_x2_obdd->root_obdd) ? "yes" : "no");
 	printf("x1 || x2 taut? : %s \n", obdd_is_tautology(new_mgr, x1_or_x2_obdd->root_obdd) ? "yes" : "no");
 
-	obdd_print(x1_and_x2_obdd);
+	obdd_print(x1_and_x2_obdd, buff);
 	printf("x1 && x2 sat? : %s \n", obdd_is_sat(new_mgr, x1_and_x2_obdd->root_obdd) ? "yes" : "no");
 	printf("x1 && x2 taut? : %s \n", obdd_is_tautology(new_mgr, x1_and_x2_obdd->root_obdd) ? "yes" : "no");
 
-	obdd_print(x1_and_not_x1_obdd);
+	obdd_print(x1_and_not_x1_obdd, buff);
 	printf("x1 && !x1 sat? : %s \n", obdd_is_sat(new_mgr, x1_and_not_x1_obdd->root_obdd) ? "yes" : "no");
 	printf("x1 && !x1 taut? : %s \n", obdd_is_tautology(new_mgr, x1_and_not_x1_obdd->root_obdd) ? "yes" : "no");
 
-	obdd_print(x1_and_x2_then_x1);
+	obdd_print(x1_and_x2_then_x1, buff);
 	printf("(x1 && x2)->x1 sat? : %s \n", obdd_is_sat(new_mgr, x1_and_x2_then_x1->root_obdd) ? "yes" : "no");
 	printf("(x1 && x2)->x1 taut? : %s \n", obdd_is_tautology(new_mgr, x1_and_x2_then_x1->root_obdd) ? "yes" : "no");
 
-	obdd_print(exists_obdd);
+	obdd_print(exists_obdd, buff);
 	printf("E x2.(x2 = (x1 && !x1)) sat? : %s \n", obdd_is_sat(new_mgr, exists_obdd->root_obdd) ? "yes" : "no");
 	printf("E x2.(x2 = (x1 && !x1)) taut? : %s \n", obdd_is_tautology(new_mgr, exists_obdd->root_obdd) ? "yes" : "no");
 
-	obdd_mgr_print(new_mgr);
+	obdd_mgr_print(new_mgr, buff);
 	uint32_t valuations_count;
 
 	uint32_t valuations_size	= LIST_INITIAL_SIZE * new_mgr->vars_dict->size;
@@ -437,27 +495,27 @@ void run_obdd_tests(){
 		total_img[i]	= i + 2;
 
 	printf("X1 && X2\n");
-	obdd_print(x1_and_x2_obdd);
+	obdd_print(x1_and_x2_obdd, buff);
 	obdd_get_valuations(new_mgr, x1_and_x2_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count
 			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
-	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count);
+	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count, buff);
 
 	printf("X1 & X2 && X3\n");
-	obdd_print(x1_and_x2_and_x3_obdd);
+	obdd_print(x1_and_x2_and_x3_obdd, buff);
 	obdd_get_valuations(new_mgr, x1_and_x2_and_x3_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count
 			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
-	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count);
+	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count, buff);
 
 	printf("X1 || X2\n");
-	obdd_print(x1_or_x2_obdd);
+	obdd_print(x1_or_x2_obdd, buff);
 	obdd_get_valuations(new_mgr, x1_or_x2_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count
 			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
-	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count);
+	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count, buff);
 	printf("X1 || X2 || X3\n");
-	obdd_print(x1_or_x2_or_x3_obdd);
+	obdd_print(x1_or_x2_or_x3_obdd, buff);
 	obdd_get_valuations(new_mgr, x1_or_x2_or_x3_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count
 			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
-	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count);
+	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count, buff);
 	free(valuations);
 	free(total_img);
 	free(initialized_values);
@@ -466,6 +524,7 @@ void run_obdd_tests(){
 	free(last_nodes);
 	free(dont_care_list);
 	free(partial_valuation);
+	free(buff);
 	obdd_destroy(x1_obdd);
 	obdd_destroy(x2_obdd);
 	obdd_destroy(x3_obdd);
@@ -596,26 +655,38 @@ void run_small_obdd_tree_tests(){
 	printf("new key %d\n", obdd_state_tree_get_key(tree, key3, -1));
 	printf("new key %d\n", obdd_state_tree_get_key(tree, key4, -1));
 	printf("new key %d\n", obdd_state_tree_get_key(tree, key5, -1));
-	obdd_state_tree_print(tree);
+	char *buff = calloc(16384, sizeof(char));
+	obdd_state_tree_print(tree, buff);
+	free(buff);
 	obdd_state_tree_destroy(tree);
 }
 void run_obdd_tree_tests(){
 	obdd_state_tree* tree	= obdd_state_tree_create(7);
 	bool key1[7]				= {false, false, false, false, false, false, false};
 	uint32_t i, j;
+	bool passed = true;
 	for(i = 0; i < 128; i++){
 		for(j = 0; j < 7; j++){
 			key1[j] = ((i >> j) & 0x1) == 0;
 		}
+#if PRINT_TEST_OUTPUT
 		printf("%d:%d %s", i, obdd_state_tree_get_key(tree, key1, -1), i % 5 == 0 ? "\n" : "  ");
+#endif
+		passed = passed & ((i + 1) == obdd_state_tree_get_key(tree, key1, -1));
 	}
+#if PRINT_TEST_OUTPUT
 	printf("\nREPEATING VALUES\n");
+#endif
 	for(i = 0; i < 128; i++){
 		for(j = 0; j < 7; j++){
 			key1[j] = ((i >> j) & 0x1) == 0;
 		}
+#if PRINT_TEST_OUTPUT
 		printf("%d:%d %s", i, obdd_state_tree_get_key(tree, key1, -1), i % 5 == 0 ? "\n" : "  ");
+#endif
+		passed = passed & ((i + 1) == obdd_state_tree_get_key(tree, key1, -1));
 	}
+	print_test_result(passed, "OBDD TREE", "128 values tested");
 	//obdd_state_tree_print(tree);
 	obdd_state_tree_destroy(tree);
 }
@@ -877,24 +948,26 @@ int main (void){
 	//run_all_tests();
 
 	//MODULE TESTING
-	//run_obdd_tree_tests();
-	//run_small_obdd_tests();
-	//run_next_obdd_tests();
-	//run_obdd_tests();
-	//run_obdd_valuations();
-	//run_obdd_exists();
-	//run_concrete_bucket_list_tests();
-	//run_ordered_list_tests();
-	//run_max_heap_tests();
-	//run_report_tests();
-	//run_fast_pool_tests();
-
+	run_obdd_tree_tests();
+	run_small_obdd_tests();
+/*
+	run_next_obdd_tests();
+	run_obdd_tests();
+	run_obdd_valuations();
+	run_obdd_exists();
+	run_concrete_bucket_list_tests();
+	run_ordered_list_tests();
+	run_max_heap_tests();
+	run_report_tests();
+	run_fast_pool_tests();
+*/
 	//DRY TESTS
-	//run_fsp_tests(18);
+
 	run_parse_test("tests/test5.fsp",  "range tests");
 	run_parse_test("tests/test40.fsp", "compositions type");
 	run_parse_test("tests/test23.fsp", "biscotti");
 	run_parse_test("tests/test30.fsp", "lift 2 floors");//lift 2 floors
+
 	//run_parse_test("tests/test18.fsp",  "test18");
 
 	//run_parse_test("tests/test26.fsp", "test26");

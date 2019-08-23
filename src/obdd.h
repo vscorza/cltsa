@@ -166,14 +166,14 @@ obdd_state_tree* obdd_state_tree_create(uint32_t key_length);
 int32_t obdd_state_tree_entry_get_from_pool(obdd_state_tree* tree);
 uint32_t obdd_state_tree_get_key(obdd_state_tree* tree, bool* valuation, int32_t key_length);
 void obdd_state_tree_destroy(obdd_state_tree* tree);
-void obdd_state_tree_entry_print(obdd_state_tree* tree, obdd_state_tree_entry* entry);
-void obdd_state_tree_print(obdd_state_tree* tree);
+void obdd_state_tree_entry_print(obdd_state_tree* tree, obdd_state_tree_entry* entry, char *buff);
+void obdd_state_tree_print(obdd_state_tree* tree, char *buff);
 /** GLOBAL **/
 uint32_t get_next_mgr_ID();
 /** OBDD  MGR**/
 obdd_mgr*	obdd_mgr_create();
 void obdd_mgr_destroy(obdd_mgr* mgr);
-void obdd_mgr_print(obdd_mgr* mgr);
+void obdd_mgr_print(obdd_mgr* mgr, char *buff);
 obdd* 	obdd_mgr_true(obdd_mgr* mgr);
 obdd* 	obdd_mgr_false(obdd_mgr* mgr);
 obdd*	obdd_mgr_not_var(obdd_mgr* mgr, char* name);
@@ -208,8 +208,8 @@ obdd* obdd_restrict_vector(obdd* root, uint32_t* var_ids, bool* values, uint32_t
 obdd_node* obdd_node_restrict_vector(obdd_mgr* mgr, obdd_node* root, uint32_t* var_ids, bool* values, uint32_t current_index, uint32_t count);
 obdd* obdd_exists(obdd* root, char* var);					//apply reduction based on shannon
 obdd* obdd_forall(obdd* root, char* var);					//apply reduction based on shannon
-void obdd_print(obdd* root);
-void obdd_node_print(obdd_mgr* mgr, obdd_node* root, uint32_t spaces);
+void obdd_print(obdd* root, char *buff);
+void obdd_node_print(obdd_mgr* mgr, obdd_node* root, uint32_t spaces, char *buff);
 
 bool obdd_apply_equals_fkt(bool left, bool right);
 bool obdd_apply_xor_fkt(bool left, bool right);
@@ -233,7 +233,7 @@ bool obdd_is_true(obdd_mgr* mgr, obdd_node* root);
 bool obdd_is_constant(obdd_mgr* mgr, obdd_node* root);						//checks if representation is constant
 bool obdd_is_tautology(obdd_mgr* mgr, obdd_node* root);						//checks if representation is always true
 bool obdd_is_sat(obdd_mgr* mgr, obdd_node* root);							//checks if representation is satisfiable
-void obdd_print_valuations(obdd_mgr* mgr, bool* valuations, uint32_t valuations_count, uint32_t* valuation_img, uint32_t img_count);
+void obdd_print_valuations(obdd_mgr* mgr, bool* valuations, uint32_t valuations_count, uint32_t* valuation_img, uint32_t img_count, char *buff);
 void obdd_get_valuations(obdd_mgr* mgr, obdd* root, bool** valuations, uint32_t* valuations_size, uint32_t* valuations_count, uint32_t* valuation_img, uint32_t img_count
 		, bool* dont_care_list, bool* partial_valuation, bool* initialized_values, bool* valuation_set, obdd_node** last_nodes, int32_t* last_succ_index);
 void obdd_node_get_obdd_nodes(obdd_mgr* mgr, obdd_node* root, obdd_node*** nodes, uint32_t* nodes_count, uint32_t* nodes_size);
