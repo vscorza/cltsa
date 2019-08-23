@@ -16,6 +16,35 @@
 \newcommand{\automaton}[1]{$#1 = (S_{#1}, \Sigma_{#1}, \Delta_{#1}, s_{0}^{#1})$}
 \newcommand{\ltsComposition}[3]{$#1 \parallel_{#3} #2 = (S_{#1}\times S_{#2}, \Sigma_{#1} \cup \Sigma_{#2}, \Delta, (s_{0}^{#1},s_{0}^{#2}))$}
 
+\newcommand{\traces}{\emph{Tr} }
+\newcommand{\true}{\emph{true} }
+\newcommand{\false}{\emph{false} }
+\newcommand{\assume}{\phi}
+\newcommand{\guarantee}{\gamma}
+\newcommand{\invariant}{\rho}
+\newcommand{\fluentp}[1]{\dot{#1}}
+\newcommand{\fluent}{\emph{fl}}
+\newcommand{\set}[1]{\{#1\}}
+\newcommand{\gr}{{GR(1)}\xspace}
+\newcommand{\sgr}{{SGR(1)}\xspace}
+\newcommand{\G}{{\bf G}}
+\newcommand{\F}{{\bf F}}
+\newcommand{\X}{{\bf X}}
+\newcommand{\U}{{\bf U}}
+
+\newcommand{\exception}{\epsilon}
+\newcommand{\extension}{\uparrow}
+\newcommand{\simulates}[2]{#1 \geq #2}
+\newcommand{\notsimulates}[2]{#1 \not\geq #2}
+\newcommand{\deterministic}[2]{\emph{det}( #1 , #2 )}
+\newcommand{\simState}[3]{\emph{simState}( #1 , #2 , #3 )}
+\newcommand{\initialState}[1]{\emph{init}( #1 )}
+\newcommand{\states}[1]{\emph{states}( #1 )}
+\newcommand{\executes}[1]{\triangleright #1 }
+
+
+\newcommand{\act}{a}
+
 \title{Concurrent CLTS parallel composition} %Change this to the appropriate number.
 \author{-} %Change this to your name.
 \date{}
@@ -28,6 +57,68 @@
 \setcounter{section}{1} %This gives the chapter number.
 \setcounter{theorem}{1} %This gives the item number.
 %Note that the item number should be one less than you desire..
+
+\begin{definition}
+	\label{def:CLTS} \emph{(Concurrent Labelled Transition Systems)} 
+	A \emph{Concurrent Labelled Transition System} (CLTS) is $E =  (S, \Sigma, \Delta, s_0)$, where $S$ is a finite set of states, $\Sigma \subseteq Act$ is its {\em communicating alphabet}, $\Delta \subseteq (S \times \mathcal{P}(\Sigma) \times S)$ is a transition relation, and $s_0 \in S$ is the initial state.  We denote $\Delta(s)=\{\act~|~(s,\act,s') \in \Delta\}$. 
+	An CLTS is deterministic if $(s,\act,s')$ and $(s,\act,s'')$ are in $\Delta$ implies $s'=s''$.
+	An execution of $E$ is a word $\varepsilon=s_0, \act_0, s_1, \ldots$ where $(s_i, \act_i, s_{i+1}) \in \Delta$. 
+	A word $\pi$ is a trace (induced by $\varepsilon$) of $E$ if its the result of removing every $s_i$ from an execution $\varepsilon$ of $E$. 
+	We denote the set of infinite traces of $E$ by $\traces(E)$. 
+\end{definition}
+
+We use linear temporal logics of fluents (FLTL) over CLTS models. %~\cite{DBLP:conf/sigsoft/GiannakopoulouM03}. 
+A \emph{fluent} \emph{fl} is defined by a pair of sets and a Boolean value: $\emph{\fluent} = \langle I_{\emph{\fluent}}, T_{\emph{\fluent}}, \emph{Init}_{\emph{\fluent}} \rangle$, where $I_{\emph{\fluent}}\subseteq \mathcal{P}(Act)$ is the set of initiating actions, $T_{\emph{\fluent}} \mathcal{P}(Act)$ is the set of terminating actions and $I_{\emph{\fluent}}\cap T_{\emph{\fluent}}=\emptyset$. 
+A fluent may be initially \true or \false as indicated by \emph{Init}$_{\emph{\fluent}}$. 
+Every actions $\ell\in Act$ induces a fluent, namely $\fluentp{\ell}=\langle \{\ell\}, \{Act\setminus \set{\ell}\}, \false\rangle$. 
+Finally, the alphabet of a fluent is the union of its terminating and initiating actions.
+
+Let $\mathcal{F}$ be the set of all possible fluents over $\mathcal{P}(Act)$. 
+An FLTL formula is defined inductively using the standard Boolean connectives and temporal operators $X$~(next), $U$ (strong until) as follows: 
+$\varphi ::= \fluent \mid \neg \varphi \mid \varphi \vee \psi \mid \X \varphi \mid \varphi U \psi,$
+where $\fluent\in\mathcal{F}$. 
+As usual we introduce $\wedge$, $\F$ (eventually), and $\G$ (always) as syntactic sugar. 
+Let $\Pi$ be the set of infinite traces over \emph{Act}.
+The trace $\pi=\ell_0,\ell_1,\ldots$ satisfies a fluent $\emph{Fl}$ at position $i$, denoted $\pi,i \models \emph{Fl}$, if and only if one of the following conditions holds:
+\begin{list}{-}%{\leftmargin=3em}
+	\item $\emph{Init}_{\emph{Fl}} \wedge (\forall j \in \mathbb{N} \cdot 0 \leq j \leq i \rightarrow \ell_j \cap T_{\fluent} = \emptyset)$
+	\item $\exists j \in \mathbb{N} \cdot (j \leq i \wedge \ell_j \cap I_{\fluent} \neq \emptyset) \wedge (\forall k \in \mathbb{N} \cdot j < k \leq i \ \rightarrow \ell_k \cap T_{\fluent} = \emptyset)$
+\end{list}
+
+Given an infinite trace $\pi$, the satisfaction of a formula $\varphi$ at position $i$, denoted $\pi,i\models\varphi$, is defined as follows:
+
+\begin{tabular}{ l c l }
+$\pi, i \models_d \neg \varphi$ & $\triangleq$ & $\pi, i \not\models_d \varphi$\\
+$\pi, i \models_d \varphi \vee \psi$ & $\triangleq$ & $(\pi, i \models_d \varphi) \vee (\pi, i \models_d \psi)$\\
+$\pi, i \models_d \X \varphi$ & $\triangleq$ & $\pi, i +1 \models_d \varphi$\\
+$\pi, i \models_d \varphi \U \psi$ & $\triangleq$ & $\exists j \geq i . \pi,j \models_d \psi \wedge \forall i \leq k \le k. \pi, k \models_d \varphi$\\
+\end{tabular}
+  
+We say that $\varphi$ holds in $\pi$, denoted $\pi\models\varphi$, if $\pi,0\models\varphi$. 
+A formula $\varphi \in \mbox{FLTL}$ holds in an CLTS $E$ (denoted $E \models \varphi$) if it holds on every infinite trace produced by $E$.
+A \emph{fluent} \fluent \space is defined by a set of initiating actions $I_{\fluent}$, a set of terminating actions $T_{\fluent}$, and an initial value \emph{Initially}$_{\fluent}$.
+
+That is,
+%\begin{equation*}
+$ \fluent = \langle I_{\fluent}, T_{\fluent} \rangle_{\emph{initially}_{\fluent}} $, 
+where 
+$I_{\fluent},T_{\fluent} \subseteq \emph{Act}$ 
+and $I_{\fluent} \cap T_{\fluent} = \emptyset.$\\
+%\end{equation*}
+A fluent may be initially \true or \false as indicated by the \emph{Initially}$_{\fluent}$ attribute,
+When we omit \emph{Initially}$_{\fluent}$, we assume the fluent is
+initially \emph{false}. We use $\fluentp{\ell}$ as short for the
+fluent defined as $\fluent = \langle \ell,
+\emph{Act}\setminus\set{\ell} \rangle$.
+Given the set of fluents $\Phi$, an FLTL formula is defined
+inductively using the standard boolean connectives and temporal
+operators $\mathbf{X}$ (next), $\mathbf{U}$ (strong until) as
+follows:\\
+%\begin{equation*}
+$\varphi ::= \fluent \mid \neg \varphi \mid \varphi \vee \psi \mid
+\mathbf{X} \varphi \mid \varphi \mathbf{U} \psi$,
+%\end{equation*}
+where $\fluent \in \Phi$.
 
 \begin{definition} 
 	Let \automaton{M},\automaton{N}, with $\Delta_M : S_M \times \mathcal{P}(\Sigma_M) \times S_M$, be two CLTS instances, then CLTS concurrent parallel composition is defined as \ltsComposition{M}{N}{c} where $\Delta$ is the smallest relation s.t:
