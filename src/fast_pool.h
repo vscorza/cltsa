@@ -13,7 +13,7 @@
 #include "automaton_utils.h"
 
 typedef struct automaton_fast_pool_str {
-	uintptr_t* next_free_element;
+	uintptr_t next_free_element;
 	uint32_t next_free_element_fragment_index;
     uint32_t size ;
     uint32_t fragment_size;

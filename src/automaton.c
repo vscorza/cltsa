@@ -348,10 +348,14 @@ void automaton_automata_context_print(automaton_automata_context* ctx, char* pre
 		automaton_fluent_print(&(ctx->global_fluents[i]), ctx, prefix2, "\n");
 	}
 	printf("%sLiveness Valuations:\n", prefix2);
+	char *buff = calloc(1024, sizeof(char));
 	for(i = 0; i < ctx->liveness_valuations_count; i++){
 		printf("%s:\n", ctx->liveness_valuations_names[i]);
-		obdd_print(ctx->liveness_valuations[i]);
+		obdd_print(ctx->liveness_valuations[i], buff);
+		printf("%s", buff);
+		buff[0] = '\0';
 	}
+	free(buff);
 	if(suffix != NULL)
 		printf("%s", suffix);	
 }

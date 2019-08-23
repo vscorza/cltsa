@@ -10,7 +10,7 @@
 
 #include "automaton_utils.h"
 
-#define DEBUG_ORDERED_LIST 1
+#define DEBUG_ORDERED_LIST 0
 
 typedef uint32_t (*automaton_ordered_list_key_extractor_func)(void*);
 typedef void (*automaton_ordered_list_copy_func)(void*, void*);

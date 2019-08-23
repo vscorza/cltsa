@@ -112,8 +112,9 @@ void run_obdd_exists(){
 	//keeps a stack of predecessors as track of the path taken
 	int32_t* last_succ_index	= calloc(sizeof(int32_t), variables_count);
 
-
+#if PRINT_TEST_OUTPUT
 	printf("exists X1 (X1 && X2)");
+#endif
 	img_count	= 3;
 	total_img	= malloc(sizeof(uint32_t) * img_count);
 	total_img[0]= 2;
@@ -126,8 +127,9 @@ void run_obdd_exists(){
 	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count, buff);
 	obdd_destroy(exists_obdd);
 	free(total_img);
-
+#if PRINT_TEST_OUTPUT
 	printf("exists X2 (X1 && X2 && X3)");
+#endif
 	img_count	= 3;
 	total_img	= malloc(sizeof(uint32_t) * img_count);
 	total_img[0]= 2;
@@ -140,8 +142,9 @@ void run_obdd_exists(){
 	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count, buff);
 	obdd_destroy(exists_obdd);
 	free(total_img);
-
+#if PRINT_TEST_OUTPUT
 	printf("exists X1, X2 (X1 && X2 && X3)");
+#endif
 	img_count	= 3;
 	total_img	= malloc(sizeof(uint32_t) * img_count);
 	total_img[0]= 2;
@@ -153,6 +156,12 @@ void run_obdd_exists(){
 			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
 	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count, buff);
 	obdd_destroy(exists_obdd);
+
+	char * expected = test_get_output_content("tests/expected_output/run_obdd_exists_tests.exp");
+	bool txt_cmp = strcmp(buff, expected) == 0;
+	print_test_result(txt_cmp, "OBDD EXISTS", "obdd exists test");
+	free(expected);
+
 
 	free(valuations);
 	free(total_img);
@@ -213,8 +222,9 @@ void run_obdd_valuations(){
 	obdd_node** last_nodes		= malloc(sizeof(obdd_node*) * variables_count);
 	//keeps a stack of predecessors as track of the path taken
 	int32_t* last_succ_index	= calloc(sizeof(int32_t), variables_count);
-
+#if PRINT_TEST_OUTPUT
 	printf("!X1 over x2\n");
+#endif
 	img_count	= 1;
 	total_img	= malloc(sizeof(uint32_t) * img_count);
 	total_img[0]	= 2 + 2;
@@ -222,8 +232,9 @@ void run_obdd_valuations(){
 			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
 	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count, buff);
 	free(total_img);
-
+#if PRINT_TEST_OUTPUT
 	printf("!X1 over x1, x2\n");
+#endif
 	img_count	= 2;
 	total_img	= malloc(sizeof(uint32_t) * img_count);
 	total_img[0]	= 2;
@@ -232,8 +243,9 @@ void run_obdd_valuations(){
 			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
 	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count, buff);
 	free(total_img);
-
+#if PRINT_TEST_OUTPUT
 	printf("!X1 && !X2 over x1,x2\n");
+#endif
 	img_count	= (new_mgr->vars_dict->size - 2) / 2;
 	total_img	= malloc(sizeof(uint32_t) * img_count);
 	for(i = 0; i < img_count; i++)
@@ -242,8 +254,9 @@ void run_obdd_valuations(){
 			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
 	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count, buff);
 	free(total_img);
-
+#if PRINT_TEST_OUTPUT
 	printf("!X1 && !X2 over x1\n");
+#endif
 	img_count	= 1;
 	total_img	= malloc(sizeof(uint32_t) * img_count);
 	total_img[0]= 2;
@@ -252,8 +265,9 @@ void run_obdd_valuations(){
 	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count, buff);
 	obdd_print(not_x2_obdd, buff);
 	free(total_img);
-
+#if PRINT_TEST_OUTPUT
 	printf("!X2 over x1, x2, x3\n");
+#endif
 	img_count	= 3;
 	total_img	= malloc(sizeof(uint32_t) * img_count);
 	total_img[0]	= 2;
@@ -263,8 +277,9 @@ void run_obdd_valuations(){
 			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
 	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count, buff);
 	free(total_img);
-
+#if PRINT_TEST_OUTPUT
 	printf("!X1 && !X2 over x1, x2, x3\n");
+#endif
 	img_count	= 3;
 	total_img	= malloc(sizeof(uint32_t) * img_count);
 	total_img[0]	= 2;
@@ -274,8 +289,9 @@ void run_obdd_valuations(){
 			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
 	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count, buff);
 	free(total_img);
-
+#if PRINT_TEST_OUTPUT
 	printf("true over x1, x2, x3\n");
+#endif
 	img_count	= 3;
 	total_img	= malloc(sizeof(uint32_t) * img_count);
 	total_img[0]	= 2;
@@ -286,8 +302,12 @@ void run_obdd_valuations(){
 	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count, buff);
 	free(total_img);
 
+	char * expected = test_get_output_content("tests/expected_output/run_obdd_valuations_tests.exp");
+	bool txt_cmp = strcmp(buff, expected) == 0;
+	print_test_result(txt_cmp, "OBDD VALUATIONS", "obdd valuations test");
+	free(expected);
+
 	free(valuations);
-	free(total_img);
 	free(initialized_values);
 	free(last_succ_index);
 	free(valuation_set);
@@ -385,12 +405,19 @@ void run_next_obdd_tests(){
 	obdd* next_x2_obdd	= obdd_apply_next(x2_obdd);
 
 	obdd* not_x1_then_next_x2_obdd	= obdd_apply_or(x1_obdd, next_x2_obdd);
+#if PRINT_TEST_OUTPUT
 	printf("!X1");
+#endif
 	char *buff = calloc(16384, sizeof(char));
 	obdd_print(not_x1_obdd, buff);
+
+#if PRINT_TEST_OUTPUT
 	printf("X(X2)");
+#endif
 	obdd_print(next_x2_obdd, buff);
+#if PRINT_TEST_OUTPUT
 	printf("!X1 -> X(X2)\n");
+#endif
 	obdd_print(not_x1_then_next_x2_obdd, buff);
 	uint32_t valuations_count;
 	uint32_t img_count	= new_mgr->vars_dict->size - 2;
@@ -413,6 +440,14 @@ void run_next_obdd_tests(){
 	obdd_get_valuations(new_mgr, not_x1_then_next_x2_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count
 			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
 	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count, buff);
+	char * expected = test_get_output_content("tests/expected_output/run_next_obdd_tests.exp");
+	bool txt_cmp = strcmp(buff, expected) == 0;
+	print_test_result(txt_cmp, "NEXT OBDD", "next obdd test");
+
+	free(expected);
+
+
+
 	free(valuations);
 	free(total_img);
 	free(initialized_values);
@@ -454,25 +489,30 @@ void run_obdd_tests(){
 	obdd* exists_obdd	= obdd_exists(x2_eq_fallacy_obdd, "x2");
 	char *buff = calloc(16384, sizeof(char));
 	obdd_print(x1_or_x2_obdd, buff);
+#if PRINT_TEST_OUTPUT
 	printf("x1 || x2 sat? : %s \n", obdd_is_sat(new_mgr, x1_or_x2_obdd->root_obdd) ? "yes" : "no");
 	printf("x1 || x2 taut? : %s \n", obdd_is_tautology(new_mgr, x1_or_x2_obdd->root_obdd) ? "yes" : "no");
-
+#endif
 	obdd_print(x1_and_x2_obdd, buff);
+#if PRINT_TEST_OUTPUT
 	printf("x1 && x2 sat? : %s \n", obdd_is_sat(new_mgr, x1_and_x2_obdd->root_obdd) ? "yes" : "no");
 	printf("x1 && x2 taut? : %s \n", obdd_is_tautology(new_mgr, x1_and_x2_obdd->root_obdd) ? "yes" : "no");
-
+#endif
 	obdd_print(x1_and_not_x1_obdd, buff);
+#if PRINT_TEST_OUTPUT
 	printf("x1 && !x1 sat? : %s \n", obdd_is_sat(new_mgr, x1_and_not_x1_obdd->root_obdd) ? "yes" : "no");
 	printf("x1 && !x1 taut? : %s \n", obdd_is_tautology(new_mgr, x1_and_not_x1_obdd->root_obdd) ? "yes" : "no");
-
+#endif
 	obdd_print(x1_and_x2_then_x1, buff);
+#if PRINT_TEST_OUTPUT
 	printf("(x1 && x2)->x1 sat? : %s \n", obdd_is_sat(new_mgr, x1_and_x2_then_x1->root_obdd) ? "yes" : "no");
 	printf("(x1 && x2)->x1 taut? : %s \n", obdd_is_tautology(new_mgr, x1_and_x2_then_x1->root_obdd) ? "yes" : "no");
-
+#endif
 	obdd_print(exists_obdd, buff);
+#if PRINT_TEST_OUTPUT
 	printf("E x2.(x2 = (x1 && !x1)) sat? : %s \n", obdd_is_sat(new_mgr, exists_obdd->root_obdd) ? "yes" : "no");
 	printf("E x2.(x2 = (x1 && !x1)) taut? : %s \n", obdd_is_tautology(new_mgr, exists_obdd->root_obdd) ? "yes" : "no");
-
+#endif
 	obdd_mgr_print(new_mgr, buff);
 	uint32_t valuations_count;
 
@@ -493,29 +533,40 @@ void run_obdd_tests(){
 
 	for(i = 0; i < img_count; i++)
 		total_img[i]	= i + 2;
-
+#if PRINT_TEST_OUTPUT
 	printf("X1 && X2\n");
+#endif
 	obdd_print(x1_and_x2_obdd, buff);
 	obdd_get_valuations(new_mgr, x1_and_x2_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count
 			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
 	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count, buff);
-
+#if PRINT_TEST_OUTPUT
 	printf("X1 & X2 && X3\n");
+#endif
 	obdd_print(x1_and_x2_and_x3_obdd, buff);
 	obdd_get_valuations(new_mgr, x1_and_x2_and_x3_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count
 			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
 	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count, buff);
-
+#if PRINT_TEST_OUTPUT
 	printf("X1 || X2\n");
+#endif
 	obdd_print(x1_or_x2_obdd, buff);
 	obdd_get_valuations(new_mgr, x1_or_x2_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count
 			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
 	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count, buff);
+#if PRINT_TEST_OUTPUT
 	printf("X1 || X2 || X3\n");
+#endif
 	obdd_print(x1_or_x2_or_x3_obdd, buff);
 	obdd_get_valuations(new_mgr, x1_or_x2_or_x3_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count
 			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
 	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count, buff);
+
+	char * expected = test_get_output_content("tests/expected_output/run_obdd_tests.exp");
+	bool txt_cmp = strcmp(buff, expected) == 0;
+	print_test_result(txt_cmp, "OBDD", "obdd test");
+
+	free(expected);
 	free(valuations);
 	free(total_img);
 	free(initialized_values);
@@ -566,70 +617,100 @@ void run_max_heap_tests(){
 	test_item_bucket current_item;
 	uint32_t i;
 	uint32_t cycles = 100;
+	char *buff = calloc(150 * cycles, sizeof(char));
 	for(i = 0; i < cycles; i++){
 		current_item.b = i; current_item.a = i + cycles;
 		automaton_max_heap_add_entry(heap, &current_item);
-		printf("PUSHING ITEM <%d,%d>\n", current_item.a, current_item.b);
+		snprintf(buff + strlen(buff), sizeof(buff), "PUSHING ITEM <%d,%d>\n", current_item.a, current_item.b);
 	}
 	for(i = 0; i < cycles; i++){
 		current_item.b = i; current_item.a = i;
 		automaton_max_heap_add_entry(heap, &current_item);
-		printf("PUSHING ITEM <%d,%d>\n", current_item.a, current_item.b);
+		snprintf(buff + strlen(buff), sizeof(buff), "PUSHING ITEM <%d,%d>\n", current_item.a, current_item.b);
 	}
 	for(i = 0; i < cycles * 2; i++){
 		automaton_max_heap_pop_entry(heap, &current_item);
-		printf("POPPING ITEM: <%d,%d>\n", i, current_item.a, current_item.b);
+		snprintf(buff + strlen(buff), sizeof(buff), "POPPING ITEM: <%d,%d>\n", i, current_item.a, current_item.b);
 	}
 	automaton_max_heap_destroy(heap);
+
+	FILE *ftest = fopen("tests/expected_output/run_max_heap_tests.exp", "w");
+	fprintf(ftest, "%s", buff);
+	fclose(ftest);
+
+	char * expected = test_get_output_content("tests/expected_output/run_max_heap_tests.exp");
+	bool txt_cmp = strcmp(buff, expected) == 0;
+	print_test_result(txt_cmp, "MAX HEAP", "max heap test");
+
+	free(expected);
+	free(buff);
+
 }
 
 void run_concrete_bucket_list_tests(){
 	automaton_concrete_bucket_list* list	= automaton_concrete_bucket_list_create(RANKING_BUCKET_SIZE, test_item_extractor, sizeof(test_item_bucket));
 	test_item_bucket current_item;
 	uint32_t i;
-	uint32_t cycles = 60;
+	uint32_t cycles = 600;
 	for(i = 0; i < cycles; i++){
 		current_item.b = i; current_item.a = i % 2;
 		automaton_concrete_bucket_add_entry(list, &current_item);
 	}
+
+	char *buff = calloc(100 * cycles, sizeof(char));
+
+
 	for(i = 0; i < cycles; i++){
 		automaton_concrete_bucket_pop_entry(list, &current_item);
-		if(i % 500){
-			printf("ITEM at %d: <%d,%d>\n", i, current_item.a, current_item.b);
-		}
+			snprintf(buff + strlen(buff), sizeof(buff), "ITEM at %d: <%d,%d>\n", i, current_item.a, current_item.b);
 	}
 	automaton_concrete_bucket_destroy(list);
+
+	char * expected = test_get_output_content("tests/expected_output/run_concrete_bucket_list_tests.exp");
+	bool txt_cmp = strcmp(buff, expected) == 0;
+	print_test_result(txt_cmp, "CONCRETE BUCKET LIST", "concrete bucket list test");
+	free(expected);
+	free(buff);
 }
 
 void run_ordered_list_tests(){
 	test_item_bucket current_item;
 	uint32_t i;
 	automaton_ordered_list* ordered_list	= automaton_ordered_list_create(2, test_item_extractor, sizeof(test_item_bucket));
-	uint32_t cycles = 6;//100000;
+	uint32_t cycles = 1000;
+	char *buff = calloc(100 * cycles, sizeof(char));
 	for(i = 0; i < cycles; i++){
 		current_item.b = i; current_item.a = i + cycles;
-		printf("PUSHING ITEM at %d: <%d,%d>\n", i, current_item.a, current_item.b);
+		snprintf(buff + strlen(buff), sizeof(buff), "PUSHING ITEM at %d: <%d,%d>\n", i, current_item.a, current_item.b);
 		automaton_ordered_list_add_entry(ordered_list, &current_item);
 	}
 	for(i = 0; i < cycles; i++){
 		current_item.b = i; current_item.a = i;
-		printf("PUSHING ITEM at %d: <%d,%d>\n", i, current_item.a, current_item.b);
+		snprintf(buff + strlen(buff), sizeof(buff), "PUSHING ITEM at %d: <%d,%d>\n", i, current_item.a, current_item.b);
 		automaton_ordered_list_add_entry(ordered_list, &current_item);
 	}
 	test_item_bucket* print_bucket;
 	for(i = 0; i < ordered_list->temporary_count; i++){
 		print_bucket = GET_ORDERED_LIST_SINGLE_ENTRY(ordered_list, ordered_list->temporary, i);
-		printf("temporary item at %d: <%d,%d>\n", i, print_bucket->a, print_bucket->b);
+		snprintf(buff + strlen(buff), sizeof(buff), "temporary item at %d: <%d,%d>\n", i, print_bucket->a, print_bucket->b);
 	}
 	for(i = 0; i < ordered_list->count; i++){
 			print_bucket = GET_ORDERED_LIST_SINGLE_ENTRY(ordered_list, ordered_list->values, i);
-			printf("values item at %d: <%d,%d>\n", i, print_bucket->a, print_bucket->b);
+			snprintf(buff + strlen(buff), sizeof(buff), "values item at %d: <%d,%d>\n", i, print_bucket->a, print_bucket->b);
 		}
-	for(i = 0; i < cycles * 2; i++){
+	while(ordered_list->count > 0){
 		automaton_ordered_list_pop_entry(ordered_list, &current_item);
-		printf("POPPING ITEM at %d: <%d,%d>\n", i, current_item.a, current_item.b);
+		snprintf(buff + strlen(buff), sizeof(buff), "POPPING ITEM at %d: <%d,%d>\n", i, current_item.a, current_item.b);
 	}
 	automaton_ordered_list_destroy(ordered_list);
+
+	char * expected = test_get_output_content("tests/expected_output/run_ordered_list_tests.exp");
+	bool txt_cmp = strcmp(buff, expected) == 0;
+	print_test_result(txt_cmp, "OREDERED LIST", "ordered bucket list test");
+
+	free(expected);
+	free(buff);
+
 }
 
 void run_fsp_tests(uint32_t test_count){
@@ -840,30 +921,18 @@ void run_report_tests(){
 	automaton_automaton_add_transition(automaton, t1);
 	automaton_automaton_update_valuation(automaton);
 
-
-	obdd_destroy(liveness_valuations[0]);
-	obdd_destroy(liveness_valuations[1]);
-
 	free(local_alphabet);
 	free(fluents);
 	free(liveness_valuations);
 	free(liveness_valuations_names);
 
-	printf("FLUENT:");
-	automaton_fluent_serialize_report(stdout, f1);
-	printf("\n");
-	printf("ALPHABET:");
-	automaton_alphabet_serialize_report(stdout, alphabet);
-	printf("\n");
-	printf("CTX:");
-	automaton_automata_context_serialize_report(stdout, ctx);
-	printf("\n");
-	printf("Transition:");
-	automaton_transition_serialize_report(stdout, t1);
-	printf("\n");
-	printf("Automaton:");
-	automaton_automaton_serialize_report(stdout, automaton);
-	printf("\n");
+
+	FILE *ftest = fopen("tests/expected_output/run_report_tests.test", "w");
+	automaton_fluent_serialize_report(ftest, f1);
+	automaton_alphabet_serialize_report(ftest, alphabet);
+	automaton_automata_context_serialize_report(ftest, ctx);
+	automaton_transition_serialize_report(ftest, t1);
+	automaton_automaton_serialize_report(ftest, automaton);
 
 	automaton_transition_destroy(t1, true);
 	automaton_fluent_destroy(f1, true);
@@ -872,13 +941,26 @@ void run_report_tests(){
 	automaton_signal_event_destroy(x2, true);
 	automaton_signal_event_destroy(y1, true);
 	automaton_signal_event_destroy(y2, true);
+
+	automaton_automaton_destroy(automaton);
+	automaton_automata_context_destroy(ctx);
+	obdd_mgr_destroy(mgr);
+
+	fclose(ftest);
+	char * current = test_get_output_content("tests/expected_output/run_report_tests.test");
+	char * expected = test_get_output_content("tests/expected_output/run_report_tests.exp");
+	bool txt_cmp = strcmp(current, expected) == 0;
+	print_test_result(txt_cmp, "REPORT", "automaton report test");
+
+	free(expected);
+	free(current);
 }
 
 typedef struct test_item_pool_str{
 	uint32_t a; char name[250];
 }test_item_pool;
 
-#define MAX_POOL_COUNT	1000000
+#define MAX_POOL_COUNT	1000
 
 void run_fast_pool_tests(){
 	size_t item_size	= sizeof(test_item_pool);
@@ -888,54 +970,58 @@ void run_fast_pool_tests(){
 	test_item_pool** pool_frag2	= malloc(MAX_POOL_COUNT * sizeof(uint32_t));
 
 
+	char *buff = calloc(MAX_POOL_COUNT * 200, sizeof(char));
 
 	automaton_fast_pool* pool1	= automaton_fast_pool_create(item_size, 100, 100);
 	automaton_fast_pool* pool2	= automaton_fast_pool_create(item_size, 5, 2);
 
 	uint32_t i;
 	for(i = 0; i < MAX_POOL_COUNT/2; i++){
-		test_item_pool* item	= automaton_fast_pool_get_instance(pool1, &(pool_frag1[i]));
+		test_item_pool* item	= automaton_fast_pool_get_instance(pool1, (uintptr_t)&(pool_frag1[i]));
 		item->a		= i;
 		item->name[0]	= 'h';item->name[1]	= 'i';item->name[2]	= '!';item->name[3]	= '\0';
 		pool_ref1[i]	= item;
-		item	= automaton_fast_pool_get_instance(pool2, &(pool_frag2[i]));
+		item	= automaton_fast_pool_get_instance(pool2, (uintptr_t)&(pool_frag2[i]));
 		item->a		= i;
 		item->name[0]	= 'h';item->name[1]	= 'i';item->name[2]	= '!';item->name[3]	= '\0';
 		pool_ref2[i]	= item;
 	}
-	printf("10 100 pool \n");
+	snprintf(buff + strlen(buff), sizeof(buff), "10 100 pool \n");
 	for(i = 0; i < MAX_POOL_COUNT/2; i++){
-		if(i % 999 == 0)
-			printf("%d%s ", pool_ref1[i]->a, pool_ref1[i]->name);
+		snprintf(buff + strlen(buff), sizeof(buff), "%d%s ", pool_ref1[i]->a, pool_ref1[i]->name);
 	}
-	printf("\n");
-	printf("5 2 pool \n");
+	snprintf(buff + strlen(buff), sizeof(buff), "\n");
+	snprintf(buff + strlen(buff), sizeof(buff), "5 2 pool \n");
 	for(i = 0; i < MAX_POOL_COUNT/2; i++){
-		if(i % 999 == 0)
-			printf("%d%s ", pool_ref2[i]->a, pool_ref2[i]->name);
+		snprintf(buff + strlen(buff), sizeof(buff), "%d%s ", pool_ref2[i]->a, pool_ref2[i]->name);
 	}
-	printf("\n");
+	snprintf(buff + strlen(buff), sizeof(buff), "\n");
 	for(i = 0; i < MAX_POOL_COUNT/2; i++){
-		automaton_fast_pool_release_instance(pool1, pool_frag1[i]);
-		automaton_fast_pool_release_instance(pool2, pool_frag2[i]);
+		automaton_fast_pool_release_instance(pool1, (uintptr_t)pool_frag1[i]);
+		automaton_fast_pool_release_instance(pool2, (uintptr_t)pool_frag2[i]);
 	}
-	for(i = 0; i < MAX_POOL_COUNT; i++){
-		test_item_pool* item	= automaton_fast_pool_get_instance(pool1, &(pool_frag1[i]));
+	for(i = 0; i < MAX_POOL_COUNT/2; i++){
+		test_item_pool* item	= automaton_fast_pool_get_instance(pool1, (uintptr_t)&(pool_frag1[i]));
 		item->a		= i;
 		item->name[0]	= 'h';item->name[1]	= 'i';item->name[2]	= '!';item->name[3]	= '\0';
 		pool_ref1[i]	= item;
-		item	= automaton_fast_pool_get_instance(pool2, &(pool_frag2[i]));
+		item	= automaton_fast_pool_get_instance(pool2, (uintptr_t)&(pool_frag2[i]));
 		item->a		= i;
 		item->name[0]	= 'h';item->name[1]	= 'i';item->name[2]	= '!';item->name[3]	= '\0';
 		pool_ref2[i]	= item;
-		if(i % 999 == 0)
-			printf("%d%s ", item->a, item->name);
+		snprintf(buff + strlen(buff), sizeof(buff), "%d%s ", item->a, item->name);
 	}
-	printf("\n");
+	snprintf(buff + strlen(buff), sizeof(buff), "\n");
 	automaton_fast_pool_destroy(pool1);
 	automaton_fast_pool_destroy(pool2);
 	free(pool_frag1);free(pool_frag2);
 	free(pool_ref1);free(pool_ref2);
+	char * expected = test_get_output_content("tests/expected_output/run_fast_pool_tests.exp");
+	bool txt_cmp = strcmp(buff, expected) == 0;
+	print_test_result(txt_cmp, "FAST POOL", "fast pool test");
+
+	free(expected);
+	free(buff);
 }
 void run_all_tests(){
 	run_tree_tests();
@@ -950,7 +1036,6 @@ int main (void){
 	//MODULE TESTING
 	run_obdd_tree_tests();
 	run_small_obdd_tests();
-/*
 	run_next_obdd_tests();
 	run_obdd_tests();
 	run_obdd_valuations();
@@ -960,14 +1045,12 @@ int main (void){
 	run_max_heap_tests();
 	run_report_tests();
 	run_fast_pool_tests();
-*/
-	//DRY TESTS
 
+	//DRY TESTS
 	run_parse_test("tests/test5.fsp",  "range tests");
 	run_parse_test("tests/test40.fsp", "compositions type");
 	run_parse_test("tests/test23.fsp", "biscotti");
 	run_parse_test("tests/test30.fsp", "lift 2 floors");//lift 2 floors
-
 	//run_parse_test("tests/test18.fsp",  "test18");
 
 	//run_parse_test("tests/test26.fsp", "test26");

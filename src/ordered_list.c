@@ -173,8 +173,9 @@ bool automaton_ordered_list_add_entry(automaton_ordered_list* list, void* entry)
 				printf("Comparing: %d > %d\n", list->extractor_func(GET_ORDERED_LIST_SINGLE_ENTRY(list, list->temporary, temporary_index)),
 								list->extractor_func(GET_ORDERED_LIST_SINGLE_ENTRY(list, list->values,values_index)));
 #endif
-				if(values_index < (list->count) && list->extractor_func(GET_ORDERED_LIST_SINGLE_ENTRY(list, list->temporary, temporary_index)) >
-				list->extractor_func(GET_ORDERED_LIST_SINGLE_ENTRY(list, list->values,values_index))){
+				if(temporary_index >= list->temporary_count ||
+					(values_index < (list->count) && list->extractor_func(GET_ORDERED_LIST_SINGLE_ENTRY(list, list->temporary, temporary_index)) >
+					list->extractor_func(GET_ORDERED_LIST_SINGLE_ENTRY(list, list->values,values_index)))){
 					memcpy(GET_ORDERED_LIST_SINGLE_ENTRY(list, new_values, (uint32_t)i), GET_ORDERED_LIST_SINGLE_ENTRY(list, list->values, values_index++), list->sizeof_element);
 #if DEBUG_ORDERED_LIST
 					printf("%d(%d),", list->extractor_func(GET_ORDERED_LIST_SINGLE_ENTRY(list, new_values, (uint32_t)i)), values_index - 1);
