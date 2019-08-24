@@ -2314,6 +2314,7 @@ void automaton_automaton_print_traces_to_deadlock(automaton_automaton* automaton
 	uint32_t printed_traces = 0;
 	uint32_t *sizes;
 	uint32_t **traces	= automaton_automaton_traces_to_deadlock(automaton, automaton->initial_states[0], &count, &sizes);
+	if(traces == NULL)return;
 	uint32_t i, j, k,l;
 	uint32_t current_state, next_state;
 	automaton_transition *current_transition;
@@ -2350,6 +2351,12 @@ void automaton_automaton_print_traces_to_deadlock(automaton_automaton* automaton
 }
 
 uint32_t** automaton_automaton_traces_to_deadlock(automaton_automaton* automaton, uint32_t initial_state, uint32_t *count, uint32_t **sizes){
+	if(initial_state >= automaton->transitions_count){
+		printf("Initial state %d higher than transitions count %d\n", initial_state, automaton->transitions_count);
+		*count 				= 0;
+		return NULL;
+	}
+
 	*count 				= 0;
 	uint32_t* distances	= calloc(automaton->transitions_count, sizeof(uint32_t));
 	bool* visited		= calloc(automaton->transitions_count, sizeof(bool));

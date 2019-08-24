@@ -1053,8 +1053,13 @@ int main (void){
 	run_parse_test("tests/test5.fsp",  "range tests");
 	run_parse_test("tests/test40.fsp", "compositions type");
 	run_parse_test("tests/test23.fsp", "biscotti");
-	run_parse_test("tests/test30.fsp", "lift 2 floors");//lift 2 floors
-	run_parse_test("tests/test35.fsp", "GenBuf 2 sndrs");//GENBUF 2 Sndrs
+	//run_parse_test("tests/test30.fsp", "lift 2 floors");//lift 2 floors
+
+	//run_parse_test("tests/test41.fsp",  "k 4 graph tests");
+	//run_parse_test("tests/test37.fsp", "lts load test 1");
+	//run_parse_test("tests/test39.fsp", "lift 7 floors");//lift 7 floors
+	//run_parse_test("tests/test35.fsp", "GenBuf 2 sndrs");//GENBUF 2 Sndrs
+	//run_parse_test("tests/test31.fsp", "GenBuf 4 sndrs");//GENBUF 4 sndrs
 	//run_parse_test("tests/test18.fsp",  "test18");
 
 	//run_parse_test("tests/test26.fsp", "test26");
@@ -1073,9 +1078,9 @@ int main (void){
 
 	//IN PROGRESS
 	//run_parse_test("tests/test37.fsp", "lts load test 1");
-	//run_parse_test("tests/test39.fsp", "lift 7 floors");//lift 7 floors
+
 	//run_parse_test("tests/test38.fsp", "lift 5 floors + 10 variables");//lift 5 floors + 10 variables
-	//run_parse_test("tests/test31.fsp", "GenBuf 4 sndrs");//GENBUF 4 sndrs
+
 
 	obdd_mgr* mgr	= parser_get_obdd_mgr();
 	obdd_mgr_destroy(mgr);

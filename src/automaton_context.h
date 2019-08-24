@@ -18,9 +18,9 @@
 #define OUTPUT_SIGNALS_NAME_AUT			"Output_Signals"
 
 #define DEBUG_PARSE_STATES 0
-#define DEBUG_LTL_AUTOMATON 0
+#define DEBUG_LTL_AUTOMATON 1
 
-#define DEBUG_OBDD_DEADLOCK 0
+#define DEBUG_OBDD_DEADLOCK 1
 #define DEADLOCK_TRACE_COUNT 0
 
 #define LTL_BUCKET_SIZE	10000
@@ -89,6 +89,8 @@ int32_t automaton_parsing_tables_get_entry_index(automaton_parsing_tables* table
 int32_t automaton_parsing_tables_add_entry(automaton_parsing_tables* tables, automaton_parsing_table_entry_type type, char* key, void* value);
 automaton_automata_context* automaton_automata_context_create_from_syntax(automaton_program_syntax* program, char* ctx_name
 		, bool print_fsp);
+void automaton_indexes_valuation_add_indexes(automaton_indexes_valuation* valuation, automaton_parsing_tables* tables, automaton_indexes_syntax* indexes);
+void automaton_indexes_valuation_fix_index(automaton_indexes_valuation* valuation, char* index_name, int32_t value);
 automaton_indexes_valuation* automaton_indexes_valuation_create_from_indexes(automaton_parsing_tables* tables, automaton_indexes_syntax* indexes);
 void automaton_indexes_valuation_increase(automaton_indexes_valuation* valuation);
 bool automaton_indexes_valuation_has_next(automaton_indexes_valuation* valuation);
@@ -110,7 +112,8 @@ bool automaton_statement_syntax_to_fluent(automaton_automata_context* ctx, autom
 		, automaton_parsing_tables* tables, automaton_alphabet* global_alphabet);
 automaton_fluent* automaton_fluent_create_from_syntax(automaton_parsing_tables* tables, automaton_fluent_syntax* fluent_def_syntax, automaton_alphabet* global_alphabet);
 void automaton_index_syntax_get_range(automaton_parsing_tables* tables, automaton_index_syntax* index, int32_t *lower_index, int32_t *upper_index);
-void automaton_indexes_syntax_eval_strings(automaton_parsing_tables* tables, automaton_indexes_valuation* valuation, char*** a, int32_t* a_count, automaton_indexes_syntax* indexes);
+void automaton_indexes_syntax_eval_strings(automaton_parsing_tables* tables, automaton_indexes_valuation* valuation, uint32_t*** values, char*** a, int32_t* a_count, automaton_indexes_syntax* indexes);
+//void automaton_indexes_syntax_eval_strings(automaton_parsing_tables* tables, automaton_indexes_valuation* valuation, char*** a, int32_t* a_count, automaton_indexes_syntax* indexes);
 bool automaton_add_transition_from_valuations(obdd_mgr* mgr, automaton_automaton* automaton, uint32_t from_state, uint32_t to_state, bool* from_valuation,
 		bool* to_valuation, bool is_initial, bool is_input, uint32_t x_count, uint32_t y_count, uint32_t* obdd_on_indexes, uint32_t* obdd_off_indexes
 		,uint32_t* x_y_alphabet, uint32_t* x_y_x_p_alphabet);
