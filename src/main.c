@@ -1026,17 +1026,7 @@ void run_fast_pool_tests(){
 	free(buff);
 }
 void run_all_tests(){
-	run_tree_tests();
-	run_automaton_tests();
-	run_fast_pool_tests();
-	run_fsp_tests(5);
-}
-
-int main (void){
-	//run_all_tests();
-
 	//MODULE TESTING
-
 	run_obdd_tree_tests();
 	run_small_obdd_tests();
 	run_next_obdd_tests();
@@ -1053,7 +1043,12 @@ int main (void){
 	run_parse_test("tests/test5.fsp",  "range tests");
 	run_parse_test("tests/test40.fsp", "compositions type");
 	run_parse_test("tests/test23.fsp", "biscotti");
-	//run_parse_test("tests/test30.fsp", "lift 2 floors");//lift 2 floors
+	run_parse_test("tests/test30.fsp", "lift 2 floors");//lift 2 floors
+}
+
+int main (void){
+	//run_all_tests();
+	run_parse_test("tests/test42.fsp",  "automata load test");
 
 	//run_parse_test("tests/test41.fsp",  "k 4 graph tests");
 	//run_parse_test("tests/test37.fsp", "lts load test 1");

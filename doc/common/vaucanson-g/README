@@ -1,0 +1,65 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% Package `VauCanSon-G'  version 0.4
+%%
+%%
+%% IMPORTANT NOTICE:
+%%
+%% Copyright (C) 2002-2008 Sylvain Lombardy and Jacques Sakarovitch
+%%
+%% This package may be distributed under the terms of the LaTeX Project
+%% Public License, as described in lppl.txt in the base LaTeX distribution.
+%% Either version 1.0 or, at your option, any later version.
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Vaucanson-G : A LaTeX package for drawing automata and graphs
+
+Vaucanson-G is based on PSTricks and PSTricks does not generate dvi instructions but instead
+directly generate postscript commands. As a result, the drawings composed by Vaucanson-G
+are not correctly visible under a dvi previewer. A very common outcome is an unscaled drawing and
+all the labels are written at the origin.
+
+Vaucanson-G is a package of macros that allow to draw automata and graphs within 
+texts written using LaTeX.
+Nota Bene: The commands for graphs are still under construction
+and are not described yet neither below nor in the manual.
+
+The design of Vaucanson-G implements the following
+underlying philosophy: "simple" automata should be 
+described with simple commands.
+The complexity of commands (or the number of things to be remembered 
+to use them) should gradually grow with the complexity of the figure 
+composed by these commands.
+
+The following example shows how a simple automaton can be drawn 
+with commands, in which only the minimal information needed (position 
+and label of states, shape and label of transitions) is made explicit.
+
+\begin{VCPicture}{(0,-2)(6,2)}
+% states
+\State[p]{(0,0)}{A} \State{(3,0)}{B} \State[r]{(6,0)}{C}
+% initial--final
+\Initial{A} \Final{C}
+% transitions 
+\EdgeL{A}{B}{a} \ArcL{B}{C}{b} \ArcL{C}{B}{b}
+\LoopN{A}{a} \LoopS{C}{d}
+%
+\end{VCPicture}
+
+This is achieved by the implicit definition of a large number of 
+parameters that control the geometry of the figure: size of states, 
+width of lines,...
+The way these parameters can be handled and modified yields what is 
+the second feature of Vaucanson-G:
+-- the easy definition of styles for the elements of figures.
+-- the capability of handling the figures both in size and 
+        appearance without modifying them.
+
+Vaucanson-G is a set of macros that uses commands of the PSTricks package,
+due to Timothy van Zandt and that appears in the current version 
+of the LaTeX distribution.
+The knowledge of this beautiful macro package is not necessary to use
+the Vaucanson-G commands.
+
+Last modified: Sep 27 2008
+

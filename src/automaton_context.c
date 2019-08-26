@@ -789,7 +789,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 								count 		= 1;
 
 								automaton_indexes_syntax_eval_strings(tables, current_valuation, &indexes_values, &ret_value, &count, atom_label->indexes);
-								for(n = 0; n < (uint32_t)count;n++)free(indexes_values[n]);
+								for(n = 0; n < count;n++)free(indexes_values[n]);
 								free(indexes_values); indexes_values = NULL;
 								for(n = 0; n < count; n++){
 									element_to_find		= ret_value[n];
@@ -894,7 +894,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 										aut_dupstr(&(ret_value[0]),  atom_label->set->labels[n][o]->string_terminal);
 										count 		= 1;
 										automaton_indexes_syntax_eval_strings(tables, NULL, &indexes_values, &ret_value, &count, atom_label->set->labels[n][o]->indexes);
-										for(n = 0; n < (uint32_t)count;n++)free(indexes_values[n]);
+										for(n = 0; n < count;n++)free(indexes_values[n]);
 										free(indexes_values); indexes_values = NULL;
 										for(n = 0; n < count; n++){
 											element_to_find		= ret_value[n];
@@ -1126,7 +1126,8 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 							continue;
 						}
 					}
-					automaton_indexes_valuation_set_to_label(tables, current_valuation, state->label->indexes, transition->to_state->indexes,transition->to_state->name, label_indexes);
+					automaton_indexes_valuation_set_to_label(tables, current_valuation
+							, NULL, NULL, state->label->indexes, transition->to_state->indexes,transition->to_state->name, label_indexes);
 					aut_push_string_to_list(&labels_list, &labels_list_count, label_indexes, &label_position, false, false);
 #if DEBUG_PARSE_STATES
 					aut_context_log("LAB.LIST(trans, %s):", label_indexes);
@@ -1211,7 +1212,8 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 											}
 											if(element_global_index >= 0){
 												//TODO: set label_indexes according to current valuation values
-												automaton_indexes_valuation_set_to_label(tables, current_valuation, state->label->indexes, transition->to_state->indexes,transition->to_state->name, label_indexes);
+												automaton_indexes_valuation_set_to_label(tables, current_valuation
+														, atom_label->indexes, indexes_values[n], state->label->indexes, transition->to_state->indexes,transition->to_state->name, label_indexes);
 												aut_push_string_to_list(&labels_list, &labels_list_count, label_indexes, &label_position, false, false);
 												
 #if DEBUG_PARSE_STATES
@@ -1256,7 +1258,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 												exit(-1);
 											}
 										}
-										for(n = 0; n < (uint32_t)count;n++)free(indexes_values[n]);
+										for(n = 0; n < count;n++)free(indexes_values[n]);
 										free(indexes_values); indexes_values = NULL;
 										next_from_state[next_from_state_count++]	= to_state;
 										to_state	= (uint32_t)label_position;
@@ -1288,7 +1290,8 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 											current_automaton_transition[automaton_transition_count++]	= automaton_transition_create(current_from_state[r], to_state);
 
 											aut_context_log("(%d->%d)[!SET]<%d>", current_from_state[r], to_state,automaton_transition_count);
-											automaton_indexes_valuation_set_to_label(tables, current_valuation, state->label->indexes, transition->to_state->indexes,transition->to_state->name, label_indexes);
+											automaton_indexes_valuation_set_to_label(tables, current_valuation
+													, NULL, NULL, state->label->indexes, transition->to_state->indexes,transition->to_state->name, label_indexes);
 											aut_push_string_to_list(&labels_list, &labels_list_count, label_indexes, &label_position, false, false);
 #if DEBUG_PARSE_STATES
 											aut_context_log("LAB.LIST(!set):");
@@ -1357,7 +1360,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 														automaton_transition_add_signal_event(current_automaton_transition[automaton_transition_count - 1], ctx, &(ctx->global_alphabet->list[element_global_index]));
 													}
 												}
-												for(p = 0; p < (uint32_t)count;p++)free(indexes_values[p]);
+												for(p = 0; p < count;p++)free(indexes_values[p]);
 												free(indexes_values); indexes_values = NULL;
 											}else{
 												element_to_find		= atom_label->set->labels[n][o]->string_terminal;
@@ -1465,8 +1468,9 @@ void automaton_indexes_valuation_increase(automaton_indexes_valuation* valuation
 bool automaton_indexes_valuation_has_next(automaton_indexes_valuation* valuation){
 	return valuation->current_combination <= (valuation->total_combinations);
 }
-void automaton_indexes_valuation_set_to_label(automaton_parsing_tables* tables, automaton_indexes_valuation* valuation, automaton_indexes_syntax* from_indexes, automaton_indexes_syntax* to_indexes, char* label, char* target){
-	if(valuation == NULL || from_indexes == NULL || to_indexes == NULL){
+void automaton_indexes_valuation_set_to_label(automaton_parsing_tables* tables, automaton_indexes_valuation* valuation
+		, automaton_indexes_syntax *atom_label_indexes, uint32_t* indexes_values, automaton_indexes_syntax* from_indexes, automaton_indexes_syntax* to_indexes, char* label, char* target){
+	if(atom_label_indexes == NULL && (valuation == NULL || from_indexes == NULL || to_indexes == NULL)){
 		strcpy(target, label);
 		return;
 	}
@@ -1475,22 +1479,24 @@ void automaton_indexes_valuation_set_to_label(automaton_parsing_tables* tables, 
 	sprintf(target, "%s", label);
 	char name[40];
 	char *from_ident, *to_ident;
-	for(i = 0; i < from_indexes->count; i++){
-		for(j = 0; j < to_indexes->count; j++){
-			if(from_indexes->indexes[i]->is_expr && (from_indexes->indexes[i]->expr->type == UPPER_IDENT_TERMINAL_TYPE_AUT ||
-					from_indexes->indexes[i]->expr->type == IDENT_TERMINAL_TYPE_AUT)){
-				from_ident	= from_indexes->indexes[i]->expr->string_terminal;
-			}else if(from_indexes->indexes[i]->is_expr){
-				sprintf(target, "%s_%d", target, automaton_expression_syntax_evaluate(tables, from_indexes->indexes[i]->expr, valuation));
-			}else{from_ident	= from_indexes->indexes[i]->lower_ident;}
-			if(to_indexes->indexes[j]->is_expr && (to_indexes->indexes[j]->expr->type == UPPER_IDENT_TERMINAL_TYPE_AUT ||
-					to_indexes->indexes[j]->expr->type == IDENT_TERMINAL_TYPE_AUT)){
-				to_ident	= to_indexes->indexes[j]->expr->string_terminal;
-			}else if(to_indexes->indexes[j]->is_expr){
-				sprintf(target, "%s_%d", target, automaton_expression_syntax_evaluate(tables, to_indexes->indexes[j]->expr, valuation));
-			}else{to_ident	= to_indexes->indexes[j]->lower_ident;}
-			if(strcmp(from_ident, to_ident) == 0){
-				sprintf(target, "%s_%d", target, valuation->current_values[i]);
+	if(!(valuation == NULL || from_indexes == NULL || to_indexes == NULL)){
+		for(i = 0; i < from_indexes->count; i++){
+			for(j = 0; j < to_indexes->count; j++){
+				if(from_indexes->indexes[i]->is_expr && (from_indexes->indexes[i]->expr->type == UPPER_IDENT_TERMINAL_TYPE_AUT ||
+						from_indexes->indexes[i]->expr->type == IDENT_TERMINAL_TYPE_AUT)){
+					from_ident	= from_indexes->indexes[i]->expr->string_terminal;
+				}else if(from_indexes->indexes[i]->is_expr){
+					sprintf(target, "%s_%d", target, automaton_expression_syntax_evaluate(tables, from_indexes->indexes[i]->expr, valuation));
+				}else{from_ident	= from_indexes->indexes[i]->lower_ident;}
+				if(to_indexes->indexes[j]->is_expr && (to_indexes->indexes[j]->expr->type == UPPER_IDENT_TERMINAL_TYPE_AUT ||
+						to_indexes->indexes[j]->expr->type == IDENT_TERMINAL_TYPE_AUT)){
+					to_ident	= to_indexes->indexes[j]->expr->string_terminal;
+				}else if(to_indexes->indexes[j]->is_expr){
+					sprintf(target, "%s_%d", target, automaton_expression_syntax_evaluate(tables, to_indexes->indexes[j]->expr, valuation));
+				}else{to_ident	= to_indexes->indexes[j]->lower_ident;}
+				if(strcmp(from_ident, to_ident) == 0){
+					sprintf(target, "%s_%d", target, valuation->current_values[i]);
+				}
 			}
 		}
 	}

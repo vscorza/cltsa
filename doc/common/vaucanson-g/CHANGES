@@ -1,0 +1,35 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% Package `VauCanSon-G'  version 0.4
+%%
+%%
+%% IMPORTANT NOTICE:
+%%
+%% Copyright (C) 2002-2008 Sylvain Lombardy and Jacques Sakarovitch
+%%
+%% This package may be distributed under the terms of the LaTeX Project
+%% Public License, as described in lppl.txt in the base LaTeX distribution.
+%% Either version 1.0 or, at your option, any later version.
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Vaucanson-G : Changes
+
+
+Oct 27 2008 :Version 0.4
+          New organisation of files, compliance with every version of pstricks and xcolor.
+
+Jan 28 2008 : Small bug fix in vaucanson-g.sty.
+
+Sep 13 2007 : New wrapper vaucanson-g.sty.
+           The "pstricks1-10" option is no more required; 
+            the wrapper detects whether the patch is needed (Thanks to Akim Demaille).
+
+Jul 24 2006 : Small bug fix.
+
+Jul 06 2006 : Small bug fix.
+
+Jan 25 2006 : Patch for compliance with PSTricks 1-10 or more. 
+               New beamer style (option [beamer]).
+
+Nov 02 2004 : Additional macro to draw "final StateVar".

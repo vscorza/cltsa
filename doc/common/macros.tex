@@ -1,0 +1,38 @@
+%Theorem Environments
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+\newtheorem{corollary}[theorem]{Corollary}
+
+\newcommand{\automaton}[1]{$#1 = (S_{#1}, \Sigma_{#1}, \Delta_{#1}, s_{0}^{#1})$}
+\newcommand{\ltsComposition}[3]{$#1 \parallel_{#3} #2 = (S_{#1}\times S_{#2}, \Sigma_{#1} \cup \Sigma_{#2}, \Delta, (s_{0}^{#1},s_{0}^{#2}))$}
+
+\newcommand{\traces}{\emph{Tr} }
+\newcommand{\true}{\emph{true} }
+\newcommand{\false}{\emph{false} }
+\newcommand{\assume}{\phi}
+\newcommand{\guarantee}{\gamma}
+\newcommand{\invariant}{\rho}
+\newcommand{\fluentp}[1]{\dot{#1}}
+\newcommand{\fluent}{\emph{fl}}
+\newcommand{\set}[1]{\{#1\}}
+\newcommand{\gr}{{GR(1)}\xspace}
+\newcommand{\sgr}{{SGR(1)}\xspace}
+\newcommand{\G}{{\bf G}}
+\newcommand{\F}{{\bf F}}
+\newcommand{\X}{{\bf X}}
+\newcommand{\U}{{\bf U}}
+
+\newcommand{\exception}{\epsilon}
+\newcommand{\extension}{\uparrow}
+\newcommand{\simulates}[2]{#1 \geq #2}
+\newcommand{\notsimulates}[2]{#1 \not\geq #2}
+\newcommand{\deterministic}[2]{\emph{det}( #1 , #2 )}
+\newcommand{\simState}[3]{\emph{simState}( #1 , #2 , #3 )}
+\newcommand{\initialState}[1]{\emph{init}( #1 )}
+\newcommand{\states}[1]{\emph{states}( #1 )}
+\newcommand{\executes}[1]{\triangleright #1 }
+
+
+\newcommand{\act}{A}
