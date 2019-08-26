@@ -1,0 +1,18 @@
+When specifying digital systems it is usually convenient to describe their behavior with game structures. These capture the semantic of a two player game where at each turn the first participant, the environment, observes the current state of both input and output variables defines a new valuation for the input, only then the second player, the system observes both the previous and the current partial states to define the new valuation for the output. 
+
+\begin{definition}
+	\label{def:GS} \emph{(Game Structures)} 
+	A \emph{Game Structure} (GS) $G =  \langle \gsV, \gsX, \gsY, \gsTheE, \gsTheS, \gsRhoE, \gsRhoS, \varphi \rangle$ consists of the following:
+	\begin{itemize}
+		\item $\gsV = \{v_1,\ldots,v_n\}$ : A finite set of typed state variables over finite domains, without loss of generality we assume that they are all Boolean. In the context of a game structure a state is defined as an assignment of $\gsV$, $s \in \Sigma_{\gsV}$.
+		\item $\gsX \subseteq \gsV$ is a set of input variables.
+		\item $\gsY = \gsV \setminus \gsX$ is a set of output variables.
+		\item $\gsTheE$ is an assertion over $\gsX$ characterizing the initial states of the environment.
+		\item $\gsTheS$ is an assertion over $\gsV$ characterizing the initial states of the system.		
+		\item $\gsRhoE(\gsV,\gsX')$ is the transition relation of the environment, it identifies a valuation $s_{\gsX} \in \Sigma_{\gsX}$ as a possible input in state $s$ if $(s,s_{\gsX}) \models \gsRhoE$.
+		\item $\gsRhoS(\gsV,\gsX',\gsY')$ is the transition relation of the system, it identifies a valuation $s_{\gsY} \in \Sigma_{\gsY}$ as a possible output in state $s$ reading input $s_{\gsX} $if $(s,s_{\gsX}, s_{\gsY}) \models \gsRhoS$.		
+		\item $\varphi$ is the winning condition, given by an LTL formula.
+	\end{itemize} 
+\end{definition}
+
+Many non trivial digital designs require the definition of state machines to some extent or another. On the other hand some high level specification can involve interactions with digital or truly concurrent components. Under these circumstances a mixed specification over a finite state process algebra and a LTL game structure definition is desirable.  In order to reason about their composed behavior a proper common representation is needed. Our approach is to transform the game structure into its equivalent finite state automaton and then compose both using one of the parallel composition semantics.

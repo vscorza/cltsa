@@ -21,3 +21,4 @@ cachegrind.out*
 .cproject
 .project
 .settings/
+*.~*
