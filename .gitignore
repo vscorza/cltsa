@@ -22,3 +22,8 @@ cachegrind.out*
 .project
 .settings/
 *.~*
+*.ps
+*.dvi
+*.bbl
+*.blg
+.Rhistory

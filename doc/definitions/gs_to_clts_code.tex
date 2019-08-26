@@ -1,0 +1,53 @@
+\renewcommand{\ttdefault}{pcr}
+\begin{figure}[bt]
+\begin{lstlisting}[escapeinside={[*}{*]},basicstyle=\scriptsize\ttfamily,columns=flexible,frame=lines,mathescape=true,xleftmargin=3.0ex,keywordstyle=\textbf,morekeywords={if,while,do,else,fork,int,null, algorithm, is, input, output, return, for},numbers=left,numberstyle=\scriptsize]
+algorithm gs_to_clts is
+	input: $GS$ a set of OBDD structure representing LTL formulas
+	output: $A$ a CLTS automaton equivalent to the game structure induced by $GS$
+	
+	$A$ $\leftarrow$ create_automaton($s_0$)
+	$visited \leftarrow \{s_0\}$ 
+	$frontier \leftarrow$ valuations($\gsTheE$)
+	for $s \in frontier$:
+		add_transition($A$, $s_0$, $s$)
+		evaluate_condition($A$, $\varphi$, $s$)		
+	$new\_frontier \leftarrow $ [] 
+	for $s \in frontier$:
+		add($visited$,$s$)
+		$current \leftarrow$ valuations(restrict($\gsTheS$, $s$))
+		for $s' \in current$:
+			add_transition($A$, $s$, $s'$)
+			evaluate_condition($A$, $\varphi$, $s'$)
+			if $s' \not\in new\_frontier$:			
+				add($new\_frontier$, $s'$)
+	$frontier \leftarrow new\_frontier$
+	while $frontier \neq$ []:
+		while $frontier \neq$ []:		
+			$s_{sys} \leftarrow$ pop($frontier$)
+			if $s_{sys} \in frontier$:
+				continue
+			$current \leftarrow$ valuations(restrict($\gsRhoE$, $s_{sys}$))
+			for $s' \in current$:
+				add_transition($A$, $s_{sys}$, $s'$)
+				evaluate_condition($A$, $\varphi$, $s'$)			
+				if $s' \not\in new\_frontier$:			
+					add($new\_frontier$, $s'$)				
+		$frontier \leftarrow new\_frontier$		
+		while $frontier \neq$ []:		
+			$s_{env} \leftarrow$ pop($frontier$)
+			if $s_{env} \in frontier$:
+			continue
+			$current \leftarrow$ valuations(restrict($\gsRhoS$, $s_{env}$))
+			for $s' \in current$:
+				add_transition($A$, $s_{env}$, $s'$)
+				evaluate_condition($A$, $\varphi$, $s'$)			
+				if $s' \not\in new\_frontier$:			
+					add($new\_frontier$, $s'$)				
+		$frontier \leftarrow new\_frontier$				
+	return $A$
+\end{lstlisting}
+\caption{Game Structure to CLTS translation algorithm}
+\label{fig:gs_to_clts_algorithm}
+%%\vspace*{-4mm}
+\MediumPicture
+\end{figure}
