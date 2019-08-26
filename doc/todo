@@ -1,15 +1,12 @@
 TODO:
-SPRINT1
-- Armar lista que priorice Los que tienen mayor subida de ranking Según el timestamp (processedstates) desde el último incremento 
-	- implementar esto con max_heap, revisar lo que ya está hecho
-- hay que meter una optimización para no realizabilidad, porque es cuando pega el peor caso, reimplementar konighoefer
-- probar amba con concurrent labels
-- fluents transitions should be applied to superset of alphabet
+- transition syntax proper def: each transition in a chain induces a new target state
+	S = (t[i:1..2]->f->S[i]).
+should produce S= (t_1->f->S_1 | t_2->f->S_2). since if transitions could be merged will be when minizing.
+
+
 SPRINT2
 - aparte de <a,b,c> introducir >a,b,c< que define concurrencia débil, puede transicionar con un subconj de estos
 - parse assertions, goals
-- parse safety ltl
-- check compatibility with fluents when composing
 - implement reachability
 SPRINT3
 - yacc and automaton_context -> define a way to index concurrent labels, it is not the same to index particular labels (thus adding new transitions

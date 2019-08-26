@@ -1,0 +1,15 @@
+// alphabets def.
+set Global_Alphabet = {move,remove,push,pop, goal,idle,fiddle}
+set Controllable_Alphabet = {move, goal}
+
+// automata def.
+A = (goal -> A | move -> remove -> push -> pop -> goal -> A| push -> push -> pop ->push -> push -> pop ->push -> push -> pop ->push -> push -> pop ->push -> push -> pop ->push -> push -> pop ->push -> push -> pop ->push -> push -> pop ->push -> push -> pop ->push -> push -> pop ->push -> push -> pop ->push -> push -> pop ->push -> push -> pop ->push -> push -> pop ->push -> push -> pop ->push -> push -> pop ->push -> push -> pop ->push -> push -> pop ->push -> push -> pop ->push -> push -> pop ->push -> push -> pop ->push -> push -> pop ->push -> push -> pop -> goal -> A| push -> pop -> push -> pop -> push -> pop -> push -> pop -> push -> pop -> push -> pop -> push -> pop -> push -> pop -> goal -> A).
+B = (idle ->idle ->idle ->idle ->idle ->idle ->idle ->idle ->idle ->idle ->idle ->idle ->idle ->idle ->idle -> idle ->idle ->idle ->idle ->idle ->idle ->idle ->idle ->idle ->idle ->idle ->idle ->idle ->idle ->idle -> idle ->idle ->idle ->idle ->idle ->idle ->idle ->idle ->idle ->idle ->idle ->idle ->idle ->idle ->idle -> idle ->idle ->idle ->idle ->idle ->idle ->idle ->idle ->idle ->idle ->idle ->idle ->idle ->idle ->idle -> idle ->idle ->idle ->idle ->idle ->idle ->idle ->idle ->idle ->idle ->idle ->idle ->idle ->idle ->idle -> idle ->idle ->idle ->idle ->idle ->idle ->idle ->idle ->idle ->idle ->idle ->idle ->idle ->idle ->idle -> idle ->idle ->idle ->idle ->idle ->idle ->idle ->idle ->idle ->idle ->idle ->idle ->idle ->idle ->idle -> B).
+C = (fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> fiddle -> C).
+
+fluent F_Ass = <idle, goal> initially 1
+fluent F_Goal = <goal, move>
+
+//|f| ENV =((A ||_c B) ||_c C).
+|| ENV =((A ||_c B ||_c C)).
+//|gr1| <{F_Ass}><{F_Goal}> STRAT = ENV.

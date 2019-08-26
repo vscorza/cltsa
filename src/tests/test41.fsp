@@ -1,0 +1,10 @@
+// range def.
+range R = 1..2
+
+// alphabets def.
+set Global_Alphabet = {move[i:R]}
+set Controllable_Alphabet = {move[i:R]}
+
+// automata def.
+A= A[1],
+A[i:R] = (move[j:R]->A[j]).
