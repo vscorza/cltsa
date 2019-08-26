@@ -1,28 +1,29 @@
 
 When having to compose concurrent systems we define three different semantics that can be applied pairwise. Synchronous semantic $A ||_s B$ (Figure~\ref{fig:synchronous_composition})captures the composition of two components that share a single synchronizing event (implicit), where all participants should be able to make progress concurrently. The main motivation being digital components sharing a single clock. 
-Asynchronous semantic $A ||_a B$ (Figure~\ref{fig:asynchronous_composition}) captures the interleaving interpretation of concurrency as found in LTS systems. Concurrent semantic $A ||_c B$ (Figure~\ref{fig:concurrent_composition}) captures the behavioral superset of the latter two. It can be used when composing two processes that may not share an implicit synchronizing event, as in the synchronous semantic, but can be observed by a third component that over samples the other two, allowing for the possibility of both concurrent an independent occurrence when observed as a composed system. A synthetic example is shown in Figure~\ref{fig:concurrent_systems}, motivation for this semantic can be found in clock domain crossing examples and micro architecture buffers.
+Asynchronous semantic $A ||_a B$ (Figure~\ref{fig:asynchronous_composition}) captures the interleaving interpretation of concurrency as found in LTS systems. 
+%Concurrent semantic $A ||_c B$ (Figure~\ref{fig:concurrent_composition}) captures the behavioral superset of the latter two. It can be used when composing two processes that may not share an implicit synchronizing event, as in the synchronous semantic, but can be observed by a third component that over samples the other two, allowing for the possibility of both concurrent an independent occurrence when observed as a composed system. A synthetic example is shown in Figure~\ref{fig:concurrent_systems}, motivation for this semantic can be found in clock domain crossing examples and micro architecture buffers.
+%
+%\input{composition_example}
 
-\input{composition_example}
-
-\begin{definition} 
-	\label{def:concurrent_composition}(\emph{Concurrent Composition})	Let \automaton{M},\automaton{N}, with $\Delta_M : S_M \times \mathcal{P}(\Sigma_M) \times S_M$, be two CLTS instances, then CLTS concurrent parallel composition is defined as \ltsComposition{M}{N}{c} where $\Delta$ is the smallest relation s.t:
-	\begin{center}
-		\begin{equation}
-		\AxiomC{$(s, l_M, s') \in \Sigma_M,(t, l_N, t') \in \Sigma_N  $}\RightLabel{$l_M \cap \Sigma_N = l_N \cap \Sigma_M$}
-		\UnaryInfC{$((s,t),l_M \cup l_N,(s',t')) \in \Delta$}
-		\DisplayProof
-		\end{equation}	
-		\begin{equation}
-		\AxiomC{$(s, l_M, s') \in \Sigma_M $}\RightLabel{$l_M \cap \Sigma_N = \emptyset$}
-		\UnaryInfC{$((s,t),l_M,(s',t))$}
-		\DisplayProof
-		\quad\quad
-		\AxiomC{$(t, l_N, t') \in \Sigma_N $}\RightLabel{$l_N \cap \Sigma_M = \emptyset$}
-		\UnaryInfC{$((s,t),l_N,(s,t'))$}
-		\DisplayProof
-		\end{equation}
-	\end{center}
-\end{definition}
+%\begin{definition} 
+%	\label{def:concurrent_composition}(\emph{Concurrent Composition})	Let \automaton{M},\automaton{N}, with $\Delta_M : S_M \times \mathcal{P}(\Sigma_M) \times S_M$, be two CLTS instances, then CLTS concurrent parallel composition is defined as \ltsComposition{M}{N}{c} where $\Delta$ is the smallest relation s.t:
+%	\begin{center}
+%		\begin{equation}
+%		\AxiomC{$(s, l_M, s') \in \Sigma_M,(t, l_N, t') \in \Sigma_N  $}\RightLabel{$l_M \cap \Sigma_N = l_N \cap \Sigma_M$}
+%		\UnaryInfC{$((s,t),l_M \cup l_N,(s',t')) \in \Delta$}
+%		\DisplayProof
+%		\end{equation}	
+%		\begin{equation}
+%		\AxiomC{$(s, l_M, s') \in \Sigma_M $}\RightLabel{$l_M \cap \Sigma_N = \emptyset$}
+%		\UnaryInfC{$((s,t),l_M,(s',t))$}
+%		\DisplayProof
+%		\quad\quad
+%		\AxiomC{$(t, l_N, t') \in \Sigma_N $}\RightLabel{$l_N \cap \Sigma_M = \emptyset$}
+%		\UnaryInfC{$((s,t),l_N,(s,t'))$}
+%		\DisplayProof
+%		\end{equation}
+%	\end{center}
+%\end{definition}
 
 \begin{definition} 
 	\label{def:asynchronous_composition}(\emph{Asynchronous Composition}) Let \automaton{M},\automaton{N}, with $\Delta_M : S_M \times \mathcal{P}(\Sigma_M) \times S_M$, be two CLTS instances, then CLTS asynchronous parallel composition is defined as \ltsComposition{M}{N}{a} where $\Delta$ is the smallest relation s.t:
