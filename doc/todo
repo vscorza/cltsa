@@ -2,6 +2,8 @@ TODO:
 - transition syntax proper def: each transition in a chain induces a new target state
 	S = (t[i:1..2]->f->S[i]).
 should produce S= (t_1->f->S_1 | t_2->f->S_2). since if transitions could be merged will be when minizing.
+- implement fluent set parsing
+- implement fluent consistency check
 
 
 SPRINT2
