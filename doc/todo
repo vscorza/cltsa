@@ -4,6 +4,7 @@ TODO:
 should produce S= (t_1->f->S_1 | t_2->f->S_2). since if transitions could be merged will be when minizing.
 - implement fluent set parsing
 - implement fluent consistency check
+- implement relabeling and hiding (use half adder to full adder example)
 
 
 SPRINT2

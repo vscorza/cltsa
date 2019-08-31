@@ -1,0 +1,21 @@
+// alphabets def.
+set Global_Alphabet = {a,c,d,e,x,y}
+set Controllable_Alphabet = {}
+
+// automata def.
+P_1 = (a->P_1 | c->P_1).
+P_2 = (d->P_2 | e->P_2).
+
+Receiver = (<a,x> -> Receiver | <d,y> -> Receiver | c -> Receiver | e -> Receiver).
+
+||P_1_2 = (P_1 || P_2).
+||SYS = (Receiver || P_1_2).
+
+||P_1_2_S = (P_1 ||_s P_2).
+||SYS_S = (Receiver ||_s P_1_2_S).
+
+
+SYS = S_0,
+S_0 = (<d,y>-> S_0|<a,x>-> S_0|e-> S_0|c-> S_0). 
+
+SYS_S = S_0.*/

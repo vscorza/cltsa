@@ -1,0 +1,44 @@
+// alphabets def.
+set Global_Alphabet = {a,b,c_in,s,c,a_2,b_2,c_2,c_in_2,s_2,c_2}
+set Controllable_Alphabet = {}
+
+// automata def.
+FA = (<a,s> -> FA | <b,s> -> FA | <c_in,s> -> FA | <a,b,c> -> FA | <a,c_in,c> -> FA | <b,c_in,c> -> FA | <a,b,c_in,s,c> -> FA| <> -> FA).
+
+FA_2 = (<a_2,s_2> -> FA_2 | <b_2,s_2> -> FA_2 | <c_in_2,s_2> -> FA_2 | <a_2,b_2,c_2> -> FA_2 | <a_2,c_in_2,c_2> -> FA_2 | <b_2,c_in_2,c_2> -> FA_2 | <a_2,b_2,c_in_2,s_2,c_2> -> FA_2 | <> -> FA_2).
+
+||ADDERS_A = (FA || FA_2).
+||ADDERS_C = (FA ||_s FA_2).
+
+/*
+ADDERS_A = S_0,
+S_0 = (<>-> S_0|<a,b,c,c_in,s>-> S_0|<b,c,c_in>-> S_0|<a,c,c_in>-> S_0
+	|<a,b,c>-> S_0|<c_in,s>-> S_0|<b,s>-> S_0|<a_2,b_2,c_2,c_in_2,s_2>-> S_0
+	|<b_2,c_2,c_in_2>-> S_0|<a_2,c_2,c_in_2>-> S_0|<a_2,b_2,c_2>-> S_0
+	|<c_in_2,s_2>-> S_0|<b_2,s_2>-> S_0|<a,s>-> S_0|<a_2,s_2>-> S_0).
+
+ADDERS_C = S_0,
+S_0 = (<>-> S_0|<a_2,b_2,c_2,c_in_2,s_2>-> S_0|<b_2,c_2,c_in_2>-> S_0
+	|<a_2,c_2,c_in_2>-> S_0|<a_2,b_2,c_2>-> S_0|<c_in_2,s_2>-> S_0|<b_2,s_2>-> S_0
+	|<a_2,s_2>-> S_0|<a,b,c,c_in,s>-> S_0|<a,a_2,b,b_2,c,c_2,c_in,c_in_2,s,s_2>-> S_0
+	|<a,b,b_2,c,c_2,c_in,c_in_2,s>-> S_0|<a,a_2,b,c,c_2,c_in,c_in_2,s>-> S_0
+	|<a,a_2,b,b_2,c,c_2,c_in,s>-> S_0|<a,b,c,c_in,c_in_2,s,s_2>-> S_0
+	|<a,b,b_2,c,c_in,s,s_2>-> S_0|<a,b,c,c_in,s>-> S_0|<a,a_2,b,c,c_in,s,s_2>-> S_0
+	|<b,c,c_in>-> S_0|<a_2,b,b_2,c,c_2,c_in,c_in_2,s_2>-> S_0|<b,b_2,c,c_2,c_in,c_in_2>-> S_0
+	|<a_2,b,c,c_2,c_in,c_in_2>-> S_0|<a_2,b,b_2,c,c_2,c_in>-> S_0|<b,c,c_in,c_in_2,s_2>-> S_0
+	|<b,b_2,c,c_in,s_2>-> S_0|<b,c,c_in>-> S_0|<a_2,b,c,c_in,s_2>-> S_0|<a,c,c_in>-> S_0
+	|<a,a_2,b_2,c,c_2,c_in,c_in_2,s_2>-> S_0|<a,b_2,c,c_2,c_in,c_in_2>-> S_0
+	|<a,a_2,c,c_2,c_in,c_in_2>-> S_0|<a,a_2,b_2,c,c_2,c_in>-> S_0|<a,c,c_in,c_in_2,s_2>-> S_0
+	|<a,b_2,c,c_in,s_2>-> S_0|<a,c,c_in>-> S_0|<a,a_2,c,c_in,s_2>-> S_0|<a,b,c>-> S_0
+	|<a,a_2,b,b_2,c,c_2,c_in_2,s_2>-> S_0|<a,b,b_2,c,c_2,c_in_2>-> S_0|<a,a_2,b,c,c_2,c_in_2>-> S_0
+	|<a,a_2,b,b_2,c,c_2>-> S_0|<a,b,c,c_in_2,s_2>-> S_0|<a,b,b_2,c,s_2>-> S_0
+	|<a,b,c>-> S_0|<a,a_2,b,c,s_2>-> S_0|<c_in,s>-> S_0|<a_2,b_2,c_2,c_in,c_in_2,s,s_2>-> S_0
+	|<b_2,c_2,c_in,c_in_2,s>-> S_0|<a_2,c_2,c_in,c_in_2,s>-> S_0|<a_2,b_2,c_2,c_in,s>-> S_0
+	|<c_in,c_in_2,s,s_2>-> S_0|<b_2,c_in,s,s_2>-> S_0|<c_in,s>-> S_0|<a_2,c_in,s,s_2>-> S_0
+	|<b,s>-> S_0|<a_2,b,b_2,c_2,c_in_2,s,s_2>-> S_0|<b,b_2,c_2,c_in_2,s>-> S_0|<a_2,b,c_2,c_in_2,s>-> S_0
+	|<a_2,b,b_2,c_2,s>-> S_0|<b,c_in_2,s,s_2>-> S_0|<b,b_2,s,s_2>-> S_0|<b,s>-> S_0|<a_2,b,s,s_2>-> S_0
+	|<a,s>-> S_0|<a,a_2,b_2,c_2,c_in_2,s,s_2>-> S_0|<a,b_2,c_2,c_in_2,s>-> S_0|<a_2,c_2,c_in_2>-> S_0
+	|<a,a_2,c_2,c_in_2,s>-> S_0|<a_2,b_2,c_2>-> S_0|<a,a_2,b_2,c_2,s>-> S_0|<a,c_in_2,s,s_2>-> S_0
+	|<b_2,s_2>-> S_0|<a,b_2,s,s_2>-> S_0|<a,s>-> S_0|<a_2,s_2>-> S_0|<a,a_2,s,s_2>-> S_0).
+	
+	*/

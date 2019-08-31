@@ -19,7 +19,7 @@ The trace $\pi=\ell_0,\ell_1,\ldots$ satisfies a fluent $\emph{Fl}$ at position 
 
 %Suppose that $\fluent \in \mathcal{F}$, in order to avoid having a label $l_i$ in our trace $\pi$ where both the initiation and termination of $\fluent$ are triggered, we will require that our model $E$ satisfies a notion of consistency with respect to a set of fluents, we say that a model $E$ is consistent with respect to a set of fluents $\mathcal{F}$, noted $\cong(E,\mathcal{F})$ if the following holds: let $\pi$ be a trace of $E$,
 %$\forall \pi_i \in \pi, fl \in F, \neg(\exists i \in I_{fl}: (i \subseteq \pi_i) \wedge \exists t \in T_{fl}: (t \subseteq \pi_i))$.
-Suppose that $\fluent \in \mathcal{F}$, in order to avoid having a label $l_i$ in our trace $\pi$ where both the initiation and termination of $\fluent$ are triggered, we will require that our model $E$ satisfies a notion of consistency with respect to a set of fluents, we say that a model $E$ is consistent with respect to a set of fluents $\mathcal{F}$, noted $\cong(E,\mathcal{F})$ if the following safety condition holds: 
+\textcolor{blue}{Suppose that} $\fluent \in \mathcal{F}$, in order to avoid having a label $l_i$ in our trace $\pi$ where both the initiation and termination of $\fluent$ are triggered, we will require that our model $E$ satisfies a notion of consistency with respect to a set of fluents, we say that a model $E$ is consistent with respect to a set of fluents $\mathcal{F}$, noted $\cong(E,\mathcal{F})$ if the following safety condition holds: 
 \[\forall \fluent \in \mathcal{F}, (s,l,s') \in \Delta_E: \square(\neg(\exists i \in I_{\fluent}: i \subseteq l) \vee \neg(\exists t \in T_{\fluent}: t \subseteq l))\]
 
 

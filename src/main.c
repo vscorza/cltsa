@@ -1048,7 +1048,10 @@ void run_all_tests(){
 
 int main (void){
 	//run_all_tests();
+	//run_parse_test("tests/test43.fsp",  "half adder to full adder test");
+	//run_parse_test("tests/test44.fsp",  "two full adders test");
 	//run_parse_test("tests/test42.fsp",  "automata load test");
+	run_parse_test("tests/test45.fsp",  "receiver asynch test");
 
 	//run_parse_test("tests/test41.fsp",  "k 4 graph tests");
 	//run_parse_test("tests/test37.fsp", "lts load test 1");

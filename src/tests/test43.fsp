@@ -1,0 +1,16 @@
+// alphabets def.
+set Global_Alphabet = {a,b,c_1,s_1,c_in,sum,c_2,c_out}
+set Controllable_Alphabet = {}
+
+// automata def.
+HA = (<a,b,c_1> -> HA | <a,s_1> -> HA | <b,s_1> -> HA | <> -> HA).
+HA_2 = (<s_1,c_in,c_2> -> HA_2 | <s_1,sum> -> HA_2 | <c_in,sum> -> HA_2 | <> -> HA_2).
+
+||HA_C = (HA ||_s HA_2). 
+
+C_OUT = (<c_1,c_out> -> C_OUT | <c_2,c_out> -> C_OUT | <c_1,c_2,c_out> -> C_OUT | <> -> C_OUT).
+
+|| ENV = (HA_C ||_s C_OUT).
+
+||HA_C_A = (HA ||_c HA_2). 
+||ENV_A = (HA_C ||_c C_OUT).
