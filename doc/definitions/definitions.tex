@@ -8,7 +8,7 @@
 \usepackage{../common/vaucanson-g/vaucanson-g}
 \usepackage{float}
 \usepackage{epstopdf}
-
+\usepackage{mathtools,array}
 \input{../common/macros}
 
 \title{Concurrent CLTS} %Change this to the appropriate number.
@@ -17,6 +17,7 @@
 
 \begin{document}
 
+
 \maketitle
 
 %Counters for setting the appropriate numbering.
@@ -24,13 +25,23 @@
 \setcounter{theorem}{1} %This gives the item number.
 %Note that the item number should be one less than you desire..
 
+\subsection{Concurrent Labeled Transition Systems (CLTS)}
 \input{clts_def}
 
+\subsection{CLTS fluent satisfaction}
 \input{clts_fluent_satisfaction}
 
+\subsection{CLTS composition}
 \input{clts_composition}
 
+\subsection{CLTS equivalence check and minimization}
+\input{clts_equivalence}
+
 \newpage
+\subsection{CLTS and Game Structures interoperability}
 \input{clts_gs_interop}
+
+\subsection{CLTS grammar}
+\input{clts_grammar}
 
 \end{document}

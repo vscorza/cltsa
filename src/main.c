@@ -1044,14 +1044,16 @@ void run_all_tests(){
 	run_parse_test("tests/test40.fsp", "compositions type");
 	run_parse_test("tests/test23.fsp", "biscotti");
 	run_parse_test("tests/test30.fsp", "lift 2 floors");//lift 2 floors
+	run_parse_test("tests/test46.fsp",  "Asynch composition equiv. test");
 }
 
 int main (void){
-	//run_all_tests();
+	run_all_tests();
 	//run_parse_test("tests/test43.fsp",  "half adder to full adder test");
 	//run_parse_test("tests/test44.fsp",  "two full adders test");
 	//run_parse_test("tests/test42.fsp",  "automata load test");
-	run_parse_test("tests/test45.fsp",  "receiver asynch test");
+	//run_parse_test("tests/test45.fsp",  "receiver asynch test");
+	//run_parse_test("tests/test46.fsp",  "concurrency equiv. test");
 
 	//run_parse_test("tests/test41.fsp",  "k 4 graph tests");
 	//run_parse_test("tests/test37.fsp", "lts load test 1");

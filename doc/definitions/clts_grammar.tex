@@ -1,0 +1,66 @@
+\newenvironment{grammar}[2]
+{\begin{tabular}{@{}>{$}l<{$}@{\qquad}l@{}}
+		\multicolumn{1}{@{}l@{}}{$#1$}&\multicolumn{1}{l@{}}{#2}\\}
+	{\end{tabular}}
+\begin{figure}[H]
+\[
+\begin{grammar}{}{}
+	D_b \Coloneqq P(x_1=V_1,\ldots,x_k)V_k=B_0 &process definition\\
+	\quad D_{l_1},\ldots,D_{l_m}                        & local processes \\
+	\quad +\{A_{e_1}, \ldots,A_{e_n} \}                           & alphabet extension \\
+	\quad / \{A'_{r_1}\setminus A_{r_1},\ldots, A'_{r_p}\setminus A_{r_p} \} \setminus \{ A_{h_1},\ldots, A_{h_q} \}                         & relabeling and hiding \\
+	\\
+	D_l \Coloneqq P[x_1^1:L_1^1]\ldots[x_1^n:L_1^n]=B_1, &local process definition\\
+	\quad \ldots                        &  \\
+	\quad P[x_m^1:L_m^1]\ldots[x_m^n:L_m^n]=B_m &\\
+	\\
+	B \Coloneqq \text{\textbf{stop}} &deadlock termination\\
+	\quad |\quad  \text{\textbf{end}} &normal termination\\
+	\quad |\quad  \text{\textbf{error}} &erroneous termination\\
+	\quad |\quad  A \rightarrow B_0 &prefixing\\	
+	\quad |\quad  P(V_1,\ldots, V_n);B_0 &global process cal\\		
+	\quad |\quad  P[V_1]\ldots P[V_n] &local process call\\	
+	\quad |\quad  \text{\textbf{if }} V \text{\textbf{ then }} B_1 \text{\textbf{ else }} B_2&conditional branching\\
+	\quad |\quad  \text{\textbf{when }} V_1 B_1 | \ldots | \text{\textbf{when }} V_n B_n &choice\\	
+	\\
+	A \Coloneqq L_1 \ldots L_n &label\\	
+	\\
+	L \Coloneqq S_0 &action set\\		
+	\quad |\quad  V | x:V &expression\\	
+	\quad |\quad  \{ A_1, \ldots, A_n \} | x:\{ A_1, \ldots, A_n \} &label set\\	
+	\quad |\quad  V_1\ldots V_n | x:V_1\ldots A_n  &range\\		
+	\\
+	S \Coloneqq act | act, S_0 &action set
+\end{grammar}
+\]
+\label{fig:cfsp_basic_grammar}
+\caption{Abstract grammar of the CFSP language: basic processes}
+%%\vspace*{-4mm}
+\MediumPicture
+\end{figure}
+
+\begin{figure}[H]
+	\[
+	\begin{grammar}{}{}
+	D_c \Coloneqq \parallel P(x_1=V_1,\ldots,x_k)V_k=C_0 &process definition\\
+	\quad op_p \{A_{p_1},\ldots, A_{p_n} \} \setminus \{ A_{h_1},\ldots, A_{h_q} \}                         & priority and hiding \\
+	\\
+	op_p \Coloneqq \gg &high priority operator\\
+	\quad | \quad \ll    & low priority operator \\	
+	\\
+	C \Coloneqq P(V_1,\ldots ,V_n) &process call\\
+	\quad | \quad C_1 \parallel \ldots \parallel C_n    & asynchronous parallel composition \\		
+	\quad | \quad C_1 \parallel_c \ldots \parallel_c C_n    & synchronous parallel composition \\
+	\quad | \quad C_0 \setminus \{ A'_1 \setminus A_1, \ldots , A'_n \setminus A_n \}     & relabeling\\	
+	\quad | \quad \{ A_1, \ldots , A_n \} : C_0      & labeling\\	
+	\quad | \quad \{ A_1, \ldots , A_n \} :: C_0      & sharing\\		
+	\quad |\quad  \text{\textbf{if }} V \text{\textbf{ then }} C_1 \text{\textbf{ else }} C_2&conditional\\	
+	\quad |\quad  \text{\textbf{forall }} [x_1:L_1]\ldots[x_n:L_n] C_2&replication\\
+	 \\				 
+	\end{grammar}
+	\]
+	\label{fig:cfsp_composite_grammar}
+	\caption{Abstract grammar of the CFSP language: composite processes}
+	%%\vspace*{-4mm}
+	\MediumPicture
+\end{figure}
