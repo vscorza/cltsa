@@ -1,4 +1,7 @@
 TODO:
+
+- Poner que LTS es un caso especial de CLTS y que se puede usar composición asíncrona de LTS para componer CLTS que solo tienen singleton. Sacar composición asíncrona.
+- Dar noción de equivalencia por bisimulación.
 - step wise composition not yielding same result as composition over set of automata
 - transition syntax proper def: each transition in a chain induces a new target state
 	S = (t[i:1..2]->f->S[i]).
@@ -6,6 +9,10 @@ should produce S= (t_1->f->S_1 | t_2->f->S_2). since if transitions could be mer
 - implement fluent set parsing
 - implement fluent consistency check
 - implement relabeling and hiding (use half adder to full adder example)
+
+
+PRINT CODE
+enscript -2r -T=1 --line-numbers -p out.ps --font="Courier6" --highlight=c  automaton_context.c
 
 
 SPRINT2
