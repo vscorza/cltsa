@@ -1040,26 +1040,27 @@ void run_all_tests(){
 	run_fast_pool_tests();
 
 	//DRY TESTS
-	run_parse_test("tests/test5.fsp",  "range tests");
-	run_parse_test("tests/test40.fsp", "compositions type");
-	run_parse_test("tests/test23.fsp", "biscotti");
-	run_parse_test("tests/test30.fsp", "lift 2 floors");//lift 2 floors
-	run_parse_test("tests/test46.fsp",  "Asynch composition equiv. test");
+	run_parse_test("tests/ranges_1.fsp",  "range tests 1");
+	run_parse_test("tests/composition_types.fsp", "compositions type");
+	run_parse_test("tests/biscotti.fsp", "biscotti");
+	run_parse_test("tests/two_floors_lift.fsp", "lift 2 floors");//lift 2 floors
+	run_parse_test("tests/concurrency_equiv_test.fsp",  "Asynch composition equiv. test");
 }
 
 int main (void){
 	run_all_tests();
-	//run_parse_test("tests/test43.fsp",  "half adder to full adder test");
-	//run_parse_test("tests/test44.fsp",  "two full adders test");
-	//run_parse_test("tests/test42.fsp",  "automata load test");
-	//run_parse_test("tests/test45.fsp",  "receiver asynch test");
-	//run_parse_test("tests/test46.fsp",  "concurrency equiv. test");
+	run_parse_test("tests/ranges_2.fsp",  "half adder to full adder test");
+	//run_parse_test("tests/half_adder_to_full_adder.fsp",  "half adder to full adder test");
+	//run_parse_test("tests/two_full_adders.fsp",  "two full adders test");
+	//run_parse_test("tests/automata_load_test_1.fsp",  "automata load test");
+	//run_parse_test("tests/receiver_asynch_test.fsp",  "receiver asynch test");
+	//run_parse_test("tests/concurrency_equiv_test.fsp",  "concurrency equiv. test");
 
-	//run_parse_test("tests/test41.fsp",  "k 4 graph tests");
+	//run_parse_test("tests/k_4_graph.fsp",  "k 4 graph tests");
 	//run_parse_test("tests/test37.fsp", "lts load test 1");
-	//run_parse_test("tests/test39.fsp", "lift 7 floors");//lift 7 floors
-	//run_parse_test("tests/test35.fsp", "GenBuf 2 sndrs");//GENBUF 2 Sndrs
-	//run_parse_test("tests/test31.fsp", "GenBuf 4 sndrs");//GENBUF 4 sndrs
+	//run_parse_test("tests/seven_floors_lift.fsp", "lift 7 floors");//lift 7 floors
+	//run_parse_test("tests/genbuf_2_sndrs.fsp", "GenBuf 2 sndrs");//GENBUF 2 Sndrs
+	//run_parse_test("tests/genbuf_4_sndrs.fsp", "GenBuf 4 sndrs");//GENBUF 4 sndrs
 	//run_parse_test("tests/test18.fsp",  "test18");
 
 	//run_parse_test("tests/test26.fsp", "test26");
@@ -1071,7 +1072,7 @@ int main (void){
 	//SHOWCASE
 	//run_parse_test("tests/test21.fsp", "test21");
 
-		//run_parse_test("tests/test28.fsp", "mixed model 3 signals 2 labels");//mixed model 3 signals 2 labels
+	//run_parse_test("tests/mixed_3_signals_2_labels.fsp", "mixed model 3 signals 2 labels");//mixed model 3 signals 2 labels
 
 	//run_parse_test("tests/test29.fsp", "lift 3 floors");//lift 3 floors
 	//run_parse_test("tests/test36.fsp", "lift 5 floors");//lift 5 floors

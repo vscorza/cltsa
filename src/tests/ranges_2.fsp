@@ -1,0 +1,16 @@
+// range def.
+range R = 1..3
+range R2 = 2..3
+
+// alphabets def.
+set Global_Alphabet = {back, t, t[i:R], t[i:R][j:R]}
+set Controllable_Alphabet = {back}
+
+// automata def.
+TEST_1 = (t[i:R]->S[i]),
+S[i:R] = (back->S[i]).  
+
+// tests
+equals FATAL_Simple_Range(A, A_p).
+equals FATAL_Sequential_Range(B, B_p).
+equals FATAL_Composition_Range(D, D_p).
