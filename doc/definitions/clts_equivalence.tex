@@ -1,24 +1,49 @@
-\begin{figure}[H]
-	\begin{center}
-		\input{equivalence} 
-		\caption{Equivalence check algorithm}
-		\label{fig:equivalence-check}
-	\end{center}
-\end{figure}
+\textcolor{blue}{CLTS equivalence} is defined in the same way as LTS is. Two instances $E =  (S, \Sigma, \Delta, s_0)$,
+$E' =  (S', \Sigma', \Delta', s_0')$ are equivalent if they are bisimilar. This means that they satisfy the same set of CTL* formulas. Given two CLTS instances we propose an algorithm based on \cite{paige1987three}, it yields a partition over the set $S \times S'$ describing the bisimulation relation between $E$ and $E'$.
+$B \subseteq S \times S'$ is a bisimulation relation between $E$ and $E'$ if and only if:
 
-\begin{figure}[H]
-	\begin{center}
-		\input{minimization} 
-		\caption{Minimization algorithm}
-		\label{fig:minimization}
-	\end{center}
-\end{figure}
+\[\begin{aligned}
+	\forall s, s' \in S \times S': & B(s,s') \implies \\
+	&\forall l,t \text{ s.t. } (s,l,t) \in \Delta  :\exists t' \text{ s.t. } (s',l,t') \in \Delta' \wedge B(t,t')\\
+	&\forall l',t' \text{ s.t. } (s',l',t') \in \Delta' :\exists t \text{ s.t. } (s,l',t) \in \Delta \wedge B(t,t')\\	
+\end{aligned}\]
 
+The general algorithm is not different to previous partition based approaches, let $E$ and $E'$ be our two structures, we define a sequence of relations$B_0^*,B_1^*,\ldots$ on $S \times S'$ as follows:
+
+\begin{itemize}
+	\item $B_0^*(s_0,s_0') \wedge \forall s,s' \in S \times S' \setminus \{s_0,s_0'\}: B_0^*(s,s')$
+	\item $\begin{aligned}[t]
+	B_{n+1}^*& \iff B_m^*(s,s') \text{ } \wedge\\
+		&\forall l,t \text{ s.t. }(s,l,t) \in \Delta \implies \exists t':(s',l,t') \in \Delta' \wedge B_n^*(t,t') \text{ } \wedge\\
+		&\forall l',t' \text{ s.t. }(s',l',t') \in \Delta' \implies \exists t:(s,l',t) \in \Delta \wedge B_n^*(t,t')\end{aligned}$
+\end{itemize}
+
+Following previous algorithms it suffices to prove that if $B$ is a bisimulation between $E$ and $E'$ then $B$ is contained in $B^* \forall i \geq 0$.  Applying inductive reasoning on $i$, is clear that $B$ is contained in $B_0^*$ since any pair of $B$ are either the initial states, or non initial. Assuming 
+$B \subseteq B_n^*$ and $B(s,s')$, if $(s,l,t) \in \Delta$. Because $B$ is bisimulation, there exists $s'$ s.t. $(s',l,t') \in Delta'$ and $B(s,s')$, since $B$ is contained in $B_n^*$ it follows that $B_n^*(t,t')$.
+A similar approach holds for the third condition, proving $B_{n+1}^*(s,s')$ which shows that $B^*$ is the largest bisimulation between $E$ and $E'$.
+
+Below two other algorithms are shown, the first minimizes an CLTS according to its equivalent states and the second performs an equivalence check between two automata provided they are deterministic minimal instances.
 
 \begin{figure}[H]
 	\begin{center}
 		\input{fda-adaptation} 
-		\caption{FDA adaptation}
+		\caption{Minimization algorithm}
 		\label{fig:fda-adaptation}
 	\end{center}
 \end{figure}
+
+\begin{figure}[H]
+	\begin{center}
+		\input{equivalence} 
+		\caption{Equivalence check algorithm for deterministic minimal automata}
+		\label{fig:equivalence-check}
+	\end{center}
+\end{figure}
+
+%\begin{figure}[H]
+%	\begin{center}
+%		\input{minimization} 
+%		\caption{Minimization algorithm}
+%		\label{fig:minimization}
+%	\end{center}
+%\end{figure}
