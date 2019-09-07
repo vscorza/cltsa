@@ -798,7 +798,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 								aut_dupstr(&(ret_value[0]),  atom_label->string_terminal);
 								count 		= 1;
 
-								automaton_indexes_syntax_eval_strings(tables, current_valuations[current_valuations_count - 1], &indexes_values, &ret_value, &count, atom_label->indexes);
+								automaton_indexes_syntax_eval_strings(tables, current_valuations_count > 0 ? current_valuations[current_valuations_count - 1] : NULL, &indexes_values, &ret_value, &count, atom_label->indexes);
 								for(n = 0; n < count;n++)free(indexes_values[n]);
 								free(indexes_values); indexes_values = NULL;
 								for(n = 0; n < count; n++){
@@ -1119,7 +1119,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 				first_run_from = false;
 				label_indexes[0] = '\0';
 				//get incremental valuation on from state indexes
-				automaton_indexes_valuation_set_label(current_valuations[current_valuations_count - 1], state->label->name, label_indexes);
+				automaton_indexes_valuation_set_label(current_valuations_count > 0 ? current_valuations[current_valuations_count - 1] : NULL, state->label->name, label_indexes);
 				aut_push_string_to_list(&labels_list, &labels_list_count, label_indexes, &label_position, false, false);
 				from_state	= (uint32_t)label_position;
 #if DEBUG_PARSE_STATES

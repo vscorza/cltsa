@@ -107,8 +107,8 @@ concurrentLabel:
 	|'<' '>'										{$$ = automaton_label_syntax_create_empty();}
 	;
 concurrentLabels:
-	concurrentLabels ',' t_IDENT			{$$ = automaton_set_syntax_concat_concurrent($1, $3);free($3);}
-	|t_IDENT								{$$ = automaton_set_syntax_create_concurrent($1);free($1);}
+	concurrentLabels ',' t_IDENT indexes			{$$ = automaton_set_syntax_concat_concurrent($1, $3, $4);free($3);}
+	|t_IDENT indexes								{$$ = automaton_set_syntax_create_concurrent($1, $2);free($1);}
 	;
 orderDef:
 	t_ORDER '=' orderExp					{}

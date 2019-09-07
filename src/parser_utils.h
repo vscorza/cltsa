@@ -240,8 +240,8 @@ automaton_expression_syntax* automaton_expression_syntax_create(automaton_expres
 automaton_set_syntax* automaton_set_syntax_create(bool is_ident, uint32_t count, uint32_t* labels_count,
 		automaton_label_syntax*** labels, char* string_terminal);
 void automaton_program_add_obdd_primed_variables();
-automaton_set_syntax* automaton_set_syntax_create_concurrent(char* string_terminal);
-automaton_set_syntax* automaton_set_syntax_concat_concurrent(automaton_set_syntax* set, char* string_terminal);
+automaton_set_syntax* automaton_set_syntax_create_concurrent(char* string_terminal, automaton_indexes_syntax* indexes);
+automaton_set_syntax* automaton_set_syntax_concat_concurrent(automaton_set_syntax* set, char* string_terminal, automaton_indexes_syntax* indexes);
 automaton_set_syntax* automaton_set_syntax_create_from_label(automaton_label_syntax* label);
 automaton_set_syntax* automaton_set_syntax_create_from_ident(char* ident);
 automaton_set_syntax* automaton_set_syntax_concat_labels(automaton_set_syntax* set, automaton_label_syntax* label);

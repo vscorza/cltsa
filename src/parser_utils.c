@@ -48,7 +48,7 @@ void automaton_program_add_obdd_primed_variables(){
 		parser_add_primed_variables(dictionary_add_entry(dict, prime_name));
 	}
 }
-automaton_set_syntax* automaton_set_syntax_create_concurrent(char* string_terminal){
+automaton_set_syntax* automaton_set_syntax_create_concurrent(char* string_terminal, automaton_indexes_syntax* indexes){
 	automaton_set_syntax* set	= malloc(sizeof(automaton_set_syntax));
 	set->is_ident	= false;
 	set->count			= 1;
@@ -56,11 +56,11 @@ automaton_set_syntax* automaton_set_syntax_create_concurrent(char* string_termin
 	set->labels_count[0]= 1;
 	set->labels			= malloc(sizeof(automaton_label_syntax**) * set->count);
 	set->labels[0]		= malloc(sizeof(automaton_label_syntax*));
-	set->labels[0][0]	= automaton_label_syntax_create(false, NULL, string_terminal, NULL);
+	set->labels[0][0]	= automaton_label_syntax_create(false, NULL, string_terminal, indexes);
 	set->string_terminal= NULL;
 	return set;
 }
-automaton_set_syntax* automaton_set_syntax_concat_concurrent(automaton_set_syntax* set, char* string_terminal){
+automaton_set_syntax* automaton_set_syntax_concat_concurrent(automaton_set_syntax* set, char* string_terminal, automaton_indexes_syntax* indexes){
 	set->labels_count[0]++;
 	automaton_label_syntax** new_labels	= malloc(sizeof(automaton_label_syntax*) * set->labels_count[0]);
 	uint32_t i;
@@ -69,7 +69,7 @@ automaton_set_syntax* automaton_set_syntax_concat_concurrent(automaton_set_synta
 			new_labels[i]	= set->labels[0][i];
 		}
 	}
-	new_labels[set->labels_count[0] - 1]	= automaton_label_syntax_create(false, NULL, string_terminal, NULL);
+	new_labels[set->labels_count[0] - 1]	= automaton_label_syntax_create(false, NULL, string_terminal, indexes);
 	free(set->labels[0]);
 	set->labels[0] = new_labels;
 	return set;
