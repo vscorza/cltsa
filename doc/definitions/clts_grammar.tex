@@ -23,14 +23,19 @@
 	\quad |\quad  \text{\textbf{if }} V \text{\textbf{ then }} B_1 \text{\textbf{ else }} B_2&conditional branching\\
 	\quad |\quad  \text{\textbf{when }} V_1 B_1 | \ldots | \text{\textbf{when }} V_n B_n &choice\\	
 	\\
-	A \Coloneqq L_1 \ldots L_n &label\\	
+	A \Coloneqq S_0 | C_0 &label\\	
 	\\
-	L \Coloneqq S_0 &action set\\		
+	S \Coloneqq L_1 \ldots L_n &single label\\	
+	\\
+	L \Coloneqq act &action set\\		
 	\quad |\quad  V | x:V &expression\\	
 	\quad |\quad  \{ A_1, \ldots, A_n \} | x:\{ A_1, \ldots, A_n \} &label set\\	
-	\quad |\quad  V_1\ldots V_n | x:V_1\ldots A_n  &range\\		
+	\quad |\quad  V_1\ldots V_n | x:V_1\ldots V_n  &range\\		
 	\\
-	S \Coloneqq act | act, S_0 &action set
+	C \Coloneqq \lbrace S_1,\ldots , S_n \rbrace &concurrent labels\\		
+	\quad |\quad  C[V] | C[x:V] &expression\\	
+	\quad |\quad  C[V_1\ldots V_n] | C[x:V_1\ldots V_n]  &range\\		
+	\\	
 \end{grammar}
 \]
 \label{fig:cfsp_basic_grammar}
