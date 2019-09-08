@@ -674,105 +674,147 @@ automaton_indexes_valuation* automaton_indexes_valuation_create_from_indexes(aut
 	return valuation;
 }
 
-bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, automaton_composition_syntax* composition_syntax
-		, automaton_parsing_tables* tables){
-	int32_t main_index, index, i, j, k, l, m, n, o, p, r, s;
-	main_index						= automaton_parsing_tables_get_entry_index(tables, COMPOSITION_ENTRY_AUT, composition_syntax->name);
-	if(main_index >= 0)if(tables->composition_entries[main_index]->solved)	return false;
-	//check whether composition syntax is a composition or a single automaton description
-	if(composition_syntax->components != NULL){//MULTIPLE COMPONENTS (AUTOMATA)
-		aut_context_log("mult. components.%s\n", composition_syntax->name);
-		//if one component has not been solved then report pending automata
-		for(i = 0; i < (int32_t)composition_syntax->count; i++){
-			index						= automaton_parsing_tables_get_entry_index(tables, COMPOSITION_ENTRY_AUT, composition_syntax->components[i]->ident);
-			if(index < 0)
-				return true;
-			if(!tables->composition_entries[index]->solved)
-				return true;
+bool automaton_statement_syntax_to_composition(automaton_automata_context* ctx, automaton_composition_syntax* composition_syntax
+		, automaton_parsing_tables* tables, uint32_t main_index){
+	int32_t i, index;
+	aut_context_log("mult. components.%s\n", composition_syntax->name);
+	//if one component has not been solved then report pending automata
+	for(i = 0; i < (int32_t)composition_syntax->count; i++){
+		index						= automaton_parsing_tables_get_entry_index(tables, COMPOSITION_ENTRY_AUT, composition_syntax->components[i]->ident);
+		if(index < 0)
+			return true;
+		if(!tables->composition_entries[index]->solved)
+			return true;
+	}
+	//build composition and add to table
+	automaton_automaton** automata	= malloc(sizeof(automaton_automaton*) * composition_syntax->count);
+	automaton_synchronization_type* synch_type	= malloc(sizeof(automaton_synchronization_type) * composition_syntax->count);
+	for(i = 0; i < (int32_t)composition_syntax->count; i++){
+		//TODO: update transitions with prefixes/indexes
+		index						= automaton_parsing_tables_get_entry_index(tables, COMPOSITION_ENTRY_AUT, composition_syntax->components[i]->ident);
+		automata[i]					= tables->composition_entries[index]->valuation.automaton_value;
+		switch(composition_syntax->components[i]->synch_type){
+			case CONCURRENT_AUT: synch_type[i]	= CONCURRENT;break;
+			case SYNCH_AUT: synch_type[i]		= SYNCHRONOUS;break;
+			default: synch_type[i]				= ASYNCHRONOUS;break;
 		}
-		//build composition and add to table
-		automaton_automaton** automata	= malloc(sizeof(automaton_automaton*) * composition_syntax->count);
-		automaton_synchronization_type* synch_type	= malloc(sizeof(automaton_synchronization_type) * composition_syntax->count);
-		for(i = 0; i < (int32_t)composition_syntax->count; i++){
-			//TODO: update transitions with prefixes/indexes
-			index						= automaton_parsing_tables_get_entry_index(tables, COMPOSITION_ENTRY_AUT, composition_syntax->components[i]->ident);
-			automata[i]					= tables->composition_entries[index]->valuation.automaton_value;
-			switch(composition_syntax->components[i]->synch_type){
-				case CONCURRENT_AUT: synch_type[i]	= CONCURRENT;break;
-				case SYNCH_AUT: synch_type[i]		= SYNCHRONOUS;break;
-				default: synch_type[i]				= ASYNCHRONOUS;break;
-			}
+	}
+	//if is game build fluents and add to automata
+	uint32_t composition_count	= composition_syntax->count;
+	if(composition_syntax->is_game){
+		uint32_t new_composition_count		= composition_count + ctx->global_fluents_count;
+		automaton_automaton** new_automata	= malloc(sizeof(automaton_automaton*) * new_composition_count);
+		automaton_synchronization_type* new_synch_type = malloc(sizeof(automaton_synchronization_type) * new_composition_count);
+		for(i = 0; i < (int32_t)composition_count; i++){
+			new_automata[i]	= automata[i];
+			new_synch_type[i]	= synch_type[i];
 		}
-		//if is game build fluents and add to automata
-		uint32_t composition_count	= composition_syntax->count;
-		if(composition_syntax->is_game){
-			uint32_t new_composition_count		= composition_count + ctx->global_fluents_count;
-			automaton_automaton** new_automata	= malloc(sizeof(automaton_automaton*) * new_composition_count);
-			automaton_synchronization_type* new_synch_type = malloc(sizeof(automaton_synchronization_type) * new_composition_count);
-			for(i = 0; i < (int32_t)composition_count; i++){
-				new_automata[i]	= automata[i];
-				new_synch_type[i]	= synch_type[i];
-			}
-			//build fluent automata
-			for(i = 0; i < (int32_t)ctx->global_fluents_count; i++){
-				new_automata[i + composition_count]	= automaton_fluent_build_automaton(ctx, i);
-				//TODO: check which composition type should work for fluents
-				new_synch_type[i + composition_count]	= CONCURRENT;
-				char buf[255];
-				//automaton_automaton_print(tables->composition_entries[i]->valuation.automaton_value, true, true, true, "*\t", "*\t");
-				sprintf(buf, "%s_%d_fluent.fsp", ctx->name, i + composition_count);
-				automaton_automaton_print_fsp(new_automata[i + composition_count], buf);
-			}
-			free(automata);
-			free(synch_type);
-			automata							= new_automata;
-			synch_type							= new_synch_type;
-			composition_count					= new_composition_count;
+		//build fluent automata
+		for(i = 0; i < (int32_t)ctx->global_fluents_count; i++){
+			new_automata[i + composition_count]	= automaton_fluent_build_automaton(ctx, i);
+			//TODO: check which composition type should work for fluents
+			new_synch_type[i + composition_count]	= CONCURRENT;
+			char buf[255];
+			//automaton_automaton_print(tables->composition_entries[i]->valuation.automaton_value, true, true, true, "*\t", "*\t");
+			sprintf(buf, "%s_%d_fluent.fsp", ctx->name, i + composition_count);
+			automaton_automaton_print_fsp(new_automata[i + composition_count], buf);
 		}
-		aut_context_log("composing.\n");
-		automaton_automaton* automaton	= automaton_automata_compose(automata, synch_type, composition_count, composition_syntax->is_game);//SYNCHRONOUS);
-		if(composition_syntax->is_game)
-			for(i = 0; i < (int32_t)ctx->global_fluents_count; i++)
-				automaton_automaton_destroy(automata[composition_count - i - 1]);
-		tables->composition_entries[main_index]->solved	= true;
-		tables->composition_entries[main_index]->valuation_count			= 1;
-		tables->composition_entries[main_index]->valuation.automaton_value	= automaton;
-		aut_context_log("done, %d states\n", automaton->transitions_count);
 		free(automata);
 		free(synch_type);
-		return false;
-	}else{//SINGLE COMPONENT (AUTOMATON)
-		aut_context_log("single component.%s\n", composition_syntax->name);
-		/** BUILD LOCAL ALPHABET **/
-		uint32_t	local_alphabet_count	= 0;
-		int32_t		element_global_index;
-		int32_t		element_position;
-		uint32_t*	local_alphabet		= NULL;
-		char** ret_value				= NULL;
-		uint32_t **indexes_values		= NULL;
-		int32_t count					= 0;
-		automaton_state_syntax* state;
-		automaton_transition_syntax* transition;
-		automaton_trace_label_syntax* trace_label;
-		automaton_trace_label_atom_syntax* trace_label_atom;
-		automaton_label_syntax* atom_label;
-		char* element_to_find;
-		uint32_t current_valuations_size = LIST_INITIAL_SIZE, current_valuations_count = 0;
-		automaton_indexes_valuation** current_valuations	= calloc(current_valuations_size, sizeof(automaton_indexes_valuation*));
-		for(i = 0; i < (int32_t)composition_syntax->count; i++){
+		automata							= new_automata;
+		synch_type							= new_synch_type;
+		composition_count					= new_composition_count;
+	}
+	aut_context_log("composing.\n");
+	automaton_automaton* automaton	= automaton_automata_compose(automata, synch_type, composition_count, composition_syntax->is_game);//SYNCHRONOUS);
+	if(composition_syntax->is_game)
+		for(i = 0; i < (int32_t)ctx->global_fluents_count; i++)
+			automaton_automaton_destroy(automata[composition_count - i - 1]);
+	tables->composition_entries[main_index]->solved	= true;
+	tables->composition_entries[main_index]->valuation_count			= 1;
+	tables->composition_entries[main_index]->valuation.automaton_value	= automaton;
+	aut_context_log("done, %d states\n", automaton->transitions_count);
+	free(automata);
+	free(synch_type);
+	return false;
+}
+
+void automaton_statement_syntax_find_add_local_element(char *element_to_find, automaton_automata_context* ctx, uint32_t *local_alphabet_count, uint32_t **local_alphabet){
+	int32_t element_global_index= -1;
+	int32_t element_position	= (*local_alphabet_count);
+	int32_t m;
+	for(m = 0; m < (int32_t)ctx->global_alphabet->count; m++){
+		if(strcmp(ctx->global_alphabet->list[m].name, element_to_find) == 0){
+			element_global_index = m;
+			break;
+		}
+	}
+	if(element_global_index == -1){
+		//TODO: report local element not found
+		printf("Looking for: %s [NOT FOUND]\nGlobal Alphabet:\n(", element_to_find);
+		for(m = 0; m < (int32_t)ctx->global_alphabet->count; m++){
+			printf("%s%s", ctx->global_alphabet->list[m].name, m < ((int32_t)ctx->global_alphabet->count - 1)? ",":"");
+		}
+		printf(")\n");
+		exit(-1);
+	}
+	for(m = 0; m < (int32_t)(*local_alphabet_count); m++){
+		if((*local_alphabet)[m] == (uint32_t)element_global_index){
+			element_position	= -1;
+			break;
+		}
+		if((*local_alphabet)[m] > (uint32_t)element_global_index){
+			element_position	= m;
+			break;
+		}
+	}
+	if(element_position >= 0){
+		uint32_t* new_alphabet	= malloc(sizeof(uint32_t) * ((*local_alphabet_count) + 1));
+		for(m = 0; m < (int32_t)(*local_alphabet_count); m++){
+			if(m < element_position)
+				new_alphabet[m]	= (*local_alphabet)[m];
+			else
+				new_alphabet[m+1]	= (*local_alphabet)[m];
+		}
+		new_alphabet[element_position]	= (uint32_t)element_global_index;
+		(*local_alphabet_count)++;
+		if((*local_alphabet) != NULL) free((*local_alphabet));
+		(*local_alphabet)	= new_alphabet;
+	}
+
+}
+
+void automaton_statement_syntax_build_local_alphabet(automaton_automata_context* ctx, automaton_composition_syntax* composition_syntax
+		, automaton_parsing_tables* tables, uint32_t *local_alphabet_count, uint32_t** local_alphabet
+		, uint32_t *current_valuations_size, uint32_t *current_valuations_count, automaton_indexes_valuation ***current_valuations){
+	int32_t i,j,k,l,m,n,o;
+	/** BUILD LOCAL ALPHABET **/
+	int32_t		element_global_index;
+	int32_t		element_position;
+	char** ret_value				= NULL;
+	uint32_t **indexes_values		= NULL;
+	int32_t count					= 0;
+	automaton_state_syntax* state;
+	automaton_transition_syntax* transition;
+	automaton_trace_label_syntax* trace_label;
+	automaton_trace_label_atom_syntax* trace_label_atom;
+	automaton_label_syntax* atom_label;
+	char* element_to_find;
+
+	for(i = 0; i < (int32_t)composition_syntax->count; i++){
 			state	= composition_syntax->states[i];
 			if(state->label->indexes != NULL){
-				if(current_valuations_count >= (current_valuations_size - 1)){
-					uint32_t new_size	= current_valuations_size * LIST_INCREASE_FACTOR;
-					automaton_indexes_valuation** ptr = realloc(current_valuations, new_size * sizeof(automaton_indexes_valuation*));
+				if((*current_valuations_count) >= ((*current_valuations_size) - 1)){
+					uint32_t new_size	= (*current_valuations_size) * LIST_INCREASE_FACTOR;
+					automaton_indexes_valuation** ptr = realloc((*current_valuations), new_size * sizeof(automaton_indexes_valuation*));
 					if(ptr == NULL){
-						printf("Could not reallocate current_valuations\n");
+						printf("Could not reallocate (*current_valuations)\n");
 						exit(-1);
 					}
-					current_valuations_size	= new_size;
-					current_valuations = ptr;
+					(*current_valuations_size)	= new_size;
+					(*current_valuations) = ptr;
 				}
-				current_valuations[current_valuations_count++] 	= automaton_indexes_valuation_create_from_indexes(tables, state->label->indexes);
+				(*current_valuations)[(*current_valuations_count)++] 	= automaton_indexes_valuation_create_from_indexes(tables, state->label->indexes);
 			}
 			for(j = 0; j < (int32_t)state->transitions_count; j++){
 				transition	= state->transitions[j];
@@ -798,95 +840,15 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 								aut_dupstr(&(ret_value[0]),  atom_label->string_terminal);
 								count 		= 1;
 
-								automaton_indexes_syntax_eval_strings(tables, current_valuations_count > 0 ? current_valuations[current_valuations_count - 1] : NULL, &indexes_values, &ret_value, &count, atom_label->indexes);
+								automaton_indexes_syntax_eval_strings(tables, (*current_valuations_count) > 0 ? (*current_valuations)[(*current_valuations_count) - 1] : NULL, &indexes_values, &ret_value, &count, atom_label->indexes);
 								for(n = 0; n < count;n++)free(indexes_values[n]);
 								free(indexes_values); indexes_values = NULL;
 								for(n = 0; n < count; n++){
-									element_to_find		= ret_value[n];
-									element_global_index= -1;
-									element_position	= local_alphabet_count;
-									for(m = 0; m < (int32_t)ctx->global_alphabet->count; m++){
-										if(strcmp(ctx->global_alphabet->list[m].name, element_to_find) == 0){
-											element_global_index = m;
-											break;
-										}
-									}
-									if(element_global_index == -1){
-										//TODO: report local element not found
-										printf("Looking for: %s [NOT FOUND]\nGlobal Alphabet:\n(", element_to_find);
-										for(m = 0; m < (int32_t)ctx->global_alphabet->count; m++){
-											printf("%s%s", ctx->global_alphabet->list[m].name, m < ((int32_t)ctx->global_alphabet->count - 1)? ",":"");
-										}
-										printf(")\n");
-										exit(-1);
-									}
-									for(m = 0; m < (int32_t)local_alphabet_count; m++){
-										if(local_alphabet[m] == (uint32_t)element_global_index){
-											element_position	= -1;
-											break;
-										}
-										if(local_alphabet[m] > (uint32_t)element_global_index){
-											element_position	= m;
-											break;
-										}
-									}
-									if(element_position >= 0){
-										uint32_t* new_alphabet	= malloc(sizeof(uint32_t) * (local_alphabet_count + 1));
-										for(m = 0; m < (int32_t)local_alphabet_count; m++){
-											if(m < element_position)
-												new_alphabet[m]	= local_alphabet[m];
-											else
-												new_alphabet[m+1]	= local_alphabet[m];
-										}
-										new_alphabet[element_position]	= (uint32_t)element_global_index;
-										local_alphabet_count++;
-										if(local_alphabet != NULL) free(local_alphabet);
-										local_alphabet	= new_alphabet;
-									}
+									automaton_statement_syntax_find_add_local_element(ret_value[n], ctx, local_alphabet_count, local_alphabet);
 
 								}
 							}else{
-								element_to_find		= atom_label->string_terminal;
-								element_global_index= -1;
-								element_position	= local_alphabet_count;
-								for(m = 0; m < (int32_t)ctx->global_alphabet->count; m++){
-									if(strcmp(ctx->global_alphabet->list[m].name, element_to_find) == 0){
-										element_global_index = m;
-										break;
-									}
-								}
-								if(element_global_index == -1){
-									//TODO: report local element not found
-									printf("Looking for: %s [NOT FOUND]\nGlobal Alphabet:\n(", element_to_find);
-									for(m = 0; m < (int32_t)ctx->global_alphabet->count; m++){
-										printf("%s%s", ctx->global_alphabet->list[m].name, m < ((int32_t)ctx->global_alphabet->count - 1)? ",":"");
-									}
-									printf(")\n");
-									exit(-1);
-								}
-								for(m = 0; m < (int32_t)local_alphabet_count; m++){
-									if(local_alphabet[m] == (uint32_t)element_global_index){
-										element_position	= -1;
-										break;
-									}
-									if(local_alphabet[m] > (uint32_t)element_global_index){
-										element_position	= m;
-										break;
-									}
-								}
-								if(element_position >= 0){
-									uint32_t* new_alphabet	= malloc(sizeof(uint32_t) * (local_alphabet_count + 1));
-									for(m = 0; m < (int32_t)local_alphabet_count; m++){
-										if(m < element_position)
-											new_alphabet[m]	= local_alphabet[m];
-										else
-											new_alphabet[m+1]	= local_alphabet[m];
-									}
-									new_alphabet[element_position]	= (uint32_t)element_global_index;
-									local_alphabet_count++;
-									if(local_alphabet != NULL) free(local_alphabet);
-									local_alphabet	= new_alphabet;
-								}
+								automaton_statement_syntax_find_add_local_element(atom_label->string_terminal, ctx, local_alphabet_count, local_alphabet);
 							}
 						}else{
 							for(n = 0; n < (int32_t)(atom_label->set->count); n++){
@@ -907,80 +869,10 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 										for(n = 0; n < count;n++)free(indexes_values[n]);
 										free(indexes_values); indexes_values = NULL;
 										for(n = 0; n < count; n++){
-											element_to_find		= ret_value[n];
-											element_global_index= -1;
-											element_position	= local_alphabet_count;
-											for(m = 0; m < (int32_t)ctx->global_alphabet->count; m++){
-												if(strcmp(ctx->global_alphabet->list[m].name, element_to_find) == 0){
-													element_global_index = m;
-													break;
-												}
-											}
-											if(element_global_index == -1){
-												printf("Element global index not found %s\n", element_to_find);
-												exit(-1);
-											}
-											for(m = 0; m < (int32_t)local_alphabet_count; m++){
-												if(local_alphabet[m] == (uint32_t)element_global_index){
-													element_position	= -1;
-													break;
-												}
-												if(local_alphabet[m] > (uint32_t)element_global_index){
-													element_position	= m;
-													break;
-												}
-											}
-											if(element_position >= 0){
-												uint32_t* new_alphabet	= malloc(sizeof(uint32_t) * (local_alphabet_count + 1));
-												for(m = 0; m < (int32_t)local_alphabet_count; m++){
-													if(m < element_position)
-														new_alphabet[m]	= local_alphabet[m];
-													else
-														new_alphabet[m+1]	= local_alphabet[m];
-												}
-												new_alphabet[element_position]	= (uint32_t)element_global_index;
-												local_alphabet_count++;
-												if(local_alphabet != NULL) free(local_alphabet);
-												local_alphabet	= new_alphabet;
-											}
+											automaton_statement_syntax_find_add_local_element(ret_value[n], ctx, local_alphabet_count, local_alphabet);
 										}
 									}else{
-										element_to_find		= atom_label->set->labels[n][o]->string_terminal;
-										element_global_index= -1;
-										element_position	= local_alphabet_count;
-										for(m = 0; m < (int32_t)ctx->global_alphabet->count; m++){
-											if(strcmp(ctx->global_alphabet->list[m].name, element_to_find) == 0){
-												element_global_index = m;
-												break;
-											}
-										}
-										if(element_global_index == -1){
-											printf("Element global index not found %s\n", element_to_find);
-											exit(-1);
-										}
-										for(m = 0; m < (int32_t)local_alphabet_count; m++){
-											if(local_alphabet[m] == (uint32_t)element_global_index){
-												element_position	= -1;
-												break;
-											}
-											if(local_alphabet[m] > (uint32_t)element_global_index){
-												element_position	= m;
-												break;
-											}
-										}
-										if(element_position >= 0){
-											uint32_t* new_alphabet	= malloc(sizeof(uint32_t) * (local_alphabet_count + 1));
-											for(m = 0; m < (int32_t)local_alphabet_count; m++){
-												if(m < element_position)
-													new_alphabet[m]	= local_alphabet[m];
-												else
-													new_alphabet[m+1]	= local_alphabet[m];
-											}
-											new_alphabet[element_position]	= (uint32_t)element_global_index;
-											local_alphabet_count++;
-											if(local_alphabet != NULL) free(local_alphabet);
-											local_alphabet	= new_alphabet;
-										}
+										automaton_statement_syntax_find_add_local_element(atom_label->set->labels[n][o]->string_terminal, ctx, local_alphabet_count, local_alphabet);
 									}
 								}
 							}
@@ -997,9 +889,37 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 			ret_value = NULL;
 			count = 0;
 		}
-		aut_context_log("local alphabet built with size %d\n", local_alphabet_count);
+		aut_context_log("local alphabet built with size %d\n", (*local_alphabet_count));
+}
+
+bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, automaton_composition_syntax* composition_syntax
+		, automaton_parsing_tables* tables){
+	int32_t main_index, index, i, j, k, l, m, n, o, p, r, s;
+	main_index						= automaton_parsing_tables_get_entry_index(tables, COMPOSITION_ENTRY_AUT, composition_syntax->name);
+	if(main_index >= 0)if(tables->composition_entries[main_index]->solved)	return false;
+	//check whether composition syntax is a composition or a single automaton description
+	if(composition_syntax->components != NULL){//MULTIPLE COMPONENTS (AUTOMATA)
+		return automaton_statement_syntax_to_composition(ctx, composition_syntax, tables, main_index);
+	}else{//SINGLE COMPONENT (AUTOMATON)
+		aut_context_log("single component.%s\n", composition_syntax->name);
+		uint32_t	local_alphabet_count	= 0;
+		uint32_t*	local_alphabet		= NULL;
+		uint32_t current_valuations_size = LIST_INITIAL_SIZE, current_valuations_count = 0;
+		automaton_indexes_valuation** current_valuations	= calloc(current_valuations_size, sizeof(automaton_indexes_valuation*));
+		automaton_statement_syntax_build_local_alphabet(ctx, composition_syntax, tables, &local_alphabet_count, &local_alphabet, &current_valuations_size, &current_valuations_count
+				, &current_valuations);
 		/** CREATE AUTOMATON **/
+		char** ret_value				= NULL;
+		uint32_t **indexes_values		= NULL;
+		int32_t count					= 0;
+		automaton_state_syntax* state;
+		automaton_transition_syntax* transition;
+		automaton_trace_label_syntax* trace_label;
+		automaton_trace_label_atom_syntax* trace_label_atom;
+		automaton_label_syntax* atom_label;
+
 		automaton_automaton* automaton	= automaton_automaton_create(composition_syntax->name, ctx, local_alphabet_count, local_alphabet, false, false);
+
 		free(local_alphabet);
 		//add transitions
 		//map state label to int
@@ -1089,6 +1009,10 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 		}
 
 		//STATE ITERATION
+		int32_t		element_global_index = -1;
+		int32_t		element_position = -1;
+		char* element_to_find;
+
 		aut_context_log("State count iteration for %d states %d\n", composition_syntax->count);
 		for(i = 0; i < (int32_t)composition_syntax->count; i++){
 			state	= composition_syntax->states[i];
@@ -1454,6 +1378,9 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 			free(indexes_values);
 			indexes_values = NULL;
 		}
+		for(i = 0; i < current_valuations_count; i++)
+			free(current_valuations[i]);
+		free(current_valuations);
 		//set entry in table
 		tables->composition_entries[main_index]->solved	= true;
 		tables->composition_entries[main_index]->valuation_count			= 1;

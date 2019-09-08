@@ -102,6 +102,11 @@ void automaton_statement_syntax_to_table(automaton_statement_syntax* statement, 
 int32_t automaton_expression_syntax_evaluate(automaton_parsing_tables* tables, automaton_expression_syntax* expr, automaton_indexes_valuation* indexes_valuation);
 char** automaton_set_syntax_evaluate(automaton_parsing_tables* tables, automaton_set_syntax* set, int32_t *count, char* set_def_key);
 automaton_alphabet* automaton_parsing_tables_get_global_alphabet(automaton_parsing_tables* tables);
+bool automaton_statement_syntax_to_composition(automaton_automata_context* ctx, automaton_composition_syntax* composition_syntax
+		, automaton_parsing_tables* tables, uint32_t main_index);
+void automaton_statement_syntax_build_local_alphabet(automaton_automata_context* ctx, automaton_composition_syntax* composition_syntax
+		, automaton_parsing_tables* tables, uint32_t *local_alphabet_count, uint32_t** local_alphabet
+		, uint32_t *current_valuations_size, uint32_t *current_valuations_count, automaton_indexes_valuation ***current_valuations);
 bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, automaton_composition_syntax* composition_syntax
 		, automaton_parsing_tables* tables);
 automaton_range* automaton_range_syntax_evaluate(automaton_parsing_tables *tables, char* name, automaton_expression_syntax *range_def_syntax);
