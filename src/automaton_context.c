@@ -1499,7 +1499,6 @@ void automaton_indexes_valuation_increase(automaton_indexes_valuation* valuation
 	//if(!automaton_indexes_valuation_has_next(valuation))return;
 	uint32_t i, j, k;
 	int32_t *lower_index, *upper_index, *current_index, position;
-
 	j	= valuation->count -1;
 	valuation->current_values[j]++;
 	while(valuation->current_values[j] > valuation->ranges[j]->upper_value){
