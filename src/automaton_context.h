@@ -96,8 +96,8 @@ void automaton_indexes_valuation_increase(automaton_indexes_valuation* valuation
 bool automaton_indexes_valuation_has_next(automaton_indexes_valuation* valuation);
 void automaton_indexes_valuation_set_label(automaton_indexes_valuation* valuation, char* label, char* target);
 void automaton_indexes_valuation_set_atom_label(automaton_parsing_tables* tables, automaton_indexes_valuation* valuation, automaton_indexes_syntax* atom_indexes, char* label, char* target);
-void automaton_indexes_valuation_set_to_label(automaton_parsing_tables* tables,automaton_indexes_valuation* valuation
-		, automaton_indexes_syntax *atom_label_indexes, uint32_t* indexes_values, automaton_indexes_syntax* from_indexes, automaton_indexes_syntax* to_indexes, char* label, char* target);
+void automaton_indexes_valuation_set_to_label(automaton_parsing_tables* tables, automaton_indexes_valuation* valuation
+		, automaton_indexes_syntax* to_indexes, char* label, char* target);
 void automaton_statement_syntax_to_table(automaton_statement_syntax* statement, automaton_parsing_tables* tables);
 int32_t automaton_expression_syntax_evaluate(automaton_parsing_tables* tables, automaton_expression_syntax* expr, automaton_indexes_valuation* indexes_valuation);
 char** automaton_set_syntax_evaluate(automaton_parsing_tables* tables, automaton_set_syntax* set, int32_t *count, char* set_def_key);
@@ -105,8 +105,7 @@ automaton_alphabet* automaton_parsing_tables_get_global_alphabet(automaton_parsi
 bool automaton_statement_syntax_to_composition(automaton_automata_context* ctx, automaton_composition_syntax* composition_syntax
 		, automaton_parsing_tables* tables, uint32_t main_index);
 void automaton_statement_syntax_build_local_alphabet(automaton_automata_context* ctx, automaton_composition_syntax* composition_syntax
-		, automaton_parsing_tables* tables, uint32_t *local_alphabet_count, uint32_t** local_alphabet
-		, uint32_t *current_valuations_size, uint32_t *current_valuations_count, automaton_indexes_valuation ***current_valuations);
+		, automaton_parsing_tables* tables, uint32_t *local_alphabet_count, uint32_t** local_alphabet);
 bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, automaton_composition_syntax* composition_syntax
 		, automaton_parsing_tables* tables);
 automaton_range* automaton_range_syntax_evaluate(automaton_parsing_tables *tables, char* name, automaton_expression_syntax *range_def_syntax);
@@ -123,7 +122,7 @@ void automaton_indexes_syntax_eval_strings(automaton_parsing_tables* tables, aut
 bool automaton_add_transition_from_valuations(obdd_mgr* mgr, automaton_automaton* automaton, uint32_t from_state, uint32_t to_state, bool* from_valuation,
 		bool* to_valuation, bool is_initial, bool is_input, uint32_t x_count, uint32_t y_count, uint32_t* obdd_on_indexes, uint32_t* obdd_off_indexes
 		,uint32_t* x_y_alphabet, uint32_t* x_y_x_p_alphabet);
-void automaton_set_composed_valuation(bool* valuation, bool* partial_valuation, uint32_t valuation_offset, bool is_initial, bool is_input, uint32_t* var_ids
+void automaton_set_composed_valuation(bool* valuation, bool* partial_valuation, uint32_t valuation_offset, bool is_initial, bool is_input
 		, uint32_t x_count, uint32_t y_count);
 automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_context* ctx, char* name, obdd** env_theta_obdd, uint32_t env_theta_count, obdd** sys_theta_obdd, uint32_t sys_theta_count
 		, obdd** env_rho_obdd, uint32_t env_rho_count, obdd** sys_rho_obdd, uint32_t sys_rho_count, automaton_parsing_tables* tables);

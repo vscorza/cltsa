@@ -237,8 +237,10 @@ void automaton_indexes_valuation_copy(automaton_indexes_valuation* source, autom
 	}
 	target->ranges					= malloc(sizeof(automaton_range*) * target->count);
 	for(i = 0; i < target->count; i++){
-		target->ranges[i]			= source->ranges[i];
+		target->ranges[i]			= automaton_range_clone(source->ranges[i]);
 	}
+	target->current_combination		= source->current_combination;
+	target->total_combinations		= source->total_combinations;
 }
 /** PRINTING FUNCTIONS **/
 void automaton_signal_type_print(automaton_signal_type type, char* prefix, char* suffix){

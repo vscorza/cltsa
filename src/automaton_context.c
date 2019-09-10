@@ -578,27 +578,38 @@ automaton_alphabet* automaton_parsing_tables_get_global_alphabet(automaton_parsi
 	}
 	return global_alphabet;
 }
+/**
+ * Augment current valuation with the ranges missing from incoming indexes
+ * @param valuation the valuation to be augmented
+ * @param tables staging parsing structure
+ * @param indexes the indexes from where to take the ranges to augment the valuation
+ */
 void automaton_indexes_valuation_add_indexes(automaton_indexes_valuation* valuation, automaton_parsing_tables* tables, automaton_indexes_syntax* indexes){
 	uint32_t i, j;
 	char name[40];
+	uint32_t new_count = 0;
+	bool found = false;
 	for(i  = 0; i < valuation->count; i++){
+		found = false;
 		for(j = 0; j < indexes->count; j++){
-			if(indexes->indexes[i]->is_expr){
-				if(indexes->indexes[i]->expr->type == INTEGER_TERMINAL_TYPE_AUT){
-					sprintf(name, "%d", indexes->indexes[i]->expr->integer_terminal);
+			if(indexes->indexes[j]->is_expr){
+				if(indexes->indexes[j]->expr->type == INTEGER_TERMINAL_TYPE_AUT){
+					sprintf(name, "%d", indexes->indexes[j]->expr->integer_terminal);
 				}else{
-					sprintf(name, "%s", indexes->indexes[i]->expr->string_terminal);
+					sprintf(name, "%s", indexes->indexes[j]->expr->string_terminal);
 				}
 			}else{
-				sprintf(name, "%s", indexes->indexes[i]->lower_ident);
+				sprintf(name, "%s", indexes->indexes[j]->lower_ident);
 			}
 			if(strcmp(valuation->ranges[i]->name, name)== 0){
-				printf("Index: %s repeated across transitions\n", name);
-				exit(-1);
+				found = true;
+				break;
 			}
 		}
+		if(!found)
+			new_count++;
 	}
-	uint32_t new_count	= valuation->count + indexes->count;
+	new_count	+= valuation->count;
 	int32_t* ptr	= realloc(valuation->current_values, sizeof(int32_t) * (new_count));
 	if(ptr == NULL){
 		printf("Could not allocate memory\n");
@@ -617,6 +628,15 @@ void automaton_indexes_valuation_add_indexes(automaton_indexes_valuation* valuat
 
 	automaton_range* range;
 	for(i = 0; i < indexes->count; i++){
+		found = false;
+		for(j = 0; j < valuation->count; j++){
+			if(strcmp(valuation->ranges[j]->name, name)== 0){
+				found = true;
+				break;
+			}
+		}
+		if(found)
+			continue;
 		automaton_index_syntax_get_range(tables, indexes->indexes[i], &(lower_index), &(upper_index));
 		if(indexes->indexes[i]->is_expr){
 			if(indexes->indexes[i]->expr->type == INTEGER_TERMINAL_TYPE_AUT){
@@ -631,10 +651,18 @@ void automaton_indexes_valuation_add_indexes(automaton_indexes_valuation* valuat
 		valuation->current_values[valuation->count + i]	= lower_index;
 		valuation->ranges[valuation->count + i]			= range;
 		valuation->total_combinations	*= (upper_index - lower_index);
-	}
 
+	}
 	valuation->count	= new_count;
 }
+
+/**
+ * Fix the index with name according to parameter to the value provided
+ *
+ * @param valuation current valuation to be fixed over a single variable
+ * @param index_name the name of the variable to be fixed
+ * @param value the value to be set on said variable
+ */
 void automaton_indexes_valuation_fix_index(automaton_indexes_valuation* valuation, char* index_name, int32_t value){
 	uint32_t i;
 	for(i = 0; i < valuation->count; i++){
@@ -644,7 +672,12 @@ void automaton_indexes_valuation_fix_index(automaton_indexes_valuation* valuatio
 		}
 	}
 }
-
+/**
+ * Initializes a valuation object from a set of indexes
+ * @param tables the parsing staging structure
+ * @param indexes current indexes from wich to initialize the valuation
+ * @return the valuation where each value is defined according to ranges or values defined in indexes
+ */
 automaton_indexes_valuation* automaton_indexes_valuation_create_from_indexes(automaton_parsing_tables* tables, automaton_indexes_syntax* indexes){
 	automaton_indexes_valuation* valuation	= automaton_indexes_valuation_create();
 	valuation->count	= indexes->count;
@@ -739,6 +772,13 @@ bool automaton_statement_syntax_to_composition(automaton_automata_context* ctx, 
 	return false;
 }
 
+/**
+ * Adds an element to the local alphabet, respecting order, if element is not found in global alphabet report error
+ * @param element_to_find string to find in the global alphabet array
+ * @param ctx automata context over which current automata is initialized
+ * @param local_alphabet_count a placeholder for the local alphabet count after adding the element (if not present)
+ * @param local_alphabet the local alphabet where the element will be added (if needed)
+ */
 void automaton_statement_syntax_find_add_local_element(char *element_to_find, automaton_automata_context* ctx, uint32_t *local_alphabet_count, uint32_t **local_alphabet){
 	int32_t element_global_index= -1;
 	int32_t element_position	= (*local_alphabet_count);
@@ -784,9 +824,16 @@ void automaton_statement_syntax_find_add_local_element(char *element_to_find, au
 
 }
 
+/**
+ * Initialize the local alphabet from the automaton and valuations list for each state
+ * @param ctx is the automata context where the automaton is being held
+ * @param composition_syntax staging structure containing the automaton definition
+ * @param tables the stating parsing structure holding overall references
+ * @param local_alphabet_count placeholder for local alphabet count
+ * @param local_alphabet place holder for the local alphabet as array of int, where each int points to the position of each element in the global alphabet (ordered)
+ */
 void automaton_statement_syntax_build_local_alphabet(automaton_automata_context* ctx, automaton_composition_syntax* composition_syntax
-		, automaton_parsing_tables* tables, uint32_t *local_alphabet_count, uint32_t** local_alphabet
-		, uint32_t *current_valuations_size, uint32_t *current_valuations_count, automaton_indexes_valuation ***current_valuations){
+		, automaton_parsing_tables* tables, uint32_t *local_alphabet_count, uint32_t** local_alphabet){
 	int32_t i,j,k,l,m,n,o;
 	/** BUILD LOCAL ALPHABET **/
 	int32_t		element_global_index;
@@ -799,22 +846,25 @@ void automaton_statement_syntax_build_local_alphabet(automaton_automata_context*
 	automaton_trace_label_syntax* trace_label;
 	automaton_trace_label_atom_syntax* trace_label_atom;
 	automaton_label_syntax* atom_label;
+	uint32_t current_valuations_size = LIST_INITIAL_SIZE;
+	uint32_t current_valuations_count = 0;
+	automaton_indexes_valuation **current_valuations = calloc(current_valuations_size, sizeof(automaton_indexes_valuation*));
 	char* element_to_find;
 
 	for(i = 0; i < (int32_t)composition_syntax->count; i++){
 			state	= composition_syntax->states[i];
 			if(state->label->indexes != NULL){
-				if((*current_valuations_count) >= ((*current_valuations_size) - 1)){
-					uint32_t new_size	= (*current_valuations_size) * LIST_INCREASE_FACTOR;
-					automaton_indexes_valuation** ptr = realloc((*current_valuations), new_size * sizeof(automaton_indexes_valuation*));
+				if(current_valuations_count >= (current_valuations_size - 1)){
+					uint32_t new_size	= current_valuations_size * LIST_INCREASE_FACTOR;
+					automaton_indexes_valuation** ptr = realloc(current_valuations, new_size * sizeof(automaton_indexes_valuation*));
 					if(ptr == NULL){
 						printf("Could not reallocate (*current_valuations)\n");
 						exit(-1);
 					}
-					(*current_valuations_size)	= new_size;
-					(*current_valuations) = ptr;
+					current_valuations_size	= new_size;
+					current_valuations = ptr;
 				}
-				(*current_valuations)[(*current_valuations_count)++] 	= automaton_indexes_valuation_create_from_indexes(tables, state->label->indexes);
+				current_valuations[current_valuations_count++] 	= automaton_indexes_valuation_create_from_indexes(tables, state->label->indexes);
 			}
 			for(j = 0; j < (int32_t)state->transitions_count; j++){
 				transition	= state->transitions[j];
@@ -840,7 +890,7 @@ void automaton_statement_syntax_build_local_alphabet(automaton_automata_context*
 								aut_dupstr(&(ret_value[0]),  atom_label->string_terminal);
 								count 		= 1;
 
-								automaton_indexes_syntax_eval_strings(tables, (*current_valuations_count) > 0 ? (*current_valuations)[(*current_valuations_count) - 1] : NULL, &indexes_values, &ret_value, &count, atom_label->indexes);
+								automaton_indexes_syntax_eval_strings(tables, current_valuations_count > 0 ? current_valuations[current_valuations_count - 1] : NULL, &indexes_values, &ret_value, &count, atom_label->indexes);
 								for(n = 0; n < count;n++)free(indexes_values[n]);
 								free(indexes_values); indexes_values = NULL;
 								for(n = 0; n < count; n++){
@@ -881,6 +931,11 @@ void automaton_statement_syntax_build_local_alphabet(automaton_automata_context*
 				}
 			}
 		}
+		for(n = 0; n < current_valuations_count; n++){
+			automaton_indexes_valuation_destroy(current_valuations[n]);
+		}
+		free(current_valuations);
+		current_valuations = NULL;
 		if(ret_value != NULL){
 			for(n = 0; n < count; n++){
 				free(ret_value[n]);
@@ -891,7 +946,43 @@ void automaton_statement_syntax_build_local_alphabet(automaton_automata_context*
 		}
 		aut_context_log("local alphabet built with size %d\n", (*local_alphabet_count));
 }
+/**
+ * Appends a new valuation constructed from the merging of the last element of the provided array and the new indexes structure
+ * @param tables staging parsing structure
+ * @param current_valuations array of valuations computed for each state on the implicit transitions path
+ * @param current_valuations_size size of the valuations array
+ * @param current_valuations_count count of valid elements within the valuations array
+ * @param indexes label indexes over which the new valuation will be computed and added to the array
+ */
+void automaton_statement_syntax_append_implicit_transition_valuation(automaton_parsing_tables *tables, automaton_indexes_valuation ***current_valuations, uint32_t *current_valuations_size
+			, uint32_t *current_valuations_count, automaton_indexes_syntax *indexes){
+	automaton_indexes_valuation *composed_valuation = NULL;
+	if(*current_valuations_count > 0){
+		composed_valuation = automaton_indexes_valuation_clone((*current_valuations)[(*current_valuations_count)-1]);
+		automaton_indexes_valuation_add_indexes(composed_valuation, tables, indexes);
+	}else{
+		composed_valuation = automaton_indexes_valuation_create_from_indexes(tables, indexes);
+	}
+	if(*current_valuations_count == *current_valuations_size){
+		uint32_t new_size	= *current_valuations_size * LIST_INCREASE_FACTOR;
+		automaton_indexes_valuation** ptr = realloc(*current_valuations, new_size * sizeof(automaton_indexes_valuation*));
+		if(ptr == NULL){
+			printf("Could not reallocate current_valuations\n");
+			exit(-1);
+		}
+		*current_valuations_size	= new_size;
+		*current_valuations = ptr;
+	}
+	(*current_valuations)[(*current_valuations_count)++] 	= composed_valuation;
+}
 
+/**
+ * Initializes an automaton from a composition staging structure
+ * @param ctx automata context over which to create the automaton
+ * @param composition_syntax staging structure containing the definition of the automaton
+ * @param tables the overall parsing staging structure where the automaton will have its reference
+ * @return true if there are more automata to be initialized
+ */
 bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, automaton_composition_syntax* composition_syntax
 		, automaton_parsing_tables* tables){
 	int32_t main_index, index, i, j, k, l, m, n, o, p, r, s;
@@ -906,8 +997,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 		uint32_t*	local_alphabet		= NULL;
 		uint32_t current_valuations_size = LIST_INITIAL_SIZE, current_valuations_count = 0;
 		automaton_indexes_valuation** current_valuations	= calloc(current_valuations_size, sizeof(automaton_indexes_valuation*));
-		automaton_statement_syntax_build_local_alphabet(ctx, composition_syntax, tables, &local_alphabet_count, &local_alphabet, &current_valuations_size, &current_valuations_count
-				, &current_valuations);
+		automaton_statement_syntax_build_local_alphabet(ctx, composition_syntax, tables, &local_alphabet_count, &local_alphabet);
 		/** CREATE AUTOMATON **/
 		char** ret_value				= NULL;
 		uint32_t **indexes_values		= NULL;
@@ -944,9 +1034,6 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 		bool first_index_set	= false;
 		//HANDLE REF STATES
 		//initialize states list
-
-
-
 		for(i = 0; i < (int32_t)composition_syntax->count; i++){
 			automaton_indexes_valuation *current_valuation;
 			state	= composition_syntax->states[i];
@@ -964,7 +1051,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 				current_valuation	= NULL;
 			}
 		}
-
+		//TODO: solve aliases in states e.g. S[i:R] = S_p[i], S_p[i:R] = (s->S_2[i]).
 		//update ref states
 		for(i = 0; i < (int32_t)composition_syntax->count; i++){
 			state	= composition_syntax->states[i];
@@ -999,6 +1086,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 					automaton_automaton_add_initial_state(automaton, to_state);
 					first_state_set	= true;
 				}else{
+					//partial incomplete solution to state to state ref: (S[i:R] = S_p[i].) converted to (S[i:R] = (<> -> S_p[i]).
 					//create empty transitions
 					current_automaton_transition[0]	= automaton_transition_create(current_from_state[0], to_state);
 					automaton_automaton_add_transition(automaton, current_automaton_transition[0]);
@@ -1010,7 +1098,6 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 
 		//STATE ITERATION
 		int32_t		element_global_index = -1;
-		int32_t		element_position = -1;
 		char* element_to_find;
 
 		aut_context_log("State count iteration for %d states %d\n", composition_syntax->count);
@@ -1035,16 +1122,17 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 			bool first_run_from	= true;
 			//FROM STATE INDEXES ITERATION
 			aut_context_log("\ts[%d]\n", i);
-			while(first_run_from || (state->label->indexes != NULL != NULL && automaton_indexes_valuation_has_next(current_valuations[current_valuations_count - 1]))){
+			while(first_run_from || (state->label->indexes != NULL && automaton_indexes_valuation_has_next(current_valuations[current_valuations_count - 1]))){
 #if DEBUG_PARSE_STATES
 				if(current_valuation != NULL)
 					automaton_indexes_valuation_print(current_valuation, "", "\n");
 #endif
 				first_run_from = false;
 				label_indexes[0] = '\0';
-				//get incremental valuation on from state indexes
+				//get incremental valuation from state indexes
 				automaton_indexes_valuation_set_label(current_valuations_count > 0 ? current_valuations[current_valuations_count - 1] : NULL, state->label->name, label_indexes);
 				aut_push_string_to_list(&labels_list, &labels_list_count, label_indexes, &label_position, false, false);
+				//explicit from state
 				from_state	= (uint32_t)label_position;
 #if DEBUG_PARSE_STATES
 				aut_context_log("LAB.LIST(state):");
@@ -1061,7 +1149,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 					first_state_set	= true;
 				}
 				//aut_context_log("\t(%s):", label_indexes);
-				//FROM STATE TRANSITIONS ITERATION
+				//FROM STATE PIPED TRANSITIONS ITERATION
 				for(j = 0; j < (int32_t)state->transitions_count; j++){
 					current_from_state[0]	= from_state;
 					current_from_state_count= 1;
@@ -1073,6 +1161,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 							continue;
 						}
 					}
+/*
 					automaton_indexes_valuation_set_to_label(tables, current_valuations_count > 0 ? current_valuations[current_valuations_count - 1]: NULL
 							, NULL, NULL, state->label->indexes, transition->to_state->indexes,transition->to_state->name, label_indexes);
 					aut_push_string_to_list(&labels_list, &labels_list_count, label_indexes, &label_position, false, false);
@@ -1084,16 +1173,20 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 					aut_context_log("\n");
 #endif
 					to_state	= (uint32_t)label_position;
+*/
 
-
-					//TODO: take indexes and guard into consideration
 					for(k = 0; k < (int32_t)transition->count; k++){
 						if(k < (((int32_t)transition->count) - 1)){
 							to_state	= added_state++;
 						}else{
+							//to_state	= (uint32_t)label_position;
+							automaton_indexes_valuation_set_to_label(tables, current_valuations_count > 0 ? current_valuations[current_valuations_count - 1]: NULL
+									, transition->to_state->indexes,transition->to_state->name, label_indexes);
+							aut_push_string_to_list(&labels_list, &labels_list_count, label_indexes, &label_position, false, false);
 							to_state	= (uint32_t)label_position;
 						}
 						for(r = 0; r < (int32_t)current_from_state_count; r++){
+							//add explicit transition
 							if(automaton_transition_count >= (automaton_transition_size - 1)){
 								uint32_t new_size	= automaton_transition_size * LIST_INCREASE_FACTOR;
 								automaton_transition** new_automaton_transitions;
@@ -1106,6 +1199,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 							}
 							current_automaton_transition[automaton_transition_count++]	= automaton_transition_create(current_from_state[r], to_state);
 							aut_context_log("(%d->%d)[General]<%d>", current_from_state[r], to_state,automaton_transition_count);
+							//update implicit states array
 							if(next_from_state_count >= (next_from_state_size - 1)){
 								uint32_t new_size	= next_from_state_size * LIST_INCREASE_FACTOR;
 								uint32_t* new_next_from	= malloc(sizeof(uint32_t) * new_size);
@@ -1128,7 +1222,10 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 								if(!atom_label->is_set){
 									//process set ( Alphabet -> ...)
 									if(atom_label->indexes != NULL){
+										automaton_statement_syntax_append_implicit_transition_valuation(tables, &current_valuations, &current_valuations_size, &current_valuations_count
+												, atom_label->indexes);
 										if(!first_index_set){
+											//remove explicit transition
 											automaton_transition_destroy(current_automaton_transition[--automaton_transition_count], true);
 											next_from_state_count--;
 											first_index_set	= true;
@@ -1149,7 +1246,6 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 										for(n = 0; n < count; n++){
 											element_to_find		= ret_value[n];
 											element_global_index= -1;
-											element_position	= 0;
 											aut_context_log("%s->)", ret_value[n]);
 											for(m = 0; m < (int32_t)ctx->global_alphabet->count; m++){
 												if(strcmp(ctx->global_alphabet->list[m].name, element_to_find) == 0){
@@ -1160,7 +1256,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 											if(element_global_index >= 0){
 												//TODO: set label_indexes according to current valuation values
 												automaton_indexes_valuation_set_to_label(tables, current_valuations_count > 0 ? current_valuations[current_valuations_count - 1]: NULL
-														, atom_label->indexes, indexes_values[n], state->label->indexes, transition->to_state->indexes,transition->to_state->name, label_indexes);
+														, transition->to_state->indexes,transition->to_state->name, label_indexes);
 												aut_push_string_to_list(&labels_list, &labels_list_count, label_indexes, &label_position, false, false);
 												
 #if DEBUG_PARSE_STATES
@@ -1216,7 +1312,6 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 											first_index_set	= true;
 										}
 										element_global_index= -1;
-										element_position	= 0;
 										for(m = 0; m < (int32_t)ctx->global_alphabet->count; m++){
 											if(strcmp(ctx->global_alphabet->list[m].name, atom_label->string_terminal) == 0){
 												element_global_index = m;
@@ -1238,7 +1333,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 
 											aut_context_log("(%d->%d)[!SET]<%d>", current_from_state[r], to_state,automaton_transition_count);
 											automaton_indexes_valuation_set_to_label(tables, current_valuations_count > 0 ? current_valuations[current_valuations_count - 1]: NULL
-													, NULL, NULL, state->label->indexes, transition->to_state->indexes,transition->to_state->name, label_indexes);
+													, transition->to_state->indexes,transition->to_state->name, label_indexes);
 											aut_push_string_to_list(&labels_list, &labels_list_count, label_indexes, &label_position, false, false);
 #if DEBUG_PARSE_STATES
 											aut_context_log("LAB.LIST(!set):");
@@ -1295,7 +1390,6 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 												for(p = 0; p < count; p++){
 													element_to_find		= ret_value[p];
 													element_global_index= -1;
-													element_position	= 0;
 													for(m = 0; m < (int32_t)ctx->global_alphabet->count; m++){
 														if(strcmp(ctx->global_alphabet->list[m].name, element_to_find) == 0){
 															element_global_index = m;
@@ -1312,7 +1406,6 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 											}else{
 												element_to_find		= atom_label->set->labels[n][o]->string_terminal;
 												element_global_index= -1;
-												element_position	= 0;
 												for(m = 0; m < (int32_t)ctx->global_alphabet->count; m++){
 													if(strcmp(ctx->global_alphabet->list[m].name, element_to_find) == 0){
 														element_global_index = m;
@@ -1356,7 +1449,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 				aut_context_log("\n");
 				automaton_indexes_valuation_increase(current_valuations_count > 0 ? current_valuations[current_valuations_count - 1]: NULL);
 			}
-			if(current_valuations_count > 0){
+			while(current_valuations_count > 0){
 				automaton_indexes_valuation_destroy(current_valuations[--current_valuations_count]);
 			}
 		}
@@ -1378,9 +1471,11 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 			free(indexes_values);
 			indexes_values = NULL;
 		}
-		for(i = 0; i < current_valuations_count; i++)
-			free(current_valuations[i]);
+		for(i = 0; i < current_valuations_count; i++){
+			automaton_indexes_valuation_destroy(current_valuations[i]);
+		}
 		free(current_valuations);
+		current_valuations_count = 0;
 		//set entry in table
 		tables->composition_entries[main_index]->solved	= true;
 		tables->composition_entries[main_index]->valuation_count			= 1;
@@ -1418,9 +1513,17 @@ void automaton_indexes_valuation_increase(automaton_indexes_valuation* valuation
 bool automaton_indexes_valuation_has_next(automaton_indexes_valuation* valuation){
 	return valuation->current_combination <= (valuation->total_combinations);
 }
+/**
+ * Defines an explicit state according to the valuations defined from the original from state and through the implicit states
+ * @param tables staging parsing structure
+ * @param valuation current indexes valuation
+ * @param to_indexes indexes from the terminal to state
+ * @param label original label to be suffixed
+ * @param target placeholder for the suffixed label
+ */
 void automaton_indexes_valuation_set_to_label(automaton_parsing_tables* tables, automaton_indexes_valuation* valuation
-		, automaton_indexes_syntax *atom_label_indexes, uint32_t* indexes_values, automaton_indexes_syntax* from_indexes, automaton_indexes_syntax* to_indexes, char* label, char* target){
-	if(atom_label_indexes == NULL && (valuation == NULL || from_indexes == NULL || to_indexes == NULL)){
+		, automaton_indexes_syntax* to_indexes, char* label, char* target){
+	if(valuation == NULL || to_indexes == NULL){
 		strcpy(target, label);
 		return;
 	}
@@ -1429,29 +1532,27 @@ void automaton_indexes_valuation_set_to_label(automaton_parsing_tables* tables, 
 	sprintf(target, "%s", label);
 	char name[40];
 	char *from_ident, *to_ident;
-	if(!(valuation == NULL || from_indexes == NULL || to_indexes == NULL)){
-		for(i = 0; i < from_indexes->count; i++){
-			for(j = 0; j < to_indexes->count; j++){
-				if(from_indexes->indexes[i]->is_expr && (from_indexes->indexes[i]->expr->type == UPPER_IDENT_TERMINAL_TYPE_AUT ||
-						from_indexes->indexes[i]->expr->type == IDENT_TERMINAL_TYPE_AUT)){
-					from_ident	= from_indexes->indexes[i]->expr->string_terminal;
-				}else if(from_indexes->indexes[i]->is_expr){
-					snprintf(target + strlen(target), sizeof(target), "_%d", automaton_expression_syntax_evaluate(tables, from_indexes->indexes[i]->expr, valuation));
-				}else{from_ident	= from_indexes->indexes[i]->lower_ident;}
-				if(to_indexes->indexes[j]->is_expr && (to_indexes->indexes[j]->expr->type == UPPER_IDENT_TERMINAL_TYPE_AUT ||
-						to_indexes->indexes[j]->expr->type == IDENT_TERMINAL_TYPE_AUT)){
-					to_ident	= to_indexes->indexes[j]->expr->string_terminal;
-				}else if(to_indexes->indexes[j]->is_expr){
-					snprintf(target + strlen(target), sizeof(target), "_%d", automaton_expression_syntax_evaluate(tables, to_indexes->indexes[j]->expr, valuation));
-				}else{to_ident	= to_indexes->indexes[j]->lower_ident;}
-				if(strcmp(from_ident, to_ident) == 0){
-					snprintf(target + strlen(target), sizeof(target), "_%d", valuation->current_values[i]);
-				}
+	if(!(valuation == NULL|| to_indexes == NULL)){
+		for(j = 0; j < to_indexes->count; j++){
+			if(to_indexes->indexes[j]->is_expr && (to_indexes->indexes[j]->expr->type == UPPER_IDENT_TERMINAL_TYPE_AUT ||
+					to_indexes->indexes[j]->expr->type == IDENT_TERMINAL_TYPE_AUT)){
+				to_ident	= to_indexes->indexes[j]->expr->string_terminal;
+			}else if(to_indexes->indexes[j]->is_expr){
+				snprintf(target + strlen(target), sizeof(target), "_%d", automaton_expression_syntax_evaluate(tables, to_indexes->indexes[j]->expr, valuation));
+			}else{to_ident	= to_indexes->indexes[j]->lower_ident;}
+			if(strcmp(from_ident, to_ident) == 0){
+				snprintf(target + strlen(target), sizeof(target), "_%d", valuation->current_values[i]);
 			}
 		}
 	}
 }
 
+/**
+ * Append indexes values to label and return the result on target.
+ * @param valuation current valuation for indexes to be applied on the label
+ * @param label value to be prefixed in the computed new value
+ * @param target string where the result will be set
+ */
 void automaton_indexes_valuation_set_label(automaton_indexes_valuation* valuation, char* label, char* target){
 	if(valuation == NULL){
 		strcpy(target, label);
@@ -1464,35 +1565,30 @@ void automaton_indexes_valuation_set_label(automaton_indexes_valuation* valuatio
 	}
 }
 #define INDEX_BUF_SIZE 800
+/**
+ * Adds to the provided set of strings a the suffixes constructed from combinations of indexes
+ *
+ * @param tables staging structures from the parser
+ * @param valuation current (may be partial) valuation fo variables in the indexes
+ * @param values valuation to be applied on the indexes
+ * @param a the array of strings to be suffixed, it will also be the place where the result is stored
+ * @param a_count the number of input strings to be suffixed, it will also be the place where the number of suffixed strings are stored
+ * @param indexes the indexes over which to apply the valuation
+ */
 void automaton_indexes_syntax_eval_strings(automaton_parsing_tables* tables, automaton_indexes_valuation* valuation, uint32_t*** values, char*** a, int32_t* a_count, automaton_indexes_syntax* indexes){
 	uint32_t i, j, k;
 	int32_t *lower_index, *upper_index, *current_index, position;
 	uint32_t total_combinations = 1;
-
 	char buffer[INDEX_BUF_SIZE], buffer2[INDEX_BUF_SIZE];
-
 	for(i = 0; i < INDEX_BUF_SIZE; i++){buffer[i] = 0; buffer2[i] = 0;}
-
 	char** ret_value			= NULL;
 	int32_t inner_count			= 0;
-
 	int32_t effective_count	= indexes->count;
-	/*
-	int32_t effective_count	= 0;
-
-	for(i = 0; i < indexes->count; i++){
-		if(!(indexes->indexes[i]->is_expr)){
-			effective_count++;
-		}
-	}
-
-	if(effective_count == 0)return;*/
-
 	lower_index	= malloc(sizeof(int32_t) * effective_count);
 	upper_index	= malloc(sizeof(int32_t) * effective_count);
 	current_index	= malloc(sizeof(int32_t) * effective_count);
-
 	j = 0;
+
 	for(i = 0; i < indexes->count; i++){
 		if(!(indexes->indexes[i]->is_expr)){
 			automaton_index_syntax_get_range(tables, indexes->indexes[i], &(lower_index[j]), &(upper_index[j]));
@@ -1517,7 +1613,6 @@ void automaton_indexes_syntax_eval_strings(automaton_parsing_tables* tables, aut
 	}
 
 	uint32_t **new_values	= malloc(total_combinations * sizeof(uint32_t*));
-
 	for(i = 0; i < total_combinations; i++){
 		new_values[i]	= malloc(effective_count * sizeof(uint32_t));
 		buffer[0] = '\0';
@@ -1529,9 +1624,6 @@ void automaton_indexes_syntax_eval_strings(automaton_parsing_tables* tables, aut
 			snprintf(buffer + strlen(buffer), sizeof(buffer), "_%d", current_index[j]);
 			new_values[i][j]	= current_index[j];
 		}
-
-
-
 		for(k = 0; k < (uint32_t)*a_count; k++){
 			if(strlen(buffer2) > (INDEX_BUF_SIZE - 10) ){
 				printf("[automaton_indexes_syntax_eval_strings] buffer overrun\n");
@@ -1541,8 +1633,6 @@ void automaton_indexes_syntax_eval_strings(automaton_parsing_tables* tables, aut
 
 			aut_push_string_to_list(&ret_value, &inner_count, buffer2, &position, true, false);
 		}
-
-
 		j	= effective_count -1;
 		current_index[j]++;
 		while(current_index[j] > upper_index[j]){
@@ -1558,22 +1648,24 @@ void automaton_indexes_syntax_eval_strings(automaton_parsing_tables* tables, aut
 	}
 	if(*a != NULL)
 		free(*a);
-
 	*a_count	= inner_count;
 	(*a)		= ret_value;
-
 	if(*values != NULL){
 		free(*values);
 		*values = NULL;
 	}
-
 	*values = new_values;
-
 	free(lower_index);
 	free(upper_index);
 	free(current_index);
 }
-
+/**
+ * Evaluates index provided as input and sets its upper and lower bounds on lower_index and upper_index.
+ * @param tables the staging parsing structures
+ * @param index the current index to be observed
+ * @param lower_index will hold the index lowest value
+ * @param upper_index will hold the index upmost value
+ */
 void automaton_index_syntax_get_range(automaton_parsing_tables* tables, automaton_index_syntax* index, int32_t *lower_index, int32_t *upper_index){
 	int32_t i;
 	if(!index->is_expr){
@@ -1673,16 +1765,18 @@ automaton_fluent* automaton_fluent_create_from_syntax(automaton_parsing_tables* 
  * if it is initial and output it will receive a valuation over XY and it will store it on XY
  * if it is rho and input it will receive a valuation over XYX' and it will store X' on the X' of a XYX' state
  * if it is rho and output it will receive a valuation over XYX'Y' and it will store X'Y' on the XY of an XY
+ *
+ * @param valuation the composed valuation to be set according to the particular case
+ * @param partial valuation the partial valuation from where the values will be taken
+ * @param valuation_offset the index where the current valuation lies within the consecutive array of valuations
+ * @param is_initial true if the valuation correspond to the interpretation of an initial formula
+ * @param x_count number of input variables in the specification
+ * @param y_count number of output variables in the specification
  */
-void automaton_set_composed_valuation(bool* valuation, bool* partial_valuation, uint32_t valuation_offset, bool is_initial, bool is_input, uint32_t* var_ids
+void automaton_set_composed_valuation(bool* valuation, bool* partial_valuation, uint32_t valuation_offset, bool is_initial, bool is_input
 		, uint32_t x_count, uint32_t y_count){
 	uint32_t i;
-	/*
-	uint32_t offset_size	= (is_initial) ? (is_input? x_count : x_count + y_count) : (is_input? x_count * 2 + y_count : (x_count + y_count) * 2);
-	uint32_t var_count		= (is_initial) ? (is_input? x_count : x_count + y_count) : (is_input? x_count * 2 + y_count : x_count + y_count);
-	uint32_t right_offset	= is_initial ? 0 : (is_input? 0 : x_count + y_count);
-	for(i = 0; i < var_count; i++)valuation[left_offset + i]	= partial_valuation[offset_size * valuation_offset + right_offset + i];
-	*/
+
 	uint32_t offset_size	= (is_initial) ? (is_input? x_count : x_count + y_count) : (is_input? x_count : y_count);
 	uint32_t left_offset	= is_initial? 0 : (is_input? x_count + y_count: x_count);
 	for(i = 0; i < offset_size; i++)valuation[left_offset + i]	= partial_valuation[offset_size * valuation_offset + i];
@@ -2130,7 +2224,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	bool* tmp_state_valuation = calloc((x_count * 2 + y_count), sizeof(bool));
 	bool has_transition;
 	for(i = 0; i < current_valuations_count; i++){
-		automaton_set_composed_valuation(env_state->valuation, valuations, i, true, true, x_alphabet, x_count, y_count);
+		automaton_set_composed_valuation(env_state->valuation, valuations, i, true, true, x_count, y_count);
 		env_state->state		= obdd_state_tree_get_key(obdd_state_map, env_state->valuation, x_count);
 		has_transition	= automaton_add_transition_from_valuations(mgr, ltl_automaton, sys_state->state, env_state->state
 				, sys_state->valuation, env_state->valuation, true, true
@@ -2184,7 +2278,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 #endif
 			for(i = 0; i < current_valuations_count; i++){
 				//TODO:review bad read here
-				automaton_set_composed_valuation(sys_state->valuation, valuations, i, true, false, x_y_alphabet, x_count, y_count);
+				automaton_set_composed_valuation(sys_state->valuation, valuations, i, true, false, x_count, y_count);
 				sys_state->state		= obdd_state_tree_get_key(obdd_state_map, sys_state->valuation, x_y_count);
 
 				has_transition	= automaton_add_transition_from_valuations(mgr, ltl_automaton, env_state->state, sys_state->state
@@ -2284,7 +2378,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 				for(i = 0; i < current_valuations_count; i++){
 
 					//automaton_set_composed_valuation(env_state->valuation, valuations, i, false, true, x_y_x_p_alphabet, x_count, y_count);
-					automaton_set_composed_valuation(env_state->valuation, valuations, i, false, true, x_p_alphabet, x_count, y_count);
+					automaton_set_composed_valuation(env_state->valuation, valuations, i, false, true, x_count, y_count);
 					env_state->state		= obdd_state_tree_get_key(obdd_state_map, env_state->valuation, x_y_x_p_count);
 					has_transition	= automaton_add_transition_from_valuations(mgr, ltl_automaton, sys_state->state, env_state->state
 							, sys_state->valuation, env_state->valuation, false, true
@@ -2369,7 +2463,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 					//move X'->X
 					for(j =0; j < x_count; j++)sys_state->valuation[j] = env_state->valuation[x_count + y_count + j];
 					//move Y'->XY
-					automaton_set_composed_valuation(sys_state->valuation, valuations, i, false, false, x_p_alphabet, x_count, y_count);
+					automaton_set_composed_valuation(sys_state->valuation, valuations, i, false, false, x_count, y_count);
 					//before getting state for sys_valuation copy X' part form env state into X part of sys state
 					//for(j = 0; j < x_count; j++)sys_state->valuation[j]	= env_state->valuation[x_y_count + j];
 					sys_state->state		= obdd_state_tree_get_key(obdd_state_map, sys_state->valuation, x_y_count);
