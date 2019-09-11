@@ -1,7 +1,41 @@
+\textcolor{blue}{In this section} required background is presented in order to relate the model checking approach in game structures (either verification or synthesis) with the equivalent control problem in the CLTS domain.  The main idea behind this is that any game structure specified as a set of LTL formulas induces an equivalent automaton. A direct relation between both structures is presented, but the reader can think that it is equivalent to translating the game structure to Kripke first and to CLTS afterwards.
+
+These mappings between game structures variables and CTLS labels will be used in the following definitions, first the mapping from variables to labels:
+
+\[
+\cdot(v) = \begin{cases}
+v\uparrow & \text{if } v \equiv \top \\
+v\downarrow & \text{if } v \equiv \bot
+\end{cases}
+\]
+
+\[\cdot(\overline{v}) = \lbrace \cdot (v) | v \in \overline{v} \rbrace \]
+And then from labels to variables:
+\[
+\times (a?) = \begin{cases}
+a & \text{if } a? \equiv a\uparrow \\
+\neg a & \text{if } a? \equiv a\downarrow
+\end{cases}
+\]
+
+\[\times(\overline{a}) = \lbrace \times (a) | a \in \overline{a} \rbrace \]
+
 \begin{definition}
 	\label{def:gs_clts_equivalence} \emph{(Equivalence between Game Structure and CLTS)} 
-	Let $G_i=\langle \mathcal{V}, \mathcal{X}, \theta_{e}, \theta_{s}, \rho_{e}, \rho_{s}\rangle$, be a game structure and $E=\langle S, \Sigma, \Delta, s_{0}\rangle$ a CLTS automaton, $G$ is equivalent to $E$, written: $E \approx G$ iff:
-	\[pending\] 
+	Let $G_i=\langle \mathcal{V}, \mathcal{X}, \theta_{e}, \theta_{s}, \rho_{e}, \rho_{s}\rangle$, be a game structure and $E=\langle S, \Sigma, \Delta, s_{0}\rangle$ a CLTS automaton, $G$ is equivalent to $E$, written: $E \approx G$ if the automaton follows the game structure:
+	\[
+	\forall x, y: \theta_e(x) \wedge \theta_s(x,y) \implies \exists s',s'' : (s_0, \cdot (x), s'), (s', \cdot (y), s'') \in \Delta 
+	\] 
+	\[
+	\forall x, y : \exists v \rho_e(v,x) \wedge \rho_s(v,x,y) \implies \exists s',s'',s''' : (s', \cdot (x), s''), (s'', \cdot (y), s''') \in \Delta 
+	\] 
+And the game structure follows the automaton:	
+\[
+\forall  s',s'',l,l' : (s_0, l, s'), (s', l', s'') \in \Delta  \implies \exists x,y: \theta_e(\times(l)) \wedge \theta_s(\times(l),\times(l'))
+\] 
+\[
+\forall  s',s'',s''',l,l' : (s', l, s''), (s', l', s''') \in \Delta  \implies \exists v,x,y: \rho_e(v,\times(l)) \wedge \rho_s(v,\times(l),\times(l'))
+\] 	%2^{|\mathcal{V}|} 
 \end{definition}
 
 \begin{definition}
@@ -9,17 +43,28 @@
 	Let $G_i=\langle \mathcal{V}, \mathcal{X}, \theta_{e}, \theta_{s}, \rho_{e}, \rho_{s}\rangle$, be a game structure then $clts(G)$ is a CLTS instance that has the same observational behavior, i.e.: $clts(G) \approx G$. 
 \end{definition}
 
-\begin{definition}
-	\label{def:legal_clts} \emph{(Legality w.r.t. $E$ and $\mathcal{C}$)} 
-	Pending.
-\end{definition}
+\begin{lemma}
+	\label{def:gs_clts_equiv_implies_satifaction} \emph{(Consistency implies formula satisfaction)} 
+	Given $E$ a CLTS instance, $G$ a game structure such that $E \equiv G$ and $\mathcal{C} \in \Sigma$, if $\forall v \in \mathcal{V}: v\uparrow, v\downarrow \in \Sigma$, 
+$\mathcal{Y} = \mathcal{V}\setminus \mathcal{X}$, $v \in \mathcal{Y}$ implies $v\uparrow, v\downarrow \in \mathcal{C}$, $\dot{v} = \lbrace v\uparrow, v\downarrow \rbrace \in \mathcal{F}$ and both $E$ and $clts(G)$ are consistent w.r.t. $\mathcal{F}$ it holds that for every LTL formula $\varphi$ over $\mathcal{V}, G \models \varphi \iff \lbrace E, \mathcal{C} \rbrace \models \cdot(\varphi)$.
+\end{lemma}
+
+\begin{proof}
+\emph{Rough sketch.} An inductive proof over $\varphi$ ($\cdot(\varphi)$) shows that every trace $\pi (\cdot(\pi))$ in one structure satisfies the formula if and only if it is satisfied in the other one. 
+\end{proof}
 
 \begin{definition}
 	\label{def:mixed_env} \emph{(Mixed Environment Definition)} 
 	A mixed environment $D = \langle E, G \rangle$ is defined over both CTLS instances and game structures as follows,
-	let $E_i=\langle S_i, \Sigma_i, \Delta_i, s_{0_i}\rangle$, $E_1,\ldots,E_n$ be a set of CLTS automata and $G_i=\langle \mathcal{V}, \mathcal{X}, \theta_{e_i}, \theta_{s_i}, \rho_{e_i}, \rho_{s_i}\rangle$, $G_1,\ldots,G_m$ be a set of game structures,
-	then each element is defined as $G=\langle \mathcal{V}, \mathcal{X}, \cap_{i \in 1..m}\theta_{e_i}, \cap_{i \in 1..m}\theta_{s_i},$ $\cap_{i \in 1..m}\rho_{e_i},$ $\cap_{i \in 1..m}\rho_{s_i}\rangle$ and $E = \parallel_{*,i \in 1..n} E_i$, where $\parallel_*$ stands for either the asynchronous or synchronous composition semantic.
-	$D$ behavior is defined by the automaton $E \parallel_* clts(G)$.
+	let $E_1,\ldots,E_n$ be a set of CLTS automata and $G_1,\ldots,G_m$ a set of game structures,
+	then each of the environment $D$ components is defined as $G=\langle \mathcal{V}, \mathcal{X}, \cap_{i \in 1..m}\theta_{e_i}, \cap_{i \in 1..m}\theta_{s_i},$ $\cap_{i \in 1..m}\rho_{e_i},$ $\cap_{i \in 1..m}\rho_{s_i}\rangle$ and $E = \parallel_{*,i \in 1..n} E_i$, where $\parallel_*$ stands for either the asynchronous or synchronous composition semantic.
+	The composed behavior of $D$ is defined by the automaton $E \parallel_* clts(G)$.
+\end{definition}
+
+\begin{definition}
+	\label{def:legal_clts} \emph{(Legality w.r.t. $E$ and $\mathcal{C}$)} 
+	Given CLTS $C = \langle S_C, \Sigma$, $\Delta_C$, $s_{C_0}\rangle$ and $E = \langle S_E,\Sigma,$ $\Delta_E,$ $s_{E_0}\rangle$, where $\Sigma$ is partitioned into actions controlled and monitored (non controllable) by $C$ ($\Sigma=\mathcal{C} \; \cup \;\mathcal{U}$), we say that $C$ is a legal CLTS for $E$ if for all $(s_E,s_C) \in E \parallel_* C$ it holds that
+	$\Delta_{E}(s_E)\cap \mathcal{P}(\mathcal{C}) \supseteq \Delta_{C}(s_C)\cap \mathcal{P}(\mathcal{C})$ and also that  $\Delta_{E}(s_E)\cap \mathcal{P}(\mathcal{U}) \subseteq \Delta_{C}(s_C)\cap \mathcal{P}(\mathcal{U})$.
 \end{definition}
 
 \begin{definition}
@@ -30,5 +75,5 @@
 \begin{definition}
 	\label{def:consistent_mixed_control_problem} \emph{(Consistent Mixed Control Problem)} 
 	Let $I = \langle E, G, \mathcal{F}, \varphi \rangle$ be a mixed control problem, $I$ is consistent if $\forall v \in \mathcal{V}: v\uparrow, v\downarrow \in \Sigma$, let
-	$\mathcal{Y} = \mathcal{V}\setminus \mathcal{X}$, $v \in \mathcal{Y}$ implies $v\uparrow, v\downarrow \in \mathcal{C}$, $\dddot{v} = \lbrace v\uparrow, v\downarrow \rbrace \in \mathcal{F}$ and both $E$ and $clts(G)$ are consistent w.r.t. $\mathcal{F}$.
+	$\mathcal{Y} = \mathcal{V}\setminus \mathcal{X}$, $v \in \mathcal{Y}$ implies $v\uparrow, v\downarrow \in \mathcal{C}$, $\dot{v} = \lbrace v\uparrow, v\downarrow \rbrace \in \mathcal{F}$ and both $E$ and $clts(G)$ are consistent w.r.t. $\mathcal{F}$.
 \end{definition}
