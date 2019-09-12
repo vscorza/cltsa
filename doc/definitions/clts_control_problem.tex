@@ -1,6 +1,6 @@
-\textcolor{blue}{In this section} required background is presented in order to relate the model checking approach in game structures (either verification or synthesis) with the equivalent control problem in the CLTS domain.  The main idea behind this is that any game structure specified as a set of LTL formulas induces an equivalent automaton. A direct relation between both structures is presented, but the reader can think that it is equivalent to translating the game structure to Kripke first and to CLTS afterwards.
+\textcolor{blue}{In this section} we present the background required to relate the model checking approach in game structures with an equivalent control problem in the CLTS domain.  The main idea behind this is that any game structure specified as a set of LTL formulas induces an equivalent automaton. A direct relation between both structures is presented, but the reader can think of it as equivalent to translating the game structure to Kripke first and then to CLTS.
 
-These mappings between game structures variables and CTLS labels will be used in the following definitions, first the mapping from variables to labels:
+Game structures variables will be mapped to CTLS labels as following:
 
 \[
 \cdot(v) = \begin{cases}
@@ -10,7 +10,7 @@ v\downarrow & \text{if } v \equiv \bot
 \]
 
 \[\cdot(\overline{v}) = \lbrace \cdot (v) | v \in \overline{v} \rbrace \]
-And then from labels to variables:
+CTLS labels will be mapped to game structures variables as following:
 \[
 \times (a?) = \begin{cases}
 a & \text{if } a? \equiv a\uparrow \\
@@ -22,7 +22,7 @@ a & \text{if } a? \equiv a\uparrow \\
 
 \begin{definition}
 	\label{def:gs_clts_equivalence} \emph{(Equivalence between Game Structure and CLTS)} 
-	Let $G_i=\langle \mathcal{V}, \mathcal{X}, \theta_{e}, \theta_{s}, \rho_{e}, \rho_{s}\rangle$, be a game structure and $E=\langle S, \Sigma, \Delta, s_{0}\rangle$ a CLTS automaton, $G$ is equivalent to $E$, written: $E \approx G$ if the automaton follows the game structure:
+	Let $G=\langle \mathcal{V}, \mathcal{X}, \theta_{e}, \theta_{s}, \rho_{e}, \rho_{s}\rangle$, be a game structure and $E=\langle S, \Sigma, \Delta, s_{0}\rangle$ a CLTS automaton, $G$ is equivalent to $E$, written: $E \approx G$ if the automaton follows the game structure:
 	\[
 	\forall x, y: \theta_e(x) \wedge \theta_s(x,y) \implies \exists s',s'' : (s_0, \cdot (x), s'), (s', \cdot (y), s'') \in \Delta 
 	\] 
@@ -45,8 +45,8 @@ And the game structure follows the automaton:
 
 \begin{lemma}
 	\label{def:gs_clts_equiv_implies_satifaction} \emph{(Consistency implies formula satisfaction)} 
-	Given $E$ a CLTS instance, $G$ a game structure such that $E \equiv G$ and $\mathcal{C} \in \Sigma$, if $\forall v \in \mathcal{V}: v\uparrow, v\downarrow \in \Sigma$, 
-$\mathcal{Y} = \mathcal{V}\setminus \mathcal{X}$, $v \in \mathcal{Y}$ implies $v\uparrow, v\downarrow \in \mathcal{C}$, $\dot{v} = \lbrace v\uparrow, v\downarrow \rbrace \in \mathcal{F}$ and both $E$ and $clts(G)$ are consistent w.r.t. $\mathcal{F}$ it holds that for every LTL formula $\varphi$ over $\mathcal{V}, G \models \varphi \iff \lbrace E, \mathcal{C} \rbrace \models \cdot(\varphi)$.
+	Given $E$ a CLTS instance, $G$ a game structure such that $E \equiv G$ and $\mathcal{C} \in \Sigma$, if $\forall v \in \mathcal{V}: v\uparrow, v\downarrow \in \Sigma$, $\forall v\downarrow \in \Sigma : v \in \mathcal{V}$,
+$\mathcal{Y} = \mathcal{V}\setminus \mathcal{X}$, $v \in \mathcal{Y}$ if and only if $v\uparrow, v\downarrow \in \mathcal{C}$, $\dot{v} = \lbrace v\uparrow, v\downarrow \rbrace \in \mathcal{F}$ and both $E$ and $clts(G)$ are consistent w.r.t. $\mathcal{F}$ it holds that for every LTL formula $\varphi$ over $\mathcal{V}, G \models \varphi \iff \lbrace E, \mathcal{C} \rbrace \models \cdot(\varphi)$.
 \end{lemma}
 
 \begin{proof}
@@ -57,7 +57,7 @@ $\mathcal{Y} = \mathcal{V}\setminus \mathcal{X}$, $v \in \mathcal{Y}$ implies $v
 	\label{def:mixed_env} \emph{(Mixed Environment Definition)} 
 	A mixed environment $D = \langle E, G \rangle$ is defined over both CTLS instances and game structures as follows,
 	let $E_1,\ldots,E_n$ be a set of CLTS automata and $G_1,\ldots,G_m$ a set of game structures,
-	then each of the environment $D$ components is defined as $G=\langle \mathcal{V}, \mathcal{X}, \cap_{i \in 1..m}\theta_{e_i}, \cap_{i \in 1..m}\theta_{s_i},$ $\cap_{i \in 1..m}\rho_{e_i},$ $\cap_{i \in 1..m}\rho_{s_i}\rangle$ and $E = \parallel_{*,i \in 1..n} E_i$, where $\parallel_*$ stands for either the asynchronous or synchronous composition semantic.
+	then each component is defined as $G=\langle \mathcal{V}, \mathcal{X}, \cap_{i \in 1..m}\theta_{e_i}, \cap_{i \in 1..m}\theta_{s_i},$ $\cap_{i \in 1..m}\rho_{e_i},$ $\cap_{i \in 1..m}\rho_{s_i}\rangle$ and $E = \parallel_{*,i \in 1..n} E_i$, where $\parallel_*$ stands for either the asynchronous or synchronous composition semantic.
 	The composed behavior of $D$ is defined by the automaton $E \parallel_* clts(G)$.
 \end{definition}
 
