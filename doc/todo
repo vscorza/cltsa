@@ -1,4 +1,8 @@
 TODO:
+- Re write gs to clts translation as GS -> Kripke -> CLTS
+	where GS to Kripke splits states between XY and XYX'
+	and Kripke to CLTS transforms valuation changes into 
+	up down labels
 - run hardware cases
 - transition syntax proper def: each transition in a chain induces a new target state
 	S = (t[i:1..2]->f->S[i]).

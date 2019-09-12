@@ -19,6 +19,82 @@ The set of possible actions for each player is described as relations between cu
 
 Many non trivial digital designs require the definition of state machines to some extent or another, while at the same time high level specifications can involve interactions with digital or truly concurrent components. Under these circumstances a mixed specification over both a finite state process algebra and a LTL game structure definition is desirable.  In order to reason about their composed behavior a proper common representation is needed. Our approach is to transform the game structure into its equivalent finite state automaton and then compose both using one of the parallel composition semantics.
 
+We now present the background required to relate the model checking approach in game structures with an equivalent control problem in the CLTS domain.  The main idea behind this is that any game structure specified as a set of LTL formulas induces an equivalent automaton. A direct relation between both structures is presented, but the reader can think of it as equivalent to translating the game structure to Kripke first and then to CLTS.
+
+Game structures variables will be mapped to CTLS labels as following:
+
+\[
+\cdot(v) = \begin{cases}
+v\uparrow & \text{if } v \equiv \top \\
+v\downarrow & \text{if } v \equiv \bot
+\end{cases}
+\]
+
+\[\cdot(\overline{v}) = \lbrace \cdot (v) | v \in \overline{v} \rbrace \]
+CTLS labels will be mapped to game structures variables as following:
+\[
+\times (a?) = \begin{cases}
+a & \text{if } a? \equiv a\uparrow \\
+\neg a & \text{if } a? \equiv a\downarrow
+\end{cases}
+\]
+
+\[\times(\overline{a}) = \lbrace \times (a) | a \in \overline{a} \rbrace \]
+
+\begin{definition}
+	\label{def:gs_clts_equivalence} \emph{(Equivalence between Game Structure and CLTS)} 
+	Let $G=\langle \mathcal{V}, \mathcal{X}, \theta_{e}, \theta_{s}, \rho_{e}, \rho_{s}\rangle$, be a game structure and $E=\langle S, \Sigma, \Delta, s_{0}\rangle$ a CLTS automaton, $G$ is equivalent to $E$, written: $E \equiv G$ if the automaton follows the game structure:
+	\[
+	\forall x, y: \theta_e(x) \wedge \theta_s(x,y) \implies \exists s',s'' : (s_0, \cdot (x), s'), (s', \cdot (y), s'') \in \Delta 
+	\] 
+	\[
+	\forall x, y : \exists v \rho_e(v,x) \wedge \rho_s(v,x,y) \implies \exists s',s'',s''' : (s', \cdot (x), s''), (s'', \cdot (y), s''') \in \Delta 
+	\] 
+	And the game structure follows the automaton:	
+	\[
+	\forall  s',s'',l,l' : (s_0, l, s'), (s', l', s'') \in \Delta  \implies \exists x,y: \theta_e(\times(l)) \wedge \theta_s(\times(l),\times(l'))
+	\] 
+	\[
+	\forall  s',s'',s''',l,l' : (s', l, s''), (s', l', s''') \in \Delta  \implies \exists v,x,y: \rho_e(v,\times(l)) \wedge \rho_s(v,\times(l),\times(l'))
+	\] 	%2^{|\mathcal{V}|} 
+\end{definition}
+
+\begin{definition}
+	\label{def:gs_conversion} \emph{(Game Structure induced CLTS)} 
+	Let $G_i=\langle \mathcal{V}, \mathcal{X}, \theta_{e}, \theta_{s}, \rho_{e}, \rho_{s}\rangle$, be a game structure then $clts(G)$ is a CLTS instance that has the same observational behavior, i.e.: $clts(G) \approx G$. 
+\end{definition}
+
+\begin{lemma}
+	\label{def:gs_clts_equiv_implies_satifaction} \emph{(Consistency implies formula satisfaction)} 
+	Given $E$ a CLTS instance, $G$ a game structure such that $E \equiv G$ and $\mathcal{C} \in \Sigma$, if $\forall v \in \mathcal{V}: v\uparrow, v\downarrow \in \Sigma$, $\forall v\downarrow \in \Sigma : v \in \mathcal{V}$,
+	$\mathcal{Y} = \mathcal{V}\setminus \mathcal{X}$, $v \in \mathcal{Y}$ if and only if $v\uparrow, v\downarrow \in \mathcal{C}$, $\dot{v} = \lbrace v\uparrow, v\downarrow \rbrace \in \mathcal{F}$ and both $E$ and $clts(G)$ are consistent w.r.t. $\mathcal{F}$ it holds that for every LTL formula $\varphi$ over $\mathcal{V}, G \models \varphi \iff \langle E, \mathcal{C} \rangle \models \cdot(\varphi)$.
+\end{lemma}
+
+\begin{proof}
+	\emph{Rough sketch.} An inductive proof over $\varphi$ ($\cdot(\varphi)$) shows that every trace $\pi (\cdot(\pi))$ in one structure satisfies the formula if and only if it is satisfied in the other one. 
+\end{proof}
+
+\begin{definition}
+	\label{def:mixed_env} \emph{(Mixed Environment Definition)} 
+	A mixed environment $D = \langle E, G \rangle$ is defined over both CTLS instances and game structures as follows,
+	let $E_1,\ldots,E_n$ be a set of CLTS automata and $G_1,\ldots,G_m$ a set of game structures,
+	then each component is defined as $G=\langle \mathcal{V}, \mathcal{X}, \cap_{i \in 1..m}\theta_{e_i}, \cap_{i \in 1..m}\theta_{s_i},$ $\cap_{i \in 1..m}\rho_{e_i},$ $\cap_{i \in 1..m}\rho_{s_i}\rangle$ and $E = \parallel_{*,i \in 1..n} E_i$, where $\parallel_*$ stands for either the asynchronous or synchronous composition semantic.
+	The composed behavior of $D$ is defined by the automaton $E \parallel_* clts(G)$, thus $\langle E, G \rangle \models \varphi$ means $(E \parallel_* clts(G)) \models \varphi$.
+\end{definition}
+
+
+\begin{definition}
+	\label{def:mixed_control_problem} \emph{(Mixed Control Problem)} 
+	Let $D= \langle E, G \rangle$ be a mixed environment, if $\mathcal{F}$ is a set of fluents over $\Sigma$ and $\varphi$ an LTL formula over $\mathcal{F}$, then $I = \langle E, G, \mathcal{F}, \varphi \rangle$ conforms a mixed control problem. If $I$ is consistent and a solution to $I$ exists, such a solution will be a CLTS $M$, legal w.r.t. $D$, such that, $D \parallel M \models \varphi$.
+\end{definition}
+
+\begin{definition}
+	\label{def:consistent_mixed_control_problem} \emph{(Consistent Mixed Control Problem)} 
+	Let $I = \langle E, G, \mathcal{F}, \varphi \rangle$ be a mixed control problem, $I$ is consistent if $\forall v \in \mathcal{V}: v\uparrow, v\downarrow \in \Sigma$, let
+	$\mathcal{Y} = \mathcal{V}\setminus \mathcal{X}$, $v \in \mathcal{Y}$ implies $v\uparrow, v\downarrow \in \mathcal{C}$, $\dot{v} = \lbrace v\uparrow, v\downarrow \rbrace \in \mathcal{F}$ and both $E$ and $clts(G)$ are consistent w.r.t. $\mathcal{F}$.
+\end{definition}
+
+
 Algorithm ~\ref{fig:gs_to_clts_algorithm} takes a game structure, represented as a set 
 $\gsTheE$, $\gsTheS$, $\gsRhoE$, $\gsRhoS$, $\varphi$ of OBDDs, one for each formula, and produces the CLTS automaton $A$ that preserves its behavior. Since the state space is finite ($2^{|\gsV|}$ at most) and the number of states reached by applying $\gsRhoS(\gsRhoE(v))$ increases monotonically (when starting from $\gsTheS(\gsTheE)$), a least fixed point exists, the algorithm computes such fixed point while progressively creating the transition relation $\Delta$. \texttt{valuations}($\psi$) gives the set of valuations over $\gsV$ for a formula $\psi$ represented with an OBDD. Each valuation induces a unique state in $A$. \texttt{restrict}($\psi$, $s$) fixes a subset of variables in $\psi$ according to $s$ a valuation. If $\varphi$ is the set of propositional formulas involved in the winning condition, \texttt{evaluate\_condition}($A$, $\varphi$, $s$) evaluates the satisfaction of each such formulas according to valuation $s$ and maps the result to $s$ as a state in $A$.
 \newpage
