@@ -19,83 +19,98 @@ The set of possible actions for each player is described as relations between cu
 
 Many non trivial digital designs require the definition of state machines to some extent or another, while at the same time high level specifications can involve interactions with digital or truly concurrent components. Under these circumstances a mixed specification over both a finite state process algebra and a LTL game structure definition is desirable.  In order to reason about their composed behavior a proper common representation is needed. Our approach is to transform the game structure into its equivalent finite state automaton and then compose both using one of the parallel composition semantics.
 
-We now present the background required to relate the model checking approach in game structures with an equivalent control problem in the CLTS domain.  The main idea behind this is that any game structure specified as a set of LTL formulas induces an equivalent automaton. A direct relation between both structures is presented, but the reader can think of it as equivalent to translating the game structure to Kripke first and then to CLTS.
+\textcolor{blue}{We now present} the background required to relate the model checking approach in game structures to an equivalent control problem in the CLTS domain.  The main idea behind this is that any game structure specified as a set of LTL formulas induces an equivalent automaton. A pair of translations from a set of LTL formulas to a Kripke structure and from a Kripke structure to a CLTS are introduced first and then a direct transformation between a set of LTL formulas and a CLTS structure.
 
-Game structures variables will be mapped to CTLS labels as following:
+\begin{definition}
+	\label{def:Kripke} \emph{(Kripke Structures)} 
+	Let $AP$ be a set of atomic propositions, a \emph{Kripke Structure} (KS)  $K$ over $AP$ is a tuple $K =  \langle S, I, R, L \rangle$ consisting of the following:
+	\begin{itemize}
+		\item $S$ a finite set of states
+		\item $I \subseteq$ a set of initial states
+		\item $R \subseteq S \times S$ a transition relation
+		\item $L: S \rightarrow 2^{AP}$ a labeling function
+	\end{itemize} 
+\end{definition}
 
+The translation between game structures and Kripke interprets valuations as states, and relations between those as transitions. Let $G$ be the game structure to be translated and $K=\langle S, I, R, L \rangle$ the target Kripke structure over $AP$. 
+Assume that $|AP|=|\mathcal{V}|$ and that for each $v_i \in \mathcal{V}$ exists a proposition $\cdot(v_i) \in AP$. Valuations over $AP$ in $G$ are mapped to states in $S$ as follows, given a valuation $v \in \mathcal{V}$, $\cdot(v)$ represents a unique state in $S$ such that  $|L(\cdot(v))| = |v|$ and for each $v_i \in v$ it holds $\cdot(v_i) \in L(\cdot(v))$. The translation starts with $K$ having an initial state $s_0$ with no valuation associated to it. For every $x \in 2^{|X|}$ where $\theta_e(x)$ holds, a new state $\cdot(x)$ and transition $(s_0, \cdot(x))$ are added to $K$, then for each $x \in 2^{|X|}$, $y \in 2^{|Y|}$ such that $\theta_e(x)$ and $\theta_s(x \cup y)$ hold, state $\cdot(x \cup y)$ and transition $(\cdot(x), \cdot(x \cup y)$ are added to $K$.  For every $v,x' \in 2^{|V|\times|X'|}$ satisfying $\rho_e(v,x')$, a new state $\cdot(v \cup x')$ and transition $(\cdot(v), \cdot(v\cup x'))$ are added to $K$, and for each valuation $v,x',y' \in 2^{|V|\times|X'|\times|Y'|}, $ satisfying $\rho_e(v, x')$ and $\rho_s(v,x',y')$, state $\cdot(x \cup y)$ and transition $(\cdot(v \cup x'), \cdot(x \cup y))$ are added to $K$. 
+If the Kripke structure is constructed according to the previous translation, the following properties hold, describing the relation between plays over $G$ and paths over $K$:
+	\[\begin{aligned}[t]
+	\forall x, y: \theta_e(x) \wedge \theta_s(x,y)& \implies\\
+	&(s_0, \cdot (x)), (\cdot(x), \cdot (x \cup y)) \in R \\
+	&\wedge \forall x_i \in x: \cdot(x_i) \in L(\cdot(x)) \wedge \forall v_i \in x \cup y : \cdot(v_i) \in L(\cdot(x \cup y))\\
+	\forall x, y : \exists v \rho_e(v,x) \wedge \rho_s(v,x,y)& \implies\\
+	&(\cdot(v), \cdot(v \cup x)), (\cdot(v \cup x),\cdot(x \cup y)) \in R\\
+	&\wedge \forall v_i \in v: \cdot(v_i) \in L(\cdot(v)) \\
+	&\wedge \forall w_i \in v \cup x: \cdot(w_i) \in L(\cdot(v \cup x))\\
+	&\wedge \forall z_i \in x \cup y: \cdot(z_i) \in L(\cdot(x \cup y))	
+	\end{aligned}
+	\] 
+
+A translation between LTL formulas over atomic propositions in $K$ and boolean variables in $G$ is straight forward, since the only consideration to be taken is regarding the atomic case of formula $\varphi$ (consisting of a single variable $v_i$). Suppose that $\cdot(\varphi)$ is the translation from boolean variables into atomic propositions, we say that $\varphi$ is satisfied in a play $\sigma=s_0s_1\ldots s_i$ over $G$ if $v_i \in s_i$. In our case this also implies that $\cdot(\varphi)$ is satisfied in the path $\rho=\cdot(s_0)\cdot(s_1)\ldots \cdot(s_i)$ over $K$, since $\cdot(v_i)$ appears in $L(\cdot(s_i))$. It follows from this observation, that if $K$ is the Kripke structure constructed from $G$ following the previous translation, then LTL satisfaction is preserved between structures.
+
+The second step of our composed translation is to transform $K$ into a CLTS instance $M$.
+The set of states is kept as is and the labels are moved from $L$ in $K$ to $\Delta$ in $M$. If $M=\langle S, \Sigma, \Delta, s_0 \rangle$ is constructed fom $K =\langle S,I,R,L \rangle$ over $AP$, then both state sets are equal, $s_0$ is the only element in $I$, (since it was, in turn, constructed from $G$) and both $\Sigma$ and $\Delta$ are defined as follows:
+
+\[\forall a \in AP: a\uparrow \in \Sigma \wedge a\downarrow \in \Sigma \]
+\[\forall (s, s') \in R: (s, \delta(s,s'), s') \in \Delta \]
+
+Where we add labels to the transitions in $\Delta$, indicating the change of individual variables between valuations. If a variable keeps its value then it will not take part in the transition, otherwise if, for instance, variable $v$ is present in $s$ but not in $s'$, the change is made explicit by adding $v\downarrow$ to the concurrent label.
+
+\[\delta(s,s'): \lbrace label(a,s,s') | a \in L(s) \neq a \in L(s') \rbrace\]
 \[
-\cdot(v) = \begin{cases}
-v\uparrow & \text{if } v \equiv \top \\
-v\downarrow & \text{if } v \equiv \bot
+label (a,s,s') = \begin{cases}
+a\uparrow & \text{if } a \in L(s') \\
+a\downarrow & \text{if } a \in L(s)
 \end{cases}
 \]
 
-\[\cdot(\overline{v}) = \lbrace \cdot (v) | v \in \overline{v} \rbrace \]
-CTLS labels will be mapped to game structures variables as following:
+Now if $\cdot(\varphi)$ is the translation from atomic propositions into fluents, and a set of fluents $\mathcal{F}$ exists containing, for each proposition $a$ a fluent $\langle a\uparrow, a\downarrow \rangle$, we say that, again observing only the atomic case where the formula consists of a single variable, $\varphi$ is satisfied in a path $\rho=s_0 s_1\ldots s_i$ over $K$ if $v_i$ appears in $L(s_i)$. In our case this also implies that $\cdot(\varphi)$ is satisfied in the path $\pi=\cdot(s_0)\cdot(s_1)\ldots \cdot(s_i)$ over $M$ since, from $v_i \in L(s_i)$ follows that at some point the proposition started appearing in states leading to $s_i$, suppose that $s_j$ was the first state were $v_i$ appeared and was kept until reaching $s_i$ ($\forall j \leq k \leq i: v_i \in L(s_k)$), then transition $(s_{j-1},s_j) \in R$ was translated as $(s_{j-1}, \delta(s_{j-1},s_j),s_j)$ and $v_i\uparrow \in \delta(s_{j-1},s_j)$ since its value changed from one state to the other. It follows from this observation, that if $M$ is the CLTS structure constructed from $K$ following the previous translation, then LTL satisfaction is preserved between structures.
+
+Now we can introduce a direct translation between game structures and CLTS instances.
+Let $G$ be the game structure to be translated and $M=\langle S, \Sigma, \Delta, s_0 \rangle$ the target CLTS. The alphabet is defined as the minimal set satisfying 
+$\forall v \in \mathcal{V}: v\uparrow \in \Sigma, v\downarrow \in \Sigma$. 
+In order to construct $\Delta$ variables will be mapped as following:
+
 \[
-\times (a?) = \begin{cases}
-a & \text{if } a? \equiv a\uparrow \\
-\neg a & \text{if } a? \equiv a\downarrow
+\cdot(v_i,v) = \begin{cases}
+v_i\uparrow & \text{if } v \in v \\
+v_i\downarrow & \text{if } v \not\in v
 \end{cases}
 \]
-
-\[\times(\overline{a}) = \lbrace \times (a) | a \in \overline{a} \rbrace \]
-
-\begin{definition}
-	\label{def:gs_clts_equivalence} \emph{(Equivalence between Game Structure and CLTS)} 
-	Let $G=\langle \mathcal{V}, \mathcal{X}, \theta_{e}, \theta_{s}, \rho_{e}, \rho_{s}\rangle$, be a game structure and $E=\langle S, \Sigma, \Delta, s_{0}\rangle$ a CLTS automaton, $G$ is equivalent to $E$, written: $E \equiv G$ if the automaton follows the game structure:
+\[\cdot(v,v') = \lbrace \cdot (v_i,v') | v_i \in v \neq v_i \in v' \rbrace \]
+$\Delta$ is the minimal relation satifying:
 	\[
-	\forall x, y: \theta_e(x) \wedge \theta_s(x,y) \implies \exists s',s'' : (s_0, \cdot (x), s'), (s', \cdot (y), s'') \in \Delta 
+	\forall x, y: \theta_e(x) \wedge \theta_s(x,y) \implies \exists s',s'' : (s_0, \cdot (\bot, s'), s'), (s', \cdot (s',s''), s'') \in \Delta 
 	\] 
 	\[
-	\forall x, y : \exists v \rho_e(v,x) \wedge \rho_s(v,x,y) \implies \exists s',s'',s''' : (s', \cdot (x), s''), (s'', \cdot (y), s''') \in \Delta 
+	\forall x, y : \exists v \rho_e(v,x) \wedge \rho_s(v,x,y) \implies \exists s',s'',s''' : (s', \cdot (s',s''), s''), (s'', \cdot (s'',s'''), s''') \in \Delta 
 	\] 
-	And the game structure follows the automaton:	
-	\[
-	\forall  s',s'',l,l' : (s_0, l, s'), (s', l', s'') \in \Delta  \implies \exists x,y: \theta_e(\times(l)) \wedge \theta_s(\times(l),\times(l'))
-	\] 
-	\[
-	\forall  s',s'',s''',l,l' : (s', l, s''), (s', l', s''') \in \Delta  \implies \exists v,x,y: \rho_e(v,\times(l)) \wedge \rho_s(v,\times(l),\times(l'))
-	\] 	%2^{|\mathcal{V}|} 
-\end{definition}
-
-\begin{definition}
-	\label{def:gs_conversion} \emph{(Game Structure induced CLTS)} 
-	Let $G_i=\langle \mathcal{V}, \mathcal{X}, \theta_{e}, \theta_{s}, \rho_{e}, \rho_{s}\rangle$, be a game structure then $clts(G)$ is a CLTS instance that has the same observational behavior, i.e.: $clts(G) \approx G$. 
-\end{definition}
-
-\begin{lemma}
-	\label{def:gs_clts_equiv_implies_satifaction} \emph{(Consistency implies formula satisfaction)} 
-	Given $E$ a CLTS instance, $G$ a game structure such that $E \equiv G$ and $\mathcal{C} \in \Sigma$, if $\forall v \in \mathcal{V}: v\uparrow, v\downarrow \in \Sigma$, $\forall v\downarrow \in \Sigma : v \in \mathcal{V}$,
-	$\mathcal{Y} = \mathcal{V}\setminus \mathcal{X}$, $v \in \mathcal{Y}$ if and only if $v\uparrow, v\downarrow \in \mathcal{C}$, $\dot{v} = \lbrace v\uparrow, v\downarrow \rbrace \in \mathcal{F}$ and both $E$ and $clts(G)$ are consistent w.r.t. $\mathcal{F}$ it holds that for every LTL formula $\varphi$ over $\mathcal{V}, G \models \varphi \iff \langle E, \mathcal{C} \rangle \models \cdot(\varphi)$.
-\end{lemma}
-
-\begin{proof}
-	\emph{Rough sketch.} An inductive proof over $\varphi$ ($\cdot(\varphi)$) shows that every trace $\pi (\cdot(\pi))$ in one structure satisfies the formula if and only if it is satisfied in the other one. 
-\end{proof}
-
-\begin{definition}
-	\label{def:mixed_env} \emph{(Mixed Environment Definition)} 
-	A mixed environment $D = \langle E, G \rangle$ is defined over both CTLS instances and game structures as follows,
-	let $E_1,\ldots,E_n$ be a set of CLTS automata and $G_1,\ldots,G_m$ a set of game structures,
-	then each component is defined as $G=\langle \mathcal{V}, \mathcal{X}, \cap_{i \in 1..m}\theta_{e_i}, \cap_{i \in 1..m}\theta_{s_i},$ $\cap_{i \in 1..m}\rho_{e_i},$ $\cap_{i \in 1..m}\rho_{s_i}\rangle$ and $E = \parallel_{*,i \in 1..n} E_i$, where $\parallel_*$ stands for either the asynchronous or synchronous composition semantic.
-	The composed behavior of $D$ is defined by the automaton $E \parallel_* clts(G)$, thus $\langle E, G \rangle \models \varphi$ means $(E \parallel_* clts(G)) \models \varphi$.
-\end{definition}
 
 
-\begin{definition}
-	\label{def:mixed_control_problem} \emph{(Mixed Control Problem)} 
-	Let $D= \langle E, G \rangle$ be a mixed environment, if $\mathcal{F}$ is a set of fluents over $\Sigma$ and $\varphi$ an LTL formula over $\mathcal{F}$, then $I = \langle E, G, \mathcal{F}, \varphi \rangle$ conforms a mixed control problem. If $I$ is consistent and a solution to $I$ exists, such a solution will be a CLTS $M$, legal w.r.t. $D$, such that, $D \parallel M \models \varphi$.
-\end{definition}
+%
+%\begin{definition}
+%	\label{def:mixed_env} \emph{(Mixed Environment Definition)} 
+%	A mixed environment $D = \langle E, G \rangle$ is defined over both CTLS instances and game structures as follows,
+%	let $E_1,\ldots,E_n$ be a set of CLTS automata and $G_1,\ldots,G_m$ a set of game structures,
+%	then each component is defined as $G=\langle \mathcal{V}, \mathcal{X}, \cap_{i \in 1..m}\theta_{e_i}, \cap_{i \in 1..m}\theta_{s_i},$ $\cap_{i \in 1..m}\rho_{e_i},$ $\cap_{i \in 1..m}\rho_{s_i}\rangle$ and $E = \parallel_{*,i \in 1..n} E_i$, where $\parallel_*$ stands for either the asynchronous or synchronous composition semantic.
+%	The composed behavior of $D$ is defined by the automaton $E \parallel_* clts(G)$, thus $\langle E, G \rangle \models \varphi$ means $(E \parallel_* clts(G)) \models \varphi$.
+%\end{definition}
+%
+%
+%\begin{definition}
+%	\label{def:mixed_control_problem} \emph{(Mixed Control Problem)} 
+%	Let $D= \langle E, G \rangle$ be a mixed environment, if $\mathcal{F}$ is a set of fluents over $\Sigma$ and $\varphi$ an LTL formula over $\mathcal{F}$, then $I = \langle E, G, \mathcal{F}, \varphi \rangle$ conforms a mixed control problem. If $I$ is consistent and a solution to $I$ exists, such a solution will be a CLTS $M$, legal w.r.t. $D$, such that, $D \parallel M \models \varphi$.
+%\end{definition}
+%
+%\begin{definition}
+%	\label{def:consistent_mixed_control_problem} \emph{(Consistent Mixed Control Problem)} 
+%	Let $I = \langle E, G, \mathcal{F}, \varphi \rangle$ be a mixed control problem, $I$ is consistent if $\forall v \in \mathcal{V}: v\uparrow, v\downarrow \in \Sigma$, let
+%	$\mathcal{Y} = \mathcal{V}\setminus \mathcal{X}$, $v \in \mathcal{Y}$ implies $v\uparrow, v\downarrow \in \mathcal{C}$, $\dot{v} = \lbrace v\uparrow, v\downarrow \rbrace \in \mathcal{F}$ and both $E$ and $clts(G)$ are consistent w.r.t. $\mathcal{F}$.
+%\end{definition}
 
-\begin{definition}
-	\label{def:consistent_mixed_control_problem} \emph{(Consistent Mixed Control Problem)} 
-	Let $I = \langle E, G, \mathcal{F}, \varphi \rangle$ be a mixed control problem, $I$ is consistent if $\forall v \in \mathcal{V}: v\uparrow, v\downarrow \in \Sigma$, let
-	$\mathcal{Y} = \mathcal{V}\setminus \mathcal{X}$, $v \in \mathcal{Y}$ implies $v\uparrow, v\downarrow \in \mathcal{C}$, $\dot{v} = \lbrace v\uparrow, v\downarrow \rbrace \in \mathcal{F}$ and both $E$ and $clts(G)$ are consistent w.r.t. $\mathcal{F}$.
-\end{definition}
 
-
-Algorithm ~\ref{fig:gs_to_clts_algorithm} takes a game structure, represented as a set 
+We can now introduce algorithm ~\ref{fig:gs_to_clts_algorithm}, that takes a game structure, represented as a set 
 $\gsTheE$, $\gsTheS$, $\gsRhoE$, $\gsRhoS$, $\varphi$ of OBDDs, one for each formula, and produces the CLTS automaton $A$ that preserves its behavior. Since the state space is finite ($2^{|\gsV|}$ at most) and the number of states reached by applying $\gsRhoS(\gsRhoE(v))$ increases monotonically (when starting from $\gsTheS(\gsTheE)$), a least fixed point exists, the algorithm computes such fixed point while progressively creating the transition relation $\Delta$. \texttt{valuations}($\psi$) gives the set of valuations over $\gsV$ for a formula $\psi$ represented with an OBDD. Each valuation induces a unique state in $A$. \texttt{restrict}($\psi$, $s$) fixes a subset of variables in $\psi$ according to $s$ a valuation. If $\varphi$ is the set of propositional formulas involved in the winning condition, \texttt{evaluate\_condition}($A$, $\varphi$, $s$) evaluates the satisfaction of each such formulas according to valuation $s$ and maps the result to $s$ as a state in $A$.
 \newpage
 \input{gs_to_clts_code}
