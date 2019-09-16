@@ -96,7 +96,9 @@ void automaton_indexes_valuation_increase(automaton_indexes_valuation* valuation
 bool automaton_indexes_valuation_has_next(automaton_indexes_valuation* valuation);
 void automaton_indexes_valuation_set_label(automaton_indexes_valuation* valuation, char* label, char* target);
 void automaton_indexes_valuation_set_atom_label(automaton_parsing_tables* tables, automaton_indexes_valuation* valuation, automaton_indexes_syntax* atom_indexes, char* label, char* target);
-void automaton_indexes_valuation_set_to_label(automaton_parsing_tables* tables, automaton_indexes_valuation* valuation
+void automaton_indexes_valuation_set_to_label(automaton_parsing_tables* tables, automaton_indexes_valuation* valuation, automaton_indexes_valuation* next_valuation
+		, automaton_indexes_syntax* to_indexes, char* label, char* target);
+void automaton_indexes_valuation_set_from_label(automaton_parsing_tables* tables, automaton_indexes_valuation* current
 		, automaton_indexes_syntax* to_indexes, char* label, char* target);
 void automaton_statement_syntax_to_table(automaton_statement_syntax* statement, automaton_parsing_tables* tables);
 int32_t automaton_expression_syntax_evaluate(automaton_parsing_tables* tables, automaton_expression_syntax* expr, automaton_indexes_valuation* indexes_valuation);
@@ -117,7 +119,7 @@ bool automaton_statement_syntax_to_fluent(automaton_automata_context* ctx, autom
 		, automaton_parsing_tables* tables, automaton_alphabet* global_alphabet);
 automaton_fluent* automaton_fluent_create_from_syntax(automaton_parsing_tables* tables, automaton_fluent_syntax* fluent_def_syntax, automaton_alphabet* global_alphabet);
 void automaton_index_syntax_get_range(automaton_parsing_tables* tables, automaton_index_syntax* index, int32_t *lower_index, int32_t *upper_index);
-void automaton_indexes_syntax_eval_strings(automaton_parsing_tables* tables, automaton_indexes_valuation*** valuations, uint32_t *valuations_count, uint32_t *valuations_size
+void automaton_indexes_syntax_eval_strings(automaton_parsing_tables* tables, automaton_indexes_valuation* last_valuation, automaton_indexes_valuation*** valuations, uint32_t *valuations_count, uint32_t *valuations_size
 		, uint32_t*** values, char*** a, int32_t* a_count, automaton_indexes_syntax* indexes);
 //void automaton_indexes_syntax_eval_strings(automaton_parsing_tables* tables, automaton_indexes_valuation* valuation, char*** a, int32_t* a_count, automaton_indexes_syntax* indexes);
 bool automaton_add_transition_from_valuations(obdd_mgr* mgr, automaton_automaton* automaton, uint32_t from_state, uint32_t to_state, bool* from_valuation,
