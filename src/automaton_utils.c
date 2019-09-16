@@ -120,7 +120,15 @@ void aut_merge_string_lists(char*** a, int32_t* a_count, char** b, int32_t b_cou
 	*a					= new_list;
 	*a_count			= new_count;
 }
-
+/**
+ * Adds an element to a list of strings and then returns its index
+ * @param list the list where the new entry should be added
+ * @param list_count the lenght of the list, will be updated if needed
+ * @param element the string to be added
+ * @param position the position where the string was added at, if the string was already present and repeat_values is set to false, previous position is set
+ * @param ordered whether the list is ordered or not
+ * @param repeat_values whether the list has repeated values or not
+ */
 bool aut_push_string_to_list(char*** list, int32_t* list_count, char* element, int32_t* position, bool ordered, bool repeat_values){
 	int32_t i;
 	int32_t a_b_cmp;
@@ -132,7 +140,7 @@ bool aut_push_string_to_list(char*** list, int32_t* list_count, char* element, i
 			if(!repeat_values){
 				return false;
 			}
-		}else if(a_b_cmp > 0){
+		}else if(ordered && a_b_cmp > 0){
 			*position		= i;
 			break;
 		}

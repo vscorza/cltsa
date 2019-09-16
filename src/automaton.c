@@ -1061,13 +1061,23 @@ bool automaton_indexes_valuation_add_range(automaton_indexes_valuation* valuatio
 	valuation->ranges			= new_ranges;
 	return true;
 }
+/**
+	 * Returns the index's value with name according to parameter provided
+	 *
+	 * @param valuation current valuation to be fixed over a single variable
+	 * @param index_name the name of the variable to be fixed
+	 * @return the value of the given index
+	 */
+
 int32_t automaton_indexes_valuation_get_value(automaton_indexes_valuation* valuation, char* range_name){
 	uint32_t i;
 	for(i = 0; i < valuation->count; i++){
-		if(strcmp(valuation->ranges[i]->name, range_name))
+		if(strcmp(valuation->ranges[i]->name, range_name) == 0){
 			return valuation->current_values[i];
+		}
 	}
-	return 0;
+	printf("No index found with name %s \n", range_name);
+	exit(-1);
 }
 void automaton_indexes_valuation_set_value(automaton_indexes_valuation* valuation, char* range_name, int32_t value){
 	uint32_t i;

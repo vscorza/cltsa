@@ -1,0 +1,30 @@
+// range def.
+const LIMIT = 3
+range R = 1..LIMIT
+range R2 = 2..LIMIT
+range R3 = 1..(LIMIT*2)
+
+// alphabets def.
+set Global_Alphabet = {back, t, t[i:R3], t[i:R][j:R], back[i:R3]}
+set Controllable_Alphabet = {back, back[j:R3]}
+
+// automata def.
+TEST_1 = (t[i:R]->t[j:R]->S[i+j]),
+S[i:R3] = (back[i]->S[i]).  
+
+TEST_1_P = (t_1-> S_1 | t_2 -> S_2 | t_3 -> S_3),
+S_1 = (t_1->S_1_1 | t_2 -> S_1_2 | t_3 -> S_1_3),
+S_2 = (t_1->S_2_1 | t_2 -> S_2_2 | t_3 -> S_2_3),
+S_3 = (t_1->S_3_1 | t_2 -> S_3_2 | t_3 -> S_3_3),
+S_1_1 = (t_2 -> S_1_1),
+S_1_2 = (t_3 -> S_1_2),
+S_1_3 = (t_4 -> S_1_3),
+S_2_1 = (t_3 -> S_2_1),
+S_2_2 = (t_4 -> S_2_2),
+S_2_3 = (t_5 -> S_2_3),
+S_3_1 = (t_4 -> S_3_1),
+S_3_2 = (t_5 -> S_3_2),
+S_3_3 = (t_6 -> S_3_3).
+
+// tests
+equals FATAL_Sum_Range(TEST_1, TEST_1_P).
