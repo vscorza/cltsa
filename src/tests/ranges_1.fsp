@@ -9,23 +9,19 @@ set Controllable_Alphabet = {out}
 A=(input[i:R]-><hidden,internal>->A). 
 A_p = (input_1 -> A_p_1 | input_2 -> A_p_1 | input_3 -> A_p_1 | input_4 -> A_p_1),
 A_p_1 = (<hidden,internal> -> A_p).
-/*
 B=(input[i:R]->out->out[i:R]-><hidden,internal>->B).
 B_p=(input_1->B_p_1|input_2->B_p_1|input_3->B_p_1|input_4->B_p_1),
 B_p_1=(out->B_p_2),
 B_p_2=(out_1->B_p_3|out_2->B_p_3|out_3->B_p_3|out_4->B_p_3),
 B_p_3=(<hidden,internal>->B_p).
-
 C=(hidden->out->C).
 ||D=(A||C).
 D_p = (input_1 -> D_p_1 | input_2 -> D_p_1 | input_3 -> D_p_1 | input_4 -> D_p_1),
 D_p_1 = (<hidden,internal> -> D_p_2),
 D_p_2 = (input_1 -> D_p_3 | input_2 -> D_p_3 | input_3 -> D_p_3 | input_4 -> D_p_3 | out -> D_p),
 D_p_3 = (out -> D_p_1).
-*/
+
 // tests
 equals FATAL_Simple_Range(A, A_p).
-/*
 equals FATAL_Sequential_Range(B, B_p).
 equals FATAL_Composition_Range(D, D_p).
-*/
