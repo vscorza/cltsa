@@ -1031,7 +1031,9 @@ void automaton_indexes_valuation_destroy(automaton_indexes_valuation* valuation)
 	for(i = 0; i < valuation->count; i++){
 		automaton_range_destroy(valuation->ranges[i]);
 	}
+	valuation->current_values = NULL;
 	free(valuation->ranges);
+	valuation->ranges = NULL;
 	free(valuation);
 }
 /** INDEXES VALUATION **/

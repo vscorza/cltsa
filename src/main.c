@@ -1044,11 +1044,12 @@ void run_all_tests(){
 	run_parse_test("tests/biscotti.fsp", "biscotti");
 	run_parse_test("tests/two_floors_lift.fsp", "lift 2 floors");//lift 2 floors
 	run_parse_test("tests/ranges_1.fsp",  "range tests 1");
-	run_parse_test("tests/ranges_2.fsp",  "range 2 test");
 }
 
 int main (void){
 	run_all_tests();
+	//run_parse_test("tests/ranges_2.fsp",  "range 2 test");
+	//run_parse_test("tests/ranges_3.fsp",  "range 3 test");
 	//run_parse_test("tests/concurrency_equiv_test.fsp",  "Asynch composition equiv. test");
 	//run_parse_test("tests/half_adder_to_full_adder.fsp",  "half adder to full adder test");
 	//run_parse_test("tests/two_full_adders.fsp",  "two full adders test");
