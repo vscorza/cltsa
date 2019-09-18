@@ -1,6 +1,5 @@
 TODO:
-- review legality, should consider cases where a mixed condition of both controllable/non-controllable events occur
-- control problem reads legal w.r.t. D should be E
+- review legality, E will have purely controllable states or purely non controllable states, where all elements of all labels are either in U or (mutually exclusively) in C
 - run hardware cases
 - transition syntax proper def: each transition in a chain induces a new target state
 	S = (t[i:1..2]->f->S[i]).

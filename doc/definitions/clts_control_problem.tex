@@ -1,18 +1,17 @@
-\textcolor{blue}{In this section} we present the background to define the notion of control problem in the CLTS domain.  When defining what is a legal restriction of an environment over a set of controllable actions $\mathcal{C}$, the asymmetry of choice will be tilted in favor of the adversary, thus if a concurrent transition holds both controllable and non controllable actions it will be considered non controllable as a whole.
+\textcolor{blue}{In this section} we present the background to define the notion of control problem in the CLTS domain.  In the context of this work specifications come from the digital design domain, where the environmental signals are set first and the system signals are set afterwards, making states either controllable or non controllable, and because of this every transition's elements are all within $\mathcal{C}$ or all within $\mathcal{U}$. For a CLTS instance $E=\langle S_e, \Sigma_e, \Delta_e, s_{e_0} \rangle$ and a set of controllable actions $\mathcal{C} \subseteq \Sigma$ it is assumed that each transition is fully (non) controllable:
+
+\[ l_{\mathcal{C}}((s,l,s')): ( \forall l_i \in l:(l_i \in \mathcal{C}))\]
+\[ l_{\mathcal{U}}((s,l,s')): ( \forall l_i \in l:(l_i \not\in \mathcal{C}))\]
+\[ \forall (s,l,s') \in \Delta_e: l_{\mathcal{C}}((s,l,s')) \vee l_{\mathcal{U}}((s,l,s')) \]
+
+And that the same criteria is satisfied by every state:
+
+\[ \forall s \in S_e : (\forall l, s' \text{ s.t. } (s,l,s') \in \Delta_e:l_{\mathcal{C}}((s,l,s')))\vee (\forall l, s' \text{ s.t. } (s,l,s') \in \Delta_e:l_{\mathcal{U}}((s,l,s')))\]
 
 \begin{definition}
 	\label{def:legal_clts} \emph{(Legality w.r.t. $E$ and $\mathcal{C}$)} 
 	Given CLTS $C = \langle S_c, \Sigma$, $\Delta_c$, $s_{c_0}\rangle$ and $E = \langle S_e,\Sigma,$ $\Delta_e,$ $s_{e_0}\rangle$, where $\Sigma$ is partitioned into actions controlled and monitored (non controllable) by $C$ ($\Sigma=\mathcal{C} \; \cup \;\mathcal{U}$), we say that $C$ is a legal CLTS for $E$ if for all $(s_e,s_c) \in E \parallel_* C$ it holds that:
-	
-	\begin{gather*}
-	((\exists l, s'_{e} \text{ s.t. } (s_e,l, s'_e) \in \Delta_e \wedge l \cap \mathcal{P}(\mathcal{U}) \neq \emptyset) \implies \\
-	 (\forall l',s''_e \text{ s.t. } (s_e, l',s''_e) \in \Delta_e : \exists s'_c { s.t. } (s_c,l',s'_c) \in \Delta_c)) \\
-	 \wedge\\
-	 ((\forall l, s'_{e} \text{ s.t. } (s_e,l, s'_e) \in \Delta_e \wedge l \cap \mathcal{P}(\mathcal{U}) = \emptyset)\implies \\
-	 ((\exists l',s'_c \text{ s.t. } (s_c, l',s'_c) \in \Delta_c) \implies (\exists s'_e { s.t. } (s_e,l',s'_e) \in \Delta_e)))
-	 \end{gather*}
-	
-%	$\Delta_{E}(s_E)\cap \mathcal{P}(\mathcal{C}) \supseteq \Delta_{C}(s_C)\cap \mathcal{P}(\mathcal{C})$ and also that  $\Delta_{E}(s_E)\cap \mathcal{P}(\mathcal{U}) \subseteq \Delta_{C}(s_C)\cap \mathcal{P}(\mathcal{U})$.
+	$\Delta_{E}(s_E)\cap \mathcal{P}(\mathcal{C}) \supseteq \Delta_{C}(s_C)\cap \mathcal{P}(\mathcal{C})$ and also that  $\Delta_{E}(s_E)\cap \mathcal{P}(\mathcal{U}) \subseteq \Delta_{C}(s_C)\cap \mathcal{P}(\mathcal{U})$.
 \end{definition}
 
 \begin{definition}
