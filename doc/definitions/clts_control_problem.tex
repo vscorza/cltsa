@@ -2,11 +2,20 @@
 
 \begin{definition}
 	\label{def:legal_clts} \emph{(Legality w.r.t. $E$ and $\mathcal{C}$)} 
-	Given CLTS $C = \langle S_C, \Sigma$, $\Delta_C$, $s_{C_0}\rangle$ and $E = \langle S_E,\Sigma,$ $\Delta_E,$ $s_{E_0}\rangle$, where $\Sigma$ is partitioned into actions controlled and monitored (non controllable) by $C$ ($\Sigma=\mathcal{C} \; \cup \;\mathcal{U}$), we say that $C$ is a legal CLTS for $E$ if for all $(s_E,s_C) \in E \parallel_* C$ it holds that
-	$\Delta_{E}(s_E)\cap \mathcal{P}(\mathcal{C}) \supseteq \Delta_{C}(s_C)\cap \mathcal{P}(\mathcal{C})$ and also that  $\Delta_{E}(s_E)\cap \mathcal{P}(\mathcal{U}) \subseteq \Delta_{C}(s_C)\cap \mathcal{P}(\mathcal{U})$.
+	Given CLTS $C = \langle S_c, \Sigma$, $\Delta_c$, $s_{c_0}\rangle$ and $E = \langle S_e,\Sigma,$ $\Delta_e,$ $s_{e_0}\rangle$, where $\Sigma$ is partitioned into actions controlled and monitored (non controllable) by $C$ ($\Sigma=\mathcal{C} \; \cup \;\mathcal{U}$), we say that $C$ is a legal CLTS for $E$ if for all $(s_e,s_c) \in E \parallel_* C$ it holds that:
+	
+	\begin{gather*}
+	((\exists l, s'_{e} \text{ s.t. } (s_e,l, s'_e) \in \Delta_e \wedge l \cap \mathcal{P}(\mathcal{U}) \neq \emptyset) \implies \\
+	 (\forall l',s''_e \text{ s.t. } (s_e, l',s''_e) \in \Delta_e : \exists s'_c { s.t. } (s_c,l',s'_c) \in \Delta_c)) \\
+	 \wedge\\
+	 ((\forall l, s'_{e} \text{ s.t. } (s_e,l, s'_e) \in \Delta_e \wedge l \cap \mathcal{P}(\mathcal{U}) = \emptyset)\implies \\
+	 ((\exists l',s'_c \text{ s.t. } (s_c, l',s'_c) \in \Delta_c) \implies (\exists s'_e { s.t. } (s_e,l',s'_e) \in \Delta_e)))
+	 \end{gather*}
+	
+%	$\Delta_{E}(s_E)\cap \mathcal{P}(\mathcal{C}) \supseteq \Delta_{C}(s_C)\cap \mathcal{P}(\mathcal{C})$ and also that  $\Delta_{E}(s_E)\cap \mathcal{P}(\mathcal{U}) \subseteq \Delta_{C}(s_C)\cap \mathcal{P}(\mathcal{U})$.
 \end{definition}
 
 \begin{definition}
-	\label{def:mixed_control_problem} \emph{(CLTS Control Problem)} 
-	Let $E$ be a a CLTS instance, if $\mathcal{F}$ is a set of fluents over $\Sigma$ and $\varphi$ an LTL formula over $\mathcal{F}$, then $I = \langle E, \mathcal{F}, \varphi \rangle$ constitutes a CLTS control problem. If a solution to $I$ exists, such a solution will be a CLTS $M$, legal w.r.t. $E$, such that, $E \parallel M \models \varphi$.
+	\label{def:clts_control_problem} \emph{(CLTS Control Problem)} 
+	Let $E$ be a a CLTS instance, if $\mathcal{F}$ is a set of fluents over $\Sigma$ and $\varphi$ an LTL formula over $\mathcal{F}$, then $I = \langle E, \mathcal{F}, \varphi \rangle$ constitutes a CLTS control problem. If a solution to $I$ exists, such a solution will be a CLTS $M$, legal w.r.t. $E$, such that, $E \parallel_* M \models \varphi$.
 \end{definition}
