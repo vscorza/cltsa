@@ -1029,10 +1029,13 @@ void automaton_indexes_valuation_destroy(automaton_indexes_valuation* valuation)
 	free(valuation->current_values);
 	uint32_t i;
 	for(i = 0; i < valuation->count; i++){
-		automaton_range_destroy(valuation->ranges[i]);
+		if(valuation->ranges[i] != NULL)
+			automaton_range_destroy(valuation->ranges[i]);
 	}
+
 	valuation->current_values = NULL;
-	free(valuation->ranges);
+	if(valuation->ranges != NULL)
+		free(valuation->ranges);
 	valuation->ranges = NULL;
 	free(valuation);
 }

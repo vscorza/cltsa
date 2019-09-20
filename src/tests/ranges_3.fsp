@@ -2,10 +2,10 @@
 const LIMIT = 3
 range R = 1..LIMIT
 range R2 = 2..LIMIT
-range R3 = 1..(LIMIT*2)
+range R3 = 2..(LIMIT*2)
 
 // alphabets def.
-set Global_Alphabet = {back, t, t[i:R3], t[i:R][j:R], back[i:R3]}
+set Global_Alphabet = {back, t, t[i:R], t[i:R][j:R], back[i:R3]}
 set Controllable_Alphabet = {back, back[j:R3]}
 
 // automata def.
