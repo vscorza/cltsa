@@ -1051,7 +1051,6 @@ void run_all_tests(){
 int main (void){
 	run_all_tests();
 
-
 	//run_parse_test("tests/concurrency_equiv_test.fsp",  "Asynch composition equiv. test");
 	//run_parse_test("tests/half_adder_to_full_adder.fsp",  "half adder to full adder test");
 	//run_parse_test("tests/two_full_adders.fsp",  "two full adders test");
