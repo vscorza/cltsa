@@ -1025,7 +1025,8 @@ void run_fast_pool_tests(){
 	free(expected);
 	free(buff);
 }
-void run_all_tests(){
+
+void run_functional_tests(){
 	//MODULE TESTING
 	run_obdd_tree_tests();
 	run_small_obdd_tests();
@@ -1048,8 +1049,20 @@ void run_all_tests(){
 	run_parse_test("tests/ranges_3.fsp",  "range 3 test");
 }
 
+void run_load_tests(){
+	run_parse_test("tests/k_10_100_graph.fsp",  "k 10, 100 graph tests");
+}
+
+void run_all_tests(){
+	run_functional_tests();
+	run_load_tests();
+}
+
 int main (void){
 	run_all_tests();
+	//run_functional_tests();
+	//run_load_tests();
+	//run_parse_test("tests/k_4_graph.fsp",  "k 4 graph tests");
 
 	//run_parse_test("tests/concurrency_equiv_test.fsp",  "Asynch composition equiv. test");
 	//run_parse_test("tests/half_adder_to_full_adder.fsp",  "half adder to full adder test");
@@ -1058,7 +1071,7 @@ int main (void){
 	//run_parse_test("tests/receiver_asynch_test.fsp",  "receiver asynch test");
 	//run_parse_test("tests/concurrency_equiv_test.fsp",  "concurrency equiv. test");
 
-	//run_parse_test("tests/k_4_graph.fsp",  "k 4 graph tests");
+
 	//run_parse_test("tests/test37.fsp", "lts load test 1");
 	//run_parse_test("tests/seven_floors_lift.fsp", "lift 7 floors");//lift 7 floors
 	//run_parse_test("tests/genbuf_2_sndrs.fsp", "GenBuf 2 sndrs");//GENBUF 2 Sndrs

@@ -3341,8 +3341,8 @@ bool automaton_automata_are_equivalent(automaton_automaton* left_automaton, auto
 								  != right_automaton->out_degree[right_automaton->initial_states[0]])
 		return false;
 	bool* processed	= calloc(left_automaton->transitions_count * 2, sizeof(bool));
-	uint32_t* left_frontier		=  calloc(left_automaton->transitions_count * 2, sizeof(uint32_t));
-	uint32_t* right_frontier	=  calloc(right_automaton->transitions_count * 2, sizeof(uint32_t));
+	uint32_t* left_frontier		=  calloc(left_automaton->transitions_composite_count * 2, sizeof(uint32_t));
+	uint32_t* right_frontier	=  calloc(right_automaton->transitions_composite_count * 2, sizeof(uint32_t));
 	uint32_t frontier_count	= 0;
 	left_frontier[0]	= left_automaton->initial_states[0];
 	right_frontier[0]	= right_automaton->initial_states[0];

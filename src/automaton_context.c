@@ -1028,10 +1028,10 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 #endif
 		//TODO: solve aliases in states e.g. S[i:R] = S_p[i], S_p[i:R] = (s->S_2[i]).
 		//update ref states
-		uint32_t explicit_start_state_count, explicit_start_state_size;
-		uint32_t *explicit_start_states;
-		automaton_indexes_valuation **explicit_start_valuations;
-		automaton_indexes_valuation *explicit_start_valuation;
+		uint32_t explicit_start_state_count = 0, explicit_start_state_size= 0;
+		uint32_t *explicit_start_states = NULL;
+		automaton_indexes_valuation **explicit_start_valuations = NULL;
+		automaton_indexes_valuation *explicit_start_valuation = NULL;
 
 
 		for(i = 0; i < (int32_t)composition_syntax->count; i++){
@@ -1144,7 +1144,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 						current_valuations = NULL;
 					}
 				}
-				current_valuations_count = current_valuations_size = current_from_state_count	= explicit_start_state_count;
+				current_valuations_count = current_valuations_size = current_from_state_size = current_from_state_count	= explicit_start_state_count;
 				if(current_from_state != NULL)free(current_from_state);
 				current_from_state	= calloc(current_from_state_size, sizeof(uint32_t));
 				current_valuations = calloc(current_valuations_size, sizeof(automaton_indexes_valuation*));
