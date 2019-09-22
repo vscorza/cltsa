@@ -1194,7 +1194,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 #if DEBUG_PARSE_STATES
 								printf("\t\t[A] tau transition\n");
 #endif
-								continue;//tau
+								//continue;//tau
 							}
 							if(!atom_label->is_set){
 								//process set ( Alphabet -> ...)
@@ -1326,13 +1326,17 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 										first_index_set	= true;
 									}
 									element_global_index= -1;
-									for(m = 0; m < (int32_t)ctx->global_alphabet->count; m++){
-										if(strcmp(ctx->global_alphabet->list[m].name, atom_label->string_terminal) == 0){
-											element_global_index = m;
-											break;
+									//atom_label->string_terminal == NULL && !atom_label->is_set && atom_label->indexes == NULL
+									//is satisfied by the tau transition (used in digital systems for no change in signals)
+									if(atom_label->string_terminal != NULL){
+										for(m = 0; m < (int32_t)ctx->global_alphabet->count; m++){
+											if(strcmp(ctx->global_alphabet->list[m].name, atom_label->string_terminal) == 0){
+												element_global_index = m;
+												break;
+											}
 										}
 									}
-									if(element_global_index >= 0){
+									if(element_global_index >= 0 || atom_label->string_terminal == NULL){
 										if(automaton_transition_count >= (automaton_transition_size - 1)){
 											uint32_t new_size	= automaton_transition_size * LIST_INCREASE_FACTOR;
 											automaton_transition** new_transitions	= malloc(sizeof(automaton_transition*) * new_size);
@@ -1388,8 +1392,9 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 											next_from_state			= new_next_from;
 										}
 										next_from_state[next_from_state_count++]	= to_state;
-
-										automaton_transition_add_signal_event(current_automaton_transition[automaton_transition_count - 1], ctx, &(ctx->global_alphabet->list[element_global_index]));
+										//do not add signal if transition is tau
+										if(atom_label->string_terminal != NULL)
+											automaton_transition_add_signal_event(current_automaton_transition[automaton_transition_count - 1], ctx, &(ctx->global_alphabet->list[element_global_index]));
 #if DEBUG_PARSE_STATES
 										printf("\t\t\t[s] signal added: %s\n", ctx->global_alphabet->list[element_global_index].name);
 #endif
