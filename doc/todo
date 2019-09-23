@@ -1,14 +1,16 @@
 TODO:
+- step wise composition not yielding same result as composition over set of automata
 - run hardware cases
 	- review/document ltl -> CLTS translation
 		- check state size, running two specs sequentially
+	- explain manual composition/synthesis/ltl translation of small examples
+	- GR(1) over CLTS formalism
+	- behavior minimization based diagnosis over CLTS
+	- diagnose GENBUF with 2 clients
 	- improve fluents encoding (superset of labels is too expensive)
-	- run lift 
-	- run lift 7 floors efficiently
 	- run genbuf 2, 4, 10 clients
 	- run amba 2, 4, 10 clients
 	- document obdd
-- step wise composition not yielding same result as composition over set of automata
 - implement fluent set parsing
 - implement fluent consistency check
 - solve aliases in states e.g. S[i:R] = S_p[i], S_p[i:R] = (s->S_2[i]).
