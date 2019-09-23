@@ -47,7 +47,22 @@ void automaton_bool_array_hash_table_destroy(automaton_bool_array_hash_table* ta
 	table->entries	= NULL;
 	free(table);
 }
+/**
+ * Returns the equivalent entry for the provided boolean array if one exists, if none exists it adds it
+ * IMPORTANT: all arrays are removed as a they are replaced by new entries, clone entry if persistent use is expected
+ * @param table the hash table
+ * @param entry the boolean array to be searched
+ * @param copy_entry whether the new entry should be cloned or not
+ * @return the boolean array already stored that is equivalent to the one provided
+ */
+bool *automaton_bool_array_hash_table_add_or_get_entry(automaton_bool_array_hash_table* table, bool *entry, bool copy_entry){
+	bool* current_entry	= NULL;
+	current_entry	= automaton_bool_array_hash_table_get_entry(table, entry);
+	if(current_entry != NULL)return current_entry;
 
+	automaton_bool_array_hash_table_add_entry(table, entry, copy_entry);
+	return entry;
+}
 /**
  * Returns the equivalent entry for the provided boolean array if one exists
  * IMPORTANT: all arrays are removed as a they are replaced by new entries, clone entry if persistent use is expected

@@ -25,5 +25,5 @@ bool *automaton_bool_array_hash_table_get_entry(automaton_bool_array_hash_table*
 void automaton_bool_array_hash_table_add_entry(automaton_bool_array_hash_table* table, bool *entry, bool copy_entry);
 void automaton_bool_array_hash_table_get_entry_indexes(automaton_bool_array_hash_table* table, bool *entry
 		, uint32_t *first_level_index, uint32_t *second_level_index);
-
+bool *automaton_bool_array_hash_table_add_or_get_entry(automaton_bool_array_hash_table* table, bool *entry, bool copy_entry);
 #endif /* SRC_BOOL_ARRAY_HASH_TABLE_H_ */

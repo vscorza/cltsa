@@ -225,7 +225,7 @@ obdd* obdd_apply_xor(obdd* left, obdd* right);
 obdd* obdd_apply_and(obdd* left, obdd* right);
 obdd* obdd_apply_or(obdd* left, obdd* right);
 obdd* obdd_apply(bool (*apply_fkt)(bool,bool), obdd *left, obdd* right);	//if not canonical results should be reduced
-obdd_node* obdd_node_apply(bool (*apply_fkt)(bool,bool), obdd_mgr* mgr, obdd_node* left_node, obdd_node* right_node);
+obdd_node* obdd_node_apply(bool (*apply_fkt)(bool,bool), obdd_mgr* mgr, obdd_node* left_node, obdd_node* right_node, bool first_call);
 void obdd_remove_duplicated_terminals(obdd_mgr* mgr, obdd_node* root, obdd_node** true_node, obdd_node** false_node);
 void obdd_merge_redundant_nodes(obdd_mgr* mgr, obdd_node* root);
 void obdd_reduce(obdd* root);

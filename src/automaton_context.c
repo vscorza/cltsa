@@ -2343,6 +2343,19 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 		}
 	}
 
+	//initialize cache variables
+	for(i = 0; i < mgr->vars_dict->size; i++){
+		obdd_destroy(obdd_mgr_var(mgr, mgr->vars_dict->entries[i].key));
+		obdd_destroy(obdd_mgr_not_var(mgr, mgr->vars_dict->entries[i].key));
+	}
+
+	//initialize boolean array hash tables
+	automaton_bool_array_hash_table *x_y_hash_table	= automaton_bool_array_hash_table_create(x_y_count);
+	automaton_bool_array_hash_table *x_hash_table	= automaton_bool_array_hash_table_create(x_count);
+	automaton_bool_array_hash_table *x_y_x_p_hash_table	= automaton_bool_array_hash_table_create(x_y_x_p_count);
+	bool *hashed_valuation = NULL;
+
+
 #if DEBUG_LTL_AUTOMATON
 	char *buff = calloc(10000, sizeof(char));
 	printf("X alphabet\n[");
@@ -2501,9 +2514,10 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	bool has_transition;
 	for(i = 0; i < current_valuations_count; i++){
 		automaton_set_composed_valuation(env_state->valuation, valuations, i, true, true, x_count, y_count);
+		hashed_valuation		= automaton_bool_array_hash_table_add_or_get_entry(x_y_hash_table, env_state->valuation, true);
 		env_state->state		= obdd_state_tree_get_key(obdd_state_map, env_state->valuation, x_count);
 		has_transition	= automaton_add_transition_from_valuations(mgr, ltl_automaton, sys_state->state, env_state->state
-				, sys_state->valuation, env_state->valuation, true, true
+				, sys_state->valuation, hashed_valuation, true, true
 				, x_count, y_count
 				, obdd_on_signals_indexes, obdd_off_signals_indexes, x_y_alphabet, x_y_x_p_alphabet);
 		if(!has_transition){
@@ -2542,7 +2556,8 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	if(theta_env_bucket_list->composite_count > 0){
 		do{
 			automaton_concrete_bucket_pop_entry(theta_env_bucket_list, env_state);
-			obdd_current_state	= obdd_restrict_vector(env_sys_theta_composed, x_alphabet, env_state->valuation, x_count);
+			hashed_valuation		= automaton_bool_array_hash_table_add_or_get_entry(x_hash_table, env_state->valuation, true);
+			obdd_current_state	= obdd_restrict_vector(env_sys_theta_composed, x_alphabet, hashed_valuation, x_count);
 			obdd_get_valuations(mgr, obdd_current_state, &valuations, &valuations_size, &current_valuations_count, x_y_alphabet, x_y_count
 					, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
 #if DEBUG_LTL_AUTOMATON
@@ -2556,9 +2571,9 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 				//TODO:review bad read here
 				automaton_set_composed_valuation(sys_state->valuation, valuations, i, true, false, x_count, y_count);
 				sys_state->state		= obdd_state_tree_get_key(obdd_state_map, sys_state->valuation, x_y_count);
-
+				hashed_valuation		= automaton_bool_array_hash_table_add_or_get_entry(x_y_hash_table, sys_state->valuation, true);
 				has_transition	= automaton_add_transition_from_valuations(mgr, ltl_automaton, env_state->state, sys_state->state
-						, env_state->valuation, sys_state->valuation, true, false
+						, env_state->valuation, hashed_valuation, true, false
 						, x_count, y_count
 						, obdd_on_signals_indexes, obdd_off_signals_indexes, x_y_alphabet, x_y_x_p_alphabet);
 #if DEBUG_LTL_AUTOMATON
@@ -2630,7 +2645,8 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 				automaton_concrete_bucket_pop_entry(rho_sys_bucket_list, sys_state);
 				automaton_concrete_bucket_add_entry(rho_sys_processed_bucket_list, sys_state);
 				for(i = 0; i < x_y_count; i++)env_state->valuation[i]	= sys_state->valuation[i];
-				obdd_current_state	= obdd_restrict_vector(env_rho_composed, x_y_alphabet, sys_state->valuation, x_y_count);
+				hashed_valuation		= automaton_bool_array_hash_table_add_or_get_entry(x_y_hash_table, sys_state->valuation, true);
+				obdd_current_state	= obdd_restrict_vector(env_rho_composed, x_y_alphabet, hashed_valuation, x_y_count);
 				obdd_restricted_state	= obdd_exists_vector(obdd_current_state, not_x_p_alphabet, not_x_p_count);
 				obdd_get_valuations(mgr, obdd_restricted_state, &valuations, &valuations_size, &current_valuations_count, x_p_alphabet, x_p_count
 										, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
@@ -2655,9 +2671,10 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 
 					//automaton_set_composed_valuation(env_state->valuation, valuations, i, false, true, x_y_x_p_alphabet, x_count, y_count);
 					automaton_set_composed_valuation(env_state->valuation, valuations, i, false, true, x_count, y_count);
+					hashed_valuation		= automaton_bool_array_hash_table_add_or_get_entry(x_y_x_p_hash_table, env_state->valuation, true);
 					env_state->state		= obdd_state_tree_get_key(obdd_state_map, env_state->valuation, x_y_x_p_count);
 					has_transition	= automaton_add_transition_from_valuations(mgr, ltl_automaton, sys_state->state, env_state->state
-							, sys_state->valuation, env_state->valuation, false, true
+							, sys_state->valuation, hashed_valuation, false, true
 							, x_count, y_count
 							, obdd_on_signals_indexes, obdd_off_signals_indexes, x_y_alphabet, x_y_x_p_alphabet);
 
@@ -2710,7 +2727,8 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 				}
 				automaton_concrete_bucket_pop_entry(rho_env_bucket_list, env_state);
 				automaton_concrete_bucket_add_entry(rho_env_processed_bucket_list, env_state);
-				obdd_current_state	= obdd_restrict_vector(env_sys_rho_composed, x_y_x_p_alphabet, env_state->valuation, x_y_x_p_count);
+				hashed_valuation		= automaton_bool_array_hash_table_add_or_get_entry(x_y_x_p_hash_table, env_state->valuation, true);
+				obdd_current_state	= obdd_restrict_vector(env_sys_rho_composed, x_y_x_p_alphabet, hashed_valuation, x_y_x_p_count);
 				obdd_restricted_state	= obdd_exists_vector(obdd_current_state, not_y_p_alphabet, not_y_p_count);
 				obdd_get_valuations(mgr, obdd_restricted_state, &valuations, &valuations_size, &current_valuations_count, y_p_alphabet, y_p_count
 										, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
@@ -2740,11 +2758,12 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 					for(j =0; j < x_count; j++)sys_state->valuation[j] = env_state->valuation[x_count + y_count + j];
 					//move Y'->XY
 					automaton_set_composed_valuation(sys_state->valuation, valuations, i, false, false, x_count, y_count);
+					hashed_valuation		= automaton_bool_array_hash_table_add_or_get_entry(x_y_hash_table, sys_state->valuation, true);
 					//before getting state for sys_valuation copy X' part form env state into X part of sys state
 					//for(j = 0; j < x_count; j++)sys_state->valuation[j]	= env_state->valuation[x_y_count + j];
 					sys_state->state		= obdd_state_tree_get_key(obdd_state_map, sys_state->valuation, x_y_count);
 					has_transition	= automaton_add_transition_from_valuations(mgr, ltl_automaton, env_state->state, sys_state->state
-							, env_state->valuation, sys_state->valuation, false, false
+							, env_state->valuation, hashed_valuation, false, false
 							, x_count, y_count
 							, obdd_on_signals_indexes, obdd_off_signals_indexes, x_y_alphabet, x_y_x_p_alphabet);
 #if DEBUG_LTL_AUTOMATON
@@ -2800,6 +2819,9 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	if(sys_rho_count > 1)obdd_destroy(sys_rho_composed);
 	obdd_destroy(env_sys_theta_composed); obdd_destroy(env_sys_rho_composed);
 
+	automaton_bool_array_hash_table_destroy(x_y_hash_table);
+	automaton_bool_array_hash_table_destroy(x_hash_table);
+	automaton_bool_array_hash_table_destroy(x_y_x_p_hash_table);
 
 	free(env_state); free(sys_state); free(tmp_state_valuation);
 	free(obdd_on_signals_indexes); free(obdd_off_signals_indexes);

@@ -541,21 +541,19 @@ obdd* obdd_apply(bool (*apply_fkt)(bool,bool), obdd *left, obdd* right){
 #if DEBUG_OBDD
 		printf("(apply)%p (%p) %p\n", (void*)left, (void*)apply_fkt, (void*)right);
 #endif
-	obdd_node* cached_node	= obdd_cache_lookup2(left->mgr->cache, apply_fkt, left->root_obdd, right->root_obdd);
 
-	if(cached_node != NULL)
-		return obdd_create(left->mgr,cached_node);
-
-	obdd* applied_obdd	= obdd_create(left->mgr, obdd_node_apply(apply_fkt, left->mgr, left->root_obdd, right->root_obdd));
-	obdd_reduce(applied_obdd);
-
-	obdd_cache_insert2(left->mgr->cache, apply_fkt, left->root_obdd, right->root_obdd, applied_obdd->root_obdd);
+	obdd* applied_obdd	= obdd_create(left->mgr, obdd_node_apply(apply_fkt, left->mgr, left->root_obdd, right->root_obdd, true));
 
 	return applied_obdd;
 }	
 
-obdd_node* obdd_node_apply(bool (*apply_fkt)(bool,bool), obdd_mgr* mgr, obdd_node* left_node, obdd_node* right_node){
+obdd_node* obdd_node_apply(bool (*apply_fkt)(bool,bool), obdd_mgr* mgr, obdd_node* left_node, obdd_node* right_node, bool first_call){
+	if(first_call){
+		obdd_node* cached_node	= obdd_cache_lookup2(mgr->cache, apply_fkt, left_node, right_node);
 
+		if(cached_node != NULL)
+			return cached_node;
+	}
 	obdd_var_size_t left_var_ID	=  left_node->var_ID;
 	obdd_var_size_t right_var_ID	=  right_node->var_ID;
 
@@ -574,26 +572,33 @@ obdd_node* obdd_node_apply(bool (*apply_fkt)(bool,bool), obdd_mgr* mgr, obdd_nod
 
 	if(is_left_constant){
 		applied_node 	= obdd_mgr_mk_node_ID(mgr, right_var_ID,
-			obdd_node_apply(apply_fkt, mgr, left_node, right_node->high_obdd), 
-			obdd_node_apply(apply_fkt, mgr, left_node, right_node->low_obdd));
+			obdd_node_apply(apply_fkt, mgr, left_node, right_node->high_obdd, false),
+			obdd_node_apply(apply_fkt, mgr, left_node, right_node->low_obdd, false));
 	}else if(is_right_constant){
 		applied_node 	= obdd_mgr_mk_node_ID(mgr, left_var_ID,
-			obdd_node_apply(apply_fkt, mgr, left_node->high_obdd, right_node), 
-			obdd_node_apply(apply_fkt, mgr, left_node->low_obdd, right_node));
+			obdd_node_apply(apply_fkt, mgr, left_node->high_obdd, right_node, false),
+			obdd_node_apply(apply_fkt, mgr, left_node->low_obdd, right_node, false));
 	}else if(left_var_ID == right_var_ID){
 		applied_node 	= obdd_mgr_mk_node_ID(mgr, left_var_ID,
-			obdd_node_apply(apply_fkt, mgr, left_node->high_obdd, right_node->high_obdd), 
-			obdd_node_apply(apply_fkt, mgr, left_node->low_obdd, right_node->low_obdd));
+			obdd_node_apply(apply_fkt, mgr, left_node->high_obdd, right_node->high_obdd, false),
+			obdd_node_apply(apply_fkt, mgr, left_node->low_obdd, right_node->low_obdd, false));
 	}else if(left_var_ID < right_var_ID){
 		applied_node 	= obdd_mgr_mk_node_ID(mgr, left_var_ID,
-			obdd_node_apply(apply_fkt, mgr, left_node->high_obdd, right_node), 
-			obdd_node_apply(apply_fkt, mgr, left_node->low_obdd, right_node));
+			obdd_node_apply(apply_fkt, mgr, left_node->high_obdd, right_node, false),
+			obdd_node_apply(apply_fkt, mgr, left_node->low_obdd, right_node, false));
 	}else{
 		applied_node 	= obdd_mgr_mk_node_ID(mgr, right_var_ID,
-			obdd_node_apply(apply_fkt, mgr, left_node, right_node->high_obdd), 
-			obdd_node_apply(apply_fkt, mgr, left_node, right_node->low_obdd));
+			obdd_node_apply(apply_fkt, mgr, left_node, right_node->high_obdd, false),
+			obdd_node_apply(apply_fkt, mgr, left_node, right_node->low_obdd, false));
 	}
+	if(first_call){
+		obdd_node* true_node	= NULL;
+		obdd_node* false_node	= NULL;
+		obdd_remove_duplicated_terminals(mgr, applied_node, &true_node, &false_node);
+		obdd_merge_redundant_nodes(mgr, applied_node);
 
+		obdd_cache_insert2(mgr->cache, apply_fkt, left_node, right_node, applied_node);
+	}
 	return applied_node;	
 }
 obdd* obdd_exists_vector(obdd* root, uint32_t* var_ids, uint32_t count){
@@ -614,11 +619,11 @@ obdd_node* obdd_exists_vector_node(obdd_mgr* mgr, obdd_node* root, uint32_t* var
 
 		tmp_node	= current_node;
 
-		current_node	= obdd_node_apply(&obdd_apply_or_fkt, mgr, true_node, false_node);
+		current_node	= obdd_node_apply(&obdd_apply_or_fkt, mgr, true_node, false_node, true);
 
 		if(tmp_node != NULL && tmp_node != root) obdd_node_destroy(mgr, tmp_node);
-		obdd_node_destroy(mgr, true_node);
-		obdd_node_destroy(mgr, false_node);
+		//obdd_node_destroy(mgr, true_node);
+		//obdd_node_destroy(mgr, false_node);
 	}
 
 	return current_node;
@@ -667,29 +672,45 @@ obdd_node* obdd_node_restrict(obdd_mgr* mgr, obdd_node* root, uint32_t var_ID, b
 	return applied_node;	
 }
 
+/**
+ * Restricts the provided obdd over an array of boolean values
+ * @param root the obdd to be restricted
+ * @param var_ids the array of variable ids for each value in the boolean array
+ * @param values the array of boolean values for variables being restricted
+ * @param count the number of variables to be restricted
+ * @return the resulting obdd
+ */
 obdd* obdd_restrict_vector(obdd* root, uint32_t* var_ids, bool* values, uint32_t count){
-	obdd *acum_obdd = NULL, *new_obdd = NULL, *tmp_obdd = NULL;
+
+	obdd_node* cached_node	= obdd_cache_lookup2(root->mgr->cache, &obdd_restrict_vector, root->root_obdd, (obdd_node*)values);
+
+	if(cached_node != NULL)
+		return obdd_create(root->mgr,cached_node);
+
+	obdd_node *acum_obdd = NULL, *new_obdd = NULL, *tmp_obdd = NULL;
 	uint32_t i;
+	bool accum_cached = false;
 	for(i = 0; i < count; i++){
-		new_obdd	= (values[i]) ? obdd_mgr_var(root->mgr, dictionary_key_for_value(root->mgr->vars_dict, var_ids[i])) : obdd_mgr_not_var(root->mgr, dictionary_key_for_value(root->mgr->vars_dict, var_ids[i]));
+		new_obdd = values[i]? root->mgr->cache->cache_vars[var_ids[i]] : root->mgr->cache->cache_neg_vars[var_ids[i]];
+		//new_obdd	= (values[i]) ? obdd_mgr_var(root->mgr, dictionary_key_for_value(root->mgr->vars_dict, var_ids[i])) : obdd_mgr_not_var(root->mgr, dictionary_key_for_value(root->mgr->vars_dict, var_ids[i]));
 		if(acum_obdd == NULL){
 			acum_obdd	= new_obdd;
+			accum_cached	= true;
 		}else{
-			tmp_obdd	= obdd_apply_and(acum_obdd, new_obdd);
-			obdd_destroy(acum_obdd);
-			obdd_destroy(new_obdd);
+			tmp_obdd	= obdd_node_apply(&obdd_apply_and_fkt, root->mgr, acum_obdd, new_obdd, true);
+			if(accum_cached){
+				accum_cached = false;
+			}/*else{
+				obdd_node_destroy(root->mgr, acum_obdd);
+			}*/
 			acum_obdd	= tmp_obdd;
 		}
 	}
-	obdd* return_obdd	=  obdd_apply_and(root, acum_obdd);
-	obdd_destroy(acum_obdd);
+	obdd* return_obdd	=  obdd_create(root->mgr, obdd_node_apply(&obdd_apply_and_fkt, root->mgr, root->root_obdd, acum_obdd, true));
+	//obdd_node_destroy(root->mgr, acum_obdd);
+
+	obdd_cache_insert2(root->mgr->cache, &obdd_restrict_vector, root->root_obdd, (obdd_node*)values, return_obdd->root_obdd);
 	return return_obdd;
-	/*
-	obdd_node* restricted_node	= obdd_node_restrict_vector(root->mgr, root->root_obdd, var_ids, values, 0, count);
-	obdd* restricted_obdd = obdd_apply_and(root->mgr, restricted_node);
-	obdd_reduce(restricted_obdd);
-	return restricted_obdd;
-	*/
 }
 /*
 obdd_node* obdd_node_restrict_vector(obdd_mgr* mgr, obdd_node* root, uint32_t* var_ids, bool* values, uint32_t current_index, uint32_t count){
