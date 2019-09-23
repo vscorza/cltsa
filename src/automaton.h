@@ -15,6 +15,7 @@
 #include "max_heap.h"
 #include "dictionary.h"
 #include "obdd.h"
+#include "bool_array_hash_table.h"
 #include "y.tab.h"
 
 #define VERBOSE 0

@@ -1026,6 +1026,36 @@ void run_fast_pool_tests(){
 	free(buff);
 }
 
+void run_bool_array_hash_table_tests(){
+	uint32_t variable_count	= 40;
+	automaton_bool_array_hash_table* table	= automaton_bool_array_hash_table_create(variable_count);
+	int32_t i;
+	bool **values	= malloc(variable_count * sizeof(bool*));
+	bool test_cmp	= true;
+	for(i = 0; i < variable_count; i++){
+		values[i]	= calloc(variable_count, sizeof(bool));
+		values[i][i]	= true;
+		if(i % 4 == 0 && i > 0){
+			values[i - 1][i]	= true;
+			values[i][i - 1]	= true;
+		}
+	}
+	for(i = 0; i < variable_count; i++){
+		if(i % 4 == 0 && i > 0){
+			test_cmp = test_cmp && automaton_bool_array_hash_table_get_entry(table, values[i]) != NULL;
+		}
+		if(automaton_bool_array_hash_table_get_entry(table, values[i]) == NULL){
+			automaton_bool_array_hash_table_add_entry(table, values[i], true);
+		}
+	}
+	automaton_bool_array_hash_table_destroy(table);
+	for(i = 0; i < variable_count; i++){
+		free(values[i]);
+	}
+	free(values);
+	print_test_result(test_cmp, "BOOL_ARRAY_HASH", "bool array hash table");
+}
+
 void run_functional_tests(){
 	//MODULE TESTING
 	run_obdd_tree_tests();
@@ -1039,6 +1069,7 @@ void run_functional_tests(){
 	run_max_heap_tests();
 	run_report_tests();
 	run_fast_pool_tests();
+	run_bool_array_hash_table_tests();
 
 	//DRY TESTS
 	run_parse_test("tests/composition_types.fsp", "compositions type");
@@ -1059,10 +1090,13 @@ void run_all_tests(){
 }
 
 int main (void){
-	run_all_tests();
-	//run_functional_tests();
+	//run_parse_test("tests/mixed_3_signals_2_labels.fsp", "mixed model 3 signals 2 labels");//mixed model 3 signals 2 labels
+	//run_parse_test("tests/seven_floors_lift.fsp", "lift 7 floors");//lift 7 floors
+
+	//run_all_tests();
+	run_functional_tests();
 	//run_load_tests();
-	//run_parse_test("tests/k_4_graph.fsp",  "k 4 graph tests");
+
 
 	//run_parse_test("tests/concurrency_equiv_test.fsp",  "Asynch composition equiv. test");
 	//run_parse_test("tests/half_adder_to_full_adder.fsp",  "half adder to full adder test");
@@ -1073,7 +1107,7 @@ int main (void){
 
 
 	//run_parse_test("tests/test37.fsp", "lts load test 1");
-	//run_parse_test("tests/seven_floors_lift.fsp", "lift 7 floors");//lift 7 floors
+	//
 	//run_parse_test("tests/genbuf_2_sndrs.fsp", "GenBuf 2 sndrs");//GENBUF 2 Sndrs
 	//run_parse_test("tests/genbuf_4_sndrs.fsp", "GenBuf 4 sndrs");//GENBUF 4 sndrs
 	//run_parse_test("tests/test18.fsp",  "test18");

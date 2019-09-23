@@ -1,11 +1,18 @@
 TODO:
 - run hardware cases
+	- review/document ltl -> CLTS translation
+		X build hash valuations: *obdd -> **bool
+		- build hash restrict vector: *bool x *obdd -> *obdd
+	- improve fluents encoding (superset of labels is too expensive)
+	- run lift 
+	- run lift 7 floors efficiently
+	- run genbuf 2, 4, 10 clients
+	- run amba 2, 4, 10 clients
 - step wise composition not yielding same result as composition over set of automata
 - implement fluent set parsing
 - implement fluent consistency check
 - solve aliases in states e.g. S[i:R] = S_p[i], S_p[i:R] = (s->S_2[i]).
 - implement relabeling and hiding (use half adder to full adder example)
-
 
 PRINT CODE
 enscript -2r -T=1 --line-numbers -p out.ps --font="Courier6" --highlight=c  automaton_context.c

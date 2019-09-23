@@ -26,5 +26,5 @@ ltl fluent Goal_Serve_Request_6			= ((b5->f6)).
 ltl fluent Goal_Serve_Request_7			= ((b5->f7)).
 
 |f| ENV =(GAME_LTL).
-|gr1| <{Ass}><{Goal_Serve_Request_1,Goal_Serve_Request_2,Goal_Serve_Request_3,Goal_Serve_Request_4,Goal_Serve_Request_5,Goal_Serve_Request_6,Goal_Serve_Request_7,Goal_Back_To_Ground}> STRAT = ENV.
+//|gr1| <{Ass}><{Goal_Serve_Request_1,Goal_Serve_Request_2,Goal_Serve_Request_3,Goal_Serve_Request_4,Goal_Serve_Request_5,Goal_Serve_Request_6,Goal_Serve_Request_7,Goal_Back_To_Ground}> STRAT = ENV.
 
