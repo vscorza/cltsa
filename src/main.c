@@ -1084,6 +1084,7 @@ void run_functional_tests(){
 
 void run_load_tests(){
 	run_parse_test("tests/k_10_100_graph.fsp",  "k 10, 100 graph tests");
+	run_parse_test("tests/seven_floors_lift.fsp", "lift 7 floors");//lift 7 floors
 }
 
 void run_all_tests(){
@@ -1092,15 +1093,15 @@ void run_all_tests(){
 }
 
 int main (void){
-	//run_parse_test("tests/mixed_3_signals_2_labels.fsp", "mixed model 3 signals 2 labels");//mixed model 3 signals 2 labels
-	//run_parse_test("tests/two_floors_lift.fsp", "lift 2 floors");//lift 2 floors
 
-	//run_parse_test("tests/seven_floors_lift.fsp", "lift 7 floors");//lift 7 floors
+
 	//run_parse_test("tests/genbuf_2_sndrs.fsp", "GenBuf 2 sndrs");//GENBUF 2 Sndrs
 	//run_parse_test("tests/genbuf_4_sndrs.fsp", "GenBuf 4 sndrs");//GENBUF 4 sndrs
 
+	run_parse_test("tests/concurrency_equiv_test.fsp",  "Asynch composition equiv. test");
 
-	run_all_tests();
+
+	//run_all_tests();
 	//run_functional_tests();
 	//run_load_tests();
 

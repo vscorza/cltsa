@@ -7,6 +7,11 @@ A = (open_a -> compute_a -> value_a -> close_a -> A).
 B = (open_b -> compute_b -> value_b -> close_b -> B).
 SERVER = (<value_a,value_b>->composed_value->SERVER).
 
+//||SERVER_A =  (SERVER || A).
+//||SYS_3 =  (SERVER_A || B).
+
+||SYS_1 =  (SERVER || A || B).
+/*
 ||SYS_1 =  (SERVER || A || B).
 
 ||AB =  (A || B).
@@ -20,3 +25,4 @@ SERVER = (<value_a,value_b>->composed_value->SERVER).
 equals FATAL_Partial_Asynch_1_2(SYS_1, SYS_2).
 equals FATAL_Partial_Asynch_1_3(SYS_1, SYS_3).
 equals FATAL_Partial_Asynch_2_3(SYS_2, SYS_3).
+*/

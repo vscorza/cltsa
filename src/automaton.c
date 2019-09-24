@@ -2677,8 +2677,20 @@ void automaton_automata_bool_to_transition_alphabet(bool *tmp_alphabet, automato
 	t->signals_count	= signals_count;
 
 }
-
-bool automaton_automata_transition_mismatch(bool *pending_label, bool *current_label, uint32_t *independencies, uint32_t *dependencies, uint32_t alphabet_count
+/**
+ * Evaluates whether and how two transitions coming from two automata to be composed overlap according to their elements and alphabets
+ * @param pending_label the first label (set of boolean variables indicating presence of alphabet's elements) related to a pending transition in the composition algorithm
+ * @param current_label the second label (set of boolean variables indicating presence of alphabet's elements) related to transition under evaluation in the composition algorithm
+ * @param independencies a list of independent elements, those that appear in one automaton but not the other
+ * @param alphabet_count the size of the global alphabet
+ * @param local_alphabet the local alphabet as a set of ints (indexes in the global alphabet)
+ * @param local_alphabet_count the size of the local alphabet
+ * @param labels_overlap a boolean placeholder that determines whether the two labels overlap or not (share elements of the alphabet)
+ * @param pending_overlaps_current a boolean placeholder that determines whether the pending transition shares elements with the current transition's alphabet
+ * @param current_overlaps_pending a boolean placeholder that determines whether the current transition shares elements with the pending transition's alphabet
+ * @return true if there is a mismatch between labels and the merged transition should not be added
+ */
+bool automaton_automata_transition_mismatch(bool *pending_label, bool *current_label, uint32_t *independencies, uint32_t alphabet_count
 		, uint32_t *local_alphabet, uint32_t local_alphabet_count
 		, bool *labels_overlap, bool *pending_overlaps_current, bool *current_overlaps_pending, bool *empty_intersection){
 	uint32_t i;
@@ -2712,7 +2724,6 @@ bool automaton_automata_transition_mismatch(bool *pending_label, bool *current_l
 
 	for(i = 0; i < alphabet_count; i++){
 			//independencies[i] > 1 implies i appears in more than one automaton
-			//dependencies[i] == true implies i has appeared in an already processed automaton
 			if(independencies[i] > 1){
 				if(pending_label[i] != current_label[i]){
 					return true;
@@ -2928,6 +2939,46 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 			for(k = 0; k < current_out_degree; k++){
 				delta_i_set[k]		= false;
 			}
+			//if delta_union_count is 0 but label is independent it should be added
+
+			//TODO:if delta_union_count is 0 but label is independent it should be added
+			//| | SOMETHING LIKE WHAT'S BELOW
+			//V V
+/*
+ 						//add independent labels
+						if(!pending_added && !pending_overlaps_current){
+							pending_added 						= true;
+							if(!was_set)
+								automaton_transition_destroy(starting_transition, true);
+							starting_transition					= automaton_transition_clone(delta_union[j]);
+
+#if DEBUG_COMPOSITION
+
+							printf("\t\t[B] Pending non merged trans.: %d {", from_state);
+							for(m = 0; m < starting_transition->signals_count; m++){
+								printf("%s%s", m > 0 ? "," : ""
+										, automata[i]->context->global_alphabet->list[GET_TRANSITION_SIGNAL(starting_transition, m)].name);
+							}
+							printf("}->[");
+#endif
+							for(l = 0; l < automata_count; l++){
+								current_to_state[l]	= delta_union_to_state[j * automata_count + l];
+#if DEBUG_COMPOSITION
+								printf("%d%s", current_to_state[l], l < automata_count -1 ? "," : "");
+#endif
+								delta_union_p_to_state[delta_union_p_count * automata_count + l]	= current_to_state[l];
+							}
+#if DEBUG_COMPOSITION
+							printf("]:%d KEPT\n", starting_transition->state_to);
+#endif
+							starting_transition->state_from		= from_state;
+							automaton_automata_transition_alphabet_to_bool(&(delta_union_p_alphabet[delta_union_p_count * alphabet_count]), starting_transition, alphabet_count);
+							delta_union_p[(delta_union_p_count)++]			= starting_transition;
+							was_set = true;
+						}
+ */
+
+
 			for(j = 0; j < delta_union_count; j++){
 #if DEBUG_COMPOSITION
 				printf("\t\t<j> pending[%d] \n", j);
@@ -2954,7 +3005,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 					automaton_automata_transition_alphabet_to_bool(current_label, starting_transition, alphabet_count);
 					//check if transition doesn't block automaton_automata_tmp_transition_blocks
 					bool pending_overlaps_current, current_overlaps_pending, labels_overlap, empty_intersection;
-					if(!automaton_automata_transition_mismatch(pending_label, current_label, alphabet_independency, alphabet_dependency, alphabet_count, automata[i]->local_alphabet
+					if(!automaton_automata_transition_mismatch(pending_label, current_label, alphabet_independency, alphabet_count, automata[i]->local_alphabet
 							, automata[i]->local_alphabet_count
 							, &labels_overlap, &pending_overlaps_current, &current_overlaps_pending, &empty_intersection)){
 						if((current_type != ASYNCHRONOUS) || !empty_intersection){//merge transitions if needed
