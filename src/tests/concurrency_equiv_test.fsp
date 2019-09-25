@@ -1,10 +1,13 @@
 // alphabets def.
-set Global_Alphabet = {open_a, compute_a, value_a, close_a,open_b, compute_b, value_b, close_b,composed_value}
+//set Global_Alphabet = {open_a, compute_a, value_a, close_a,open_b, compute_b, value_b, close_b,composed_value}
+set Global_Alphabet = {open_a, value_a, open_b, value_b, composed_value}
 set Controllable_Alphabet = {}
 
 // automata def.
-A = (open_a -> compute_a -> value_a -> close_a -> A).
-B = (open_b -> compute_b -> value_b -> close_b -> B).
+//A = (open_a -> compute_a -> value_a -> close_a -> A).
+//B = (open_b -> compute_b -> value_b -> close_b -> B).
+A = (open_a -> value_a -> A).
+B = (open_b -> value_b -> B).
 SERVER = (<value_a,value_b>->composed_value->SERVER).
 
 //||SERVER_A =  (SERVER || A).
