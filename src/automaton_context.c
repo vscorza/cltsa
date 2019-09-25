@@ -731,7 +731,8 @@ bool automaton_statement_syntax_to_composition(automaton_automata_context* ctx, 
 		composition_count					= new_composition_count;
 	}
 	aut_context_log("composing.\n");
-	automaton_automaton* automaton	= automaton_automata_compose(automata, synch_type, composition_count, composition_syntax->is_game);//SYNCHRONOUS);
+	automaton_automaton* automaton	= automaton_automata_compose(automata, synch_type, composition_count, composition_syntax->is_game
+			, composition_syntax->name);//SYNCHRONOUS);
 	if(composition_syntax->is_game)
 		for(i = 0; i < (int32_t)ctx->global_fluents_count; i++)
 			automaton_automaton_destroy(automata[composition_count - i - 1]);

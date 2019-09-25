@@ -2635,20 +2635,20 @@ void automaton_automata_add_pending_transitions(automaton_automaton **automata, 
 		}
 	}
 }
-void automaton_automata_merge_transition_alphabet_into_bool(bool *tmp_alphabet, automaton_transition *t, uint32_t alphabet_count){
+void automaton_automata_merge_transition_alphabet_into_bool(uint32_t *tmp_alphabet, automaton_transition *t, uint32_t alphabet_count){
 	uint32_t i;
 	for(i = 0; i < t->signals_count; i++){
 		uint32_t sig = GET_TRANSITION_SIGNAL(t, i);
-			tmp_alphabet[sig] = true;
+		tmp_alphabet[sig]++;
 	}
 }
-void automaton_automata_transition_alphabet_to_bool(bool *tmp_alphabet, automaton_transition *t, uint32_t alphabet_count){
+void automaton_automata_transition_alphabet_to_bool(uint32_t *tmp_alphabet, automaton_transition *t, uint32_t alphabet_count){
 	uint32_t i;
 
-	for(i = 0; i < alphabet_count; i++)tmp_alphabet[i] = false;
+	for(i = 0; i < alphabet_count; i++)tmp_alphabet[i] = 0;
 	automaton_automata_merge_transition_alphabet_into_bool(tmp_alphabet, t, alphabet_count);
 }
-void automaton_automata_bool_to_transition_alphabet(bool *tmp_alphabet, automaton_transition *t, uint32_t alphabet_count){
+void automaton_automata_bool_to_transition_alphabet(uint32_t *tmp_alphabet, automaton_transition *t, uint32_t alphabet_count){
 	uint32_t i, signals_count = 0, tail_count = 0;
 	signal_t *other_signals;
 	for(i = 0; i < alphabet_count; i++)if(tmp_alphabet[i])signals_count++;
@@ -2691,7 +2691,7 @@ void automaton_automata_bool_to_transition_alphabet(bool *tmp_alphabet, automato
  * @param check_independency determines whether the mismatch should be checked when labels overlap (only applied when at the last automaton)
  * @return true if there is a mismatch between labels and the merged transition should not be added
  */
-bool automaton_automata_transition_mismatch(bool *pending_label, bool *current_label, uint32_t *independencies, uint32_t alphabet_count
+bool automaton_automata_transition_mismatch(uint32_t *pending_label, uint32_t *current_label, uint32_t *independencies, uint32_t alphabet_count
 		, uint32_t *local_alphabet, uint32_t local_alphabet_count
 		, bool *labels_overlap, bool *pending_overlaps_current, bool *current_overlaps_pending, bool *empty_intersection
 		, bool check_independency){
@@ -2701,7 +2701,7 @@ bool automaton_automata_transition_mismatch(bool *pending_label, bool *current_l
 	*labels_overlap = false;
 	*empty_intersection = true;
 	for(i = 0; i < alphabet_count; i++){
-		if(pending_label[i] && (pending_label[i] == current_label[i])){
+		if(pending_label[i] && ((pending_label[i] > 0) == (current_label[i] > 0))){
 			*labels_overlap = true;
 			*pending_overlaps_current = true;
 			*current_overlaps_pending = true;
@@ -2726,9 +2726,9 @@ bool automaton_automata_transition_mismatch(bool *pending_label, bool *current_l
 	for(i = 0; i < alphabet_count; i++){
 			//independencies[i] > 1 implies i appears in more than one automaton
 			if(independencies[i] > 1){
-				//TODO:add appearances array for each transition, counts in how many automata the labe appeared
-				//if number of appearances equals indepencies count then the label is ok
-				if((check_independency || !*labels_overlap) && (pending_label[i] != current_label[i])){
+				if(!*labels_overlap && ((pending_label[i] > 0) != (current_label[i] > 0))){
+					return true;
+				}else if(check_independency && ((pending_label[i] + current_label[i]) != independencies[i])){
 					return true;
 				}else if (pending_label[i]){
 					*empty_intersection = false;
@@ -2743,9 +2743,11 @@ bool automaton_automata_transition_mismatch(bool *pending_label, bool *current_l
  * @param synch_type the array of synchronization types to be applied sequentially and pairwise for the provided automata
  * @param automata_count the number of automata to be composed
  * @param is_game true if the resulting automaton will hold valuations on its states, false otherwise
+ * @param composition_name the name of the composition as specified in the syntax
  * @return the CLTS resulting from applying the composition type according to synch_type definitions over automata
  */
-automaton_automaton* automaton_automata_compose(automaton_automaton** automata, automaton_synchronization_type* synch_type, uint32_t automata_count, bool is_game){
+automaton_automaton* automaton_automata_compose(automaton_automaton** automata, automaton_synchronization_type* synch_type, uint32_t automata_count
+		, bool is_game, char* composition_name){
 	clock_t begin = clock();
 	uint32_t transitions_added_count	= 0;
 	uint32_t i, j, k, l, m, n, o, p;
@@ -2761,7 +2763,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 	if(is_game){
 		composition = automaton_automaton_create("Game", ctx, alphabet_count, alphabet, true, false);
 	}else{
-		composition = automaton_automaton_create("Composition", ctx, alphabet_count, alphabet, false, false);
+		composition = automaton_automaton_create(composition_name, ctx, alphabet_count, alphabet, false, false);
 	}
 
 	alphabet_count = ctx->global_alphabet->count;
@@ -2795,12 +2797,12 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 	automaton_transition** delta_union		= malloc(sizeof(automaton_transition*) * max_degree_sum);
 	uint32_t delta_union_count				= 0;
 	uint32_t* delta_union_to_state			= calloc(automata_count * max_degree_sum, sizeof(int32_t));
-	bool* delta_union_alphabet				= calloc(alphabet_count * max_degree_sum, sizeof(bool));
+	uint32_t* delta_union_alphabet				= calloc(alphabet_count * max_degree_sum, sizeof(uint32_t));
 	//delta_union_p structs
 	automaton_transition** delta_union_p		= malloc(sizeof(automaton_transition*) * max_degree_sum);
 	uint32_t delta_union_p_count				= 0;
 	uint32_t* delta_union_p_to_state			= calloc(automata_count * max_degree_sum, sizeof(int32_t));
-	bool* delta_union_p_alphabet				= calloc(alphabet_count * max_degree_sum, sizeof(bool));
+	uint32_t* delta_union_p_alphabet				= calloc(alphabet_count * max_degree_sum, sizeof(uint32_t));
 	//delta_union_tmp structs
 	automaton_transition** delta_union_tmp;
 	uint32_t delta_union_tmp_count;
@@ -2815,8 +2817,8 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 	uint32_t* current_to_state			= malloc(sizeof(int32_t) * automata_count);
 
 
-	bool* pending_label				= calloc(alphabet_count, sizeof(bool));
-	bool* current_label				= calloc(alphabet_count, sizeof(bool));
+	uint32_t* pending_label				= calloc(alphabet_count, sizeof(uint32_t));
+	uint32_t* current_label				= calloc(alphabet_count, sizeof(uint32_t));
 	uint32_t* tmp_transition_alphabet	= malloc(sizeof(int32_t) * alphabet_count);
 	uint32_t tmp_transition_count		= 0;
 	/** compose transition relation **/
@@ -3072,7 +3074,10 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 								}
 								printf("\n");
 #endif
-								automaton_automata_transition_alphabet_to_bool(&(delta_union_p_alphabet[delta_union_p_count * alphabet_count]), starting_transition, alphabet_count);
+								for(m = 0; m < alphabet_count; m++){
+									delta_union_p_alphabet[delta_union_p_count * alphabet_count + m]	= pending_label[m];
+								}
+								//automaton_automata_transition_alphabet_to_bool(&(delta_union_p_alphabet[delta_union_p_count * alphabet_count]), starting_transition, alphabet_count);
 								delta_union_p[(delta_union_p_count)++]			= starting_transition;
 								was_set = true;
 							}
@@ -3153,7 +3158,10 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 									}
 									printf("\n");
 #endif
-									automaton_automata_transition_alphabet_to_bool(&(delta_union_p_alphabet[delta_union_p_count * alphabet_count]), starting_transition, alphabet_count);
+									for(m = 0; m < alphabet_count; m++){
+										delta_union_p_alphabet[delta_union_p_count * alphabet_count + m]	= pending_label[m];
+									}
+									//automaton_automata_transition_alphabet_to_bool(&(delta_union_p_alphabet[delta_union_p_count * alphabet_count]), starting_transition, alphabet_count);
 									delta_union_p[(delta_union_p_count)++]			= starting_transition;
 									was_set = true;
 								}

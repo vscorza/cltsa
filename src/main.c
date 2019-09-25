@@ -864,7 +864,7 @@ void run_automaton_tests(){
 	automaton_automaton** automata		= malloc(sizeof(automaton_automaton*) * 2);
 	automata[0]							= automaton_1;
 	automata[1]							= automaton_2;
-	automaton_automaton* composition	= automaton_automata_compose(automata, 2, CONCURRENT, false);
+	automaton_automaton* composition	= automaton_automata_compose(automata, 2, CONCURRENT, false, "TEST");
 	free(automata); automata = NULL;
 	automaton_automaton_print(composition, false, true, true, "\t", "\n");
 	automaton_automaton_destroy(composition); composition = NULL;

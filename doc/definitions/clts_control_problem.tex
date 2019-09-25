@@ -1,12 +1,13 @@
-\textcolor{blue}{In this section} we present the background to define the notion of control problem in the CLTS domain.  In the context of this work specifications come from the digital design domain, where the environmental signals are set first and the system signals are set afterwards, making states either controllable or non controllable, and because of this every transition's elements are all within $\mathcal{C}$ or all within $\mathcal{U}$. For a CLTS instance $E=\langle S_e, \Sigma_e, \Delta_e, s_{e_0} \rangle$ and a set of controllable actions $\mathcal{C} \subseteq \Sigma$ it is assumed that each transition is fully (non) controllable:
+\textcolor{blue}{In this section} we present the background to define the notion of control problem in the CLTS domain.  In the context of this work specifications come from the digital design domain, where the environmental signals are set first and the system signals are set afterwards, making states either controllable or non controllable, and because of this every transition's elements are all within $\mathcal{C}$ or all within $\mathcal{U}$. 
 
+\begin{definition}\label{def:bi-partite_clts} \emph{(Bi-partite w.r.t. $\mathcal{C}$)} 
+A CLTS instance $E=\langle S_e, \Sigma_e, \Delta_e, s_{e_0} \rangle$ is considered to be bi-partite with respect to a set of controllable actions $\mathcal{C} \subseteq \Sigma$ if and only if each transition is fully (non) controllable:
 \[ l_{\mathcal{C}}((s,l,s')): ( \forall l_i \in l:(l_i \in \mathcal{C}))\]
 \[ l_{\mathcal{U}}((s,l,s')): ( \forall l_i \in l:(l_i \not\in \mathcal{C}))\]
 \[ \forall (s,l,s') \in \Delta_e: l_{\mathcal{C}}((s,l,s')) \vee l_{\mathcal{U}}((s,l,s')) \]
-
 And that the same criteria is satisfied by every state:
-
 \[ \forall s \in S_e : (\forall l, s' \text{ s.t. } (s,l,s') \in \Delta_e:l_{\mathcal{C}}((s,l,s')))\vee (\forall l, s' \text{ s.t. } (s,l,s') \in \Delta_e:l_{\mathcal{U}}((s,l,s')))\]
+\end{definition}
 
 \begin{definition}
 	\label{def:legal_clts} \emph{(Legality w.r.t. $E$ and $\mathcal{C}$)} 
@@ -16,5 +17,5 @@ And that the same criteria is satisfied by every state:
 
 \begin{definition}
 	\label{def:clts_control_problem} \emph{(CLTS Control Problem)} 
-	Let $E$ be a a CLTS instance, if $\mathcal{F}$ is a set of fluents over $\Sigma$ and $\varphi$ an LTL formula over $\mathcal{F}$, then $I = \langle E, \mathcal{F}, \varphi \rangle$ constitutes a CLTS control problem. If a solution to $I$ exists, such a solution will be a CLTS $M$, legal w.r.t. $E$, such that, $E \parallel_* M \models \varphi$.
+	Let $E = \langle S_e,\Sigma,$ $\Delta_e,$ $s_{e_0}\rangle $ be bi-partite w.r.t. $\mathcal{C} \subseteq \Sigma$, if $\mathcal{F}$ is a set of fluents over $\Sigma$ and $\varphi$ an LTL formula over $\mathcal{F}$, then $I = \langle E, \mathcal{C}, \mathcal{F}, \varphi \rangle$ constitutes a CLTS control problem. If a solution to $I$ exists, such a solution will be a CLTS $M$, legal w.r.t. $E$ and $\mathcal{C}$, such that, $E \parallel_* M \models \varphi$.
 \end{definition}

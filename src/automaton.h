@@ -334,7 +334,7 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 		, char** guarantees, uint32_t guarantees_count);
 /** AUTOMATA OPERATIONS **/
 uint32_t automaton_automata_get_composite_state(uint32_t states_count, uint32_t* states);
-automaton_automaton* automaton_automata_compose(automaton_automaton** automata, automaton_synchronization_type* synch_type, uint32_t automata_count, bool is_game);
+automaton_automaton* automaton_automata_compose(automaton_automaton** automata, automaton_synchronization_type* synch_type, uint32_t automata_count, bool is_game, char *composition_name);
 bool automaton_automaton_check_invariant(automaton_automaton* current_automaton);
 bool automaton_automaton_update_valuation(automaton_automaton* current_automaton);
 automaton_automaton* automaton_automaton_determinize(automaton_automaton* left_automaton);
