@@ -2,7 +2,7 @@
 \begin{lstlisting}[escapeinside={[*}{*]},basicstyle=\scriptsize\ttfamily,columns=flexible,frame=lines,mathescape=true,xleftmargin=3.0ex,keywordstyle=\textbf,morekeywords={if,while,do,else,fork,int,null, algorithm, is, input, output, return, for},numbers=left,numberstyle=\scriptsize]
 algorithm compose_automata is
 	input: $A_1 \ldots A_N$  the set of CLTS automata to be composed
-	input: $type$ an element of $\{synch,asynch,concurrent\}$ the type of composition to be applied
+	input: $type_2 \ldots type_N$ a set of elements of $\{synch,asynch,concurrent\}$ indicating the type of composition to be applied from left to right, pair-wise
 	output: $A$ the CLTS automaton that results from applying $\parallel_{type}$ to $A_1 \ldots A_N$
 	$s_0$ = $(s^1_{0},\ldots,s^N_{0})$
 	$frontier$ = [$s_0$]
