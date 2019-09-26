@@ -1,5 +1,10 @@
 TODO:
+- for varphi being gr(1):
+	- write control problem to generalized streett translation
+	- write strategy to clts translation
 - step wise composition not yielding same result as composition over set of automata
+	- formalize algorithm
+	- reimplement composition
 - run hardware cases
 	- review/document ltl -> CLTS translation
 		- check state size, running two specs sequentially
