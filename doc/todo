@@ -1,7 +1,6 @@
 TODO:
-- for varphi being gr(1):
-	- write control problem to generalized streett translation
-	- write strategy to clts translation
+- document manually run cses
+- write soundness/completeness demo for gr(1) translations
 - step wise composition not yielding same result as composition over set of automata
 	- formalize algorithm
 	- reimplement composition
