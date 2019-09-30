@@ -1,7 +1,8 @@
 TODO:
-- document manually run cses
+- formalize gs -> clts translation:
+	- let G be a game structure clts(G) is a clts s.t....
 - write soundness/completeness demo for gr(1) translations
-- review composition times
+- review composition times (what can be avoided early in each composite state exploration?)
 - run hardware cases
 	- review/document ltl -> CLTS translation
 		- check state size, running two specs sequentially

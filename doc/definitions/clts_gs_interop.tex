@@ -17,6 +17,28 @@ The set of possible actions for each player is described as relations between cu
 	\end{itemize} 
 \end{definition}
 
+\begin{definition}
+	\label{def:GS_play} \emph{(Play over Game Structure)} 
+	Let $G =  \langle \gsV, \gsX, \gsY, \gsTheE, \gsTheS, \gsRhoE, \gsRhoS, \varphi \rangle$ be a game structure, $\sigma = \sigma_1,\sigma_2,\ldots \in (2^{\mathcal{V}})^\omega$ is a play over $G$ if the following holds:
+	\begin{itemize} 
+		\item The initial condition is satisfied, i.e. $\theta_e(\sigma_1|_{\mathcal{X}}) \wedge \theta_s(\sigma_1)$
+		\item The valuations are updated according to $\rho$,
+		 $\forall i \in 2\ldots: \rho_e(\sigma_{i-1}, \sigma_i|_{\mathcal{X}}) \wedge \rho_s(\sigma_{i-1}, \sigma_i|_{\mathcal{X}},\sigma_i|_{\mathcal{Y}})$		
+	\end{itemize}
+\end{definition}
+
+A play $\sigma$ satisfies LTL formula $\varphi$  if $\sigma_1 \models \varphi$ according to the following inductive definition:
+
+\begin{tabular}{ l c l }
+	$\sigma_i \models_d v$ & $\triangleq$ & $v \in \sigma_i$ for any $v \in \mathcal{V}$\\	
+	$\sigma_i \models_d \neg \varphi$ & $\triangleq$ & $\sigma_i \not\models_d \varphi$\\
+	$\sigma_i \models_d \varphi \vee \psi$ & $\triangleq$ & $(\sigma_i \models_d \varphi) \vee (\sigma_i \models_d \psi)$\\
+	$\sigma_i \models_d \bigcirc \varphi$ & $\triangleq$ & $\sigma_{i+1} \models_d \varphi$\\
+	$\sigma_i \models_d \varphi \U \psi$ & $\triangleq$ & $\exists j \geq i . \sigma_j \models_d \psi \wedge \forall i \leq k \le k. \sigma_k \models_d \varphi$\\
+\end{tabular}
+
+A game structure $G$ satisfies LTL formula $\varphi$ if it is satisfied by all of its plays.
+
 Many non trivial digital designs require the definition of state machines to some extent or another, while at the same time high level specifications can involve interactions with digital or truly concurrent components. Under these circumstances a mixed specification over both a finite state process algebra and a LTL game structure definition is desirable.  In order to reason about their composed behavior a proper common representation is needed. Our approach is to transform the game structure into its equivalent finite state automaton and then compose both using one of the parallel composition semantics.
 
 \textcolor{blue}{We now present} the background required to relate the model checking approach in game structures to an equivalent control problem in the CLTS domain.  The main idea behind this is that any game structure specified as a set of LTL formulas induces an equivalent automaton. A pair of translations from a set of LTL formulas to a Kripke structure and from a Kripke structure to a CLTS are introduced first and then a direct transformation between a set of LTL formulas and a CLTS structure.
@@ -68,7 +90,27 @@ a\downarrow & \text{if } a \in L(s)
 Now if $\cdot(\varphi)$ is the translation from atomic propositions into fluents, and a set of fluents $\mathcal{F}$ exists containing, for each proposition $a$ a fluent $\langle a\uparrow, a\downarrow \rangle$, we say that, again observing only the atomic case where the formula consists of a single variable, $\varphi$ is satisfied in a path $\rho=s_0 s_1\ldots s_i$ over $K$ if $v_i$ appears in $L(s_i)$. In our case this also implies that $\cdot(\varphi)$ is satisfied in the path $\pi=\cdot(s_0)\cdot(s_1)\ldots \cdot(s_i)$ over $M$ since, from $v_i \in L(s_i)$ follows that at some point the proposition started appearing in states leading to $s_i$, suppose that $s_j$ was the first state were $v_i$ appeared and was kept until reaching $s_i$ ($\forall j \leq k \leq i: v_i \in L(s_k)$), then transition $(s_{j-1},s_j) \in R$ was translated as $(s_{j-1}, \delta(s_{j-1},s_j),s_j)$ and $v_i\uparrow \in \delta(s_{j-1},s_j)$ since its value changed from one state to the other. It follows from this observation, that if $M$ is the CLTS structure constructed from $K$ following the previous translation, then LTL satisfaction is preserved between structures.
 
 Now we can introduce a direct translation between game structures and CLTS instances.
-Let $G$ be the game structure to be translated and $M=\langle S, \Sigma, \Delta, s_0 \rangle$ the target CLTS. The alphabet is defined as the minimal set satisfying 
+
+\begin{definition}
+	\label{def:fl_ltl} \emph{(LTL over $\mathcal{V}$ to LTL over $\mathcal{F}$ translation)} 
+	Let $\varphi$ be a LTL formula over countable boolean variables $\mathcal{V}$, and if $\mathcal{F}$ is the minimal fluent set containing $v_f = \langle v\uparrow, v\downarrow \rangle$ for each $v \in \mathcal{V}$, $fl(\varphi)$ is an equivalent LTL formula over fluents according to the following inductive definition:\\
+	
+\begin{tabular}{ l c l }
+	$fl(v)$ & $\triangleq$ & $v_f$\\	
+	$fl(\neg \varphi)$ & $\triangleq$ & $\neg fl(\varphi)$\\
+	$fl(\varphi \vee \psi$ & $\triangleq$ & $fl(\varphi) \vee fl(\psi)$\\
+	$fl(\bigcirc \varphi)$ & $\triangleq$ & $\bigcirc fl(\varphi)$\\
+	$fl(\varphi \U \psi)$ & $\triangleq$ & $fl(\varphi) \U fl(\psi)$\\
+\end{tabular}	
+\end{definition}
+
+
+\begin{definition}
+	\label{def:gs_to_clts_translation} \emph{(Game Structure to CLTS translation)} 
+Let $G =  \langle \gsV, \gsX, \gsY, \gsTheE, \gsTheS, \gsRhoE, \gsRhoS, \varphi \rangle$ be a game structure, $clts(G)=M$ is a CLTS instance such that $G \models \varphi$ $\iff$ $M \models fl(\varphi)$.
+\end{definition}
+
+Let $G$ be the game structure to be translated and $M=\langle S, \Sigma, \Delta, s_0 \rangle$ the target CLTS, i.e. a candidate for $clts(G)$.  The alphabet is defined as the minimal set satisfying 
 $\forall v \in \mathcal{V}: v\uparrow \in \Sigma, v\downarrow \in \Sigma$. 
 In order to construct $\Delta$ variables will be mapped as following:
 

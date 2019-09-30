@@ -58,7 +58,7 @@ void print_test_result(bool passed, char* name, char* description){
 	fflush(stdout);
 }
 
-void run_parse_test(char* test_file, char* test_name){
+void run_parse_test_local(char* test_file, char* test_name, char* result_name){
 	FILE *fd;
     if (!(yyin = fopen(test_file, "r")))
     {
@@ -71,15 +71,21 @@ void run_parse_test(char* test_file, char* test_name){
 	parser_reset_obdd_mgr();
 	yyparse();
     //printf("\n\n%d\n\n\n", parsed_program->count);
-	char buf[255];
-	sprintf(buf, "results/%s", test_name);
+
 	bool PRINT_FSP				= true;
 
-	automaton_automata_context* ctx		= automaton_automata_context_create_from_syntax(parsed_program, buf, PRINT_FSP);
+	automaton_automata_context* ctx		= automaton_automata_context_create_from_syntax(parsed_program, result_name, PRINT_FSP);
     automaton_automata_context_destroy(ctx);
     automaton_program_syntax_destroy(parsed_program);
     fclose(yyin);
 }
+
+void run_parse_test(char* test_file, char* test_name){
+	char buf[255];
+	snprintf(buf, sizeof(buf),"results/%s", test_name);
+	run_parse_test_local(test_file, test_name, buf);
+}
+
 void run_obdd_exists(){
 	obdd_mgr* new_mgr	= obdd_mgr_create();
 	//compare x1 & !(x2 | x3) == x1 & !x2 & !x3
@@ -1093,47 +1099,85 @@ void run_all_tests(){
 	run_load_tests();
 }
 
-int main (void){
-	//ONGOING
-	//run_parse_test("tests/genbuf_2_sndrs.fsp", "GenBuf 2 sndrs");//GENBUF 2 Sndrs
+void print_help(){
+	printf("CLTS modeling and synthesis tool usage\n");
+	printf("\t-h\tprints this help message\n");
+	printf("\t-r filename\t inteprets specification located at [filename]\n");
+	printf("\t--all-tests\t runs all tests\n");
+	printf("\t--func-tests\t runs functional tests\n");
+	printf("\t--load-tests\t runs load tests\n");
+}
 
-	//GENERAL TESTS
-	//run_all_tests();
-	run_functional_tests();
-	//run_load_tests();
+int main (int argc, char** argv){
+	int32_t i;
+	if(argc > 1){
+		if(strcmp(argv[1], "-h") == 0)
+			print_help();
+		if(strcmp(argv[1], "--all-tests") == 0)
+			run_all_tests();
+		if(strcmp(argv[1], "--func-tests") == 0)
+			run_functional_tests();
+		if(strcmp(argv[1], "--load-tests") == 0)
+			run_load_tests();
+		char name_buff[700];
+		if(argc > 2){
+			if(strcmp(argv[1], "-r") == 0){
+				char const *folder = getenv("TMPDIR");
+				if (folder == 0)
+					folder = "/tmp";
+				char result_buff[255];
+				char *result_name;
+				for(i = 2; i < argc; i++){
+					result_name = strrchr(argv[i], '/');
+					if(result_name == NULL)result_name = argv[i];
+					else result_name++;
+					snprintf(result_buff, sizeof(result_buff),"%s/%s", folder, 	result_name);
+					snprintf(name_buff, sizeof(name_buff), "Running:%s", argv[i]);
+					run_parse_test_local(argv[i], name_buff, result_buff);
+				}
+			}
+		}
+	}else{
+		//ONGOING
+		//run_parse_test("tests/genbuf_2_sndrs.fsp", "GenBuf 2 sndrs");//GENBUF 2 Sndrs
+		run_parse_test("tests/biscotti.fsp", "biscotti");
+		//GENERAL TESTS
+		//run_all_tests();
+		//run_functional_tests();
 
-	//TODO
-	//run_parse_test("tests/genbuf_4_sndrs.fsp", "GenBuf 4 sndrs");//GENBUF 4 sndrs
+
+		//TODO
+		//run_parse_test("tests/genbuf_4_sndrs.fsp", "GenBuf 4 sndrs");//GENBUF 4 sndrs
 
 
-	//run_parse_test("tests/half_adder_to_full_adder.fsp",  "half adder to full adder test");
-	//run_parse_test("tests/two_full_adders.fsp",  "two full adders test");
-	//run_parse_test("tests/automata_load_test_1.fsp",  "automata load test");
-	//run_parse_test("tests/receiver_asynch_test.fsp",  "receiver asynch test");
-	//run_parse_test("tests/concurrency_equiv_test.fsp",  "concurrency equiv. test");
+		//run_parse_test("tests/half_adder_to_full_adder.fsp",  "half adder to full adder test");
+		//run_parse_test("tests/two_full_adders.fsp",  "two full adders test");
+		//run_parse_test("tests/automata_load_test_1.fsp",  "automata load test");
+		//run_parse_test("tests/receiver_asynch_test.fsp",  "receiver asynch test");
+		//run_parse_test("tests/concurrency_equiv_test.fsp",  "concurrency equiv. test");
 
 
 
-	//run_parse_test("tests/test18.fsp",  "test18");
+		//run_parse_test("tests/test18.fsp",  "test18");
 
-	//run_parse_test("tests/test26.fsp", "test26");
-	//run_parse_test("tests/test27.fsp", "test27");
-	//run_parse_test("tests/test32.fsp", "test32");
-	//run_parse_test("tests/test34.fsp", "test34");
-	//run_parse_test("tests/test40.fsp", "compositions type");
+		//run_parse_test("tests/test26.fsp", "test26");
+		//run_parse_test("tests/test27.fsp", "test27");
+		//run_parse_test("tests/test32.fsp", "test32");
+		//run_parse_test("tests/test34.fsp", "test34");
+		//run_parse_test("tests/test40.fsp", "compositions type");
 
-	//SHOWCASE
-	//run_parse_test("tests/test21.fsp", "test21");
-
-
-	//run_parse_test("tests/test29.fsp", "lift 3 floors");//lift 3 floors
-	//run_parse_test("tests/test36.fsp", "lift 5 floors");//lift 5 floors
-
-	//IN PROGRESS
-	//run_parse_test("tests/test37.fsp", "lts load test 1");
-	//run_parse_test("tests/test38.fsp", "lift 5 floors + 10 variables");//lift 5 floors + 10 variables
+		//SHOWCASE
+		//run_parse_test("tests/test21.fsp", "test21");
 
 
+		//run_parse_test("tests/test29.fsp", "lift 3 floors");//lift 3 floors
+		//run_parse_test("tests/test36.fsp", "lift 5 floors");//lift 5 floors
+
+		//IN PROGRESS
+		//run_parse_test("tests/test37.fsp", "lts load test 1");
+		//run_parse_test("tests/test38.fsp", "lift 5 floors + 10 variables");//lift 5 floors + 10 variables
+
+	}
 	obdd_mgr* mgr	= parser_get_obdd_mgr();
 	obdd_mgr_destroy(mgr);
 
