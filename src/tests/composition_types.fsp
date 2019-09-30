@@ -11,13 +11,6 @@ C = (<f,g> -> e -> C ).
 |f| CONCURRENT = (A ||_c B ||_c C).
 |f| SYNCHRONOUS = (A ||_s B ||_s C).
 
-//|f| CONCURRENT = (A ||_c B).
-//|f| CONCURRENT = (A ||_c C).
-//|f| CONCURRENT = (C ||_c B).
-//|f| CONCURRENT = (B ||_c A).
-//|f| CONCURRENT = (A ||_c A).
-//|f| CONCURRENT = (C ||_c B).
-//|f| CONCURRENT = (A ||_c B ||_c C).
 
 SYNCH_p = (<a,b,c,f,g> -> e -> SYNCH_p).
 
@@ -28,7 +21,7 @@ ASYNCH_p_3 = (<a,b> -> ASYNCH_p_4 | c -> ASYNCH_p_5),
 ASYNCH_p_4 = (c -> ASYNCH_p_6),
 ASYNCH_p_5 = (<a,b> -> ASYNCH_p_6),
 ASYNCH_p_6 = (e -> ASYNCH_p),
-ASYNCH_p_7 = (<f,g> -> ASYNCH_p).
+ASYNCH_p_7 = (<f,g> -> ASYNCH_p_6).
 
 CONC_p = (<f,g> -> CONC_p_5 | <c,f,g> -> CONC_p_6 | c -> CONC_p_3| <a,b,c> -> CONC_p_2
 	| <a,b> -> CONC_p_1 | <a,b,f,g> -> CONC_p_7| <a,b,c,f,g> -> CONC_p_4),

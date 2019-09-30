@@ -1,9 +1,7 @@
 TODO:
 - document manually run cses
 - write soundness/completeness demo for gr(1) translations
-- step wise composition not yielding same result as composition over set of automata
-	- formalize algorithm
-	- reimplement composition
+- review composition times
 - run hardware cases
 	- review/document ltl -> CLTS translation
 		- check state size, running two specs sequentially

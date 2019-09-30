@@ -2250,6 +2250,7 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 								strategy_maps_is_set[succ_guarantee][succ_ranking->state] = true;
 							}
 							bool is_input	= false;
+							free(strategy_transition->other_signals);
 							automaton_transition_copy(current_transition, strategy_transition);
 							strategy_transition->state_from	= strategy_maps[i][current_ranking->state];
 							strategy_transition->state_to	= strategy_maps[succ_guarantee][succ_ranking->state];
@@ -2282,6 +2283,7 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 								automaton_transition_print(strategy_transition, strategy->context, "", "\n");
 							}
 #endif
+
 							//add initial state if not already added
 							if(strategy->initial_states_count == 0 && current_ranking->state == game_automaton->initial_states[0]){
 #if DEBUG_STRATEGY_BUILD
@@ -2807,6 +2809,7 @@ int32_t automaton_automata_check_overlap(bool *accum_label, bool *current_label,
 			if(accum_label[i] != current_label[i]){
 				at_least_one_does_not = true;
 			}
+			if(!no_overlapping && at_least_one_does_not)return 1;
 		}
 	}
 	if(no_overlapping)return -1;
@@ -3029,8 +3032,9 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 
 #endif
 			//initialize label accumulator
-			bool accum_set = false;
+			bool accum_set = false; bool is_input = false;
 			if(idxs[0] > 0){
+				is_input = is_input || automata[0]->transitions[current_state[0]][idxs[0] - 1].is_input;
 				automaton_automata_transition_alphabet_to_bool(label_accum
 						, &(automata[0]->transitions[current_state[0]][idxs[0] - 1]), alphabet_count);
 				accum_set = true;
@@ -3045,6 +3049,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 					for(k = 0; k < alphabet_count; k++)
 						current_label[k]	= false;
 				}else{
+					is_input = is_input || automata[j]->transitions[current_state[j]][idxs[j] - 1].is_input;
 					not_considered = false;
 					automaton_automata_transition_alphabet_to_bool(current_label
 							, &(automata[j]->transitions[current_state[j]][idxs[j] - 1]), alphabet_count);
@@ -3117,6 +3122,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 				uint32_t composite_to			= automaton_composite_tree_get_key(tree, current_to_state);
 				automaton_transition *current_transition	= automaton_transition_create(from_state, composite_to);
 				automaton_automata_bool_to_transition_alphabet(label_accum, current_transition, alphabet_count);
+				current_transition->is_input	= is_input;
 				automaton_automaton_add_transition(composition, current_transition);
 #if DEBUG_COMPOSITION
 				printf("\t[+] Adding trans: %d {", current_transition->state_from);
@@ -3176,6 +3182,16 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 					}
 				}
 				transitions_added_count++;
+#if VERBOSE
+				if(transitions_added_count % 10000 == 0){
+					printf("\t[!] Added %d transitions\n", transitions_added_count);
+					fflush(stdout);
+				}
+				if((found_hits + found_misses) % 5000 == 0){
+					printf("\t[!] %d hits, %d misses\n", found_hits, found_misses);
+					fflush(stdout);
+				}
+#endif
 				automaton_transition_destroy(current_transition, true);
 				// expand frontier
 				bool found = automaton_bucket_has_entry(bucket_list, composite_to);
@@ -3209,6 +3225,9 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 			automaton_automata_compose_increment_idxs(idxs, idxs_size, automata_count);
 		}
 	}
+#if VERBOSE
+	printf("TOTAL Composition has [%09d] states and [%09d] transitions run for [%08f] KEY ACCESS.: [Misses:%li,hits:%li]\n", tree->max_value, composition->transitions_composite_count, (double)(clock() - begin) / CLOCKS_PER_SEC, found_misses, found_hits);
+#endif
 	//CLEANUP
 	for(i = 0; i < automata_count; i++){
 		free(boolean_alphabet[i]);

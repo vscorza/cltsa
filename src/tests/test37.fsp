@@ -23,5 +23,6 @@ fluent F_MoveToBelt = <moveToBelt, cook>
 SUCCESSFULLY_COOKED_TWICE = (cook->cook->moveToBelt->SUCCESSFULLY_COOKED_TWICE). 
 
 |f| ENV =(A||B||C||D||E||BISCOTTI || SUCCESSFULLY_COOKED_TWICE).
+//|f| ENV =(A||B||C||D||BISCOTTI || SUCCESSFULLY_COOKED_TWICE).
 |gr1| <{F_NotCooking}><{F_MoveToBelt}> STRAT = ENV.
 
