@@ -110,7 +110,7 @@ Now we can introduce a direct translation between game structures and CLTS insta
 Let $G =  \langle \gsV, \gsX, \gsY, \gsTheE, \gsTheS, \gsRhoE, \gsRhoS, \varphi \rangle$ be a game structure, $clts(G)=M$ is a CLTS instance such that $G \models \varphi$ $\iff$ $M \models fl(\varphi)$.
 \end{definition}
 
-Let $G$ be the game structure to be translated and $M=\langle S, \Sigma, \Delta, s_0 \rangle$ the target CLTS, i.e. a candidate for $clts(G)$.  The alphabet is defined as the minimal set satisfying 
+Let $G$ be the game structure to be translated and $M=\langle S, \Sigma, \Delta, s_0 \rangle$ the target CLTS, i.e. the candidate for $clts(G)$.  The alphabet is defined as the minimal set satisfying 
 $\forall v \in \mathcal{V}: v\uparrow \in \Sigma, v\downarrow \in \Sigma$. 
 In order to construct $\Delta$ variables will be mapped as following:
 
@@ -121,15 +121,16 @@ v_i\downarrow & \text{if } v \not\in v
 \end{cases}
 \]
 \[\cdot(v,v') = \lbrace \cdot (v_i,v') | v_i \in v \neq v_i \in v' \rbrace \]
-$\Delta$ is the minimal relation satifying:
+Suppose that a set of mappings $s:\mathcal{X}\rightarrow S$,$s:\mathcal{V} \rightarrow S$,$s:\mathcal{V} \times \mathcal{X} \rightarrow S$ exist, relating a valuation over those set of variables with a distinct state in the CLTS automaton, then $\Delta$ is the minimal relation satifying:
 	\[
-	\forall x, y: \theta_e(x) \wedge \theta_s(x,y) \implies \exists s',s'' : (s_0, \cdot (\bot, s'), s'), (s', \cdot (s',s''), s'') \in \Delta 
+	\forall x, y: \theta_e(x) \wedge \theta_s(x,y) \implies \exists s(x),s(x,y) : (s_0, \cdot (\bot, x), s(x)), (s(x), \cdot (x,(x \cup y)), s(x,y)) \in \Delta 
 	\] 
 	\[
-	\forall x, y : \exists v \rho_e(v,x) \wedge \rho_s(v,x,y) \implies \exists s',s'',s''' : (s', \cdot (s',s''), s''), (s'', \cdot (s'',s'''), s''') \in \Delta 
+	\forall x, y : \exists v: \rho_e(v,x) \wedge \rho_s(v,x,y) \implies\]
+	\[\exists s(v),s(v,x),s(x,y) : (s(v), \cdot (v, v \cup x),s(v,x)), (s(v,x), \cdot (v \cup x,x \cup y), s(x,y)) \in \Delta 
 	\] 
 
-
+As in the previous cases, and showing only the atomic case where the formula consists of a single variable $v$, $\varphi$ is satisfied in move $\sigma_i$ within play $\sigma=\sigma_1,\sigma_2\ldots ,\sigma_i$ on $G$ if $v$ belongs to $\sigma_i$. In our case this also implies that $fl(\varphi)$ is satisfied in state $s_i$ within the path $\pi=s(x),s(x,y),\ldots,s_i=s(\sigma_i)$ over $M$ since, from $v \in \sigma_i$ follows that at some point the proposition started appearing in states leading to $s_i$, suppose that $s_j$ was the first state were $v$ appeared and was kept until reaching $s_i$ ($\forall j \leq k \leq i: v \in \sigma_k$), then step $(\sigma_{j-1},\sigma_j) \in G$ was translated as $(s(\sigma_{j-1}), \cdot(\sigma_{j-1},\sigma_j),\sigma_{j})$ and $v\uparrow \in \cdot(\sigma_{j-1},\sigma_j)$ since its value changed from one state to the other. It follows from this observation, that if $M$ is the CLTS structure constructed from $G$ following the previous translation, then LTL satisfaction is preserved between structures.
 %
 %\begin{definition}
 %	\label{def:mixed_env} \emph{(Mixed Environment Definition)} 
