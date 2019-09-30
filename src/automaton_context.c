@@ -2502,7 +2502,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	//keeps a stack of predecessors as track of the path taken
 	int32_t* last_succ_index	= calloc(sizeof(int32_t), variables_count);
 #if VERBOSE
-	printf(ANSI_COLOR_RED "Building theta valuations\n" ANSI_COLOR_RESET, buff);
+	printf(ANSI_COLOR_RED "Building theta valuations\n" ANSI_COLOR_RESET);
 #endif
 	obdd_get_valuations(mgr, env_theta_composed, &valuations, &valuations_size, &current_valuations_count, x_alphabet, x_count
 			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
