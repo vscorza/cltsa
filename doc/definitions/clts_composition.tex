@@ -97,9 +97,9 @@ In the scope of this work asynchronous composition will only be applied over CLT
 	\label{def:synchronous_composition}(\emph{Synchronous Composition}) Let \automaton{M},\automaton{N}, with $\Delta_M : S_M \times \mathcal{P}(\Sigma_M) \times S_M$, be two CLTS instances, then CLTS synchronous parallel composition is defined as \ltsComposition{M}{N}{s} where $\Delta$ is the smallest relation s.t:
 	\begin{center}
 		\begin{equation}
-		\AxiomC{$(s, l_M, s') \in \Sigma_M,(t, l_N, t') \in \Sigma_N  $}\RightLabel{$l_M \cap \Sigma_N = l_N \cap \Sigma_M$}
+		\AxiomC{$(s, l_M, s') \in \Delta_M,(t, l_N, t') \in \Delta_N  $}\RightLabel{$l_M \cap \Sigma_N = l_N \cap \Sigma_M$}
 		\UnaryInfC{$((s,t),l_M \cup l_N,(s',t')) \in \Delta$}
-		\DisplayProof
+		\DisplayProof	
 		\end{equation}	
 	\end{center}
 \end{definition}
@@ -125,7 +125,7 @@ In the scope of this work asynchronous composition will only be applied over CLT
 An algorithm to apply parallel composition over a set of automata (according to a set of semantic definitions) is now presented.  The idea is to start with the composition of the initial states $(s_{0_1},\ldots,s_{0_n})$ as the only element if the $frontier$ to be explored. In subsequent iterations elements are removed and their composed transitions filtered and merged. The resulting target $(s'_1,\ldots,s'_n)$ states are pushed back to the $frontier$ for further evaluation. At every step in the exploration of a particular state $s:(s_1,\ldots,s_n)$ the cross product of the elements of the sets of outgoing transitions $\Delta_1(s_1) \times \ldots \Delta_n(s_n)$ is tested for consistency with respect to the  semantic $(type_1,\ldots,type_{n-1})$. Combinations of source transitions $\delta:(\delta_1,\ldots,\delta_n)$ are iterated depth first obtaining combination $(\delta_1,\ldots,\delta_n)$, then a linear pass over its components merges previous labels (if needed) and checks the partial resulting label $l_{1\ldots i}$  against the following properties:
 \[\neg blocks(\delta_{1\ldots i})= \neg(l_{1\ldots i}\cap \Sigma_{i+1} \neq l_{i+1} \cap \Sigma_{1\ldots i}) \]
 \[asynch(\delta_{1\ldots i})= \neg (l_{1\ldots i}\cap \Sigma_{i+1} = l_{i+1} \cap \Sigma_{1\ldots i}=\emptyset) \]
-\[synch(\delta_{1\ldots i})= \neg (l_{1\ldots i}=\emptyset \wedge l_{i+1} =\emptyset) \]
+\[synch(\delta_{1\ldots i})= \neg (l_{1\ldots i}=\emptyset \vee l_{i+1} =\emptyset) \]
 Property $\neg blocks$ should always hold, then $asynch$ and $synch$ need to be satisfied according to $type_i$ (if $type_i \neq concurrent$). As soon as a property is violated the next element $\delta':(\delta'_1,\ldots,\delta'_n)$ is evaluated, if these properties hold up to $n$ then, if $\delta_{i}:(s_i,l_i,t_i)$, transition
 $((s_1,\ldots,s_n),l_{1\ldots n},(t_1,\ldots,t_n))$ is added to the composition.
 

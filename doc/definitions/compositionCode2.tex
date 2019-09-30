@@ -24,13 +24,14 @@ algorithm compose_automata is
 				else
 					$accum$ = $l(\Delta_i(s_i)[idxs[i]])$
 			else
-				if overlaps($accum,\Sigma_i) \neq$ overlap($l(\Delta_i(s_i)[idxs[i]])$)
+				if overlaps($accum,\Sigma_i) \neq$ overlaps($l(\Delta_i(s_i)[idxs[i]], \Sigma_{1\ldots i-1})$)
 					increment($idxs$)
 					break
-				if $type_i = asynch$ $\wedge $ overlaps($accum,\Sigma_i) \neq$ overlap($l(\Delta_i(s_i)[idxs[i]])$) = $\emptyset$
+				if $type_i = asynch$ $\wedge $ (overlaps($accum,\Sigma_i) =$ overlaps($l(\Delta_i(s_i)[idxs[i]], \Sigma_{1\ldots i-1})$) = $\emptyset$
+					$\vee$ (overlaps($accum,\Sigma_i) = \emptyset \wedge idxs[i] = |\Delta_i(s_i)|+1$))
 					increment($idxs$)
 					break					
-				if $type_i = synch$ $\wedge $ overlaps($accum,\Sigma_i) = \emptyset$ $\wedge$ $idxs[i] = |\Delta_i(s_i)|+1$
+				if $type_i = synch$ $\wedge $ $idxs[i] = |\Delta_i(s_i)|+1$
 					increment($idxs$)
 					break	
 			if $idxs[i] < |\Delta_i(s_i)|+1$
