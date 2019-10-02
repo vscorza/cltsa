@@ -1,0 +1,43 @@
+<html>
+<head><title>CLTSA</title>
+<body>
+<h1 class="code-line" data-line-start=0 data-line-end=1 ><a id="CLTSA_0"></a>CLTSA</h1>
+<p class="has-line-data" data-line-start="2" data-line-end="3">CLTSA is intended as tool for modeling, verifying and synthesizing reactive systems through the use of a mix of FSP and game structures LTL syntax.</p>
+<h2 class="code-line" data-line-start=4 data-line-end=5 ><a id="Getting_Started_4"></a>Getting Started</h2>
+<p class="has-line-data" data-line-start="6" data-line-end="7">These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.</p>
+<h3 class="code-line" data-line-start=8 data-line-end=9 ><a id="Prerequisites_8"></a>Prerequisites</h3>
+<p class="has-line-data" data-line-start="10" data-line-end="11">In order to compile the source code you will need the following</p>
+<pre><code class="has-line-data" data-line-start="13" data-line-end="16">make
+gcc
+lex
+bison
+</code></pre>
+<h3 class="code-line" data-line-start=17 data-line-end=18 ><a id="Installing_17"></a>Installing</h3>
+<p class="has-line-data" data-line-start="19" data-line-end="20">A clean version of the tool should be built by simply running</p>
+<pre><code class="has-line-data" data-line-start="21" data-line-end="23">cd src </br>make all
+</code></pre>
+<p class="has-line-data" data-line-start="24" data-line-end="25">To check that the compilation was succesful you can run this command:</p>
+<pre><code class="has-line-data" data-line-start="27" data-line-end="29">./cltsa -h
+</code></pre>
+<p class="has-line-data" data-line-start="30" data-line-end="31">It should print a help message indicating you to use the tool.</p>
+<h2 class="code-line" data-line-start=32 data-line-end=33 ><a id="Running_the_tests_32"></a>Running the tests</h2>
+<p class="has-line-data" data-line-start="34" data-line-end="35">If you want to run the tests execute the tool with the following parameters:</p>
+<pre><code class="has-line-data" data-line-start="36" data-line-end="38">./cltsa --all-tests
+</code></pre>
+<p class="has-line-data" data-line-start="38" data-line-end="39">Will run all the tests.</p>
+<pre><code class="has-line-data" data-line-start="40" data-line-end="42">./cltsa --func-tests
+</code></pre>
+<p class="has-line-data" data-line-start="42" data-line-end="43">Will run the functional tests.</p>
+<pre><code class="has-line-data" data-line-start="44" data-line-end="46">./cltsa --load-tests
+</code></pre>
+<p class="has-line-data" data-line-start="46" data-line-end="47">Will run the load tests.</p>
+<h3 class="code-line" data-line-start=47 data-line-end=48 ><a id="Running_a_particular_specification_47"></a>Running a particular specification</h3>
+<p class="has-line-data" data-line-start="49" data-line-end="50">If you want to parse and verify/sinthesize a particular specification, suppose it is stored in a file named <em>spec.cfsp</em> you need to run:</p>
+<pre><code class="has-line-data" data-line-start="52" data-line-end="54">./cltsa -r spec.cfsp
+</code></pre>
+<h2 class="code-line" data-line-start=56 data-line-end=57 ><a id="Authors_56"></a>Authors</h2>
+<ul>
+<li class="has-line-data" data-line-start="58" data-line-end="60">*<em>Mariano Cerrutti</em> - <em>PhD Student at LaFHIS</em> - <a href="https://lafhis.dc.uba.ar/home">LaFHIS Web</a></li>
+</ul>
+</body>
+</html>
