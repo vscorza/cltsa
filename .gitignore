@@ -27,3 +27,4 @@ cachegrind.out*
 *.bbl
 *.blg
 .Rhistory
+cltsa
