@@ -14,6 +14,7 @@ TODO:
 	- run genbuf 2, 4, 10 clients
 	- run amba 2, 4, 10 clients
 	- document obdd
+	- adapt examples from https://www.doulos.com/knowhow/psl/
 - implement fluent set parsing
 - implement fluent consistency check
 - [automata-reporter]
