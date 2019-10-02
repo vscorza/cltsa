@@ -1,8 +1,8 @@
 TODO:
-- formalize gs -> clts translation:
-	- let G be a game structure clts(G) is a clts s.t....
+- prepare bundle
+- document manually run cses
 - write soundness/completeness demo for gr(1) translations
-- review composition times (what can be avoided early in each composite state exploration?)
+- review composition times
 - run hardware cases
 	- review/document ltl -> CLTS translation
 		- check state size, running two specs sequentially
@@ -16,6 +16,10 @@ TODO:
 	- document obdd
 - implement fluent set parsing
 - implement fluent consistency check
+- [automata-reporter]
+	- integration of cfsp editor (parsing error location info)
+	- partial automaton exploration for big automata (jung adaptation with outgoing dashed labels)
+	- alla RATSY signal reporting for automaton
 - solve aliases in states e.g. S[i:R] = S_p[i], S_p[i:R] = (s->S_2[i]).
 - implement relabeling and hiding (use half adder to full adder example)
 
