@@ -1,5 +1,4 @@
 TODO:
-- prepare bundle
 - document manually run cses
 - write soundness/completeness demo for gr(1) translations
 - review composition times
@@ -26,7 +25,6 @@ TODO:
 
 PRINT CODE
 enscript -2r -T=1 --line-numbers -p out.ps --font="Courier6" --highlight=c  automaton_context.c
-
 
 SPRINT2
 - aparte de <a,b,c> introducir >a,b,c< que define concurrencia débil, puede transicionar con un subconj de estos
