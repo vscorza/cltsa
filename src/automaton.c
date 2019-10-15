@@ -2183,7 +2183,7 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 						current_transition	= &(game_automaton->transitions[current_ranking->state][l]);
 						for(m = 0; m < current_transition->signals_count; m++){
 							automaton_signal_event * evt =
-									&ctx->global_alphabet->list[game_automaton->local_alphabet[GET_TRANSITION_SIGNAL(current_transition,m)]];
+									&ctx->global_alphabet->list[GET_TRANSITION_SIGNAL(current_transition,m)];
 							if(evt->type == INPUT_SIG){
 								is_controllable = false;
 								break;
@@ -2263,7 +2263,7 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 							strategy_transition->other_signals	= current_transition->other_signals;
 							*/
 							for(m = 0; m < current_transition->signals_count; m++){
-								automaton_signal_event * evt = &ctx->global_alphabet->list[strategy->local_alphabet[GET_TRANSITION_SIGNAL(current_transition,m)]];
+								automaton_signal_event * evt = &ctx->global_alphabet->list[GET_TRANSITION_SIGNAL(current_transition,m)];
 								if(evt->type == INPUT_SIG){
 									is_input = true;
 									break;
@@ -2756,19 +2756,40 @@ void automaton_automata_bool_to_transition_alphabet(bool *tmp_alphabet, automato
  * @param idxs an array of the current indexes of the components' transitions to be evaluated
  * @param idxs_sizes the outgoing degree for the current component's state plus one for the case where the transition
  * 	is not applied
+ * @param idxs_skip the list of transitions to be skipped when incrementing (if one transition shares alphabet with an
+ * 	automaton whose state has no transition bringing that element skip it altogether)
  * @param automata_count the number of automata being composed
  * @return true if the max value for the indexes is reached, false otherwise
  */
-bool automaton_automata_compose_increment_idxs(uint32_t *idxs, uint32_t *idxs_sizes, uint32_t automata_count){
+bool automaton_automata_compose_increment_idxs(uint32_t *idxs, uint32_t *idxs_sizes, bool** idxs_skip, uint32_t automata_count){
 	int32_t i = automata_count;
+	bool set_anew = false;
 	do{
 		i--;
-		if(idxs[i] < (idxs_sizes[i] - 1)){
-				idxs[i]++;
-				return false;
-		}else{
-			idxs[i] = 0;
-		}
+#if DEBUG_COMPOSITION
+		printf("\t[I]dx[%d] ", i);
+#endif
+
+		set_anew	= false;
+		do{
+			if(idxs[i] < (idxs_sizes[i] - 1)){//increment current digit if possible
+					idxs[i]++;
+#if DEBUG_COMPOSITION
+					printf(">%d",idxs[i]);
+#endif
+					if(!idxs_skip[i][idxs[i]-1])//if transition will not be skipped exit
+						return false;
+			}else{
+				idxs[i] = 0;
+				set_anew	= true;
+#if DEBUG_COMPOSITION
+					printf("|0");
+#endif
+			}
+		}while(!set_anew && idxs[i] > 0 && idxs_skip[i][idxs[i]-1]);//keep incrmenting if current transition should be skipped
+#if DEBUG_COMPOSITION
+		printf("\n");
+#endif
 	}while(i >0);
 	return true;
 }
@@ -2931,6 +2952,12 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 	//indexes structures
 	uint32_t* idxs	= calloc(automata_count, sizeof(uint32_t));
 	uint32_t* idxs_size	= calloc(automata_count, sizeof(uint32_t));
+	bool** idxs_skip	= calloc(automata_count, sizeof(bool*));
+	bool** automata_accum	= calloc(automata_count, sizeof(bool*));
+	for(i = 0; i < automata_count; i++){
+		idxs_skip[i] 		= calloc(automata[i]->max_out_degree, sizeof(bool));
+		automata_accum[i]	= calloc(alphabet_count, sizeof(bool));
+	}
 	bool* label_accum	= calloc(alphabet_count, sizeof(bool));
 
 	int32_t last_char	= -1;	signal_t current_signal, current_other_signal;
@@ -2983,11 +3010,22 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 			continue;
 		}
 		//pop a state
+		automaton_transition *current_transition	= NULL;
 		for(i = 0; i < automata_count; i++){
 			//initialize current state and indexes structs.
 			current_state[i]= frontier[(frontier_count - 1) * automata_count + i];
 			idxs_size[i]	= automata[i]->out_degree[current_state[i]] + 1;
 			idxs[i]			= 0;
+			//initialize label skips and automata label accum struct
+			for(j = 0; j < alphabet_count; j++)	automata_accum[i][j]	= false;
+			for(j = 0; j < automata[i]->out_degree[current_state[i]]; j++)idxs_skip[i][j]	= false;
+			for(j = 0; j < automata[i]->out_degree[current_state[i]]; j++){
+				current_transition = &(automata[i]->transitions[current_state[i]][j]);
+				for(k = 0; k < current_transition->signals_count; k++){
+					int32_t sig_idx = GET_TRANSITION_SIGNAL(current_transition,k);
+					automata_accum[i][sig_idx] = true;
+				}
+			}
 #if DEBUG_COMPOSITION
 			printf("%s%d", i > 0 ? "," : "", current_state[i]);
 #endif
@@ -2997,8 +3035,39 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 #if DEBUG_COMPOSITION
 		printf("]\n");
 #endif
+
+#if DEBUG_COMPOSITION
+		for(i = 0; i < automata_count; i++){
+			printf("\t[A] Accum alphabet[%d]:",i);
+			for(j = 0; j < ctx->global_alphabet->count; j++){
+				if(automata_accum[i][j])printf("%s ", ctx->global_alphabet->list[j].name);
+			}
+			printf("\n");
+		}
+#endif
+		//set idxs_skip marks
+		bool transition_skipped = false;
+		for(i = 0; i < automata_count; i++){
+			for(j = 0; j < automata[i]->out_degree[current_state[i]]; j++){
+				current_transition = &(automata[i]->transitions[current_state[i]][j]);
+				transition_skipped = false;
+				for(k = 0; k < automata_count; k++ && !transition_skipped){
+					if(k == i)continue;
+					//if l_i_j intersects sigma_k != l_i_j intersects automata_accum_k skip l_i_j
+					for(l = 0; l < current_transition->signals_count; l++ && ! transition_skipped){
+						int32_t sig_idx	= GET_TRANSITION_SIGNAL(current_transition,l);
+						if(boolean_alphabet[k][sig_idx] != automata_accum[k][sig_idx]){
+							idxs_skip[i][j]		= true;
+							transition_skipped	= true;
+						}
+					}
+				}
+
+			}
+		}
+
 		//get first non null combination
-		automaton_automata_compose_increment_idxs(idxs, idxs_size, automata_count);
+		automaton_automata_compose_increment_idxs(idxs, idxs_size, idxs_skip, automata_count);
 #if DEBUG_COMPOSITION
 		printf("\t[i] Initial Idxs: [");
 		for(j = 0; j < automata_count; j++){
@@ -3222,7 +3291,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 					}
 				}
 			}
-			automaton_automata_compose_increment_idxs(idxs, idxs_size, automata_count);
+			automaton_automata_compose_increment_idxs(idxs, idxs_size, idxs_skip, automata_count);
 		}
 	}
 #if VERBOSE
@@ -3233,10 +3302,12 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 		free(boolean_alphabet[i]);
 		free(accumulated_alphabet_overlap[i]);
 		free(accumulated_boolean_alphabet[i]);
+		free(idxs_skip[i]);
+		free(automata_accum[i]);
 	}
 	free(boolean_alphabet);free(accumulated_alphabet_overlap); free(accumulated_boolean_alphabet);
 	free(current_label);free(frontier);free(composite_frontier);free(current_state);free(current_to_state);
-	free(idxs);free(idxs_size);free(label_accum);
+	free(idxs);free(idxs_size);free(label_accum);free(idxs_skip);free(automata_accum);
 	free(alphabet);
 	automaton_composite_tree_destroy(tree);
 	automaton_bucket_destroy(bucket_list);

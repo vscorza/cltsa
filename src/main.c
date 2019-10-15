@@ -1140,10 +1140,11 @@ int main (int argc, char** argv){
 	}else{
 		//ONGOING
 		//run_parse_test("tests/genbuf_2_sndrs.fsp", "GenBuf 2 sndrs");//GENBUF 2 Sndrs
-		run_parse_test("tests/biscotti.fsp", "biscotti");
+
+
 		//GENERAL TESTS
 		//run_all_tests();
-		//run_functional_tests();
+		run_functional_tests();
 
 
 		//TODO

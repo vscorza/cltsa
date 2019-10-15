@@ -23,4 +23,3 @@ STRAT_p_4 = (moveToBelt -> cook-> STRAT_p_1).
 
 // tests
 equals FATAL_Biscotti_Strategy(STRAT, STRAT_p).
-*/
