@@ -1,15 +1,7 @@
 TODO:
-- review composition times
-	- implement pruning before increment cross computation of transitions
-	  labels l_j_i for automaton j go from 0 <= i < k, sigma_j if the proper alphabet
-	  sigma_l_j are the elements of sigma_j appearing in labels l_j_1..l_j_k-1
-	  if l_j_i intersect sigma_j' neq l_j_i intersect sigma_l_j' then remove l_j_i
-	  before cross product, should greatly decrease exploration
 - run hardware cases
 	- review/document ltl -> CLTS translation
 		- check state size, running two specs sequentially
-	- explain manual composition/synthesis/ltl translation of small examples
-	- GR(1) over CLTS formalism
 	- behavior minimization based diagnosis over CLTS
 	- diagnose GENBUF with 2 clients
 	- improve fluents encoding (superset of labels is too expensive)
