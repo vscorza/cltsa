@@ -1,4 +1,5 @@
 TODO:
+=====
 - run hardware cases
 	- review/document ltl -> CLTS translation
 		- check state size, running two specs sequentially
@@ -18,9 +19,22 @@ TODO:
 - solve aliases in states e.g. S[i:R] = S_p[i], S_p[i:R] = (s->S_2[i]).
 - implement relabeling and hiding (use half adder to full adder example)
 
+Meetings
+========
+2019-10-16 meeting
+- How does CLTS control problem compares to LTS cp? Does every CLTS control problem can be encoded as LTS?
+- Where is the benefit when solving hardware specs? Is it in the formalism or the tool?
+- What happens with the language of the composition? does the components languages are included in the target?
+- Explain the motivation behind the availability of two composition semantics, motivate it as allowing encapsulation of synch component asynchronous composed with another (or viceversa)
+
+
 PRINT CODE
+==========
 enscript -2r -T=1 --line-numbers -p out.ps --font="Courier6" --highlight=c  automaton_context.c
 
+
+BACKLOG
+=======
 SPRINT2
 - aparte de <a,b,c> introducir >a,b,c< que define concurrencia débil, puede transicionar con un subconj de estos
 - parse assertions, goals
