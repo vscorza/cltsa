@@ -137,3 +137,18 @@ $((s_1,\ldots,s_n),l_{1\ldots n},(t_1,\ldots,t_n))$ is added to the composition.
 		\label{fig:dfs-code2}
 	\end{center}
 \end{figure}
+
+When taking fluents into consideration several valuations can be applied to the same state, because of this a mechanism needs to be defined to disambiguate which valuation is correct at any given step of a trace that follows the behavior of an automaton.
+In the context of this work the approach is to extend the states of the automaton with its fluents' valuations. Starting with the initial state the automaton is updated applying the following mapping:
+
+\[
+eval(s_0) = {Initially_0,\ldots,Initially_k}\\
+eval(v,l) = {update(l,i) | i \in 0\ldots k}
+\]
+\[
+update(l,i)	=  \begin{cases}
+\top & \text{if } \exists \alpha \in I_i: l \subseteq \alpha \\
+\bot & \text{if } \exists \beta \in T_i: l \subseteq \beta \\
+v_i & \text{if } \nexists \gamma \in I_i \cup T_i: l \subseteq \gamma \\
+\end{cases}
+\]
