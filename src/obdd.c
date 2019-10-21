@@ -706,9 +706,8 @@ obdd* obdd_restrict_vector(obdd* root, uint32_t* var_ids, bool* values, uint32_t
 			acum_obdd	= tmp_obdd;
 		}
 	}
+	//TODO: here's the issue applying and against restricted vector gives nothing back (null->1 | !null->0 tree)
 	obdd* return_obdd	=  obdd_create(root->mgr, obdd_node_apply(&obdd_apply_and_fkt, root->mgr, root->root_obdd, acum_obdd, true));
-	//obdd_node_destroy(root->mgr, acum_obdd);
-
 	obdd_cache_insert2(root->mgr->cache, &obdd_restrict_vector, root->root_obdd, (obdd_node*)values, return_obdd->root_obdd);
 	return return_obdd;
 }
@@ -858,6 +857,23 @@ bool obdd_is_sat(obdd_mgr* mgr, obdd_node* root){
 		return obdd_is_sat(mgr, root->high_obdd) || obdd_is_sat(mgr, root->low_obdd);
 	}
 }
+
+void obdd_print_valuations_names(obdd_mgr* mgr, bool* valuations, uint32_t valuations_count, uint32_t* valuation_img, uint32_t img_count){
+	uint32_t i, j;
+	//printf(ANSI_COLOR_GREEN);
+
+	for(i = 0; i < valuations_count; i++){
+		for(j = 0; j < (img_count); j++){
+			int value = GET_VAR_IN_VALUATION(valuations, img_count, i, j);
+			//printf("%s\t",  value > 1 ? "X" : (value != 0 ? "1" : "0"));
+			if(value >= 1)
+				printf("%s\t", mgr->vars_dict->entries[valuation_img[j]].key);
+		}
+		printf("\n");
+	}
+	//printf(ANSI_COLOR_RESET);
+}
+
 
 void obdd_print_valuations(obdd_mgr* mgr, bool* valuations, uint32_t valuations_count, uint32_t* valuation_img, uint32_t img_count, char *buff){
 	uint32_t i, j;

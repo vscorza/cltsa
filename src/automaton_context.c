@@ -2358,7 +2358,6 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 
 
 #if DEBUG_LTL_AUTOMATON
-	char *buff = calloc(10000, sizeof(char));
 	printf("X alphabet\n[");
 	for(i = 0; i < x_count; i++)
 		printf("%s%s", mgr->vars_dict->entries[x_alphabet[i]].key, i == x_count - 1 ? "" : ",");
@@ -2509,7 +2508,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 #if DEBUG_LTL_AUTOMATON
 	int32_t state_counter = 0;
 	printf("Init env valuations\n");
-	obdd_print_valuations(mgr, valuations, current_valuations_count, x_alphabet, x_count, buff);
+	obdd_print_valuations_names(mgr, valuations, current_valuations_count, x_alphabet, x_count);
 #endif
 	bool* tmp_state_valuation = calloc((x_count * 2 + y_count), sizeof(bool));
 	bool has_transition;
@@ -2523,13 +2522,13 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 				, obdd_on_signals_indexes, obdd_off_signals_indexes, x_y_alphabet, x_y_x_p_alphabet);
 		if(!has_transition){
 #if DEBUG_LTL_AUTOMATON
-			snprintf(buff + strlen(buff), sizeof(buff), "(%d-[", sys_state->state);
+			printf("(%d-[", sys_state->state);
 			for(j = 0; j < x_count; j++)
-				snprintf(buff + strlen(buff), sizeof(buff), "%s", env_state->valuation[j] ? "1" : "0");
+				printf("%s", env_state->valuation[j] ? "1" : "0");
 			state_counter++;
-			snprintf(buff + strlen(buff), sizeof(buff), "]->%d)\n", env_state->state);
+			printf("]->%d)\n", env_state->state);
 			if(state_counter % 1000 == 0){
-				snprintf(buff + strlen(buff), sizeof(buff), "States processed for ltl: %d\n", state_counter) < 0 ? abort() : (void)0;
+				printf("States processed for ltl: %d\n", state_counter) < 0 ? abort() : (void)0;
 				fflush(stdout);
 			}
 #endif
@@ -2542,7 +2541,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	obdd_get_valuations(mgr, env_sys_theta_composed, &valuations, &valuations_size, &current_valuations_count, x_y_alphabet, x_y_count
 			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
 	printf("Init sys valuations\n");
-	obdd_print_valuations(mgr, valuations, current_valuations_count, x_y_alphabet, x_y_count, buff);
+	obdd_print_valuations_names(mgr, valuations, current_valuations_count, x_y_alphabet, x_y_count);
 #endif
 	/**
 	 * We restrict robdd(theta_env && theta_sys) with the valuation for each pending state s_i in bucket_list
@@ -2562,11 +2561,11 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 			obdd_get_valuations(mgr, obdd_current_state, &valuations, &valuations_size, &current_valuations_count, x_y_alphabet, x_y_count
 					, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
 #if DEBUG_LTL_AUTOMATON
-			snprintf(buff + strlen(buff), sizeof(buff), "%d-[", sys_state->state);
+			printf("%d-[", sys_state->state);
 			for(j = 0; j < x_y_count; j++)
-				snprintf(buff + strlen(buff), sizeof(buff), "%s", env_state->valuation[j] ? "1" : "0");
-			snprintf(buff + strlen(buff), sizeof(buff), "]\n");
-			obdd_print_valuations(mgr, valuations, current_valuations_count, x_y_alphabet, x_y_count, buff);
+				printf("%s", env_state->valuation[j] ? "1" : "0");
+			printf("]\n");
+			obdd_print_valuations_names(mgr, valuations, current_valuations_count, x_y_alphabet, x_y_count);
 #endif
 			for(i = 0; i < current_valuations_count; i++){
 				//TODO:review bad read here
@@ -2578,13 +2577,13 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 						, x_count, y_count
 						, obdd_on_signals_indexes, obdd_off_signals_indexes, x_y_alphabet, x_y_x_p_alphabet);
 #if DEBUG_LTL_AUTOMATON
-				snprintf(buff + strlen(buff), sizeof(buff), "(%d-[", env_state->state);
+				printf("(%d-[", env_state->state);
 					for(j = 0; j < x_count + y_count; j++)
-						snprintf(buff + strlen(buff), sizeof(buff), "%s", sys_state->valuation[j] ? "1" : "0");
+						printf("%s", sys_state->valuation[j] ? "1" : "0");
 					state_counter++;
-					snprintf(buff + strlen(buff), sizeof(buff), "]->%d)%s\n", sys_state->state,!has_transition && !automaton_concrete_bucket_has_entry(rho_sys_bucket_list, sys_state)? "*":"");
+					printf("]->%d)%s\n", sys_state->state,!has_transition && !automaton_concrete_bucket_has_entry(rho_sys_bucket_list, sys_state)? "*":"");
 					if(state_counter % 1000 == 0){
-						snprintf(buff + strlen(buff), sizeof(buff), "States processed for ltl: %d\n", state_counter);
+						printf("States processed for ltl: %d\n", state_counter);
 						fflush(stdout);
 					}
 #endif
@@ -2594,9 +2593,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 			}
 			obdd_destroy(obdd_current_state);
 #if DEBUG_LTL_AUTOMATON
-			printf("%s", buff);
 			fflush(stdout);
-			buff[0] = '\0';
 #endif
 		}while(theta_env_bucket_list->composite_count > 0);
 	}
@@ -2604,7 +2601,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	printf(ANSI_COLOR_RED "Building rho valuations\n" ANSI_COLOR_RESET);
 #endif
 #if DEBUG_LTL_AUTOMATON
-	snprintf(buff + strlen(buff), sizeof(buff), "Rho relation building\n");
+	printf("Rho relation building\n");
 #endif
 
 	/**
@@ -2620,25 +2617,25 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	 * once rho_env_bucket_list is empty we start again with rho_bucket_list until both lists are empty
 	 */
 #define CNTR_LIMIT 200
-#if VERBOSE
+#if VERBOSE || DEBUG_LTL_AUTOMATON
 	printf("[#obdd nodes:val.size:val.count:bucket_count]\n");
 #endif
 	uint32_t rho_counter = 0, skipped = 0, evaluated = 0;
 	do{
-#if VERBOSE
-		printf("\nsys.");
+#if VERBOSE || DEBUG_LTL_AUTOMATON
+		printf("\n [[ sys. ]] \n");
 #endif
 		if(rho_sys_bucket_list->composite_count > 0){
 			do{
 				rho_counter++;
 				if(rho_counter == CNTR_LIMIT){
-#if VERBOSE
+#if VERBOSE || DEBUG_LTL_AUTOMATON
 					printf(ANSI_COLOR_BLUE"[%d:%d:%d:%d]"ANSI_COLOR_RESET, mgr->nodes_pool->composite_count, valuations_size, current_valuations_count, rho_sys_bucket_list->composite_count);
 					fflush(stdout);
 #endif
 #if DEBUG_LTL_AUTOMATON
-					snprintf(buff + strlen(buff), sizeof(buff), "evaluated|processed|skipped:\t%d\t%d\t%d\t||\t", evaluated, rho_sys_processed_bucket_list->composite_count + rho_env_processed_bucket_list->composite_count, skipped);
-					snprintf(buff + strlen(buff), sizeof(buff), "pending S (S|E|P_S|P_E):\t%d\t%d\t%d\t%d\n", rho_sys_bucket_list->composite_count, rho_env_bucket_list->composite_count, rho_sys_processed_bucket_list->composite_count, rho_env_processed_bucket_list->composite_count);
+					printf("evaluated|processed|skipped:\t%d\t%d\t%d\t||\t", evaluated, rho_sys_processed_bucket_list->composite_count + rho_env_processed_bucket_list->composite_count, skipped);
+					printf("pending S (S|E|P_S|P_E):\t%d\t%d\t%d\t%d\n", rho_sys_bucket_list->composite_count, rho_env_bucket_list->composite_count, rho_sys_processed_bucket_list->composite_count, rho_env_processed_bucket_list->composite_count);
 #endif
 					rho_counter	= 0;
 				}
@@ -2656,9 +2653,14 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 						, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
 						*/
 #if DEBUG_LTL_AUTOMATON
-				snprintf(buff + strlen(buff), sizeof(buff), "XY->X'\n");
+				printf("XY valuation\n");
+				for(j = 0; j < x_y_count; j++)
+					if(hashed_valuation[j])
+						printf("\t%s", mgr->vars_dict->entries[x_y_alphabet[j]].key);
+				printf("\n");
+				printf("XY->X'\n");
 				//obdd_print_valuations(mgr, valuations, current_valuations_count, x_y_x_p_alphabet, x_y_x_p_count);
-				obdd_print_valuations(mgr, valuations, current_valuations_count, x_p_alphabet, x_p_count, buff);
+				obdd_print_valuations_names(mgr, valuations, current_valuations_count, x_p_alphabet, x_p_count);
 #endif
 #if DEBUG_OBDD_DEADLOCK
 				if(current_valuations_count == 0){
@@ -2681,48 +2683,50 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 
 
 #if DEBUG_LTL_AUTOMATON
-					snprintf(buff + strlen(buff), sizeof(buff), "(%d-[", sys_state->state);
-						for(j = 0; j < x_y_x_p_count; j++)
-							snprintf(buff + strlen(buff), sizeof(buff), "%s", env_state->valuation[j] ? "1" : "0");
-						snprintf(buff + strlen(buff), sizeof(buff), "]->%d)%s\n", env_state->state, has_transition? "" : "*");
-						state_counter++;
-						if(state_counter % 1000 == 0){
-							snprintf(buff + strlen(buff), sizeof(buff), "States processed for ltl: %d\n", state_counter);
-							fflush(stdout);
-						}
+					printf("(%d-[", sys_state->state);
+					for(j = 0; j < x_y_x_p_count; j++)
+						printf("%s", env_state->valuation[j] ? "1" : "0");
+					printf("]->%d)%s", env_state->state, has_transition? "" : "*");
 #endif
 					if(!has_transition && !automaton_concrete_bucket_has_entry(rho_env_bucket_list, env_state) && !automaton_concrete_bucket_has_entry(rho_env_processed_bucket_list, env_state)){
 						automaton_concrete_bucket_add_entry(rho_env_bucket_list, env_state);
+#if DEBUG_LTL_AUTOMATON
+					printf("[ADDED]");
+#endif
 					}
 #if DEBUG_LTL_AUTOMATON
 					else skipped++;
 					evaluated++;
+					printf("\n");
+					state_counter++;
+					if(state_counter % 1000 == 0){
+						printf("States processed for ltl: %d\n", state_counter);
+						fflush(stdout);
+					}
 #endif
 				}
 				obdd_destroy(obdd_restricted_state);
 				obdd_destroy(obdd_current_state);
 #if DEBUG_LTL_AUTOMATON
-				printf("%s", buff);
 				fflush(stdout);
-				buff[0] = '\0';
 #endif
 			}while(rho_sys_bucket_list->composite_count > 0);
 		}
-#if VERBOSE
-		printf("\nenv.");
+#if VERBOSE || DEBUG_LTL_AUTOMATON
+		printf("\n [[ env. ]] \n");
 #endif
 		if(rho_env_bucket_list->composite_count > 0){
 			do{
 				rho_counter++;
 				if(rho_counter == CNTR_LIMIT){
-#if VERBOSE
+#if VERBOSE  || DEBUG_LTL_AUTOMATON
 					printf(ANSI_COLOR_BLUE"[%d:%d:%d:%d]"ANSI_COLOR_RESET, mgr->nodes_pool->composite_count, valuations_size, current_valuations_count, rho_env_bucket_list->composite_count);
 					fflush(stdout);
 #endif
 #if DEBUG_LTL_AUTOMATON
 
-					snprintf(buff + strlen(buff), sizeof(buff), "evaluated|processed|skipped:\t%d\t%d\t%d\t||\t", evaluated, rho_sys_processed_bucket_list->composite_count + rho_env_processed_bucket_list->composite_count, skipped);
-					snprintf(buff + strlen(buff), sizeof(buff), "pending E (S|E|P_S|P_E):\t%d\t%d\t%d\t%d\n", rho_sys_bucket_list->composite_count, rho_env_bucket_list->composite_count, rho_sys_processed_bucket_list->composite_count, rho_env_processed_bucket_list->composite_count);
+					printf("evaluated|processed|skipped:\t%d\t%d\t%d\t||\t", evaluated, rho_sys_processed_bucket_list->composite_count + rho_env_processed_bucket_list->composite_count, skipped);
+					printf("pending E (S|E|P_S|P_E):\t%d\t%d\t%d\t%d\n", rho_sys_bucket_list->composite_count, rho_env_bucket_list->composite_count, rho_sys_processed_bucket_list->composite_count, rho_env_processed_bucket_list->composite_count);
 #endif
 					rho_counter	= 0;
 				}
@@ -2738,12 +2742,14 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 						, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
 						*/
 #if DEBUG_LTL_AUTOMATON
+				printf("XYX' valuation\n");
 				for(j = 0; j < x_y_x_p_count; j++)
-					snprintf(buff + strlen(buff), sizeof(buff), "\t%s", env_state->valuation[j] ? "1" : "0");
-				snprintf(buff + strlen(buff), sizeof(buff), "\n");
-				snprintf(buff + strlen(buff), sizeof(buff), "X'->X'Y' \n");
+					if(hashed_valuation[j])
+						printf("\t%s", mgr->vars_dict->entries[x_y_x_p_alphabet[j]].key);
+				printf("\n");
+				printf("X'->X'Y'\n\n");
 				//obdd_print_valuations(mgr, valuations, current_valuations_count, signals_alphabet, signals_count);
-				obdd_print_valuations(mgr, valuations, current_valuations_count, y_p_alphabet, y_p_count, buff);
+				obdd_print_valuations_names(mgr, valuations, current_valuations_count, y_p_alphabet, y_p_count);
 #endif
 #if DEBUG_OBDD_DEADLOCK
 				if(current_valuations_count == 0){
@@ -2768,45 +2774,44 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 							, x_count, y_count
 							, obdd_on_signals_indexes, obdd_off_signals_indexes, x_y_alphabet, x_y_x_p_alphabet);
 #if DEBUG_LTL_AUTOMATON
-					snprintf(buff + strlen(buff), sizeof(buff), "(%d-[", env_state->state);
-						for(j = 0; j < x_y_count; j++)
-							snprintf(buff + strlen(buff), sizeof(buff), "%s", sys_state->valuation[j] ? "1" : "0");
-						state_counter++;
-						snprintf(buff + strlen(buff), sizeof(buff), "]->%d)%s\n", sys_state->state, has_transition? "" : "*");
-						if(state_counter % 1000 == 0){
-							snprintf(buff + strlen(buff), sizeof(buff), "States processed for ltl: %d\n", state_counter);
-						}
+					printf("(%d-[", env_state->state);
+					for(j = 0; j < x_y_count; j++)
+						printf("%s", sys_state->valuation[j] ? "1" : "0");
+					printf("]->%d)%s", sys_state->state, has_transition? "" : "*");
 #endif
 
 					if(!has_transition && !automaton_concrete_bucket_has_entry(rho_sys_bucket_list, sys_state) && !automaton_concrete_bucket_has_entry(rho_sys_processed_bucket_list, sys_state)){
 						automaton_concrete_bucket_add_entry(rho_sys_bucket_list, sys_state);
+#if DEBUG_LTL_AUTOMATON
+						printf("[ADDED]");
+#endif
 					}
 #if DEBUG_LTL_AUTOMATON
 					else skipped++;
 					evaluated++;
+					printf("\n");
+					state_counter++;
+					if(state_counter % 1000 == 0){
+						printf("States processed for ltl: %d\n", state_counter);
+					}
 #endif
 				}
 				obdd_destroy(obdd_restricted_state);
 				obdd_destroy(obdd_current_state);
 #if DEBUG_LTL_AUTOMATON
-				printf("%s", buff);
 				fflush(stdout);
-				buff[0] = '\0';
 #endif
 			}while(rho_env_bucket_list->composite_count > 0);
 		}
 	}while(rho_sys_bucket_list->composite_count > 0);
 
-#if DEBUG_LTL_AUTOMATON
-	free(buff);
-#endif
 	free(initialized_values);
 	free(last_succ_index);
 	free(valuation_set);
 	free(last_nodes);
 	free(dont_care_list);
 	free(partial_valuation);
-#if VERBOSE
+#if VERBOSE  || DEBUG_LTL_AUTOMATON
 	printf("\nOBDD->Automaton done\n");
 #endif
 	int32_t main_index					= automaton_parsing_tables_add_entry(tables, COMPOSITION_ENTRY_AUT, name, ltl_automaton);
