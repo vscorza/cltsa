@@ -166,8 +166,8 @@ obdd_state_tree* obdd_state_tree_create(uint32_t key_length);
 int32_t obdd_state_tree_entry_get_from_pool(obdd_state_tree* tree);
 uint32_t obdd_state_tree_get_key(obdd_state_tree* tree, bool* valuation, int32_t key_length);
 void obdd_state_tree_destroy(obdd_state_tree* tree);
-void obdd_state_tree_entry_print(obdd_state_tree* tree, obdd_state_tree_entry* entry, char *buff);
-void obdd_state_tree_print(obdd_state_tree* tree, char *buff);
+void obdd_state_tree_entry_print(obdd_state_tree* tree, obdd_state_tree_entry* entry, char *buff, uint32_t buff_size);
+void obdd_state_tree_print(obdd_state_tree* tree, char *buff, uint32_t buff_size);
 /** GLOBAL **/
 uint32_t get_next_mgr_ID();
 /** OBDD  MGR**/
@@ -208,8 +208,8 @@ obdd* obdd_restrict_vector(obdd* root, uint32_t* var_ids, bool* values, uint32_t
 obdd_node* obdd_node_restrict_vector(obdd_mgr* mgr, obdd_node* root, uint32_t* var_ids, bool* values, uint32_t current_index, uint32_t count);
 obdd* obdd_exists(obdd* root, char* var);					//apply reduction based on shannon
 obdd* obdd_forall(obdd* root, char* var);					//apply reduction based on shannon
-void obdd_print(obdd* root, char *buff);
-void obdd_node_print(obdd_mgr* mgr, obdd_node* root, uint32_t spaces, char *buff);
+void obdd_print(obdd* root, char *buff, uint32_t buff_size);
+void obdd_node_print(obdd_mgr* mgr, obdd_node* root, uint32_t spaces, char *buff, uint32_t buff_size);
 
 bool obdd_apply_equals_fkt(bool left, bool right);
 bool obdd_apply_xor_fkt(bool left, bool right);

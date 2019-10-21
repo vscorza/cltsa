@@ -467,10 +467,13 @@ bool automaton_concrete_bucket_add_entry(automaton_concrete_bucket_list* list, v
 
 	if(list->bucket_count[index] >= (list->bucket_size[index] - 1)){
 		uint32_t new_size			= list->bucket_size[index] * LIST_INCREASE_FACTOR;
-		void* new_bucket			= malloc(list->sizeof_element * new_size);
+		void* new_bucket			= calloc(new_size, list->sizeof_element);
+		memcpy(new_bucket, bucket, list->sizeof_element * list->bucket_count[index]);
+		/*
 		for(i = 0; i < list->bucket_count[index]; i++){
 			memcpy(GET_CONCRETE_BUCKET_SINGLE_ENTRY(list, new_bucket, i), GET_CONCRETE_BUCKET_LIST_ENTRY(list, index, i), list->sizeof_element);
 		}
+		*/
 		list->bucket_size[index]	= new_size;
 		free(bucket);
 		list->buckets[index]		= new_bucket;

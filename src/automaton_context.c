@@ -2568,7 +2568,6 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 			obdd_print_valuations_names(mgr, valuations, current_valuations_count, x_y_alphabet, x_y_count);
 #endif
 			for(i = 0; i < current_valuations_count; i++){
-				//TODO:review bad read here
 				automaton_set_composed_valuation(sys_state->valuation, valuations, i, true, false, x_count, y_count);
 				sys_state->state		= obdd_state_tree_get_key(obdd_state_map, sys_state->valuation, x_y_count);
 				hashed_valuation		= automaton_bool_array_hash_table_add_or_get_entry(x_y_hash_table, sys_state->valuation, true);
@@ -2841,11 +2840,6 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	free(local_alphabet);
 	obdd_state_tree_destroy(state_map);
 	obdd_state_tree_destroy(obdd_state_map);
-	//TODO:remove this
-	//automaton_automaton_print(ltl_automaton, true, true, true, "", "");
-	//automaton_automaton_print_fsp(ltl_automaton, "tests/ltl_automaton_lift.fsp");
-	//automaton_automaton_print_dot(ltl_automaton, "tests/ltl_automaton_lift.dot");
-	//automaton_automaton_print_report(ltl_automaton, "tests/ltl_automaton_lift.rep");
 	return ltl_automaton;
 }
 

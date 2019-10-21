@@ -353,7 +353,7 @@ void automaton_automata_context_print(automaton_automata_context* ctx, char* pre
 	char *buff = calloc(1024, sizeof(char));
 	for(i = 0; i < ctx->liveness_valuations_count; i++){
 		printf("%s:\n", ctx->liveness_valuations_names[i]);
-		obdd_print(ctx->liveness_valuations[i], buff);
+		obdd_print(ctx->liveness_valuations[i], buff, 1024);
 		printf("%s", buff);
 		buff[0] = '\0';
 	}
@@ -3091,7 +3091,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 			char buff[20];
 			printf("\t[T] Components transitions:\n");
 			for(j = 0; j < automata_count; j++){
-				snprintf(buff, sizeof(buff), "\t\t i:[%d]", j);
+				snprintf(buff, sizeof(buff) - strlen(buff) - 1, "\t\t i:[%d]", j);
 				if(idxs[j] > 0)
 					automaton_transition_print(&(automata[j]->transitions[current_state[j]][idxs[j] - 1]), ctx, buff,"\n");
 				else

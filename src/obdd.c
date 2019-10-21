@@ -25,25 +25,25 @@ int32_t obdd_composite_state_compare(void* left_state, void* right_state){
 }
 
 /** MAP TREE **/
-void obdd_state_tree_entry_print(obdd_state_tree* tree, obdd_state_tree_entry* entry, char *buff){
+void obdd_state_tree_entry_print(obdd_state_tree* tree, obdd_state_tree_entry* entry, char *buff, uint32_t buff_size){
 	if(entry->is_leaf)
-		snprintf(buff + strlen(buff), sizeof(buff), "[%d]\n", entry->leaf_value);
+		snprintf(buff + strlen(buff),buff_size - strlen(buff) - 1, "[%d]\n", entry->leaf_value);
 	else{
 		if(entry->low_index != NULL){
-			snprintf(buff + strlen(buff), sizeof(buff), "0");
-			obdd_state_tree_entry_print(tree, &(tree->entries_pool[entry->low_index]), buff);
+			snprintf(buff + strlen(buff), buff_size - strlen(buff) - 1, "0");
+			obdd_state_tree_entry_print(tree, &(tree->entries_pool[entry->low_index]), buff, buff_size);
 		}
 		if(entry->high_index != NULL){
-			snprintf(buff + strlen(buff), sizeof(buff), "1");
-			obdd_state_tree_entry_print(tree, &(tree->entries_pool[entry->high_index]), buff);
+			snprintf(buff + strlen(buff), buff_size - strlen(buff) - 1, "1");
+			obdd_state_tree_entry_print(tree, &(tree->entries_pool[entry->high_index]), buff, buff_size);
 		}
 	}
 }
 
-void obdd_state_tree_print(obdd_state_tree* tree, char *buff){
-	snprintf(buff + strlen(buff), sizeof(buff), "Binary Map Tree.\n");
+void obdd_state_tree_print(obdd_state_tree* tree, char *buff, uint32_t buff_size){
+	snprintf(buff + strlen(buff), buff_size - strlen(buff) - 1, "Binary Map Tree.\n");
 	if(tree->first_entry_index != NULL)
-		obdd_state_tree_entry_print(tree, tree->first_entry_index, buff);
+		obdd_state_tree_entry_print(tree, tree->first_entry_index, buff, buff_size);
 }
 
 obdd_state_tree* obdd_state_tree_create(uint32_t key_length){
@@ -214,12 +214,12 @@ void obdd_mgr_destroy(obdd_mgr* mgr){
 }
 
 void obdd_mgr_print(obdd_mgr* mgr, char *buff){
-	snprintf(buff + strlen(buff), sizeof(buff), "[OBDD MANAGER]\nMgr: %d\n", mgr->ID);
-	snprintf(buff + strlen(buff), sizeof(buff), "Mgr.Dict:\n");
+	snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "[OBDD MANAGER]\nMgr: %d\n", mgr->ID);
+	snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "Mgr.Dict:\n");
 	uint32_t i;
 	dictionary* dict	= mgr->vars_dict;
 	for(i = 0; i < dict->size; i++){
-		snprintf(buff + strlen(buff), sizeof(buff), "[%s]:%d\n", dict->entries[i].key, dict->entries[i].value);
+		snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "[%s]:%d\n", dict->entries[i].key, dict->entries[i].value);
 	}
 }
 
@@ -707,7 +707,20 @@ obdd* obdd_restrict_vector(obdd* root, uint32_t* var_ids, bool* values, uint32_t
 		}
 	}
 	//TODO: here's the issue applying and against restricted vector gives nothing back (null->1 | !null->0 tree)
+
+	char buff[45000]; buff[0] = '\0';
+	/*
+	obdd_node_print(root->mgr, root->root_obdd, 0, buff, sizeof(buff));
+	printf("%s\n", buff);
+	buff[0] = '\0';
+	obdd_node_print(root->mgr, acum_obdd, 0, buff, sizeof(buff));
+	printf("%s\n", buff);
+	fflush(stdout);
+	*/
 	obdd* return_obdd	=  obdd_create(root->mgr, obdd_node_apply(&obdd_apply_and_fkt, root->mgr, root->root_obdd, acum_obdd, true));
+	//obdd_node_print(root->mgr, return_obdd->root_obdd, 0, buff, sizeof(buff));
+	//printf("%s\n", buff);
+
 	obdd_cache_insert2(root->mgr->cache, &obdd_restrict_vector, root->root_obdd, (obdd_node*)values, return_obdd->root_obdd);
 	return return_obdd;
 }
@@ -777,25 +790,25 @@ obdd* obdd_forall(obdd* root, char* var){
 	return var_and_no_var_obdd;
 }
 
-void obdd_print(obdd* root, char *buff){
-	snprintf(buff + strlen(buff), sizeof(buff), "[OBDD]\nMgr_ID:%d\nValue:", root->mgr->ID);
-	obdd_node_print(root->mgr, root->root_obdd, 0, buff);
-	snprintf(buff + strlen(buff), sizeof(buff), "\n");
+void obdd_print(obdd* root, char *buff, uint32_t buff_size){
+	snprintf(buff + strlen(buff), buff_size - strlen(buff) - 1, "[OBDD]\nMgr_ID:%d\nValue:", root->mgr->ID);
+	obdd_node_print(root->mgr, root->root_obdd, 0, buff, buff_size);
+	snprintf(buff + strlen(buff), buff_size - strlen(buff) - 1, "\n");
 }
 
-void obdd_node_print(obdd_mgr* mgr, obdd_node* root, uint32_t spaces, char *buff){
+void obdd_node_print(obdd_mgr* mgr, obdd_node* root, uint32_t spaces, char *buff, uint32_t buff_size){
 	char* var			= dictionary_key_for_value(mgr->vars_dict,root->var_ID);
 	uint32_t i;
 
 	if(obdd_is_constant(mgr, root)){
-		snprintf(buff + strlen(buff), sizeof(buff), "->%s", var);
+		snprintf(buff + strlen(buff), buff_size - strlen(buff) - 1, "->%s", var);
 		return;
 	}else if(spaces > 0){
-		snprintf(buff + strlen(buff), sizeof(buff), "^");
+		snprintf(buff + strlen(buff), buff_size - strlen(buff) - 1, "^");
 	}
-	snprintf(buff + strlen(buff), sizeof(buff), "\n");
+	snprintf(buff + strlen(buff), buff_size - strlen(buff) - 1, "\n");
 	for(i = 0; i < spaces; i++)
-		snprintf(buff + strlen(buff), sizeof(buff), "\t");
+		snprintf(buff + strlen(buff), buff_size - strlen(buff) - 1, "\t");
 	bool has_left_side = false;
 /*
 	if(root->var_ID != mgr->true_obdd->root_obdd->var_ID && root->var_ID != mgr->false_obdd->root_obdd->var_ID){
@@ -816,19 +829,20 @@ void obdd_node_print(obdd_mgr* mgr, obdd_node* root, uint32_t spaces, char *buff
 		printf("\t");
 		*/
 	if(root->high_obdd != NULL){
-		snprintf(buff + strlen(buff), sizeof(buff), "%s", var);
-		obdd_node_print(mgr, root->high_obdd, spaces + 1, buff);
+		snprintf(buff + strlen(buff), buff_size - strlen(buff) - 1, "%s", var);
+		obdd_node_print(mgr, root->high_obdd, spaces + 1, buff, buff_size);
 		has_left_side	= true;
 	}	
 	if(root->low_obdd != NULL){
 		if(has_left_side){
-			snprintf(buff + strlen(buff), sizeof(buff), "\n");
+			snprintf(buff + strlen(buff), buff_size - strlen(buff) - 1, "\n");
 			for(i = 0; i < spaces; i++)
-				snprintf(buff + strlen(buff), sizeof(buff), "\t");
-			snprintf(buff + strlen(buff), sizeof(buff), "v");
+				snprintf(buff + strlen(buff), buff_size - strlen(buff) - 1, "\t");
+			snprintf(buff + strlen(buff), buff_size - strlen(buff) - 1, "v");
 		}
-		snprintf(buff + strlen(buff), sizeof(buff), "(!%s)", var);
-		obdd_node_print(mgr, root->low_obdd, spaces + 1, buff);
+
+		snprintf(buff + strlen(buff), buff_size - strlen(buff) - 1, "(!%s)", var);
+		obdd_node_print(mgr, root->low_obdd, spaces + 1, buff, buff_size);
 	}	
 }
 
@@ -879,19 +893,19 @@ void obdd_print_valuations(obdd_mgr* mgr, bool* valuations, uint32_t valuations_
 	uint32_t i, j;
 	//printf(ANSI_COLOR_GREEN);
 	for(i = 0; i < img_count; i++){
-		snprintf(buff + strlen(buff), sizeof(buff), "%s\t", mgr->vars_dict->entries[valuation_img[i]].key);
+		snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "%s\t", mgr->vars_dict->entries[valuation_img[i]].key);
 	}
-	snprintf(buff + strlen(buff), sizeof(buff), "\n");
+	snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "\n");
 	for(i = 0; i < valuations_count; i++){
 		for(j = 0; j < (img_count); j++){
 			int value = GET_VAR_IN_VALUATION(valuations, img_count, i, j);
 			//printf("%s\t",  value > 1 ? "X" : (value != 0 ? "1" : "0"));
 			if(value > 1)
-				snprintf(buff + strlen(buff), sizeof(buff), "%d[%d %d]\t", value,  i, j);
+				snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "%d[%d %d]\t", value,  i, j);
 			else
-				snprintf(buff + strlen(buff), sizeof(buff), "%d\t",  value);
+				snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "%d\t",  value);
 		}
-		snprintf(buff + strlen(buff), sizeof(buff), "\n");
+		snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "\n");
 	}
 	//printf(ANSI_COLOR_RESET);
 }

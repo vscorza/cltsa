@@ -100,7 +100,8 @@ void run_obdd_exists(){
 	obdd* true_obdd		= obdd_apply_or(x1_obdd, not_x1_obdd);
 	obdd* x1_and_x2_obdd	= obdd_apply_and(x1_obdd, x2_obdd);
 	obdd* x1_and_x2_and_x3_obdd	= obdd_apply_and(x1_and_x2_obdd, x3_obdd);
-	char *buff = calloc(16384, sizeof(char));
+	uint32_t buff_size = 16384;
+	char *buff = calloc(buff_size, sizeof(char));
 	obdd_mgr_print(new_mgr, buff);
 	uint32_t valuations_count;
 	uint32_t valuations_size	= LIST_INITIAL_SIZE * new_mgr->vars_dict->size;
@@ -129,7 +130,7 @@ void run_obdd_exists(){
 	total_img[1]= 4;
 	total_img[2]= 6;
 	obdd *exists_obdd	= obdd_exists(x1_and_x2_obdd, "x1");
-	obdd_print(exists_obdd, buff);
+	obdd_print(exists_obdd, buff, buff_size);
 	obdd_get_valuations(new_mgr, exists_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count
 			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
 	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count, buff);
@@ -144,7 +145,7 @@ void run_obdd_exists(){
 	total_img[1]= 4;
 	total_img[2]= 6;
 	exists_obdd	= obdd_exists(x1_and_x2_and_x3_obdd, "x2");
-	obdd_print(exists_obdd, buff);
+	obdd_print(exists_obdd, buff, buff_size);
 	obdd_get_valuations(new_mgr, exists_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count
 			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
 	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count, buff);
@@ -159,7 +160,7 @@ void run_obdd_exists(){
 	total_img[1]= 4;
 	total_img[2]= 6;
 	exists_obdd	= obdd_exists_vector(x1_and_x2_and_x3_obdd, total_img, 2);
-	obdd_print(exists_obdd, buff);
+	obdd_print(exists_obdd, buff, buff_size);
 	obdd_get_valuations(new_mgr, exists_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count
 			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
 	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count, buff);
@@ -208,9 +209,9 @@ void run_obdd_valuations(){
 	obdd* not_x1_and_not_x2_obdd	= obdd_apply_and(not_x1_obdd, not_x2_obdd);
 	obdd* true_obdd		= obdd_apply_or(x1_obdd, not_x1_obdd);
 
-
-	char *buff = calloc(16384, sizeof(char));
-	obdd_print(not_x1_and_not_x2_obdd, buff);
+	uint32_t buff_size = 16384;
+	char *buff = calloc(buff_size, sizeof(char));
+	obdd_print(not_x1_and_not_x2_obdd, buff, buff_size);
 
 	obdd_mgr_print(new_mgr, buff);
 	uint32_t valuations_count;
@@ -271,7 +272,7 @@ void run_obdd_valuations(){
 	obdd_get_valuations(new_mgr, not_x1_and_not_x2_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count
 			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
 	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count, buff);
-	obdd_print(not_x2_obdd, buff);
+	obdd_print(not_x2_obdd, buff, buff_size);
 	free(total_img);
 #if PRINT_TEST_OUTPUT
 	printf("!X2 over x1, x2, x3\n");
@@ -352,8 +353,9 @@ void run_small_obdd_tests(){
 #if PRINT_TEST_OUTPUT
 	printf("X1 -> X2\n");
 #endif
-	char *buff = calloc(16384, sizeof(char));
-	obdd_print(x1_then_x2_obdd, buff);
+	uint32_t buff_size = 16384;
+	char *buff = calloc(buff_size, sizeof(char));
+	obdd_print(x1_then_x2_obdd, buff, buff_size);
 	char * expected = test_get_output_content("tests/expected_output/run_small_obdd_tests.exp");
 	bool txt_cmp = strcmp(buff, expected) == 0;
 	print_test_result(txt_cmp, "SMALL OBDD", "small obdd test");
@@ -416,17 +418,18 @@ void run_next_obdd_tests(){
 #if PRINT_TEST_OUTPUT
 	printf("!X1");
 #endif
-	char *buff = calloc(16384, sizeof(char));
-	obdd_print(not_x1_obdd, buff);
+	uint32_t buff_size  = 16384;
+	char *buff = calloc(buff_size, sizeof(char));
+	obdd_print(not_x1_obdd, buff, buff_size);
 
 #if PRINT_TEST_OUTPUT
 	printf("X(X2)");
 #endif
-	obdd_print(next_x2_obdd, buff);
+	obdd_print(next_x2_obdd, buff, buff_size);
 #if PRINT_TEST_OUTPUT
 	printf("!X1 -> X(X2)\n");
 #endif
-	obdd_print(not_x1_then_next_x2_obdd, buff);
+	obdd_print(not_x1_then_next_x2_obdd, buff, buff_size);
 	uint32_t valuations_count;
 	uint32_t img_count	= new_mgr->vars_dict->size - 2;
 	uint32_t* total_img	= malloc(sizeof(uint32_t) * img_count);
@@ -495,28 +498,29 @@ void run_obdd_tests(){
 
 	obdd* x2_eq_fallacy_obdd= obdd_apply_equals(x2_obdd, x1_and_not_x1_obdd);
 	obdd* exists_obdd	= obdd_exists(x2_eq_fallacy_obdd, "x2");
-	char *buff = calloc(16384, sizeof(char));
-	obdd_print(x1_or_x2_obdd, buff);
+	uint32_t buff_size = 16384;
+	char *buff = calloc(buff_size, sizeof(char));
+	obdd_print(x1_or_x2_obdd, buff, buff_size);
 #if PRINT_TEST_OUTPUT
 	printf("x1 || x2 sat? : %s \n", obdd_is_sat(new_mgr, x1_or_x2_obdd->root_obdd) ? "yes" : "no");
 	printf("x1 || x2 taut? : %s \n", obdd_is_tautology(new_mgr, x1_or_x2_obdd->root_obdd) ? "yes" : "no");
 #endif
-	obdd_print(x1_and_x2_obdd, buff);
+	obdd_print(x1_and_x2_obdd, buff, buff_size);
 #if PRINT_TEST_OUTPUT
 	printf("x1 && x2 sat? : %s \n", obdd_is_sat(new_mgr, x1_and_x2_obdd->root_obdd) ? "yes" : "no");
 	printf("x1 && x2 taut? : %s \n", obdd_is_tautology(new_mgr, x1_and_x2_obdd->root_obdd) ? "yes" : "no");
 #endif
-	obdd_print(x1_and_not_x1_obdd, buff);
+	obdd_print(x1_and_not_x1_obdd, buff, buff_size);
 #if PRINT_TEST_OUTPUT
 	printf("x1 && !x1 sat? : %s \n", obdd_is_sat(new_mgr, x1_and_not_x1_obdd->root_obdd) ? "yes" : "no");
 	printf("x1 && !x1 taut? : %s \n", obdd_is_tautology(new_mgr, x1_and_not_x1_obdd->root_obdd) ? "yes" : "no");
 #endif
-	obdd_print(x1_and_x2_then_x1, buff);
+	obdd_print(x1_and_x2_then_x1, buff, buff_size);
 #if PRINT_TEST_OUTPUT
 	printf("(x1 && x2)->x1 sat? : %s \n", obdd_is_sat(new_mgr, x1_and_x2_then_x1->root_obdd) ? "yes" : "no");
 	printf("(x1 && x2)->x1 taut? : %s \n", obdd_is_tautology(new_mgr, x1_and_x2_then_x1->root_obdd) ? "yes" : "no");
 #endif
-	obdd_print(exists_obdd, buff);
+	obdd_print(exists_obdd, buff, buff_size);
 #if PRINT_TEST_OUTPUT
 	printf("E x2.(x2 = (x1 && !x1)) sat? : %s \n", obdd_is_sat(new_mgr, exists_obdd->root_obdd) ? "yes" : "no");
 	printf("E x2.(x2 = (x1 && !x1)) taut? : %s \n", obdd_is_tautology(new_mgr, exists_obdd->root_obdd) ? "yes" : "no");
@@ -544,28 +548,28 @@ void run_obdd_tests(){
 #if PRINT_TEST_OUTPUT
 	printf("X1 && X2\n");
 #endif
-	obdd_print(x1_and_x2_obdd, buff);
+	obdd_print(x1_and_x2_obdd, buff, buff_size);
 	obdd_get_valuations(new_mgr, x1_and_x2_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count
 			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
 	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count, buff);
 #if PRINT_TEST_OUTPUT
 	printf("X1 & X2 && X3\n");
 #endif
-	obdd_print(x1_and_x2_and_x3_obdd, buff);
+	obdd_print(x1_and_x2_and_x3_obdd, buff, buff_size);
 	obdd_get_valuations(new_mgr, x1_and_x2_and_x3_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count
 			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
 	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count, buff);
 #if PRINT_TEST_OUTPUT
 	printf("X1 || X2\n");
 #endif
-	obdd_print(x1_or_x2_obdd, buff);
+	obdd_print(x1_or_x2_obdd, buff, buff_size);
 	obdd_get_valuations(new_mgr, x1_or_x2_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count
 			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
 	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count, buff);
 #if PRINT_TEST_OUTPUT
 	printf("X1 || X2 || X3\n");
 #endif
-	obdd_print(x1_or_x2_or_x3_obdd, buff);
+	obdd_print(x1_or_x2_or_x3_obdd, buff, buff_size);
 	obdd_get_valuations(new_mgr, x1_or_x2_or_x3_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count
 			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
 	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count, buff);
@@ -629,16 +633,16 @@ void run_max_heap_tests(){
 	for(i = 0; i < cycles; i++){
 		current_item.b = i; current_item.a = i + cycles;
 		automaton_max_heap_add_entry(heap, &current_item);
-		snprintf(buff + strlen(buff), sizeof(buff), "PUSHING ITEM <%d,%d>\n", current_item.a, current_item.b);
+		snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "PUSHING ITEM <%d,%d>\n", current_item.a, current_item.b);
 	}
 	for(i = 0; i < cycles; i++){
 		current_item.b = i; current_item.a = i;
 		automaton_max_heap_add_entry(heap, &current_item);
-		snprintf(buff + strlen(buff), sizeof(buff), "PUSHING ITEM <%d,%d>\n", current_item.a, current_item.b);
+		snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "PUSHING ITEM <%d,%d>\n", current_item.a, current_item.b);
 	}
 	for(i = 0; i < cycles * 2; i++){
 		automaton_max_heap_pop_entry(heap, &current_item);
-		snprintf(buff + strlen(buff), sizeof(buff), "POPPING ITEM: <%d,%d>\n", i, current_item.a, current_item.b);
+		snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "POPPING ITEM: <%d,%d>\n", i, current_item.a, current_item.b);
 	}
 	automaton_max_heap_destroy(heap);
 
@@ -670,7 +674,7 @@ void run_concrete_bucket_list_tests(){
 
 	for(i = 0; i < cycles; i++){
 		automaton_concrete_bucket_pop_entry(list, &current_item);
-			snprintf(buff + strlen(buff), sizeof(buff), "ITEM at %d: <%d,%d>\n", i, current_item.a, current_item.b);
+			snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "ITEM at %d: <%d,%d>\n", i, current_item.a, current_item.b);
 	}
 	automaton_concrete_bucket_destroy(list);
 
@@ -689,26 +693,26 @@ void run_ordered_list_tests(){
 	char *buff = calloc(100 * cycles, sizeof(char));
 	for(i = 0; i < cycles; i++){
 		current_item.b = i; current_item.a = i + cycles;
-		snprintf(buff + strlen(buff), sizeof(buff), "PUSHING ITEM at %d: <%d,%d>\n", i, current_item.a, current_item.b);
+		snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "PUSHING ITEM at %d: <%d,%d>\n", i, current_item.a, current_item.b);
 		automaton_ordered_list_add_entry(ordered_list, &current_item);
 	}
 	for(i = 0; i < cycles; i++){
 		current_item.b = i; current_item.a = i;
-		snprintf(buff + strlen(buff), sizeof(buff), "PUSHING ITEM at %d: <%d,%d>\n", i, current_item.a, current_item.b);
+		snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "PUSHING ITEM at %d: <%d,%d>\n", i, current_item.a, current_item.b);
 		automaton_ordered_list_add_entry(ordered_list, &current_item);
 	}
 	test_item_bucket* print_bucket;
 	for(i = 0; i < ordered_list->temporary_count; i++){
 		print_bucket = GET_ORDERED_LIST_SINGLE_ENTRY(ordered_list, ordered_list->temporary, i);
-		snprintf(buff + strlen(buff), sizeof(buff), "temporary item at %d: <%d,%d>\n", i, print_bucket->a, print_bucket->b);
+		snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "temporary item at %d: <%d,%d>\n", i, print_bucket->a, print_bucket->b);
 	}
 	for(i = 0; i < ordered_list->count; i++){
 			print_bucket = GET_ORDERED_LIST_SINGLE_ENTRY(ordered_list, ordered_list->values, i);
-			snprintf(buff + strlen(buff), sizeof(buff), "values item at %d: <%d,%d>\n", i, print_bucket->a, print_bucket->b);
+			snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "values item at %d: <%d,%d>\n", i, print_bucket->a, print_bucket->b);
 		}
 	while(ordered_list->count > 0){
 		automaton_ordered_list_pop_entry(ordered_list, &current_item);
-		snprintf(buff + strlen(buff), sizeof(buff), "POPPING ITEM at %d: <%d,%d>\n", i, current_item.a, current_item.b);
+		snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "POPPING ITEM at %d: <%d,%d>\n", i, current_item.a, current_item.b);
 	}
 	automaton_ordered_list_destroy(ordered_list);
 
@@ -744,8 +748,9 @@ void run_small_obdd_tree_tests(){
 	printf("new key %d\n", obdd_state_tree_get_key(tree, key3, -1));
 	printf("new key %d\n", obdd_state_tree_get_key(tree, key4, -1));
 	printf("new key %d\n", obdd_state_tree_get_key(tree, key5, -1));
-	char *buff = calloc(16384, sizeof(char));
-	obdd_state_tree_print(tree, buff);
+	uint32_t buff_size	= 16384;
+	char *buff = calloc(buff_size, sizeof(char));
+	obdd_state_tree_print(tree, buff, buff_size);
 	free(buff);
 	obdd_state_tree_destroy(tree);
 }
@@ -994,16 +999,16 @@ void run_fast_pool_tests(){
 		item->name[0]	= 'h';item->name[1]	= 'i';item->name[2]	= '!';item->name[3]	= '\0';
 		pool_ref2[i]	= item;
 	}
-	snprintf(buff + strlen(buff), sizeof(buff), "10 100 pool \n");
+	snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "10 100 pool \n");
 	for(i = 0; i < MAX_POOL_COUNT/2; i++){
-		snprintf(buff + strlen(buff), sizeof(buff), "%d%s ", pool_ref1[i]->a, pool_ref1[i]->name);
+		snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "%d%s ", pool_ref1[i]->a, pool_ref1[i]->name);
 	}
-	snprintf(buff + strlen(buff), sizeof(buff), "\n");
-	snprintf(buff + strlen(buff), sizeof(buff), "5 2 pool \n");
+	snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "\n");
+	snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "5 2 pool \n");
 	for(i = 0; i < MAX_POOL_COUNT/2; i++){
-		snprintf(buff + strlen(buff), sizeof(buff), "%d%s ", pool_ref2[i]->a, pool_ref2[i]->name);
+		snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "%d%s ", pool_ref2[i]->a, pool_ref2[i]->name);
 	}
-	snprintf(buff + strlen(buff), sizeof(buff), "\n");
+	snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "\n");
 	for(i = 0; i < MAX_POOL_COUNT/2; i++){
 		automaton_fast_pool_release_instance(pool1, (uintptr_t)pool_frag1[i]);
 		automaton_fast_pool_release_instance(pool2, (uintptr_t)pool_frag2[i]);
@@ -1017,9 +1022,9 @@ void run_fast_pool_tests(){
 		item->a		= i;
 		item->name[0]	= 'h';item->name[1]	= 'i';item->name[2]	= '!';item->name[3]	= '\0';
 		pool_ref2[i]	= item;
-		snprintf(buff + strlen(buff), sizeof(buff), "%d%s ", item->a, item->name);
+		snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "%d%s ", item->a, item->name);
 	}
-	snprintf(buff + strlen(buff), sizeof(buff), "\n");
+	snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "\n");
 	automaton_fast_pool_destroy(pool1);
 	automaton_fast_pool_destroy(pool2);
 	free(pool_frag1);free(pool_frag2);
@@ -1139,12 +1144,12 @@ int main (int argc, char** argv){
 		}
 	}else{
 		//ONGOING
-		run_parse_test("tests/genbuf_2_sndrs.fsp", "GenBuf 2 sndrs(debug version)");//GENBUF 2 Sndrs
+		//run_parse_test("tests/genbuf_2_sndrs_debug.fsp", "GenBuf 2 sndrs(debug version)");//GENBUF 2 Sndrs
 
 
 		//GENERAL TESTS
 		//run_all_tests();
-		//run_functional_tests();
+		run_functional_tests();
 
 
 		//TODO

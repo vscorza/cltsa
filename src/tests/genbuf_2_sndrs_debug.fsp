@@ -1,0 +1,59 @@
+//GenBuf example taken from Synthesis of Reactive(1) Designs 2 senders
+set Global_Alphabet = {}
+set Controllable_Alphabet = {}
+
+set Global_Signals	= {enq, deq, full, empty, slc_0}
+set Output_Signals	= {enq, deq, slc_0}
+order			= {full < empty < slc_0 < enq < deq}
+
+/***********
+**** THETA
+***********/
+ltl env theta Init_Buffer_e in GENBUF	= (!full && empty && !slc_0).
+ltl sys theta Init_Buffer_s in GENBUF	= (!enq && !deq).
+/***********
+**** SYS RHO
+***********/
+//bToS_ACK only if sToB_REQ
+//restrict eng/deq operations
+ltl sys rho G_11_1 in GENBUF			= []((full && !deq)-> !enq).
+ltl sys rho G_11_1_X in GENBUF			= [](X((full && !deq)-> !enq)).
+ltl sys rho G_11_2 in GENBUF			= [](empty-> !deq).
+ltl sys rho G_11_2_X in GENBUF			= [](X(empty-> !deq)).
+
+//if sToB_REQ and not full then should ENQ
+//ltl sys rho G_13 in GENBUF			= [](!full -> (enq || X(enq))).
+
+/***********
+**** ENV RHO
+***********/
+//keep empty / full fixed if deq == enq
+ltl env rho A_5_1 in GENBUF			= []((deq <-> enq) -> (empty <-> X(empty))).
+ltl env rho A_5_2 in GENBUF			= []((deq <-> enq) -> (full <-> X(full))).
+ltl env rho A_5_3 in GENBUF			= []((enq && !deq) -> !X(empty)).
+ltl env rho A_5_4 in GENBUF			= []((deq && !enq) -> !X(full)).
+
+
+/***********
+**** AUTOMATA
+***********/
+//G_7 was turned into an automaton
+//G_7_ROUND_ROBIN	= (bToR_REQ_0.on -> bToR_REQ_1.on -> G_7_ROUND_ROBIN).
+
+/***********
+**** FLUENTS
+***********/
+//G_12 was turned into a fluent
+//fluent F_Goal_12 = <deq.on, empty.off> initially 1
+
+//ltl fluent G_1_2_sndr_0		= (sToB_REQ_0 <-> bToS_ACK_0).
+//ltl fluent G_1_2_sndr_1		= (sToB_REQ_1 <-> bToS_ACK_1).
+//ltl fluent A_2_sndr_0		= (bToR_REQ_0 <-> rToB_ACK_0).
+//ltl fluent A_2_sndr_1		= (bToR_REQ_1 <-> rToB_ACK_1).
+
+/***********
+**** SYNTHESIS
+***********/
+//|f| ENV =(GENBUF ||_c G_7_ROUND_ROBIN).
+//|gr1| <{A_2_sndr_0, A_2_sndr_1}><{F_Goal_12, G_1_2_sndr_0, G_1_2_sndr_1}> STRAT = ENV.
+
