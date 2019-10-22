@@ -23,6 +23,8 @@ TODO:
 - adapt examples from https://www.doulos.com/knowhow/psl/
 - solve aliases in states e.g. S[i:R] = S_p[i], S_p[i:R] = (s->S_2[i]).
 - implement relabeling and hiding (use half adder to full adder example)
+- implement symbolic synthesis
+- implement diagnosis of maximal realizable ltl spec (maximal set of ltl formula s.t. at least one liveness is satisfied)
 
 Meetings
 ========

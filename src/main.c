@@ -1145,11 +1145,11 @@ int main (int argc, char** argv){
 	}else{
 		//ONGOING
 		//run_parse_test("tests/genbuf_2_sndrs_debug.fsp", "GenBuf 2 sndrs(debug version)");//GENBUF 2 Sndrs
-
+		run_parse_test("tests/genbuf_2_sndrs.fsp", "GenBuf 2 sndrs(debug version)");//GENBUF 2 Sndrs
 
 		//GENERAL TESTS
 		//run_all_tests();
-		run_functional_tests();
+		//run_functional_tests();
 
 
 		//TODO
