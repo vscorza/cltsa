@@ -314,7 +314,6 @@ bool automaton_fluent_has_starting_signal(automaton_fluent* fluent, automaton_al
 bool automaton_fluent_add_starting_signal(automaton_fluent* fluent, automaton_alphabet* alphabet, automaton_signal_event* signal_event);
 bool automaton_fluent_has_ending_signal(automaton_fluent* fluent, automaton_alphabet* alphabet, automaton_signal_event* signal_event);
 bool automaton_fluent_add_ending_signal(automaton_fluent* fluent, automaton_alphabet* alphabet, automaton_signal_event* signal_event);
-automaton_automaton* automaton_fluent_build_automaton(automaton_automata_context* ctx, uint32_t fluent_index);
 /** VALUATION **/
 bool automaton_valuation_has_fluent(automaton_valuation* valuation, automaton_automata_context* ctx, automaton_fluent* fluent);
 bool automaton_valuation_add_fluent(automaton_valuation* valuation, automaton_automata_context* ctx, automaton_fluent* fluent);

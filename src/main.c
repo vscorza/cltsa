@@ -20,28 +20,26 @@ char* automataFile  =  "automata.txt";
 char* test_get_output_content(char *filename){
 	char *buffer = NULL;
 	size_t size = 0;
-
-	/* Open your_file in read-only mode */
 	FILE *fp = fopen(filename, "r");
-
-	/* Get the buffer size */
 	fseek(fp, 0, SEEK_END); /* Go to end of file */
 	size = ftell(fp); /* How many bytes did we pass ? */
-
-	/* Set position of stream to the beginning */
 	rewind(fp);
-
-	/* Allocate the buffer (no need to initialize it with calloc) */
 	buffer = malloc((size + 1) * sizeof(*buffer)); /* size + 1 byte for the \0 */
-
-	/* Read the file into the buffer */
 	fread(buffer, size, 1, fp); /* Read 1 chunk of size bytes from fp into buffer */
-
 	/* NULL-terminate the buffer */
 	buffer[size] = '\0';
-
 	/* Print it ! */
 	return buffer;
+}
+
+void test_set_expected_content(char* content, char* filename){
+	FILE *fp = fopen(filename, "w");
+
+	int results = fputs(content, fp);
+	if (results == EOF) {
+	    // Failed to write do error code here.
+	}
+	fclose(fp);
 }
 
 void print_test_result(bool passed, char* name, char* description){
@@ -356,7 +354,10 @@ void run_small_obdd_tests(){
 	uint32_t buff_size = 16384;
 	char *buff = calloc(buff_size, sizeof(char));
 	obdd_print(x1_then_x2_obdd, buff, buff_size);
+
+
 	char * expected = test_get_output_content("tests/expected_output/run_small_obdd_tests.exp");
+
 	bool txt_cmp = strcmp(buff, expected) == 0;
 	print_test_result(txt_cmp, "SMALL OBDD", "small obdd test");
 
@@ -451,6 +452,7 @@ void run_next_obdd_tests(){
 	obdd_get_valuations(new_mgr, not_x1_then_next_x2_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count
 			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
 	obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count, buff);
+
 	char * expected = test_get_output_content("tests/expected_output/run_next_obdd_tests.exp");
 	bool txt_cmp = strcmp(buff, expected) == 0;
 	print_test_result(txt_cmp, "NEXT OBDD", "next obdd test");
@@ -1029,6 +1031,7 @@ void run_fast_pool_tests(){
 	automaton_fast_pool_destroy(pool2);
 	free(pool_frag1);free(pool_frag2);
 	free(pool_ref1);free(pool_ref2);
+
 	char * expected = test_get_output_content("tests/expected_output/run_fast_pool_tests.exp");
 	bool txt_cmp = strcmp(buff, expected) == 0;
 	print_test_result(txt_cmp, "FAST POOL", "fast pool test");
@@ -1145,11 +1148,11 @@ int main (int argc, char** argv){
 	}else{
 		//ONGOING
 		//run_parse_test("tests/genbuf_2_sndrs_debug.fsp", "GenBuf 2 sndrs(debug version)");//GENBUF 2 Sndrs
-		run_parse_test("tests/genbuf_2_sndrs.fsp", "GenBuf 2 sndrs(debug version)");//GENBUF 2 Sndrs
+		//run_parse_test("tests/genbuf_2_sndrs.fsp", "GenBuf 2 sndrs(debug version)");//GENBUF 2 Sndrs
 
 		//GENERAL TESTS
 		//run_all_tests();
-		//run_functional_tests();
+		run_functional_tests();
 
 
 		//TODO

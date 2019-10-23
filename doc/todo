@@ -1,15 +1,14 @@
 TODO:
 =====
 - re-implement fluents
-	- modify state tree to map composite states x fluent valuations -> int
-	- test new tree mapper
-	- write eval(v,l) that takes a fluent valuation and a label and defines the new valuation
-	- update composition/game building
+	- finish update on automaton.c:3126
+		- write eval(v,l) that takes a fluent valuation and a label and defines the new valuation
 - run hardware cases
 	- review/document ltl -> CLTS translation
 		- check state size, running two specs sequentially
 	- behavior minimization based diagnosis over CLTS
 	- diagnose GENBUF with 2 clients
+	- diagnose small synthetic case in order to compare delta debugging with behavior minimization
 	- improve fluents encoding (superset of labels is too expensive)
 	- run genbuf 2, 4, 10 clients
 	- run amba 2, 4, 10 clients

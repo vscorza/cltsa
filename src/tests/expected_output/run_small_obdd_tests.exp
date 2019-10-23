@@ -1,5 +1,6 @@
 [OBDD]
-
+Mgr_ID:0
+Value:
 x1^
 	x2->1
 	v(!x2)->0

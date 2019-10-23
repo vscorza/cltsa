@@ -706,36 +706,9 @@ bool automaton_statement_syntax_to_composition(automaton_automata_context* ctx, 
 	}
 	//if is game build fluents and add to automata
 	uint32_t composition_count	= composition_syntax->count;
-	if(composition_syntax->is_game){
-		uint32_t new_composition_count		= composition_count + ctx->global_fluents_count;
-		automaton_automaton** new_automata	= malloc(sizeof(automaton_automaton*) * new_composition_count);
-		automaton_synchronization_type* new_synch_type = malloc(sizeof(automaton_synchronization_type) * new_composition_count);
-		for(i = 0; i < (int32_t)composition_count; i++){
-			new_automata[i]	= automata[i];
-			new_synch_type[i]	= synch_type[i];
-		}
-		//build fluent automata
-		for(i = 0; i < (int32_t)ctx->global_fluents_count; i++){
-			new_automata[i + composition_count]	= automaton_fluent_build_automaton(ctx, i);
-			//TODO: check which composition type should work for fluents
-			new_synch_type[i + composition_count]	= CONCURRENT;
-			char buf[255];
-			//automaton_automaton_print(tables->composition_entries[i]->valuation.automaton_value, true, true, true, "*\t", "*\t");
-			sprintf(buf, "%s_%d_fluent.fsp", ctx->name, i + composition_count);
-			automaton_automaton_print_fsp(new_automata[i + composition_count], buf);
-		}
-		free(automata);
-		free(synch_type);
-		automata							= new_automata;
-		synch_type							= new_synch_type;
-		composition_count					= new_composition_count;
-	}
 	aut_context_log("composing.\n");
 	automaton_automaton* automaton	= automaton_automata_compose(automata, synch_type, composition_count, composition_syntax->is_game
 			, composition_syntax->name);//SYNCHRONOUS);
-	if(composition_syntax->is_game)
-		for(i = 0; i < (int32_t)ctx->global_fluents_count; i++)
-			automaton_automaton_destroy(automata[composition_count - i - 1]);
 	tables->composition_entries[main_index]->solved	= true;
 	tables->composition_entries[main_index]->valuation_count			= 1;
 	tables->composition_entries[main_index]->valuation.automaton_value	= automaton;

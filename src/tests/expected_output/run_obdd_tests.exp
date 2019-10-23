@@ -1,34 +1,43 @@
 [OBDD]
-
+Mgr_ID:2
+Value:
 x1->1
 v(!x1)^
 	x2->1
 	v(!x2)->0
 [OBDD]
-
+Mgr_ID:2
+Value:
 x1^
 	x2->1
 	v(!x2)->0
 v(!x1)->0
 [OBDD]
-
+Mgr_ID:2
+Value:
 x1->0
 v(!x1)->0
 [OBDD]
-
+Mgr_ID:2
+Value:
 x1->1
 v(!x1)->1
 [OBDD]
-
+Mgr_ID:2
+Value:
 x1->1
 v(!x1)->1
-[OBDD MMgr.Dic[1]:0
+[OBDD MANAGER]
+Mgr: 2
+Mgr.Dict:
+[1]:0
 [0]:1
 [x1]:2
 [x2]:3
 [x3]:4
 [OBDD]
-
+Mgr_ID:2
+Value:
 x1^
 	x2->1
 	v(!x2)->0
@@ -36,7 +45,8 @@ v(!x1)->0
 x1	x2	
 1	1	
 [OBDD]
-
+Mgr_ID:2
+Value:
 x1^
 	x2^
 		x3->1
@@ -46,7 +56,8 @@ v(!x1)->0
 x1	x2	
 1	1	
 [OBDD]
-
+Mgr_ID:2
+Value:
 x1->1
 v(!x1)^
 	x2->1
@@ -56,7 +67,8 @@ x1	x2
 1	0	
 1	1	
 [OBDD]
-
+Mgr_ID:2
+Value:
 x1->1
 v(!x1)^
 	x2->1

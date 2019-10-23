@@ -1295,84 +1295,6 @@ bool automaton_fluent_add_ending_signal(automaton_fluent* fluent, automaton_alph
 	fluent->ending_signals_count++;
 	return false;
 }
-automaton_automaton* automaton_fluent_build_automaton(automaton_automata_context* ctx, uint32_t fluent_index){
-	automaton_fluent* current_fluent	= &(ctx->global_fluents[fluent_index]);
-	uint32_t i, j;
-	//uint32_t* local_alphabet			= malloc(sizeof(uint32_t) * (current_fluent->ending_signals_count + current_fluent->starting_signals_count));
-	uint32_t* local_alphabet			= malloc(sizeof(uint32_t) * (ctx->global_alphabet->count));
-	uint32_t alphabet_count				= 0;
-	bool found							= false;
-	/*for(i = 0; i < current_fluent->starting_signals_count; i++){
-		found	= false;
-		for(j = 0; j < alphabet_count; j++)
-			if(local_alphabet[j] == current_fluent->starting_signals[i]){
-				found	= true;
-				break;
-			}
-		if(!found)
-			local_alphabet[alphabet_count++]	= current_fluent->starting_signals[i];
-	}
-	for(i = 0; i < current_fluent->ending_signals_count; i++){
-		found	= false;
-		for(j = 0; j < alphabet_count; j++)
-			if(local_alphabet[j] == current_fluent->ending_signals[i]){
-				found	= true;
-				break;
-			}
-		if(!found)
-			local_alphabet[alphabet_count++]	= current_fluent->ending_signals[i];
-	}*/
-	for(j = 0; j < ctx->global_alphabet->count; j++)
-		local_alphabet[alphabet_count++]	= j;
-
-	automaton_transition *starting_transition	= automaton_transition_create(0, 1);
-	automaton_transition *starting_loop			= automaton_transition_create(0, 0);
-	automaton_transition *ending_transition		= automaton_transition_create(1, 0);
-	automaton_transition *ending_loop			= automaton_transition_create(1, 1);
-
-	//TODO:should be superset both on transition and loop
-	automaton_automaton* current_automaton	= automaton_automaton_create(current_fluent->name, ctx, alphabet_count, local_alphabet, false, false);
-	for(i = 0; i < ctx->global_alphabet->count; i++){
-		for(j = 0; j < current_fluent->starting_signals_count; j++){
-			if(i != current_fluent->starting_signals[j]){
-				automaton_transition_initialize(starting_loop, 0, 0);
-				automaton_transition_add_signal_event(starting_loop, ctx, &(ctx->global_alphabet->list[i]));
-				automaton_automaton_add_transition(current_automaton, starting_loop);
-				automaton_transition_destroy(starting_loop, false);
-			}
-		}
-		for(j = 0; j < current_fluent->ending_signals_count; j++){
-			if(i != current_fluent->ending_signals[j]){
-				automaton_transition_initialize(ending_loop, 1, 1);
-				automaton_transition_add_signal_event(ending_loop, ctx, &(ctx->global_alphabet->list[i]));
-				automaton_automaton_add_transition(current_automaton, ending_loop);
-				automaton_transition_destroy(ending_loop, false);
-			}
-		}
-	}
-	automaton_transition_destroy(starting_loop, true);
-	automaton_transition_destroy(ending_loop, true);
-
-	for(i = 0; i < current_fluent->starting_signals_count; i++){
-		automaton_transition_initialize(starting_transition, 0, 1);
-		automaton_transition_add_signal_event(starting_transition, ctx, &(ctx->global_alphabet->list[current_fluent->starting_signals[i]]));
-		automaton_automaton_add_transition(current_automaton, starting_transition);
-		automaton_transition_destroy(starting_transition, false);
-
-	}
-	automaton_transition_destroy(starting_transition, true);
-
-	for(i = 0; i < current_fluent->ending_signals_count; i++){
-		automaton_transition_initialize(ending_transition, 1, 0);
-		automaton_transition_add_signal_event(ending_transition, ctx, &(ctx->global_alphabet->list[current_fluent->ending_signals[i]]));
-		automaton_automaton_add_transition(current_automaton, ending_transition);
-		automaton_transition_destroy(ending_transition, false);
-	}
-	free(local_alphabet);
-	automaton_transition_destroy(ending_transition, true);
-	automaton_automaton_add_initial_state(current_automaton, current_fluent->initial_valuation? 1 : 0);
-	return current_automaton;
-}
 /** VALUATION **/
 bool automaton_valuation_has_fluent(automaton_valuation* valuation, automaton_automata_context* ctx, automaton_fluent* fluent){
 	uint32_t i;
@@ -2925,7 +2847,9 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 #endif
 
 	// create key tree,frontier bucket list, get current state transitions list harness
-	automaton_composite_tree* tree	= automaton_composite_tree_create(automata_count);
+
+	automaton_composite_tree* tree	= automaton_composite_tree_create(is_game?
+			automata_count + ctx->global_fluents_count :automata_count);
 	automaton_bucket_list* bucket_list	= automaton_bucket_list_create(BUCKET_SIZE);
 	uint32_t max_degree_sum		= 0;	uint32_t max_signals_count	= 0;
 	uint32_t max_out_degree		= 0;
@@ -2941,10 +2865,11 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 	/** compose transition relation **/
 	uint32_t frontier_size			= LIST_INITIAL_SIZE;//TODO: check this number is fixed
 	uint32_t frontier_count			= 1;
-	uint32_t* frontier			= malloc(sizeof(uint32_t) * automata_count * frontier_size);
+	uint32_t key_size			= is_game ? automata_count + ctx->global_fluents_count : automata_count;
+	uint32_t* frontier			= malloc(sizeof(uint32_t) * key_size * frontier_size);
 	uint32_t* composite_frontier		= malloc(sizeof(uint32_t) * frontier_size);
-	uint32_t* current_state			= malloc(sizeof(uint32_t) * automata_count);
-	uint32_t* current_to_state			= malloc(sizeof(uint32_t) * automata_count);
+	uint32_t* current_state			= malloc(sizeof(uint32_t) * key_size);
+	uint32_t* current_to_state			= malloc(sizeof(uint32_t) * key_size);
 	uint32_t from_state;	uint32_t to_state;	bool overlaps;	bool shared_equals;
 	//uint32_t* signals_union			= malloc(sizeof(uint32_t) * max_degree_sum);
 	//uint32_t signals_union_count	= 0;
@@ -2964,6 +2889,10 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 	long int found_hits	= 0;	long int found_misses	= 0;	//set initial state
 	for(i = 0; i < automata_count; i++){
 		frontier[i]	= automata[i]->initial_states[0];
+	}
+	if(is_game){
+		for(i = 0; i < ctx->global_fluents_count; i++)
+			frontier[automata_count + i]	= ctx->global_fluents[i].initial_valuation? 1 : 0;
 	}
 	uint32_t composite_initial_state	= automaton_composite_tree_get_key(tree, frontier);
 	composite_frontier[0]			= composite_initial_state;
@@ -3013,7 +2942,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 		automaton_transition *current_transition	= NULL;
 		for(i = 0; i < automata_count; i++){
 			//initialize current state and indexes structs.
-			current_state[i]= frontier[(frontier_count - 1) * automata_count + i];
+			current_state[i]= frontier[(frontier_count - 1) * key_size + i];
 			idxs_size[i]	= automata[i]->out_degree[current_state[i]] + 1;
 			idxs[i]			= 0;
 			//initialize label skips and automata label accum struct
@@ -3029,6 +2958,12 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 #if DEBUG_COMPOSITION
 			printf("%s%d", i > 0 ? "," : "", current_state[i]);
 #endif
+		}
+		//if automata is game take fluent valuation into consideration
+		if(is_game){
+			for(i = automata_count; i < key_size; i++){
+				current_state[i]= frontier[(frontier_count - 1) * key_size + i];
+			}
 		}
 
 		frontier_count--;
@@ -3188,6 +3123,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 					if(idxs[k] == 0)current_to_state[k]= current_state[k];
 					else current_to_state[k]	= automata[k]->transitions[current_state[k]][idxs[k] - 1].state_to;
 				}
+				//TODO: update fluent valuation on current_to_state
 				uint32_t composite_to			= automaton_composite_tree_get_key(tree, current_to_state);
 				automaton_transition *current_transition	= automaton_transition_create(from_state, composite_to);
 				automaton_automata_bool_to_transition_alphabet(label_accum, current_transition, alphabet_count);
@@ -3268,8 +3204,8 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 				if(!found){
 					composite_frontier[frontier_count]	= composite_to;
 					automaton_bucket_add_entry(bucket_list, composite_to);
-					for(n = 0; n < automata_count; n++){
-						frontier[frontier_count * automata_count + n]	= current_to_state[n];
+					for(n = 0; n < key_size; n++){
+						frontier[frontier_count * key_size + n]	= current_to_state[n];
 					}
 					frontier_count++;
 					if(frontier_count >= (frontier_size - 1)){
@@ -3277,7 +3213,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 						uint32_t i;
 						uint32_t* new_frontier				= malloc(sizeof(uint32_t) * new_size * automata_count);
 						uint32_t* new_composite_frontier	= malloc(sizeof(uint32_t) * new_size);
-						for(i = 0; i < frontier_size * automata_count; i++){
+						for(i = 0; i < frontier_size * key_size; i++){
 							new_frontier[i]					= frontier[i];
 						}
 						for(i = 0; i < frontier_size; i++){
