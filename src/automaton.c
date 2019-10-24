@@ -2874,6 +2874,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 	//uint32_t* signals_union			= malloc(sizeof(uint32_t) * max_degree_sum);
 	//uint32_t signals_union_count	= 0;
 
+
 	//indexes structures
 	uint32_t* idxs	= calloc(automata_count, sizeof(uint32_t));
 	uint32_t* idxs_size	= calloc(automata_count, sizeof(uint32_t));
@@ -3123,7 +3124,33 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 					if(idxs[k] == 0)current_to_state[k]= current_state[k];
 					else current_to_state[k]	= automata[k]->transitions[current_state[k]][idxs[k] - 1].state_to;
 				}
+				bool satisfies_fluent_condition = true;
 				//TODO: update fluent valuation on current_to_state
+				if(is_game){
+					//check starting conditions
+					for(k = 0; k < ctx->global_fluents_count; k++){
+						current_to_state[automata_count + k]	= current_state[automata_count + k];
+						if(!current_state[automata_count + k]){//check ending for those that are up
+							satisfies_fluent_condition = true;
+							for(l = 0; l < ctx->global_fluents[k].ending_signals_count; l++){
+								if(!label_accum[ctx->global_fluents[k].ending_signals[l]]){
+									satisfies_fluent_condition = false;
+									break;
+								}
+							}
+							if(satisfies_fluent_condition)current_to_state[automata_count + k]	= false;
+						}else{//check starting for those that are down
+							satisfies_fluent_condition = true;
+							for(l = 0; l < ctx->global_fluents[k].starting_signals_count; l++){
+								if(!label_accum[ctx->global_fluents[k].starting_signals[l]]){
+									satisfies_fluent_condition = false;
+									break;
+								}
+							}
+							if(satisfies_fluent_condition)current_to_state[automata_count + k]	= true;
+						}
+					}
+				}
 				uint32_t composite_to			= automaton_composite_tree_get_key(tree, current_to_state);
 				automaton_transition *current_transition	= automaton_transition_create(from_state, composite_to);
 				automaton_automata_bool_to_transition_alphabet(label_accum, current_transition, alphabet_count);
