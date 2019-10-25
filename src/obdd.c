@@ -673,7 +673,7 @@ obdd_node* obdd_node_restrict(obdd_mgr* mgr, obdd_node* root, uint32_t var_ID, b
 }
 
 /**
- * Restricts the provided obdd over an array of boolean values
+ * Restricts the provided obdd over an array of boolean values (values should ordered following var_ids)
  * @param root the obdd to be restricted
  * @param var_ids the array of variable ids for each value in the boolean array
  * @param values the array of boolean values for variables being restricted

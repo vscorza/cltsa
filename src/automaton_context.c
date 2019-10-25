@@ -2219,6 +2219,8 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	uint32_t* y_p_alphabet_o	= malloc(sizeof(uint32_t) * y_p_count);
 	uint32_t* x_p_y_p_alphabet_o	= malloc(sizeof(uint32_t) * (y_p_count + x_p_count));
 	uint32_t* signals_alphabet_o	= malloc(sizeof(uint32_t) * signals_count);
+	uint32_t* not_x_p_alphabet_o	= malloc(sizeof(uint32_t) * not_x_p_count);
+	uint32_t* not_y_p_alphabet_o	= malloc(sizeof(uint32_t) * not_y_p_count);
 	x_count = 0, y_count = 0, x_p_count = 0, y_p_count = 0,signals_count = 0, x_y_count = 0, x_y_x_p_count = 0, not_x_p_count = 0, not_y_p_count = 0;
 	for(i = 0; i < mgr->vars_dict->size; i++){//X
 		//avoid searching for the true/false variables
@@ -2238,10 +2240,10 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 		}
 		if(!(is_primed && !is_input))x_y_x_p_alphabet_o[x_y_x_p_count++] = i;
 		signals_alphabet_o[signals_count++]	= i;
-		if(!is_primed || !is_input)not_x_p_alphabet[not_x_p_count++] = i;
-		if(!is_primed || is_input)not_y_p_alphabet[not_y_p_count++] = i;
+		if(!is_primed || !is_input)not_x_p_alphabet_o[not_x_p_count++] = i;
+		if(!is_primed || is_input)not_y_p_alphabet_o[not_y_p_count++] = i;
 	}
-	x_count = 0, y_count = 0, x_p_count = 0, y_p_count = 0,signals_count = 0, x_y_count = 0, x_y_x_p_count = 0;
+	x_count = 0, y_count = 0, x_p_count = 0, y_p_count = 0,signals_count = 0, x_y_count = 0, x_y_x_p_count = 0, not_x_p_count = 0, not_y_p_count = 0;
 	//this code seems repeated but should be kept this way since enforces
 	//sequentialization of X Y X' Y' variables
 	for(i = 0; i < mgr->vars_dict->size; i++){//X
@@ -2258,6 +2260,8 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 		}else{if(is_primed)y_p_alphabet[y_p_count++]	= i; else y_alphabet[y_count++]	= i;}
 		if(is_primed){ x_p_y_p_alphabet[x_p_y_p_count++] = i;}
 		if(is_input && !is_primed){
+			not_x_p_alphabet_o[not_x_p_count++] = i;
+			not_y_p_alphabet_o[not_y_p_count++] = i;
 			x_y_alphabet[x_y_count++] = i;
 			x_y_x_p_alphabet[x_y_x_p_count++] = i;
 			signals_alphabet[signals_count++]	= i;
@@ -2278,6 +2282,8 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 			global_index	= automaton_alphabet_get_value_index(ctx->global_alphabet, current_key);
 			is_input		= ctx->global_alphabet->list[global_index].type == INPUT_SIG;
 			if(!is_primed && !is_input){
+				not_x_p_alphabet_o[not_x_p_count++] = i;
+				not_y_p_alphabet_o[not_y_p_count++] = i;
 				x_y_alphabet[x_y_count++] = i;
 				x_y_x_p_alphabet[x_y_x_p_count++] = i;
 				signals_alphabet[signals_count++]	= i;
@@ -2298,6 +2304,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 		global_index	= automaton_alphabet_get_value_index(ctx->global_alphabet, current_key);
 		is_input		= ctx->global_alphabet->list[global_index].type == INPUT_SIG;
 		if(is_primed && is_input){
+			not_y_p_alphabet_o[not_y_p_count++] = i;
 			x_y_x_p_alphabet[x_y_x_p_count++] = i;
 			signals_alphabet[signals_count++]	= i;
 		}
@@ -2313,6 +2320,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 		global_index	= automaton_alphabet_get_value_index(ctx->global_alphabet, current_key);
 		is_input		= ctx->global_alphabet->list[global_index].type == INPUT_SIG;
 		if(is_primed && !is_input){
+			not_x_p_alphabet_o[not_x_p_count++] = i;
 			signals_alphabet[signals_count++]	= i;
 		}
 	}
@@ -2617,7 +2625,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 				for(i = 0; i < x_y_count; i++)env_state->valuation[i]	= sys_state->valuation[i];
 				hashed_valuation		= automaton_bool_array_hash_table_add_or_get_entry(x_y_hash_table, sys_state->valuation, true);
 				obdd_current_state	= obdd_restrict_vector(env_rho_composed, x_y_alphabet, hashed_valuation, x_y_count);
-				obdd_restricted_state	= obdd_exists_vector(obdd_current_state, not_x_p_alphabet, not_x_p_count);
+				obdd_restricted_state	= obdd_exists_vector(obdd_current_state, not_x_p_alphabet_o, not_x_p_count);
 				obdd_get_valuations(mgr, obdd_restricted_state, &valuations, &valuations_size, &current_valuations_count, x_p_alphabet, x_p_count
 										, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
 				/*
@@ -2706,7 +2714,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 				automaton_concrete_bucket_add_entry(rho_env_processed_bucket_list, env_state);
 				hashed_valuation		= automaton_bool_array_hash_table_add_or_get_entry(x_y_x_p_hash_table, env_state->valuation, true);
 				obdd_current_state	= obdd_restrict_vector(env_sys_rho_composed, x_y_x_p_alphabet, hashed_valuation, x_y_x_p_count);
-				obdd_restricted_state	= obdd_exists_vector(obdd_current_state, not_y_p_alphabet, not_y_p_count);
+				obdd_restricted_state	= obdd_exists_vector(obdd_current_state, y_p_alphabet_o, y_p_count);
 				obdd_get_valuations(mgr, obdd_restricted_state, &valuations, &valuations_size, &current_valuations_count, y_p_alphabet, y_p_count
 										, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
 				/*
@@ -2809,6 +2817,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	free(x_alphabet); free(y_alphabet); free(x_p_alphabet); free(y_p_alphabet);free(x_y_alphabet); free(x_y_x_p_alphabet); free(x_p_y_p_alphabet); free(signals_alphabet);
 	free(not_x_p_alphabet); free(not_y_p_alphabet);
 	free(x_alphabet_o); free(y_alphabet_o); free(x_p_alphabet_o); free(y_p_alphabet_o);free(x_y_alphabet_o); free(x_y_x_p_alphabet_o); free(x_p_y_p_alphabet_o); free(signals_alphabet_o);
+	free(not_x_p_alphabet_o);free(not_y_p_alphabet_o);
 	free(valuations);
 	free(local_alphabet);
 	obdd_state_tree_destroy(state_map);

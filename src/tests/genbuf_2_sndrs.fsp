@@ -4,7 +4,7 @@ set Controllable_Alphabet = {}
 
 set Global_Signals	= {sToB_REQ_0, sToB_REQ_1, bToS_ACK_0, bToS_ACK_1, bToR_REQ_0, bToR_REQ_1, rToB_ACK_0, rToB_ACK_1, enq, deq, full, empty, slc_0}
 set Output_Signals	= {bToS_ACK_0, bToS_ACK_1, bToR_REQ_0, bToR_REQ_1, enq, deq, slc_0}
-order			= {sToB_REQ_0 < sToB_REQ_1 < rToB_ACK_0 < rToB_ACK_1 < full < empty < slc_0 < bToS_ACK_0 < bToS_ACK_1 < bToR_REQ_0 < bToR_REQ_1 < enq < deq}
+order			= {sToB_REQ_0 < sToB_REQ_1 < rToB_ACK_0 < rToB_ACK_1 < full < empty < bToS_ACK_0 < bToS_ACK_1 < bToR_REQ_0 < bToR_REQ_1 < enq < deq < slc_0}
 
 /***********
 **** THETA
@@ -82,12 +82,12 @@ ltl env rho A_5_4 in GENBUF			= []((deq && !enq) -> !X(full)).
 **** FLUENTS
 ***********/
 //G_12 was turned into a fluent
-//fluent F_Goal_12 = <deq.on, empty.off> initially 1
+fluent F_Goal_12 = <deq.on, empty.off> initially 1
 
-//ltl fluent G_1_2_sndr_0		= (sToB_REQ_0 <-> bToS_ACK_0).
-//ltl fluent G_1_2_sndr_1		= (sToB_REQ_1 <-> bToS_ACK_1).
-//ltl fluent A_2_sndr_0		= (bToR_REQ_0 <-> rToB_ACK_0).
-//ltl fluent A_2_sndr_1		= (bToR_REQ_1 <-> rToB_ACK_1).
+ltl fluent G_1_2_sndr_0		= (sToB_REQ_0 <-> bToS_ACK_0).
+ltl fluent G_1_2_sndr_1		= (sToB_REQ_1 <-> bToS_ACK_1).
+ltl fluent A_2_sndr_0		= (bToR_REQ_0 <-> rToB_ACK_0).
+ltl fluent A_2_sndr_1		= (bToR_REQ_1 <-> rToB_ACK_1).
 
 /***********
 **** SYNTHESIS
