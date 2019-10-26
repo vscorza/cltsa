@@ -2375,7 +2375,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	obdd* env_rho_composed				= NULL;
 	obdd* sys_rho_composed				= NULL;
 	obdd* env_sys_rho_composed			= NULL;
-#if VERBOSE
+#if VERBOSE || DEBUG_LTL_AUTOMATON
 	printf(ANSI_COLOR_RED);
 	printf("Composing env/sys theta functions\n");
 #endif
@@ -2397,10 +2397,17 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 			if(i > 1)obdd_destroy(old_obdd);
 		}
 	}
-#if VERBOSE
+#if VERBOSE || DEBUG_LTL_AUTOMATON
 	printf("Composing env rho functions\n");
+	uint32_t buff_size = 20000;
+	char buff[20000];
 #endif
 	for(i = 0; i < env_rho_count; i++){
+#if VERBOSE || DEBUG_LTL_AUTOMATON
+			printf("Env rho %d\n",i);
+			obdd_print(env_rho_obdd[i], buff, buff_size);
+			printf("%s", buff); buff[0] = '\0';
+#endif
 		if(i == 0){ env_rho_composed	= env_rho_obdd[i];
 		}else{
 			old_obdd	= env_rho_composed;
@@ -2408,15 +2415,20 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 			obdd_destroy(env_rho_obdd[i]);
 			if(i > 1)obdd_destroy(old_obdd);
 		}
-#if VERBOSE
+#if VERBOSE || DEBUG_LTL_AUTOMATON
 		printf("[%d]", env_rho_composed->mgr->nodes_pool->composite_count);
 		fflush(stdout);
 #endif
 	}
-#if VERBOSE
+#if VERBOSE || DEBUG_LTL_AUTOMATON
 	printf("\nComposing sys rho functions\n");
 #endif
 	for(i = 0; i < sys_rho_count; i++){
+#if VERBOSE || DEBUG_LTL_AUTOMATON
+			printf("Sys rho %d\n",i);
+			obdd_print(sys_rho_obdd[i], buff, buff_size);
+			printf("%s", buff); buff[0] = '\0';
+#endif
 		if(i == 0){ sys_rho_composed	= sys_rho_obdd[i];
 		}else{
 			old_obdd	= sys_rho_composed;
@@ -2424,19 +2436,30 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 			obdd_destroy(sys_rho_obdd[i]);
 			if(i > 1)obdd_destroy(old_obdd);
 		}
-#if VERBOSE
+#if VERBOSE || DEBUG_LTL_AUTOMATON
 		printf("[%d]", sys_rho_composed->mgr->nodes_pool->composite_count);
 		fflush(stdout);
 #endif
 	}
-#if VERBOSE
+#if VERBOSE || DEBUG_LTL_AUTOMATON
 	printf("\n");
 	fflush(stdout);
 	printf(ANSI_COLOR_RESET);
 #endif
 	env_sys_theta_composed				= obdd_apply_and(env_theta_composed, sys_theta_composed);
 	env_sys_rho_composed				= obdd_apply_and(env_rho_composed, sys_rho_composed);
-
+#if VERBOSE || DEBUG_LTL_AUTOMATON
+	printf("\n");
+	buff[0]	= '\0';
+	printf("Env sys theta composed\n");
+	obdd_print(env_sys_theta_composed, buff, buff_size);
+	printf("%s", buff); buff[0] = '\0';
+	printf("Env sys rho composed\n");
+	obdd_print(env_sys_rho_composed, buff, buff_size);
+	printf("%s", buff); buff[0] = '\0';
+	fflush(stdout);
+	printf(ANSI_COLOR_RESET);
+#endif
 	/**
 	 * BEHAVIOUR CONSTRUCTION (RHO AND THETA)
 	 */
@@ -2479,13 +2502,11 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	bool* valuation_set			= malloc(sizeof(bool) * variables_count);
 	//keeps a stack of visited nodes
 	obdd_node** last_nodes		= malloc(sizeof(obdd_node*) * variables_count);
-	//keeps a stack of predecessors as track of the path taken
-	int32_t* last_succ_index	= calloc(sizeof(int32_t), variables_count);
 #if VERBOSE
 	printf(ANSI_COLOR_RED "Building theta valuations\n" ANSI_COLOR_RESET);
 #endif
 	obdd_get_valuations(mgr, env_theta_composed, &valuations, &valuations_size, &current_valuations_count, x_alphabet, x_count
-			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
+			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes);
 #if DEBUG_LTL_AUTOMATON
 	int32_t state_counter = 0;
 	printf("Init env valuations\n");
@@ -2520,7 +2541,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 #if DEBUG_LTL_AUTOMATON
 	state_counter = 0;
 	obdd_get_valuations(mgr, env_sys_theta_composed, &valuations, &valuations_size, &current_valuations_count, x_y_alphabet, x_y_count
-			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
+			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes);
 	printf("Init sys valuations\n");
 	obdd_print_valuations_names(mgr, valuations, current_valuations_count, x_y_alphabet, x_y_count);
 #endif
@@ -2540,7 +2561,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 			hashed_valuation		= automaton_bool_array_hash_table_add_or_get_entry(x_hash_table, env_state->valuation, true);
 			obdd_current_state	= obdd_restrict_vector(env_sys_theta_composed, x_alphabet, hashed_valuation, x_count);
 			obdd_get_valuations(mgr, obdd_current_state, &valuations, &valuations_size, &current_valuations_count, x_y_alphabet, x_y_count
-					, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
+					, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes);
 #if DEBUG_LTL_AUTOMATON
 			printf("%d-[", sys_state->state);
 			for(j = 0; j < x_y_count; j++)
@@ -2577,11 +2598,8 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 #endif
 		}while(theta_env_bucket_list->composite_count > 0);
 	}
-#if VERBOSE
+#if VERBOSE || DEBUG_LTL_AUTOMATON
 	printf(ANSI_COLOR_RED "Building rho valuations\n" ANSI_COLOR_RESET);
-#endif
-#if DEBUG_LTL_AUTOMATON
-	printf("Rho relation building\n");
 #endif
 
 	/**
@@ -2625,9 +2643,11 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 				for(i = 0; i < x_y_count; i++)env_state->valuation[i]	= sys_state->valuation[i];
 				hashed_valuation		= automaton_bool_array_hash_table_add_or_get_entry(x_y_hash_table, sys_state->valuation, true);
 				obdd_current_state	= obdd_restrict_vector(env_rho_composed, x_y_alphabet, hashed_valuation, x_y_count);
-				obdd_restricted_state	= obdd_exists_vector(obdd_current_state, not_x_p_alphabet_o, not_x_p_count);
-				obdd_get_valuations(mgr, obdd_restricted_state, &valuations, &valuations_size, &current_valuations_count, x_p_alphabet, x_p_count
-										, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
+				obdd_get_valuations(mgr, obdd_current_state, &valuations, &valuations_size, &current_valuations_count, x_p_alphabet, x_p_count
+														, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes);
+				//obdd_restricted_state	= obdd_exists_vector(obdd_current_state, not_x_p_alphabet_o, not_x_p_count);
+				//obdd_get_valuations(mgr, obdd_restricted_state, &valuations, &valuations_size, &current_valuations_count, x_p_alphabet, x_p_count
+				//						, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
 				/*
 				obdd_get_valuations(mgr, obdd_current_state, &valuations, &valuations_size, &current_valuations_count, x_y_x_p_alphabet, x_y_x_p_count
 						, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
@@ -2685,7 +2705,10 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 					}
 #endif
 				}
-				obdd_destroy(obdd_restricted_state);
+				if(obdd_restricted_state != NULL){
+					obdd_destroy(obdd_restricted_state);
+					obdd_restricted_state = NULL;
+				}
 				obdd_destroy(obdd_current_state);
 #if DEBUG_LTL_AUTOMATON
 				fflush(stdout);
@@ -2714,9 +2737,13 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 				automaton_concrete_bucket_add_entry(rho_env_processed_bucket_list, env_state);
 				hashed_valuation		= automaton_bool_array_hash_table_add_or_get_entry(x_y_x_p_hash_table, env_state->valuation, true);
 				obdd_current_state	= obdd_restrict_vector(env_sys_rho_composed, x_y_x_p_alphabet, hashed_valuation, x_y_x_p_count);
+				obdd_get_valuations(mgr, obdd_current_state, &valuations, &valuations_size, &current_valuations_count, y_p_alphabet, y_p_count
+														, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes);
+				/*
 				obdd_restricted_state	= obdd_exists_vector(obdd_current_state, y_p_alphabet_o, y_p_count);
 				obdd_get_valuations(mgr, obdd_restricted_state, &valuations, &valuations_size, &current_valuations_count, y_p_alphabet, y_p_count
 										, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
+										*/
 				/*
 				obdd_get_valuations(mgr, obdd_current_state, &valuations, &valuations_size, &current_valuations_count, signals_alphabet, signals_count
 						, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, last_succ_index);
@@ -2776,7 +2803,10 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 					}
 #endif
 				}
-				obdd_destroy(obdd_restricted_state);
+				if(obdd_restricted_state != NULL){
+					obdd_destroy(obdd_restricted_state);
+					obdd_restricted_state	= NULL;
+				}
 				obdd_destroy(obdd_current_state);
 #if DEBUG_LTL_AUTOMATON
 				fflush(stdout);
@@ -2786,7 +2816,6 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	}while(rho_sys_bucket_list->composite_count > 0);
 
 	free(initialized_values);
-	free(last_succ_index);
 	free(valuation_set);
 	free(last_nodes);
 	free(dont_care_list);

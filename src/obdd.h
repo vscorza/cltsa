@@ -11,7 +11,7 @@
 #define VAR_NEXT_SUFFIX		"_p"
 
 #define DEBUG_OBDD	0
-#define DEBUG_OBDD_VALUATIONS	0
+#define DEBUG_OBDD_VALUATIONS	1
 #define DEBUG_OBDD_STATE_TREE	0
 
 #define OBDD_FRAGMENT_SIZE		1000
@@ -236,7 +236,7 @@ bool obdd_is_sat(obdd_mgr* mgr, obdd_node* root);							//checks if representati
 void obdd_print_valuations_names(obdd_mgr* mgr, bool* valuations, uint32_t valuations_count, uint32_t* valuation_img, uint32_t img_count);
 void obdd_print_valuations(obdd_mgr* mgr, bool* valuations, uint32_t valuations_count, uint32_t* valuation_img, uint32_t img_count, char *buff);
 void obdd_get_valuations(obdd_mgr* mgr, obdd* root, bool** valuations, uint32_t* valuations_size, uint32_t* valuations_count, uint32_t* valuation_img, uint32_t img_count
-		, bool* dont_care_list, bool* partial_valuation, bool* initialized_values, bool* valuation_set, obdd_node** last_nodes, int32_t* last_succ_index);
+		, bool* dont_care_list, bool* partial_valuation, bool* initialized_values, bool* valuation_set, obdd_node** last_nodes);
 void obdd_node_get_obdd_nodes(obdd_mgr* mgr, obdd_node* root, obdd_node*** nodes, uint32_t* nodes_count, uint32_t* nodes_size);
 obdd_node** obdd_get_obdd_nodes(obdd_mgr* mgr, obdd* root, uint32_t* nodes_count);
 

@@ -957,8 +957,25 @@ obdd_node** obdd_get_obdd_nodes(obdd_mgr* mgr, obdd* root, uint32_t* nodes_count
 
 	return nodes;
 }
-void obdd_get_valuations(obdd_mgr* mgr, obdd* root, bool** valuations, uint32_t* valuations_size, uint32_t* valuations_count, uint32_t* valuation_img, uint32_t img_count
-		, bool* dont_care_list, bool* partial_valuation, bool* initialized_values, bool* valuation_set, obdd_node** last_nodes, int32_t* last_succ_index){
+/**
+ * Returns a set of valuations for a given obdd over an image
+ * @param mgr the obdd manager to be used while computing the valuations
+ * @param root the obdd to be evaluated
+ * @param valuations_size a placeholder for the resulting valuations' size
+ * @param valuations_count a placeholder for the resulting valuations' count
+ * @param valuation_img an array of indexes for the image variables space, should be ordered following the robdd partial order
+ * @param img_count the number of elements in the image array
+ * @param dont_care_list a temporary placeholder for the set of variables not being taken into consideration for any particular evaluation
+ * @param partial_valuation a temporary placeholder for the state of any particular evaluation
+ * @param initialized_values a temporary placeholder for the set of initialized boolean values
+ * @param valuation_set a temporary placeholder for the array used to check that all values were set
+ * @param last_nodes a temporary placeholder for the stack of last visited nodes for any particular evaluation
+ * @param last_succ_index temporary placeholder for
+ */
+void obdd_get_valuations(obdd_mgr* mgr, obdd* root, bool** valuations, uint32_t* valuations_size,
+		uint32_t* valuations_count, uint32_t* valuation_img, uint32_t img_count
+		, bool* dont_care_list, bool* partial_valuation, bool* initialized_values
+		, bool* valuation_set, obdd_node** last_nodes){
 	int32_t i, j, dont_cares_count, variable_index;
 	uint32_t nodes_count;
 	*valuations_count			= 0;
@@ -995,15 +1012,7 @@ void obdd_get_valuations(obdd_mgr* mgr, obdd* root, bool** valuations, uint32_t*
 		uint32_t modulo	= dont_cares_count;
 
 		#if DEBUG_OBDD_VALUATIONS
-						printf("[T]erminals on node: %d (%d:%s) :\n", last_node_index, last_nodes[current_index]->var_ID,dictionary_key_for_value(mgr->vars_dict,last_nodes[current_index]->var_ID));
-
-						printf("last_succ_index[%d]:%d\t<", last_node_index, last_succ_index[current_index]);
-						for(i = 0; i <= (int32_t)current_index; i++)
-							printf("%s", dont_care_list[i]? "?" : (partial_valuation[i]? "1" : "0"));
-						for(i = variables_count - 1; i > last_node_index; i--)
-							printf("x");
-						printf(">\n");
-						printf("Partial Valuation\t<");
+								printf("Partial Valuation\t<");
 						for(i = 0; i < (int32_t)variables_count; i++)
 							printf("%s", partial_valuation[i]? "1" : "0");
 						printf(">\n");
@@ -1140,7 +1149,6 @@ void obdd_get_valuations(obdd_mgr* mgr, obdd* root, bool** valuations, uint32_t*
 				#if DEBUG_OBDD_VALUATIONS
 								printf("[T]erminals on node: %d (%d:%s) :\n", last_node_index, last_nodes[current_index]->var_ID,dictionary_key_for_value(mgr->vars_dict,last_nodes[current_index]->var_ID));
 
-								printf("last_succ_index[%d]:%d\t<", last_node_index, last_succ_index[current_index]);
 								for(i = 0; i <= (int32_t)current_index; i++)
 									printf("%s", dont_care_list[i]? "?" : (partial_valuation[i]? "1" : "0"));
 								for(i = variables_count - 1; i > last_node_index; i--)

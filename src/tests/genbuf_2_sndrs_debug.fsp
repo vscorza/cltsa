@@ -22,7 +22,7 @@ ltl sys rho G_11_2 in GENBUF			= [](empty-> !deq).
 ltl sys rho G_11_2_X in GENBUF			= [](X(empty-> !deq)).
 
 //if sToB_REQ and not full then should ENQ
-//ltl sys rho G_13 in GENBUF			= [](!full -> (enq || X(enq))).
+ltl sys rho G_13 in GENBUF			= [](!full -> (enq || X(enq))).
 
 /***********
 **** ENV RHO
