@@ -14,10 +14,10 @@ ltl sys theta Init_Buffer_s in TEST	= (!y1).
 **** SYS RHO
 ***********/
 ltl sys rho G_sys_1 in TEST			= [](!y1).
-//ltl sys rho G_sys_1 in TEST			= [](X(!y1)).
+ltl sys rho G_sys_1 in TEST			= [](X(!y1)).
 /***********
 **** ENV RHO
 ***********/
-//ltl env rho A_env_1 in TEST			= [](!x1 <-> (X(x1))).
-//ltl env rho A_5_2 in TEST			= [](x1 <-> x2).
+ltl env rho A_env_1 in TEST			= [](!x1 <-> (X(x1))).
+ltl env rho A_5_2 in TEST			= [](x1 <-> x2).
 ltl env rho A_5_3 in TEST			= [](X(x1 <-> x3)).

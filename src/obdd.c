@@ -410,21 +410,24 @@ obdd* obdd_apply_not(obdd* value){
 obdd_node* obdd_node_apply_next(obdd_mgr* mgr, obdd_node* value){
 	if(obdd_is_constant(mgr, value))
 		return value;
-	dictionary* dict	= mgr->vars_dict;
-	char var_next[200];
-	strcpy(var_next, dictionary_key_for_value(dict, value->var_ID));
-	strcat(var_next, VAR_NEXT_SUFFIX);
-
 	obdd_node *cached_node	= obdd_cache_lookup1(mgr->cache, obdd_node_apply_next, value);
 
 	if(cached_node != NULL)
 		return cached_node;
 
+	dictionary* dict	= mgr->vars_dict;
+	char var_next[200];
+	strcpy(var_next, dictionary_key_for_value(dict, value->var_ID));
+	strcat(var_next, VAR_NEXT_SUFFIX);
+
 	uint32_t var_ID		= dictionary_add_entry(dict,  var_next);
 	obdd_node *high_value	= (value->high_obdd != NULL && !obdd_is_constant(mgr, value->high_obdd))?
 				obdd_node_apply_next(mgr, value->high_obdd) : value->high_obdd;
+	//this is done to avoid a node being destroyed before beind assigned due to cache removal
+	high_value->ref_count++;
 	obdd_node *low_value	= (value->low_obdd != NULL && !obdd_is_constant(mgr, value->low_obdd))?
 					obdd_node_apply_next(mgr, value->low_obdd) : value->low_obdd;
+	high_value->ref_count--;
 	obdd_node *next_value	= 	obdd_mgr_mk_node(mgr, var_next
 			, high_value, low_value);
 

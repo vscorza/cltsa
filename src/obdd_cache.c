@@ -50,8 +50,10 @@ void obdd_cache_insert(obdd_cache *cache, uintptr_t op, obdd_node *f, obdd_node 
 
 	if(item->data != NULL){
 		item->data->ref_count--;
-		if(item->data->ref_count == 0)
-			obdd_node_destroy(cache->mgr, item->data);
+
+		 if(item->data->ref_count == 0){
+			//obdd_node_destroy(cache->mgr, item->data);
+		 }
 	}
 
 	item->f	= (obdd_node*) uf;
@@ -74,8 +76,10 @@ void obdd_cache_insert2(obdd_cache *cache, uintptr_t op, obdd_node *f, obdd_node
 
 	if(item->data != NULL){
 		item->data->ref_count--;
-		if(item->data->ref_count == 0)
-			obdd_node_destroy(cache->mgr, item->data);
+
+		 if(item->data->ref_count == 0){
+			//obdd_node_destroy(cache->mgr, item->data);
+		 }
 	}
 
 	item->f	= f;
@@ -97,8 +101,9 @@ void obdd_cache_insert1(obdd_cache *cache, uintptr_t op, obdd_node *f, obdd_node
 
 	if(item->data != NULL){
 		item->data->ref_count--;
-		if(item->data->ref_count == 0)
-			obdd_node_destroy(cache->mgr, item->data);
+		 if(item->data->ref_count == 0){
+			//obdd_node_destroy(cache->mgr, item->data);
+		 }
 	}
 
 	item->f	= f;
