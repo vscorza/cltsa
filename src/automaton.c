@@ -20,7 +20,7 @@ automaton_alphabet* automaton_alphabet_clone(automaton_alphabet* source){
 void automaton_alphabet_copy(automaton_alphabet* source,automaton_alphabet* target){
 	target->count						= source->count;
 	target->size 						= source->size;
-	target->list						= malloc(sizeof(automaton_signal_event) * target->size);
+	target->list						= calloc(target->size, sizeof(automaton_signal_event));
 	uint32_t i;
 	for(i = 0; i < target->count; i++){
 		automaton_signal_event_copy(&(source->list[i]), &(target->list[i]));
@@ -41,8 +41,8 @@ void automaton_transition_copy(automaton_transition* source, automaton_transitio
 	for(i = 0; i < FIXED_SIGNALS_COUNT; i++)
 		target->signals[i]			= source->signals[i];
 	if(target->signals_size > FIXED_SIGNALS_COUNT){
-		if(target->other_signals != NULL)free(target->other_signals);
-		target->other_signals					= malloc(sizeof(signal_t) * (target->signals_size - FIXED_SIGNALS_COUNT));
+		if(target->other_signals != NULL){free(target->other_signals);target->other_signals = NULL;}
+		target->other_signals					= calloc((target->signals_size - FIXED_SIGNALS_COUNT), sizeof(signal_t) );
 		for(i = 0; i < (target->signals_size - FIXED_SIGNALS_COUNT); i++){
 			target->other_signals[i]			= source->other_signals[i];
 		}
@@ -1208,12 +1208,12 @@ bool automaton_transition_add_signal_event_ID(automaton_transition* transition, 
 	uint32_t new_count		= transition->signals_count + 1;
 	if(new_count > transition->signals_size){
 		if(transition->signals_size == FIXED_SIGNALS_COUNT){//should add new list
-			transition->other_signals	= malloc(sizeof(signal_t) * FIXED_SIGNALS_COUNT);
+			transition->other_signals	= calloc(FIXED_SIGNALS_COUNT, sizeof(signal_t));
 			transition->signals_size	+= FIXED_SIGNALS_COUNT;
 		}else{//should update list
 			uint32_t old_size			= transition->signals_size - FIXED_SIGNALS_COUNT;
 			uint32_t new_size			= old_size * SIGNALS_INCREASE_FACTOR;
-			signal_t* new_signals		= malloc(sizeof(signal_t) * new_size);
+			signal_t* new_signals		= calloc( new_size, sizeof(signal_t));
 			for(i = 0; i < (int32_t)old_size; i++)
 				new_signals[i]			= transition->other_signals[i];
 			free(transition->other_signals);
@@ -2051,14 +2051,19 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 	for(i = 0; i < guarantees_count; i++){
 		one_option	= false;
 		for(j = 0; j < game_automaton->out_degree[game_automaton->initial_states[0]]; j++){
+#if DEBUG_STRATEGY_BUILD
+			printf("[CHK] RANKING FOR %d: %d\n", game_automaton->transitions[game_automaton->initial_states[0]][j].state_to,
+					((automaton_ranking*)automaton_concrete_bucket_get_entry(ranking_list[i], game_automaton->transitions[game_automaton->initial_states[0]][j].state_to))->value);
+#endif
 			if(((automaton_ranking*)automaton_concrete_bucket_get_entry(ranking_list[i]
 																					 , game_automaton->transitions[game_automaton->initial_states[0]][j].state_to))->value != RANKING_INFINITY){
+
 				one_option = true;
 			}
 		}
 		if(!one_option){
 			is_winning = false;
-			break;
+			//break;
 		}
 	}
 
@@ -2174,6 +2179,7 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 							}
 							bool is_input	= false;
 							free(strategy_transition->other_signals);
+							strategy_transition->other_signals = NULL;
 							automaton_transition_copy(current_transition, strategy_transition);
 							strategy_transition->state_from	= strategy_maps[i][current_ranking->state];
 							strategy_transition->state_to	= strategy_maps[succ_guarantee][succ_ranking->state];
@@ -2210,6 +2216,7 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 							//add initial state if not already added
 							if(strategy->initial_states_count == 0 && current_ranking->state == game_automaton->initial_states[0]){
 #if DEBUG_STRATEGY_BUILD
+								printf("(g:%d)[INI] Initial state added as %d\n",i, strategy_maps[i][current_ranking->state]);
 #endif
 								automaton_automaton_add_initial_state(strategy, strategy_maps[i][current_ranking->state]);
 							}
