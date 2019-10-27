@@ -27,7 +27,7 @@ void automaton_alphabet_copy(automaton_alphabet* source,automaton_alphabet* targ
 	}
 }
 automaton_transition* automaton_transition_clone(automaton_transition* source){
-	automaton_transition* copy		= malloc(sizeof(automaton_transition));
+	automaton_transition* copy		= calloc(1, sizeof(automaton_transition));
 	automaton_transition_copy(source, copy);
 	return copy;
 }
@@ -41,6 +41,7 @@ void automaton_transition_copy(automaton_transition* source, automaton_transitio
 	for(i = 0; i < FIXED_SIGNALS_COUNT; i++)
 		target->signals[i]			= source->signals[i];
 	if(target->signals_size > FIXED_SIGNALS_COUNT){
+		if(target->other_signals != NULL)free(target->other_signals);
 		target->other_signals					= malloc(sizeof(signal_t) * (target->signals_size - FIXED_SIGNALS_COUNT));
 		for(i = 0; i < (target->signals_size - FIXED_SIGNALS_COUNT); i++){
 			target->other_signals[i]			= source->other_signals[i];
@@ -690,7 +691,7 @@ automaton_alphabet* automaton_alphabet_create(){
 	return alphabet;
 }
 automaton_transition* automaton_transition_create(uint32_t from_state, uint32_t to_state){
-	automaton_transition* transition	= malloc(sizeof(automaton_transition));
+	automaton_transition* transition	= calloc(1, sizeof(automaton_transition));
 	automaton_transition_initialize(transition, from_state, to_state);
 	return transition;
 }
@@ -837,10 +838,10 @@ void automaton_automaton_initialize(automaton_automaton* automaton, char* name, 
 		automaton->in_degree[i]				= 0;
 		automaton->in_size[i]				= TRANSITIONS_INITIAL_SIZE;
 		automaton->out_size[i]				= TRANSITIONS_INITIAL_SIZE;
-		automaton->transitions[i]			= malloc(sizeof(automaton_transition) * automaton->out_size[i]);
+		automaton->transitions[i]			= calloc(automaton->out_size[i], sizeof(automaton_transition));
 		for(j = 0; j < automaton->out_size[i]; j++)
 			automaton_transition_initialize(&(automaton->transitions[i][j]), 0, 0);
-		automaton->inverted_transitions[i]	= malloc(sizeof(automaton_transition) * automaton->in_size[i]);
+		automaton->inverted_transitions[i]	= calloc(automaton->in_size[i],sizeof(automaton_transition));
 		for(j = 0; j < automaton->in_size[i]; j++)
 			automaton_transition_initialize(&(automaton->inverted_transitions[i][j]), 0, 0);
 	}
@@ -1414,11 +1415,11 @@ void automaton_automaton_resize_to_state(automaton_automaton* current_automaton,
 		next_in_degree[i]				= 0;
 		next_in_size[i]					= TRANSITIONS_INITIAL_SIZE;
 		next_out_size[i]				= TRANSITIONS_INITIAL_SIZE;
-		next_trans[i]					= malloc(sizeof(automaton_transition) * next_out_size[i]);
+		next_trans[i]					= calloc(next_out_size[i], sizeof(automaton_transition));
 		for(j = 0; j < next_out_size[i]; j++){
 			automaton_transition_initialize(&(next_trans[i][j]), 0, 0);
 		}
-		next_inv_trans[i]				= malloc(sizeof(automaton_transition) * next_in_size[i]);
+		next_inv_trans[i]				= calloc(next_in_size[i], sizeof(automaton_transition));
 		for(j = 0; j < next_in_size[i]; j++){
 			automaton_transition_initialize(&(next_inv_trans[i][j]), 0, 0);
 		}
@@ -1447,7 +1448,7 @@ void automaton_automaton_resize_to_state(automaton_automaton* current_automaton,
 		if(current_automaton->context->global_fluents_count > 0){
 			old_valuations_size						= GET_FLUENTS_ARR_SIZE(current_automaton->context->global_fluents_count, old_size);
 			current_automaton->valuations_size		= GET_FLUENTS_ARR_SIZE(current_automaton->context->global_fluents_count, current_automaton->transitions_size);
-			new_valuations 							= malloc(sizeof(uint32_t) * current_automaton->valuations_size);
+			new_valuations 							= calloc(current_automaton->valuations_size, sizeof(uint32_t));
 			for(i = 0; i < old_valuations_size; i++){
 				new_valuations[i]					= current_automaton->valuations[i];
 			}
@@ -1487,7 +1488,7 @@ bool automaton_automaton_add_transition(automaton_automaton* current_automaton, 
 
 	if(old_out_degree  >= old_out_size){
 		current_automaton->out_size[from_state]	= (old_out_size * LIST_INCREASE_FACTOR);
-		automaton_transition* new_out	= malloc(sizeof(automaton_transition) * current_automaton->out_size[from_state]);
+		automaton_transition* new_out	= calloc(current_automaton->out_size[from_state], sizeof(automaton_transition));
 		for(i = 0; i < old_out_degree; i++){
 				automaton_transition_copy(&(current_automaton->transitions[from_state][i]), &(new_out[i]));
 				automaton_transition_destroy(&(current_automaton->transitions[from_state][i]), false);
@@ -1502,7 +1503,7 @@ bool automaton_automaton_add_transition(automaton_automaton* current_automaton, 
 	automaton_transition_copy(transition, &(current_automaton->transitions[from_state][old_out_degree]));
 	if(old_in_degree  >= old_in_size){
 		current_automaton->in_size[to_state]	= (old_in_size * LIST_INCREASE_FACTOR);
-		automaton_transition* new_in	= malloc(sizeof(automaton_transition) * current_automaton->in_size[to_state]);
+		automaton_transition* new_in	= calloc(current_automaton->in_size[to_state], sizeof(automaton_transition));
 		for(i = 0; i < old_in_degree; i++){
 			automaton_transition_copy(&(current_automaton->inverted_transitions[to_state][i]), &(new_in[i]));
 			automaton_transition_destroy(&(current_automaton->inverted_transitions[to_state][i]), false);
@@ -3237,8 +3238,13 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 					frontier_count++;
 					if(frontier_count >= (frontier_size - 1)){
 						uint32_t new_size	= frontier_size * LIST_INCREASE_FACTOR;
-						uint32_t i;
-						uint32_t* new_frontier				= malloc(sizeof(uint32_t) * new_size * automata_count);
+						uint32_t i, key_size;
+						if(is_game){
+							key_size	= automata_count + ctx->global_fluents_count;
+						}else{
+							key_size	= automata_count;
+						}
+						uint32_t* new_frontier				= malloc(sizeof(uint32_t) * new_size * key_size);
 						uint32_t* new_composite_frontier	= malloc(sizeof(uint32_t) * new_size);
 						for(i = 0; i < frontier_size * key_size; i++){
 							new_frontier[i]					= frontier[i];

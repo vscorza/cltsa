@@ -46,7 +46,7 @@ ltl sys rho G_11_2 in GENBUF			= [](empty-> !deq).
 ltl sys rho G_11_2_X in GENBUF			= [](X(empty-> !deq)).
 
 //if sToB_REQ and not full then should ENQ
-//ltl sys rho G_13 in GENBUF			= []((!full && (sToB_REQ_0 || sToB_REQ_1)) -> (enq || X(enq))).
+ltl sys rho G_13 in GENBUF			= []((!full && (sToB_REQ_0 || sToB_REQ_1)) -> (enq || X(enq))).
 
 /***********
 **** ENV RHO
@@ -76,7 +76,7 @@ ltl env rho A_5_4 in GENBUF			= []((deq && !enq) -> !X(full)).
 **** AUTOMATA
 ***********/
 //G_7 was turned into an automaton
-//G_7_ROUND_ROBIN	= (bToR_REQ_0.on -> bToR_REQ_1.on -> G_7_ROUND_ROBIN).
+G_7_ROUND_ROBIN	= (bToR_REQ_0.on -> bToR_REQ_1.on -> G_7_ROUND_ROBIN).
 
 /***********
 **** FLUENTS
@@ -92,6 +92,7 @@ ltl fluent A_2_sndr_1		= (bToR_REQ_1 <-> rToB_ACK_1).
 /***********
 **** SYNTHESIS
 ***********/
-//|f| ENV =(GENBUF ||_c G_7_ROUND_ROBIN).
-//|gr1| <{A_2_sndr_0, A_2_sndr_1}><{F_Goal_12, G_1_2_sndr_0, G_1_2_sndr_1}> STRAT = ENV.
+|f| ENV =(GENBUF ||_c G_7_ROUND_ROBIN).
+|gr1| <{A_2_sndr_0, A_2_sndr_1}><{F_Goal_12, G_1_2_sndr_0, G_1_2_sndr_1}> STRAT = ENV.
+//|gr1| <{A_2_sndr_0, A_2_sndr_1}><{F_Goal_12}> STRAT = ENV.
 
