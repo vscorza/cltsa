@@ -1966,7 +1966,7 @@ automaton_fluent* automaton_fluent_create_from_syntax(automaton_parsing_tables* 
 		, automaton_alphabet* global_alphabet){
 	//TODO:implement fluents initial value
 	automaton_fluent* fluent	= automaton_fluent_create(fluent_def_syntax->name, false);
-	uint32_t i, j, k;
+	uint32_t i, j, k, l;
 	if(fluent_def_syntax->initiating_set->is_ident || fluent_def_syntax->finishing_set->is_ident){
 		//TODO: implement set by ref in fluents
 		printf("[FATAL ERROR] fluent set by ref not implemented\n");
@@ -1974,6 +1974,7 @@ automaton_fluent* automaton_fluent_create_from_syntax(automaton_parsing_tables* 
 	}
 	automaton_signal_event** sig_events;
 	automaton_set_syntax* current_set;
+	automaton_signal_event* current_event;
 	for(i = 0; i < fluent_def_syntax->initiating_set->count; i++){
 		if(fluent_def_syntax->initiating_set->labels[i][0]->is_set){
 			current_set = fluent_def_syntax->initiating_set->labels[i][0]->set;
@@ -1986,13 +1987,26 @@ automaton_fluent* automaton_fluent_create_from_syntax(automaton_parsing_tables* 
 			exit(-1);
 		}
 		for(k = 0; k < current_set->count; k++){
-			sig_events	= calloc(current_set->labels_count[k], sizeof(automaton_signal_event*));
-			for(j = 0; j < current_set->labels_count[k]; j++)
-				sig_events[j] = automaton_signal_event_create(current_set->labels[k][j]->string_terminal, INPUT_SIG);
-			automaton_fluent_add_starting_signals(fluent, global_alphabet, current_set->labels_count[k], sig_events);
-			for(j = 0; j < fluent_def_syntax->initiating_set->labels_count[k]; j++)
-				automaton_signal_event_destroy(sig_events[j], true);
-			free(sig_events);
+			for(j = 0; j < current_set->labels_count[k]; j++){
+				if(current_set->labels[k][j]->is_set){
+					if(current_set->labels[k][j]->set->is_ident){
+						printf("[FATAL ERROR] fluent set by ref not implemented\n");exit(-1);
+					}
+					sig_events	= calloc(current_set->labels[k][j]->set->labels_count[0], sizeof(automaton_signal_event*));
+					for(l = 0; l < current_set->labels[k][j]->set->labels_count[0]; l++){
+						sig_events[j] = automaton_signal_event_create(current_set->labels[k][j]->set->labels[0][l]->string_terminal, INPUT_SIG);
+					}
+					automaton_fluent_add_starting_signals(fluent, global_alphabet, current_set->labels[k][j]->set->labels_count[0], sig_events);
+					for(l = 0; l < current_set->labels[k][j]->set->labels_count[0]; l++){
+						automaton_signal_event_destroy(sig_events[l], true);
+					}
+					free(sig_events);
+				}else{
+					current_event = automaton_signal_event_create(current_set->labels[k][j]->string_terminal, INPUT_SIG);
+					automaton_fluent_add_starting_signals(fluent, global_alphabet, 1, &current_event);
+					automaton_signal_event_destroy(current_event, true);
+				}
+			}
 		}
 	}
 	for(i = 0; i < fluent_def_syntax->finishing_set->count; i++){
@@ -2007,13 +2021,26 @@ automaton_fluent* automaton_fluent_create_from_syntax(automaton_parsing_tables* 
 			exit(-1);
 		}
 		for(k = 0; k < current_set->count; k++){
-			sig_events	= calloc(current_set->labels_count[k], sizeof(automaton_signal_event*));
-			for(j = 0; j < current_set->labels_count[k]; j++)
-				sig_events[j] = automaton_signal_event_create(current_set->labels[k][j]->string_terminal, INPUT_SIG);
-			automaton_fluent_add_ending_signals(fluent, global_alphabet, current_set->labels_count[k], sig_events);
-			for(j = 0; j < fluent_def_syntax->initiating_set->labels_count[k]; j++)
-				automaton_signal_event_destroy(sig_events[j], true);
-			free(sig_events);
+			for(j = 0; j < current_set->labels_count[k]; j++){
+				if(current_set->labels[k][j]->is_set){
+					if(current_set->labels[k][j]->set->is_ident){
+						printf("[FATAL ERROR] fluent set by ref not implemented\n");exit(-1);
+					}
+					sig_events	= calloc(current_set->labels[k][j]->set->labels_count[0], sizeof(automaton_signal_event*));
+					for(l = 0; l < current_set->labels[k][j]->set->labels_count[0]; l++){
+						sig_events[j] = automaton_signal_event_create(current_set->labels[k][j]->set->labels[0][l]->string_terminal, INPUT_SIG);
+					}
+					automaton_fluent_add_ending_signals(fluent, global_alphabet, current_set->labels[k][j]->set->labels_count[0], sig_events);
+					for(l = 0; l < current_set->labels[k][j]->set->labels_count[0]; l++){
+						automaton_signal_event_destroy(sig_events[l], true);
+					}
+					free(sig_events);
+				}else{
+					current_event = automaton_signal_event_create(current_set->labels[k][j]->string_terminal, INPUT_SIG);
+					automaton_fluent_add_ending_signals(fluent, global_alphabet, 1, &current_event);
+					automaton_signal_event_destroy(current_event, true);
+				}
+			}
 		}
 	}
 	fluent->initial_valuation	= fluent_def_syntax->initial_value != 0;

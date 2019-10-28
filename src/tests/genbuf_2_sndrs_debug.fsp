@@ -46,6 +46,7 @@ ltl env rho A_5_4 in GENBUF			= []((deq && !enq) -> !X(full)).
 //G_12 was turned into a fluent
 fluent F_Goal_12 = <{deq.on,empty.on}, empty.off> initially 1
 
+
 ltl fluent A_1		= (deq || !deq).
 
 /***********

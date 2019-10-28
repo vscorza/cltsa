@@ -3238,7 +3238,8 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 									break;
 								}
 							}
-							if(satisfies_one_condition)current_to_state[automata_count + k]	= false;
+							if(satisfies_one_condition)
+								current_to_state[automata_count + k]	= false;
 						}else{//check starting for those that are down
 							satisfies_one_condition	= false;
 							for(l = 0; l < ctx->global_fluents[k].starting_signals_count; l++){
@@ -3254,7 +3255,8 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 									break;
 								}
 							}
-							if(satisfies_one_condition)current_to_state[automata_count + k]	= true;
+							if(satisfies_one_condition)
+								current_to_state[automata_count + k]	= true;
 						}
 					}
 				}
@@ -3284,7 +3286,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 					for(i = 0; i < fluent_count; i++){
 						fluent_index	= GET_STATE_FLUENT_INDEX(fluent_count, composite_to, i);
 						//set new valuation
-						fluent_automata_index	= automata_count - fluent_count + i;
+						fluent_automata_index	= automata_count - fluent_count + i + 1;
 						if(current_to_state[fluent_automata_index] == 1){
 							//Check if it should be added to the inverted valuation list
 							state_found		= automaton_bucket_has_entry(composition->inverted_valuations[i], composite_to);
