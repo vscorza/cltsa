@@ -133,9 +133,11 @@ typedef struct automaton_transition_str{
 typedef struct automaton_fluent_str{
 	char*		name;
 	uint32_t	starting_signals_count;
-	signal_t*	starting_signals;
+	uint32_t*	starting_signals_element_count;
+	signal_t**	starting_signals;
 	uint32_t	ending_signals_count;
-	signal_t*	ending_signals;
+	uint32_t*	ending_signals_element_count;
+	signal_t**	ending_signals;
 	bool		initial_valuation;
 } automaton_fluent;
 
@@ -310,10 +312,10 @@ bool automaton_transition_has_signal_event_ID(automaton_transition* transition, 
 bool automaton_transition_add_signal_event(automaton_transition* transition, automaton_automata_context* ctx, automaton_signal_event* signal_event);
 bool automaton_transition_add_signal_event_ID(automaton_transition* transition, automaton_automata_context* ctx, uint32_t index, automaton_signal_type type);
 /** FLUENT **/
-bool automaton_fluent_has_starting_signal(automaton_fluent* fluent, automaton_alphabet* alphabet, automaton_signal_event* signal_event);
-bool automaton_fluent_add_starting_signal(automaton_fluent* fluent, automaton_alphabet* alphabet, automaton_signal_event* signal_event);
-bool automaton_fluent_has_ending_signal(automaton_fluent* fluent, automaton_alphabet* alphabet, automaton_signal_event* signal_event);
-bool automaton_fluent_add_ending_signal(automaton_fluent* fluent, automaton_alphabet* alphabet, automaton_signal_event* signal_event);
+bool automaton_fluent_has_starting_signals(automaton_fluent* fluent, automaton_alphabet* alphabet, uint32_t signal_count, automaton_signal_event** signal_events);
+bool automaton_fluent_add_starting_signals(automaton_fluent* fluent, automaton_alphabet* alphabet, uint32_t signal_count, automaton_signal_event** signal_events);
+bool automaton_fluent_has_ending_signals(automaton_fluent* fluent, automaton_alphabet* alphabet, uint32_t signal_count, automaton_signal_event** signal_events);
+bool automaton_fluent_add_ending_signals(automaton_fluent* fluent, automaton_alphabet* alphabet, uint32_t signal_count, automaton_signal_event** signal_events);
 /** VALUATION **/
 bool automaton_valuation_has_fluent(automaton_valuation* valuation, automaton_automata_context* ctx, automaton_fluent* fluent);
 bool automaton_valuation_add_fluent(automaton_valuation* valuation, automaton_automata_context* ctx, automaton_fluent* fluent);

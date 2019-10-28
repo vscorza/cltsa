@@ -58,19 +58,42 @@ automaton_fluent* automaton_fluent_clone(automaton_fluent* source){
 void automaton_fluent_copy(automaton_fluent* source, automaton_fluent* target){
 	target->name 					= malloc(sizeof(char) * (strlen(source->name) + 1));
 	strcpy(target->name, source->name);
+	uint32_t i, j;
+	if(target->starting_signals_count > 0){
+		for(i = 0; i < target->starting_signals_count; i++){
+			free(target->starting_signals[i]);
+		}
+		free(target->starting_signals);
+		free(target->starting_signals_element_count);
+	}
 	target->starting_signals_count	= source->starting_signals_count;
-	if(target->starting_signals != NULL)free(target->starting_signals);
-	target->starting_signals		= malloc(sizeof(uint32_t) * target->starting_signals_count);
-	uint32_t i;
+	target->starting_signals		= calloc(target->starting_signals_count, sizeof(signal_t*));
+	target->starting_signals_element_count = calloc(target->starting_signals_count, sizeof(uint32_t));
 	for(i = 0; i < target->starting_signals_count; i++){
-		target->starting_signals[i]	= source->starting_signals[i];
+		target->starting_signals_element_count[i]	= source->starting_signals_element_count[i];
+		target->starting_signals[i]	= calloc(target->starting_signals_element_count[i], sizeof(signal_t));
+		for(j = 0; j < target->starting_signals_element_count[i]; j++){
+			target->starting_signals[i][j]	= source->starting_signals[i][j];
+		}
+	}
+	if(target->ending_signals_count > 0){
+		for(i = 0; i < target->ending_signals_count; i++){
+			free(target->ending_signals[i]);
+		}
+		free(target->ending_signals);
+		free(target->ending_signals_element_count);
 	}
 	target->ending_signals_count	= source->ending_signals_count;
-	if(target->ending_signals != NULL)free(target->ending_signals);
-	target->ending_signals			= malloc(sizeof(uint32_t) * target->ending_signals_count);
+	target->ending_signals		= calloc(target->ending_signals_count, sizeof(signal_t*));
+	target->ending_signals_element_count = calloc(target->ending_signals_count, sizeof(uint32_t));
 	for(i = 0; i < target->ending_signals_count; i++){
-		target->ending_signals[i]	= source->ending_signals[i];
+		target->ending_signals_element_count[i]	= source->ending_signals_element_count[i];
+		target->ending_signals[i]	= calloc(target->ending_signals_element_count[i], sizeof(signal_t));
+		for(j = 0; j < target->ending_signals_element_count[i]; j++){
+			target->ending_signals[i][j]	= source->ending_signals[i][j];
+		}
 	}
+
 	target->initial_valuation		= source->initial_valuation;
 }
 automaton_valuation* automaton_valuation_clone(automaton_valuation* source){
@@ -300,19 +323,27 @@ void automaton_transition_print(automaton_transition* transition, automaton_auto
 void automaton_fluent_print(automaton_fluent* fluent, automaton_automata_context* ctx, char* prefix, char* suffix){
 	if(prefix != NULL)
 		printf("%s", prefix);
-	uint32_t i;
+	uint32_t i,j;
 
 	automaton_alphabet*	alphabet	= ctx->global_alphabet;
 
-	printf("Fluent %s:<{", fluent->name);
+	printf("Fluent %s:<[", fluent->name);
 	for(i = 0; i < fluent->starting_signals_count; i++){
-		printf("%s%s", alphabet->list[fluent->starting_signals[i]].name, (i < (fluent->starting_signals_count -1)? "," : ""));
+		printf("{");
+		for(j = 0; j < fluent->starting_signals_element_count[i]; j++){
+			printf("%s%s", alphabet->list[fluent->starting_signals[i][j]].name, (j < (fluent->starting_signals_element_count[i] -1)? "," : ""));
+		}
+		printf("}%s", i < fluent->starting_signals_count - 1 ? ",":"");
 	}
-	printf("},{");
+	printf("],[");
 	for(i = 0; i < fluent->ending_signals_count; i++){
-		printf("%s%s", alphabet->list[fluent->ending_signals[i]].name, (i < (fluent->ending_signals_count -1)? "," : ""));
+		printf("{");
+		for(j = 0; j < fluent->ending_signals_element_count[i]; j++){
+			printf("%s%s", alphabet->list[fluent->ending_signals[i][j]].name, (j < (fluent->ending_signals_element_count[i] -1)? "," : ""));
+		}
+		printf("}%s", i < fluent->ending_signals_count - 1 ? ",":"");
 	}
-	printf("}> initially %s", (fluent->initial_valuation? "true":"false"));
+	printf("]> initially %s", (fluent->initial_valuation? "true":"false"));
 	if(suffix != NULL)
 		printf("%s", suffix);
 }
@@ -560,13 +591,19 @@ void automaton_signal_event_serialize_report(FILE *f, automaton_signal_event *ev
 //<name,starting_count,[f_1,..,f_n],ending_count,[f'_1,..,f'_m],initially>
 void automaton_fluent_serialize_report(FILE *f, automaton_fluent *fluent){
 	fprintf(f, "%s%s%s%d%s%s", AUT_SER_OBJ_START, fluent->name, AUT_SER_SEP, fluent->starting_signals_count, AUT_SER_SEP, AUT_SER_ARRAY_START);
-	uint32_t i;
+	uint32_t i,j;
 	for(i = 0; i < fluent->starting_signals_count; i++){
-		fprintf(f, "%d%s", fluent->starting_signals[i], i == (fluent->starting_signals_count - 1)? "" :  AUT_SER_SEP);
+		fprintf(f, "%d%s%s", fluent->starting_signals_element_count[i], AUT_SER_SEP, AUT_SER_ARRAY_START);
+		for(j = 0; j < fluent->starting_signals_element_count[i]; j++)
+			fprintf(f, "%d%s", fluent->starting_signals[i][j], j == (fluent->starting_signals_element_count[i] - 1)? "" :  AUT_SER_SEP);
+		fprintf(f, "%s%s", AUT_SER_ARRAY_END, i == (fluent->starting_signals_count - 1) ? "" : AUT_SER_SEP, AUT_SER_ARRAY_START);
 	}
 	fprintf(f, "%s%s%d%s%s", AUT_SER_ARRAY_END, AUT_SER_SEP, fluent->ending_signals_count, AUT_SER_SEP, AUT_SER_ARRAY_START);
 	for(i = 0; i < fluent->ending_signals_count; i++){
-		fprintf(f, "%d%s", fluent->ending_signals[i], i == (fluent->ending_signals_count - 1)? "" :  AUT_SER_SEP);
+		fprintf(f, "%d%s%s", fluent->ending_signals_element_count[i], AUT_SER_SEP, AUT_SER_ARRAY_START);
+		for(j = 0; j < fluent->ending_signals_element_count[i]; j++)
+			fprintf(f, "%d%s", fluent->ending_signals[i][j], j == (fluent->ending_signals_element_count[i] - 1)? "" :  AUT_SER_SEP);
+		fprintf(f, "%s%s", AUT_SER_ARRAY_END, i == (fluent->ending_signals_count - 1) ? "" : AUT_SER_SEP, AUT_SER_ARRAY_START);
 	}
 	fprintf(f, "%s%s%s%s", AUT_SER_ARRAY_END, AUT_SER_SEP, fluent->initial_valuation? "1" : "0", AUT_SER_OBJ_END);
 }
@@ -753,8 +790,10 @@ void automaton_fluent_initialize(automaton_fluent* fluent, char* name, bool init
 	fluent->name	= malloc(sizeof(char) * (strlen(name) + 1));
 	strcpy(fluent->name, name);
 	fluent->starting_signals_count	= 0;
+	fluent->starting_signals_element_count = NULL;
 	fluent->starting_signals		= NULL;
 	fluent->ending_signals_count	= 0;
+	fluent->ending_signals_element_count	= NULL;
 	fluent->ending_signals			= NULL;
 	fluent->initial_valuation		= initial_valuation;
 }
@@ -917,11 +956,18 @@ void automaton_transition_destroy(automaton_transition* transition, bool freeBas
 }
 void automaton_fluent_destroy(automaton_fluent* fluent, bool freeBase){
 	free(fluent->name);
+	uint32_t i;
+	for(i = 0; i < fluent->starting_signals_count; i++){free(fluent->starting_signals[i]);}
 	free(fluent->starting_signals);
+	for(i = 0; i < fluent->ending_signals_count; i++){free(fluent->ending_signals[i]);}
 	free(fluent->ending_signals);
 	fluent->name					= NULL;
 	fluent->starting_signals_count	= 0;
+	free(fluent->starting_signals_element_count);
+	fluent->starting_signals_element_count	= NULL;
 	fluent->starting_signals		= NULL;
+	free(fluent->ending_signals_element_count);
+	fluent->ending_signals_element_count	= NULL;
 	fluent->ending_signals_count	= 0;
 	fluent->ending_signals			= NULL;
 	fluent->initial_valuation		= false;
@@ -1250,49 +1296,87 @@ bool automaton_transition_add_signal_event_ID(automaton_transition* transition, 
 	return false;
 }
 /** FLUENT **/
-bool automaton_fluent_has_starting_signal(automaton_fluent* fluent, automaton_alphabet* alphabet, automaton_signal_event* signal_event){
-	uint32_t i;
-	signal_t signal_index	= automaton_alphabet_get_signal_index(alphabet, signal_event);
+bool automaton_fluent_has_starting_signals(automaton_fluent* fluent, automaton_alphabet* alphabet, uint32_t signals_count, automaton_signal_event** signal_events){
+	uint32_t i,j,k;
+	signal_t signal_index;
+	bool found = false;
 	for(i = 0; i < fluent->starting_signals_count; i++){
-		if(fluent->starting_signals[i] == signal_index)
-			return true;
+		if(fluent->starting_signals_element_count[i] != signals_count)continue;
+		for(k = 0; k < signals_count; k++){
+			signal_index	= automaton_alphabet_get_signal_index(alphabet, signal_events[k]);
+			found = false;
+			for(j = 0; j < fluent->starting_signals_element_count[i]; j++){
+				if(fluent->starting_signals[i][j] == signal_index){
+					found = true;
+					break;
+				}
+			}
+			if(!found)return false;
+		}
+		return true;
 	}
 	return false;
 }
-bool automaton_fluent_add_starting_signal(automaton_fluent* fluent, automaton_alphabet* alphabet, automaton_signal_event* signal_event){
-	if(automaton_fluent_has_starting_signal(fluent, alphabet, signal_event))
+bool automaton_fluent_add_starting_signals(automaton_fluent* fluent, automaton_alphabet* alphabet
+		, uint32_t signals_count, automaton_signal_event** signal_events){
+	if(automaton_fluent_has_starting_signals(fluent, alphabet, signals_count, signal_events))
 		return true;
 	uint32_t i;
-	signal_t signal_index	= automaton_alphabet_get_signal_index(alphabet, signal_event);
-	signal_t* new_signals	= malloc(sizeof(signal_t) * (fluent->starting_signals_count + 1));
-	for(i = 0; i < fluent->starting_signals_count; i++)
-		new_signals[i]	= fluent->starting_signals[i];
-	free(fluent->starting_signals);
-	new_signals[fluent->starting_signals_count]	= signal_index;
-	fluent->starting_signals	= new_signals;
+	uint32_t new_count = fluent->starting_signals_count +1;
+	signal_t** ptr	= realloc(fluent->starting_signals, sizeof(signal_t*) * new_count);
+	if(ptr == NULL){printf("Could not allocate memory\n");exit(-1);	}
+	else fluent->starting_signals	= ptr;
+	uint32_t* i_ptr	= realloc(fluent->starting_signals_element_count, sizeof(uint32_t) * new_count);
+	if(ptr == NULL){printf("Could not allocate memory\n");exit(-1);}
+	else fluent->starting_signals_element_count	= i_ptr;
+	signal_t *new_signals	= calloc(signals_count, sizeof(signal_t));
+	for(i = 0; i < signals_count; i++){
+		new_signals[i]	= automaton_alphabet_get_signal_index(alphabet, signal_events[i]);
+	}
+	fluent->starting_signals[fluent->starting_signals_count]	= new_signals;
+	fluent->starting_signals_element_count[fluent->starting_signals_count]	= signals_count;
 	fluent->starting_signals_count++;
 	return false;
 }
-bool automaton_fluent_has_ending_signal(automaton_fluent* fluent, automaton_alphabet* alphabet, automaton_signal_event* signal_event){
-	uint32_t i;
-	signal_t signal_index	= automaton_alphabet_get_signal_index(alphabet, signal_event);
+bool automaton_fluent_has_ending_signals(automaton_fluent* fluent, automaton_alphabet* alphabet, uint32_t signals_count, automaton_signal_event** signal_events){
+	uint32_t i,j,k;
+	signal_t signal_index;
+	bool found = false;
 	for(i = 0; i < fluent->ending_signals_count; i++){
-		if(fluent->ending_signals[i] == signal_index)
-			return true;
+		if(fluent->ending_signals_element_count[i] != signals_count)continue;
+		for(k = 0; k < signals_count; k++){
+			signal_index	= automaton_alphabet_get_signal_index(alphabet, signal_events[k]);
+			found = false;
+			for(j = 0; j < fluent->ending_signals_element_count[i]; j++){
+				if(fluent->ending_signals[i][j] == signal_index){
+					found = true;
+					break;
+				}
+			}
+			if(!found)return false;
+		}
+		return true;
 	}
 	return false;
 }
-bool automaton_fluent_add_ending_signal(automaton_fluent* fluent, automaton_alphabet* alphabet, automaton_signal_event* signal_event){
-	if(automaton_fluent_has_ending_signal(fluent, alphabet, signal_event))
+bool automaton_fluent_add_ending_signals(automaton_fluent* fluent, automaton_alphabet* alphabet
+		, uint32_t signals_count, automaton_signal_event** signal_events){
+	if(automaton_fluent_has_ending_signals(fluent, alphabet, signals_count, signal_events))
 		return true;
 	uint32_t i;
-	signal_t signal_index	= automaton_alphabet_get_signal_index(alphabet, signal_event);
-	signal_t* new_signals	= malloc(sizeof(signal_t) * (fluent->ending_signals_count + 1));
-	for(i = 0; i < fluent->ending_signals_count; i++)
-		new_signals[i]	= fluent->ending_signals[i];
-	free(fluent->ending_signals);
-	new_signals[fluent->ending_signals_count]	= signal_index;
-	fluent->ending_signals	= new_signals;
+	uint32_t new_count = fluent->ending_signals_count +1;
+	signal_t** ptr	= realloc(fluent->ending_signals, sizeof(signal_t*) * new_count);
+	if(ptr == NULL){printf("Could not allocate memory\n");exit(-1);	}
+	else fluent->ending_signals	= ptr;
+	uint32_t* i_ptr	= realloc(fluent->ending_signals_element_count, sizeof(uint32_t) * new_count);
+	if(ptr == NULL){printf("Could not allocate memory\n");exit(-1);}
+	else fluent->ending_signals_element_count	= i_ptr;
+	signal_t *new_signals	= calloc(signals_count, sizeof(signal_t));
+	for(i = 0; i < signals_count; i++){
+		new_signals[i]	= automaton_alphabet_get_signal_index(alphabet, signal_events[i]);
+	}
+	fluent->ending_signals[fluent->ending_signals_count]	= new_signals;
+	fluent->ending_signals_element_count[fluent->ending_signals_count]	= signals_count;
 	fluent->ending_signals_count++;
 	return false;
 }
@@ -3132,6 +3216,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 					if(idxs[k] == 0)current_to_state[k]= current_state[k];
 					else current_to_state[k]	= automata[k]->transitions[current_state[k]][idxs[k] - 1].state_to;
 				}
+				bool satisfies_one_condition = false;
 				bool satisfies_fluent_condition = true;
 				//TODO: update fluent valuation on current_to_state
 				if(is_game){
@@ -3139,23 +3224,37 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 					for(k = 0; k < ctx->global_fluents_count; k++){
 						current_to_state[automata_count + k]	= current_state[automata_count + k];
 						if(!current_state[automata_count + k]){//check ending for those that are up
-							satisfies_fluent_condition = true;
+							satisfies_one_condition	= false;
 							for(l = 0; l < ctx->global_fluents[k].ending_signals_count; l++){
-								if(!label_accum[ctx->global_fluents[k].ending_signals[l]]){
-									satisfies_fluent_condition = false;
+								satisfies_fluent_condition = true;
+								for(m = 0; m < ctx->global_fluents[k].ending_signals_element_count[l]; m++){
+									if(!label_accum[ctx->global_fluents[k].ending_signals[l][m]]){
+										satisfies_fluent_condition = false;
+										break;
+									}
+								}
+								if(satisfies_fluent_condition){
+									satisfies_one_condition	= true;
 									break;
 								}
 							}
-							if(satisfies_fluent_condition)current_to_state[automata_count + k]	= false;
+							if(satisfies_one_condition)current_to_state[automata_count + k]	= false;
 						}else{//check starting for those that are down
-							satisfies_fluent_condition = true;
+							satisfies_one_condition	= false;
 							for(l = 0; l < ctx->global_fluents[k].starting_signals_count; l++){
-								if(!label_accum[ctx->global_fluents[k].starting_signals[l]]){
-									satisfies_fluent_condition = false;
+								satisfies_fluent_condition	= true;
+								for(m = 0; m < ctx->global_fluents[k].starting_signals_element_count[l]; m++){
+									if(!label_accum[ctx->global_fluents[k].starting_signals[l][m]]){
+										satisfies_fluent_condition = false;
+										break;
+									}
+								}
+								if(satisfies_fluent_condition){
+									satisfies_one_condition	= true;
 									break;
 								}
 							}
-							if(satisfies_fluent_condition)current_to_state[automata_count + k]	= true;
+							if(satisfies_one_condition)current_to_state[automata_count + k]	= true;
 						}
 					}
 				}

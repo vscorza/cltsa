@@ -1,18 +1,13 @@
 TODO:
 =====
-- re-implement fluents
-	- finish update on automaton.c:3126
-		- write eval(v,l) that takes a fluent valuation and a label and defines the new valuation
+- implement fluent set parsing
 - run hardware cases
-	- review/document ltl -> CLTS translation
-		- check state size, running two specs sequentially
 	- behavior minimization based diagnosis over CLTS
 	- diagnose GENBUF with 2 clients
 	- diagnose small synthetic case in order to compare delta debugging with behavior minimization
 	- improve fluents encoding (superset of labels is too expensive)
 	- run genbuf 2, 4, 10 clients
 	- run amba 2, 4, 10 clients
-- implement fluent set parsing
 - implement fluent consistency check
 - [automata-reporter]
 	- integration of cfsp editor (parsing error location info)

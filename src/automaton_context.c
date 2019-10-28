@@ -1966,44 +1966,55 @@ automaton_fluent* automaton_fluent_create_from_syntax(automaton_parsing_tables* 
 		, automaton_alphabet* global_alphabet){
 	//TODO:implement fluents initial value
 	automaton_fluent* fluent	= automaton_fluent_create(fluent_def_syntax->name, false);
-	uint32_t i;
+	uint32_t i, j, k;
 	if(fluent_def_syntax->initiating_set->is_ident || fluent_def_syntax->finishing_set->is_ident){
 		//TODO: implement set by ref in fluents
 		printf("[FATAL ERROR] fluent set by ref not implemented\n");
 		exit(-1);
 	}
-	for(i =0; i < fluent_def_syntax->initiating_set->count; i++){
-		if(fluent_def_syntax->initiating_set->labels_count[i] != 1){
-			//TODO: implement concurrent fluents
-			printf("[FATAL ERROR] concurrent labels in fluents not implement\n");
-			exit(-1);
-		}
-	}
-	for(i =0; i < fluent_def_syntax->finishing_set->count; i++){
-		if(fluent_def_syntax->finishing_set->labels_count[i] != 1){
-			//TODO: implement concurrent fluents
-			printf("[FATAL ERROR] concurrent labels in fluents not implement\n");
-			exit(-1);
-		}
-	}
-	automaton_signal_event* sig_event;
+	automaton_signal_event** sig_events;
+	automaton_set_syntax* current_set;
 	for(i = 0; i < fluent_def_syntax->initiating_set->count; i++){
 		if(fluent_def_syntax->initiating_set->labels[i][0]->is_set){
+			current_set = fluent_def_syntax->initiating_set->labels[i][0]->set;
+		}else{
+			current_set	= fluent_def_syntax->initiating_set;
+		}
+		if(current_set->is_ident){
+			//TODO: implement set by ref in fluents
 			printf("[FATAL ERROR] fluent set by ref not implemented\n");
 			exit(-1);
 		}
-		sig_event = automaton_signal_event_create(fluent_def_syntax->initiating_set->labels[i][0]->string_terminal, INPUT_SIG);
-		automaton_fluent_add_starting_signal(fluent, global_alphabet, sig_event);
-		automaton_signal_event_destroy(sig_event, true);
+		for(k = 0; k < current_set->count; k++){
+			sig_events	= calloc(current_set->labels_count[k], sizeof(automaton_signal_event*));
+			for(j = 0; j < current_set->labels_count[k]; j++)
+				sig_events[j] = automaton_signal_event_create(current_set->labels[k][j]->string_terminal, INPUT_SIG);
+			automaton_fluent_add_starting_signals(fluent, global_alphabet, current_set->labels_count[k], sig_events);
+			for(j = 0; j < fluent_def_syntax->initiating_set->labels_count[k]; j++)
+				automaton_signal_event_destroy(sig_events[j], true);
+			free(sig_events);
+		}
 	}
 	for(i = 0; i < fluent_def_syntax->finishing_set->count; i++){
 		if(fluent_def_syntax->finishing_set->labels[i][0]->is_set){
+			current_set = fluent_def_syntax->finishing_set->labels[i][0]->set;
+		}else{
+			current_set	= fluent_def_syntax->finishing_set;
+		}
+		if(current_set->is_ident){
+			//TODO: implement set by ref in fluents
 			printf("[FATAL ERROR] fluent set by ref not implemented\n");
 			exit(-1);
 		}
-		sig_event = automaton_signal_event_create(fluent_def_syntax->finishing_set->labels[i][0]->string_terminal, INPUT_SIG);
-		automaton_fluent_add_ending_signal(fluent, global_alphabet, sig_event);
-		automaton_signal_event_destroy(sig_event, true);
+		for(k = 0; k < current_set->count; k++){
+			sig_events	= calloc(current_set->labels_count[k], sizeof(automaton_signal_event*));
+			for(j = 0; j < current_set->labels_count[k]; j++)
+				sig_events[j] = automaton_signal_event_create(current_set->labels[k][j]->string_terminal, INPUT_SIG);
+			automaton_fluent_add_ending_signals(fluent, global_alphabet, current_set->labels_count[k], sig_events);
+			for(j = 0; j < fluent_def_syntax->initiating_set->labels_count[k]; j++)
+				automaton_signal_event_destroy(sig_events[j], true);
+			free(sig_events);
+		}
 	}
 	fluent->initial_valuation	= fluent_def_syntax->initial_value != 0;
 	return fluent;
@@ -3071,6 +3082,7 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 			automaton_fluent* old_fluents					= NULL;
 			automaton_fluent current_fluent;
 			current_fluent.ending_signals_count	= 0; current_fluent.ending_signals	= NULL;
+			current_fluent.ending_signals_count	= NULL; current_fluent.starting_signals_element_count = NULL;
 			current_fluent.starting_signals_count	= 0; current_fluent.starting_signals	= NULL;
 			//TODO:this needs to be done when building the game, not afterwards, when liveness data is lost, ends with restoration involving
 			//was_merged and old values

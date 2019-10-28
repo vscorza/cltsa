@@ -828,10 +828,10 @@ void run_automaton_tests(){
 	automaton_fluent** fluents		= malloc(sizeof(automaton_fluent*) * 2);
 	fluents[0]	= automaton_fluent_create("f_in", false);
 	fluents[1]	= automaton_fluent_create("f_out", false);
-	automaton_fluent_add_starting_signal(fluents[0], alphabet, in);
-	automaton_fluent_add_ending_signal(fluents[0], alphabet, tau);
-	automaton_fluent_add_starting_signal(fluents[1], alphabet, out);
-	automaton_fluent_add_ending_signal(fluents[1], alphabet, in);
+	automaton_fluent_add_starting_signals(fluents[0], alphabet, 1, &in);
+	automaton_fluent_add_ending_signals(fluents[0], alphabet, 1, &tau);
+	automaton_fluent_add_starting_signals(fluents[1], alphabet, 1, &out);
+	automaton_fluent_add_ending_signals(fluents[1], alphabet, 1, &in);
 
 	uint32_t fluents_count			= 2;
 	automaton_automata_context* ctx	= automaton_automata_context_create("Context 1", alphabet, fluents_count, fluents, 0, NULL, NULL);
@@ -895,9 +895,9 @@ void run_report_tests(){
 	automaton_alphabet_add_signal_event(alphabet, y1);
 	automaton_alphabet_add_signal_event(alphabet, y2);
 	automaton_fluent *f1 = automaton_fluent_create("test fluent", true);
-	automaton_fluent_add_starting_signal(f1, alphabet, x1);
-	automaton_fluent_add_ending_signal(f1, alphabet, y1);
-	automaton_fluent_add_ending_signal(f1, alphabet, y2);
+	automaton_fluent_add_starting_signals(f1, alphabet, 1, &x1);
+	automaton_fluent_add_ending_signals(f1, alphabet, 1, &y1);
+	automaton_fluent_add_ending_signals(f1, alphabet, 1, &y2);
 
 	automaton_fluent **fluents	= malloc(sizeof(automaton_fluent*) * 1);
 	fluents[0]					= f1;
@@ -1133,12 +1133,12 @@ int main (int argc, char** argv){
 		}
 	}else{
 		//ONGOING
-		run_parse_test("tests/genbuf_2_sndrs_debug.fsp", "GenBuf 2 sndrs(debug version)");//GENBUF 2 Sndrs
+		//run_parse_test("tests/genbuf_2_sndrs_debug.fsp", "GenBuf 2 sndrs(debug version)");//GENBUF 2 Sndrs
 		//run_parse_test("tests/genbuf_2_sndrs.fsp", "GenBuf 2 sndrs");//GENBUF 2 Sndrs
 		//run_parse_test("tests/obdd_context_1.fsp", "OBDD automaton 1");
 		//GENERAL TESTS
 		//run_all_tests();
-		//run_functional_tests();
+		run_functional_tests();
 
 
 		//TODO
