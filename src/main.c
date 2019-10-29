@@ -1134,7 +1134,8 @@ int main (int argc, char** argv){
 	}else{
 		//ONGOING
 		//run_parse_test("tests/genbuf_2_sndrs_debug.fsp", "GenBuf 2 sndrs(debug version)");//GENBUF 2 Sndrs
-		run_parse_test("tests/genbuf_2_sndrs.fsp", "GenBuf 2 sndrs");//GENBUF 2 Sndrs
+		//run_parse_test("tests/genbuf_2_sndrs.fsp", "GenBuf 2 sndrs");//GENBUF 2 Sndrs
+		run_parse_test("tests/nonreal_test_1.fsp", "nonrealizable test 1");//GENBUF 2 Sndrs
 		//run_parse_test("tests/obdd_context_1.fsp", "OBDD automaton 1");
 		//GENERAL TESTS
 		//run_all_tests();

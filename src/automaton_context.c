@@ -2149,6 +2149,8 @@ bool automaton_add_transition_from_valuations(obdd_mgr* mgr, automaton_automaton
 			//evaluate each liveness formula on landing state to check if formula is satisfied and then set bit
 			if(!is_initial){
 				if(is_input){
+					//TODO:
+					//restrict x according to x' in to_valuation
 					obdd_current_state	= obdd_restrict_vector(automaton->context->liveness_valuations[i],
 							x_y_alphabet, to_valuation, x_count + y_count);
 							//x_y_x_p_alphabet, to_valuation, x_count * 2 + y_count);

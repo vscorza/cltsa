@@ -1893,12 +1893,13 @@ void automaton_ranking_increment(automaton_automaton* game_automaton, automaton_
 	fluent_index				= GET_STATE_FLUENT_INDEX(fluent_count, ref_state, assumptions_indexes[current_ranking->assumption_to_satisfy]);
 	satisfies_assumption		= TEST_FLUENT_BIT(game_automaton->valuations, fluent_index);
 	if(satisfies_assumption){
-		if(current_ranking->assumption_to_satisfy < (int32_t)(assumptions_count - 1)){
-			target_ranking->assumption_to_satisfy = current_ranking->assumption_to_satisfy + 1;
-		}else if(current_ranking->value < (int32_t)(max_delta[current_guarantee])){
+		if(current_ranking->value < (int32_t)(max_delta[current_guarantee])){
 			target_ranking->value++;
+		}else if(current_ranking->assumption_to_satisfy < (int32_t)(assumptions_count - 1)){
+			target_ranking->assumption_to_satisfy = current_ranking->assumption_to_satisfy + 1;
+			target_ranking->value 		= INITIAL_RANKING_VALUE;
 		}else{
-			target_ranking->value 					= RANKING_INFINITY;
+			target_ranking->value 		= RANKING_INFINITY;
 		}
 	}
 }
