@@ -123,7 +123,7 @@ void automaton_indexes_syntax_eval_strings(automaton_parsing_tables* tables, aut
 		, uint32_t*** values, char*** a, int32_t* a_count, automaton_indexes_syntax* indexes);
 //void automaton_indexes_syntax_eval_strings(automaton_parsing_tables* tables, automaton_indexes_valuation* valuation, char*** a, int32_t* a_count, automaton_indexes_syntax* indexes);
 bool automaton_add_transition_from_valuations(obdd_mgr* mgr, automaton_automaton* automaton, uint32_t from_state, uint32_t to_state, bool* from_valuation,
-		bool* to_valuation, bool is_initial, bool is_input, uint32_t x_count, uint32_t y_count, uint32_t* obdd_on_indexes, uint32_t* obdd_off_indexes
+		bool* to_valuation, bool* adjusted_valuation, bool is_initial, bool is_input, uint32_t x_count, uint32_t y_count, uint32_t* obdd_on_indexes, uint32_t* obdd_off_indexes
 		,uint32_t* x_y_alphabet, uint32_t* x_y_x_p_alphabet);
 void automaton_set_composed_valuation(bool* valuation, bool* partial_valuation, uint32_t valuation_offset, bool is_initial, bool is_input
 		, uint32_t x_count, uint32_t y_count);

@@ -23,7 +23,7 @@ ltl env rho Env_2 in TEST			= [](!x2 <-> X(x2)).
 
 ltl fluent G_1		= (y1).
 ltl fluent A_1		= (x1).
-ltl fluent A_2		= (x1).
+ltl fluent A_2		= (x2).
 
 /***********
 **** SYNTHESIS
