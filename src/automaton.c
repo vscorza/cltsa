@@ -1655,10 +1655,12 @@ void automaton_ranking_destroy(automaton_ranking*  ranking){
 }
 uint32_t automaton_pending_state_extractor(void* pending_state){return ((automaton_pending_state*)pending_state)->state;}
 uint32_t automaton_pending_state_ranking_extractor(void* pending_state){return ((automaton_pending_state*)pending_state)->value;}
-automaton_pending_state* automaton_pending_state_create(uint32_t state, int32_t goal_to_satisfy, int32_t value, uint32_t timestamp){
+automaton_pending_state* automaton_pending_state_create(uint32_t state, int32_t goal_to_satisfy, int32_t assumption_to_satisfy,
+		int32_t value, uint32_t timestamp){
 	automaton_pending_state* pending	= malloc(sizeof(automaton_pending_state));
 	pending->state			= state;
 	pending->goal_to_satisfy= goal_to_satisfy;
+	pending->assumption_to_satisfy	= assumption_to_satisfy;
 	pending->value			= value;
 	pending->timestamp		= timestamp;
 	return pending;
@@ -1667,7 +1669,9 @@ int32_t automaton_pending_state_compare(void* left_pending_state, void* right_pe
 	automaton_pending_state* left	= (automaton_pending_state*)left_pending_state;
 	automaton_pending_state* right= (automaton_pending_state*)right_pending_state;
 
-	if(left->value > right->value){
+	if(left->assumption_to_satisfy > right->assumption_to_satisfy){
+		return 1;
+	}else if(left->value > right->value){
 		return 1;
 	}else if(left->value < right->value){
 		return -1;
@@ -1684,6 +1688,7 @@ void automaton_pending_state_copy(void* target_input, void* source_input){
 	automaton_pending_state* source	= (automaton_pending_state*)source_input;
 	target->state				= source->state;
 	target->goal_to_satisfy		= source->goal_to_satisfy;
+	target->assumption_to_satisfy	= source->assumption_to_satisfy;
 	target->value				= source->value;
 	target->timestamp			= source->timestamp;
 }
@@ -1734,12 +1739,14 @@ automaton_ranking* automaton_state_best_successor_ranking(automaton_automaton* g
 			min_ranking = max_ranking = current_value;
 		}
 		if(is_controllable){
-			if((min_value >= current_value->value) || (current_value->value != RANKING_INFINITY && min_value == RANKING_INFINITY)){
+			if(automaton_ranking_gt(min_ranking, current_value)){
+			//if((min_value >= current_value->value) || (current_value->value != RANKING_INFINITY && min_value == RANKING_INFINITY)){
 				min_value 	= current_value->value;
 				min_ranking	= current_value;
 			}
 		}else{
-			if((max_value <= current_value->value) || (current_value->value == RANKING_INFINITY && min_value != RANKING_INFINITY)){
+			if(automaton_ranking_lt(max_ranking, current_value)){
+			//if((max_value <= current_value->value) || (current_value->value == RANKING_INFINITY && min_value != RANKING_INFINITY)){
 				max_value 	= current_value->value;
 				max_ranking	= current_value;
 			}
@@ -1757,7 +1764,8 @@ automaton_ranking* automaton_state_best_successor_ranking(automaton_automaton* g
 bool automaton_ranking_gt(automaton_ranking* left, automaton_ranking* right){
 	if(left->value == RANKING_INFINITY)return right->value != RANKING_INFINITY;
 	if(right->value == RANKING_INFINITY)return false;
-	return (left->value > right->value) || (left->value == right->value && left->assumption_to_satisfy > right->assumption_to_satisfy);
+	return (left->assumption_to_satisfy > right->assumption_to_satisfy)
+			|| (left->assumption_to_satisfy == right->assumption_to_satisfy && left->value > right->value);
 }
 bool automaton_ranking_eq(automaton_ranking* left, automaton_ranking* right){
 	if(left->value == RANKING_INFINITY) return right->value == RANKING_INFINITY;
@@ -1842,6 +1850,8 @@ void automaton_add_unstable_predecessors(automaton_automaton* game_automaton, au
 	automaton_transition* current_transition;
 	automaton_pending_state current_pending_state;
 	automaton_pending_state *existing_pending_state;
+	automaton_ranking* current_ranking;
+
 	for(i = 0; i < game_automaton->in_degree[state]; i++){
 		current_transition	= &(game_automaton->inverted_transitions[state][i]);
 		//TODO:check if we should add another structure to answer inclusion queries (heap of state_from synched with pending_state)
@@ -1853,11 +1863,20 @@ void automaton_add_unstable_predecessors(automaton_automaton* game_automaton, au
 			//check if entry exists in the pending structure, if so update previous value
 			if(automaton_concrete_bucket_has_key(key_list, current_transition->state_from)){
 				//automaton_concrete_bucket_get_entry(key_list, current_transition->state_from);
-				existing_pending_state					= automaton_concrete_bucket_get_entry(key_list, current_transition->state_from);
-				existing_pending_state->value			= ((automaton_ranking*)automaton_concrete_bucket_get_entry(ranking[current_guarantee], current_transition->state_from))->value;
-				existing_pending_state->timestamp		= timestamp;
+				current_ranking							= ((automaton_ranking*)automaton_concrete_bucket_get_entry(ranking[current_guarantee], current_transition->state_from));
+				automaton_ranking r;
+				r.assumption_to_satisfy = current_ranking->assumption_to_satisfy;
+				r.state					= current_ranking->state;
+				r.value					= current_ranking->value;
+				if(automaton_ranking_gt(current_ranking, &r)){
+					existing_pending_state					= automaton_concrete_bucket_get_entry(key_list, current_transition->state_from);
+					existing_pending_state->value			= current_ranking->value;
+					existing_pending_state->assumption_to_satisfy			= current_ranking->value;
+					existing_pending_state->timestamp		= timestamp;
+				}
 			}else{
 				current_pending_state.goal_to_satisfy	= current_guarantee; current_pending_state.state = current_transition->state_from;
+				current_pending_state.assumption_to_satisfy	= first_assumption_index;
 				current_pending_state.value				= ((automaton_ranking*)automaton_concrete_bucket_get_entry(ranking[current_guarantee], current_transition->state_from))->value;
 				current_pending_state.timestamp			= timestamp;
 				void* new_entry							= automaton_max_heap_add_entry(pending_list, &current_pending_state);
@@ -2034,6 +2053,7 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 #endif
 							concrete_pending_state.state 	= i; concrete_pending_state.goal_to_satisfy	= j;//TODO: check this, was ...goal_to_satisfy = guarantees_indexes[j];
 							concrete_pending_state.value	= 0; concrete_pending_state.timestamp		= 0;
+							concrete_pending_state.assumption_to_satisfy = first_assumption_index;
 							void* new_entry					= automaton_max_heap_add_entry(pending_list, &concrete_pending_state);
 							automaton_concrete_bucket_add_entry(key_list, new_entry);
 							break;

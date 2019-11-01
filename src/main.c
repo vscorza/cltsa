@@ -950,6 +950,7 @@ void run_report_tests(){
 	fclose(ftest);
 	char * current = test_get_output_content("tests/expected_output/run_report_tests.test");
 	char * expected = test_get_output_content("tests/expected_output/run_report_tests.exp");
+
 	bool txt_cmp = strcmp(current, expected) == 0;
 	print_test_result(txt_cmp, "REPORT", "automaton report test");
 
@@ -1080,6 +1081,8 @@ void run_functional_tests(){
 	run_parse_test("tests/mixed_3_signals_2_labels.fsp", "mixed model 3 signals 2 labels");//mixed model 3 signals 2 labels
 	run_parse_test("tests/two_floors_lift.fsp", "lift 2 floors");//lift 2 floors
 	run_parse_test("tests/concurrency_equiv_test.fsp",  "Asynch composition equiv. test");
+	run_parse_test("tests/nonreal_test_1_realizable_version.fsp", "non realizable test 1 (realizable version)");
+	run_parse_test("tests/obdd_context_1.fsp", "OBDD NEXT IFF TEST");
 }
 
 void run_load_tests(){
@@ -1135,11 +1138,10 @@ int main (int argc, char** argv){
 		//ONGOING
 		//run_parse_test("tests/genbuf_2_sndrs_debug.fsp", "GenBuf 2 sndrs(debug version)");//GENBUF 2 Sndrs
 		//run_parse_test("tests/genbuf_2_sndrs.fsp", "GenBuf 2 sndrs");//GENBUF 2 Sndrs
-		run_parse_test("tests/nonreal_test_1.fsp", "nonrealizable test 1");//GENBUF 2 Sndrs
-		//run_parse_test("tests/obdd_context_1.fsp", "OBDD automaton 1");
+
 		//GENERAL TESTS
 		//run_all_tests();
-		//run_functional_tests();
+		run_functional_tests();
 
 
 		//TODO

@@ -30,8 +30,8 @@
 #define INITIAL_RANKING_VALUE 0
 
 #define DEBUG_COMPOSITION 0
-#define DEBUG_SYNTHESIS 1
-#define DEBUG_STRATEGY_BUILD 1
+#define DEBUG_SYNTHESIS 0
+#define DEBUG_STRATEGY_BUILD 0
 #define DEBUG_COMPOSITE_TREE 0
 
 #define BUCKET_SIZE		1000000
@@ -215,6 +215,7 @@ typedef struct automaton_ranking_str{
 typedef struct automaton_pending_state_str{
 	uint32_t state;
 	int32_t goal_to_satisfy;
+	int32_t assumption_to_satisfy;
 	int32_t value;
 	uint32_t timestamp;
 } automaton_pending_state;
@@ -357,7 +358,8 @@ automaton_ranking* automaton_ranking_create(uint32_t current_state, int32_t assu
 void automaton_ranking_destroy(automaton_ranking*  ranking);
 uint32_t automaton_pending_state_extractor(void* pending_state);
 uint32_t automaton_pending_state_ranking_extractor(void* pending_state);
-automaton_pending_state* automaton_pending_state_create(uint32_t current_state, int32_t goal_to_satisfy, int32_t value, uint32_t timestamp);
+automaton_pending_state* automaton_pending_state_create(uint32_t current_state, int32_t goal_to_satisfy, int32_t assumption_to_satisfy,
+		int32_t value, uint32_t timestamp);
 void automaton_pending_state_destroy(automaton_pending_state*  pending_state);
 automaton_ranking* automaton_state_best_successor_ranking(automaton_automaton* game_automaton, uint32_t state, automaton_concrete_bucket_list** ranking
 		, uint32_t current_guarantee, uint32_t guarantee_count, uint32_t* guarantees_indexes);
