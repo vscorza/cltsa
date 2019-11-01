@@ -1,0 +1,69 @@
+set Global_Alphabet = {}
+set Controllable_Alphabet = {}
+
+set Global_Signals	= {x1,x2,x3,y1,y2}
+set Output_Signals	= {y1, y2}
+order			= {x3 < x2 < x1 < y1 < y2}
+
+/***********
+**** THETA
+***********/
+ltl env theta Init_E in TEST	= (!x1 && !x2 && !x3).
+ltl sys theta Init_S in TEST	= (!y1 && !y2).
+/***********
+**** SYS RHO
+***********/
+ltl sys rho Sys_1 in TEST			= [](x3 <-> y1).
+ltl sys rho Sys_2 in TEST			= [](X(x3 <-> y1)).
+ltl sys rho Sys_3 in TEST			= [](x1 <-> y2).
+ltl sys rho Sys_4 in TEST			= [](X(x1 <-> y2)).
+/***********
+**** ENV RHO
+***********/
+ltl env rho Env_1 in TEST			= []((x1 && x2) <-> (X(x3))).
+ltl env rho Env_2 in TEST			= [](!x2 <-> X(x2)).
+
+ltl fluent G_1		= (y1).
+ltl fluent G_2		= (y2).
+ltl fluent A_1		= (x1).
+ltl fluent A_2		= (x1 && x2).
+
+/***********
+**** SYNTHESIS
+***********/
+|f| ENV =(TEST).
+|gr1| <{A_1, A_2}><{G_1, G_2}> STRAT = ENV.
+
+STRAT_p = S_0,
+S_0 = (<>-> S_1),
+S_1 = (<>-> S_2),
+S_2 = (x2.on-> S_3|<x1.on,x2.on>-> S_4),
+S_3 = (<>-> S_5),
+S_4 = (y2.on-> S_6),
+S_5 = (x2.off-> S_15|<x1.on,x2.off>-> S_16),
+S_6 = (<x1.off,x2.off,x3.on>-> S_7|<x2.off,x3.on>-> S_8),
+S_7 = (<y1.on,y2.off>-> S_9),
+S_8 = (y1.on-> S_10),
+S_9 = (<x2.on,x3.off>-> S_20|<x1.on,x2.on,x3.off>-> S_21),
+S_10 = (<x1.off,x2.on,x3.off>-> S_11|<x2.on,x3.off>-> S_12),
+S_11 = (<y1.off,y2.off>-> S_29),
+S_12 = (y1.off-> S_30),
+S_15 = (<>-> S_2),
+S_16 = (y2.on-> S_17),
+S_17 = (<x1.off,x2.on>-> S_18|x2.on-> S_19),
+S_18 = (y2.off-> S_5),
+S_20 = (y1.off-> S_29),
+S_21 = (<y1.off,y2.on>-> S_30),
+S_26 = (x2.on-> S_27|<x1.on,x2.on>-> S_28),
+S_27 = (<>-> S_29),
+S_28 = (y2.on-> S_30),
+S_29 = (x2.off-> S_35|<x1.on,x2.off>-> S_36),
+S_30 = (<x1.off,x2.off,x3.on>-> S_7|<x2.off,x3.on>-> S_8),
+S_35 = (<>-> S_26),
+S_36 = (y2.on-> S_37),
+S_37 = (<x1.off,x2.on>-> S_18|x2.on-> S_19).
+
+// tests
+equals FATAL_NON_REAL_REALIZABLE_VERSION_2(STRAT, STRAT_p).
+
+

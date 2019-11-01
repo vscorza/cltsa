@@ -1,0 +1,37 @@
+set Global_Alphabet = {}
+set Controllable_Alphabet = {}
+
+set Global_Signals	= {x1,x2,x3,y1,y2}
+set Output_Signals	= {y1, y2}
+order			= {x3 < x2 < x1 < y1 < y2}
+
+/***********
+**** THETA
+***********/
+ltl env theta Init_E in TEST	= (!x1 && !x2 && !x3).
+ltl sys theta Init_S in TEST	= (!y1 && !y2).
+/***********
+**** SYS RHO
+***********/
+ltl sys rho Sys_1 in TEST			= [](x3 <-> y1).
+ltl sys rho Sys_2 in TEST			= [](X(x3 <-> y1)).
+ltl sys rho Sys_3 in TEST			= [](x1 <-> y2).
+ltl sys rho Sys_4 in TEST			= [](X(x1 <-> y2)).
+/***********
+**** ENV RHO
+***********/
+ltl env rho Env_1 in TEST			= []((x1 && x2) <-> (X(x3))).
+ltl env rho Env_2 in TEST			= [](!x2 <-> X(x2)).
+
+ltl fluent G_1		= (y1).
+ltl fluent G_2		= (y2).
+ltl fluent A_1		= (x1).
+ltl fluent A_2		= (x2).
+
+/***********
+**** SYNTHESIS
+***********/
+|f| ENV =(TEST).
+|gr1| <{A_1, A_2}><{G_1, G_2}> STRAT = ENV.
+
+

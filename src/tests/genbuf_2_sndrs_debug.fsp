@@ -47,11 +47,12 @@ ltl env rho A_5_4 in GENBUF			= []((deq && !enq) -> !X(full)).
 fluent F_Goal_12 = <{deq.on,empty.on}, empty.off> initially 1
 
 
-ltl fluent A_1		= (deq || !deq).
+ltl fluent A_1		= (empty).
+ltl fluent A_2		= (full).
 
 /***********
 **** SYNTHESIS
 ***********/
 |f| ENV =(GENBUF).
-|gr1| <{A_1}><{F_Goal_12}> STRAT = ENV.
+|gr1| <{A_1,A_2}><{F_Goal_12}> STRAT = ENV.
 

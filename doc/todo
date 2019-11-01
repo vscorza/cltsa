@@ -1,8 +1,6 @@
 TODO:
 =====
-- correct automaton_context.automaton_add_transition_from_valuations
-	- add to_valuation_input where x values are replaced by those in x'
-	- at :2152 restrict obdd_current_state with to_valuation_input instead of to_valuation
+- check several goals 1 realizable other non realizable
 - run hardware cases
 	- behavior minimization based diagnosis over CLTS
 	- diagnose GENBUF with 2 clients
