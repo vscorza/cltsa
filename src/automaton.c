@@ -1739,13 +1739,13 @@ automaton_ranking* automaton_state_best_successor_ranking(automaton_automaton* g
 			min_ranking = max_ranking = current_value;
 		}
 		if(is_controllable){
-			if(automaton_ranking_gt(min_ranking, current_value)){
+			if(automaton_ranking_lt(current_value, min_ranking)){
 			//if((min_value >= current_value->value) || (current_value->value != RANKING_INFINITY && min_value == RANKING_INFINITY)){
 				min_value 	= current_value->value;
 				min_ranking	= current_value;
 			}
 		}else{
-			if(automaton_ranking_lt(max_ranking, current_value)){
+			if(automaton_ranking_gt(current_value, max_ranking)){
 			//if((max_value <= current_value->value) || (current_value->value == RANKING_INFINITY && min_value != RANKING_INFINITY)){
 				max_value 	= current_value->value;
 				max_ranking	= current_value;
@@ -1905,7 +1905,7 @@ void automaton_ranking_increment(automaton_automaton* game_automaton, automaton_
 	//goal satisfaction resets ranking
 	if(satisfies_goal){
 		target_ranking->value					= INITIAL_RANKING_VALUE;
-		target_ranking->assumption_to_satisfy	= first_assumption_index;
+		target_ranking->assumption_to_satisfy	= 0;
 		return;
 	}
 	//assumption being satisfied increments ranking
@@ -1927,28 +1927,50 @@ void automaton_ranking_update(automaton_automaton* game_automaton, automaton_con
 		, uint32_t current_guarantee, uint32_t guarantee_count, uint32_t assumptions_count
 		, uint32_t* guarantees_indexes, uint32_t* assumptions_indexes, uint32_t first_assumption_index){
 	automaton_ranking incr_ranking;
-	incr_ranking.assumption_to_satisfy 	= current_ranking->assumption_to_satisfy;
-	incr_ranking.state					= current_ranking->state;
-	incr_ranking.value					= current_ranking->value;
 	/**
 	 * get best_j(v)
 	 */
 	automaton_ranking* best_ranking		= automaton_state_best_successor_ranking(game_automaton, current_ranking->state, ranking, current_guarantee, guarantee_count, guarantees_indexes);
+#if DEBUG_SYNTHESIS
+	uint32_t fluent_index		= GET_STATE_FLUENT_INDEX(game_automaton->context->global_fluents_count,
+			current_ranking->state, guarantees_indexes[current_guarantee]);
+	bool satisfies_guarantee	= TEST_FLUENT_BIT(game_automaton->valuations, fluent_index);
+	printf("[B ] %d <%d:%d, %d> best succ <%d, %d>", current_ranking->state, current_guarantee, current_ranking->value
+			, current_ranking->assumption_to_satisfy, best_ranking->value, best_ranking->assumption_to_satisfy);
+	if(satisfies_guarantee){
+		printf("satisfies %d\n", current_guarantee);
+	}else{
+		printf("\n");
+	}
+#endif
 	/**
 	 * get incr_j_v(best_j(v))
 	 */
 	automaton_ranking_increment(game_automaton, ranking, best_ranking, current_ranking->state, max_delta, current_guarantee, guarantee_count, assumptions_count
 			, guarantees_indexes, assumptions_indexes, first_assumption_index, &incr_ranking);
+#if DEBUG_SYNTHESIS
+	printf("[In] %d <%d:%d, %d> incr <%d, %d>\n", current_ranking->state, current_guarantee, current_ranking->value
+			, current_ranking->assumption_to_satisfy, incr_ranking.value, incr_ranking.assumption_to_satisfy);
+#endif
+
 	/**
 	 * update to max between current ranking and the next
 	 */
-	if(automaton_ranking_lt(current_ranking, &incr_ranking)){
+#if DEBUG_SYNTHESIS
+	uint32_t old_value	= current_ranking->value;
+	uint32_t old_ass	= current_ranking->assumption_to_satisfy;
+#endif
+	if(automaton_ranking_lt(&incr_ranking, best_ranking)){
+		current_ranking->value			= best_ranking->value;
+		current_ranking->assumption_to_satisfy	= best_ranking->assumption_to_satisfy;
+	}else{
 		current_ranking->value			= incr_ranking.value;
 		current_ranking->assumption_to_satisfy	= incr_ranking.assumption_to_satisfy;
 	}
 #if DEBUG_SYNTHESIS
-	printf("[U ] %d <%d:%d, %d> update (incr.: <%d, %d>) \n", current_ranking->state, current_guarantee, current_ranking->value
-			, current_ranking->assumption_to_satisfy, incr_ranking.value, incr_ranking.assumption_to_satisfy);
+	printf("[U ] %d <%d:%d, %d> update <%d, %d> was <%d, %d>\n", current_ranking->state, current_guarantee, current_ranking->value
+			, current_ranking->assumption_to_satisfy, incr_ranking.value, incr_ranking.assumption_to_satisfy
+			, old_value, old_ass);
 #endif
 }
 
@@ -2053,7 +2075,7 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 #endif
 							concrete_pending_state.state 	= i; concrete_pending_state.goal_to_satisfy	= j;//TODO: check this, was ...goal_to_satisfy = guarantees_indexes[j];
 							concrete_pending_state.value	= 0; concrete_pending_state.timestamp		= 0;
-							concrete_pending_state.assumption_to_satisfy = first_assumption_index;
+							concrete_pending_state.assumption_to_satisfy = 0;
 							void* new_entry					= automaton_max_heap_add_entry(pending_list, &concrete_pending_state);
 							automaton_concrete_bucket_add_entry(key_list, new_entry);
 							break;
@@ -2110,8 +2132,10 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 			pending_processed++;
 			continue;
 		}
+
 		automaton_ranking_update(game_automaton, ranking_list,
-				(automaton_ranking*)automaton_concrete_bucket_get_entry(ranking_list[current_pending_state.goal_to_satisfy], current_pending_state.state)
+				current_ranking
+				//(automaton_ranking*)automaton_concrete_bucket_get_entry(ranking_list[current_pending_state.goal_to_satisfy], current_pending_state.state)
 				, max_delta, current_pending_state.goal_to_satisfy, guarantees_count, assumptions_count
 				, guarantees_indexes, assumptions_indexes, first_assumption_index);
 #if DEBUG_SYNTHESIS

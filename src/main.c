@@ -1139,8 +1139,8 @@ int main (int argc, char** argv){
 		//ONGOING
 		//run_parse_test("tests/genbuf_2_sndrs_debug.fsp", "GenBuf 2 sndrs(debug version)");//GENBUF 2 Sndrs
 		//run_parse_test("tests/genbuf_2_sndrs_simplified.fsp", "GenBuf 2 sndrs (simplified)");//GENBUF 2 Sndrs
-		//run_parse_test("tests/nonreal_test_2.fsp", "non realizable test 2");
-		run_parse_test("tests/genbuf_2_sndrs.fsp", "GenBuf 2 sndrs");//GENBUF 2 Sndrs
+		run_parse_test("tests/nonreal_test_2.fsp", "non realizable test 2");
+		//run_parse_test("tests/genbuf_2_sndrs.fsp", "GenBuf 2 sndrs");//GENBUF 2 Sndrs
 
 		//GENERAL TESTS
 		//run_all_tests();
