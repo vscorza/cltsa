@@ -461,7 +461,7 @@ bool automaton_concrete_bucket_add_entry(automaton_concrete_bucket_list* list, v
 
 	if(bucket == NULL){
 		list->bucket_size[index]	= 2;
-		list->buckets[index]		= malloc(list->sizeof_element * list->bucket_size[index]);
+		list->buckets[index]		= calloc(list->bucket_size[index], list->sizeof_element);
 		bucket						= list->buckets[index];
 	}
 
