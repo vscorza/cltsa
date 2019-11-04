@@ -1,6 +1,5 @@
 TODO:
 =====
-- check several goals 1 realizable other non realizable
 - run hardware cases
 	- behavior minimization based diagnosis over CLTS
 	- diagnose GENBUF with 2 clients
@@ -9,6 +8,7 @@ TODO:
 	- run genbuf 2, 4, 10 clients
 	- run amba 2, 4, 10 clients
 - implement fluent consistency check
+- implement IS_REALIZABLE(gr1). on parser
 - [automata-reporter]
 	- integration of cfsp editor (parsing error location info)
 	- partial automaton exploration for big automata (jung adaptation with outgoing dashed labels)

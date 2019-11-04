@@ -334,6 +334,10 @@ bool automaton_automaton_has_state(automaton_automaton* current_automaton, uint3
 bool automaton_automaton_add_initial_state(automaton_automaton* current_automaton, uint32_t state);
 automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automaton, char** assumptions, uint32_t assumptions_count
 		, char** guarantees, uint32_t guarantees_count);
+bool automaton_is_gr1_realizable(automaton_automaton* game_automaton, char** assumptions, uint32_t assumptions_count
+		, char** guarantees, uint32_t guarantees_count);
+automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_automaton* game_automaton, char** assumptions, uint32_t assumptions_count
+		, char** guarantees, uint32_t guarantees_count);
 /** AUTOMATA OPERATIONS **/
 uint32_t automaton_automata_get_composite_state(uint32_t states_count, uint32_t* states);
 automaton_automaton* automaton_automata_compose(automaton_automaton** automata, automaton_synchronization_type* synch_type, uint32_t automata_count, bool is_game, char *composition_name);

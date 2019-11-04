@@ -167,7 +167,7 @@ void automaton_automaton_copy(automaton_automaton* source, automaton_automaton* 
 		in_degree				= target->in_degree[i];
 		in_size					= target->in_size[i];
 		if(in_size > 0){
-			target->inverted_transitions	= malloc(sizeof(automaton_transition) * in_size);
+			target->inverted_transitions[i]	= malloc(sizeof(automaton_transition) * in_size);
 			for(j = 0; j < in_degree; j++){
 				automaton_transition_copy(&(source->inverted_transitions[i][j]), &(target->inverted_transitions[i][j]));
 			}
@@ -1437,7 +1437,7 @@ bool automaton_automaton_has_transition(automaton_automaton* current_automaton, 
 	uint32_t i, j, k;
 	if(out_degree == 0)
 		return false;
-	bool found_signal = false;
+	bool mismatch = false;
 	for(i = 0; i < out_degree; i++){
 		if(current_transitions[i].signals_count != transition->signals_count)
 			continue;
@@ -1445,27 +1445,13 @@ bool automaton_automaton_has_transition(automaton_automaton* current_automaton, 
 			if(transition->signals_count == 0 && current_transitions[i].signals_count == 0){
 				return true;
 			}else{
+				mismatch = false;
 				for(j = 0; j < transition->signals_count; j++){
-					found_signal = false;
 					signal_t sig_j	= j < FIXED_SIGNALS_COUNT? transition->signals[j] : transition->other_signals[j-FIXED_SIGNALS_COUNT];
 					signal_t sig_k	= j < FIXED_SIGNALS_COUNT? current_transitions[i].signals[j] : current_transitions[i].other_signals[j - FIXED_SIGNALS_COUNT];
-					if(sig_j != sig_k)return false;
+					if(sig_j != sig_k)mismatch = true;
 				}
-				/*
-				for(j = 0; j < transition->signals_count; j++){
-					found_signal = false;
-					for(k = 0; k < current_transitions[i].signals_count; k++){
-						signal_t sig_j	= j < FIXED_SIGNALS_COUNT? transition->signals[j] : transition->other_signals[j-FIXED_SIGNALS_COUNT];
-						signal_t sig_k	= k < FIXED_SIGNALS_COUNT? current_transitions[i].signals[k] : current_transitions[i].other_signals[k - FIXED_SIGNALS_COUNT];
-						if(sig_j == sig_k){
-							found_signal = true;
-							break;
-						}
-					}
-					if(!found_signal)return false;
-				}
-				*/
-				return true;
+				if(!mismatch)return true;
 			}
 		}
 	}
@@ -1610,8 +1596,53 @@ bool automaton_automaton_add_transition(automaton_automaton* current_automaton, 
 	current_automaton->transitions_composite_count++;
 	return true;
 }
+
 bool automaton_automaton_remove_transition(automaton_automaton* current_automaton, automaton_transition* transition){
-	exit(-1);
+	uint32_t from_state	= transition->state_from; uint32_t to_state	= transition->state_to;
+	automaton_transition *other_transition;
+	uint32_t index		= 0, inverse_index	= 0;
+	uint32_t i, j, k;
+	bool transition_found = true;
+	for(i = 0; i < current_automaton->out_degree[from_state]; i++){//find transition index in automaton
+		other_transition	= &(current_automaton->transitions[from_state][i]);
+		if(other_transition->signals_count != transition->signals_count
+				|| other_transition->state_to != to_state)continue;
+		transition_found	= true;
+		for(j = 0; j < transition->signals_count; j++)
+			if(GET_TRANSITION_SIGNAL(transition, j) != GET_TRANSITION_SIGNAL(other_transition,j))
+				transition_found = false; break;
+		if(transition_found){	index = i;	break;	}
+	}
+	if(!transition_found)return false;
+	for(i = 0; i < current_automaton->in_degree[to_state]; i++){//find inverse index in automaton
+		other_transition	= &(current_automaton->inverted_transitions[to_state][i]);
+		if(other_transition->signals_count != transition->signals_count
+				|| other_transition->state_from != from_state)continue;
+		transition_found	= true;
+		for(j = 0; j < transition->signals_count; j++)
+			if(GET_TRANSITION_SIGNAL(transition, j) != GET_TRANSITION_SIGNAL(other_transition,j))
+				transition_found = false; break;
+		if(transition_found){	inverse_index = i;	break;	}
+	}
+	if(!transition_found)return false;
+	//remove from transitions
+	automaton_transition_destroy(&(current_automaton->transitions[from_state][index]), false);
+	for(i = index; i < current_automaton->out_degree[from_state]-1; i++){
+		memcpy(&(current_automaton->transitions[from_state][i]),&(current_automaton->transitions[from_state][i+1])
+					, sizeof(automaton_transition));
+	}
+	//remove from inverted transitions
+	automaton_transition_destroy(&(current_automaton->inverted_transitions[to_state][inverse_index]), false);
+	for(i = inverse_index; i < current_automaton->in_degree[to_state]-1; i++){
+		memcpy(&(current_automaton->inverted_transitions[to_state][i]),&(current_automaton->inverted_transitions[to_state][i+1])
+					, sizeof(automaton_transition));
+	}
+	//update structures
+	current_automaton->out_degree[from_state]--;
+	current_automaton->in_degree[to_state]--;
+	current_automaton->transitions_count--;
+	current_automaton->transitions_composite_count--;
+	return true;
 }
 
 bool automaton_automaton_add_initial_state(automaton_automaton* current_automaton, uint32_t state){
@@ -2388,6 +2419,104 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 #endif
 	return strategy;
 
+}
+
+bool automaton_is_gr1_realizable(automaton_automaton* game_automaton, char** assumptions, uint32_t assumptions_count
+		, char** guarantees, uint32_t guarantees_count){
+	automaton_automaton* strategy = automaton_get_gr1_strategy(game_automaton, assumptions, assumptions_count,
+			guarantees, guarantees_count);
+	bool is_realizable = strategy->transitions_count != 0;
+	automaton_automaton_destroy(strategy);
+	return is_realizable;
+}
+
+automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_automaton* game_automaton, char** assumptions, uint32_t assumptions_count
+		, char** guarantees, uint32_t guarantees_count){
+	if(automaton_is_gr1_realizable(game_automaton, assumptions, assumptions_count,
+			guarantees, guarantees_count))
+		return game_automaton;
+
+	//candidate transitions lists
+	uint32_t t_size = LIST_INITIAL_SIZE, t_count = 0;
+	uint32_t *t_states	= calloc(t_size, sizeof(uint32_t)), *t_indexes = calloc(t_size, sizeof(uint32_t));
+	//transitions to remove lists
+	uint32_t r_size = LIST_INITIAL_SIZE, r_count = 0;
+	uint32_t *r_states	= calloc(r_size, sizeof(uint32_t)), *r_indexes = calloc(r_size, sizeof(uint32_t));
+
+	int32_t i,j,k;
+	uint32_t new_size; uint32_t *ptr;
+
+	//get a master copy of the game, remove controllable transitions from mixed states,
+		//initialize list of non controllable transitions
+	automaton_automaton *master	= automaton_automaton_clone(game_automaton);
+	automaton_automaton_add_initial_state(master, game_automaton->initial_states[0]);
+	automaton_transition *current_transition	= NULL;
+	for(i = 0; i < master->transitions_count; i++){
+		for(j = master->out_degree[i] - 1; j >= 0; j--){
+			current_transition = &(master->transitions[i][j]);
+			if(!master->is_controllable[i]){
+				if(!current_transition->is_input)
+					automaton_automaton_remove_transition(master, current_transition);
+				else{
+					if(t_count == t_size){
+						new_size	= t_size * LIST_INCREASE_FACTOR;
+						ptr	= realloc(t_states, new_size * sizeof(uint32_t));
+						if(ptr == NULL){printf("Could not allocate memory\n"); exit(-1);}
+						t_states	= ptr;
+						ptr	= realloc(t_indexes, new_size * sizeof(uint32_t));
+						if(ptr == NULL){printf("Could not allocate memory\n"); exit(-1);}
+						t_indexes	= ptr;					t_size		= new_size;
+					}
+					t_states[t_count]	= i;	t_indexes[t_count++]	= j;
+				}
+			}
+		}
+	}
+	automaton_automaton *minimization	= automaton_automaton_clone(master);
+	uint32_t name_size	= strlen(master->name) + strlen(" diagnosis") + 1;
+	char *buff = calloc(name_size, sizeof(char));
+	snprintf(buff, name_size, "%s diagnosis", master->name);
+	free(minimization->name);
+	minimization->name	= buff;
+	bool minimized	= false;
+	while(t_count > 0){
+		//get next candidate
+		current_transition	= &(master->transitions[t_states[t_count - 1]][t_indexes[t_count - 1]]); t_count--;
+		//do not consider missing transitions or transitions that would induce deadlocks
+		while(!automaton_automaton_has_transition(minimization, current_transition) ||
+				minimization->out_degree[current_transition->state_from] == 1){
+			if(t_count == 0){
+				minimized = true;
+				break;
+			}
+			current_transition	= &(master->transitions[t_states[t_count - 1]][t_indexes[t_count - 1]]); t_count--;
+		}
+		if(minimized)break;
+		//evaluate next reduction
+		if(r_count == r_size){
+			new_size	= r_size * LIST_INCREASE_FACTOR;
+			ptr	= realloc(r_states, new_size * sizeof(uint32_t));
+			if(ptr == NULL){printf("Could not allocate memory\n"); exit(-1);}
+			r_states	= ptr;
+			ptr	= realloc(r_indexes, new_size * sizeof(uint32_t));
+			if(ptr == NULL){printf("Could not allocate memory\n"); exit(-1);}
+			r_indexes	= ptr;					r_size		= new_size;
+		}
+		r_states[r_count]	= t_states[t_count];	r_indexes[r_count++]	= t_indexes[t_count];
+
+		automaton_automaton_remove_transition(minimization, current_transition);
+		//if minimization is realizable then restore transition and remove it from the to_remove list
+		if(automaton_is_gr1_realizable(minimization, assumptions, assumptions_count,
+				guarantees, guarantees_count)){
+			automaton_automaton_add_transition(minimization, current_transition);
+			r_count--;
+		}
+	}
+	free(t_states); free(t_indexes);
+	free(r_states); free(r_indexes);
+
+	automaton_automaton_destroy(master);
+	return minimization;
 }
 
 void automaton_automaton_print_traces_to_deadlock(automaton_automaton* automaton, uint32_t max_traces){
