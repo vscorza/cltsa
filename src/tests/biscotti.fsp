@@ -6,13 +6,14 @@ COOKING = (cooking->COOKING | finishedCooking->FINISHED | cook->OVERHEATED),
 FINISHED = (cook->COOKING | moveToBelt->BISCOTTI),  
 OVERHEATED = (overHeated->OVERHEATED).
 
-fluent F_NotCooking = <finishedCooking, cook> initially 1
+fluent F_NotCooking = <{finishedCooking,overHeated}, cook> initially 1
 fluent F_MoveToBelt = <moveToBelt, cook>
 
 SUCCESSFULLY_COOKED_TWICE = (cook->cook->COOKED),
 COOKED = (moveToBelt->SUCCESSFULLY_COOKED_TWICE | cook->ERROR).
 || ENV =(BISCOTTI || SUCCESSFULLY_COOKED_TWICE). 
 |f| ENV_G =(BISCOTTI || SUCCESSFULLY_COOKED_TWICE).
+
 |gr1| <{F_NotCooking}><{F_MoveToBelt}> STRAT = ENV_G.
 
 STRAT_p = (cook -> STRAT_p_1),

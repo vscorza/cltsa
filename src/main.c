@@ -1140,11 +1140,12 @@ int main (int argc, char** argv){
 		//run_parse_test("tests/genbuf_2_sndrs_debug.fsp", "GenBuf 2 sndrs(debug version)");//GENBUF 2 Sndrs
 		//run_parse_test("tests/genbuf_2_sndrs_simplified.fsp", "GenBuf 2 sndrs (simplified)");//GENBUF 2 Sndrs
 		//run_parse_test("tests/nonreal_test_2.fsp", "non realizable test 2");
-		//run_parse_test("tests/genbuf_2_sndrs.fsp", "GenBuf 2 sndrs");//GENBUF 2 Sndrs
+		run_parse_test("tests/genbuf_2_sndrs.fsp", "GenBuf 2 sndrs");//GENBUF 2 Sndrs
 		//run_parse_test("tests/nonreal_test_2_realizable_version.fsp", "non realizable test 2 (realizable version)");
 		//GENERAL TESTS
 		//run_all_tests();
-		run_functional_tests();
+		//run_parse_test("tests/biscotti.fsp", "biscotti");
+		//run_functional_tests();
 
 
 		//TODO

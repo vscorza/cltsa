@@ -1803,14 +1803,16 @@ bool automaton_state_is_stable(automaton_automaton* game_automaton, uint32_t sta
 	int32_t current_value		=  current_ranking->value;
 	//TODO: check this against definition
 	if(current_value == RANKING_INFINITY)return true;
-	fluent_index				= GET_STATE_FLUENT_INDEX(fluent_count, state, assumptions_indexes[current_ranking->assumption_to_satisfy]);
-	bool satisfies_assumption	= TEST_FLUENT_BIT(game_automaton->valuations, fluent_index);
-	j = satisfies_guarantee? (current_guarantee + 1) % guarantee_count : current_guarantee;
 	/**
 	 * r_j(w)
 	 */
+	j = current_guarantee;
 	automaton_ranking* sr		= automaton_state_best_successor_ranking(game_automaton, state, ranking, j
 			, guarantee_count, guarantees_indexes);
+
+	fluent_index				= GET_STATE_FLUENT_INDEX(fluent_count, state, assumptions_indexes[current_ranking->assumption_to_satisfy]);
+	bool satisfies_assumption	= TEST_FLUENT_BIT(game_automaton->valuations, fluent_index);
+	j = satisfies_guarantee? (current_guarantee + 1) % guarantee_count : current_guarantee;
 	if(sr == NULL){
 #if DEBUG_SYNTHESIS
 		printf("[S ] %d <%d:_, _> No best successor\n", state, j);
@@ -1861,18 +1863,18 @@ void automaton_add_unstable_predecessors(automaton_automaton* game_automaton, au
 	printf("[->] %d <%d:_, _> Pushing into pending pred. for state %d\n", current_transition->state_from, current_guarantee, state);
 #endif
 			//check if entry exists in the pending structure, if so update previous value
+			current_ranking							= ((automaton_ranking*)automaton_concrete_bucket_get_entry(ranking[current_guarantee], current_transition->state_from));
 			if(automaton_concrete_bucket_has_key(key_list, current_transition->state_from)){
-				current_ranking							= ((automaton_ranking*)automaton_concrete_bucket_get_entry(ranking[current_guarantee], current_transition->state_from));
 				existing_pending_state					= automaton_concrete_bucket_get_entry(key_list, current_transition->state_from);
-				if(automaton_ranking_gt(current_ranking, existing_pending_state)){
-					existing_pending_state->value			= current_ranking->value;
-					existing_pending_state->assumption_to_satisfy			= current_ranking->assumption_to_satisfy;
-					existing_pending_state->timestamp		= timestamp;
-				}
+				existing_pending_state->value			= current_ranking->value;
+				existing_pending_state->assumption_to_satisfy			= current_ranking->assumption_to_satisfy;
+				existing_pending_state->timestamp		= timestamp;
+				existing_pending_state->goal_to_satisfy	= current_guarantee;
 			}else{
-				current_pending_state.goal_to_satisfy	= current_guarantee; current_pending_state.state = current_transition->state_from;
-				current_pending_state.assumption_to_satisfy	= first_assumption_index;
-				current_pending_state.value				= ((automaton_ranking*)automaton_concrete_bucket_get_entry(ranking[current_guarantee], current_transition->state_from))->value;
+				current_pending_state.goal_to_satisfy	= current_guarantee;
+				current_pending_state.state = current_transition->state_from;
+				current_pending_state.assumption_to_satisfy	= current_ranking->assumption_to_satisfy;
+				current_pending_state.value				= current_ranking->value;
 				current_pending_state.timestamp			= timestamp;
 				void* new_entry							= automaton_max_heap_add_entry(pending_list, &current_pending_state);
 				automaton_concrete_bucket_add_entry(key_list, new_entry);
@@ -1887,6 +1889,7 @@ void automaton_ranking_increment(automaton_automaton* game_automaton, automaton_
 	uint32_t i;
 	bool satisfies_goal, satisfies_assumption;
 	//set default values
+	target_ranking->state					= ref_state;
 	target_ranking->assumption_to_satisfy	= current_ranking->assumption_to_satisfy;
 	target_ranking->value					= current_ranking->value;
 	//infinity is preserved
@@ -1955,10 +1958,7 @@ void automaton_ranking_update(automaton_automaton* game_automaton, automaton_con
 	uint32_t old_value	= current_ranking->value;
 	uint32_t old_ass	= current_ranking->assumption_to_satisfy;
 #endif
-	if(automaton_ranking_lt(&incr_ranking, best_ranking)){
-		current_ranking->value			= best_ranking->value;
-		current_ranking->assumption_to_satisfy	= best_ranking->assumption_to_satisfy;
-	}else{
+	if(automaton_ranking_gt(&incr_ranking, current_ranking)){
 		current_ranking->value			= incr_ranking.value;
 		current_ranking->assumption_to_satisfy	= incr_ranking.assumption_to_satisfy;
 	}
@@ -1981,7 +1981,7 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 			, automaton_pending_state_compare);
 	automaton_concrete_bucket_list** key_lists		= calloc(guarantees_count, sizeof(automaton_concrete_bucket_list*));
 	for(i = 0; i < guarantees_count; i++)
-				key_lists[i]					= automaton_concrete_bucket_list_create(RANKING_BUCKET_SIZE, automaton_pending_state_extractor, sizeof(automaton_pending_state*));
+				key_lists[i]					= automaton_concrete_bucket_list_create(RANKING_BUCKET_SIZE, automaton_pending_state_extractor, sizeof(automaton_pending_state));
 	uint32_t current_state;
 	//these are the indexes from the global fluents list, should not be used in ranking_list
 	uint32_t* assumptions_indexes				= malloc(sizeof(uint32_t) * assumptions_count);
@@ -2053,9 +2053,6 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 				concrete_ranking.state	= i; concrete_ranking.assumption_to_satisfy	= 0;
 				concrete_ranking.value	= RANKING_INFINITY;
 				automaton_concrete_bucket_add_entry(ranking_list[j], &concrete_ranking);
-#if DEBUG_SYNTHESIS
-	printf("[Deadlock] Adding unstable pred for %d\n", i);
-#endif
 			}else{
 				//rank_g(state) = (0, 1)
 				concrete_ranking.state	= i; concrete_ranking.assumption_to_satisfy	= 0;
@@ -2087,6 +2084,9 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 	for(i = 0; i < game_automaton->transitions_count; i++){
 		for(j = 0; j < guarantees_count; j++){
 			if(game_automaton->out_degree[i] == 0){
+#if DEBUG_SYNTHESIS
+	printf("[Deadlock] Adding unstable pred for %d\n", i);
+#endif
 				automaton_add_unstable_predecessors(game_automaton, pending_list, key_lists[j], i, ranking_list, /*guarantees_indexes[j] <- WAS*/ j, guarantees_count
 						, assumptions_count, guarantees_indexes, assumptions_indexes, assumptions_indexes[first_assumption_index], pending_processed);
 			}
@@ -2157,7 +2157,7 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 #if DEBUG_SYNTHESIS || DEBUG_STRATEGY_BUILD
 	printf("!!RANKING STABILIZATION ACHIEVED FOR %s!!\n", strategy_name);
 	for(i = 0; i < game_automaton->transitions_count; i++){
-		if(game_automaton->out_degree[i] <= 0) continue;
+		//if(game_automaton->out_degree[i] <= 0) continue;
 		printf("[S %d:", i);
 		for(j = 0; j < guarantees_count; j++){
 			current_ranking	= ((automaton_ranking*)automaton_concrete_bucket_get_entry(ranking_list[j], i));
@@ -3026,6 +3026,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 	}
 	bool* label_accum	= calloc(alphabet_count, sizeof(bool));
 
+
 	int32_t last_char	= -1;	signal_t current_signal, current_other_signal;
 	long int found_hits	= 0;	long int found_misses	= 0;	//set initial state
 	for(i = 0; i < automata_count; i++){
@@ -3177,9 +3178,11 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 
 #endif
 			//initialize label accumulator
-			bool accum_set = false; bool is_input = false;
+			bool accum_set = false; bool is_input = automata[0]->transitions[current_state[0]]->is_input;
+			bool accum_input	= false;
 			if(idxs[0] > 0){
 				is_input = is_input || automata[0]->transitions[current_state[0]][idxs[0] - 1].is_input;
+				accum_input = accum_input || automata[0]->transitions[current_state[0]][idxs[0] - 1].is_input;
 				automaton_automata_transition_alphabet_to_bool(label_accum
 						, &(automata[0]->transitions[current_state[0]][idxs[0] - 1]), alphabet_count);
 				accum_set = true;
@@ -3190,6 +3193,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 			//check if current combination is viable
 			for(j = 1; j < automata_count; j++){
 				if(idxs[j] == 0){//transition not being considered
+					is_input = is_input || automata[j]->transitions[current_state[j]]->is_input;
 					not_considered = true;
 					for(k = 0; k < alphabet_count; k++)
 						current_label[k]	= false;
@@ -3271,7 +3275,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 					//check starting conditions
 					for(k = 0; k < ctx->global_fluents_count; k++){
 						current_to_state[automata_count + k]	= current_state[automata_count + k];
-						if(!current_state[automata_count + k]){//check ending for those that are up
+						if(current_state[automata_count + k]){//check ending for those that are up
 							satisfies_one_condition	= false;
 							for(l = 0; l < ctx->global_fluents[k].ending_signals_count; l++){
 								satisfies_fluent_condition = true;
@@ -3310,8 +3314,9 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 				}
 				uint32_t composite_to			= automaton_composite_tree_get_key(tree, current_to_state);
 				automaton_transition *current_transition	= automaton_transition_create(from_state, composite_to);
+				current_transition->is_input	= accum_input;
 				automaton_automata_bool_to_transition_alphabet(label_accum, current_transition, alphabet_count);
-				current_transition->is_input	= is_input;
+				//current_transition->is_input	= is_input;
 				automaton_automaton_add_transition(composition, current_transition);
 #if DEBUG_COMPOSITION
 				printf("\t[+] Adding trans: %d {", current_transition->state_from);
@@ -3334,7 +3339,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 					for(i = 0; i < fluent_count; i++){
 						fluent_index	= GET_STATE_FLUENT_INDEX(fluent_count, composite_to, i);
 						//set new valuation
-						fluent_automata_index	= automata_count - fluent_count + i + 1;
+						fluent_automata_index	= automata_count + i;
 						if(current_to_state[fluent_automata_index] == 1){
 							//Check if it should be added to the inverted valuation list
 							state_found		= automaton_bucket_has_entry(composition->inverted_valuations[i], composite_to);
