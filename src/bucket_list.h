@@ -19,6 +19,7 @@ typedef struct automaton_bucket_list_str{
 }automaton_bucket_list;
 
 automaton_bucket_list* automaton_bucket_list_create(uint32_t count);
+automaton_bucket_list* automaton_bucket_list_clone(automaton_bucket_list *source);
 bool automaton_bucket_has_entry(automaton_bucket_list* list, uint32_t entry);
 bool automaton_bucket_add_entry(automaton_bucket_list* list, uint32_t entry);
 bool automaton_bucket_remove_entry(automaton_bucket_list* list, uint32_t entry);

@@ -3145,6 +3145,7 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 					automaton_fluent_copy(&current_fluent, &(ctx->global_fluents[j]));
 				}
 				uint32_t new_size					= GET_FLUENTS_ARR_SIZE(ctx->global_fluents_count, game_automaton->transitions_size);
+				game_automaton->valuations_size			= new_size;
 				game_automaton->valuations 				= calloc(new_size,  sizeof(uint32_t));
 				game_automaton->inverted_valuations		= malloc(sizeof(automaton_bucket_list*) * ctx->global_fluents_count);
 				for(j = 0; j < (int32_t)old_fluents_count; j++){
@@ -3180,10 +3181,21 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 			guarantees		= automaton_set_syntax_evaluate(tables, gr1_game->guarantees, &guarantees_count, set_name);
 			winning_region_automaton	= automaton_get_gr1_strategy(game_automaton, assumptions, assumptions_count
 					, guarantees, guarantees_count);
+			bool nonreal	= false;
 			if(winning_region_automaton->transitions_count == 0){
+				nonreal	= true;
 				automaton_automaton_destroy(winning_region_automaton);
-				automaton_get_gr1_unrealizable_minimization(game_automaton, assumptions, assumptions_count
+				winning_region_automaton = automaton_get_gr1_unrealizable_minimization(game_automaton, assumptions, assumptions_count
 						, guarantees, guarantees_count);
+				automaton_automaton_remove_unreachable_states(winning_region_automaton);
+				/*
+				 * 	uint32_t name_size	= strlen(master->name) + strlen(" diagnosis") + 1;
+	char *buff = calloc(name_size, sizeof(char));
+	snprintf(buff, name_size, "%s diagnosis", master->name);
+	free(minimization->name);
+	minimization->name	= buff;
+				 *
+				 * */
 			}
 			main_index = automaton_parsing_tables_add_entry(tables, COMPOSITION_ENTRY_AUT, gr1_game->name, winning_region_automaton);
 			tables->composition_entries[main_index]->solved	= true;
@@ -3194,9 +3206,9 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 				char buf[150];
 				char cmd[350];
 				//automaton_automaton_print(tables->composition_entries[i]->valuation.automaton_value, true, true, true, "*\t", "*\t");
-				sprintf(buf, "%s_%d_strat.fsp", ctx_name, i);
+				sprintf(buf, "%s_%d_%s.fsp", ctx_name, i, nonreal? "diag" : "strat");
 				automaton_automaton_print_fsp(winning_region_automaton, buf);
-				sprintf(buf, "%s_%d_strat.rep", ctx_name, i);
+				sprintf(buf, "%s_%d_%s.rep", ctx_name, i, nonreal? "diag" : "strat");
 				automaton_automaton_print_report(winning_region_automaton, buf);
 				/*
 				sprintf(buf, "%s_%d_strat_%s.dot", ctx_name, i, is_synchronous? "synch": "asynch");

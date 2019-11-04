@@ -25,6 +25,25 @@ automaton_bucket_list* automaton_bucket_list_create(uint32_t count){
 	}
 	return bucket;
 }
+
+automaton_bucket_list* automaton_bucket_list_clone(automaton_bucket_list *source){
+	automaton_bucket_list* bucket	= malloc(sizeof(automaton_bucket_list));
+	uint32_t i,j;
+	bucket->composite_count			= source->composite_count;
+	bucket->count					= source->count;
+	bucket->buckets				= malloc(sizeof(uint32_t*) * bucket->count);
+	bucket->bucket_size				= malloc(sizeof(uint32_t) * bucket->count);
+	bucket->bucket_count			= malloc(sizeof(uint32_t) * bucket->count);
+	for(i = 0; i < bucket->count; i++){
+		bucket->bucket_count[i]		= source->bucket_count[i];
+		bucket->bucket_size[i]		= source->bucket_size[i];
+		bucket->buckets[i]			= calloc(bucket->bucket_size[i], sizeof(uint32_t));
+		for(j = 0; j < bucket->bucket_count[i]; j++)
+			bucket->buckets[i][j]	= source->buckets[i][j];
+	}
+	return bucket;
+}
+
 bool automaton_bucket_has_entry(automaton_bucket_list* list, uint32_t entry){
 	uint32_t index		= entry % list->count;
 	uint32_t* bucket	= list->buckets[index];
@@ -535,6 +554,7 @@ void automaton_concrete_bucket_destroy(automaton_concrete_bucket_list* list){
 	uint32_t i;
 	for(i = 0; i < list->count; i++){
 		free(list->buckets[i]);
+		list->buckets[i]	= NULL;
 	}
 	free(list->buckets);
 	free(list->bucket_count);

@@ -155,7 +155,7 @@ void automaton_automaton_copy(automaton_automaton* source, automaton_automaton* 
 	target->in_size					= malloc(sizeof(uint32_t) * target->transitions_size);
 	target->max_out_degree			= source->max_out_degree;
 	target->max_concurrent_degree	= source->max_concurrent_degree;
-	target->is_controllable			= malloc(sizeof(bool) * target->transitions_count);
+	target->is_controllable			= malloc(sizeof(bool) * target->transitions_size);
 	target->out_degree				= malloc(sizeof(uint32_t) * target->transitions_size);
 	target->out_size				= malloc(sizeof(uint32_t) * target->transitions_size);
 	target->transitions				= malloc(sizeof(automaton_transition*) * target->transitions_size);
@@ -167,7 +167,7 @@ void automaton_automaton_copy(automaton_automaton* source, automaton_automaton* 
 		in_degree				= target->in_degree[i];
 		in_size					= target->in_size[i];
 		if(in_size > 0){
-			target->inverted_transitions[i]	= malloc(sizeof(automaton_transition) * in_size);
+			target->inverted_transitions[i]	= calloc(in_size, sizeof(automaton_transition));
 			for(j = 0; j < in_degree; j++){
 				automaton_transition_copy(&(source->inverted_transitions[i][j]), &(target->inverted_transitions[i][j]));
 			}
@@ -177,7 +177,7 @@ void automaton_automaton_copy(automaton_automaton* source, automaton_automaton* 
 		out_degree				= target->out_degree[i];
 		out_size				= target->out_size[i];
 		if(out_size > 0){
-			target->transitions[i]	= malloc(sizeof(automaton_transition) * out_size);
+			target->transitions[i]	= calloc(out_size, sizeof(automaton_transition));
 			for(j = 0; j < out_degree; j++){
 				automaton_transition_copy(&(source->transitions[i][j]), &(target->transitions[i][j]));
 			}
@@ -202,13 +202,12 @@ void automaton_automaton_copy(automaton_automaton* source, automaton_automaton* 
 			}
 		target->inverted_valuations						= malloc(sizeof(automaton_bucket_list*) * target->context->global_fluents_count);
 		for(i = 0; i < target->context->global_fluents_count; i++){
-			target->inverted_valuations[i]				= automaton_bucket_list_create(FLUENT_BUCKET_SIZE);
+			target->inverted_valuations[i]			= automaton_bucket_list_clone(source->inverted_valuations[i]);
 		}
 		target->liveness_inverted_valuations			= malloc(sizeof(automaton_bucket_list*) * target->context->liveness_valuations_count);
 		for(i = 0; i < target->context->liveness_valuations_count; i++){
-			target->liveness_inverted_valuations[i]		= automaton_bucket_list_create(FLUENT_BUCKET_SIZE);
+			target->liveness_inverted_valuations[i]	= automaton_bucket_list_clone(source->liveness_inverted_valuations[i]);
 		}
-		//TODO: copy buckets contents
 	}
 }
 automaton_automata* automaton_automata_clone(automaton_automata* source){
@@ -1012,10 +1011,10 @@ void automaton_automaton_destroy(automaton_automaton* automaton){
 	free(automaton->local_alphabet);
 	uint32_t i,j;
 	for(i = 0; i < automaton->transitions_size; i++){
-		for(j = 0; j < automaton->out_size[i]; j++){
+		for(j = 0; j < automaton->out_degree[i]; j++){
 			automaton_transition_destroy(&(automaton->transitions[i][j]), false);
 		}
-		for(j = 0; j < automaton->in_size[i]; j++){
+		for(j = 0; j < automaton->in_degree[i]; j++){
 			automaton_transition_destroy(&(automaton->inverted_transitions[i][j]), false);
 		}
 		free(automaton->transitions[i]);
@@ -1034,6 +1033,7 @@ void automaton_automaton_destroy(automaton_automaton* automaton){
 		for(i = 0; i < automaton->context->global_fluents_count; i++)
 			automaton_bucket_destroy(automaton->inverted_valuations[i]);
 		if(automaton->valuations_size > 0){
+
 			free(automaton->inverted_valuations);
 			free(automaton->valuations);
 		}
@@ -1600,7 +1600,7 @@ bool automaton_automaton_add_transition(automaton_automaton* current_automaton, 
 bool automaton_automaton_remove_transition(automaton_automaton* current_automaton, automaton_transition* transition){
 	uint32_t from_state	= transition->state_from; uint32_t to_state	= transition->state_to;
 	automaton_transition *other_transition;
-	uint32_t index		= 0, inverse_index	= 0;
+	int32_t index		= -1, inverse_index	= -1;
 	uint32_t i, j, k;
 	bool transition_found = true;
 	for(i = 0; i < current_automaton->out_degree[from_state]; i++){//find transition index in automaton
@@ -1609,22 +1609,26 @@ bool automaton_automaton_remove_transition(automaton_automaton* current_automato
 				|| other_transition->state_to != to_state)continue;
 		transition_found	= true;
 		for(j = 0; j < transition->signals_count; j++)
-			if(GET_TRANSITION_SIGNAL(transition, j) != GET_TRANSITION_SIGNAL(other_transition,j))
+			if(GET_TRANSITION_SIGNAL(transition, j) != GET_TRANSITION_SIGNAL(other_transition,j)){
 				transition_found = false; break;
+			}
 		if(transition_found){	index = i;	break;	}
 	}
-	if(!transition_found)return false;
+	if(!transition_found)
+		return false;
 	for(i = 0; i < current_automaton->in_degree[to_state]; i++){//find inverse index in automaton
 		other_transition	= &(current_automaton->inverted_transitions[to_state][i]);
 		if(other_transition->signals_count != transition->signals_count
 				|| other_transition->state_from != from_state)continue;
 		transition_found	= true;
 		for(j = 0; j < transition->signals_count; j++)
-			if(GET_TRANSITION_SIGNAL(transition, j) != GET_TRANSITION_SIGNAL(other_transition,j))
+			if(GET_TRANSITION_SIGNAL(transition, j) != GET_TRANSITION_SIGNAL(other_transition,j)){
 				transition_found = false; break;
+			}
 		if(transition_found){	inverse_index = i;	break;	}
 	}
-	if(!transition_found)return false;
+	if(!transition_found)
+		return false;
 	//remove from transitions
 	automaton_transition_destroy(&(current_automaton->transitions[from_state][index]), false);
 	for(i = index; i < current_automaton->out_degree[from_state]-1; i++){
@@ -1640,7 +1644,7 @@ bool automaton_automaton_remove_transition(automaton_automaton* current_automato
 	//update structures
 	current_automaton->out_degree[from_state]--;
 	current_automaton->in_degree[to_state]--;
-	current_automaton->transitions_count--;
+	//current_automaton->transitions_count--;
 	current_automaton->transitions_composite_count--;
 	return true;
 }
@@ -1895,6 +1899,7 @@ void automaton_add_unstable_predecessors(automaton_automaton* game_automaton, au
 #endif
 			//check if entry exists in the pending structure, if so update previous value
 			current_ranking							= ((automaton_ranking*)automaton_concrete_bucket_get_entry(ranking[current_guarantee], current_transition->state_from));
+			if(current_ranking == NULL)continue;
 			if(automaton_concrete_bucket_has_key(key_list, current_transition->state_from)){
 				existing_pending_state					= automaton_concrete_bucket_get_entry(key_list, current_transition->state_from);
 				existing_pending_state->value			= current_ranking->value;
@@ -2425,16 +2430,17 @@ bool automaton_is_gr1_realizable(automaton_automaton* game_automaton, char** ass
 		, char** guarantees, uint32_t guarantees_count){
 	automaton_automaton* strategy = automaton_get_gr1_strategy(game_automaton, assumptions, assumptions_count,
 			guarantees, guarantees_count);
-	bool is_realizable = strategy->transitions_count != 0;
+	bool is_realizable = (strategy->transitions_count != 0
+			&& strategy->out_degree[strategy->initial_states[0]] > 0);
 	automaton_automaton_destroy(strategy);
 	return is_realizable;
 }
 
 automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_automaton* game_automaton, char** assumptions, uint32_t assumptions_count
 		, char** guarantees, uint32_t guarantees_count){
-	if(automaton_is_gr1_realizable(game_automaton, assumptions, assumptions_count,
+	/*if(automaton_is_gr1_realizable(game_automaton, assumptions, assumptions_count,
 			guarantees, guarantees_count))
-		return game_automaton;
+		return game_automaton;*/
 
 	//candidate transitions lists
 	uint32_t t_size = LIST_INITIAL_SIZE, t_count = 0;
@@ -2473,22 +2479,21 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_autom
 		}
 	}
 	automaton_automaton *minimization	= automaton_automaton_clone(master);
-	uint32_t name_size	= strlen(master->name) + strlen(" diagnosis") + 1;
-	char *buff = calloc(name_size, sizeof(char));
-	snprintf(buff, name_size, "%s diagnosis", master->name);
-	free(minimization->name);
-	minimization->name	= buff;
+
 	bool minimized	= false;
+	uint32_t steps = 0;
 	while(t_count > 0){
 		//get next candidate
 		current_transition	= &(master->transitions[t_states[t_count - 1]][t_indexes[t_count - 1]]); t_count--;
 		//do not consider missing transitions or transitions that would induce deadlocks
-		while(!automaton_automaton_has_transition(minimization, current_transition) ||
+		while(/*!automaton_automaton_has_transition(minimization, current_transition) ||*/
 				minimization->out_degree[current_transition->state_from] == 1){
 			if(t_count == 0){
 				minimized = true;
 				break;
 			}
+
+			steps++;
 			current_transition	= &(master->transitions[t_states[t_count - 1]][t_indexes[t_count - 1]]); t_count--;
 		}
 		if(minimized)break;
@@ -2503,13 +2508,25 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_autom
 			r_indexes	= ptr;					r_size		= new_size;
 		}
 		r_states[r_count]	= t_states[t_count];	r_indexes[r_count++]	= t_indexes[t_count];
-
+		steps++;
 		automaton_automaton_remove_transition(minimization, current_transition);
+
 		//if minimization is realizable then restore transition and remove it from the to_remove list
 		if(automaton_is_gr1_realizable(minimization, assumptions, assumptions_count,
 				guarantees, guarantees_count)){
 			automaton_automaton_add_transition(minimization, current_transition);
 			r_count--;
+		}
+		//avoid retrieving the trivial diagnosis
+		if(minimization->out_degree[minimization->initial_states[0]] == 0){
+			automaton_automaton_add_transition(minimization, current_transition);
+			r_count--;
+			automaton_automaton_destroy(minimization);
+			minimization = automaton_automaton_clone(master);
+			for(i =0 ; i < r_count; i++){
+				current_transition	= &(master->transitions[r_states[i]][r_indexes[i]]);
+				automaton_automaton_remove_transition(minimization, current_transition);
+			}
 		}
 	}
 	free(t_states); free(t_indexes);
@@ -2657,6 +2674,7 @@ uint32_t* automaton_automaton_distance_to_state(automaton_automaton* automaton, 
 	//update distances
 	while(pending_list->composite_count > 0){
 		automaton_concrete_bucket_pop_entry(pending_list, &current_state);
+		if(current_state >= automaton->transitions_count)continue;
 		if(visited[current_state])continue;
 		visited[current_state]	= true;
 		min_distance			= 0;
