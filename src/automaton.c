@@ -3354,7 +3354,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 					//set liveness valuations
 					for(i = 0; i < liveness_valuations_count; i++){
 						bool current_valuation = true;
-						for(j = 0; j < automata_count - fluent_count; j++){
+						for(j = 0; j < automata_count; j++){
 							if(automata[j]->built_from_ltl){
 								fluent_index	= GET_STATE_FLUENT_INDEX(liveness_valuations_count, current_to_state[j], i);
 								current_valuation = current_valuation && TEST_FLUENT_BIT(automata[j]->liveness_valuations, fluent_index);

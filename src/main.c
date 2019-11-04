@@ -1084,6 +1084,7 @@ void run_functional_tests(){
 	run_parse_test("tests/nonreal_test_1_realizable_version.fsp", "non realizable test 1 (realizable version)");
 	run_parse_test("tests/nonreal_test_2_realizable_version.fsp", "non realizable test 2 (realizable version)");
 	run_parse_test("tests/obdd_context_1.fsp", "OBDD NEXT IFF TEST");
+	run_parse_test("tests/genbuf_2_sndrs_debug.fsp", "GenBuf 2 sndrs(debug version)");//GENBUF 2 Sndrs debug version
 }
 
 void run_load_tests(){
@@ -1137,15 +1138,13 @@ int main (int argc, char** argv){
 		}
 	}else{
 		//ONGOING
-		//run_parse_test("tests/genbuf_2_sndrs_debug.fsp", "GenBuf 2 sndrs(debug version)");//GENBUF 2 Sndrs
 		//run_parse_test("tests/genbuf_2_sndrs_simplified.fsp", "GenBuf 2 sndrs (simplified)");//GENBUF 2 Sndrs
-		//run_parse_test("tests/nonreal_test_2.fsp", "non realizable test 2");
-		run_parse_test("tests/genbuf_2_sndrs.fsp", "GenBuf 2 sndrs");//GENBUF 2 Sndrs
-		//run_parse_test("tests/nonreal_test_2_realizable_version.fsp", "non realizable test 2 (realizable version)");
+		//run_parse_test("tests/genbuf_2_sndrs.fsp", "GenBuf 2 sndrs");//GENBUF 2 Sndrs
+
+		//run_parse_test("tests/two_floors_lift.fsp", "lift 2 floors");//lift 2 floors
 		//GENERAL TESTS
 		//run_all_tests();
-		//run_parse_test("tests/biscotti.fsp", "biscotti");
-		//run_functional_tests();
+		run_functional_tests();
 
 
 		//TODO
@@ -1156,12 +1155,8 @@ int main (int argc, char** argv){
 		//run_parse_test("tests/two_full_adders.fsp",  "two full adders test");
 		//run_parse_test("tests/automata_load_test_1.fsp",  "automata load test");
 		//run_parse_test("tests/receiver_asynch_test.fsp",  "receiver asynch test");
-		//run_parse_test("tests/concurrency_equiv_test.fsp",  "concurrency equiv. test");
-
-
 
 		//run_parse_test("tests/test18.fsp",  "test18");
-
 		//run_parse_test("tests/test26.fsp", "test26");
 		//run_parse_test("tests/test27.fsp", "test27");
 		//run_parse_test("tests/test32.fsp", "test32");

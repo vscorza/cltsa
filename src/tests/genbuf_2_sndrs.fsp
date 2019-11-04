@@ -93,7 +93,7 @@ ltl fluent A_2_sndr_1		= (bToR_REQ_1 <-> rToB_ACK_1).
 **** SYNTHESIS
 ***********/
 |f| ENV =(GENBUF || G_7_ROUND_ROBIN).
-|gr1| <{A_2_sndr_0, A_2_sndr_1}><{G_1_2_sndr_1}> STRAT = ENV.
+|gr1| <{A_2_sndr_0, A_2_sndr_1}><{F_Goal_12}> STRAT = ENV.
 //|gr1| <{A_2_sndr_0, A_2_sndr_1}><{F_Goal_12, G_1_2_sndr_0, G_1_2_sndr_1}> STRAT = ENV.
 //|gr1| <{A_2_sndr_0, A_2_sndr_1}><{G_1_2_sndr_0, G_1_2_sndr_1}> STRAT = ENV.
 
