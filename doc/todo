@@ -1,12 +1,12 @@
 TODO:
 =====
+- write behavior minimization cases in clts
 - run hardware cases
 	- behavior minimization based diagnosis over CLTS
 	- diagnose GENBUF with 2 clients
-	- diagnose small synthetic case in order to compare delta debugging with behavior minimization
-	- improve fluents encoding (superset of labels is too expensive)
 	- run genbuf 2, 4, 10 clients
 	- run amba 2, 4, 10 clients
+- compare against konighoefer and jvts systems, write experimental claim
 - implement fluent consistency check
 - implement IS_REALIZABLE(gr1). on parser
 - [automata-reporter]
