@@ -27,13 +27,13 @@ automaton_bucket_list* automaton_bucket_list_create(uint32_t count){
 }
 
 automaton_bucket_list* automaton_bucket_list_clone(automaton_bucket_list *source){
-	automaton_bucket_list* bucket	= malloc(sizeof(automaton_bucket_list));
+	automaton_bucket_list* bucket	= calloc(1, sizeof(automaton_bucket_list));
 	uint32_t i,j;
 	bucket->composite_count			= source->composite_count;
 	bucket->count					= source->count;
-	bucket->buckets				= malloc(sizeof(uint32_t*) * bucket->count);
-	bucket->bucket_size				= malloc(sizeof(uint32_t) * bucket->count);
-	bucket->bucket_count			= malloc(sizeof(uint32_t) * bucket->count);
+	bucket->buckets					= calloc(bucket->count, sizeof(uint32_t*));
+	bucket->bucket_size				= calloc(bucket->count, sizeof(uint32_t));
+	bucket->bucket_count			= calloc(bucket->count, sizeof(uint32_t));
 	for(i = 0; i < bucket->count; i++){
 		bucket->bucket_count[i]		= source->bucket_count[i];
 		bucket->bucket_size[i]		= source->bucket_size[i];

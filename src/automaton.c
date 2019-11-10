@@ -196,15 +196,15 @@ void automaton_automaton_copy(automaton_automaton* source, automaton_automaton* 
 			target->valuations[i]		= source->valuations[i];
 		}
 		target->liveness_valuations_size	= source->liveness_valuations_size;
-		target->liveness_valuations			= malloc(sizeof(uint32_t) * target->liveness_valuations_size);
+		target->liveness_valuations			= calloc(target->liveness_valuations_size, sizeof(uint32_t));
 		for(i = 0; i < target->liveness_valuations_size; i++){
 				target->liveness_valuations[i]		= source->liveness_valuations[i];
 			}
-		target->inverted_valuations						= malloc(sizeof(automaton_bucket_list*) * target->context->global_fluents_count);
+		target->inverted_valuations						= calloc(target->context->global_fluents_count, sizeof(automaton_bucket_list*));
 		for(i = 0; i < target->context->global_fluents_count; i++){
 			target->inverted_valuations[i]			= automaton_bucket_list_clone(source->inverted_valuations[i]);
 		}
-		target->liveness_inverted_valuations			= malloc(sizeof(automaton_bucket_list*) * target->context->liveness_valuations_count);
+		target->liveness_inverted_valuations			= calloc(target->context->liveness_valuations_count, sizeof(automaton_bucket_list*));
 		for(i = 0; i < target->context->liveness_valuations_count; i++){
 			target->liveness_inverted_valuations[i]	= automaton_bucket_list_clone(source->liveness_inverted_valuations[i]);
 		}

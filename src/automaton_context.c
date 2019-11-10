@@ -3124,7 +3124,7 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 			automaton_fluent* old_fluents					= NULL;
 			automaton_fluent current_fluent;
 			current_fluent.ending_signals_count	= 0; current_fluent.ending_signals	= NULL;
-			current_fluent.ending_signals_count	= NULL; current_fluent.starting_signals_element_count = NULL;
+			current_fluent.ending_signals_element_count	= NULL; current_fluent.starting_signals_element_count = NULL;
 			current_fluent.starting_signals_count	= 0; current_fluent.starting_signals	= NULL;
 			//TODO:this needs to be done when building the game, not afterwards, when liveness data is lost, ends with restoration involving
 			//was_merged and old values
@@ -3188,14 +3188,22 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 				winning_region_automaton = automaton_get_gr1_unrealizable_minimization(game_automaton, assumptions, assumptions_count
 						, guarantees, guarantees_count);
 				automaton_automaton_remove_unreachable_states(winning_region_automaton);
-				/*
-				 * 	uint32_t name_size	= strlen(master->name) + strlen(" diagnosis") + 1;
-	char *buff = calloc(name_size, sizeof(char));
-	snprintf(buff, name_size, "%s diagnosis", master->name);
-	free(minimization->name);
-	minimization->name	= buff;
-				 *
-				 * */
+				//clear everything game related from diagnosis
+				for(i = 0; i < winning_region_automaton->context->global_fluents_count; i++)
+					automaton_bucket_destroy(winning_region_automaton->inverted_valuations[i]);
+				if(winning_region_automaton->valuations_size > 0){
+					free(winning_region_automaton->inverted_valuations);winning_region_automaton->inverted_valuations = NULL;
+					free(winning_region_automaton->valuations);winning_region_automaton->valuations = NULL;
+					winning_region_automaton->valuations_size = 0;
+				}
+				if(winning_region_automaton->liveness_valuations_size > 0){
+					for(i = 0; i < winning_region_automaton->context->liveness_valuations_count; i++)
+						automaton_bucket_destroy(winning_region_automaton->liveness_inverted_valuations[i]);
+					free(winning_region_automaton->liveness_inverted_valuations); winning_region_automaton->liveness_inverted_valuations = NULL;
+					free(winning_region_automaton->liveness_valuations); winning_region_automaton->liveness_valuations = NULL;
+					winning_region_automaton->liveness_valuations_size = 0;
+				}
+				winning_region_automaton->is_game = false;
 			}
 			main_index = automaton_parsing_tables_add_entry(tables, COMPOSITION_ENTRY_AUT, gr1_game->name, winning_region_automaton);
 			tables->composition_entries[main_index]->solved	= true;
