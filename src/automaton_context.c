@@ -3188,6 +3188,22 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 				winning_region_automaton = automaton_get_gr1_unrealizable_minimization(game_automaton, assumptions, assumptions_count
 						, guarantees, guarantees_count);
 				automaton_automaton_remove_unreachable_states(winning_region_automaton);
+			}
+			main_index = automaton_parsing_tables_add_entry(tables, COMPOSITION_ENTRY_AUT, gr1_game->name, winning_region_automaton);
+			tables->composition_entries[main_index]->solved	= true;
+			tables->composition_entries[main_index]->valuation_count			= 1;
+			tables->composition_entries[main_index]->valuation.automaton_value	= winning_region_automaton;
+
+			if(print_fsp){
+				char buf[150];
+				char cmd[350];
+				//automaton_automaton_print(tables->composition_entries[i]->valuation.automaton_value, true, true, true, "*\t", "*\t");
+				sprintf(buf, "%s_%d_%s.fsp", ctx_name, i, nonreal? "diag" : "strat");
+				automaton_automaton_print_fsp(winning_region_automaton, buf);
+				sprintf(buf, "%s_%d_%s.rep", ctx_name, i, nonreal? "diag" : "strat");
+				automaton_automaton_print_report(winning_region_automaton, buf);
+			}
+			if(nonreal){
 				//clear everything game related from diagnosis
 				for(i = 0; i < winning_region_automaton->context->global_fluents_count; i++)
 					automaton_bucket_destroy(winning_region_automaton->inverted_valuations[i]);
@@ -3205,26 +3221,7 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 				}
 				winning_region_automaton->is_game = false;
 			}
-			main_index = automaton_parsing_tables_add_entry(tables, COMPOSITION_ENTRY_AUT, gr1_game->name, winning_region_automaton);
-			tables->composition_entries[main_index]->solved	= true;
-			tables->composition_entries[main_index]->valuation_count			= 1;
-			tables->composition_entries[main_index]->valuation.automaton_value	= winning_region_automaton;
 
-			if(print_fsp){
-				char buf[150];
-				char cmd[350];
-				//automaton_automaton_print(tables->composition_entries[i]->valuation.automaton_value, true, true, true, "*\t", "*\t");
-				sprintf(buf, "%s_%d_%s.fsp", ctx_name, i, nonreal? "diag" : "strat");
-				automaton_automaton_print_fsp(winning_region_automaton, buf);
-				sprintf(buf, "%s_%d_%s.rep", ctx_name, i, nonreal? "diag" : "strat");
-				automaton_automaton_print_report(winning_region_automaton, buf);
-				/*
-				sprintf(buf, "%s_%d_strat_%s.dot", ctx_name, i, is_synchronous? "synch": "asynch");
-				automaton_automaton_print_dot(winning_region_automaton, buf);
-				sprintf(cmd, "sfdp -Tsvg %s > %s.svg\n", buf, buf);
-				system(cmd);
-				*/
-			}
 			//restore old liveness valuations and old context
 			if(was_merged){
 				for(i = 0; i < ctx->global_fluents_count; i++)

@@ -1630,16 +1630,20 @@ bool automaton_automaton_remove_transition(automaton_automaton* current_automato
 	if(!transition_found)
 		return false;
 	//remove from transitions
-	automaton_transition_destroy(&(current_automaton->transitions[from_state][index]), false);
-	for(i = index; i < current_automaton->out_degree[from_state]-1; i++){
-		memcpy(&(current_automaton->transitions[from_state][i]),&(current_automaton->transitions[from_state][i+1])
-					, sizeof(automaton_transition));
+	if(index > -1){
+		automaton_transition_destroy(&(current_automaton->transitions[from_state][index]), false);
+		for(i = index; i < current_automaton->out_degree[from_state]-1; i++){
+			memcpy(&(current_automaton->transitions[from_state][i]),&(current_automaton->transitions[from_state][i+1])
+						, sizeof(automaton_transition));
+		}
 	}
 	//remove from inverted transitions
-	automaton_transition_destroy(&(current_automaton->inverted_transitions[to_state][inverse_index]), false);
-	for(i = inverse_index; i < current_automaton->in_degree[to_state]-1; i++){
-		memcpy(&(current_automaton->inverted_transitions[to_state][i]),&(current_automaton->inverted_transitions[to_state][i+1])
-					, sizeof(automaton_transition));
+	if(inverse_index > -1){
+		automaton_transition_destroy(&(current_automaton->inverted_transitions[to_state][inverse_index]), false);
+		for(i = inverse_index; i < current_automaton->in_degree[to_state]-1; i++){
+			memcpy(&(current_automaton->inverted_transitions[to_state][i]),&(current_automaton->inverted_transitions[to_state][i+1])
+						, sizeof(automaton_transition));
+		}
 	}
 	//update structures
 	current_automaton->out_degree[from_state]--;
