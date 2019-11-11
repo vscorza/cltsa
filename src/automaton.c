@@ -1636,6 +1636,7 @@ bool automaton_automaton_remove_transition(automaton_automaton* current_automato
 			memcpy(&(current_automaton->transitions[from_state][i]),&(current_automaton->transitions[from_state][i+1])
 						, sizeof(automaton_transition));
 		}
+		current_automaton->out_degree[from_state]--;
 	}
 	//remove from inverted transitions
 	if(inverse_index > -1){
@@ -1644,10 +1645,9 @@ bool automaton_automaton_remove_transition(automaton_automaton* current_automato
 			memcpy(&(current_automaton->inverted_transitions[to_state][i]),&(current_automaton->inverted_transitions[to_state][i+1])
 						, sizeof(automaton_transition));
 		}
+		current_automaton->in_degree[to_state]--;
 	}
 	//update structures
-	current_automaton->out_degree[from_state]--;
-	current_automaton->in_degree[to_state]--;
 	//current_automaton->transitions_count--;
 	current_automaton->transitions_composite_count--;
 	return true;
@@ -2490,7 +2490,7 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_autom
 		//get next candidate
 		current_transition	= &(master->transitions[t_states[t_count - 1]][t_indexes[t_count - 1]]); t_count--;
 		//do not consider missing transitions or transitions that would induce deadlocks
-		while(/*!automaton_automaton_has_transition(minimization, current_transition) ||*/
+		while(//!automaton_automaton_has_transition(minimization, current_transition) ||
 				minimization->out_degree[current_transition->state_from] == 1){
 			if(t_count == 0){
 				minimized = true;
@@ -2500,7 +2500,15 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_autom
 			steps++;
 			current_transition	= &(master->transitions[t_states[t_count - 1]][t_indexes[t_count - 1]]); t_count--;
 		}
-		if(minimized)break;
+		if(minimized){
+			automaton_automaton_destroy(minimization);
+			minimization = automaton_automaton_clone(master);
+			for(i =0 ; i < r_count; i++){
+				current_transition	= &(master->transitions[r_states[i]][r_indexes[i]]);
+				automaton_automaton_remove_transition(minimization, current_transition);
+			}
+			break;
+		}
 		//evaluate next reduction
 		if(r_count == r_size){
 			new_size	= r_size * LIST_INCREASE_FACTOR;
@@ -2514,16 +2522,19 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_autom
 		r_states[r_count]	= t_states[t_count];	r_indexes[r_count++]	= t_indexes[t_count];
 		steps++;
 		automaton_automaton_remove_transition(minimization, current_transition);
+		//automaton_automaton_remove_unreachable_states(minimization);
 
 		//if minimization is realizable then restore transition and remove it from the to_remove list
+		/*
 		if(automaton_is_gr1_realizable(minimization, assumptions, assumptions_count,
 				guarantees, guarantees_count)){
 			automaton_automaton_add_transition(minimization, current_transition);
 			r_count--;
-		}
+		}*/
 		//avoid retrieving the trivial diagnosis
-		if(minimization->out_degree[minimization->initial_states[0]] == 0){
-			automaton_automaton_add_transition(minimization, current_transition);
+		if(automaton_is_gr1_realizable(minimization, assumptions, assumptions_count,
+				guarantees, guarantees_count) || minimization->out_degree[minimization->initial_states[0]] == 0){
+			//automaton_automaton_add_transition(minimization, current_transition);
 			r_count--;
 			automaton_automaton_destroy(minimization);
 			minimization = automaton_automaton_clone(master);
@@ -2535,6 +2546,10 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_autom
 	}
 	free(t_states); free(t_indexes);
 	free(r_states); free(r_indexes);
+
+	if(automaton_is_gr1_realizable(minimization, assumptions, assumptions_count,
+				guarantees, guarantees_count))
+			exit(-1);
 
 	automaton_automaton_destroy(master);
 	return minimization;
