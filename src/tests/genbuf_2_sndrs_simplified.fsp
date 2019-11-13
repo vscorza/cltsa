@@ -48,12 +48,17 @@ ltl env rho A_1_1_sndr_1 in GENBUF		= []((sToB_REQ_1 && !bToS_ACK_1) -> X(sToB_R
 ltl env rho A_1_2_sndr_0 in GENBUF		= [](bToS_ACK_0 -> X(!sToB_REQ_0)).
 ltl env rho A_1_2_sndr_1 in GENBUF		= [](bToS_ACK_1 -> X(!sToB_REQ_1)).
 
+//lower rToB_ACK if no bToR_REQ
+ltl env rho A_2_2_sndr_0 in GENBUF		= []((!bToR_REQ_0) -> X(!rToB_ACK_0)).
+ltl env rho A_2_2_sndr_1 in GENBUF		= []((!bToR_REQ_1) -> X(!rToB_ACK_1)).
+
 //keep rToB_ACK if still REQ's
 ltl env rho A_3_rcvr_0 in GENBUF		= []((bToR_REQ_0 && rToB_ACK_0) -> X(rToB_ACK_0)).
 ltl env rho A_3_rcvr_1 in GENBUF		= []((bToR_REQ_1 && rToB_ACK_1) -> X(rToB_ACK_1)).
 //rToB_ACK if REQ'd
 ltl env rho A_4_rcvr_0 in GENBUF		= [](X(rToB_ACK_0) -> bToR_REQ_0).
 ltl env rho A_4_rcvr_1 in GENBUF		= [](X(rToB_ACK_1) -> bToR_REQ_1).
+
 
 
 /***********
@@ -125,12 +130,16 @@ S_387 = (<bToR_REQ_0.off,bToR_REQ_1.on>-> S_70),
 S_409 = (<bToR_REQ_0.on,bToR_REQ_1.off>-> S_48).
 
 
-fluent F_Goal_12 = <{deq.on,empty.on}, empty.off> initially 1
+//fluent F_Goal_12 = <{deq.on,empty.on}, empty.off> initially 1
+fluent A_2_sndr_0 = <rToB_ACK_0.on, bToR_REQ_0.on> initially 1
+fluent A_2_sndr_1 = <rToB_ACK_1.on, bToR_REQ_1.on> initially 1
 
 ltl fluent G_1_2_sndr_0		= (sToB_REQ_0 <-> bToS_ACK_0).
 ltl fluent G_1_2_sndr_1		= (sToB_REQ_1 <-> bToS_ACK_1).
-ltl fluent A_2_sndr_0		= (bToR_REQ_0 <-> rToB_ACK_0).
-ltl fluent A_2_sndr_1		= (bToR_REQ_1 <-> rToB_ACK_1).
+/*
+ltl fluent A_2_sndr_0		= (bToR_REQ_0 -> rToB_ACK_0).
+ltl fluent A_2_sndr_1		= (bToR_REQ_1 -> rToB_ACK_1).
+*/
 
 
 /***********
