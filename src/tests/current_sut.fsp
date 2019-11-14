@@ -1,0 +1,257 @@
+//GenBuf example taken from Synthesis of Reactive(1) Designs 2 senders
+set Global_Alphabet = {}
+set Controllable_Alphabet = {}
+
+set Global_Signals	= {sToB_REQ_0, sToB_REQ_1, bToS_ACK_0, bToS_ACK_1, bToR_REQ_0, bToR_REQ_1, rToB_ACK_0, rToB_ACK_1}
+set Output_Signals	= {bToS_ACK_0, bToS_ACK_1, bToR_REQ_0, bToR_REQ_1}
+order			= {sToB_REQ_0 < sToB_REQ_1 < rToB_ACK_0 < rToB_ACK_1 < bToS_ACK_0 < bToS_ACK_1 < bToR_REQ_0 < bToR_REQ_1}
+
+/***********
+**** THETA
+***********/
+ltl env theta Init_Buffer_e in GENBUF	= (!sToB_REQ_0 && !sToB_REQ_1 && !rToB_ACK_0 && !rToB_ACK_1).
+ltl sys theta Init_Buffer_s in GENBUF	= (!bToS_ACK_0 && !bToS_ACK_1 && !bToR_REQ_0 && !bToR_REQ_1).
+/***********
+**** SYS RHO
+***********/
+//bToS_ACK only if sToB_REQ
+ltl sys rho G_2_sndr_0 in GENBUF		= []((!sToB_REQ_0 && X(sToB_REQ_0)) -> X(!bToS_ACK_0)).
+ltl sys rho G_2_sndr_1 in GENBUF		= []((!sToB_REQ_1 && X(sToB_REQ_1)) -> X(!bToS_ACK_1)).
+//bToS_ACK only if sToB_REQ
+ltl sys rho G_3_sndr_0 in GENBUF		= []((!bToS_ACK_0 && X(bToS_ACK_0)) -> sToB_REQ_0).
+ltl sys rho G_3_sndr_1 in GENBUF		= []((!bToS_ACK_1 && X(bToS_ACK_1)) -> sToB_REQ_1).
+//keep bToS_ACK up if sToB_REQ still going
+ltl sys rho G_4_sndr_0 in GENBUF		= []((bToS_ACK_0 && sToB_REQ_0) -> X(bToS_ACK_0)).
+ltl sys rho G_4_sndr_1 in GENBUF		= []((bToS_ACK_1 && sToB_REQ_1) -> X(bToS_ACK_1)).
+//mutex bToS_ACK
+ltl sys rho G_5 in GENBUF			= [](!(bToS_ACK_0 && bToS_ACK_1)).
+ltl sys rho G_5_X in GENBUF			= [](X(!(bToS_ACK_0 && bToS_ACK_1))).
+//mutex bToR_REQ
+ltl sys rho G_5_b_1_rcvr_0 in GENBUF		= [](!(bToR_REQ_0 && bToR_REQ_1)).
+ltl sys rho G_5_b_1_rcvr_0 in GENBUF		= [](X(!(bToR_REQ_0 && bToR_REQ_1))).
+//keep bToR_REQ if not yet ack
+ltl sys rho G_6_1_rcvr_0 in GENBUF		= []((bToR_REQ_0 && !rToB_ACK_0) -> X(bToR_REQ_0)).
+ltl sys rho G_6_1_rcvr_1 in GENBUF		= []((bToR_REQ_1 && !rToB_ACK_1) -> X(bToR_REQ_1)).
+//lower bToR_REQ when rToB_ACK received
+ltl sys rho G_8_rcvr_0 in GENBUF		= [](rToB_ACK_0 -> X(!bToR_REQ_0)).
+ltl sys rho G_8_rcvr_1 in GENBUF		= [](rToB_ACK_1 -> X(!bToR_REQ_1)).
+//bToS_ACK raises iff enq
+
+/***********
+**** ENV RHO
+***********/
+
+//keep sToB_REQ if not yet ACK'd
+ltl env rho A_1_1_sndr_0 in GENBUF		= []((sToB_REQ_0 && !bToS_ACK_0) -> X(sToB_REQ_0)).
+ltl env rho A_1_1_sndr_1 in GENBUF		= []((sToB_REQ_1 && !bToS_ACK_1) -> X(sToB_REQ_1)).
+//lower sToB_REQ once ACK'd
+ltl env rho A_1_2_sndr_0 in GENBUF		= [](bToS_ACK_0 -> X(!sToB_REQ_0)).
+ltl env rho A_1_2_sndr_1 in GENBUF		= [](bToS_ACK_1 -> X(!sToB_REQ_1)).
+
+//lower rToB_ACK if no bToR_REQ
+ltl env rho A_2_2_sndr_0 in GENBUF		= []((!bToR_REQ_0) -> X(!rToB_ACK_0)).
+ltl env rho A_2_2_sndr_1 in GENBUF		= []((!bToR_REQ_1) -> X(!rToB_ACK_1)).
+
+//keep rToB_ACK if still REQ's
+ltl env rho A_3_rcvr_0 in GENBUF		= []((bToR_REQ_0 && rToB_ACK_0) -> X(rToB_ACK_0)).
+ltl env rho A_3_rcvr_1 in GENBUF		= []((bToR_REQ_1 && rToB_ACK_1) -> X(rToB_ACK_1)).
+//rToB_ACK if REQ'd
+ltl env rho A_4_rcvr_0 in GENBUF		= [](X(rToB_ACK_0) -> bToR_REQ_0).
+ltl env rho A_4_rcvr_1 in GENBUF		= [](X(rToB_ACK_1) -> bToR_REQ_1).
+
+
+
+/***********
+**** AUTOMATA
+***********/
+//G_7 was turned into an automaton
+G_7_ROUND_ROBIN	= (bToR_REQ_0.on -> bToR_REQ_1.on -> G_7_ROUND_ROBIN).
+
+/***********
+**** FLUENTS
+***********/
+//G_12 was turned into a fluent
+
+DIAG = S_0,
+S_0 = (<>-> S_1),
+S_1 = (<>-> S_2),
+S_2 = (<sToB_REQ_0.on,sToB_REQ_1.on>-> S_6),
+S_6 = (bToR_REQ_0.on-> S_8),
+S_8 = (<>-> S_9),
+S_9 = (bToS_ACK_0.on-> S_306|bToS_ACK_1.on-> S_187),
+S_16 = (<rToB_ACK_0.off,rToB_ACK_1.on>-> S_18),
+S_18 = (<bToS_ACK_0.on,bToS_ACK_1.off>-> S_20),
+S_20 = (<sToB_REQ_0.off,sToB_REQ_1.on>-> S_409),
+S_28 = (<rToB_ACK_0.on,rToB_ACK_1.off>-> S_30),
+S_30 = (<bToS_ACK_0.on,bToS_ACK_1.off>-> S_32),
+S_32 = (<sToB_REQ_0.off,sToB_REQ_1.on>-> S_387),
+S_33 = (<>-> S_34),
+S_34 = (<bToR_REQ_0.off,bToS_ACK_1.off>-> S_35),
+S_35 = (<rToB_ACK_0.off,sToB_REQ_1.on>-> S_385),
+S_43 = (<>-> S_44),
+S_44 = (bToR_REQ_1.off-> S_47),
+S_47 = (rToB_ACK_1.off-> S_371),
+S_48 = (<rToB_ACK_0.on,rToB_ACK_1.off>-> S_370),
+S_55 = (rToB_ACK_0.on-> S_57),
+S_57 = (<bToS_ACK_0.on,bToS_ACK_1.off>-> S_32),
+S_70 = (<rToB_ACK_0.off,rToB_ACK_1.on>-> S_353),
+S_76 = (rToB_ACK_1.on-> S_78),
+S_78 = (<bToS_ACK_0.on,bToS_ACK_1.off>-> S_20),
+S_85 = (rToB_ACK_1.on-> S_87),
+S_87 = (<bToS_ACK_0.off,bToS_ACK_1.on>-> S_89),
+S_89 = (<sToB_REQ_0.on,sToB_REQ_1.off>-> S_91),
+S_91 = (<bToR_REQ_0.on,bToR_REQ_1.off>-> S_28),
+S_124 = (sToB_REQ_0.on-> S_126),
+S_126 = (bToR_REQ_0.off-> S_127|<bToR_REQ_0.off,bToS_ACK_1.on>-> S_128|<bToR_REQ_0.off,bToR_REQ_1.on>-> S_129),
+S_127 = (rToB_ACK_0.off-> S_317),
+S_128 = (<rToB_ACK_0.off,sToB_REQ_1.off>-> S_316),
+S_129 = (rToB_ACK_0.off-> S_133),
+S_133 = (bToS_ACK_0.on-> S_228),
+S_157 = (rToB_ACK_0.on-> S_159),
+S_159 = (bToS_ACK_0.off-> S_124),
+S_160 = (<sToB_REQ_0.on,sToB_REQ_1.off>-> S_162),
+S_162 = (<bToR_REQ_0.off,bToR_REQ_1.on>-> S_16),
+S_187 = (sToB_REQ_1.off-> S_188|<rToB_ACK_0.on,sToB_REQ_1.off>-> S_189),
+S_188 = (<>-> S_55),
+S_189 = (<>-> S_33),
+S_228 = (<rToB_ACK_1.on,sToB_REQ_0.off>-> S_230),
+S_230 = (<>-> S_43),
+S_290 = (sToB_REQ_0.off-> S_293),
+S_293 = (bToR_REQ_1.on-> S_85),
+S_306 = (sToB_REQ_0.off-> S_307),
+S_307 = (<>-> S_157),
+S_316 = (bToR_REQ_1.on-> S_76),
+S_317 = (bToS_ACK_0.on-> S_290),
+S_353 = (<bToS_ACK_0.off,bToS_ACK_1.on>-> S_89),
+S_370 = (<bToS_ACK_0.off,bToS_ACK_1.on>-> S_160),
+S_371 = (bToR_REQ_0.on-> S_157),
+S_385 = (bToS_ACK_0.on-> S_290),
+S_387 = (<bToR_REQ_0.off,bToR_REQ_1.on>-> S_70),
+S_409 = (<bToR_REQ_0.on,bToR_REQ_1.off>-> S_48).
+
+SUT = S_0,
+S_0 = (<>-> S_1),
+S_1 = (<>-> S_2),
+S_2 = (<>-> S_3|sToB_REQ_1.on-> S_4|sToB_REQ_0.on-> S_5|<sToB_REQ_0.on,sToB_REQ_1.on>-> S_6),
+S_3 = (bToR_REQ_0.on-> S_174),
+S_4 = (bToR_REQ_0.on-> S_163),
+S_5 = (bToR_REQ_0.on-> S_58),
+S_6 = (bToR_REQ_0.on-> S_8),
+S_8 = (<>-> S_9|rToB_ACK_0.on-> S_10),
+S_9 = (bToS_ACK_0.on-> S_306|bToS_ACK_1.on-> S_187),
+S_10 = (bToS_ACK_1.on-> S_13),
+S_11 = (<>-> S_414),
+S_13 = (sToB_REQ_1.off-> S_14),
+S_14 = (bToR_REQ_0.off-> S_15),
+S_15 = (rToB_ACK_0.off-> S_412),
+S_16 = (<rToB_ACK_0.off,rToB_ACK_1.on>-> S_18),
+S_18 = (<bToS_ACK_0.on,bToS_ACK_1.off>-> S_20),
+S_20 = (sToB_REQ_0.off-> S_408),
+S_21 = (<>-> S_22),
+S_22 = (<bToR_REQ_1.off,bToS_ACK_0.on,bToS_ACK_1.off>-> S_25),
+S_25 = (<rToB_ACK_1.off,sToB_REQ_0.off,sToB_REQ_1.on>-> S_401),
+S_27 = (rToB_ACK_1.off-> S_395),
+S_28 = (<rToB_ACK_0.on,rToB_ACK_1.off>-> S_30),
+S_30 = (<bToS_ACK_0.on,bToS_ACK_1.off>-> S_32),
+S_31 = (sToB_REQ_1.on-> S_389),
+S_32 = (<sToB_REQ_0.off,sToB_REQ_1.on>-> S_387),
+S_33 = (<>-> S_34),
+S_34 = (<bToR_REQ_0.off,bToR_REQ_1.on>-> S_16),
+S_43 = (<>-> S_44),
+S_44 = (<bToR_REQ_0.on,bToR_REQ_1.off,bToS_ACK_0.off>-> S_46|<bToR_REQ_1.off,bToS_ACK_0.off,bToS_ACK_1.on>-> S_49|<bToR_REQ_0.on,bToR_REQ_1.off,bToS_ACK_0.off,bToS_ACK_1.on>-> S_50),
+S_46 = (<rToB_ACK_0.on,rToB_ACK_1.off,sToB_REQ_0.on>-> S_375),
+S_49 = (<rToB_ACK_1.off,sToB_REQ_1.off>-> S_367|<rToB_ACK_1.off,sToB_REQ_0.on,sToB_REQ_1.off>-> S_368),
+S_50 = (<rToB_ACK_1.off,sToB_REQ_0.on,sToB_REQ_1.off>-> S_53),
+S_53 = (<>-> S_55),
+S_55 = (<>-> S_56|rToB_ACK_0.on-> S_57),
+S_56 = (bToS_ACK_1.off-> S_58),
+S_57 = (<bToS_ACK_0.on,bToS_ACK_1.off>-> S_32),
+S_58 = (rToB_ACK_0.on-> S_364),
+S_70 = (<rToB_ACK_0.off,rToB_ACK_1.on>-> S_353),
+S_76 = (rToB_ACK_1.on-> S_78),
+S_78 = (<bToS_ACK_0.on,bToS_ACK_1.off>-> S_20),
+S_85 = (rToB_ACK_1.on-> S_87),
+S_87 = (bToS_ACK_0.off-> S_88),
+S_88 = (sToB_REQ_0.on-> S_347),
+S_89 = (sToB_REQ_1.off-> S_90),
+S_90 = (<bToR_REQ_0.on,bToR_REQ_1.off>-> S_93),
+S_93 = (<rToB_ACK_0.on,rToB_ACK_1.off,sToB_REQ_0.on>-> S_97),
+S_97 = (bToS_ACK_1.off-> S_31),
+S_124 = (sToB_REQ_0.on-> S_126),
+S_126 = (<bToR_REQ_0.off,bToS_ACK_1.on>-> S_128|<bToR_REQ_0.off,bToR_REQ_1.on>-> S_129|<bToR_REQ_0.off,bToR_REQ_1.on,bToS_ACK_1.on>-> S_130),
+S_128 = (<rToB_ACK_0.off,sToB_REQ_1.off>-> S_316),
+S_129 = (rToB_ACK_0.off-> S_133|<rToB_ACK_0.off,rToB_ACK_1.on>-> S_134),
+S_130 = (<rToB_ACK_0.off,sToB_REQ_1.off>-> S_131|<rToB_ACK_0.off,rToB_ACK_1.on,sToB_REQ_1.off>-> S_132),
+S_131 = (<>-> S_76),
+S_132 = (<>-> S_21),
+S_133 = (bToS_ACK_0.on-> S_228),
+S_134 = (bToS_ACK_1.on-> S_137),
+S_137 = (sToB_REQ_1.off-> S_138),
+S_138 = (bToR_REQ_1.off-> S_27|<bToR_REQ_0.on,bToR_REQ_1.off>-> S_28),
+S_142 = (rToB_ACK_1.off-> S_313),
+S_157 = (rToB_ACK_0.on-> S_159),
+S_159 = (bToS_ACK_0.off-> S_124),
+S_160 = (<sToB_REQ_0.on,sToB_REQ_1.off>-> S_162),
+S_162 = (<bToR_REQ_0.off,bToR_REQ_1.on>-> S_16),
+S_163 = (rToB_ACK_0.on-> S_184|<rToB_ACK_0.on,sToB_REQ_0.on>-> S_186),
+S_169 = (<rToB_ACK_0.on,sToB_REQ_0.on>-> S_173),
+S_173 = (bToS_ACK_1.off-> S_31),
+S_174 = (<rToB_ACK_0.on,sToB_REQ_1.on>-> S_178|<rToB_ACK_0.on,sToB_REQ_0.on>-> S_180|<rToB_ACK_0.on,sToB_REQ_0.on,sToB_REQ_1.on>-> S_182),
+S_178 = (<>-> S_124),
+S_180 = (<>-> S_31),
+S_182 = (<>-> S_11),
+S_184 = (bToS_ACK_1.on-> S_160),
+S_186 = (bToS_ACK_1.on-> S_13),
+S_187 = (<rToB_ACK_0.on,sToB_REQ_1.off>-> S_189),
+S_189 = (<>-> S_33),
+S_228 = (sToB_REQ_0.off-> S_229),
+S_229 = (<>-> S_85),
+S_254 = (<rToB_ACK_0.on,rToB_ACK_1.off,sToB_REQ_1.on>-> S_258),
+S_258 = (bToS_ACK_0.off-> S_124),
+S_306 = (sToB_REQ_0.off-> S_307),
+S_307 = (<>-> S_157),
+S_313 = (bToS_ACK_0.on-> S_306),
+S_316 = (bToR_REQ_1.on-> S_76),
+S_347 = (<bToR_REQ_0.on,bToR_REQ_1.off>-> S_142),
+S_353 = (<bToS_ACK_0.off,bToS_ACK_1.on>-> S_89),
+S_364 = (bToS_ACK_0.on-> S_32),
+S_367 = (bToR_REQ_0.on-> S_169),
+S_368 = (bToR_REQ_0.on-> S_55),
+S_375 = (bToS_ACK_1.on-> S_13),
+S_387 = (<bToR_REQ_0.off,bToR_REQ_1.on>-> S_70),
+S_389 = (<bToR_REQ_0.off,bToR_REQ_1.on,bToS_ACK_0.on>-> S_391),
+S_391 = (<rToB_ACK_0.off,rToB_ACK_1.on,sToB_REQ_0.off>-> S_393),
+S_393 = (<>-> S_43),
+S_395 = (bToR_REQ_0.on-> S_55),
+S_401 = (bToR_REQ_0.on-> S_157),
+S_408 = (<bToR_REQ_0.on,bToR_REQ_1.off>-> S_254),
+S_412 = (bToR_REQ_1.on-> S_76),
+S_414 = (<bToR_REQ_0.off,bToR_REQ_1.on,bToS_ACK_1.on>-> S_130).
+
+
+fluent F_Goal_12 = <{deq.on,empty.on}, empty.off> initially 1
+fluent A_2_sndr_0 = <rToB_ACK_0.on, bToR_REQ_0.on> initially 1
+fluent A_2_sndr_1 = <rToB_ACK_1.on, bToR_REQ_1.on> initially 1
+
+ltl fluent G_1_2_sndr_0		= (sToB_REQ_0 <-> bToS_ACK_0).
+ltl fluent G_1_2_sndr_1		= (sToB_REQ_1 <-> bToS_ACK_1).
+/*
+ltl fluent A_2_sndr_0		= (bToR_REQ_0 -> rToB_ACK_0).
+ltl fluent A_2_sndr_1		= (bToR_REQ_1 -> rToB_ACK_1).
+*/
+
+
+/***********
+**** SYNTHESIS
+***********/
+
+|f| ENV =(GENBUF || G_7_ROUND_ROBIN).
+//|f| ENV =(SUT || G_7_ROUND_ROBIN).
+//|gr1| <{A_2_sndr_0, A_2_sndr_1}><{F_Goal_12, G_1_2_sndr_0, G_1_2_sndr_1}> STRAT = ENV.
+|gr1| <{A_2_sndr_0, A_2_sndr_1}><{G_1_2_sndr_0, G_1_2_sndr_1}> STRAT = ENV.
+//|gr1| <{A_2_sndr_0, A_2_sndr_1}><{F_Goal_12, G_1_2_sndr_0, G_1_2_sndr_1}> STRAT = ENV.
+
+
+
+// tests
+equals FATAL_Genbuf_2_Sndrs_Diag(STRAT,DIAG).

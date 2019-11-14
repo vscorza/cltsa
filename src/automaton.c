@@ -482,10 +482,13 @@ bool automaton_automaton_print_fsp(automaton_automaton* current_automaton, char*
 	for(i = 0; i < current_automaton->initial_states_count; i++){
 		fprintf(f, "A = S_%d,\n", current_automaton->initial_states[i]);
 	}
+	bool first_line = true;
 	automaton_transition* current_transition;
 	for(i = 0; i < current_automaton->transitions_count; i++){
-		if(current_automaton->out_degree[i] <= 0){
-			fprintf(f, "S_%d = STOP", i);
+		if(first_line){
+			first_line = false;
+		}else if(current_automaton->out_degree[i] > 0){
+			fprintf(f, ",\n");
 		}
 		for(j = 0; j < current_automaton->out_degree[i]; j++){
 			current_transition	= &(current_automaton->transitions[i][j]);
@@ -501,8 +504,8 @@ bool automaton_automaton_print_fsp(automaton_automaton* current_automaton, char*
 			if(j < (current_automaton->out_degree[i] - 1))fprintf(f, "|");
 			if(j == (current_automaton->out_degree[i] - 1))fprintf(f, ")");
 		}
-		if(i == (current_automaton->transitions_count - 1)){fprintf(f, ".");}else{fprintf(f, ",\n");}
 	}
+	fprintf(f, ".");
 	fclose(f);
 	return true;
 }
@@ -2442,9 +2445,6 @@ bool automaton_is_gr1_realizable(automaton_automaton* game_automaton, char** ass
 
 automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_automaton* game_automaton, char** assumptions, uint32_t assumptions_count
 		, char** guarantees, uint32_t guarantees_count){
-	/*if(automaton_is_gr1_realizable(game_automaton, assumptions, assumptions_count,
-			guarantees, guarantees_count))
-		return game_automaton;*/
 
 	//candidate transitions lists
 	uint32_t t_size = LIST_INITIAL_SIZE, t_count = 0;
@@ -2453,7 +2453,7 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_autom
 	uint32_t r_size = LIST_INITIAL_SIZE, r_count = 0;
 	uint32_t *r_states	= calloc(r_size, sizeof(uint32_t)), *r_indexes = calloc(r_size, sizeof(uint32_t));
 
-	int32_t i,j,k;
+	int32_t i,j,k, from_step;
 	uint32_t new_size; uint32_t *ptr;
 
 	//get a master copy of the game, remove controllable transitions from mixed states,
@@ -2467,7 +2467,14 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_autom
 			if(!master->is_controllable[i]){
 				if(!current_transition->is_input)
 					automaton_automaton_remove_transition(master, current_transition);
-				else{
+			}
+		}
+	}
+	for(i = 0; i < master->transitions_count; i++){
+		for(j = master->out_degree[i] - 1; j >= 0; j--){
+			current_transition = &(master->transitions[i][j]);
+			if(!master->is_controllable[i]){
+				if(current_transition->is_input){
 					if(t_count == t_size){
 						new_size	= t_size * LIST_INCREASE_FACTOR;
 						ptr	= realloc(t_states, new_size * sizeof(uint32_t));
@@ -2482,7 +2489,10 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_autom
 			}
 		}
 	}
+	automaton_automaton_remove_deadlocks(master);
+	automaton_automaton_update_valuations(master);
 	automaton_automaton *minimization	= automaton_automaton_clone(master);
+	automaton_automaton *last_unrealizable	= automaton_automaton_clone(master);
 
 	bool minimized	= false;
 	uint32_t steps = 0;
@@ -2490,8 +2500,7 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_autom
 		//get next candidate
 		current_transition	= &(master->transitions[t_states[t_count - 1]][t_indexes[t_count - 1]]); t_count--;
 		//do not consider missing transitions or transitions that would induce deadlocks
-		while(//!automaton_automaton_has_transition(minimization, current_transition) ||
-				minimization->out_degree[current_transition->state_from] == 1){
+		while(minimization->out_degree[current_transition->state_from] == 1){
 			if(t_count == 0){
 				minimized = true;
 				break;
@@ -2522,36 +2531,45 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_autom
 		r_states[r_count]	= t_states[t_count];	r_indexes[r_count++]	= t_indexes[t_count];
 		steps++;
 		automaton_automaton_remove_transition(minimization, current_transition);
-		//automaton_automaton_remove_unreachable_states(minimization);
+		automaton_automaton_remove_deadlocks(minimization);
+		automaton_automaton_update_valuations(minimization);
 
-		//if minimization is realizable then restore transition and remove it from the to_remove list
-		/*
-		if(automaton_is_gr1_realizable(minimization, assumptions, assumptions_count,
-				guarantees, guarantees_count)){
-			automaton_automaton_add_transition(minimization, current_transition);
-			r_count--;
-		}*/
-		//avoid retrieving the trivial diagnosis
 		if(automaton_is_gr1_realizable(minimization, assumptions, assumptions_count,
 				guarantees, guarantees_count) || minimization->out_degree[minimization->initial_states[0]] == 0){
 			//automaton_automaton_add_transition(minimization, current_transition);
 			r_count--;
 			automaton_automaton_destroy(minimization);
-			minimization = automaton_automaton_clone(master);
+			minimization = automaton_automaton_clone(last_unrealizable);
 			for(i =0 ; i < r_count; i++){
 				current_transition	= &(master->transitions[r_states[i]][r_indexes[i]]);
 				automaton_automaton_remove_transition(minimization, current_transition);
 			}
+			automaton_automaton_remove_deadlocks(minimization);
+			automaton_automaton_update_valuations(minimization);
+			printf("[%d,%d,R,%d]\n", t_count, r_count,steps);
+		}else{
+			automaton_automaton_destroy(last_unrealizable);
+			last_unrealizable = automaton_automaton_clone(minimization);
+			from_step = steps;
+			printf("[%d,%d,N,%d]\n", t_count, r_count, from_step);
 		}
+		fflush(stdout);
 	}
+
 	free(t_states); free(t_indexes);
 	free(r_states); free(r_indexes);
 
 	if(automaton_is_gr1_realizable(minimization, assumptions, assumptions_count,
-				guarantees, guarantees_count))
-			exit(-1);
+				guarantees, guarantees_count) || minimization->out_degree[minimization->initial_states[0]] == 0){
+		automaton_automaton_destroy(minimization);
+		minimization = automaton_automaton_clone(last_unrealizable);
+		printf("[%d,%d]Returning restored from %d\n", t_count, r_count, from_step);
+	}else{
+		printf("[%d,%d]Returning last from %d\n", t_count, r_count, from_step);
+	}
 
 	automaton_automaton_destroy(master);
+	automaton_automaton_destroy(last_unrealizable);
 	return minimization;
 }
 
@@ -2721,15 +2739,52 @@ uint32_t* automaton_automaton_distance_to_state(automaton_automaton* automaton, 
 void automaton_automaton_remove_unreachable_states(automaton_automaton* automaton){
 	if(automaton->initial_states_count < 1)return;
 	uint32_t* distances	= automaton_automaton_distance_to_state(automaton, automaton->initial_states[0]);
-	uint32_t i;
-	for(i = 0; i < automaton->transitions_count; i++){
-		if(distances[i] != 0 || i == automaton->initial_states[0])continue;
-		automaton->in_degree[i]	= 0;
-		automaton->out_degree[i]	= 0;
-		automaton->out_size[i]	= 0;
-		automaton->in_size[i]	= 0;
-	}
+	uint32_t i,j;
+	bool unreachable_found = false;
+	do{
+		unreachable_found = false;
+		for(i = 0; i < automaton->transitions_count; i++){
+			if(i == automaton->initial_states[0])continue;
+			if((automaton->in_degree[i] != 0) && (distances[i] != 0))continue;
+			if(automaton->in_degree[i] == 0 && automaton->out_degree[i] == 0)continue;
+			unreachable_found = true;
+			for(j = 0; j < automaton->out_degree[i]; j++){
+				automaton_automaton_remove_transition(automaton, &(automaton->transitions[i][j]));
+			}
+		}
+	}while(unreachable_found);
 	free(distances);
+}
+
+void automaton_automaton_remove_deadlocks(automaton_automaton* automaton){
+	if(automaton->initial_states_count < 1)return;
+	uint32_t i, j;
+	bool deadlock_found = false;
+	do{
+		deadlock_found = false;
+		for(i = 0; i < automaton->transitions_count; i++){
+			if(automaton->out_degree[i] == 0 && automaton->in_degree[i] > 0){
+				deadlock_found = true;
+				for(j = 0; j < automaton->in_degree[i]; j++){
+					automaton_automaton_remove_transition(automaton, &(automaton->inverted_transitions[i][j]));
+				}
+			}
+		}
+	}while(deadlock_found);
+	automaton_automaton_remove_unreachable_states(automaton);
+}
+
+void automaton_automaton_update_valuations(automaton_automaton* automaton){
+	uint32_t i,j;
+	for(i = 0; i < automaton->transitions_count; i++){
+		if(automaton->in_degree[i] == 0 && automaton->out_degree[i] == 0){
+			for(j = 0; j < automaton->context->global_fluents_count; j++){
+				if(automaton_bucket_has_entry(automaton->inverted_valuations[j], i)){
+					automaton_bucket_remove_entry(automaton->inverted_valuations[j], i);
+				}
+			}
+		}
+	}
 }
 
 uint32_t automaton_automata_get_composite_state(uint32_t states_count, uint32_t* states){
