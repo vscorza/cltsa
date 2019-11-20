@@ -3155,7 +3155,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 	// create automaton
 	automaton_automaton* composition;
 	char buff[255];
-	snprintf(buff, sizeof(buff), "Game for: %s", composition_name);
+	snprintf(buff, sizeof(buff), "%s_Game", composition_name);
 	if(is_game){
 		composition = automaton_automaton_create(buff, ctx, alphabet_count, alphabet, true, false);
 	}else{

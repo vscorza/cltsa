@@ -3190,19 +3190,26 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 				automaton_automaton_remove_unreachable_states(winning_region_automaton);
 			}
 			main_index = automaton_parsing_tables_add_entry(tables, COMPOSITION_ENTRY_AUT, gr1_game->name, winning_region_automaton);
+
+			uint32_t namelen	= strlen(winning_region_automaton->name) + 12;
+			char *name = calloc(namelen, sizeof(char));
+			snprintf(name, namelen, "%s_%s", winning_region_automaton->name, nonreal? "diag" : "strat");
+			free(winning_region_automaton->name);
+			winning_region_automaton->name	= name;
 			tables->composition_entries[main_index]->solved	= true;
 			tables->composition_entries[main_index]->valuation_count			= 1;
 			tables->composition_entries[main_index]->valuation.automaton_value	= winning_region_automaton;
-
+			/*
 			if(print_fsp){
 				char buf[150];
 				char cmd[350];
 				//automaton_automaton_print(tables->composition_entries[i]->valuation.automaton_value, true, true, true, "*\t", "*\t");
+
 				sprintf(buf, "%s_%d_%s.fsp", ctx_name, i, nonreal? "diag" : "strat");
 				automaton_automaton_print_fsp(winning_region_automaton, buf);
 				sprintf(buf, "%s_%d_%s.rep", ctx_name, i, nonreal? "diag" : "strat");
 				automaton_automaton_print_report(winning_region_automaton, buf);
-			}
+			}*/
 			if(nonreal){
 				//clear everything game related from diagnosis
 				for(i = 0; i < winning_region_automaton->context->global_fluents_count; i++)
@@ -3294,9 +3301,9 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 		for(i = 0; i < tables->composition_count; i++){
 			if(tables->composition_entries[i]->solved){
 				//automaton_automaton_print(tables->composition_entries[i]->valuation.automaton_value, true, true, true, "*\t", "*\t");
-				sprintf(buf, "%s_%d_result.fsp", ctx_name, i);
+				sprintf(buf, "%s_%s.fsp", ctx_name, tables->composition_entries[i]->valuation.automaton_value->name);
 				automaton_automaton_print_fsp(tables->composition_entries[i]->valuation.automaton_value, buf);
-				sprintf(buf, "%s_%d_result.rep", ctx_name, i);
+				sprintf(buf, "%s_%s.rep", ctx_name, tables->composition_entries[i]->valuation.automaton_value->name);
 				automaton_automaton_print_report(tables->composition_entries[i]->valuation.automaton_value, buf);
 				/*
 				sprintf(buf, "%s_%d_result_%s.dot", ctx_name, i, is_synchronous? "synch": "asynch");
