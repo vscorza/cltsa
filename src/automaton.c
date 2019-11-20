@@ -707,6 +707,130 @@ void automaton_automaton_serialize_report(FILE *f, automaton_automaton *automato
 
 	fprintf(f, "%s%s", AUT_SER_ARRAY_END, AUT_SER_OBJ_END);
 }
+void automaton_ranking_alphabet_serialize_report(FILE *f, automaton_alphabet *alphabet, uint32_t max_delta){
+	fprintf(f, "%s%d%s%s", AUT_SER_OBJ_START, alphabet->count + max_delta + 1, AUT_SER_SEP, AUT_SER_ARRAY_START);
+	uint32_t i;
+	for(i = 0; i < alphabet->count; i++){
+		automaton_signal_event_serialize_report(f, &(alphabet->list[i]));
+		fprintf(f, "%s", AUT_SER_SEP);
+	}
+	fprintf(f, "%sinf%s0%s%s", AUT_SER_OBJ_START, AUT_SER_SEP, AUT_SER_OBJ_END, AUT_SER_SEP);
+	for(i = 0; i < max_delta; i++){
+		fprintf(f, "%sd%d%s0%s", AUT_SER_OBJ_START, i + 1,AUT_SER_SEP, AUT_SER_OBJ_END);
+		fprintf(f, "%s", i == (max_delta - 1)? "" :  AUT_SER_SEP);
+	}
+	fprintf(f, "%s%s", AUT_SER_ARRAY_END, AUT_SER_OBJ_END);
+}
+void automaton_ranking_automata_context_serialize_report(FILE *f, automaton_automata_context *ctx, uint32_t max_delta){
+	fprintf(f, "%s%s%s", AUT_SER_OBJ_START, ctx->name, AUT_SER_SEP);
+	automaton_ranking_alphabet_serialize_report(f, ctx->global_alphabet, max_delta);
+	fprintf(f, "%s%d%s%s", AUT_SER_SEP, ctx->global_fluents_count, AUT_SER_SEP, AUT_SER_ARRAY_START);
+	uint32_t i;
+	for(i = 0; i < ctx->global_fluents_count; i++){
+		fprintf(f, "%s%s", ctx->global_fluents[i].name, i == (ctx->global_fluents_count - 1)? "" :  AUT_SER_SEP);
+	}
+	fprintf(f, "%s%s%d%s%s", AUT_SER_ARRAY_END, AUT_SER_SEP, ctx->liveness_valuations_count, AUT_SER_SEP, AUT_SER_ARRAY_START);
+	for(i = 0; i < ctx->liveness_valuations_count; i++){
+		fprintf(f, "%s%s", ctx->liveness_valuations_names[i], i == (ctx->liveness_valuations_count - 1)? "" :  AUT_SER_SEP);
+	}
+	fprintf(f, "%s%s", AUT_SER_ARRAY_END, AUT_SER_OBJ_END);
+}
+void automaton_ranking_transition_serialize_report(FILE *f, automaton_transition *transition,uint32_t ranking_value){
+	fprintf(f, "%s%d%s%d%s%d%s%s", AUT_SER_OBJ_START, transition->state_from, AUT_SER_SEP, transition->state_to, AUT_SER_SEP, 1 /*transition->signals_count + 1*/, AUT_SER_SEP, AUT_SER_ARRAY_START);
+	uint32_t i;
+	/*
+	for(i = 0; i < transition->signals_count; i++){
+		fprintf(f, "%d%s", ((i >= FIXED_SIGNALS_COUNT) ? (transition->other_signals[i - FIXED_SIGNALS_COUNT]) : transition->signals[i]),AUT_SER_SEP);
+	}
+	*/
+	fprintf(f,"%d", ranking_value);
+	fprintf(f, "%s%s%s%s", AUT_SER_ARRAY_END, AUT_SER_SEP, transition->is_input? "1" :"0",AUT_SER_OBJ_END);
+}
+bool automaton_ranking_print_report(automaton_automaton *automaton,
+		automaton_concrete_bucket_list** ranking_list, uint32_t* max_delta, uint32_t guarantee_count){
+	uint32_t name_len = strlen(automaton->name) + 30;
+	char *filename = calloc(name_len, sizeof(char));
+	FILE *f = NULL;
+	uint32_t r;
+	for(r = 0; r < guarantee_count; r++){
+		snprintf(filename, name_len, "results/%s_ranking_%d.rep", automaton->name, r);
+		f = fopen(filename, "w");
+
+		if (f == NULL)
+		{
+			printf("Error opening file!\n");
+			return false;
+		}
+
+		fprintf(f, "%s%s_ranking_%d%s", AUT_SER_OBJ_START, automaton->name, r, AUT_SER_SEP);
+		automaton_ranking_automata_context_serialize_report(f, automaton->context, max_delta[r]);
+		fprintf(f, "%s%d%s%s", AUT_SER_SEP, automaton->local_alphabet_count + max_delta[r], AUT_SER_SEP, AUT_SER_ARRAY_START);
+		uint32_t i, j;
+		uint32_t fluent_index;
+		uint32_t fluent_count	= automaton->context->global_fluents_count;
+		uint32_t liveness_count	= automaton->context->liveness_valuations_count;
+		for(i = 0; i < automaton->local_alphabet_count; i++){
+			fprintf(f, "%d%s", automaton->local_alphabet[i],AUT_SER_SEP);
+		}
+		fprintf(f, "%d%s", automaton->local_alphabet_count + 1, AUT_SER_SEP);
+		for(i = 0; i < max_delta[r]; i++){
+			fprintf(f, "%d%s", automaton->local_alphabet_count + 1 + i, i == (max_delta[r] - 1)? "" :  AUT_SER_SEP);
+		}
+		fprintf(f, "%s%s%d%s%s", AUT_SER_ARRAY_END, AUT_SER_SEP, automaton->transitions_count, AUT_SER_SEP, AUT_SER_ARRAY_START);
+		uint32_t current_count	= 0;
+		int32_t ranking_value;
+		bool first_transition	= true;
+		for(i = 0; i < automaton->transitions_count; i++){
+			for(j = 0; j < automaton->out_degree[i]; j++){
+				if(&(automaton->transitions[i][j]) != NULL){
+					if(first_transition)first_transition = false;
+					else fprintf(f, "%s",AUT_SER_SEP);
+					ranking_value = ((automaton_ranking*)automaton_concrete_bucket_get_entry(ranking_list[r],automaton->transitions[i][j].state_to))->value;
+					automaton_ranking_transition_serialize_report(f, &(automaton->transitions[i][j]),
+							ranking_value == RANKING_INFINITY? automaton->local_alphabet_count :automaton->local_alphabet_count + ranking_value);
+				}else{
+					printf("ERROR: Transition was null at [%d][%d]\n", i, j);
+				}
+				current_count++;
+			}
+		}
+		fprintf(f, "%s%s%d%s%s", AUT_SER_ARRAY_END, AUT_SER_SEP, automaton->initial_states_count, AUT_SER_SEP, AUT_SER_ARRAY_START);
+		for(i = 0; i < automaton->initial_states_count; i++){
+			fprintf(f, "%d%s", automaton->initial_states[i], i == (automaton->initial_states_count - 1)? "" :  AUT_SER_SEP);
+		}
+		fprintf(f, "%s%s%s", AUT_SER_ARRAY_END, AUT_SER_SEP, AUT_SER_ARRAY_START);
+		for(i = 0; i < automaton->transitions_count; i++){
+			fprintf(f, "%s", AUT_SER_ARRAY_START);
+			for(j = 0; j < fluent_count; j++){
+				if(automaton->is_game){
+					fluent_index	= GET_STATE_FLUENT_INDEX(fluent_count, i, j);
+					fprintf(f, "%s%s", TEST_FLUENT_BIT(automaton->valuations, fluent_index) ? "1" : "0", j == (fluent_count - 1)? "" :  AUT_SER_SEP);
+				}else{
+					fprintf(f, "%s%s", "0", j == (fluent_count - 1)? "" :  AUT_SER_SEP);
+				}
+			}
+			fprintf(f, "%s%s", AUT_SER_ARRAY_END, i == (automaton->transitions_count - 1) ? "" : AUT_SER_SEP);
+		}
+		fprintf(f, "%s%s%s", AUT_SER_ARRAY_END, AUT_SER_SEP, AUT_SER_ARRAY_START);
+		for(i = 0; i < automaton->transitions_count; i++){
+			fprintf(f, "%s", AUT_SER_ARRAY_START);
+			for(j = 0; j < liveness_count; j++){
+				if(automaton->is_game){
+					fluent_index	= GET_STATE_FLUENT_INDEX(liveness_count, i, j);
+					fprintf(f, "%s%s", TEST_FLUENT_BIT(automaton->liveness_valuations, fluent_index) ? "1" : "0", j == (liveness_count - 1)? "" :  AUT_SER_SEP);
+				}else{
+					fprintf(f, "%s%s", "0", j == (fluent_count - 1)? "" :  AUT_SER_SEP);
+				}
+
+			}
+			fprintf(f, "%s%s", AUT_SER_ARRAY_END, i == (automaton->transitions_count - 1) ? "" : AUT_SER_SEP);
+		}
+
+		fprintf(f, "%s%s", AUT_SER_ARRAY_END, AUT_SER_OBJ_END);
+	}
+	free(filename);
+	return true;
+}
 bool automaton_automaton_print_report(automaton_automaton *automaton, char *filename){
 	FILE *f = fopen(filename, "w");
 	if (f == NULL)
@@ -1608,6 +1732,7 @@ bool automaton_automaton_remove_transition(automaton_automaton* current_automato
 	bool transition_found = true;
 	for(i = 0; i < current_automaton->out_degree[from_state]; i++){//find transition index in automaton
 		other_transition	= &(current_automaton->transitions[from_state][i]);
+		if(other_transition->is_input != transition->is_input)continue;
 		if(other_transition->signals_count != transition->signals_count
 				|| other_transition->state_to != to_state)continue;
 		transition_found	= true;
@@ -1621,6 +1746,7 @@ bool automaton_automaton_remove_transition(automaton_automaton* current_automato
 		return false;
 	for(i = 0; i < current_automaton->in_degree[to_state]; i++){//find inverse index in automaton
 		other_transition	= &(current_automaton->inverted_transitions[to_state][i]);
+		if(other_transition->is_input != transition->is_input)continue;
 		if(other_transition->signals_count != transition->signals_count
 				|| other_transition->state_from != from_state)continue;
 		transition_found	= true;
@@ -1906,7 +2032,8 @@ void automaton_add_unstable_predecessors(automaton_automaton* game_automaton, au
 #endif
 			//check if entry exists in the pending structure, if so update previous value
 			current_ranking							= ((automaton_ranking*)automaton_concrete_bucket_get_entry(ranking[current_guarantee], current_transition->state_from));
-			if(current_ranking == NULL)continue;
+			if(current_ranking == NULL)
+				continue;
 			if(automaton_concrete_bucket_has_key(key_list, current_transition->state_from)){
 				existing_pending_state					= automaton_concrete_bucket_get_entry(key_list, current_transition->state_from);
 				existing_pending_state->value			= current_ranking->value;
@@ -2013,7 +2140,7 @@ void automaton_ranking_update(automaton_automaton* game_automaton, automaton_con
 }
 
 automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automaton, char** assumptions, uint32_t assumptions_count
-		, char** guarantees, uint32_t guarantees_count){
+		, char** guarantees, uint32_t guarantees_count, bool print_ranking){
 	clock_t begin = clock();
 	uint32_t pending_processed	= 0;
 	//TODO: preallocate pending states and rankings
@@ -2239,7 +2366,6 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 			//break;
 		}
 	}
-
 	if(is_winning){
 		//keep winning states
 		uint32_t new_count;
@@ -2408,7 +2534,18 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 		free(strategy_transition);
 
 	}
-
+	if(print_ranking){
+		automaton_automaton *clone = automaton_automaton_clone(game_automaton);
+		automaton_ranking_print_report(clone, ranking_list, max_delta, guarantees_count);
+		uint32_t clone_len	= strlen(clone->name)+30;
+		char *clone_name	= calloc(clone_len, sizeof(char));
+		snprintf(clone_name, clone_len, "%s_minimized", clone->name);
+		free(clone->name);
+		clone->name	= clone_name;
+		automaton_automaton_remove_deadlocks(clone);
+		automaton_ranking_print_report(clone, ranking_list, max_delta, guarantees_count);
+		automaton_automaton_destroy(clone);
+	}
 	//destroy structures
 	free(max_delta);
 	for(i = 0; i < guarantees_count; i++){
@@ -2436,7 +2573,7 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 bool automaton_is_gr1_realizable(automaton_automaton* game_automaton, char** assumptions, uint32_t assumptions_count
 		, char** guarantees, uint32_t guarantees_count){
 	automaton_automaton* strategy = automaton_get_gr1_strategy(game_automaton, assumptions, assumptions_count,
-			guarantees, guarantees_count);
+			guarantees, guarantees_count, false);
 	bool is_realizable = (strategy->transitions_count != 0
 			&& strategy->out_degree[strategy->initial_states[0]] > 0);
 	automaton_automaton_destroy(strategy);
@@ -2567,6 +2704,10 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_autom
 	}else{
 		printf("[%d,%d]Returning last from %d\n", t_count, r_count, from_step);
 	}
+	//print rankings
+	automaton_automaton* strategy = automaton_get_gr1_strategy(minimization, assumptions, assumptions_count,
+			guarantees, guarantees_count, true);
+	automaton_automaton_destroy(strategy);
 
 	automaton_automaton_destroy(master);
 	automaton_automaton_destroy(last_unrealizable);

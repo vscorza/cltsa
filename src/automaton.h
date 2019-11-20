@@ -297,6 +297,11 @@ void automaton_alphabet_serialize_report(FILE *f, automaton_alphabet *alphabet);
 void automaton_transition_serialize_report(FILE *f, automaton_transition *transition);
 void automaton_automaton_serialize_report(FILE *f, automaton_automaton *automaton);
 bool automaton_automaton_print_report(automaton_automaton *automaton, char *filename);
+void automaton_ranking_alphabet_serialize_report(FILE *f, automaton_alphabet *alphabet, uint32_t max_delta);
+void automaton_ranking_automata_context_serialize_report(FILE *f, automaton_automata_context *ctx, uint32_t max_delta);
+void automaton_ranking_transition_serialize_report(FILE *f, automaton_transition *transition,uint32_t ranking_value);
+bool automaton_ranking_print_report(automaton_automaton *automaton,
+		automaton_concrete_bucket_list** ranking_list, uint32_t* max_delta, uint32_t guarantee_count);
 /** INDEXES VALUATION **/
 bool automaton_indexes_valuation_has_range(automaton_indexes_valuation* valuation, automaton_range* range);
 bool automaton_indexes_valuation_add_range(automaton_indexes_valuation* valuation, automaton_range* range);
@@ -333,7 +338,7 @@ bool automaton_automaton_remove_transition(automaton_automaton* current_automato
 bool automaton_automaton_has_state(automaton_automaton* current_automaton, uint32_t state);
 bool automaton_automaton_add_initial_state(automaton_automaton* current_automaton, uint32_t state);
 automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automaton, char** assumptions, uint32_t assumptions_count
-		, char** guarantees, uint32_t guarantees_count);
+		, char** guarantees, uint32_t guarantees_count, bool print_ranking);
 bool automaton_is_gr1_realizable(automaton_automaton* game_automaton, char** assumptions, uint32_t assumptions_count
 		, char** guarantees, uint32_t guarantees_count);
 automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_automaton* game_automaton, char** assumptions, uint32_t assumptions_count
