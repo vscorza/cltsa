@@ -1740,7 +1740,10 @@ bool automaton_automaton_remove_transition(automaton_automaton* current_automato
 			if(GET_TRANSITION_SIGNAL(transition, j) != GET_TRANSITION_SIGNAL(other_transition,j)){
 				transition_found = false; break;
 			}
-		if(transition_found){	index = i;	break;	}
+		if(transition_found){
+			index = i;
+			break;
+		}
 	}
 	if(!transition_found)
 		return false;
@@ -1754,7 +1757,10 @@ bool automaton_automaton_remove_transition(automaton_automaton* current_automato
 			if(GET_TRANSITION_SIGNAL(transition, j) != GET_TRANSITION_SIGNAL(other_transition,j)){
 				transition_found = false; break;
 			}
-		if(transition_found){	inverse_index = i;	break;	}
+		if(transition_found){
+			inverse_index = i;
+			break;
+		}
 	}
 	if(!transition_found)
 		return false;
