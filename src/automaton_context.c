@@ -2074,8 +2074,6 @@ bool automaton_add_transition_from_valuations(obdd_mgr* mgr, automaton_automaton
 		uint32_t* x_y_alphabet, uint32_t* x_y_x_p_alphabet){
 	uint32_t i, fluent_index, fluent_count	= automaton->context->liveness_valuations_count;
 	automaton_transition* transition		= automaton_transition_create(from_state, to_state);
-	//if is-input set the transition type for non-labelled transitions
-	transition->is_input					= is_input;
 	//TODO: optimize alphabet indexes computation
 #if DEBUG_LTL_AUTOMATON
 	uint32_t to_state_size	= is_input? (is_initial? x_count : x_count * 2 + y_count) : (x_count + y_count);
@@ -2129,6 +2127,7 @@ bool automaton_add_transition_from_valuations(obdd_mgr* mgr, automaton_automaton
 		printf("%s", to_valuation[i]?"1":"0");
 	printf(")%d",to_state);
 #endif
+	transition->is_input					= is_input;
 	bool has_transition = automaton_automaton_has_transition(automaton, transition);
 	if(!has_transition){
 		automaton_automaton_add_transition(automaton, transition);
