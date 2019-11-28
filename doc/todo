@@ -1,6 +1,10 @@
 TODO:
 =====
 - write behavior minimization cases in clts
+- minimization over delta debugging
+- take bigger values first on synthesis
+- take noncontrollable states first on synthesis
+- keep inf scc over rankings
 - run hardware cases
 	- behavior minimization based diagnosis over CLTS
 	- diagnose GENBUF with 2 clients

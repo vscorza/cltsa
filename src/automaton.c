@@ -2660,7 +2660,6 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_autom
 	automaton_automaton_remove_deadlocks(master);
 	automaton_automaton_update_valuations(master);
 	automaton_automaton *minimization	= automaton_automaton_clone(master);
-	automaton_automaton *last_unrealizable	= automaton_automaton_clone(master);
 
 	bool minimized	= false;
 	uint32_t steps = 0;
@@ -2704,22 +2703,26 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_autom
 
 		if(automaton_is_gr1_realizable(minimization, assumptions, assumptions_count,
 				guarantees, guarantees_count) || minimization->out_degree[minimization->initial_states[0]] == 0){
-			//automaton_automaton_add_transition(minimization, current_transition);
+			automaton_automaton_add_transition(minimization, current_transition);
 			r_count--;
 			automaton_automaton_destroy(minimization);
-			minimization = automaton_automaton_clone(last_unrealizable);
+			minimization = automaton_automaton_clone(master);
 			for(i =0 ; i < r_count; i++){
 				current_transition	= &(master->transitions[r_states[i]][r_indexes[i]]);
 				automaton_automaton_remove_transition(minimization, current_transition);
 			}
 			automaton_automaton_remove_deadlocks(minimization);
 			automaton_automaton_update_valuations(minimization);
-			//printf("[%d,%d,R,%d]\n", t_count, r_count,steps);
+			printf("[%d,%d,R,%d]\n", t_count, r_count,steps);
 		}else{
+			/*
 			automaton_automaton_destroy(last_unrealizable);
 			last_unrealizable = automaton_automaton_clone(minimization);
+			*/
+			automaton_automaton_remove_deadlocks(minimization);
+			automaton_automaton_update_valuations(minimization);
 			from_step = steps;
-			//printf("[%d,%d,N,%d]\n", t_count, r_count, from_step);
+			printf("[%d,%d,N,%d]\n", t_count, r_count, from_step);
 		}
 		fflush(stdout);
 	}
@@ -2730,10 +2733,17 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_autom
 	if(automaton_is_gr1_realizable(minimization, assumptions, assumptions_count,
 				guarantees, guarantees_count) || minimization->out_degree[minimization->initial_states[0]] == 0){
 		automaton_automaton_destroy(minimization);
-		minimization = automaton_automaton_clone(last_unrealizable);
-		//printf("[%d,%d]Returning restored from %d\n", t_count, r_count, from_step);
+		minimization = automaton_automaton_clone(master);
+		for(i =0 ; i < r_count; i++){
+			current_transition	= &(master->transitions[r_states[i]][r_indexes[i]]);
+			automaton_automaton_remove_transition(minimization, current_transition);
+		}
+		automaton_automaton_remove_deadlocks(minimization);
+		automaton_automaton_update_valuations(minimization);
+		printf("[%d,%d,R,%d]\n", t_count, r_count,steps);
+		printf("[%d,%d]Returning restored from %d\n", t_count, r_count, from_step);
 	}else{
-		//printf("[%d,%d]Returning last from %d\n", t_count, r_count, from_step);
+		printf("[%d,%d]Returning last from %d\n", t_count, r_count, from_step);
 	}
 	//print rankings
 	automaton_automaton* strategy = automaton_get_gr1_strategy(minimization, assumptions, assumptions_count,
@@ -2741,7 +2751,6 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_autom
 	automaton_automaton_destroy(strategy);
 
 	automaton_automaton_destroy(master);
-	automaton_automaton_destroy(last_unrealizable);
 	return minimization;
 }
 
