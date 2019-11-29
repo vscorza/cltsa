@@ -2621,7 +2621,7 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_autom
 	uint32_t r_size = LIST_INITIAL_SIZE, r_count = 0;
 	uint32_t *r_states	= calloc(r_size, sizeof(uint32_t)), *r_indexes = calloc(r_size, sizeof(uint32_t));
 
-	int32_t i,j,k, from_step;
+	int32_t i,j,k, from_step = 0;
 	uint32_t new_size; uint32_t *ptr;
 
 	//get a master copy of the game, remove controllable transitions from mixed states,
@@ -2919,6 +2919,7 @@ uint32_t* automaton_automaton_distance_to_state(automaton_automaton* automaton, 
 
 void automaton_automaton_remove_unreachable_states(automaton_automaton* automaton){
 	if(automaton->initial_states_count < 1)return;
+	if(automaton->transitions_count < 1)return;
 	uint32_t* distances	= automaton_automaton_distance_to_state(automaton, automaton->initial_states[0]);
 	uint32_t i,j;
 	bool unreachable_found = false;
