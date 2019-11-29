@@ -2443,6 +2443,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	printf("Composing env rho functions\n");
 	uint32_t buff_size = 20000;
 	char buff[20000];
+	buff[0] = '\0';
 #endif
 	for(i = 0; i < env_rho_count; i++){
 #if VERBOSE || DEBUG_LTL_AUTOMATON

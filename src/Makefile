@@ -1,8 +1,8 @@
 #CC=gcc
 #CC=gcc-8
 CC=clang
-#CFLAGS= -Wall -Wextra -pedantic -g -lm -Wno-unused-variable -Wno-unused-parameter -O0
-CFLAGS= -Wall -Wextra -pedantic -g -lm -Wno-unused-variable -Wno-unused-parameter -O3
+CFLAGS= -Wall -Wextra -pedantic -g -lm -Wno-unused-variable -Wno-unused-parameter -O0
+#CFLAGS= -Wall -Wextra -pedantic -g -lm -Wno-unused-variable -Wno-unused-parameter -O3
 #CFLAGS= -Wall -Wextra -pedantic -lm -Wno-unused-variable -Wno-unused-parameter -O3
 #CFLAGS= -Wall -Wextra -pedantic -lm -Wno-unused-variable -Wno-unused-parameter -O2
 #CFLAGS= -Wall -Wextra -pedantic -lm -Wno-unused-variable -Wno-unused-parameter -Ofast
