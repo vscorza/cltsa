@@ -1,6 +1,20 @@
 #include "obdd.h"
 #include "assert.h"
 
+//TODO:remove
+uint32_t var_0_cache_mgr_create = 0, var_1_cache_mgr_create = 0;
+uint32_t var_0_cache_var_ID = 0, var_1_cache_var_ID = 0;
+uint32_t var_0_cache_obdd = 0, var_1_cache_obdd = 0;
+uint32_t var_0_cache_next = 0, var_1_cache_next = 0;
+uint32_t var_0_cache_high_succ = 0, var_1_cache_high_succ = 0;
+uint32_t var_0_cache_low_succ = 0, var_1_cache_low_succ = 0;
+uint32_t var_0_cache_mgr_create_off = 0, var_1_cache_mgr_create_off = 0;
+uint32_t var_0_cache_var_ID_off = 0, var_1_cache_var_ID_off = 0;
+uint32_t var_0_cache_obdd_off = 0, var_1_cache_obdd_off = 0;
+uint32_t var_0_cache_next_off = 0, var_1_cache_next_off = 0;
+uint32_t var_0_cache_high_succ_off = 0, var_1_cache_high_succ_off = 0;
+uint32_t var_0_cache_low_succ_off = 0, var_1_cache_low_succ_off = 0;
+
 uint32_t obdd_mgr_greatest_ID = 0;
 /** OBDD COMPOSITE STATE **/
 obdd_composite_state* obdd_composite_state_create(uint32_t state, uint32_t valuation_count){
@@ -172,6 +186,8 @@ obdd_mgr*	obdd_mgr_create(){
 	//create variables dict
 	new_mgr->vars_dict		= dictionary_create();
 	
+	var_0_cache_mgr_create++; var_1_cache_mgr_create++;
+
 	//create constant obdds for true and false values
 	uint32_t fragment_ID;
 #if OBDD_USE_POOL
@@ -207,6 +223,8 @@ void obdd_mgr_destroy(obdd_mgr* mgr){
 		dictionary_destroy(mgr->vars_dict);
 		mgr->vars_dict 	= NULL;
 	}
+	var_0_cache_mgr_create_off++; var_1_cache_mgr_create_off++;
+
 	mgr->true_obdd->root_obdd->ref_count--;
 	obdd_destroy(mgr->true_obdd);
 	mgr->true_obdd	= NULL;
@@ -287,6 +305,9 @@ obdd*	obdd_mgr_var_ID(obdd_mgr* mgr, obdd_var_size_t var_ID){
 	}else{
 		var_obdd->root_obdd = obdd_cache_insert_var(mgr->cache, var_ID);
 	}
+	if(var_ID == 0)var_0_cache_var_ID++;
+	if(var_ID == 1)var_1_cache_var_ID++;
+
 	var_obdd->root_obdd->ref_count++;
 	return var_obdd;	
 }
@@ -311,6 +332,8 @@ obdd*	obdd_mgr_not_var_ID(obdd_mgr* mgr, obdd_var_size_t var_ID){
 	}else{
 		var_obdd->root_obdd = obdd_cache_insert_neg_var(mgr->cache, var_ID);
 	}
+	if(var_ID == 0)var_0_cache_var_ID++;
+	if(var_ID == 1)var_1_cache_var_ID++;
 	var_obdd->root_obdd->ref_count++;
 	return var_obdd;
 }
@@ -329,8 +352,11 @@ obdd* obdd_create(obdd_mgr* mgr, obdd_node* root){
 #endif
 	new_obdd->mgr		= mgr;
 	new_obdd->root_obdd	= root;
-	if(root!= NULL)
+	if(root!= NULL){
 		root->ref_count++;
+		if(root->var_ID == 0)var_0_cache_obdd++;
+		if(root->var_ID == 1)var_1_cache_obdd++;
+	}
 	new_obdd->true_obdd	= mgr->true_obdd->root_obdd;
 	new_obdd->false_obdd= mgr->false_obdd->root_obdd;
 	new_obdd->fragment_ID	= fragment_ID;
@@ -364,6 +390,8 @@ obdd* obdd_clone(obdd* root){
 
 void obdd_destroy(obdd* root){
 	if(root->root_obdd != NULL){
+		if(root->root_obdd->var_ID == 0)var_0_cache_obdd_off++;
+		if(root->root_obdd->var_ID == 1)var_1_cache_obdd_off++;
 		root->root_obdd->ref_count--;
 		obdd_node_destroy(root->mgr, root->root_obdd);
 		root->root_obdd		= NULL;
@@ -383,10 +411,11 @@ void obdd_destroy(obdd* root){
 
 void obdd_add_high_successor(obdd_node* src, obdd_node* dst){
 	src->high_obdd	= dst;
-	if(dst != NULL && dst->node_ID == 2334244)
-		printf("\nUUUU\n");
 
 	if(dst != NULL){
+		if(dst->var_ID == 0)var_0_cache_high_succ++;
+		if(dst->var_ID == 1)var_1_cache_high_succ++;
+
 		dst->ref_count++;
 #if DEBUG_OBDD
 		printf("(++)[%d]%p -{1}-> [%d]%p (ref:%d)\n", src->var_ID, (void*)src, dst->var_ID,(void*)dst, dst->ref_count);
@@ -400,6 +429,8 @@ void obdd_add_high_successor(obdd_node* src, obdd_node* dst){
 void obdd_add_low_successor(obdd_node* src, obdd_node* dst){
 	src->low_obdd	= dst;
 	if(dst != NULL){
+		if(dst->var_ID == 0)var_0_cache_low_succ++;
+		if(dst->var_ID == 1)var_1_cache_low_succ++;
 		dst->ref_count++;
 #if DEBUG_OBDD
 		printf("(++)[%d]%p -{0}-> [%d]%p (ref:%d)\n", src->var_ID, (void*)src, dst->var_ID,(void*)dst, dst->ref_count);
@@ -415,6 +446,8 @@ void obdd_remove_high_successor(obdd_node* src, obdd_node* dst){
 		exit(-2);
 	src->high_obdd	= NULL;
 	if(dst != NULL){
+		if(dst->var_ID == 0)var_0_cache_high_succ_off++;
+		if(dst->var_ID == 1)var_1_cache_high_succ_off++;
 		dst->ref_count--;
 #if DEBUG_OBDD
 		printf("(--)[%d]%p -{1}-> [%d]%p (ref:%d)\n", src->var_ID, (void*)src, dst->var_ID, (void*)dst, dst->ref_count);
@@ -426,6 +459,8 @@ void obdd_remove_low_successor(obdd_node* src, obdd_node* dst){
 		exit(-2);
 	src->low_obdd	= NULL;
 	if(dst != NULL){
+		if(dst->var_ID == 0)var_0_cache_low_succ_off++;
+		if(dst->var_ID == 1)var_1_cache_low_succ_off++;
 		dst->ref_count--;
 #if DEBUG_OBDD
 		printf("(--)[%d]%p -{0}-> [%d]%p (ref:%d)\n", src->var_ID, (void*)src, dst->var_ID, (void*)dst, dst->ref_count);
@@ -1287,8 +1322,7 @@ void obdd_node_destroy(obdd_mgr* mgr, obdd_node* node){
 	if(node->ref_count > 0)
 		printf("\n");
 #endif
-	if(node->node_ID == 2334244)
-		printf("\nOOOO\n");
+
 	if(node->ref_count == 0){
 #if DEBUG_OBDD
 		printf(ANSI_COLOR_RED"[XX]\n"ANSI_COLOR_RESET);

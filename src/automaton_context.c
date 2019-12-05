@@ -2509,10 +2509,6 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 #if (VERBOSE || DEBUG_LTL_AUTOMATON) && OBDD_USE_POOL
 	printf("[%d] [%d]\n", previous_node_count, sys_rho_composed->mgr->nodes_pool->composite_count);
 #endif
-	//TODO:REMOVE THIS
-	fflush(stdout);
-	exit(0);
-	//TODO:REMOVE THIS
 	/**
 	 * BEHAVIOUR CONSTRUCTION (RHO AND THETA)
 	 */

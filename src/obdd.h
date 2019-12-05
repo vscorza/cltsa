@@ -20,15 +20,15 @@
 #define OBDD_NODE_FRAGMENTS_SIZE	1000
 #define OBDD_NODE_LIST_SIZE		64
 
-#define OBDD_CACHE_DEBUG		1
+#define OBDD_CACHE_DEBUG		0
 #define OBDD_CACHE_SIZE			16//262144
 #define OBDD_CACHE_MAX_SIZE		0
-#define OBDD_USE_POOL			0
+#define OBDD_USE_POOL			1
 
 typedef uintptr_t ptruint;
 
 typedef uint16_t obdd_var_size_t;
-typedef uint16_t obdd_ref_count_size_t;
+typedef uint32_t obdd_ref_count_size_t;
 
 /* Primes for cache hash functions. */
 #define DD_P1			12582917
