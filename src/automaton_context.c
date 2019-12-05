@@ -2458,7 +2458,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 			obdd_destroy(env_rho_obdd[i]);
 			if(i > 1)obdd_destroy(old_obdd);
 		}
-#if VERBOSE || DEBUG_LTL_AUTOMATON
+#if (VERBOSE || DEBUG_LTL_AUTOMATON) && OBDD_USE_POOL
 		printf("[%d]", env_rho_composed->mgr->nodes_pool->composite_count);
 		fflush(stdout);
 #endif
@@ -2479,7 +2479,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 			obdd_destroy(sys_rho_obdd[i]);
 			if(i > 1)obdd_destroy(old_obdd);
 		}
-#if VERBOSE || DEBUG_LTL_AUTOMATON
+#if (VERBOSE || DEBUG_LTL_AUTOMATON) && OBDD_USE_POOL
 		printf("[%d]", sys_rho_composed->mgr->nodes_pool->composite_count);
 		fflush(stdout);
 #endif
@@ -2488,6 +2488,9 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	printf("\n");
 	fflush(stdout);
 	printf(ANSI_COLOR_RESET);
+#endif
+#if (VERBOSE || DEBUG_LTL_AUTOMATON) && OBDD_USE_POOL
+	uint32_t previous_node_count = sys_rho_composed->mgr->nodes_pool->composite_count;
 #endif
 	env_sys_theta_composed				= obdd_apply_and(env_theta_composed, sys_theta_composed);
 	env_sys_rho_composed				= obdd_apply_and(env_rho_composed, sys_rho_composed);
@@ -2503,6 +2506,13 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	fflush(stdout);
 	printf(ANSI_COLOR_RESET);
 #endif
+#if (VERBOSE || DEBUG_LTL_AUTOMATON) && OBDD_USE_POOL
+	printf("[%d] [%d]\n", previous_node_count, sys_rho_composed->mgr->nodes_pool->composite_count);
+#endif
+	//TODO:REMOVE THIS
+	fflush(stdout);
+	exit(0);
+	//TODO:REMOVE THIS
 	/**
 	 * BEHAVIOUR CONSTRUCTION (RHO AND THETA)
 	 */
@@ -2671,7 +2681,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 			do{
 				rho_counter++;
 				if(rho_counter == CNTR_LIMIT){
-#if VERBOSE || DEBUG_LTL_AUTOMATON
+#if (VERBOSE || DEBUG_LTL_AUTOMATON) && OBDD_USE_POOL
 					printf(ANSI_COLOR_BLUE"[%d:%d:%d:%d]"ANSI_COLOR_RESET, mgr->nodes_pool->composite_count, valuations_size, current_valuations_count, rho_sys_bucket_list->composite_count);
 					fflush(stdout);
 #endif
@@ -2774,7 +2784,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 			do{
 				rho_counter++;
 				if(rho_counter == CNTR_LIMIT){
-#if VERBOSE  || DEBUG_LTL_AUTOMATON
+#if (VERBOSE || DEBUG_LTL_AUTOMATON) && OBDD_USE_POOL
 					printf(ANSI_COLOR_BLUE"[%d:%d:%d:%d]"ANSI_COLOR_RESET, mgr->nodes_pool->composite_count, valuations_size, current_valuations_count, rho_env_bucket_list->composite_count);
 					fflush(stdout);
 #endif

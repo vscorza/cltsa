@@ -161,8 +161,10 @@ obdd_mgr*	obdd_mgr_create(){
 	obdd_mgr* new_mgr	= malloc(sizeof(obdd_mgr));
 	new_mgr->ID			= get_new_mgr_ID();
 	//create pools
+#if OBDD_USE_POOL
 	new_mgr->obdd_pool	= automaton_fast_pool_create(sizeof(obdd), OBDD_FRAGMENTS_SIZE, OBDD_FRAGMENT_SIZE);
 	new_mgr->nodes_pool	= automaton_fast_pool_create(sizeof(obdd_node), OBDD_NODE_FRAGMENTS_SIZE, OBDD_NODE_FRAGMENT_SIZE);
+#endif
 	//is initialized in 1 so that we can later check for already deleted nodes
 	new_mgr->greatest_node_ID	= 1;
 	new_mgr->greatest_var_ID	= 0;
@@ -172,7 +174,11 @@ obdd_mgr*	obdd_mgr_create(){
 	
 	//create constant obdds for true and false values
 	uint32_t fragment_ID;
+#if OBDD_USE_POOL
 	obdd* true_obdd		= automaton_fast_pool_get_instance(new_mgr->obdd_pool, &fragment_ID);//malloc(sizeof(obdd));
+#else
+	obdd* true_obdd		= malloc(sizeof(obdd));
+#endif
 	true_obdd->root_obdd= obdd_mgr_mk_node(new_mgr, TRUE_VAR, NULL, NULL);
 	true_obdd->root_obdd->ref_count++;
 	true_obdd->mgr		= new_mgr;
@@ -180,7 +186,11 @@ obdd_mgr*	obdd_mgr_create(){
 	true_obdd->false_obdd	= NULL;
 	true_obdd->fragment_ID	= fragment_ID;
 	new_mgr->true_obdd	= true_obdd;
+#if OBDD_USE_POOL
 	obdd* false_obdd	= automaton_fast_pool_get_instance(new_mgr->obdd_pool, &fragment_ID);//malloc(sizeof(obdd));
+#else
+	obdd* false_obdd	= malloc(sizeof(obdd));
+#endif
 	false_obdd->root_obdd= obdd_mgr_mk_node(new_mgr, FALSE_VAR, NULL, NULL);
 	false_obdd->root_obdd->ref_count++;
 	false_obdd->mgr		= new_mgr;
@@ -206,10 +216,12 @@ void obdd_mgr_destroy(obdd_mgr* mgr){
 	obdd_cache_destroy(mgr->cache);
 	free(mgr->cache);
 	mgr->cache		= NULL;
+#if OBDD_USE_POOL
 	automaton_fast_pool_destroy(mgr->obdd_pool);
 	automaton_fast_pool_destroy(mgr->nodes_pool);
 	mgr->obdd_pool	= NULL;
 	mgr->nodes_pool	= NULL;
+#endif
 	free(mgr);	
 }
 
@@ -235,15 +247,20 @@ obdd_node* obdd_mgr_mk_node(obdd_mgr* mgr, char* var, obdd_node* high, obdd_node
 }
 
 obdd_node* obdd_mgr_mk_node_ID(obdd_mgr* mgr, obdd_var_size_t var_ID, obdd_node* high, obdd_node* low){
-	//obdd_node* new_node	= malloc(sizeof(obdd_node));
+#if OBDD_USE_POOL
 	uint32_t fragment_ID;
 	obdd_node* new_node	= automaton_fast_pool_get_instance(mgr->nodes_pool, &fragment_ID);
+#else
+	obdd_node* new_node	= calloc(1, sizeof(obdd_node));
+#endif
 	new_node->var_ID	= var_ID;
 	new_node->node_ID	= obdd_mgr_get_next_node_ID(mgr);
 	obdd_add_high_successor(new_node, high);
 	obdd_add_low_successor(new_node, low);
 	new_node->ref_count	= 0;
+#if OBDD_USE_POOL
 	new_node->fragment_ID = fragment_ID;
+#endif
 #if DEBUG_OBDD
 		printf("(create)[%d]%p <%s>\n",new_node->var_ID, (void*)new_node, var);
 #endif
@@ -305,7 +322,11 @@ obdd*	obdd_mgr_false(obdd_mgr* mgr){ return mgr->false_obdd; }
 obdd* obdd_create(obdd_mgr* mgr, obdd_node* root){
 	//obdd* new_obdd		= malloc(sizeof(obdd));
 	uint32_t fragment_ID;
+#if OBDD_USE_POOL
 	obdd* new_obdd		= automaton_fast_pool_get_instance(mgr->obdd_pool, &fragment_ID);
+#else
+	obdd* new_obdd		= malloc(sizeof(obdd));
+#endif
 	new_obdd->mgr		= mgr;
 	new_obdd->root_obdd	= root;
 	if(root!= NULL)
@@ -327,7 +348,11 @@ obdd_node* obdd_node_clone(obdd_mgr* mgr, obdd_node* root){
 obdd* obdd_clone(obdd* root){
 	//obdd* clone	= malloc(sizeof(obdd));
 	uint32_t fragment_ID;
+#if OBDD_USE_POOL
 	obdd* clone			= automaton_fast_pool_get_instance(root->mgr->obdd_pool, &fragment_ID);
+#else
+	obdd* clone			= malloc(sizeof(obdd));
+#endif
 	clone->false_obdd	= root->false_obdd;
 	clone->true_obdd	= root->true_obdd;
 	clone->mgr			= root->mgr;
@@ -349,11 +374,18 @@ void obdd_destroy(obdd* root){
 	root->false_obdd	= NULL;
 	root->mgr			= NULL;
 	//free(root);
+#if OBDD_USE_POOL
 	automaton_fast_pool_release_instance(mgr->obdd_pool, root->fragment_ID);
+#else
+	free(root);
+#endif
 }
 
 void obdd_add_high_successor(obdd_node* src, obdd_node* dst){
 	src->high_obdd	= dst;
+	if(dst != NULL && dst->node_ID == 2334244)
+		printf("\nUUUU\n");
+
 	if(dst != NULL){
 		dst->ref_count++;
 #if DEBUG_OBDD
@@ -379,6 +411,8 @@ void obdd_add_low_successor(obdd_node* src, obdd_node* dst){
 	}
 }
 void obdd_remove_high_successor(obdd_node* src, obdd_node* dst){
+	if(src->high_obdd != dst)
+		exit(-2);
 	src->high_obdd	= NULL;
 	if(dst != NULL){
 		dst->ref_count--;
@@ -388,6 +422,8 @@ void obdd_remove_high_successor(obdd_node* src, obdd_node* dst){
 	}
 }
 void obdd_remove_low_successor(obdd_node* src, obdd_node* dst){
+	if(src->low_obdd != dst)
+		exit(-2);
 	src->low_obdd	= NULL;
 	if(dst != NULL){
 		dst->ref_count--;
@@ -427,10 +463,11 @@ obdd_node* obdd_node_apply_next(obdd_mgr* mgr, obdd_node* value){
 	high_value->ref_count++;
 	obdd_node *low_value	= (value->low_obdd != NULL && !obdd_is_constant(mgr, value->low_obdd))?
 					obdd_node_apply_next(mgr, value->low_obdd) : value->low_obdd;
-	high_value->ref_count--;
+	low_value->ref_count++;
 	obdd_node *next_value	= 	obdd_mgr_mk_node(mgr, var_next
 			, high_value, low_value);
-
+	high_value->ref_count--;
+	low_value->ref_count--;
 	obdd_cache_insert1(mgr->cache, obdd_node_apply_next, value, next_value);
 
 	return next_value;
@@ -1250,6 +1287,8 @@ void obdd_node_destroy(obdd_mgr* mgr, obdd_node* node){
 	if(node->ref_count > 0)
 		printf("\n");
 #endif
+	if(node->node_ID == 2334244)
+		printf("\nOOOO\n");
 	if(node->ref_count == 0){
 #if DEBUG_OBDD
 		printf(ANSI_COLOR_RED"[XX]\n"ANSI_COLOR_RESET);
@@ -1269,6 +1308,10 @@ void obdd_node_destroy(obdd_mgr* mgr, obdd_node* node){
 		node->var_ID	= 0;
 		node->node_ID	= 0;
 		//free(node);
+#if OBDD_USE_POOL
 		automaton_fast_pool_release_instance(mgr->nodes_pool, node->fragment_ID);
+#else
+		free(node);
+#endif
 	}
 }

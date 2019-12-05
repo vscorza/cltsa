@@ -270,13 +270,17 @@ obdd_node* obdd_cache_constant_lookup(obdd_cache *cache, uintptr_t op, obdd_node
 }
 
 obdd_node* obdd_cache_lookup_var(obdd_cache *cache, uint32_t var_id){
-	if((var_id + 1) > cache->vars_size)
-		return NULL;
+	if((var_id + 1) > cache->vars_size){
+		printf("[OBDD_CACHE] var out of range");
+		exit(-1);
+	}
 	return cache->cache_vars[var_id];
 }
 obdd_node* obdd_cache_lookup_neg_var(obdd_cache *cache, uint32_t var_id){
-	if((var_id + 1) > cache->vars_size)
-		return NULL;
+	if((var_id + 1) > cache->vars_size){
+		printf("[OBDD_CACHE] var out of range");
+		exit(-1);
+	}
 	return cache->cache_neg_vars[var_id];
 }
 

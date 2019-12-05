@@ -17,12 +17,13 @@
 #define OBDD_FRAGMENT_SIZE		1000
 #define OBDD_FRAGMENTS_SIZE		100
 #define OBDD_NODE_FRAGMENT_SIZE	10000
-#define OBDD_NODE_FRAGMENTS_SIZE	100
+#define OBDD_NODE_FRAGMENTS_SIZE	1000
 #define OBDD_NODE_LIST_SIZE		64
 
-#define OBDD_CACHE_DEBUG		0
+#define OBDD_CACHE_DEBUG		1
 #define OBDD_CACHE_SIZE			16//262144
 #define OBDD_CACHE_MAX_SIZE		0
+#define OBDD_USE_POOL			0
 
 typedef uintptr_t ptruint;
 
@@ -99,8 +100,10 @@ typedef struct obdd_mgr_t {
 	struct obdd_t*			true_obdd;
 	struct obdd_t*			false_obdd;
 	dictionary*		vars_dict;
+#if OBDD_USE_POOL
 	automaton_fast_pool*	obdd_pool;
 	automaton_fast_pool*	nodes_pool;
+#endif
 	struct obdd_cache_t*		cache;
 }obdd_mgr;
 
