@@ -2593,25 +2593,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 #endif
 			automaton_concrete_bucket_add_entry(theta_env_bucket_list, env_state);
 		}
-		automaton_set_composed_valuation(sys_state->valuation, valuations, i, true, false, x_count, y_count);
-		sys_state->state		= obdd_state_tree_get_key(obdd_state_map, sys_state->valuation, x_y_count);
-		hashed_valuation		= automaton_bool_array_hash_table_add_or_get_entry(x_y_hash_table, sys_state->valuation, true);
 
-		has_transition	= automaton_add_transition_from_valuations(mgr, ltl_automaton, env_state->state, sys_state->state
-				, env_state->valuation, hashed_valuation, env_state->valuation, true, false
-				, x_count, y_count
-				, obdd_on_signals_indexes, obdd_off_signals_indexes, x_y_alphabet, x_y_x_p_alphabet);
-#if DEBUG_LTL_AUTOMATON
-		printf("(%d-[", env_state->state);
-			for(j = 0; j < x_count + y_count; j++)
-				printf("%s", sys_state->valuation[j] ? "1" : "0");
-			state_counter++;
-			printf("]->%d)%s\n", sys_state->state,!has_transition && !automaton_concrete_bucket_has_entry(rho_sys_bucket_list, sys_state)? "*":"");
-			if(state_counter % 1000 == 0){
-				printf("States processed for ltl: %d\n", state_counter);
-				fflush(stdout);
-			}
-#endif
 		if(!has_transition && !automaton_concrete_bucket_has_entry(rho_sys_bucket_list, sys_state)){
 			automaton_concrete_bucket_add_entry(rho_sys_bucket_list, sys_state);
 		}
@@ -2684,12 +2666,25 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	//NEW RHO BUILD APPROACH
 	obdd_get_valuations(mgr, env_sys_rho_composed, &valuations, &valuations_size, &current_valuations_count, signals_alphabet, signals_count
 			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes);
+#if DEBUG_LTL_AUTOMATON
+		printf("env sys rho valuations\n");
+		obdd_print_valuations_stdout(mgr, valuations, current_valuations_count, signals_alphabet, signals_count);
+#endif
 	for(i = 0; i < current_valuations_count; i++){
 		//xy ->xy'
 		//automaton_set_composed_valuation(env_state->valuation, valuations, i, false, true, x_y_x_p_alphabet, x_count, y_count);
-		automaton_set_composed_valuation(env_state->valuation, valuations, i, false, true, x_count, y_count);
+		for(j = 0; j < x_y_count; j++)sys_state->valuation[j]	= valuations[i * signals_count + j];
+		for(j = 0; j < x_y_x_p_count; j++)env_state->valuation[j]	= valuations[i * signals_count + j];
+#if DEBUG_LTL_AUTOMATON
+		printf("sys val.:");
+		for(j = 0; j < x_y_count; j++)printf("%d\t",sys_state->valuation[j]);
+		printf("\tenv val.:");
+		for(j = 0; j < x_y_x_p_count; j++)printf("%d\t",env_state->valuation[j]);
+		printf("\n");
+#endif
 		hashed_valuation		= automaton_bool_array_hash_table_add_or_get_entry(x_y_x_p_hash_table, env_state->valuation, true);
 		env_state->state		= obdd_state_tree_get_key(obdd_state_map, env_state->valuation, x_y_x_p_count);
+		sys_state->state		= obdd_state_tree_get_key(obdd_state_map, sys_state->valuation, x_y_count);
 		for(j = 0; j < x_y_count; j++)adjusted_valuation[j] = 0;
 		for(j = 0; j < x_count; j++)adjusted_valuation[j] = hashed_valuation[x_y_count + j];
 #if DEBUG_LTL_AUTOMATON
@@ -2699,7 +2694,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 		printf("]\n");
 #endif
 		has_transition	= automaton_add_transition_from_valuations(mgr, ltl_automaton, sys_state->state, env_state->state
-				, sys_state->valuation, hashed_valuation, adjusted_valuation, false, true
+				, env_state->valuation, hashed_valuation, adjusted_valuation, false, true
 				, x_count, y_count
 				, obdd_on_signals_indexes, obdd_off_signals_indexes, x_y_alphabet, x_y_x_p_alphabet);
 
@@ -2710,8 +2705,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 			printf("%s", env_state->valuation[j] ? "1" : "0");
 		printf("]->%d)%s", env_state->state, has_transition? "" : "*");
 #endif
-		if(!has_transition && !automaton_concrete_bucket_has_entry(rho_env_bucket_list, env_state) && !automaton_concrete_bucket_has_entry(rho_env_processed_bucket_list, env_state)){
-			automaton_concrete_bucket_add_entry(rho_env_bucket_list, env_state);
+		if(!has_transition){
 #if DEBUG_LTL_AUTOMATON
 		printf("[ADDED]");
 #endif
@@ -2728,10 +2722,18 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 #endif
 		//xyx'->x'y'
 		//automaton_set_composed_valuation(sys_state->valuation, valuations, i, false, false, signals_alphabet, x_count, y_count);
-		//move X'->X
-		for(j =0; j < x_count; j++)sys_state->valuation[j] = env_state->valuation[x_count + y_count + j];
 		//move Y'->XY
-		automaton_set_composed_valuation(sys_state->valuation, valuations, i, false, false, x_count, y_count);
+		for(j = 0; j < x_y_count; j++)sys_state->valuation[j]	= valuations[i * signals_count + x_y_count  + j];
+#if DEBUG_LTL_AUTOMATON
+		printf("env val.:");
+		for(j = 0; j < x_y_x_p_count; j++)printf("%d\t",env_state->valuation[j]);
+
+		printf("\t sys val.:");
+		for(j = 0; j < x_y_count; j++)printf("%d\t",sys_state->valuation[j]);
+		printf("\n");
+#endif
+		//move X'->X
+		//for(j =0; j < x_count; j++)env_state->valuation[j] = env_state->valuation[x_y_count + j];
 		hashed_valuation		= automaton_bool_array_hash_table_add_or_get_entry(x_y_hash_table, sys_state->valuation, true);
 		//before getting state for sys_valuation copy X' part form env state into X part of sys state
 		//for(j = 0; j < x_count; j++)sys_state->valuation[j]	= env_state->valuation[x_y_count + j];
@@ -2747,8 +2749,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 		printf("]->%d)%s", sys_state->state, has_transition? "" : "*");
 #endif
 
-		if(!has_transition && !automaton_concrete_bucket_has_entry(rho_sys_bucket_list, sys_state) && !automaton_concrete_bucket_has_entry(rho_sys_processed_bucket_list, sys_state)){
-			automaton_concrete_bucket_add_entry(rho_sys_bucket_list, sys_state);
+		if(!has_transition){
 #if DEBUG_LTL_AUTOMATON
 			printf("[ADDED]");
 #endif
@@ -2763,6 +2764,8 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 		}
 #endif
 	}
+
+	automaton_automaton_remove_unreachable_states(ltl_automaton);
 
 
 /////////////////////////////////////

@@ -963,6 +963,26 @@ void obdd_print_valuations_names(obdd_mgr* mgr, bool* valuations, uint32_t valua
 	//printf(ANSI_COLOR_RESET);
 }
 
+void obdd_print_valuations_stdout(obdd_mgr* mgr, bool* valuations, uint32_t valuations_count, uint32_t* valuation_img, uint32_t img_count){
+	uint32_t i, j;
+	printf(ANSI_COLOR_GREEN);
+	for(i = 0; i < img_count; i++){
+		printf("%s\t", mgr->vars_dict->entries[valuation_img[i]].key);
+	}
+	printf("\n");
+	for(i = 0; i < valuations_count; i++){
+		for(j = 0; j < (img_count); j++){
+			int value = GET_VAR_IN_VALUATION(valuations, img_count, i, j);
+			//printf("%s\t",  value > 1 ? "X" : (value != 0 ? "1" : "0"));
+			if(value > 1)
+				printf("%d[%d %d]\t", value,  i, j);
+			else
+				printf("%d\t",  value);
+		}
+		printf("\n");
+	}
+	printf(ANSI_COLOR_RESET);
+}
 
 void obdd_print_valuations(obdd_mgr* mgr, bool* valuations, uint32_t valuations_count, uint32_t* valuation_img, uint32_t img_count, char *buff){
 	uint32_t i, j;
