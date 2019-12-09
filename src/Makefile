@@ -2,7 +2,11 @@
 #CC=gcc-8
 CC=clang
 #CFLAGS= -Wall -Wextra -pedantic -g -lm -Wno-unused-variable -Wno-unused-parameter -O0
-CFLAGS= -Wall -Wextra -pedantic -g -lm -Wno-unused-variable -Wno-unused-parameter -O3
+#CFLAGS= -Wall -Wextra -pedantic -g -lm -Wno-unused-variable -Wno-unused-parameter -O3
+CFLAGS= -fsanitize=address -Wall -Wextra -pedantic -g -lm -Wno-unused-variable -Wno-unused-parameter -O0 ; ASAN_OPTIONS=detect_leaks=1
+#CFLAGS= -fsanitize=address -Wall -Wextra -pedantic -lm -Wno-unused-variable -Wno-unused-parameter -O0 ; ASAN_OPTIONS=detect_leaks=1
+#CFLAGS= -fsanitize=address -Wall -Wextra -pedantic -g -lm -Wno-unused-variable -Wno-unused-parameter -O3 ; ASAN_OPTIONS=detect_leaks=1
+#CFLAGS= -fsanitize=address -Wall -Wextra -pedantic -lm -Wno-unused-variable -Wno-unused-parameter -O3 ; ASAN_OPTIONS=detect_leaks=1
 #CFLAGS= -Wall -Wextra -pedantic -lm -Wno-unused-variable -Wno-unused-parameter -O3
 #CFLAGS= -Wall -Wextra -pedantic -lm -Wno-unused-variable -Wno-unused-parameter -O2
 #CFLAGS= -Wall -Wextra -pedantic -lm -Wno-unused-variable -Wno-unused-parameter -Ofast

@@ -1,103 +1,103 @@
-//lift example taken from Synthesis of Reactive(1) Designs 2 floors
+//GenBuf example taken from Synthesis of Reactive(1) Designs 4 senders
 set Global_Alphabet = {}
 set Controllable_Alphabet = {}
 
-set Global_Signals	= {b1, b2, f1, f2}
-set Output_Signals	= {f1, f2}
+set Global_Signals	= {sToB_REQ_0, sToB_REQ_1, sToB_REQ_2, sToB_REQ_3, bToS_ACK_0, bToS_ACK_1, bToS_ACK_2, bToS_ACK_3, bToR_REQ_0, bToR_REQ_1, rToB_ACK_0, rToB_ACK_1, enq, deq, full, empty, slc_0, slc_1}
+set Output_Signals	= {bToS_ACK_0, bToS_ACK_1, bToS_ACK_2, bToS_ACK_3, bToR_REQ_0, bToR_REQ_1, enq, deq, slc_0, slc_1}
+order			= {sToB_REQ_0 < sToB_REQ_1 < sToB_REQ_2 < sToB_REQ_3 < rToB_ACK_0 < rToB_ACK_1 < full < empty < bToS_ACK_0 < bToS_ACK_1 < bToS_ACK_2 < bToS_ACK_3 < bToR_REQ_0 < bToR_REQ_1 < enq < deq < slc_0 < slc_1}
+/***********
+**** THETA
+***********/
+ltl env theta Init_Buffer_e in GENBUF	= (!sToB_REQ_0 && !sToB_REQ_1 && !sToB_REQ_2 && !sToB_REQ_3 && !rToB_ACK_0 && !rToB_ACK_1 && !full && empty).
+ltl sys theta Init_Buffer_s in GENBUF	= (!bToS_ACK_0 && !bToS_ACK_1 && !bToS_ACK_2 && !bToS_ACK_3 && !bToR_REQ_0 && !bToR_REQ_1 && !enq && !deq && !slc_0 && !slc_1).
+/***********
+**** SYS RHO
+***********/
+//bToS_ACK only if sToB_REQ
+ltl sys rho G_3_sndr_0 in GENBUF		= []((!bToS_ACK_0 && X(bToS_ACK_0)) -> sToB_REQ_0).
+ltl sys rho G_3_sndr_1 in GENBUF		= []((!bToS_ACK_1 && X(bToS_ACK_1)) -> sToB_REQ_1).
+ltl sys rho G_3_sndr_2 in GENBUF		= []((!bToS_ACK_2 && X(bToS_ACK_2)) -> sToB_REQ_2).
+ltl sys rho G_3_sndr_3 in GENBUF		= []((!bToS_ACK_3 && X(bToS_ACK_3)) -> sToB_REQ_3).
+//keep bToS_ACK up if sToB_REQ still going
+ltl sys rho G_4_sndr_0 in GENBUF		= []((bToS_ACK_0 && sToB_REQ_0) -> X(bToS_ACK_0)).
+ltl sys rho G_4_sndr_1 in GENBUF		= []((bToS_ACK_1 && sToB_REQ_1) -> X(bToS_ACK_1)).
+ltl sys rho G_4_sndr_2 in GENBUF		= []((bToS_ACK_2 && sToB_REQ_2) -> X(bToS_ACK_2)).
+ltl sys rho G_4_sndr_3 in GENBUF		= []((bToS_ACK_3 && sToB_REQ_3) -> X(bToS_ACK_3)).
+//mutex bToS_ACK
+ltl sys rho G_5 in GENBUF			= []((!(bToS_ACK_0 && bToS_ACK_1))&&(!(bToS_ACK_0 && bToS_ACK_2))&&(!(bToS_ACK_0 && bToS_ACK_3))&&(!(bToS_ACK_1 && bToS_ACK_2))&&(!(bToS_ACK_1 && bToS_ACK_3))&&(!(bToS_ACK_2 && bToS_ACK_3))).
+ltl sys rho G_5_X in GENBUF			= [](X((!(bToS_ACK_0 && bToS_ACK_1))&&(!(bToS_ACK_0 && bToS_ACK_2))&&(!(bToS_ACK_0 && bToS_ACK_3))&&(!(bToS_ACK_1 && bToS_ACK_2))&&(!(bToS_ACK_1 && bToS_ACK_3))&&(!(bToS_ACK_2 && bToS_ACK_3)))).
+//mutex bToR_REQ
+ltl sys rho G_5_b_1_rcvr_0 in GENBUF		= [](!(bToR_REQ_0 && bToR_REQ_1)).
+ltl sys rho G_5_b_1_rcvr_0 in GENBUF		= [](X(!(bToR_REQ_0 && bToR_REQ_1))).
+//keep bToR_REQ if not yet ack
+ltl sys rho G_6_1_rcvr_0 in GENBUF		= []((bToR_REQ_0 && !rToB_ACK_0) -> X(bToR_REQ_0)).
+ltl sys rho G_6_1_rcvr_1 in GENBUF		= []((bToR_REQ_1 && !rToB_ACK_1) -> X(bToR_REQ_1)).
+//lower bToR_REQ when rToB_ACK received
+ltl sys rho G_8_rcvr_0 in GENBUF		= [](rToB_ACK_0 -> X(!bToR_REQ_0)).
+ltl sys rho G_8_rcvr_1 in GENBUF		= [](rToB_ACK_1 -> X(!bToR_REQ_1)).
+//bToS_ACK raises iff enq
+ltl sys rho G_9_1 in GENBUF			= [](X(enq) <-> ((!bToS_ACK_0 && X(bToS_ACK_0)) || (!bToS_ACK_1 && X(bToS_ACK_1)) || (!bToS_ACK_2 && X(bToS_ACK_2)) || (!bToS_ACK_3 && X(bToS_ACK_3)))).
+//update slc accordingly
+ltl sys rho G_9_2 in GENBUF			= [](((!bToS_ACK_0 && X(bToS_ACK_0)) -> (!X(slc_0) && !X(slc_1))) && ((!bToS_ACK_1 && X(bToS_ACK_1)) -> (X(slc_0) && !X(slc_1))) && ((!bToS_ACK_2 && X(bToS_ACK_2)) -> (!X(slc_0) && X(slc_1))) && ((!bToS_ACK_3 && X(bToS_ACK_3)) -> (X(slc_0) && X(slc_1)))).
+//only deq if rToB_ACK'd
+ltl sys rho G_10 in GENBUF			= [](X(deq) ->	((!X(rToB_ACK_0) && rToB_ACK_0)	||	(!X(rToB_ACK_1) && rToB_ACK_1))).
+//restrict eng/deq operations
+ltl sys rho G_11_1 in GENBUF			= []((full && !deq)-> !enq).
+ltl sys rho G_11_1_X in GENBUF			= [](X((full && !deq)-> !enq)).
+ltl sys rho G_11_2 in GENBUF			= [](empty-> !deq).
+ltl sys rho G_11_2_X in GENBUF			= [](X(empty-> !deq)).
 
-ltl env theta Init_Lift_e in GAME_LTL	= (!b1 && !b2).
-ltl sys theta Init_Lift_s in GAME_LTL	= (f1 && !f2).
-ltl env rho Env_Release_B in GAME_LTL	= [](((b1 && f1)-> X(!b1)) &&((b2 && f2)-> X(!b2))).
-ltl env rho Env_Keep_B in GAME_LTL		= [](((b1 && !f1)-> X(b1)) &&((b2 && !f2)-> X(b2))).
-ltl sys rho Sys_Mutex in GAME_LTL		= [](!(f1 && f2) && !(X(f1 && f2))).
-ltl sys rho Sys_Adj_Floors in GAME_LTL	= []((f1 -> X(f1 || f2)) && (f2 -> X(f1 || f2))).
-ltl sys rho Sys_Move_Iff_B in GAME_LTL	= []((f1 && X(f2))->(b1 || b2)).
+//if sToB_REQ and not full then should ENQ
+ltl sys rho G_13 in GENBUF			= []((!full && (sToB_REQ_0 || sToB_REQ_1 || sToB_REQ_2 || sToB_REQ_3)) -> (enq || X(enq))).
 
+/***********
+**** ENV RHO
+***********/
 
-ltl fluent Ass = (b1 || !b1).
-ltl fluent Goal_Back_To_Ground			= (f1 || (b1 || b2)).
-ltl fluent Goal_Serve_Request_1			= ((b1->f1)).
-ltl fluent Goal_Serve_Request_2			= ((b2->f2)).
+//keep sToB_REQ if not yet ACK'd
+ltl env rho A_1_1_sndr_0 in GENBUF		= []((sToB_REQ_0 && !bToS_ACK_0) -> X(sToB_REQ_0)).
+ltl env rho A_1_1_sndr_1 in GENBUF		= []((sToB_REQ_1 && !bToS_ACK_1) -> X(sToB_REQ_1)).
+ltl env rho A_1_1_sndr_2 in GENBUF		= []((sToB_REQ_2 && !bToS_ACK_2) -> X(sToB_REQ_2)).
+ltl env rho A_1_1_sndr_3 in GENBUF		= []((sToB_REQ_3 && !bToS_ACK_3) -> X(sToB_REQ_3)).
+//lower sToB_REQ once ACK'd
+ltl env rho A_1_2_sndr_0 in GENBUF		= [](bToS_ACK_0 -> X(!sToB_REQ_0)).
+ltl env rho A_1_2_sndr_1 in GENBUF		= [](bToS_ACK_1 -> X(!sToB_REQ_1)).
+ltl env rho A_1_2_sndr_2 in GENBUF		= [](bToS_ACK_2 -> X(!sToB_REQ_2)).
+ltl env rho A_1_2_sndr_3 in GENBUF		= [](bToS_ACK_3 -> X(!sToB_REQ_3)).
+//lower rToB_ACK if no bToR_REQ
+ltl env rho A_2_2_sndr_0 in GENBUF		= []((!bToR_REQ_0) -> X(!rToB_ACK_0)).
+ltl env rho A_2_2_sndr_1 in GENBUF		= []((!bToR_REQ_1) -> X(!rToB_ACK_1)).
+//keep rToB_ACK if still REQ's
+ltl env rho A_3_rcvr_0 in GENBUF		= []((bToR_REQ_0 && rToB_ACK_0) -> X(rToB_ACK_0)).
+ltl env rho A_3_rcvr_1 in GENBUF		= []((bToR_REQ_1 && rToB_ACK_1) -> X(rToB_ACK_1)).
+//rToB_ACK if REQ'd
+ltl env rho A_4_rcvr_0 in GENBUF		= [](X(rToB_ACK_0) -> bToR_REQ_0).
+ltl env rho A_4_rcvr_1 in GENBUF		= [](X(rToB_ACK_1) -> bToR_REQ_1).
+//keep empty / full fixed if deq == enq
+ltl env rho A_5_1 in GENBUF			= []((deq <-> enq) -> (empty <-> X(empty))).
+ltl env rho A_5_2 in GENBUF			= []((deq <-> enq) -> (full <-> X(full))).
+ltl env rho A_5_3 in GENBUF			= []((enq && !deq) -> !X(empty)).
+ltl env rho A_5_4 in GENBUF			= []((deq && !enq) -> !X(full)).
+/***********
+**** AUTOMATA
+***********/
+//G_7 was turned into an automaton
+G_7_ROUND_ROBIN	= (bToR_REQ_0.on -> bToR_REQ_1.on -> G_7_ROUND_ROBIN).
 
-|f| ENV =(GAME_LTL).
-|gr1| <{Ass}><{Goal_Serve_Request_1,Goal_Serve_Request_2,Goal_Back_To_Ground}> STRAT = ENV.
+/***********
+**** FLUENTS
+***********/
+//G_12 was turned into a fluent
+fluent F_Goal_12 = <{deq.on,empty.on}, empty.off> initially 1
+fluent A_2_sndr_0 = <rToB_ACK_0.on, bToR_REQ_0.on> initially 1
+fluent A_2_sndr_1 = <rToB_ACK_1.on, bToR_REQ_1.on> initially 1
 
-GAME_FSP = S_0,
-S_0 = (<>-> S_1),
-S_1 = (f1.on-> S_2),
-S_2 = (<b1.on,b2.on>-> S_6|b2.on-> S_5|b1.on-> S_4|<>-> S_3),
-S_3 = (<>-> S_2),
-S_4 = (<>-> S_7),
-S_5 = (<>-> S_23),
-S_6 = (<>-> S_19),
-S_7 = (<b1.off,b2.on>-> S_9|b1.off-> S_8),
-S_8 = (<>-> S_2|<f1.off,f2.on>-> S_10),
-S_9 = (<>-> S_23|<f1.off,f2.on>-> S_22),
-S_10 = (<b1.on,b2.on>-> S_14|b2.on-> S_13|b1.on-> S_12|<>-> S_11),
-S_11 = (<f1.on,f2.off>-> S_2|<>-> S_10),
-S_12 = (<f1.on,f2.off>-> S_7|<>-> S_15),
-S_13 = (<f1.on,f2.off>-> S_23|<>-> S_22),
-S_14 = (<f1.on,f2.off>-> S_19|<>-> S_18),
-S_15 = (b2.on-> S_17|<>-> S_16),
-S_16 = (<f1.on,f2.off>-> S_7|<>-> S_15),
-S_17 = (<f1.on,f2.off>-> S_19|<>-> S_18),
-S_18 = (b2.off-> S_20),
-S_19 = (b1.off-> S_21),
-S_20 = (<f1.on,f2.off>-> S_7|<>-> S_15),
-S_21 = (<>-> S_23|<f1.off,f2.on>-> S_22),
-S_22 = (<b1.on,b2.off>-> S_25|b2.off-> S_24),
-S_23 = (b1.on-> S_27|<>-> S_26),
-S_24 = (<f1.on,f2.off>-> S_2|<>-> S_10),
-S_25 = (<f1.on,f2.off>-> S_7|<>-> S_15),
-S_26 = (<>-> S_23|<f1.off,f2.on>-> S_22),
-S_27 = (<>-> S_19|<f1.off,f2.on>-> S_18).
-
-STRAT_p = S_0,
-S_0	= (<>-> S_1),
-S_1 = (f1.on-> S_2),
-S_2 = (<>-> S_3|b1.on-> S_4|b2.on-> S_5|<b1.on,b2.on>-> S_6),
-S_3 = (<>-> S_55),
-S_4 = (<>-> S_9),
-S_5 = (<>-> S_56),
-S_6 = (<>-> S_13),
-S_7 = (<>-> S_2),
-S_8 = (<>-> S_9),
-S_9 = (b1.off-> S_63|<b1.off,b2.on>-> S_64),
-S_10 = (<>-> S_11),
-S_11 = (<>-> S_61|b1.on-> S_62),
-S_12 = (<>-> S_13),
-S_13 = (b1.off-> S_57),
-S_17 = (b2.off-> S_59|<b1.on,b2.off>-> S_60),
-S_26 = (b2.off-> S_28),
-S_28 = (<f1.on,f2.off>-> S_9),
-S_29 = (<>-> S_30|<f1.on,f2.off>-> S_9),
-S_30 = (<>-> S_32|b2.on-> S_33),
-S_31 = (<>-> S_32|b2.on-> S_33),
-S_32 = (<f1.on,f2.off>-> S_9),
-S_33 = (<f1.on,f2.off>-> S_13),
-S_34 = (b1.off-> S_35|<b1.off,b2.on>-> S_36),
-S_35 = (<f1.off,f2.on>-> S_65|<>-> S_55),
-S_36 = (<f1.off,f2.on>-> S_58|<>-> S_56),
-S_38 = (<>-> S_40|b1.on-> S_41|b2.on-> S_42|<b1.on,b2.on>-> S_43),
-S_40 = (<f1.on,f2.off>-> S_2),
-S_41 = (<>-> S_30|<f1.on,f2.off>-> S_9),
-S_42 = (<>-> S_17|<f1.on,f2.off>-> S_11),
-S_43 = (<>-> S_26|<f1.on,f2.off>-> S_13),
-S_46 = (<f1.on,f2.off>-> S_2),
-S_47 = (<>-> S_30|<f1.on,f2.off>-> S_9),
-S_55 = (<>-> S_7|b1.on-> S_8|b2.on-> S_10|<b1.on,b2.on>-> S_12),
-S_56 = (<>-> S_61|b1.on-> S_62),
-S_57 = (<f1.off,f2.on>-> S_58),
-S_58 = (b2.off-> S_46|<b1.on,b2.off>-> S_47),
-S_59 = (<>-> S_38|<f1.on,f2.off>-> S_2),
-S_60 = (<>-> S_31|<f1.on,f2.off>-> S_34),
-S_61 = (<f1.off,f2.on>-> S_58),
-S_62 = (<f1.off,f2.on>-> S_78),
-S_63 = (<f1.off,f2.on>-> S_38|<>-> S_2),
-S_64 = (<f1.off,f2.on>-> S_58),
-S_65 = (<>-> S_40|b1.on-> S_41|b2.on-> S_42|<b1.on,b2.on>-> S_43),
-S_78 = (b2.off-> S_29).
-//TESTS
-equals FATAL_Game_Lift_2_FSP_VS_LTL(GAME_LTL, GAME_FSP).
-equals FATAL_Game_Lift_2_STRAT_VS_STRAT_p(STRAT, STRAT_p).
-
+ltl fluent G_1_2_sndr_0		= (sToB_REQ_0 <-> bToS_ACK_0).
+ltl fluent G_1_2_sndr_1		= (sToB_REQ_1 <-> bToS_ACK_1).
+ltl fluent G_1_2_sndr_2		= (sToB_REQ_2 <-> bToS_ACK_2).
+ltl fluent G_1_2_sndr_3		= (sToB_REQ_3 <-> bToS_ACK_3).
+/***********
+**** SYNTHESIS
+***********/
+|f| ENV =(GENBUF || G_7_ROUND_ROBIN).
+//|gr1| <{A_2_sndr_0, A_2_sndr_1}><{F_Goal_12, G_1_2_sndr_0, G_1_2_sndr_1, G_1_2_sndr_2, G_1_2_sndr_3}> STRAT = ENV.
