@@ -979,11 +979,11 @@ void run_fast_pool_tests(){
 
 	uint32_t i;
 	for(i = 0; i < MAX_POOL_COUNT/2; i++){
-		test_item_pool* item	= automaton_fast_pool_get_instance(pool1, (uintptr_t)&(pool_frag1[i]));
+		test_item_pool* item	= automaton_fast_pool_get_instance(pool1, (uint32_t*)&(pool_frag1[i]));
 		item->a		= i;
 		item->name[0]	= 'h';item->name[1]	= 'i';item->name[2]	= '!';item->name[3]	= '\0';
 		pool_ref1[i]	= item;
-		item	= automaton_fast_pool_get_instance(pool2, (uintptr_t)&(pool_frag2[i]));
+		item	= automaton_fast_pool_get_instance(pool2, (uint32_t*)&(pool_frag2[i]));
 		item->a		= i;
 		item->name[0]	= 'h';item->name[1]	= 'i';item->name[2]	= '!';item->name[3]	= '\0';
 		pool_ref2[i]	= item;
@@ -1003,11 +1003,11 @@ void run_fast_pool_tests(){
 		automaton_fast_pool_release_instance(pool2, (uintptr_t)pool_frag2[i]);
 	}
 	for(i = 0; i < MAX_POOL_COUNT/2; i++){
-		test_item_pool* item	= automaton_fast_pool_get_instance(pool1, (uintptr_t)&(pool_frag1[i]));
+		test_item_pool* item	= automaton_fast_pool_get_instance(pool1, (uint32_t*)&(pool_frag1[i]));
 		item->a		= i;
 		item->name[0]	= 'h';item->name[1]	= 'i';item->name[2]	= '!';item->name[3]	= '\0';
 		pool_ref1[i]	= item;
-		item	= automaton_fast_pool_get_instance(pool2, (uintptr_t)&(pool_frag2[i]));
+		item	= automaton_fast_pool_get_instance(pool2, (uint32_t*)&(pool_frag2[i]));
 		item->a		= i;
 		item->name[0]	= 'h';item->name[1]	= 'i';item->name[2]	= '!';item->name[3]	= '\0';
 		pool_ref2[i]	= item;
@@ -1028,7 +1028,7 @@ void run_fast_pool_tests(){
 }
 
 void run_bool_array_hash_table_tests(){
-	uint32_t variable_count	= 40;
+	int32_t variable_count	= 40;
 	automaton_bool_array_hash_table* table	= automaton_bool_array_hash_table_create(variable_count);
 	int32_t i;
 	bool **values	= malloc(variable_count * sizeof(bool*));
@@ -1140,7 +1140,7 @@ int main (int argc, char** argv){
 	}else{
 		//ONGOING
 		//run_parse_test("tests/genbuf_2_sndrs_simplified.fsp", "GenBuf 2 sndrs (simplified)");//GENBUF 2 Sndrs
-		//run_parse_test("tests/genbuf_2_sndrs.fsp", "GenBuf 2 sndrs");//GENBUF 2 Sndrs
+		run_parse_test("tests/genbuf_2_sndrs.fsp", "GenBuf 2 sndrs");//GENBUF 2 Sndrs
 
 		//run_parse_test("tests/genbuf_4_sndrs.fsp", "GenBuf 4 sndrs");//GENBUF 4 sndrs
 
@@ -1148,7 +1148,7 @@ int main (int argc, char** argv){
 		//run_all_tests();
 		//run_functional_tests();
 
-		run_parse_test("tests/current_sut.fsp", "current_SUT");
+		//run_parse_test("tests/current_sut.fsp", "current_SUT");
 
 		//TODO
 

@@ -1,16 +1,14 @@
 #CC=gcc
 #CC=gcc-8
 CC=clang
-#CFLAGS= -Wall -Wextra -pedantic -g -lm -Wno-unused-variable -Wno-unused-parameter -O0
-#CFLAGS= -Wall -Wextra -pedantic -g -lm -Wno-unused-variable -Wno-unused-parameter -O3
-CFLAGS= -fsanitize=address -Wall -Wextra -pedantic -g -lm -Wno-unused-variable -Wno-unused-parameter -O0 ; ASAN_OPTIONS=detect_leaks=1
-#CFLAGS= -fsanitize=address -Wall -Wextra -pedantic -lm -Wno-unused-variable -Wno-unused-parameter -O0 ; ASAN_OPTIONS=detect_leaks=1
-#CFLAGS= -fsanitize=address -Wall -Wextra -pedantic -g -lm -Wno-unused-variable -Wno-unused-parameter -O3 ; ASAN_OPTIONS=detect_leaks=1
-#CFLAGS= -fsanitize=address -Wall -Wextra -pedantic -lm -Wno-unused-variable -Wno-unused-parameter -O3 ; ASAN_OPTIONS=detect_leaks=1
-#CFLAGS= -Wall -Wextra -pedantic -lm -Wno-unused-variable -Wno-unused-parameter -O3
-#CFLAGS= -Wall -Wextra -pedantic -lm -Wno-unused-variable -Wno-unused-parameter -O2
-#CFLAGS= -Wall -Wextra -pedantic -lm -Wno-unused-variable -Wno-unused-parameter -Ofast
-#CFLAGS= -Wall -Wextra -pedantic -g -lm -lasan -Wno-unused-variable -Wno-unused-parameter -fsanitize=address -fno-omit-frame-pointer -fuse-ld=gold -O0
+#CFLAGS= -Wall -Wextra -pedantic -g -Wno-unused-variable -Wno-unused-parameter -O0
+#CFLAGS= -Wall -Wextra -pedantic -g -Wno-unused-variable -Wno-unused-parameter -O3
+#CFLAGS= -fsanitize=address -Wall -Wextra -pedantic -g -Wno-unused-variable -Wno-unused-parameter -O0 
+CFLAGS= -fsanitize=address -Wall -Wextra -pedantic -g -Wno-unused-variable -Wno-unused-parameter -O3
+#CFLAGS= -Wall -Wextra -pedantic -Wno-unused-variable -Wno-unused-parameter -O3
+#CFLAGS= -Wall -Wextra -pedantic -Wno-unused-variable -Wno-unused-parameter -O2
+#CFLAGS= -Wall -Wextra -pedantic -Wno-unused-variable -Wno-unused-parameter -Ofast
+#CFLAGS= -Wall -Wextra -pedantic -g -lasan -Wno-unused-variable -Wno-unused-parameter -fsanitize=address -fno-omit-frame-pointer -fuse-ld=gold -O0
 NASM=nasm
 NASMFLAGS=-f elf64 -g -F DWARF
 LEX = lex

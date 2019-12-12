@@ -43,11 +43,11 @@ void obdd_state_tree_entry_print(obdd_state_tree* tree, obdd_state_tree_entry* e
 	if(entry->is_leaf)
 		snprintf(buff + strlen(buff),buff_size - strlen(buff) - 1, "[%d]\n", entry->leaf_value);
 	else{
-		if(entry->low_index != NULL){
+		if(entry->low_index != (int32_t)NULL){
 			snprintf(buff + strlen(buff), buff_size - strlen(buff) - 1, "0");
 			obdd_state_tree_entry_print(tree, &(tree->entries_pool[entry->low_index]), buff, buff_size);
 		}
-		if(entry->high_index != NULL){
+		if(entry->high_index != (int32_t)NULL){
 			snprintf(buff + strlen(buff), buff_size - strlen(buff) - 1, "1");
 			obdd_state_tree_entry_print(tree, &(tree->entries_pool[entry->high_index]), buff, buff_size);
 		}
@@ -56,7 +56,7 @@ void obdd_state_tree_entry_print(obdd_state_tree* tree, obdd_state_tree_entry* e
 
 void obdd_state_tree_print(obdd_state_tree* tree, char *buff, uint32_t buff_size){
 	snprintf(buff + strlen(buff), buff_size - strlen(buff) - 1, "Binary Map Tree.\n");
-	if(tree->first_entry_index != NULL)
+	if(tree->first_entry_index != (int32_t)NULL)
 		obdd_state_tree_entry_print(tree, tree->first_entry_index, buff, buff_size);
 }
 
@@ -681,7 +681,7 @@ obdd* obdd_exists_vector(obdd* root, uint32_t* var_ids, uint32_t count){
 }
 
 obdd_node* obdd_exists_vector_node(obdd_mgr* mgr, obdd_node* root, uint32_t* var_ids, uint32_t count){
-	int32_t i;
+	uint32_t i;
 	obdd_node* true_node;
 	obdd_node* false_node;
 

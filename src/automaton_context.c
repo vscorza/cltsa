@@ -2666,6 +2666,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	//NEW RHO BUILD APPROACH
 	obdd_get_valuations(mgr, env_sys_rho_composed, &valuations, &valuations_size, &current_valuations_count, signals_alphabet, signals_count
 			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes);
+
 #if DEBUG_LTL_AUTOMATON
 		printf("env sys rho valuations\n");
 		obdd_print_valuations_stdout(mgr, valuations, current_valuations_count, signals_alphabet, signals_count);
