@@ -18,11 +18,11 @@
 #include "bool_array_hash_table.h"
 #include "y.tab.h"
 
-#define VERBOSE 0
+#define VERBOSE 1
 
 #define COMPOSE_SYNCH	1
 #define PARTIAL_SHARE	2
-#define FIXED_SIGNALS_COUNT	4
+#define FIXED_SIGNALS_COUNT	8//4
 #define SIGNALS_INCREASE_FACTOR 2
 #define TRANSITIONS_INITIAL_SIZE 2
 
@@ -34,8 +34,8 @@
 #define DEBUG_STRATEGY_BUILD 0
 #define DEBUG_COMPOSITE_TREE 0
 
-#define BUCKET_SIZE		1000000
-#define FLUENT_BUCKET_SIZE 10000
+#define BUCKET_SIZE		10000//1000000
+#define FLUENT_BUCKET_SIZE 1000//10000
 #define RANKING_BUCKET_SIZE 10000
 #define DISTANCE_BUCKET_SIZE 1000
 #define PRINT_PARTIAL_COMPOSITION 1
@@ -58,7 +58,7 @@
 #define AUT_SER_ARRAY_END "]"
 #define AUT_SER_SEP ","
 
-typedef uint16_t signal_t;
+typedef uint8_t signal_t;
 typedef uint8_t fluent_count_t;
 /****************
 ==== ENUMS ==== 

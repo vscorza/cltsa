@@ -1590,6 +1590,7 @@ void automaton_automaton_resize_to_state(automaton_automaton* current_automaton,
 	uint32_t old_size	= current_automaton->transitions_size;
 	uint32_t next_size	= old_size;
 	while(state >= next_size) next_size *= LIST_INCREASE_FACTOR;
+	printf("%d\t%d\n", state, next_size);
 	bool* next_is_controllable			= malloc(sizeof(bool) * next_size);
 	uint32_t* next_out_degree			= malloc(sizeof(uint32_t) * next_size);
 	uint32_t* next_out_size				= malloc(sizeof(uint32_t) * next_size);

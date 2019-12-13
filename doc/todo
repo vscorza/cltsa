@@ -1,5 +1,6 @@
 TODO:
 =====
+- split obdd -> automaton transformation valuations from xyx'y'(xy->xyx'->xy) to xyx'(xy->xyx'), yx'y'(xyx'->xy) is an exist over x
 - write behavior minimization cases in clts
 - minimization over delta debugging
 - take bigger values first on synthesis

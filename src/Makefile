@@ -2,9 +2,9 @@
 #CC=gcc-8
 CC=clang
 #CFLAGS= -Wall -Wextra -pedantic -g -Wno-unused-variable -Wno-unused-parameter -O0
-#CFLAGS= -Wall -Wextra -pedantic -g -Wno-unused-variable -Wno-unused-parameter -O3
+CFLAGS= -Wall -Wextra -pedantic -g -Wno-unused-variable -Wno-unused-parameter -O3
 #CFLAGS= -fsanitize=address -Wall -Wextra -pedantic -g -Wno-unused-variable -Wno-unused-parameter -O0 
-CFLAGS= -fsanitize=address -Wall -Wextra -pedantic -g -Wno-unused-variable -Wno-unused-parameter -O3
+#CFLAGS= -fsanitize=address -Wall -Wextra -pedantic -g -Wno-unused-variable -Wno-unused-parameter -O3
 #CFLAGS= -Wall -Wextra -pedantic -Wno-unused-variable -Wno-unused-parameter -O3
 #CFLAGS= -Wall -Wextra -pedantic -Wno-unused-variable -Wno-unused-parameter -O2
 #CFLAGS= -Wall -Wextra -pedantic -Wno-unused-variable -Wno-unused-parameter -Ofast

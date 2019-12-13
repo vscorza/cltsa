@@ -2446,7 +2446,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	buff[0] = '\0';
 #endif
 	for(i = 0; i < env_rho_count; i++){
-#if VERBOSE || DEBUG_LTL_AUTOMATON
+#if DEBUG_LTL_AUTOMATON
 			printf("Env rho %d\n",i);
 			obdd_print(env_rho_obdd[i], buff, buff_size);
 			printf("%s", buff); buff[0] = '\0';
@@ -2463,11 +2463,11 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 		fflush(stdout);
 #endif
 	}
-#if VERBOSE || DEBUG_LTL_AUTOMATON
+#if DEBUG_LTL_AUTOMATON
 	printf("\nComposing sys rho functions\n");
 #endif
 	for(i = 0; i < sys_rho_count; i++){
-#if VERBOSE || DEBUG_LTL_AUTOMATON
+#if DEBUG_LTL_AUTOMATON
 			printf("Sys rho %d\n",i);
 			obdd_print(sys_rho_obdd[i], buff, buff_size);
 			printf("%s", buff); buff[0] = '\0';
@@ -2494,7 +2494,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 #endif
 	env_sys_theta_composed				= obdd_apply_and(env_theta_composed, sys_theta_composed);
 	env_sys_rho_composed				= obdd_apply_and(env_rho_composed, sys_rho_composed);
-#if VERBOSE || DEBUG_LTL_AUTOMATON
+#if DEBUG_LTL_AUTOMATON
 	printf("\n");
 	buff[0]	= '\0';
 	printf("Env sys theta composed\n");
@@ -2554,7 +2554,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 #if VERBOSE
 	printf(ANSI_COLOR_RED "Building theta valuations\n" ANSI_COLOR_RESET);
 #endif
-#if DEBUG_LTL_AUTOMATON
+#if VERBOSE || DEBUG_LTL_AUTOMATON
 	int32_t state_counter = 0;
 #endif
 
@@ -2666,7 +2666,9 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	//NEW RHO BUILD APPROACH
 	obdd_get_valuations(mgr, env_sys_rho_composed, &valuations, &valuations_size, &current_valuations_count, signals_alphabet, signals_count
 			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes);
-
+#if VERBOSE  || DEBUG_LTL_AUTOMATON
+	printf("\t\tOBDD valuations: [[%d]]\n", current_valuations_count);
+#endif
 #if DEBUG_LTL_AUTOMATON
 		printf("env sys rho valuations\n");
 		obdd_print_valuations_stdout(mgr, valuations, current_valuations_count, signals_alphabet, signals_count);
@@ -2700,18 +2702,18 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 				, obdd_on_signals_indexes, obdd_off_signals_indexes, x_y_alphabet, x_y_x_p_alphabet);
 
 
-#if DEBUG_LTL_AUTOMATON
+#if VERBOSE  || DEBUG_LTL_AUTOMATON
 		printf("(%d-[", sys_state->state);
 		for(j = 0; j < x_y_x_p_count; j++)
 			printf("%s", env_state->valuation[j] ? "1" : "0");
 		printf("]->%d)%s", env_state->state, has_transition? "" : "*");
 #endif
 		if(!has_transition){
-#if DEBUG_LTL_AUTOMATON
+#if VERBOSE  || DEBUG_LTL_AUTOMATON
 		printf("[ADDED]");
 #endif
 		}
-#if DEBUG_LTL_AUTOMATON
+#if VERBOSE  || DEBUG_LTL_AUTOMATON
 		else skipped++;
 		evaluated++;
 		printf("\n");
@@ -2743,7 +2745,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 				, env_state->valuation, hashed_valuation, adjusted_valuation, false, false
 				, x_count, y_count
 				, obdd_on_signals_indexes, obdd_off_signals_indexes, x_y_alphabet, x_y_x_p_alphabet);
-#if DEBUG_LTL_AUTOMATON
+#if VERBOSE  || DEBUG_LTL_AUTOMATON
 		printf("(%d-[", env_state->state);
 		for(j = 0; j < x_y_count; j++)
 			printf("%s", sys_state->valuation[j] ? "1" : "0");
@@ -2751,14 +2753,17 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 #endif
 
 		if(!has_transition){
-#if DEBUG_LTL_AUTOMATON
+#if VERBOSE  || DEBUG_LTL_AUTOMATON
 			printf("[ADDED]");
 #endif
 		}
-#if DEBUG_LTL_AUTOMATON
+#if VERBOSE  || DEBUG_LTL_AUTOMATON
 		else skipped++;
 		evaluated++;
-		printf("\n");
+		printf("\n\t%d:%d:\t%d:\t%d\n", i, evaluated, skipped, current_valuations_count);
+		if(i == 194899){
+			printf("BOOGERS\n");
+		}
 		state_counter++;
 		if(state_counter % 1000 == 0){
 			printf("States processed for ltl: %d\n", state_counter);
