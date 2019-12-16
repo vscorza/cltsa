@@ -1141,8 +1141,7 @@ int main (int argc, char** argv){
 		//ONGOING
 		//run_parse_test("tests/genbuf_2_sndrs_simplified.fsp", "GenBuf 2 sndrs (simplified)");//GENBUF 2 Sndrs
 		//run_parse_test("tests/genbuf_2_sndrs.fsp", "GenBuf 2 sndrs");//GENBUF 2 Sndrs
-
-		run_parse_test("tests/genbuf_4_sndrs.fsp", "GenBuf 4 sndrs");//GENBUF 4 sndrs
+		run_parse_test("tests/genbuf_4_sndrs_no_automaton.fsp", "GenBuf 4 sndrs(no automaton)");//GENBUF 4 sndrs
 
 		//GENERAL TESTS
 		//run_all_tests();
@@ -1151,7 +1150,7 @@ int main (int argc, char** argv){
 		//run_parse_test("tests/current_sut.fsp", "current_SUT");
 
 		//TODO
-
+		//run_parse_test("tests/genbuf_4_sndrs.fsp", "GenBuf 4 sndrs");//GENBUF 4 sndrs
 		//run_parse_test("tests/half_adder_to_full_adder.fsp",  "half adder to full adder test");
 		//run_parse_test("tests/two_full_adders.fsp",  "two full adders test");
 		//run_parse_test("tests/automata_load_test_1.fsp",  "automata load test");

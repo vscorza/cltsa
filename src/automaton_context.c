@@ -2761,9 +2761,6 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 		else skipped++;
 		evaluated++;
 		printf("\n\t%d:%d:\t%d:\t%d\n", i, evaluated, skipped, current_valuations_count);
-		if(i == 194899){
-			printf("BOOGERS\n");
-		}
 		state_counter++;
 		if(state_counter % 1000 == 0){
 			printf("States processed for ltl: %d\n", state_counter);

@@ -1,19 +1,36 @@
 TODO:
 =====
-- split obdd -> automaton transformation valuations from xyx'y'(xy->xyx'->xy) to xyx'(xy->xyx'), yx'y'(xyx'->xy) is an exist over x
+- use single bit booleans in obdd valuations
 - write behavior minimization cases in clts
 - minimization over delta debugging
-- take bigger values first on synthesis
-- take noncontrollable states first on synthesis
-- keep inf scc over rankings
 - run hardware cases
 	- behavior minimization based diagnosis over CLTS
 	- diagnose GENBUF with 2 clients
 	- run genbuf 2, 4, 10 clients
 	- run amba 2, 4, 10 clients
+- write obdd valuations as iterator instead of matrix
+- change transitions to | to_state | is_input | bit_array of signals |
+- synthesis improvements
+	- take bigger values first on synthesis
+	- take noncontrollable states first on synthesis
+	- keep inf scc over rankings
 - compare against konighoefer and jvts systems, write experimental claim
 - implement fluent consistency check
 - implement IS_REALIZABLE(gr1). on parser
+- develop mixed structures 
+	- EROBDD (enumerative ROBDD) first node determines current state
+	  s -[s1] -> s_1 | ... | s -[sk] -> s_k, the seconde node
+	  (not sure if should be last one) determines next state,for each transition
+	  s_i -> s_j where there are signal changes those are added, if signal
+	  v is set between s_i,s_j then v is false in V and true in V',
+	  recreate this o EROBDD s_i, s' branch, then the EROBDD is minimized, first
+	  as OBDDs then, for equivalent state nodes, merges are represented as 
+	  intervals S_{1,4,[7,12]} and so on
+	- define apply:EROBDD x OBDD -> EROBDD (where an OBDD is restricted by
+	  an EROBDD)
+	- define EROBDD valuations
+	- write definitions and lemmas
+	- implement and test against existing examples
 - [automata-reporter]
 	- integration of cfsp editor (parsing error location info)
 	- partial automaton exploration for big automata (jung adaptation with outgoing dashed labels)
