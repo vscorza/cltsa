@@ -1,5 +1,6 @@
 TODO:
 =====
+- adapt genbuf spec from aiger (review safety restrictions)
 - use single bit booleans in obdd valuations
 - write behavior minimization cases in clts
 - minimization over delta debugging

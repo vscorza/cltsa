@@ -41,6 +41,7 @@ ltl sys rho G_7_0_4 in GENBUF				= [](X((!s_0) -> (!bToR_REQ_1))).//restrict X
 ltl sys rho G_7_1_1 in GENBUF				= []((s_0 && bToR_REQ_1) -> X(!s_0)).
 ltl sys rho G_7_1_2 in GENBUF				= []((s_0 && !bToR_REQ_1) -> X(s_0)).
 ltl sys rho G_7_1_3 in GENBUF				= []((s_0) -> (!bToR_REQ_0)).
+ltl sys rho G_7_1_4 in GENBUF				= [](X((s_0) -> (!bToR_REQ_0))).
 //lower bToR_REQ when rToB_ACK received
 ltl sys rho G_8_rcvr_0 in GENBUF		= [](rToB_ACK_0 -> X(!bToR_REQ_0)).
 ltl sys rho G_8_rcvr_1 in GENBUF		= [](rToB_ACK_1 -> X(!bToR_REQ_1)).
