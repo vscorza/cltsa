@@ -1,7 +1,7 @@
 TODO:
 =====
 - adapt genbuf spec from aiger (review safety restrictions)
-- use single bit booleans in obdd valuations
+- add transitions when getting obdd valuations
 - write behavior minimization cases in clts
 - minimization over delta debugging
 - run hardware cases
@@ -9,8 +9,8 @@ TODO:
 	- diagnose GENBUF with 2 clients
 	- run genbuf 2, 4, 10 clients
 	- run amba 2, 4, 10 clients
-- write obdd valuations as iterator instead of matrix
 - change transitions to | to_state | is_input | bit_array of signals |
+- split functionality into several files, refactor
 - synthesis improvements
 	- take bigger values first on synthesis
 	- take noncontrollable states first on synthesis
