@@ -770,7 +770,7 @@ bool obdd_satisfies_vector(obdd* root, uint32_t* var_ids, bool* values, uint32_t
 		}
 		current_node	= (values[current_index]) ? current_node->high_obdd : current_node->low_obdd;
 	}
-	return obdd_is_constant(root->mgr, current_node);
+	return obdd_is_true(root->mgr, current_node);
 }
 
 

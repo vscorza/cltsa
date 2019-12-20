@@ -1142,6 +1142,8 @@ int main (int argc, char** argv){
 		//run_parse_test("tests/genbuf_2_sndrs.fsp", "GenBuf 2 sndrs");//GENBUF 2 Sndrs
 		//run_parse_test("tests/genbuf_4_sndrs_no_automaton.fsp", "GenBuf 4 sndrs(no automaton)");//GENBUF 4 sndrs
 		//run_parse_test("tests/genbuf_4_sndrs.fsp", "GenBuf 4 sndrs");//GENBUF 4 sndrs
+		//run_parse_test("tests/two_floors_lift.fsp", "lift 2 floors");//lift 2 floors
+
 
 		//GENERAL TESTS
 		//run_all_tests();
