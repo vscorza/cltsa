@@ -2069,6 +2069,9 @@ void automaton_set_composed_valuation(bool* valuation, bool* partial_valuation, 
 	uint32_t left_offset	= is_initial? 0 : (is_input? x_count + y_count: x_count);
 	for(i = 0; i < offset_size; i++)valuation[left_offset + i]	= partial_valuation[offset_size * valuation_offset + i];
 }
+
+uint64_t __global_signals_count = 0;
+uint32_t __global_max_signals	= 0;
 bool automaton_add_transition_from_valuations(obdd_mgr* mgr, automaton_automaton* automaton, uint32_t from_state, uint32_t to_state, bool* from_valuation,
 		bool* to_valuation, bool* adjusted_valuation, bool is_initial, bool is_input, uint32_t x_count, uint32_t y_count, uint32_t* obdd_on_indexes, uint32_t* obdd_off_indexes,
 		uint32_t* x_y_alphabet, uint32_t* x_y_x_p_alphabet){
@@ -2135,10 +2138,18 @@ bool automaton_add_transition_from_valuations(obdd_mgr* mgr, automaton_automaton
 #if DEBUG_LTL_AUTOMATON
 	printf("%s", has_transition? "" : "*");
 #endif
+	__global_signals_count += transition->signals_count;
+	if(transition->signals_count > __global_max_signals){
+		__global_max_signals = transition->signals_count;
+	}
+	if(__global_signals_count % 10000 == 0){
+		printf("transition load: %" PRIu64 "\t(%d / %d) max: %d\n", __global_signals_count / automaton->transitions_composite_count
+				, __global_signals_count, automaton->transitions_composite_count, __global_max_signals);
+	}
 	automaton_transition_destroy(transition, true);
 	//TODO:check this
 	//should add after adding transition since structure resizing may not have been triggered
-	obdd* obdd_current_state;
+	bool obdd_sat_vector = false;
 	if(!has_transition){
 #if DEBUG_LTL_AUTOMATON
 		printf("% V:");
@@ -2150,15 +2161,15 @@ bool automaton_add_transition_from_valuations(obdd_mgr* mgr, automaton_automaton
 				if(is_input){
 					//TODO:
 					//restrict x according to x' in to_valuation
-					obdd_current_state	= obdd_restrict_vector(automaton->context->liveness_valuations[i],
+					obdd_sat_vector	= obdd_satisfies_vector(automaton->context->liveness_valuations[i],
 							x_y_alphabet, adjusted_valuation, x_count + y_count);
 
 							//x_y_x_p_alphabet, to_valuation, x_count * 2 + y_count);
 				}else{
-					obdd_current_state	= obdd_restrict_vector(automaton->context->liveness_valuations[i],
+					obdd_sat_vector	= obdd_satisfies_vector(automaton->context->liveness_valuations[i],
 												x_y_alphabet, to_valuation, x_count + y_count);
 				}
-				if(obdd_is_sat(mgr, obdd_current_state->root_obdd)){
+				if(obdd_sat_vector){
 #if DEBUG_LTL_AUTOMATON
 					printf("1");
 #endif
@@ -2169,7 +2180,6 @@ bool automaton_add_transition_from_valuations(obdd_mgr* mgr, automaton_automaton
 #endif
 					CLEAR_FLUENT_BIT(automaton->liveness_valuations, fluent_index);
 				}
-				obdd_destroy(obdd_current_state);
 			}
 		}
 	}
@@ -2178,6 +2188,7 @@ bool automaton_add_transition_from_valuations(obdd_mgr* mgr, automaton_automaton
 #endif
 	return has_transition;
 }
+
 
 void automaton_add_transition_from_obdd_valuation(obdd_mgr* mgr, automaton_automaton* ltl_automaton,
 		obdd_composite_state* env_state, obdd_composite_state* sys_state, obdd_state_tree* obdd_state_map,
@@ -3007,7 +3018,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	printf(ANSI_COLOR_RED "Building rho valuations\n" ANSI_COLOR_RESET);
 #endif
 	//NEW RHO BUILD APPROACH
-
+	free(valuations);
 	automaton_add_transitions_from_valuations(mgr, env_sys_rho_composed, ltl_automaton, &current_valuations_count, signals_alphabet, signals_count,
 			dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, env_state, sys_state, obdd_state_map, x_count, y_count, x_y_count, x_y_x_p_count,
 			x_y_alphabet, x_y_x_p_alphabet, signals_count, hashed_valuation, adjusted_valuation, x_y_hash_table,
@@ -3064,7 +3075,6 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	free(not_x_p_alphabet); free(not_y_p_alphabet);
 	free(x_alphabet_o); free(y_alphabet_o); free(x_p_alphabet_o); free(y_p_alphabet_o);free(x_y_alphabet_o); free(x_y_x_p_alphabet_o); free(x_p_y_p_alphabet_o); free(signals_alphabet_o);
 	free(not_x_p_alphabet_o);free(not_y_p_alphabet_o);
-	free(valuations);
 	free(local_alphabet);
 	obdd_state_tree_destroy(state_map);
 	obdd_state_tree_destroy(obdd_state_map);

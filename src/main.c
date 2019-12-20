@@ -1071,7 +1071,6 @@ void run_functional_tests(){
 	run_report_tests();
 	run_fast_pool_tests();
 	run_bool_array_hash_table_tests();
-
 	//DRY TESTS
 	run_parse_test("tests/composition_types.fsp", "compositions type");
 	run_parse_test("tests/biscotti.fsp", "biscotti");
@@ -1141,12 +1140,12 @@ int main (int argc, char** argv){
 		//ONGOING
 		//run_parse_test("tests/genbuf_2_sndrs_simplified.fsp", "GenBuf 2 sndrs (simplified)");//GENBUF 2 Sndrs
 		//run_parse_test("tests/genbuf_2_sndrs.fsp", "GenBuf 2 sndrs");//GENBUF 2 Sndrs
-		run_parse_test("tests/genbuf_4_sndrs_no_automaton.fsp", "GenBuf 4 sndrs(no automaton)");//GENBUF 4 sndrs
+		//run_parse_test("tests/genbuf_4_sndrs_no_automaton.fsp", "GenBuf 4 sndrs(no automaton)");//GENBUF 4 sndrs
 		//run_parse_test("tests/genbuf_4_sndrs.fsp", "GenBuf 4 sndrs");//GENBUF 4 sndrs
 
 		//GENERAL TESTS
 		//run_all_tests();
-		//run_functional_tests();
+		run_functional_tests();
 
 		//run_parse_test("tests/current_sut.fsp", "current_SUT");
 

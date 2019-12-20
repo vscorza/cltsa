@@ -8,6 +8,7 @@
 #include <stdbool.h>
 #include <assert.h>
 #include <time.h>
+#include <inttypes.h>
 #include "automaton_utils.h"
 #include "parser_utils.h"
 #include "bucket_list.h"
@@ -22,7 +23,7 @@
 
 #define COMPOSE_SYNCH	1
 #define PARTIAL_SHARE	2
-#define FIXED_SIGNALS_COUNT	8//4
+#define FIXED_SIGNALS_COUNT	6//4
 #define SIGNALS_INCREASE_FACTOR 2
 #define TRANSITIONS_INITIAL_SIZE 2
 

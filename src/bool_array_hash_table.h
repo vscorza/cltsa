@@ -8,7 +8,7 @@
 #ifndef SRC_BOOL_ARRAY_HASH_TABLE_H_
 #define SRC_BOOL_ARRAY_HASH_TABLE_H_
 
-#define BOOL_ARRAY_HASH_TABLE_SIZE 8
+#define BOOL_ARRAY_HASH_TABLE_SIZE 3
 
 #include "automaton_utils.h"
 

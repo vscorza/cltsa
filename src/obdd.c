@@ -747,6 +747,33 @@ obdd_node* obdd_node_restrict(obdd_mgr* mgr, obdd_node* root, uint32_t var_ID, b
 	return applied_node;	
 }
 
+
+/**
+ * Returns true if the vector is satisfied by the obdd, IMPORTANT: var_ids should be ordered and should
+ * fully define the valuation of the obdd, since it is following only one path down the obdd to the terminal
+ * @param root the obdd to be restricted
+ * @param var_ids the array of variable ids for each value in the boolean array
+ * @param values the array of boolean values for variables being restricted
+ * @param count the number of variables to be restricted
+ * @return the resulting obdd
+ */
+bool obdd_satisfies_vector(obdd* root, uint32_t* var_ids, bool* values, uint32_t count){
+	uint32_t i;
+	bool accum_cached = false;
+	obdd_node* current_node = root->root_obdd;
+	uint32_t current_index = 0;
+	uint32_t current_var	= var_ids[current_index];
+	while(!obdd_is_constant(root->mgr, current_node)){
+		while(current_node->var_ID > current_var){
+			current_var	= var_ids[++current_index];
+			if(current_index >= count)return false;
+		}
+		current_node	= (values[current_index]) ? current_node->high_obdd : current_node->low_obdd;
+	}
+	return obdd_is_constant(root->mgr, current_node);
+}
+
+
 /**
  * Restricts the provided obdd over an array of boolean values (values should ordered following var_ids)
  * @param root the obdd to be restricted
@@ -783,7 +810,6 @@ obdd* obdd_restrict_vector(obdd* root, uint32_t* var_ids, bool* values, uint32_t
 	}
 	//TODO: here's the issue applying and against restricted vector gives nothing back (null->1 | !null->0 tree)
 
-	char buff[45000]; buff[0] = '\0';
 	/*
 	obdd_node_print(root->mgr, root->root_obdd, 0, buff, sizeof(buff));
 	printf("%s\n", buff);
