@@ -2296,6 +2296,25 @@ void automaton_add_transitions_from_valuations(obdd_mgr* mgr, obdd* root, automa
 	obdd_node* current_node		= root->root_obdd;
 	obdd_node* last_node;
 
+	//build ordered ref for x_y_alphabet to be used in fluent satisfaction
+	uint32_t* x_y_order	= calloc(x_y_count, sizeof(uint32_t));
+	uint32_t* x_y_vars	= calloc(x_y_count, sizeof(uint32_t));
+	uint32_t order_index = 0;
+	int32_t last_var = -1;
+	int32_t current_var = -1;
+	int32_t current_index = -1;
+	for(i = 0; i < x_y_count; i++){
+		current_var	= -1;
+		for(j = 0; j < x_y_count; j++){
+			if(x_y_alphabet[j] > last_var && (x_y_alphabet[j] < current_var || current_var == -1)){
+				current_var	= x_y_alphabet[j];
+				current_index	= (int32_t)j;
+			}
+		}
+	}
+
+
+
 	//solve case where var_ID is 0 (obdd == true, retrieve all values for img)
 	if(current_node->var_ID == mgr->false_obdd->root_obdd->var_ID)return;
 	if(current_node->var_ID == mgr->true_obdd->root_obdd->var_ID){
@@ -2528,6 +2547,8 @@ void automaton_add_transitions_from_valuations(obdd_mgr* mgr, obdd* root, automa
 #if DEBUG_OBDD_VALUATIONS
 	printf(ANSI_COLOR_RESET);
 #endif
+	free(x_y_order);
+	free(x_y_vars);
 	free(valuation);
 }
 
@@ -3354,7 +3375,8 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 			sprintf(set_name, "Guarantees %s", gr1_game->name);
 			guarantees		= automaton_set_syntax_evaluate(tables, gr1_game->guarantees, &guarantees_count, set_name);
 			winning_region_automaton	= automaton_get_gr1_strategy(game_automaton, assumptions, assumptions_count
-					, guarantees, guarantees_count, false);
+					, guarantees, guarantees_count, true);
+					//, guarantees, guarantees_count, false);
 			bool nonreal	= false;
 			if(winning_region_automaton->transitions_count == 0){
 				nonreal	= true;

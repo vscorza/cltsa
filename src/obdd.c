@@ -766,7 +766,8 @@ bool obdd_satisfies_vector(obdd* root, uint32_t* var_ids, bool* values, uint32_t
 	while(!obdd_is_constant(root->mgr, current_node)){
 		while(current_node->var_ID > current_var){
 			current_var	= var_ids[++current_index];
-			if(current_index >= count)return false;
+			if(current_index >= count)
+				return false;
 		}
 		current_node	= (values[current_index]) ? current_node->high_obdd : current_node->low_obdd;
 	}
