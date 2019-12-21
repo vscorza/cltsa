@@ -2714,7 +2714,9 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_autom
 			}
 			automaton_automaton_remove_deadlocks(minimization);
 			automaton_automaton_update_valuations(minimization);
-			printf("[%d,%d,R,%d]\n", t_count, r_count,steps);
+#if DEBUG_UNREAL
+			printf("Minimizing [%d,%d,R,%d]\n", t_count, r_count,steps);
+#endif
 		}else{
 			/*
 			automaton_automaton_destroy(last_unrealizable);
@@ -2723,7 +2725,9 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_autom
 			automaton_automaton_remove_deadlocks(minimization);
 			automaton_automaton_update_valuations(minimization);
 			from_step = steps;
-			printf("[%d,%d,N,%d]\n", t_count, r_count, from_step);
+#if DEBUG_UNREAL
+			printf("Minimizing [%d,%d,N,%d]\n", t_count, r_count, from_step);
+#endif
 		}
 		fflush(stdout);
 	}

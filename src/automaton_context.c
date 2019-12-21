@@ -2138,6 +2138,7 @@ bool automaton_add_transition_from_valuations(obdd_mgr* mgr, automaton_automaton
 #if DEBUG_LTL_AUTOMATON
 	printf("%s", has_transition? "" : "*");
 #endif
+#if VERBOSE || DEBUG_LTL_AUTOMATON
 	__global_signals_count += transition->signals_count;
 	if(transition->signals_count > __global_max_signals){
 		__global_max_signals = transition->signals_count;
@@ -2146,6 +2147,7 @@ bool automaton_add_transition_from_valuations(obdd_mgr* mgr, automaton_automaton
 		printf("transition load: %" PRIu64 "\t(%d / %d) max: %d\n", __global_signals_count / automaton->transitions_composite_count
 				, __global_signals_count, automaton->transitions_composite_count, __global_max_signals);
 	}
+#endif
 	automaton_transition_destroy(transition, true);
 	//TODO:check this
 	//should add after adding transition since structure resizing may not have been triggered
