@@ -207,7 +207,7 @@ obdd_node* obdd_exists_vector_node(obdd_mgr* mgr, obdd_node* root, uint32_t* var
 obdd* obdd_restrict(obdd* root, char* var, bool value);
 obdd* obdd_restrict_ID(obdd* root, uint32_t var_ID, bool value);
 obdd_node* obdd_node_restrict(obdd_mgr* mgr, obdd_node* root, uint32_t var_ID, bool value);
-bool obdd_satisfies_vector(obdd* root, uint32_t* var_ids, bool* values, uint32_t count);
+bool obdd_satisfies_vector(obdd* root, uint32_t* var_ids, bool* values, uint32_t count, uint32_t* x_y_order);
 obdd* obdd_restrict_vector(obdd* root, uint32_t* var_ids, bool* values, uint32_t count);
 obdd_node* obdd_node_restrict_vector(obdd_mgr* mgr, obdd_node* root, uint32_t* var_ids, bool* values, uint32_t current_index, uint32_t count);
 obdd* obdd_exists(obdd* root, char* var);					//apply reduction based on shannon

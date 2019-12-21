@@ -755,21 +755,22 @@ obdd_node* obdd_node_restrict(obdd_mgr* mgr, obdd_node* root, uint32_t var_ID, b
  * @param var_ids the array of variable ids for each value in the boolean array
  * @param values the array of boolean values for variables being restricted
  * @param count the number of variables to be restricted
+ * @param x_y_order a vector containing the position of the values in var_ids as ordered by var_ide
  * @return the resulting obdd
  */
-bool obdd_satisfies_vector(obdd* root, uint32_t* var_ids, bool* values, uint32_t count){
+bool obdd_satisfies_vector(obdd* root, uint32_t* var_ids, bool* values, uint32_t count, uint32_t* x_y_order){
 	uint32_t i;
 	bool accum_cached = false;
 	obdd_node* current_node = root->root_obdd;
-	uint32_t current_index = 0;
-	uint32_t current_var	= var_ids[current_index];
+	uint32_t current_index 	= 0;
+	uint32_t current_var	= var_ids[x_y_order[current_index]];
 	while(!obdd_is_constant(root->mgr, current_node)){
 		while(current_node->var_ID > current_var){
-			current_var	= var_ids[++current_index];
+			current_var	= var_ids[x_y_order[++current_index]];
 			if(current_index >= count)
 				return false;
 		}
-		current_node	= (values[current_index]) ? current_node->high_obdd : current_node->low_obdd;
+		current_node	= (values[x_y_order[current_index]]) ? current_node->high_obdd : current_node->low_obdd;
 	}
 	return obdd_is_true(root->mgr, current_node);
 }
