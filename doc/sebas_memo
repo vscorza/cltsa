@@ -1,0 +1,8 @@
+Hola Sebas cómo estás?
+Te mando un update por si no nos vemos mañana o el miércoles.
+Estoy trabajando con diagnósticos de especificaciones grandes (20 señales ~), el sistema se las banca, el algoritmo de diagnóstico corre en aprox. 3 min y minimiza en promedio un 60% del espacio de estados.
+Estoy tratando de caracterizar qué tipo de fallas se diagnostican mejor con está técnica (en relación a si se quitan assumptions o safety y si se agregan goals),porque en algunos casos si bien minimiza no ayuda en una inspección directa.
+
+Estuve revisitando a Könighofer y tiene el mismo dilema, él lo resuelve agregando a la minimización consultas de countertraces y counterstrategies.  
+Mi idea es: armar una tabla, en principio sobre GenBuf que es fácil de escalar en las tres dimensiones donde reporte cantidad de goals, assumptions, restricciones de safety y señales y luego tamaño y tiempos de juego y de la minimizaciónagarrar la minimización y aplicar label hiding + tau reduction sobre señales que no tocan al problema, bajo la hipótesis de que hay muchas transiciones controlables ortogonales a la causa de no realizabilidad que la técnica no puede quitar
+Te mando un abrazo.
