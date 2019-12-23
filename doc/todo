@@ -1,14 +1,19 @@
 TODO:
 =====
-- adapt genbuf spec from aiger (review safety restrictions)
-- add transitions when getting obdd valuations
-- write behavior minimization cases in clts
 - minimization over delta debugging
+	- write ith(C,i,n) logic, ith: P(delta_u x int x int) -> P(delta_u)
+	  gets the ith class of partitioning C in n approximately equal intervals
+	- write interval addition and substraction (C - C') (C U C')
+- explore controllable simplification
+	- hide queue in genbuf (hide signals, tau reduction)
+	- review konighoefer work
+- write behavior minimization cases in clts
 - run hardware cases
 	- behavior minimization based diagnosis over CLTS
 	- diagnose GENBUF with 2 clients
 	- run genbuf 2, 4, 10 clients
 	- run amba 2, 4, 10 clients
+- graph the way removed transitions increment in the lineal minimization
 - change transitions to | to_state | is_input | bit_array of signals |
 - split functionality into several files, refactor
 - synthesis improvements

@@ -1167,9 +1167,9 @@ void automaton_automaton_destroy(automaton_automaton* automaton){
 		if(automaton->liveness_valuations_size > 0){
 			for(i = 0; i < automaton->context->liveness_valuations_count; i++)
 				automaton_bucket_destroy(automaton->liveness_inverted_valuations[i]);
-			free(automaton->liveness_inverted_valuations);
-			free(automaton->liveness_valuations);
 		}
+		free(automaton->liveness_inverted_valuations);
+		free(automaton->liveness_valuations);
 	}
 	automaton->name			= NULL;
 	automaton->context		= NULL;
@@ -2732,8 +2732,7 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_autom
 		fflush(stdout);
 	}
 
-	free(t_states); free(t_indexes);
-	free(r_states); free(r_indexes);
+
 
 	if(automaton_is_gr1_realizable(minimization, assumptions, assumptions_count,
 				guarantees, guarantees_count) || minimization->out_degree[minimization->initial_states[0]] == 0){
@@ -2750,6 +2749,9 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_autom
 	}else{
 		printf("[%d,%d]Returning last from %d\n", t_count, r_count, from_step);
 	}
+
+	free(t_states); free(t_indexes);
+	free(r_states); free(r_indexes);
 	//print rankings
 	automaton_automaton* strategy = automaton_get_gr1_strategy(minimization, assumptions, assumptions_count,
 			guarantees, guarantees_count, true);
