@@ -1140,12 +1140,12 @@ int main (int argc, char** argv){
 		//ONGOING
 		//run_parse_test("tests/genbuf_2_sndrs_simplified.fsp", "GenBuf 2 sndrs (simplified)");//GENBUF 2 Sndrs
 		//run_parse_test("tests/genbuf_2_sndrs.fsp", "GenBuf 2 sndrs");//GENBUF 2 Sndrs
-		//run_parse_test("tests/genbuf_4_sndrs_no_automaton.fsp", "GenBuf 4 sndrs(no automaton)");//GENBUF 4 sndrs
+		run_parse_test("tests/genbuf_4_sndrs_no_automaton.fsp", "GenBuf 4 sndrs(no automaton)");//GENBUF 4 sndrs
 		//run_parse_test("tests/genbuf_4_sndrs.fsp", "GenBuf 4 sndrs");//GENBUF 4 sndrs
 
 		//run_parse_test("tests/genbuf_2_sndrs_unreal_missing_assumption.fsp", "GenBuf 2 sndrs (missing assumption)");//GENBUF 2 Sndrs
 		//run_parse_test("tests/genbuf_2_sndrs_unreal_missing_assumption_simplified.fsp", "GenBuf 2 sndrs (missing assumption_simplified)");
-		run_parse_test("tests/genbuf_2_sndrs_unreal_missing_assumption_no_queue.fsp", "GenBuf 2 sndrs (missing assumption no queue)");//GENBUF 2 Sndrs
+		//run_parse_test("tests/genbuf_2_sndrs_unreal_missing_assumption_no_queue.fsp", "GenBuf 2 sndrs (missing assumption no queue)");//GENBUF 2 Sndrs
 		//run_parse_test("tests/genbuf_2_sndrs_no_queue.fsp", "GenBuf 2 sndrs (no queue)");//GENBUF 2 Sndrs
 
 		//GENERAL TESTS
