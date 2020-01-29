@@ -343,6 +343,12 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 		, char** guarantees, uint32_t guarantees_count, bool print_ranking);
 bool automaton_is_gr1_realizable(automaton_automaton* game_automaton, char** assumptions, uint32_t assumptions_count
 		, char** guarantees, uint32_t guarantees_count);
+automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd(automaton_automaton* game_automaton, char** assumptions, uint32_t assumptions_count
+		, char** guarantees, uint32_t guarantees_count);
+automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2(automaton_automaton* master, char** assumptions, uint32_t assumptions_count
+		, char** guarantees, uint32_t guarantees_count, uint32_t non_controllable_size, uint8_t *partition_bit_vector, uint32_t transitions_kept_size, uint32_t paritions_count
+		, uint32_t transitions_count, uint32_t t_count, uint32_t t_size, uint32_t *t_states, uint32_t *t_indexes
+		, uint32_t r_count, uint32_t r_size, uint32_t *r_states, uint32_t *r_indexes);
 automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_automaton* game_automaton, char** assumptions, uint32_t assumptions_count
 		, char** guarantees, uint32_t guarantees_count);
 /** AUTOMATA OPERATIONS **/
