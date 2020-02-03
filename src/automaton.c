@@ -2617,9 +2617,6 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd(automaton_au
 	//candidate transitions lists
 	uint32_t t_size = LIST_INITIAL_SIZE, t_count = 0;
 	uint32_t *t_states	= calloc(t_size, sizeof(uint32_t)), *t_indexes = calloc(t_size, sizeof(uint32_t));
-	//transitions to remove lists
-	uint32_t r_size = LIST_INITIAL_SIZE, r_count = 0;
-	uint32_t *r_states	= calloc(r_size, sizeof(uint32_t)), *r_indexes = calloc(r_size, sizeof(uint32_t));
 
 	int32_t i,j,k, from_step = 0;
 	uint32_t new_size; uint32_t *ptr;
@@ -2663,14 +2660,17 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd(automaton_au
 	automaton_automaton_remove_deadlocks(master);
 	automaton_automaton_update_valuations(master);
 
-	uint8_t *partition_bit_vector	= calloc(ceil(non_controllable_size / sizeof(uint8_t)), sizeof(uint8_t));
+	int32_t vector_size			= (int32_t)ceil(non_controllable_size / sizeof(uint8_t));
+	uint8_t *partition_bit_vector	= calloc(vector_size, sizeof(uint8_t));
+	for(i = 0; i < vector_size;i++)partition_bit_vector[i]	= 0xFF;
 	uint32_t transitions_kept_size  = non_controllable_size;
 	uint32_t partitions_count		= 2;
+#if DEBUG_UNREAL
+			printf("Minimizing %s through delta debugging\n", master->name);
+#endif
 	automaton_automaton *result 	= automaton_get_gr1_unrealizable_minimization_dd2(master, assumptions, assumptions_count, guarantees, guarantees_count
-			, non_controllable_size, partition_bit_vector, transitions_kept_size, partitions_count
-			, t_count, t_size, t_states, t_indexes, r_count, r_size, r_states, r_indexes);
+			, partition_bit_vector, transitions_kept_size, partitions_count, t_count, t_size, t_states, t_indexes);
 	free(t_states); free(t_indexes);
-	free(r_states); free(r_indexes);
 	//print rankings
 	automaton_automaton* strategy = automaton_get_gr1_strategy(result, assumptions, assumptions_count,
 			guarantees, guarantees_count, true);
@@ -2681,155 +2681,149 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd(automaton_au
 	return result;
 }
 
+/**
+	 * Returns a minimal automaton preserving unrealizability by using a delta debugging approach over the set of non
+	 * controllable transitions
+	 *
+	 * @param master the initial automaton to be minimized
+	 * @param assumptions the set of assumptions' names in the gr1 formula
+	 * @param assumptions_count the size of the assumptions' set
+	 * @param guarantees the set of guarantees' names in the gr1 formula
+	 * @param guarantees_count the size of the guarantees' set
+	 * @param partition_bit_vector the boolean vector determining which transitions were kept in previous runs
+	 * @param transitions_ketp_size the size of transitions kept in the boolean vector
+	 * @param partitions_count the number of partitions to be tested on this particular call (n in dd)
+	 * @param t_count the size of the non controllable transitions' set
+	 * @param t_size the size of allocated elements fro the non controllable transitions' set
+	 * @param t_states a linear projection of non controllable transitions to source states
+	 * @param t_indexes a liner projection of non controllable transitions to index within source state out list
+	 * @return the minimized automaton
+	 */
 automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2(automaton_automaton* master, char** assumptions, uint32_t assumptions_count
-		, char** guarantees, uint32_t guarantees_count, uint32_t non_controllable_size, uint8_t *partition_bit_vector, uint32_t transitions_kept_size, uint32_t partitions_count
-		, uint32_t transitions_count, uint32_t t_count, uint32_t t_size, uint32_t *t_states, uint32_t *t_indexes
-		, uint32_t r_count, uint32_t r_size, uint32_t *r_states, uint32_t *r_indexes){
-
+		, char** guarantees, uint32_t guarantees_count, uint8_t *partition_bit_vector, uint32_t transitions_kept_size
+		, uint32_t partitions_count, uint32_t t_count, uint32_t t_size, uint32_t *t_states, uint32_t *t_indexes){
 	int32_t i,j,k,dd, from_step = 0;
 	uint32_t new_size; uint32_t *ptr;
-
 	automaton_automaton *minimization	= NULL;
 	automaton_transition *current_transition	= NULL;
-
 	bool minimized	= false;
 	uint32_t steps = 0;
-
+#if DEBUG_UNREAL
+			printf("\tDD, kept:[%d]\tn:[%d]", transitions_kept_size,partitions_count);
+#endif
 	//in order to get the set of transitions for C_i or its complement the range is computed over kept_transitions
 	//then a lineal run on the set of transitions is performed to reach the start of the range (could be kept updated
 	//between iterations, the end of a range is the beginning of the next) and then from that point onwards
 	//the transitions are preserved
-
+	float step	= transitions_kept_size / (partitions_count * 1.0f);
+	//bit indexes refer to locations in the whole transition space, linear indexes refer to locations in the kept transitions
+	uint32_t last_linear_index = 0, first_linear_index = 0, removed = 0;
+	int32_t current_linear_index = -1;
 	//check if C_i achieves nonrealizability
-	for(dd = 0; dd < partitions_count; dd++){
+	for(dd = 0; dd < (partitions_count-1); dd++){
+		first_linear_index	= (uint32_t)floor(step * dd);
+		last_linear_index	= (uint32_t)floor(step * (dd+1))-1;
 		minimization = automaton_automaton_clone(master);
+		removed = 0;
+		//remove transitions as the range is evaluated traversing the transitions' list
+		for(i = 0; i < t_count; i++){
+			if(TEST_BITVECTOR_BIT(partition_bit_vector, i)){
+				current_linear_index++;
+			}
+			if(current_linear_index < first_linear_index || current_linear_index > last_linear_index || !(TEST_BITVECTOR_BIT(partition_bit_vector, i))){
+				current_transition	= &(master->transitions[t_states[i]][t_indexes[i]]);
+				automaton_automaton_remove_transition(minimization, current_transition);
+				removed++;
+			}
+		}
 
-		//prune
-
-		//if non-realizable perform recursive call and return
+		//if non-realizable:update structs, perform recursive call and return
 		automaton_automaton_remove_deadlocks(minimization);
 		automaton_automaton_update_valuations(minimization);
-
 		if(automaton_is_gr1_realizable(minimization, assumptions, assumptions_count,
 				guarantees, guarantees_count) || minimization->out_degree[minimization->initial_states[0]] == 0){
 			automaton_automaton_destroy(minimization);
 		}else{//update bit vector to keep only current partition and set n to 2
+#if DEBUG_UNREAL
+			printf("(part. %d unreal.)\n", dd);
+#endif
+			current_linear_index = 0; transitions_kept_size = 0;
 			//bit vector sets to false anything outside the range
-			return minimization;
+			for(i = 0; i < t_count; i++){
+				if(TEST_BITVECTOR_BIT(partition_bit_vector, i)){
+					current_linear_index++;
+				}
+				if(current_linear_index < first_linear_index || current_linear_index > last_linear_index){
+					CLEAR_BITVECTOR_BIT(partition_bit_vector, i);
+				}else if(TEST_BITVECTOR_BIT(partition_bit_vector, i)){
+					transitions_kept_size++;
+				}
+			}
+			partitions_count = 2;
+			return automaton_get_gr1_unrealizable_minimization_dd2(master, assumptions, assumptions_count, guarantees, guarantees_count
+					, partition_bit_vector, transitions_kept_size, partitions_count, t_count, t_size, t_states, t_indexes);
+		}
+	}
+	last_linear_index = first_linear_index = 0, current_linear_index = 0;
+	//check if C_i complement achieves nonrealizability
+	for(dd = 0; dd < (partitions_count-1); dd++){
+		first_linear_index	= floor(step * dd);
+		last_linear_index	= floor(step * (dd+1))-1;
+		minimization = automaton_automaton_clone(master);
+		removed = 0;
+		//remove transitions as the range is evaluated traversing the transitions' list
+		for(i = 0; i < t_count; i++){
+			if(TEST_BITVECTOR_BIT(partition_bit_vector, i)){
+				current_linear_index++;
+			}
+			if((current_linear_index >= first_linear_index && current_linear_index <= last_linear_index) || !(TEST_BITVECTOR_BIT(partition_bit_vector, i))){
+				current_transition	= &(master->transitions[t_states[i]][t_indexes[i]]);
+				automaton_automaton_remove_transition(minimization, current_transition);
+				removed++;
+			}
 		}
 
-	}
-	//check if C_i complement achieves nonrealizability
-	for(dd = 0; dd < partitions_count; dd++){
-		minimization = automaton_automaton_clone(master);
-
-		//prune
-
-		//if non-realizable perform recursive call and return
+		//if non-realizable:update structs, perform recursive call and return
 		automaton_automaton_remove_deadlocks(minimization);
 		automaton_automaton_update_valuations(minimization);
-
 		if(automaton_is_gr1_realizable(minimization, assumptions, assumptions_count,
 				guarantees, guarantees_count) || minimization->out_degree[minimization->initial_states[0]] == 0){
 			automaton_automaton_destroy(minimization);
-		}else{//update bit vector to keep only current partition complement and set n to 2
-			//bit vector sets to false anything inside the range
-			return minimization;
+		}else{//update bit vector to keep only current partition complement and set n to max(n-1, 2)
+#if DEBUG_UNREAL
+			printf("(compl. to part. %d unreal.)\n", dd);
+#endif
+			current_linear_index = 0; transitions_kept_size = 0;
+			//bit vector sets to false anything outside the range
+			for(i = 0; i < t_count; i++){
+				if(TEST_BITVECTOR_BIT(partition_bit_vector, i)){
+					current_linear_index++;
+				}
+				if(current_linear_index >= first_linear_index && current_linear_index <= last_linear_index){
+					CLEAR_BITVECTOR_BIT(partition_bit_vector, i);
+				}else if(TEST_BITVECTOR_BIT(partition_bit_vector, i)){
+					transitions_kept_size++;
+				}
+			}
+			partitions_count = max(partitions_count - 1, 2);
+			return automaton_get_gr1_unrealizable_minimization_dd2(master, assumptions, assumptions_count, guarantees, guarantees_count
+					, partition_bit_vector, transitions_kept_size, partitions_count, t_count, t_size, t_states, t_indexes);
 		}
 	}
 	//if n is less than the size of kept transitions perform recursive call with n = min(|kept|, 2 * n)
-	if(/**/){
-
+	if(partitions_count < transitions_kept_size){
+		partitions_count = min(transitions_kept_size, 2 * partitions_count);
+#if DEBUG_UNREAL
+			printf("(refining n)\n");
+#endif
+		return automaton_get_gr1_unrealizable_minimization_dd2(master, assumptions, assumptions_count, guarantees, guarantees_count
+				, partition_bit_vector, transitions_kept_size, partitions_count, t_count, t_size, t_states, t_indexes);
 	}else{
+#if DEBUG_UNREAL
+			printf("(minimal)\n");
+#endif
 		return automaton_automaton_clone(master);
 	}
-
-	//////////////////
-	//OLD CODE
-	while(t_count > 0){
-		//get next candidate
-		current_transition	= &(master->transitions[t_states[t_count - 1]][t_indexes[t_count - 1]]); t_count--;
-		//do not consider missing transitions or transitions that would induce deadlocks
-		while(minimization->out_degree[current_transition->state_from] == 1){
-			if(t_count == 0){
-				minimized = true;
-				break;
-			}
-
-			steps++;
-			current_transition	= &(master->transitions[t_states[t_count - 1]][t_indexes[t_count - 1]]); t_count--;
-		}
-		if(minimized){
-			automaton_automaton_destroy(minimization);
-			minimization = automaton_automaton_clone(master);
-			for(i =0 ; i < r_count; i++){
-				current_transition	= &(master->transitions[r_states[i]][r_indexes[i]]);
-				automaton_automaton_remove_transition(minimization, current_transition);
-			}
-			break;
-		}
-		//evaluate next reduction
-		if(r_count == r_size){
-			new_size	= r_size * LIST_INCREASE_FACTOR;
-			ptr	= realloc(r_states, new_size * sizeof(uint32_t));
-			if(ptr == NULL){printf("Could not allocate memory\n"); exit(-1);}
-			r_states	= ptr;
-			ptr	= realloc(r_indexes, new_size * sizeof(uint32_t));
-			if(ptr == NULL){printf("Could not allocate memory\n"); exit(-1);}
-			r_indexes	= ptr;					r_size		= new_size;
-		}
-		r_states[r_count]	= t_states[t_count];	r_indexes[r_count++]	= t_indexes[t_count];
-		steps++;
-		automaton_automaton_remove_transition(minimization, current_transition);
-		automaton_automaton_remove_deadlocks(minimization);
-		automaton_automaton_update_valuations(minimization);
-
-		if(automaton_is_gr1_realizable(minimization, assumptions, assumptions_count,
-				guarantees, guarantees_count) || minimization->out_degree[minimization->initial_states[0]] == 0){
-			automaton_automaton_add_transition(minimization, current_transition);
-			r_count--;
-			automaton_automaton_destroy(minimization);
-			minimization = automaton_automaton_clone(master);
-			for(i =0 ; i < r_count; i++){
-				current_transition	= &(master->transitions[r_states[i]][r_indexes[i]]);
-				automaton_automaton_remove_transition(minimization, current_transition);
-			}
-			automaton_automaton_remove_deadlocks(minimization);
-			automaton_automaton_update_valuations(minimization);
-#if DEBUG_UNREAL
-			printf("Minimizing [%d,%d,R,%d]\n", t_count, r_count,steps);
-#endif
-		}else{
-			/*
-			automaton_automaton_destroy(last_unrealizable);
-			last_unrealizable = automaton_automaton_clone(minimization);
-			*/
-			automaton_automaton_remove_deadlocks(minimization);
-			automaton_automaton_update_valuations(minimization);
-			from_step = steps;
-#if DEBUG_UNREAL
-			printf("Minimizing [%d,%d,N,%d]\n", t_count, r_count, from_step);
-#endif
-		}
-		fflush(stdout);
-	}
-	if(automaton_is_gr1_realizable(minimization, assumptions, assumptions_count,
-				guarantees, guarantees_count) || minimization->out_degree[minimization->initial_states[0]] == 0){
-		automaton_automaton_destroy(minimization);
-		minimization = automaton_automaton_clone(master);
-		for(i =0 ; i < r_count; i++){
-			current_transition	= &(master->transitions[r_states[i]][r_indexes[i]]);
-			automaton_automaton_remove_transition(minimization, current_transition);
-		}
-		automaton_automaton_remove_deadlocks(minimization);
-		automaton_automaton_update_valuations(minimization);
-		printf("[%d,%d,R,%d]\n", t_count, r_count,steps);
-		printf("[%d,%d]Returning restored from %d\n", t_count, r_count, from_step);
-	}else{
-		printf("[%d,%d]Returning last from %d\n", t_count, r_count, from_step);
-	}
-
-	return minimization;
 }
 
 automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_automaton* game_automaton, char** assumptions, uint32_t assumptions_count

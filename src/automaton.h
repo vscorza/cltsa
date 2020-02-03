@@ -9,6 +9,7 @@
 #include <assert.h>
 #include <time.h>
 #include <inttypes.h>
+#include <math.h>
 #include "automaton_utils.h"
 #include "parser_utils.h"
 #include "bucket_list.h"
@@ -18,6 +19,9 @@
 #include "obdd.h"
 #include "bool_array_hash_table.h"
 #include "y.tab.h"
+
+#define max(a,b) ({ __typeof__ (a) _a = (a); __typeof__ (b) _b = (b); _a > _b ? _a : _b; })
+#define min(a,b) ({ __typeof__ (a) _a = (a); __typeof__ (b) _b = (b); _a < _b ? _a : _b; })
 
 #define VERBOSE 0
 
@@ -53,6 +57,11 @@
 #define CLEAR_FLUENT_BIT(arr,index)   ( arr[(index/FLUENT_ENTRY_SIZE)] &= ~(1 << (index%FLUENT_ENTRY_SIZE)) )
 #define TEST_FLUENT_BIT(arr,index)    ( arr[(index/FLUENT_ENTRY_SIZE)] & (1 << (index%FLUENT_ENTRY_SIZE)) )
 #define GET_TRANSITION_SIGNAL(t, i)  (((i) < FIXED_SIGNALS_COUNT ? (t)->signals[(i)] : (t)->other_signals[(i)-FIXED_SIGNALS_COUNT]))
+
+#define BITVECTOR_ENTRY_SIZE 8
+#define TEST_BITVECTOR_BIT(arr,index)    ( arr[(index/BITVECTOR_ENTRY_SIZE)] & (1 << (index%BITVECTOR_ENTRY_SIZE)) )
+#define SET_BITVECTOR_BIT(arr,index)     ( arr[(index/BITVECTOR_ENTRY_SIZE)] |= (1 << (index%BITVECTOR_ENTRY_SIZE)) )
+#define CLEAR_BITVECTOR_BIT(arr,index)   ( arr[(index/BITVECTOR_ENTRY_SIZE)] &= ~(1 << (index%BITVECTOR_ENTRY_SIZE)) )
 
 #define AUT_SER_OBJ_START "<"
 #define AUT_SER_OBJ_END ">"
@@ -346,9 +355,8 @@ bool automaton_is_gr1_realizable(automaton_automaton* game_automaton, char** ass
 automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd(automaton_automaton* game_automaton, char** assumptions, uint32_t assumptions_count
 		, char** guarantees, uint32_t guarantees_count);
 automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2(automaton_automaton* master, char** assumptions, uint32_t assumptions_count
-		, char** guarantees, uint32_t guarantees_count, uint32_t non_controllable_size, uint8_t *partition_bit_vector, uint32_t transitions_kept_size, uint32_t paritions_count
-		, uint32_t transitions_count, uint32_t t_count, uint32_t t_size, uint32_t *t_states, uint32_t *t_indexes
-		, uint32_t r_count, uint32_t r_size, uint32_t *r_states, uint32_t *r_indexes);
+		, char** guarantees, uint32_t guarantees_count, uint8_t *partition_bit_vector, uint32_t transitions_kept_size, uint32_t paritions_count
+		, uint32_t t_count, uint32_t t_size, uint32_t *t_states, uint32_t *t_indexes);
 automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_automaton* game_automaton, char** assumptions, uint32_t assumptions_count
 		, char** guarantees, uint32_t guarantees_count);
 /** AUTOMATA OPERATIONS **/
