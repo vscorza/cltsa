@@ -3,8 +3,8 @@
 CC=clang
 CPARAMS = -Wall -Wextra -pedantic -Wno-unused-variable -Wno-unused-parameter
 CLIBS = -lm
-#CFLAGS= -g -O0
-CFLAGS= -g -O3
+CFLAGS= -g -O0
+#CFLAGS= -g -O3
 #CFLAGS= -fsanitize=address -g -O0 
 #CFLAGS= -fsanitize=address -g -O3
 #CFLAGS= -O3
@@ -24,7 +24,7 @@ YACCFLAGS =
 all: cltsa
 
 
-cltsa: main.c parser_utils_c.o y.tab.o lex.yy.o automaton_c.o automaton_utils_c.o automaton_context_c.o  bucket_list_c.o automaton_mu_calculus_c.o ordered_list_c.o max_heap_c.o obdd_c.o obdd_cache_c.o dictionary_c.o fast_pool_c.o bool_array_hash_table_c.o
+cltsa: main.c parser_utils_c.o y.tab.o lex.yy.o automaton_c.o automaton_utils_c.o automaton_context_c.o  bucket_list_c.o ordered_list_c.o max_heap_c.o obdd_c.o obdd_cache_c.o dictionary_c.o fast_pool_c.o bool_array_hash_table_c.o
 	$(CC) $(CPARAMS) $(CFLAGS) $^ -o $@ $(CLIBS) 
 
 automaton_utils_c.o: automaton_utils.c
@@ -33,13 +33,10 @@ automaton_utils_c.o: automaton_utils.c
 dictionary_c.o: dictionary.c automaton_utils_c.o
 	$(CC) $(CPARAMS) $(CFLAGS) -c $< -o $@ $(CLIBS) 
 
-automaton_c.o: automaton.c bucket_list_c.o automaton_mu_calculus_c.o parser_utils_c.o
+automaton_c.o: automaton.c bucket_list_c.o parser_utils_c.o
 	$(CC) $(CPARAMS) $(CFLAGS) -c $< -o $@ $(CLIBS) 
 
-automaton_context_c.o: automaton_context.c parser_utils_c.o automaton_mu_calculus_c.o
-	$(CC) $(CPARAMS) $(CFLAGS) -c $< -o $@ $(CLIBS) 
-
-automaton_mu_calculus_c.o: automaton_mu_calculus.c automaton_utils_c.o parser_utils_c.o
+automaton_context_c.o: automaton_context.c parser_utils_c.o 
 	$(CC) $(CPARAMS) $(CFLAGS) -c $< -o $@ $(CLIBS) 
 
 bucket_list_c.o: bucket_list.c automaton_utils_c.o parser_utils_c.o

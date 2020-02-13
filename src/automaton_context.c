@@ -2130,7 +2130,11 @@ bool automaton_add_transition_from_valuations(obdd_mgr* mgr, automaton_automaton
 		printf("%s", to_valuation[i]?"1":"0");
 	printf(")%d",to_state);
 #endif
-	transition->is_input					= is_input;
+	if(is_input){
+		TRANSITION_SET_INPUT(transition);
+	}else{
+		TRANSITION_CLEAR_INPUT(transition);
+	}
 	bool has_transition = automaton_automaton_has_transition(automaton, transition);
 	if(!has_transition){
 		automaton_automaton_add_transition(automaton, transition);
