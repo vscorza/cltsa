@@ -491,11 +491,10 @@ bool automaton_automaton_print_fsp(automaton_automaton* current_automaton, char*
 			bool first_print = true;
 			for(k = 0; k < (TRANSITION_ENTRY_SIZE * FIXED_SIGNALS_COUNT) - 1; k++){
 				uint64_t check_value = (TEST_TRANSITION_BIT(current_transition, k));
-				uint32_t check_value2 = (TEST_TRANSITION_BIT(current_transition, k));
-				if(check_value != 0){
+				if(check_value != (uint64_t)0){
 					if(first_print)first_print = false;
-					else printf(",");
-					printf("%s", ctx->global_alphabet->list[k].name);
+					else fprintf(f,",");
+					fprintf(f,"%s", ctx->global_alphabet->list[k].name);
 				}
 			}
 			if(signal_count > 1)fprintf(f, ">");
@@ -647,8 +646,8 @@ void automaton_transition_serialize_report(FILE *f, automaton_transition *transi
 	for(k = 0; k < (TRANSITION_ENTRY_SIZE * FIXED_SIGNALS_COUNT) - 1; k++){
 		if(TEST_TRANSITION_BIT(transition, k)){
 			if(first_print)first_print = false;
-			else printf(AUT_SER_SEP);
-			printf("%d", k);
+			else fprintf(f, "%s", AUT_SER_SEP);
+			fprintf(f,"%d", k);
 		}
 	}
 	fprintf(f, "%s%s%s%s", AUT_SER_ARRAY_END, AUT_SER_SEP, TRANSITION_IS_INPUT(transition)? "1" :"0",AUT_SER_OBJ_END);
