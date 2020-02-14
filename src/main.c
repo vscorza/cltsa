@@ -1144,7 +1144,7 @@ int main (int argc, char** argv){
 		//run_parse_test("tests/genbuf_8_sndrs_no_automaton.fsp", "GenBuf 8 sndrs(no automaton)");//GENBUF 8 sndrs
 		//run_parse_test("tests/genbuf_4_sndrs.fsp", "GenBuf 4 sndrs");//GENBUF 4 sndrs
 
-		run_parse_test("tests/composition_types.fsp", "compositions type");
+		//run_parse_test("tests/composition_types.fsp", "compositions type");
 		//run_parse_test("tests/concurrency_equiv_test.fsp",  "Asynch composition equiv. test");
 
 		//run_parse_test("tests/genbuf_2_sndrs_unreal_missing_assumption.fsp", "GenBuf 2 sndrs (missing assumption)");//GENBUF 2 Sndrs
@@ -1154,7 +1154,7 @@ int main (int argc, char** argv){
 
 		//GENERAL TESTS
 		//run_all_tests();
-		//run_functional_tests();
+		run_functional_tests();
 
 		//run_parse_test("tests/current_sut.fsp", "current_SUT");
 

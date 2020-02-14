@@ -2351,10 +2351,10 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 					succ_guarantee	= may_increase && is_controllable ? ((i + 1) % guarantees_count) : i;
 					for(l = 0; l < game_automaton->out_degree[current_ranking->state] && is_controllable; l++){
 						current_transition	= &(game_automaton->transitions[current_ranking->state][l]);
-						for(m = 0; m < &ctx->global_alphabet->count; m++){
+						for(m = 0; m < (ctx)->global_alphabet->count; m++){
 							if(TEST_TRANSITION_BIT(current_transition, m)){
 								automaton_signal_event * evt =
-										&ctx->global_alphabet->list[m];
+										&(ctx->global_alphabet->list[m]);
 								if(evt->type == INPUT_SIG){
 									is_controllable = false;
 									break;
@@ -2433,10 +2433,10 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 							}
 							strategy_transition->other_signals	= current_transition->other_signals;
 							*/
-							for(m = 0; m < &ctx->global_alphabet->count; m++){
+							for(m = 0; m < (ctx)->global_alphabet->count; m++){
 								if(TEST_TRANSITION_BIT(current_transition, m)){
 									automaton_signal_event * evt =
-											&ctx->global_alphabet->list[m];
+											&(ctx->global_alphabet->list[m]);
 									if(evt->type == INPUT_SIG){
 										is_input = false;
 										break;
@@ -3237,65 +3237,6 @@ void automaton_automata_add_pending_transitions(automaton_automaton **automata, 
 		}
 	}
 }
-/**
- * Evaluates whether and how two transitions coming from two automata to be composed overlap according to their elements and alphabets
- * @param pending_label the first label (set of boolean variables indicating presence of alphabet's elements) related to a pending transition in the composition algorithm
- * @param current_label the second label (set of boolean variables indicating presence of alphabet's elements) related to transition under evaluation in the composition algorithm
- * @param independencies a list of independent elements, those that appear in one automaton but not the other
- * @param alphabet_count the size of the global alphabet
- * @param local_alphabet the local alphabet as a set of ints (indexes in the global alphabet)
- * @param local_alphabet_count the size of the local alphabet
- * @param labels_overlap a boolean placeholder that determines whether the two labels overlap or not (share elements of the alphabet)
- * @param pending_overlaps_current a boolean placeholder that determines whether the pending transition shares elements with the current transition's alphabet
- * @param current_overlaps_pending a boolean placeholder that determines whether the current transition shares elements with the pending transition's alphabet
- * @param check_independency determines whether the mismatch should be checked when labels overlap (only applied when at the last automaton)
- * @return true if there is a mismatch between labels and the merged transition should not be added
- */
-bool automaton_automata_transition_mismatch(uint32_t *pending_label, uint32_t *current_label, uint32_t *independencies, uint32_t alphabet_count
-		, uint32_t *local_alphabet, uint32_t local_alphabet_count
-		, bool *labels_overlap, bool *pending_overlaps_current, bool *current_overlaps_pending, bool *empty_intersection
-		, bool check_independency){
-	uint32_t i;
-	*pending_overlaps_current = false;
-	*current_overlaps_pending = false;
-	*labels_overlap = false;
-	*empty_intersection = true;
-	for(i = 0; i < alphabet_count; i++){
-		if(pending_label[i] && ((pending_label[i] > 0) == (current_label[i] > 0))){
-			*labels_overlap = true;
-			*pending_overlaps_current = true;
-			*current_overlaps_pending = true;
-			break;
-		}
-	}
-	if(!*labels_overlap){
-		for(i = 0; i < local_alphabet_count; i++){
-			if(pending_label[local_alphabet[i]]){
-				*pending_overlaps_current = true;
-				break;
-			}
-		}
-		for(i = 0; i < alphabet_count; i++){
-			if(current_label[i] && independencies[i] > 1){
-				*current_overlaps_pending = true;
-				break;
-			}
-		}
-	}
-
-	for(i = 0; i < alphabet_count; i++){
-			if(independencies[i] > 1){
-				if(!*labels_overlap && ((pending_label[i] > 0) != (current_label[i] > 0))){
-					return true;
-				}else if(check_independency && ((pending_label[i] + current_label[i]) != independencies[i])){
-					return true;
-				}else if (pending_label[i]){
-					*empty_intersection = false;
-				}
-			}
-	}
-	return false;
-}
 
 /**
  * Increments the indexes array as a counter, if the max value is reached the returned value is true
@@ -3355,7 +3296,7 @@ bool automaton_automata_idxs_is_max(uint32_t *idxs, uint32_t automata_count){
 }
 
 /**
- * Evaluates overlapping of the accumulated label with a give transition
+ * Evaluates overlapping of the accumulated label with a given transition
  * @param accum_label a boolean array describing the members of the accumulated label
  * @param current_label a boolean array describing the current transition label
  * @param alphabet_overlap a boolean array describing which elements should be considered in the check
@@ -3367,13 +3308,26 @@ int32_t automaton_automata_check_overlap(uint64_t *accum_label, uint64_t *curren
 	bool at_least_one_overlaps	= false;
 	bool at_least_one_does_not	= false;
 	bool no_overlapping			= true;
+	uint64_t mask_all = ~((uint64_t)0x0);
+	uint64_t mask_not1 = ~((uint64_t)0x1);
+	uint64_t current_mask;
 	for(i = 0; i < FIXED_SIGNALS_COUNT; i++){
-		if(alphabet_overlap[i]){
-			if(accum_label[i] || current_label[i])no_overlapping = false;
-			if(accum_label[i] == current_label[i] && accum_label[i]){
+		current_mask = i==0? mask_not1 : mask_all;
+		if((alphabet_overlap[i]&current_mask)>(uint64_t)0x0){
+			if(
+					(
+							(alphabet_overlap[i]&current_mask) &
+							(
+									(accum_label[i]&current_mask)| (current_label[i]&current_mask)
+							)
+					)
+					>(uint64_t)0x0)
+				no_overlapping = false;
+			if(((accum_label[i]&current_mask) == (current_label[i]&current_mask))
+					&& ((accum_label[i]&current_mask)>(uint64_t)0x0)){
 				at_least_one_overlaps = true;
 			}
-			if(accum_label[i] != current_label[i]){
+			if((accum_label[i]&current_mask) != (current_label[i]&current_mask)){
 				at_least_one_does_not = true;
 			}
 			if(!no_overlapping && at_least_one_does_not)return 1;
@@ -3438,16 +3392,18 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 		accumulated_boolean_alphabet[i] = calloc(FIXED_SIGNALS_COUNT, sizeof(uint64_t));
 		accumulated_alphabet_overlap[i] = calloc(FIXED_SIGNALS_COUNT, sizeof(uint64_t));
 		for(j = 0; j < automata[i]->local_alphabet_count; j++){
-			boolean_alphabet[i][((j+1)/TRANSITION_ENTRY_SIZE)] |= (1 << ((j+1)%TRANSITION_ENTRY_SIZE));
-			accumulated_boolean_alphabet[i][((j+1)/TRANSITION_ENTRY_SIZE)] |= (1 << ((j+1)%TRANSITION_ENTRY_SIZE));
+			k	= automata[i]->local_alphabet[j];
+			SET_SIGNAL_ARRAY_BIT(boolean_alphabet[i], k);
+			SET_SIGNAL_ARRAY_BIT(accumulated_boolean_alphabet[i], k);
 		}
 		if(i > 0){
-			for(j = 0; j < alphabet_count; j++){
-				if(accumulated_boolean_alphabet[i-1][((j+1)/TRANSITION_ENTRY_SIZE)] & (1 << ((j+1)%TRANSITION_ENTRY_SIZE)))
-					accumulated_boolean_alphabet[i][((j+1)/TRANSITION_ENTRY_SIZE)] |= (1 << ((j+1)%TRANSITION_ENTRY_SIZE));
-				accumulated_alphabet_overlap[i][((j+1)/TRANSITION_ENTRY_SIZE)] &= ~(1 << ((j+1)%TRANSITION_ENTRY_SIZE))
-						| ((boolean_alphabet[i][((j+1)/TRANSITION_ENTRY_SIZE)] & accumulated_boolean_alphabet[i - 1][((j+1)/TRANSITION_ENTRY_SIZE)] )
-								& (1 << ((j+1)%TRANSITION_ENTRY_SIZE)));
+			for(k = 0; k < alphabet_count; k++){
+				if(TEST_SIGNAL_ARRAY_BIT(accumulated_boolean_alphabet[i-1],k))
+					SET_SIGNAL_ARRAY_BIT(accumulated_boolean_alphabet[i], k);
+				accumulated_alphabet_overlap[i][((k+1)/TRANSITION_ENTRY_SIZE)] &= ~(((uint64_t)1) << ((k+1)%TRANSITION_ENTRY_SIZE));
+				accumulated_alphabet_overlap[i][((k+1)/TRANSITION_ENTRY_SIZE)] |=
+						((boolean_alphabet[i][((k+1)/TRANSITION_ENTRY_SIZE)] & accumulated_boolean_alphabet[i - 1][((k+1)/TRANSITION_ENTRY_SIZE)] )
+								& (((uint64_t)1) << ((k+1)%TRANSITION_ENTRY_SIZE)));
 			}
 		}
 	}
@@ -3460,15 +3416,15 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 		printf("[A] Alphabets for i:%d, |local.alpha.|:%d\n", i, automata[i]->local_alphabet_count);
 		printf("\t[B] Boolean alphabet:");
 		for(j = 0; j < alphabet_count; j++){
-			if(boolean_alphabet[i][j])printf("%s ", ctx->global_alphabet->list[j].name);
+			if(TEST_SIGNAL_ARRAY_BIT(boolean_alphabet[i],j))printf("%s ", ctx->global_alphabet->list[j].name);
 		}
 		printf("\n\t[C] ACcumulated boolean alphabet:");
 		for(j = 0; j < alphabet_count; j++){
-			if(accumulated_boolean_alphabet[i][j])printf("%s ", ctx->global_alphabet->list[j].name);
+			if(TEST_SIGNAL_ARRAY_BIT(accumulated_boolean_alphabet[i],j))printf("%s ", ctx->global_alphabet->list[j].name);
 		}
 		printf("\n\t[O] Accumulated boolean alphabet Overlap 1..i:");
 		for(j = 0; j < alphabet_count; j++){
-			if(accumulated_alphabet_overlap[i][j])printf("%s ", ctx->global_alphabet->list[j].name);
+			if(TEST_SIGNAL_ARRAY_BIT(accumulated_alphabet_overlap[i],j))printf("%s ", ctx->global_alphabet->list[j].name);
 		}
 		printf("\n");
 	}
@@ -3604,11 +3560,12 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 		for(i = 0; i < automata_count; i++){
 			printf("\t[A] Accum alphabet[%d]:",i);
 			for(j = 0; j < ctx->global_alphabet->count; j++){
-				if(automata_accum[i][j])printf("%s ", ctx->global_alphabet->list[j].name);
+				if(TEST_SIGNAL_ARRAY_BIT(automata_accum[i], j))printf("%s ", ctx->global_alphabet->list[j].name);
 			}
 			printf("\n");
 		}
 #endif
+		uint64_t current_mask;
 		//set idxs_skip marks
 		bool transition_skipped = false;
 		for(i = 0; i < automata_count; i++){
@@ -3618,8 +3575,10 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 				for(k = 0; k < automata_count; k++ && !transition_skipped){
 					if(k == i)continue;
 					//if l_i_j intersects sigma_k != l_i_j intersects automata_accum_k skip l_i_j
-					for(l = 1; l < FIXED_SIGNALS_COUNT && !transition_skipped; l++){
-						if(boolean_alphabet[k][l] != automata_accum[k][l]){
+					for(l = 0; l < FIXED_SIGNALS_COUNT; l++ && !transition_skipped){
+						current_mask	= l == 0 ? ~((uint64_t)1) : ~((uint64_t)0);
+						if((boolean_alphabet[k][l] & current_transition->signals[k] & current_mask)
+								!= (automata_accum[k][l] & current_transition->signals[k] & current_mask)){
 							idxs_skip[i][j]		= true;
 							transition_skipped	= true;
 						}
@@ -3695,17 +3654,17 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 #if DEBUG_COMPOSITION
 				printf("\t\t[LCA] Accum. label:[");
 				for(k = 0; k < alphabet_count; k++){
-					if(label_accum[k])printf("%s ", ctx->global_alphabet->list[k].name);
+					if(TEST_SIGNAL_ARRAY_BIT(label_accum,k))printf("%s ", ctx->global_alphabet->list[k].name);
 				}
 				printf("]");
 				printf("Current label:[");
 				for(k = 0; k < alphabet_count; k++){
-					if(current_label[k])printf("%s ", ctx->global_alphabet->list[k].name);
+					if(TEST_SIGNAL_ARRAY_BIT(current_label,k))printf("%s ", ctx->global_alphabet->list[k].name);
 				}
 				printf("]");
 				printf("Accum. alphabet overlap:[");
 				for(k = 0; k < alphabet_count; k++){
-					if(accumulated_alphabet_overlap[j][k])printf("%s ", ctx->global_alphabet->list[k].name);
+					if(TEST_SIGNAL_ARRAY_BIT(accumulated_alphabet_overlap[j],k))printf("%s ", ctx->global_alphabet->list[k].name);
 				}
 				printf("]");
 
@@ -3766,7 +3725,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 							for(l = 0; l < ctx->global_fluents[k].ending_signals_count; l++){
 								satisfies_fluent_condition = true;
 								for(m = 0; m < ctx->global_fluents[k].ending_signals_element_count[l]; m++){
-									if(!label_accum[ctx->global_fluents[k].ending_signals[l][m]]){
+									if(!(TEST_BITVECTOR_BIT(label_accum,ctx->global_fluents[k].ending_signals[l][m]))){
 										satisfies_fluent_condition = false;
 										break;
 									}
@@ -3783,7 +3742,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 							for(l = 0; l < ctx->global_fluents[k].starting_signals_count; l++){
 								satisfies_fluent_condition	= true;
 								for(m = 0; m < ctx->global_fluents[k].starting_signals_element_count[l]; m++){
-									if(!label_accum[ctx->global_fluents[k].starting_signals[l][m]]){
+									if(!(TEST_BITVECTOR_BIT(label_accum,ctx->global_fluents[k].starting_signals[l][m]))){
 										satisfies_fluent_condition = false;
 										break;
 									}
@@ -3813,7 +3772,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 #if DEBUG_COMPOSITION
 				printf("\t[+] Adding trans: %d {", current_transition->state_from);
 				for(k = 0; k < (TRANSITION_ENTRY_SIZE * FIXED_SIGNALS_COUNT) - 1; k++){
-					if(TEST_TRANSITION_BIT(current_transition->signals, k)){
+					if(TEST_TRANSITION_BIT(current_transition, k)){
 						printf("%s ", automata[0]->context->global_alphabet->list[k].name);
 					}
 				}
@@ -3980,8 +3939,8 @@ bool automaton_automata_are_equivalent(automaton_automaton* left_automaton, auto
 			for(j = 0; j < right_automaton->out_degree[right_state]; j++){
 				label_mismatch = false;
 				for(k = 0; k < FIXED_SIGNALS_COUNT; k++){
-					if(left_automaton->transitions[left_state][i].signals[k] !=
-							right_automaton->transitions[right_state][j].signals[k]){
+					if((left_automaton->transitions[left_state][i].signals[k]&~((uint64_t)1)) !=
+							(right_automaton->transitions[right_state][j].signals[k]&~((uint64_t)1))){
 						label_mismatch = true;
 												break;
 					}

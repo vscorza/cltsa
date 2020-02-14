@@ -67,6 +67,9 @@
 #define TEST_TRANSITION_BIT(t,index)    ( (t->signals[((index+1)/TRANSITION_ENTRY_SIZE)]) & ((uint64_t)1 << ((index+1)%TRANSITION_ENTRY_SIZE)) )
 #define SET_TRANSITION_BIT(t,index)     ( (t->signals[((index+1)/TRANSITION_ENTRY_SIZE)]) |= ((uint64_t)1 << ((index+1)%TRANSITION_ENTRY_SIZE)) )
 #define CLEAR_TRANSITION_BIT(t,index)   ( (t->signals[((index+1)/TRANSITION_ENTRY_SIZE)]) &= ~(((uint64_t)1 << ((index+1)%TRANSITION_ENTRY_SIZE))) )
+#define TEST_SIGNAL_ARRAY_BIT(arr,index)    ( (arr[((index+1)/TRANSITION_ENTRY_SIZE)]) & ((uint64_t)1 << ((index+1)%TRANSITION_ENTRY_SIZE)) )
+#define SET_SIGNAL_ARRAY_BIT(arr,index)     ( (arr[((index+1)/TRANSITION_ENTRY_SIZE)]) |= ((uint64_t)1 << ((index+1)%TRANSITION_ENTRY_SIZE)) )
+#define CLEAR_SIGNAL_ARRAY_BIT(arr,index)   ( (arr[((index+1)/TRANSITION_ENTRY_SIZE)]) &= ~(((uint64_t)1 << ((index+1)%TRANSITION_ENTRY_SIZE))) )
 #define GET_TRANSITION_SIGNAL_COUNT(transition) uint32_t signal_count = 0,_p_ = 0;for(_p_ = 0; _p_ < (TRANSITION_ENTRY_SIZE * FIXED_SIGNALS_COUNT) - 1; _p_++){if(TEST_TRANSITION_BIT((transition), _p_))signal_count++;}
 #define TRANSITION_IS_INPUT(transition)	(((transition)->signals[0]&((uint64_t)0x1))==true)
 #define TRANSITION_SET_INPUT(transition)	(transition)->signals[0] |= ((uint64_t)0x1);
