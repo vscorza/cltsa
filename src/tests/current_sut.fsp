@@ -1,32 +1,26 @@
-// alphabets def.
-//set Global_Alphabet = {open_a, compute_a, value_a, close_a,open_b, compute_b, value_b, close_b,composed_value}
-set Global_Alphabet = {open_a, value_a, open_b, value_b, composed_value}
-set Controllable_Alphabet = {}
+set Global_Alphabet = {cook, finishedCooking, cooking, moveToBelt, overHeated}
+set Controllable_Alphabet = {cook, moveToBelt}
 
-// automata def.
-//A = (open_a -> compute_a -> value_a -> close_a -> A).
-//B = (open_b -> compute_b -> value_b -> close_b -> B).
-A = (open_a -> value_a -> A).
-B = (open_b -> value_b -> B).
-SERVER = (<value_a,value_b>->composed_value->SERVER).
-/*
-||SYS_1_a =  (B || SERVER || A).
-||AB_a =  (A || B).
-||SYS_2_a =  (SERVER || AB_a).
-||SERVER_A_a =  (SERVER || A).
-||SYS_3_a =  (SERVER_A_a || B).
-*/
-||SYS_1_c =  (B ||_c SERVER ||_c A).
-||AB_c =  (A ||_c B).
-||SYS_2_c =  (SERVER ||_c AB_c).
-||SERVER_A_c =  (SERVER ||_c A).
-||SYS_3_c =  (SERVER_A_c ||_c B).
-/*
+BISCOTTI = (cook->COOKING),
+COOKING = (cooking->COOKING | finishedCooking->FINISHED | cook->OVERHEATED), 
+FINISHED = (cook->COOKING | moveToBelt->BISCOTTI),  
+OVERHEATED = (overHeated->OVERHEATED).
+
+fluent F_NotCooking = <{finishedCooking,overHeated}, cook> initially 1
+fluent F_MoveToBelt = <moveToBelt, cook>
+
+SUCCESSFULLY_COOKED_TWICE = (cook->cook->COOKED),
+COOKED = (moveToBelt->SUCCESSFULLY_COOKED_TWICE | cook->ERROR).
+|| ENV =(BISCOTTI || SUCCESSFULLY_COOKED_TWICE). 
+|f| ENV_G =(BISCOTTI || SUCCESSFULLY_COOKED_TWICE).
+
+|gr1| <{F_NotCooking}><{F_MoveToBelt}> STRAT = ENV_G.
+
+STRAT_p = (cook -> STRAT_p_1),
+STRAT_p_1 = (cooking -> STRAT_p_1 | finishedCooking -> STRAT_p_2),
+STRAT_p_2 = (cook -> STRAT_p_3),
+STRAT_p_3 = (cooking -> STRAT_p_3 | finishedCooking -> STRAT_p_4),
+STRAT_p_4 = (moveToBelt -> cook-> STRAT_p_1).
+
 // tests
-equals FAIL_Partial_Asynch_1_2(SYS_1_a, SYS_2_a).
-equals FATAL_Partial_Asynch_1_3(SYS_1_a, SYS_3_a).
-equals FAIL_Partial_Asynch_2_3(SYS_2_a, SYS_3_a).
-equals FATAL_Partial_Conc_1_2(SYS_1_c, SYS_2_c).
-equals FATAL_Partial_Conc_1_3(SYS_1_c, SYS_3_c).
-*/
-equals FATAL_Partial_Conc_2_3(SYS_2_c, SYS_3_c).
+equals FATAL_Biscotti_Strategy(STRAT, STRAT_p).

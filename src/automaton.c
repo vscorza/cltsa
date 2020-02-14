@@ -2438,7 +2438,7 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 									automaton_signal_event * evt =
 											&(ctx->global_alphabet->list[m]);
 									if(evt->type == INPUT_SIG){
-										is_input = false;
+										is_input = true;
 										break;
 									}
 								}
@@ -3323,11 +3323,11 @@ int32_t automaton_automata_check_overlap(uint64_t *accum_label, uint64_t *curren
 					)
 					>(uint64_t)0x0)
 				no_overlapping = false;
-			if(((accum_label[i]&current_mask) == (current_label[i]&current_mask))
-					&& ((accum_label[i]&current_mask)>(uint64_t)0x0)){
+			if(((alphabet_overlap[i]&accum_label[i]&current_mask) == (alphabet_overlap[i]&current_label[i]&current_mask))
+					&& ((alphabet_overlap[i]&accum_label[i]&current_mask)>(uint64_t)0x0)){
 				at_least_one_overlaps = true;
 			}
-			if((accum_label[i]&current_mask) != (current_label[i]&current_mask)){
+			if((alphabet_overlap[i]&accum_label[i]&current_mask) != (alphabet_overlap[i]&current_label[i]&current_mask)){
 				at_least_one_does_not = true;
 			}
 			if(!no_overlapping && at_least_one_does_not)return 1;
@@ -3725,7 +3725,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 							for(l = 0; l < ctx->global_fluents[k].ending_signals_count; l++){
 								satisfies_fluent_condition = true;
 								for(m = 0; m < ctx->global_fluents[k].ending_signals_element_count[l]; m++){
-									if(!(TEST_BITVECTOR_BIT(label_accum,ctx->global_fluents[k].ending_signals[l][m]))){
+									if(!(TEST_SIGNAL_ARRAY_BIT(label_accum,ctx->global_fluents[k].ending_signals[l][m]))){
 										satisfies_fluent_condition = false;
 										break;
 									}
@@ -3735,14 +3735,27 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 									break;
 								}
 							}
-							if(satisfies_one_condition)
+							if(satisfies_one_condition){
 								current_to_state[automata_count + k]	= false;
+#if DEBUG_COMPOSITION
+								printf("\t[F] %s: %d ->", ctx->global_fluents[k].name, from_state);
+								for(m = 0; m < ctx->global_fluents[k].ending_signals_element_count[l]; m++){
+									printf("%s ", ctx->global_alphabet->list[ctx->global_fluents[k].ending_signals[l][m]].name);
+								}
+								printf(", accum: ");
+								for(m = 0; m < (FIXED_SIGNALS_COUNT * TRANSITION_ENTRY_SIZE) - 1; m++){
+									if(TEST_SIGNAL_ARRAY_BIT(label_accum, m))printf("%s", ctx->global_alphabet->list[m].name);
+								}
+
+								printf("(cleared) \n");
+#endif
+							}
 						}else{//check starting for those that are down
 							satisfies_one_condition	= false;
 							for(l = 0; l < ctx->global_fluents[k].starting_signals_count; l++){
 								satisfies_fluent_condition	= true;
 								for(m = 0; m < ctx->global_fluents[k].starting_signals_element_count[l]; m++){
-									if(!(TEST_BITVECTOR_BIT(label_accum,ctx->global_fluents[k].starting_signals[l][m]))){
+									if(!(TEST_SIGNAL_ARRAY_BIT(label_accum,ctx->global_fluents[k].starting_signals[l][m]))){
 										satisfies_fluent_condition = false;
 										break;
 									}
@@ -3752,8 +3765,20 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 									break;
 								}
 							}
-							if(satisfies_one_condition)
+							if(satisfies_one_condition){
 								current_to_state[automata_count + k]	= true;
+#if DEBUG_COMPOSITION
+								printf("\t[F] %s: %d ->", ctx->global_fluents[k].name, from_state);
+								for(m = 0; m < ctx->global_fluents[k].starting_signals_element_count[l]; m++){
+									printf("%s ", ctx->global_alphabet->list[ctx->global_fluents[k].starting_signals[l][m]].name);
+								}
+								printf(", accum: ");
+								for(m = 0; m < (FIXED_SIGNALS_COUNT * TRANSITION_ENTRY_SIZE) - 1; m++){
+									if(TEST_SIGNAL_ARRAY_BIT(label_accum, m))printf("%s", ctx->global_alphabet->list[m].name);
+								}
+								printf("(set)\n");
+#endif
+							}
 						}
 					}
 				}
