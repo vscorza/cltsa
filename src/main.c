@@ -1154,9 +1154,9 @@ int main (int argc, char** argv){
 
 		//GENERAL TESTS
 		//run_all_tests();
-		run_functional_tests();
+		//run_functional_tests();
 
-		//run_parse_test("tests/current_sut.fsp", "current_SUT");
+		run_parse_test("tests/current_sut.fsp", "current_SUT");
 
 		//TODO
 

@@ -1,39 +1,32 @@
 // alphabets def.
-set Global_Alphabet = {a,b,c,d,e,f,g}
-set Controllable_Alphabet = {a,b}
+//set Global_Alphabet = {open_a, compute_a, value_a, close_a,open_b, compute_b, value_b, close_b,composed_value}
+set Global_Alphabet = {open_a, value_a, open_b, value_b, composed_value}
+set Controllable_Alphabet = {}
 
 // automata def.
-A = (<a,b> -> e -> A ).
-B = ( c -> e ->B).
-C = (<f,g> -> e -> C ).
-
-|f| ASYNCHRONOUS = (A || B || C).
-|f| CONCURRENT = (A ||_c B ||_c C).
-|f| SYNCHRONOUS = (A ||_s B ||_s C).
-
-
-SYNCH_p = (<a,b,c,f,g> -> e -> SYNCH_p).
-
-ASYNCH_p = (<f,g> -> ASYNCH_p_3 |c -> ASYNCH_p_2 |<a,b> -> ASYNCH_p_1),
-ASYNCH_p_1 = (<f,g> -> ASYNCH_p_4 | c -> ASYNCH_p_7),
-ASYNCH_p_2 = (<a,b> -> ASYNCH_p_7 | <f,g> -> ASYNCH_p_5),
-ASYNCH_p_3 = (<a,b> -> ASYNCH_p_4 | c -> ASYNCH_p_5),
-ASYNCH_p_4 = (c -> ASYNCH_p_6),
-ASYNCH_p_5 = (<a,b> -> ASYNCH_p_6),
-ASYNCH_p_6 = (e -> ASYNCH_p),
-ASYNCH_p_7 = (<f,g> -> ASYNCH_p_6).
-
-CONC_p = (<f,g> -> CONC_p_5 | <c,f,g> -> CONC_p_6 | c -> CONC_p_3| <a,b,c> -> CONC_p_2
-	| <a,b> -> CONC_p_1 | <a,b,f,g> -> CONC_p_7| <a,b,c,f,g> -> CONC_p_4),
-CONC_p_1 = (<f,g> -> CONC_p_7 | c -> CONC_p_2 | <c,f,g> -> CONC_p_4),
-CONC_p_2 = (<f,g> -> CONC_p_4),
-CONC_p_3 = (<f,g> -> CONC_p_6 | <a,b> -> CONC_p_2| <a,b,f,g> -> CONC_p_4),
-CONC_p_4 = (e -> CONC_p),
-CONC_p_5 = (<a,b,c> -> CONC_p_4 | <a,b> -> CONC_p_7 | c -> CONC_p_6),
-CONC_p_6 = (<a,b> -> CONC_p_4),
-CONC_p_7 = (c -> CONC_p_4).
-
+//A = (open_a -> compute_a -> value_a -> close_a -> A).
+//B = (open_b -> compute_b -> value_b -> close_b -> B).
+A = (open_a -> value_a -> A).
+B = (open_b -> value_b -> B).
+SERVER = (<value_a,value_b>->composed_value->SERVER).
+/*
+||SYS_1_a =  (B || SERVER || A).
+||AB_a =  (A || B).
+||SYS_2_a =  (SERVER || AB_a).
+||SERVER_A_a =  (SERVER || A).
+||SYS_3_a =  (SERVER_A_a || B).
+*/
+||SYS_1_c =  (B ||_c SERVER ||_c A).
+||AB_c =  (A ||_c B).
+||SYS_2_c =  (SERVER ||_c AB_c).
+||SERVER_A_c =  (SERVER ||_c A).
+||SYS_3_c =  (SERVER_A_c ||_c B).
+/*
 // tests
-equals FATAL_Synch_Composition(SYNCHRONOUS, SYNCH_p).
-equals FATAL_Asynch_Composition(ASYNCHRONOUS, ASYNCH_p).
-equals FATAL_Conc_Composition(CONCURRENT, CONC_p).
+equals FAIL_Partial_Asynch_1_2(SYS_1_a, SYS_2_a).
+equals FATAL_Partial_Asynch_1_3(SYS_1_a, SYS_3_a).
+equals FAIL_Partial_Asynch_2_3(SYS_2_a, SYS_3_a).
+equals FATAL_Partial_Conc_1_2(SYS_1_c, SYS_2_c).
+equals FATAL_Partial_Conc_1_3(SYS_1_c, SYS_3_c).
+*/
+equals FATAL_Partial_Conc_2_3(SYS_2_c, SYS_3_c).
