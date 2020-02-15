@@ -2143,9 +2143,10 @@ bool automaton_add_transition_from_valuations(obdd_mgr* mgr, automaton_automaton
 	printf("%s", has_transition? "" : "*");
 #endif
 #if VERBOSE || DEBUG_LTL_AUTOMATON
-	__global_signals_count += transition->signals_count;
-	if(transition->signals_count > __global_max_signals){
-		__global_max_signals = transition->signals_count;
+	GET_TRANSITION_SIGNAL_COUNT(transition);
+	__global_signals_count += signal_count;
+	if(signal_count > __global_max_signals){
+		__global_max_signals = signal_count;
 	}
 	if(__global_signals_count % 10000 == 0){
 		printf("transition load: %" PRIu64 "\t(%d / %d) max: %d\n", __global_signals_count / automaton->transitions_composite_count

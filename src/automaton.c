@@ -297,6 +297,8 @@ void automaton_transition_print(automaton_transition* transition, automaton_auto
 	if(prefix != NULL)
 		printf("%s", prefix);
 	uint32_t i,j;
+
+	if(TRANSITION_IS_INPUT(transition))printf("!");
 	printf("(%d {", transition->state_from);
 	bool first_print = true;
 	for(i = 0; i < (TRANSITION_ENTRY_SIZE * FIXED_SIGNALS_COUNT) - 1; i++){
@@ -448,6 +450,7 @@ void automaton_automaton_print(automaton_automaton* current_automaton, bool prin
 	}
 	printf("%sTransitions:\n", prefix2);
 	for(i = 0; i < current_automaton->transitions_count; i++){
+		if(!current_automaton->is_controllable[i])printf("(!)");
 		for(j = 0; j < current_automaton->out_degree[i]; j++)
 		automaton_transition_print(&(current_automaton->transitions[i][j]), ctx, prefix2, "\n");
 	}
@@ -1817,7 +1820,7 @@ automaton_ranking* automaton_state_best_successor_ranking(automaton_automaton* g
 	for(i = 0; i < game_automaton->out_degree[state]; i++){
 		//if transition is controllable in non-controllable state, then skip
 
-		if(!is_controllable && TRANSITION_IS_INPUT((&game_automaton->transitions[state][i])))continue;
+		if(!is_controllable && !TRANSITION_IS_INPUT((&game_automaton->transitions[state][i])))continue;
 		to_state	= game_automaton->transitions[state][i].state_to;
 		//if(to_state == state)continue;
 		current_value	= ((automaton_ranking*)automaton_concrete_bucket_get_entry(ranking[j], to_state));

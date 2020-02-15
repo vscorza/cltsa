@@ -1143,6 +1143,7 @@ int main (int argc, char** argv){
 		//run_parse_test("tests/genbuf_4_sndrs_no_automaton.fsp", "GenBuf 4 sndrs(no automaton)");//GENBUF 4 sndrs
 		//run_parse_test("tests/genbuf_8_sndrs_no_automaton.fsp", "GenBuf 8 sndrs(no automaton)");//GENBUF 8 sndrs
 		//run_parse_test("tests/genbuf_4_sndrs.fsp", "GenBuf 4 sndrs");//GENBUF 4 sndrs
+		run_parse_test("tests/automata_load_test_2.fsp",  "automata load test");
 
 		//run_parse_test("tests/genbuf_2_sndrs_unreal_missing_assumption.fsp", "GenBuf 2 sndrs (missing assumption)");//GENBUF 2 Sndrs
 		//run_parse_test("tests/genbuf_2_sndrs_unreal_missing_assumption_simplified.fsp", "GenBuf 2 sndrs (missing assumption_simplified)");
@@ -1153,7 +1154,7 @@ int main (int argc, char** argv){
 		//run_all_tests();
 		//run_functional_tests();
 
-		run_parse_test("tests/current_sut.fsp", "current_SUT");
+		//run_parse_test("tests/current_sut.fsp", "current_SUT");
 
 		//TODO
 
