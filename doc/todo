@@ -1,6 +1,9 @@
 TODO:
 =====
 - write behavior minimization cases in clts
+- debug genbuf being realizable without assumptions
+- review key mapping tree structure, it appears to be a bottleneck in composition
+- debug dd minimization on collector, was yielding realizable automaton
 - dynamic order of obdd variables
 - run hardware cases
 	- behavior minimization based diagnosis over CLTS

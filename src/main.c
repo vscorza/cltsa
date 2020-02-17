@@ -1077,6 +1077,7 @@ void run_functional_tests(){
 	run_parse_test("tests/ranges_1.fsp",  "range tests 1");
 	run_parse_test("tests/ranges_2.fsp",  "range 2 test");
 	run_parse_test("tests/ranges_3.fsp",  "range 3 test");
+	run_parse_test("tests/ranges_4.fsp",  "range 4 test");
 	run_parse_test("tests/mixed_3_signals_2_labels.fsp", "mixed model 3 signals 2 labels");//mixed model 3 signals 2 labels
 	run_parse_test("tests/two_floors_lift.fsp", "lift 2 floors");//lift 2 floors
 	run_parse_test("tests/concurrency_equiv_test.fsp",  "Asynch composition equiv. test");
@@ -1140,16 +1141,27 @@ int main (int argc, char** argv){
 		//ONGOING
 		//run_parse_test("tests/genbuf_2_sndrs_simplified.fsp", "GenBuf 2 sndrs (simplified)");//GENBUF 2 Sndrs
 		//run_parse_test("tests/genbuf_2_sndrs.fsp", "GenBuf 2 sndrs");//GENBUF 2 Sndrs
+		//run_parse_test("tests/genbuf_2_sndrs_no_automaton.fsp", "GenBuf 2 sndrs(no automaton)");//GENBUF 2 sndrs
 		//run_parse_test("tests/genbuf_4_sndrs_no_automaton.fsp", "GenBuf 4 sndrs(no automaton)");//GENBUF 4 sndrs
-		run_parse_test("tests/genbuf_8_sndrs_no_automaton.fsp", "GenBuf 8 sndrs(no automaton)");//GENBUF 8 sndrs
+		//run_parse_test("tests/genbuf_8_sndrs_no_automaton.fsp", "GenBuf 8 sndrs(no automaton)");//GENBUF 8 sndrs
 		//run_parse_test("tests/genbuf_4_sndrs.fsp", "GenBuf 4 sndrs");//GENBUF 4 sndrs
 		//run_parse_test("tests/automata_load_test_1.fsp",  "automata load test");
 		//run_parse_test("diagnoses/ahb/ahb_2_masters/ahb_2_masters_v1.fsp", "AHB 2 Masters");//AHB 2 Masters
+		//run_parse_test("diagnoses/syntcomp/collector/collector_2_in_v1.fsp", "Collector 2 inputs");//Collector 2 inputs
+		//run_parse_test("diagnoses/syntcomp/collector/collector_3_in_v1.fsp", "Collector 3 inputs");//Collector 3 inputs
+		//run_parse_test("diagnoses/syntcomp/collector/collector_4_in_v1.fsp", "Collector 4 inputs");//Collector 4 inputs
+		//run_parse_test("diagnoses/syntcomp/collector/collector_5_in_v1.fsp", "Collector 5 inputs");//Collector 5 inputs
+		//run_parse_test("diagnoses/syntcomp/collector/collector_6_in_v3.fsp", "Collector 6 inputs");//Collector 6 inputs
+		//run_parse_test("diagnoses/syntcomp/collector/collector_3_in_missing_assumption_v1.fsp", "Collector 3 inputs");//Collector 3 inputs missing 1 assumtpion
+		//run_parse_test("diagnoses/syntcomp/collector/collector_4_in_missing_assumption_v1.fsp", "Collector 4 inputs");//Collector 4 inputs missing 1 assumption
+		run_parse_test("tests/ranges_4.fsp",  "range 4 test");
 
 		//run_parse_test("tests/genbuf_2_sndrs_unreal_missing_assumption.fsp", "GenBuf 2 sndrs (missing assumption)");//GENBUF 2 Sndrs
 		//run_parse_test("tests/genbuf_2_sndrs_unreal_missing_assumption_simplified.fsp", "GenBuf 2 sndrs (missing assumption_simplified)");
 		//run_parse_test("tests/genbuf_2_sndrs_unreal_missing_assumption_no_queue.fsp", "GenBuf 2 sndrs (missing assumption no queue)");//GENBUF 2 Sndrs
 		//run_parse_test("tests/genbuf_2_sndrs_no_queue.fsp", "GenBuf 2 sndrs (no queue)");//GENBUF 2 Sndrs
+		//run_parse_test("tests/genbuf_2_sndrs_no_automaton_missing_assumption_simplified.fsp", "GenBuf 2 sndrs(no automaton)");
+		//run_parse_test("diagnoses/mtsa/exploration_robot/exploration-robot-v1.lts", "Exploration robot");
 
 		//GENERAL TESTS
 		//run_all_tests();

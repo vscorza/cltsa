@@ -4060,23 +4060,19 @@ automaton_composite_tree_entry* automaton_composite_tree_entry_get_from_pool(aut
 		tree->entries_composite_size		+= new_size;
 		tree->entries_size_count++;
 		current_pool						= tree->entries_size_count - 1;
-		uint32_t* new_entries_size		= malloc(sizeof(uint32_t) * tree->entries_size_count);
-		uint32_t* new_entries_count		= malloc(sizeof(uint32_t) * tree->entries_size_count);
-		automaton_composite_tree_entry** new_entries_pool	= malloc(sizeof(automaton_composite_tree_entry*) * tree->entries_size_count);
-		for(i = 0; i < (tree->entries_size_count - 1); i++){
-			new_entries_size[i]			= tree->entries_size[i];
-			new_entries_count[i]		= tree->entries_count[i];
-			new_entries_pool[i]					= tree->entries_pool[i];
-		}
-		new_entries_size[current_pool]	= new_size;
-		new_entries_count[current_pool]	= 0;
-		new_entries_pool[current_pool]			= malloc(sizeof(automaton_composite_tree_entry) * new_size);
-		free(tree->entries_size);
-		free(tree->entries_count);
-		free(tree->entries_pool);
-		tree->entries_size				= new_entries_size;
-		tree->entries_count				= new_entries_count;
-		tree->entries_pool				= new_entries_pool;
+
+		uint32_t* ptr	= realloc(tree->entries_size, sizeof(uint32_t) * tree->entries_size_count);
+		if(ptr == NULL){printf("Could not allocate memory\n");exit(-1);	}
+		else tree->entries_size	= ptr;
+		ptr	= realloc(tree->entries_count, sizeof(uint32_t) * tree->entries_size_count);
+		if(ptr == NULL){printf("Could not allocate memory\n");exit(-1);	}
+		else tree->entries_count	= ptr;
+		automaton_composite_tree_entry** ptr2	= realloc(tree->entries_pool, sizeof(automaton_composite_tree_entry*) * tree->entries_size_count);
+		if(ptr2 == NULL){printf("Could not allocate memory\n");exit(-1);	}
+		else tree->entries_pool	= ptr2;
+		tree->entries_size[current_pool]	= new_size;
+		tree->entries_count[current_pool]	= 0;
+		tree->entries_pool[current_pool]	= malloc(sizeof(automaton_composite_tree_entry) * new_size);
 	}
 
 	automaton_composite_tree_entry* entry	= &(tree->entries_pool[current_pool][tree->entries_count[current_pool]++]);

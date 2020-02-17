@@ -1,0 +1,109 @@
+//GenBuf example taken from Synthesis of Reactive(1) Designs 2 senders
+set Global_Alphabet = {n,s,e,w,load,unload,stall}
+set Controllable_Alphabet = {n,s,e,w,load,unload}
+
+order 				= {}
+//set Moves = {n,s,e,w}
+//set Actions = {load,unload}
+//set A = {Moves,Actions}
+const Min = 1 //this must always be odd
+const Max = 9
+range Pos = Min..Max
+
+//Concrete
+MAZE = M[1][1],
+M[r:Pos][c:Pos] = ( 
+				when(r > Min) n->M[r-1][c] 
+				| when(r < Max) s->M[r+1][c]
+				| when(c > Min) w->M[r][c-1]
+				| when(c < Max) e->M[r][c+1]
+				| when((r == Max) * (c == Max)) load->M[r][c]
+				| when((r == Min) * (c == Min)) unload->M[r][c]
+				| when(r == c) stall -> M[r][c]
+).
+
+MAZE_P = S_1,
+S_1 = (s-> S_10|e-> S_2|unload-> S_1|stall-> S_1),
+S_2 = (s-> S_11|w-> S_1|e-> S_3),
+S_3 = (s-> S_12|w-> S_2|e-> S_4),
+S_4 = (s-> S_13|w-> S_3|e-> S_5),
+S_5 = (s-> S_14|w-> S_4|e-> S_6),
+S_6 = (s-> S_15|w-> S_5|e-> S_7),
+S_7 = (s-> S_16|w-> S_6|e-> S_8),
+S_8 = (s-> S_17|w-> S_7|e-> S_9),
+S_9 = (s-> S_18|w-> S_8),
+S_10 = (n-> S_1|s-> S_19|e-> S_11),
+S_11 = (n-> S_2|s-> S_20|w-> S_10|e-> S_12|stall-> S_11),
+S_12 = (n-> S_3|s-> S_21|w-> S_11|e-> S_13),
+S_13 = (n-> S_4|s-> S_22|w-> S_12|e-> S_14),
+S_14 = (n-> S_5|s-> S_23|w-> S_13|e-> S_15),
+S_15 = (n-> S_6|s-> S_24|w-> S_14|e-> S_16),
+S_16 = (n-> S_7|s-> S_25|w-> S_15|e-> S_17),
+S_17 = (n-> S_8|s-> S_26|w-> S_16|e-> S_18),
+S_18 = (n-> S_9|s-> S_27|w-> S_17),
+S_19 = (n-> S_10|s-> S_28|e-> S_20),
+S_20 = (n-> S_11|s-> S_29|w-> S_19|e-> S_21),
+S_21 = (n-> S_12|s-> S_30|w-> S_20|e-> S_22|stall-> S_21),
+S_22 = (n-> S_13|s-> S_31|w-> S_21|e-> S_23),
+S_23 = (n-> S_14|s-> S_32|w-> S_22|e-> S_24),
+S_24 = (n-> S_15|s-> S_33|w-> S_23|e-> S_25),
+S_25 = (n-> S_16|s-> S_34|w-> S_24|e-> S_26),
+S_26 = (n-> S_17|s-> S_35|w-> S_25|e-> S_27),
+S_27 = (n-> S_18|s-> S_36|w-> S_26),
+S_28 = (n-> S_19|s-> S_37|e-> S_29),
+S_29 = (n-> S_20|s-> S_38|w-> S_28|e-> S_30),
+S_30 = (n-> S_21|s-> S_39|w-> S_29|e-> S_31),
+S_31 = (n-> S_22|s-> S_40|w-> S_30|e-> S_32|stall-> S_31),
+S_32 = (n-> S_23|s-> S_41|w-> S_31|e-> S_33),
+S_33 = (n-> S_24|s-> S_42|w-> S_32|e-> S_34),
+S_34 = (n-> S_25|s-> S_43|w-> S_33|e-> S_35),
+S_35 = (n-> S_26|s-> S_44|w-> S_34|e-> S_36),
+S_36 = (n-> S_27|s-> S_45|w-> S_35),
+S_37 = (n-> S_28|s-> S_46|e-> S_38),
+S_38 = (n-> S_29|s-> S_47|w-> S_37|e-> S_39),
+S_39 = (n-> S_30|s-> S_48|w-> S_38|e-> S_40),
+S_40 = (n-> S_31|s-> S_49|w-> S_39|e-> S_41),
+S_41 = (n-> S_32|s-> S_50|w-> S_40|e-> S_42|stall-> S_41),
+S_42 = (n-> S_33|s-> S_51|w-> S_41|e-> S_43),
+S_43 = (n-> S_34|s-> S_52|w-> S_42|e-> S_44),
+S_44 = (n-> S_35|s-> S_53|w-> S_43|e-> S_45),
+S_45 = (n-> S_36|s-> S_54|w-> S_44),
+S_46 = (n-> S_37|s-> S_55|e-> S_47),
+S_47 = (n-> S_38|s-> S_56|w-> S_46|e-> S_48),
+S_48 = (n-> S_39|s-> S_57|w-> S_47|e-> S_49),
+S_49 = (n-> S_40|s-> S_58|w-> S_48|e-> S_50),
+S_50 = (n-> S_41|s-> S_59|w-> S_49|e-> S_51),
+S_51 = (n-> S_42|s-> S_60|w-> S_50|e-> S_52|stall-> S_51),
+S_52 = (n-> S_43|s-> S_61|w-> S_51|e-> S_53),
+S_53 = (n-> S_44|s-> S_62|w-> S_52|e-> S_54),
+S_54 = (n-> S_45|s-> S_63|w-> S_53),
+S_55 = (n-> S_46|s-> S_64|e-> S_56),
+S_56 = (n-> S_47|s-> S_65|w-> S_55|e-> S_57),
+S_57 = (n-> S_48|s-> S_66|w-> S_56|e-> S_58),
+S_58 = (n-> S_49|s-> S_67|w-> S_57|e-> S_59),
+S_59 = (n-> S_50|s-> S_68|w-> S_58|e-> S_60),
+S_60 = (n-> S_51|s-> S_69|w-> S_59|e-> S_61),
+S_61 = (n-> S_52|s-> S_70|w-> S_60|e-> S_62|stall-> S_61),
+S_62 = (n-> S_53|s-> S_71|w-> S_61|e-> S_63),
+S_63 = (n-> S_54|s-> S_72|w-> S_62),
+S_64 = (n-> S_55|s-> S_73|e-> S_65),
+S_65 = (n-> S_56|s-> S_74|w-> S_64|e-> S_66),
+S_66 = (n-> S_57|s-> S_75|w-> S_65|e-> S_67),
+S_67 = (n-> S_58|s-> S_76|w-> S_66|e-> S_68),
+S_68 = (n-> S_59|s-> S_77|w-> S_67|e-> S_69),
+S_69 = (n-> S_60|s-> S_78|w-> S_68|e-> S_70),
+S_70 = (n-> S_61|s-> S_79|w-> S_69|e-> S_71),
+S_71 = (n-> S_62|s-> S_80|w-> S_70|e-> S_72|stall-> S_71),
+S_72 = (n-> S_63|s-> S_81|w-> S_71),
+S_73 = (n-> S_64|e-> S_74),
+S_74 = (n-> S_65|w-> S_73|e-> S_75),
+S_75 = (n-> S_66|w-> S_74|e-> S_76),
+S_76 = (n-> S_67|w-> S_75|e-> S_77),
+S_77 = (n-> S_68|w-> S_76|e-> S_78),
+S_78 = (n-> S_69|w-> S_77|e-> S_79),
+S_79 = (n-> S_70|w-> S_78|e-> S_80),
+S_80 = (n-> S_71|w-> S_79|e-> S_81),
+S_81 = (n-> S_72|w-> S_80|load-> S_81|stall-> S_81).
+
+// tests
+equals FATAL_Robot_Range(MAZE, MAZE_P).

@@ -1135,11 +1135,6 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 #endif
 				}
 				transition	= state->transitions[j];
-				if(transition->condition != NULL){
-					if(!automaton_expression_syntax_evaluate(tables, transition->condition, current_valuations_count > 0 ? current_valuations[current_valuations_count - 1]: NULL)){
-						continue;
-					}
-				}
 
 #if DEBUG_PARSE_STATES
 				printf("\t[T] piped transition %i \n", j);
@@ -1156,7 +1151,12 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 #if DEBUG_PARSE_STATES
 						printf("\t\t[>] current from state %d (%d)\n", current_from_state[r], current_from_state_count);
 #endif
-
+						if(transition->condition != NULL){
+							//if(!automaton_expression_syntax_evaluate(tables, transition->condition, current_valuations_count > 0 ? current_valuations[current_valuations_count - 1]: NULL)){
+							if(!automaton_expression_syntax_evaluate(tables, transition->condition, current_valuations_count > 0 ? current_valuations[current_valuations_count -current_from_state_count + r]: NULL)){
+								continue;
+							}
+						}
 						trace_label	= transition->labels[k];
 						//SET ITERATION ( s_i = ({a,b,c} -> S_j).
 						first_index_set = false;
@@ -3393,12 +3393,8 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 				nonreal	= true;
 				automaton_automaton_destroy(winning_region_automaton);
 
-				winning_region_automaton = automaton_get_gr1_unrealizable_minimization_dd(game_automaton, assumptions, assumptions_count
-										, guarantees, guarantees_count);
-				/*
-				winning_region_automaton = automaton_get_gr1_unrealizable_minimization(game_automaton, assumptions, assumptions_count
-						, guarantees, guarantees_count);
-*/
+				//winning_region_automaton = automaton_get_gr1_unrealizable_minimization_dd(game_automaton, assumptions, assumptions_count, guarantees, guarantees_count);
+				winning_region_automaton = automaton_get_gr1_unrealizable_minimization(game_automaton, assumptions, assumptions_count, guarantees, guarantees_count);
 				automaton_automaton_remove_unreachable_states(winning_region_automaton);
 			}
 			main_index = automaton_parsing_tables_add_entry(tables, COMPOSITION_ENTRY_AUT, gr1_game->name, winning_region_automaton);
