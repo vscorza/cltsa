@@ -3580,8 +3580,10 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 					//if l_i_j intersects sigma_k != l_i_j intersects automata_accum_k skip l_i_j
 					for(l = 0; l < FIXED_SIGNALS_COUNT; l++ && !transition_skipped){
 						current_mask	= l == 0 ? ~((uint64_t)1) : ~((uint64_t)0);
-						if((boolean_alphabet[k][l] & current_transition->signals[k] & current_mask)
-								!= (automata_accum[k][l] & current_transition->signals[k] & current_mask)){
+						if((boolean_alphabet[k][l]
+												& current_transition->signals[l] & current_mask)
+								!= (automata_accum[k][l]
+													  & current_transition->signals[l] & current_mask)){
 							idxs_skip[i][j]		= true;
 							transition_skipped	= true;
 						}
