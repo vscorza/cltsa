@@ -5,9 +5,9 @@ set Controllable_Alphabet = {}
 set Global_Signals	= {sToB_REQ_0, sToB_REQ_1, sToB_REQ_2, sToB_REQ_3, sToB_REQ_4, sToB_REQ_5, sToB_REQ_6, sToB_REQ_7, bToS_ACK_0, bToS_ACK_1, bToS_ACK_2, bToS_ACK_3, bToS_ACK_4, bToS_ACK_5, 
 					bToS_ACK_6, bToS_ACK_7,	bToR_REQ_0, bToR_REQ_1, rToB_ACK_0, rToB_ACK_1, enq, deq, full, empty, slc_0, slc_1, slc_2, s_0}
 set Output_Signals	= {bToS_ACK_0, bToS_ACK_1, bToS_ACK_2, bToS_ACK_3, bToS_ACK_4, bToS_ACK_5, bToS_ACK_6, bToS_ACK_7, bToR_REQ_0, bToR_REQ_1, enq, deq, slc_0, slc_1, slc_2, s_0}
-order			= {s_0 < sToB_REQ_0 < sToB_REQ_1 < sToB_REQ_2 < sToB_REQ_3  < sToB_REQ_4  < sToB_REQ_5  < sToB_REQ_6  < sToB_REQ_7 < rToB_ACK_0 < rToB_ACK_1 < full	< empty < bToS_ACK_0
-				< bToS_ACK_1 < bToS_ACK_2 < bToS_ACK_3 < bToS_ACK_4 < bToS_ACK_5 < bToS_ACK_6 < bToS_ACK_7 < bToR_REQ_0 < bToR_REQ_1 < enq < deq < slc_0 < slc_1 < slc_2}
-
+//order			= {s_0 < sToB_REQ_0 < sToB_REQ_1 < sToB_REQ_2 < sToB_REQ_3  < sToB_REQ_4  < sToB_REQ_5  < sToB_REQ_6  < sToB_REQ_7 < rToB_ACK_0 < rToB_ACK_1 < full	< empty < bToS_ACK_0
+//				< bToS_ACK_1 < bToS_ACK_2 < bToS_ACK_3 < bToS_ACK_4 < bToS_ACK_5 < bToS_ACK_6 < bToS_ACK_7 < bToR_REQ_0 < bToR_REQ_1 < enq < deq < slc_0 < slc_1 < slc_2}
+order		= {}
 /***********
 **** THETA
 ***********/
