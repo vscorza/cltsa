@@ -6,7 +6,6 @@ TODO:
 - dynamic order of obdd variables
 - run hardware cases
 	- behavior minimization based diagnosis over CLTS
-	- diagnose GENBUF with 2 clients
 	- run genbuf 2, 4, 10 clients
 	- run amba 2, 4, 10 clients
 - explore controllable simplification
@@ -64,7 +63,6 @@ BACKLOG
 =======
 SPRINT2
 - aparte de <a,b,c> introducir >a,b,c< que define concurrencia débil, puede transicionar con un subconj de estos
-- parse assertions, goals
 - implement reachability
 SPRINT3
 - yacc and automaton_context -> define a way to index concurrent labels, it is not the same to index particular labels (thus adding new transitions
@@ -77,4 +75,3 @@ A = ( <a, b[i], c[i]>[i:R] -> A). should translate to A = ( {<a,b.1,c.1>, <a,b.2
 SPRINTX
 - partitioned composition, everything not on the frontier can be downloaded to a bucket list of files in order to free the memory
 - keep indexes and other information in the automaton structure (concolyc style)
-- merge obdd and lts

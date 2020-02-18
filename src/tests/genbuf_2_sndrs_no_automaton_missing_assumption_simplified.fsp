@@ -2,7 +2,7 @@
 set Global_Alphabet = {}
 set Controllable_Alphabet = {}
 
-set Global_Signals	= {sToB_REQ_0, sToB_REQ_1, bToS_ACK_0, bToS_ACK_1, bToR_REQ_0, bToR_REQ_1, rToB_ACK_0, rToB_ACK_1, s_0, g_0, g_1, a_0, a_1}
+set Global_Signals	= {sToB_REQ_0, sToB_REQ_1, bToS_ACK_0, bToS_ACK_1, bToR_REQ_0, bToR_REQ_1, rToB_ACK_0, rToB_ACK_1, s_0, g_0, g_1, a_0, a_1, enq}
 set Output_Signals	= {bToS_ACK_0, bToS_ACK_1, bToR_REQ_0, bToR_REQ_1, s_0, g_0, g_1}
 order 				= {}
 /***********
@@ -22,8 +22,10 @@ ltl sys rho G_1_sndr_1_g0_g1 in GENBUF		= []((!g_1 && sToB_REQ_1 && !bToS_ACK_1)
 ltl sys rho G_1_sndr_1_g1_g1 in GENBUF		= []((g_1 && !bToS_ACK_1)->(X(g_1))).
 ltl sys rho G_1_sndr_1_g1_g0 in GENBUF		= []((g_1 && bToS_ACK_1)->(X(!g_1))).
 //sToB_REQ then not bToS_ACK
-ltl sys rho G_2_sndr_0 in GENBUF		= []((!sToB_REQ_0 && X(sToB_REQ_0)) -> !(X(bToS_ACK_0))).
-ltl sys rho G_2_sndr_1 in GENBUF		= []((!sToB_REQ_1 && X(sToB_REQ_1)) -> !(X(bToS_ACK_1))).
+ltl sys rho G_2_sndr_0 in GENBUF		= []((!sToB_REQ_0 && X(sToB_REQ_0)) -> (X(!bToS_ACK_0))).
+ltl sys rho G_2_sndr_1 in GENBUF		= []((!sToB_REQ_1 && X(sToB_REQ_1)) -> (X(!bToS_ACK_1))).
+ltl sys rho G_2_b_sndr_0 in GENBUF		= []((!bToS_ACK_0 && !sToB_REQ_0) -> (X(!bToS_ACK_0))).
+ltl sys rho G_2_b_sndr_1 in GENBUF		= []((!bToS_ACK_1 && !sToB_REQ_1) -> (X(!bToS_ACK_1))).
 //bToS_ACK only if sToB_REQ
 ltl sys rho G_3_sndr_0 in GENBUF		= []((!bToS_ACK_0 && X(bToS_ACK_0)) -> sToB_REQ_0).
 ltl sys rho G_3_sndr_1 in GENBUF		= []((!bToS_ACK_1 && X(bToS_ACK_1)) -> sToB_REQ_1).
@@ -39,40 +41,42 @@ ltl sys rho G_5_b_1_rcvr_0 in GENBUF		= [](X(!(bToR_REQ_0 && bToR_REQ_1))).
 //keep bToR_REQ if not yet ack
 ltl sys rho G_6_1_rcvr_0 in GENBUF		= []((bToR_REQ_0 && !rToB_ACK_0) -> X(bToR_REQ_0)).
 ltl sys rho G_6_1_rcvr_1 in GENBUF		= []((bToR_REQ_1 && !rToB_ACK_1) -> X(bToR_REQ_1)).
-//serving receivers in round robin fashion 
-ltl sys rho G_7_0_1 in GENBUF				= []((!s_0 && bToR_REQ_0) -> X(s_0)).//advance state
-ltl sys rho G_7_0_2 in GENBUF				= []((!s_0 && !bToR_REQ_0) -> X(!s_0)).//keep state
-//ltl sys rho G_7_0_3 in GENBUF				= []((!s_0) -> (!bToR_REQ_1)).//restrict
-//ltl sys rho G_7_0_4 in GENBUF				= [](X((!s_0) -> (!bToR_REQ_1))).//restrict X
-ltl sys rho G_7_1_1 in GENBUF				= []((s_0 && bToR_REQ_1) -> X(!s_0)).
-ltl sys rho G_7_1_2 in GENBUF				= []((s_0 && !bToR_REQ_1) -> X(s_0)).
-//ltl sys rho G_7_1_3 in GENBUF				= []((s_0) -> (!bToR_REQ_0)).
-//ltl sys rho G_7_1_4 in GENBUF				= [](X((s_0) -> (!bToR_REQ_0))).
+//serving receivers in round robin fashion
+ltl sys rho G_7_mutex in GENBUF				= [](!(bToR_REQ_0 && bToR_REQ_1)). 
+ltl sys rho G_7_0_1 in GENBUF				= []((!s_0 && bToR_REQ_0 && X(!bToR_REQ_0)) -> X(s_0)).//advance state
+ltl sys rho G_7_0_2 in GENBUF				= []((!s_0 && !(bToR_REQ_0 && X(!bToR_REQ_0))) -> X(!s_0)).//keep state
+ltl sys rho G_7_0_3 in GENBUF				= []((!s_0) -> (!bToR_REQ_1)).//restrict
+ltl sys rho G_7_0_1 in GENBUF				= []((s_0 && bToR_REQ_1 && X(!bToR_REQ_1)) -> X(!s_0)).//advance state
+ltl sys rho G_7_0_2 in GENBUF				= []((s_0 && !(bToR_REQ_1 && X(!bToR_REQ_1))) -> X(s_0)).//keep state
+ltl sys rho G_7_1_3 in GENBUF				= []((s_0) -> (!bToR_REQ_0)).
 //lower bToR_REQ when rToB_ACK received
 ltl sys rho G_8_rcvr_0 in GENBUF		= [](rToB_ACK_0 -> X(!bToR_REQ_0)).
 ltl sys rho G_8_rcvr_1 in GENBUF		= [](rToB_ACK_1 -> X(!bToR_REQ_1)).
+//fix btos_ACK to enq
+ltl sys rho G_9 in GENBUF				= [](X(enq) <-> ((!bToS_ACK_0 && X(bToS_ACK_0))||(!bToS_ACK_1 && X(bToS_ACK_1)))).
 /***********
 **** ENV RHO
 ***********/
-
+//A1
+ltl env rho A_1_1_sndr_0 in GENBUF			= []((sToB_REQ_0 && !bToS_ACK_0)->X(sToB_REQ_0)).
+ltl env rho A_1_1_sndr_1 in GENBUF			= []((sToB_REQ_1 && !bToS_ACK_1)->X(sToB_REQ_1)).
+ltl env rho A_1_2_sndr_0 in GENBUF			= [](bToS_ACK_0 -> X(!sToB_REQ_0)).
+ltl env rho A_1_2_sndr_1 in GENBUF			= [](bToS_ACK_1 -> X(!sToB_REQ_1)).
 //keep sToB_REQ if not yet ACK'd
-ltl env rho A_1_sndr_0_a0_a0 in GENBUF		= []((!a_0 && !(bToR_REQ_0 && !rToB_ACK_0))->(X(!a_0))).
-ltl env rho A_1_sndr_0_a0_a1 in GENBUF		= []((!a_0 && bToR_REQ_0 && !rToB_ACK_0)->(X(a_0))).
-ltl env rho A_1_sndr_0_a1_a1 in GENBUF		= []((a_0 && !rToB_ACK_0)->(X(a_0))).
-ltl env rho A_1_sndr_0_a1_a0 in GENBUF		= []((a_0 && rToB_ACK_0)->(X(!a_0))).
-ltl env rho A_1_sndr_1_a0_a0 in GENBUF		= []((!a_1 && !(bToR_REQ_1 && !rToB_ACK_1))->(X(!a_1))).
-ltl env rho A_1_sndr_1_a0_a1 in GENBUF		= []((!a_1 && bToR_REQ_1 && !rToB_ACK_1)->(X(a_1))).
-ltl env rho A_1_sndr_1_a1_a1 in GENBUF		= []((a_1 && !rToB_ACK_1)->(X(a_1))).
-ltl env rho A_1_sndr_1_a1_a0 in GENBUF		= []((a_1 && rToB_ACK_1)->(X(!a_1))).
+ltl env rho A_2_sndr_0_a0_a0 in GENBUF		= []((!a_0 && !(bToR_REQ_0 && !rToB_ACK_0))->(X(!a_0))).
+ltl env rho A_2_sndr_0_a0_a1 in GENBUF		= []((!a_0 && bToR_REQ_0 && !rToB_ACK_0)->(X(a_0))).
+ltl env rho A_2_sndr_0_a1_a1 in GENBUF		= []((a_0 && !rToB_ACK_0)->(X(a_0))).
+ltl env rho A_2_sndr_0_a1_a0 in GENBUF		= []((a_0 && rToB_ACK_0)->(X(!a_0))).
+ltl env rho A_2_sndr_1_a0_a0 in GENBUF		= []((!a_1 && !(bToR_REQ_1 && !rToB_ACK_1))->(X(!a_1))).
+ltl env rho A_2_sndr_1_a0_a1 in GENBUF		= []((!a_1 && bToR_REQ_1 && !rToB_ACK_1)->(X(a_1))).
+ltl env rho A_2_sndr_1_a1_a1 in GENBUF		= []((a_1 && !rToB_ACK_1)->(X(a_1))).
+ltl env rho A_2_sndr_1_a1_a0 in GENBUF		= []((a_1 && rToB_ACK_1)->(X(!a_1))).
 //lower sToB_REQ once ACK'd
-ltl env rho A_1_2_sndr_0 in GENBUF		= [](bToS_ACK_0 -> X(!sToB_REQ_0)).
-ltl env rho A_1_2_sndr_1 in GENBUF		= [](bToS_ACK_1 -> X(!sToB_REQ_1)).
+//ltl env rho A_X_2_sndr_0 in GENBUF		= [](bToS_ACK_0 -> X(!sToB_REQ_0)).
+//ltl env rho A_X_2_sndr_1 in GENBUF		= [](bToS_ACK_1 -> X(!sToB_REQ_1)).
 //lower rToB_ACK if no bToR_REQ
-ltl env rho A_2_2_sndr_0 in GENBUF		= []((!bToR_REQ_0) -> X(!rToB_ACK_0)).
-ltl env rho A_2_2_sndr_1 in GENBUF		= []((!bToR_REQ_1) -> X(!rToB_ACK_1)).
-//keep rToB_ACK if still REQ's
-ltl env rho A_3_rcvr_0 in GENBUF		= []((!bToR_REQ_0) -> X(!rToB_ACK_0)).
-ltl env rho A_3_rcvr_1 in GENBUF		= []((!bToR_REQ_1) -> X(!rToB_ACK_1)).
+ltl env rho A_3_2_sndr_0 in GENBUF		= []((!bToR_REQ_0) -> X(!rToB_ACK_0)).
+ltl env rho A_3_2_sndr_1 in GENBUF		= []((!bToR_REQ_1) -> X(!rToB_ACK_1)).
 //rToB_ACK if REQ'd
 ltl env rho A_4_rcvr_0 in GENBUF		= []((bToR_REQ_0 && rToB_ACK0)->X(rToB_ACK_0)).
 ltl env rho A_4_rcvr_1 in GENBUF		= []((bToR_REQ_1 && rToB_ACK1)->X(rToB_ACK_1)).
@@ -87,9 +91,10 @@ ltl fluent A_1_2		= (!a_0).
 ltl fluent A_2_2		= (!a_1).
 
 ltl fluent G_1_2_sndr_0		= (!g_0).
+ltl fluent G_1_2_sndr_0_b	= (g_0).
 ltl fluent G_1_2_sndr_1		= (!g_1).//(sToB_REQ_1 <-> bToS_ACK_1).
 /***********
 **** SYNTHESIS
 ***********/
 |f| ENV =(GENBUF).
-|gr1| <{A_1_2}><{G_1_2_sndr_0, G_1_2_sndr_1}> STRAT = ENV.
+|gr1| <{A_1_2, A_2_2}><{G_1_2_sndr_0, G_1_2_sndr_0_b, G_1_2_sndr_1}> STRAT = ENV.
