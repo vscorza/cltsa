@@ -1,8 +1,18 @@
 TODO:
 =====
-- debug genbuf being realizable without assumptions
-- debug dd minimization on collector, was yielding realizable automaton
+- debug dd minimization on collector and genbuf, was yielding realizable automaton
 - review key mapping tree structure, it appears to be a bottleneck in composition
+- review konighoefer numbers
+- implement mutations on existing examples
+	- remove assumption
+	- add non controllable transition
+	- remove controllable transition
+	- mutate assumption formula using operators
+	- mutate goal formula using operators
+	- add conjuction of goals as new goal
+- review relation between minimization, original plant and controller either on structure or syntax
+- reason about general diagnosis 
+- diagnose mutation over small parameters, produce hypothesis, scale both hypothesis and parameter to see if it holds
 - dynamic order of obdd variables
 - run hardware cases
 	- behavior minimization based diagnosis over CLTS

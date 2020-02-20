@@ -30,7 +30,7 @@ ltl sys rho Latch_2_up in COLLECTOR		= [](in_2 -> X(latch_2)).
 ltl sys rho Latch_2_keep in COLLECTOR		= [](!(allFinished || in_2) -> (latch_2 <-> X(latch_2))).
 ltl sys rho Latch_2_down in COLLECTOR		= [](in_2 && allFinished && !in_2 -> X(!latch_2)).
 //only set allFinished if every latch is up
-ltl sys rho Restrict_AllFinished in COLLECTOR	= [](allFinished -> (latch_0 && latch_1 && latch_2)).
+ltl sys rho Restrict_AllFinished in COLLECTOR	= [](X(allFinished) -> (latch_0 && latch_1 && latch_2)).
 
 /***********
 **** ENV RHO
