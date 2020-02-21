@@ -1,6 +1,6 @@
 TODO:
 =====
-- review key mapping tree structure, it appears to be a bottleneck in composition
+- env_rho composition is taking too long
 - review konighoefer numbers
 - implement mutations on existing examples
 	- remove assumption
