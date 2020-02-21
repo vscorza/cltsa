@@ -2588,7 +2588,7 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd(automaton_au
 	automaton_automaton *minimized	= automaton_automaton_clone(master);
 	automaton_automaton *result 	= automaton_get_gr1_unrealizable_minimization_dd2(master, minimized, assumptions, assumptions_count, guarantees, guarantees_count
 			, partition_bit_vector, transitions_kept_size, partitions_count, t_count, t_size, t_states, t_indexes);
-	free(t_states); free(t_indexes);
+	free(t_states); free(t_indexes); free(partition_bit_vector);
 	//print rankings
 	automaton_automaton* strategy = automaton_get_gr1_strategy(result, assumptions, assumptions_count,
 			guarantees, guarantees_count, true);
@@ -2629,7 +2629,6 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2(automaton_a
 	transitions_kept_size = 0;
 	uint32_t removed	= 0;
 	automaton_automaton *inner_automaton	= automaton_automaton_clone(minimized);
-	printf("inner == minimized? %s\n", automaton_automata_are_equivalent(inner_automaton, minimized)? "Y" : "N");
 	automaton_automaton *return_automaton	= NULL;
 	for(i = 0; i < t_count; i++){
 		current_transition	= &(master->transitions[t_states[i]][t_indexes[i]]);
@@ -2641,16 +2640,6 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2(automaton_a
 		}else{
 			transitions_kept_size++;
 		}
-	}
-	printf("inner trans removed == minimized? %s\n", automaton_automata_are_equivalent(inner_automaton, minimized)? "Y" : "N");
-	automaton_automaton_remove_deadlocks(inner_automaton);
-	printf("inner deadlocks removed == minimized? %s\n", automaton_automata_are_equivalent(inner_automaton, minimized)? "Y" : "N");
-	automaton_automaton_update_valuations(inner_automaton);
-	printf("inner vals updated == minimized? %s\n", automaton_automata_are_equivalent(inner_automaton, minimized)? "Y" : "N");
-	if(automaton_is_gr1_realizable(inner_automaton, assumptions, assumptions_count,
-			guarantees, guarantees_count) || inner_automaton->out_degree[inner_automaton->initial_states[0]] == 0){
-		printf("Inner automaton was realizable, minimization %s newly removed transitions: %d\n", automaton_is_gr1_realizable(minimized, assumptions, assumptions_count,
-				guarantees, guarantees_count)? "too" :"was not", removed );
 	}
 #if DEBUG_UNREAL
 	printf("\tDD, kept:[%d]\tn:[%d]\td(s_0):[%d]", transitions_kept_size,partitions_count,inner_automaton->out_degree[inner_automaton->initial_states[0]]);
@@ -4075,7 +4064,7 @@ automaton_composite_tree* automaton_composite_tree_create(uint32_t key_length){
 	tree->entries_composite_count	= 0;
 	tree->entries_size				= malloc(sizeof(uint32_t) * tree->entries_size_count);
 	tree->entries_count				= malloc(sizeof(uint32_t) * tree->entries_size_count);
-	tree->entries_size[0]			= LIST_INITIAL_SIZE;
+	tree->entries_size[0]			= LIST_INITIAL_SIZE * LIST_INITIAL_SIZE * 32;
 	tree->entries_count[0]			= 0;
 	tree->entries_composite_size	= tree->entries_size[0];
 	tree->entries_pool				= malloc(sizeof(automaton_composite_tree_entry*) * tree->entries_size_count);

@@ -76,11 +76,11 @@ ltl sys rho TransSys_51 in AHB	=   [] ((decide && !hbusreq0 && !hbusreq1) -> X h
 ltl sys rho TransSys_52 in AHB	=   [] ((!decide)->(((!hgrant0) <-> X(!hgrant0)))).
 ltl sys rho TransSys_53 in AHB	=   [] ((!decide)->(((!hgrant1) <-> X(!hgrant1)))).
 ltl sys rho TransSys_54 in AHB	=   [] ((!decide) -> (!hlocked <-> X(!hlocked))).
-ltl sys rho TransSys_55 in AHB	=   [] (( !stateG10 && (( hgrant1 ||  hbusreq1))) -> X !stateG10).
-ltl sys rho TransSys_56 in AHB	=   [] (( !stateG10 && ( !hgrant1 &&  !hbusreq1)) -> X stateG10).
-ltl sys rho TransSys_57 in AHB	=   [] (( stateG10 && ( !hgrant1 &&  !hbusreq1)) -> X stateG10).
-ltl sys rho TransSys_58 in AHB	=   [] (( stateG10 && (( hgrant1) &&  !hbusreq1)) -> X (start && !start)).
-ltl sys rho TransSys_59 in AHB	=   [] (( stateG10 &&  hbusreq1) -> X !stateG10).
+ltl sys rho TransSys_55 in AHB	=   [] (( !stateG10_1 && (( hgrant1 ||  hbusreq1))) -> X !stateG10_1).
+ltl sys rho TransSys_56 in AHB	=   [] (( !stateG10_1 && ( !hgrant1 &&  !hbusreq1)) -> X stateG10_1).
+ltl sys rho TransSys_57 in AHB	=   [] (( stateG10_1 && ( !hgrant1 &&  !hbusreq1)) -> X stateG10_1).
+ltl sys rho TransSys_58 in AHB	=   [] (( stateG10_1 && (( hgrant1) &&  !hbusreq1)) -> X (start && !start)).
+ltl sys rho TransSys_59 in AHB	=   [] (( stateG10_1 &&  hbusreq1) -> X !stateG10_1).
 /***********
 **** FLUENTS
 ***********/
@@ -99,4 +99,5 @@ ltl fluent FairSys_4   		= ((hmaster) || !hbusreq1).
 ***********/
 |f| ENV =(AHB).
 |gr1| <{FairEnv_0,FairEnv_1}><{FairSys_0,FairSys_1,FairSys_2,FairSys_3,FairSys_4}> STRAT = ENV.
+
 

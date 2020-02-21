@@ -1,0 +1,136 @@
+<project><signals>
+<signal><name>hready</name><kind>E</kind><type>boolean</type><notes></notes></signal>
+<signal><name>hbusreq</name><kind>E</kind><type>array 0..2 of boolean</type><notes></notes></signal>
+<signal><name>hlock</name><kind>E</kind><type>array 0..2 of boolean</type><notes></notes></signal>
+<signal><name>hburst</name><kind>E</kind><type>array 0..1 of boolean</type><notes></notes></signal>
+<signal><name>hmaster</name><kind>S</kind><type>array 0..1 of boolean</type><notes></notes></signal>
+<signal><name>hmastlock</name><kind>S</kind><type>boolean</type><notes></notes></signal>
+<signal><name>start</name><kind>S</kind><type>boolean</type><notes></notes></signal>
+<signal><name>decide</name><kind>S</kind><type>boolean</type><notes></notes></signal>
+<signal><name>hlocked</name><kind>S</kind><type>boolean</type><notes></notes></signal>
+<signal><name>hgrant</name><kind>S</kind><type>array 0..2 of boolean</type><notes></notes></signal>
+<signal><name>stateA1</name><kind>S</kind><type>array 0..2 of boolean</type><notes></notes></signal>
+<signal><name>stateG2</name><kind>S</kind><type>array 0..2 of boolean</type><notes></notes></signal>
+<signal><name>stateG3</name><kind>S</kind><type>array 0..2 of boolean</type><notes></notes></signal>
+<signal><name>stateG10</name><kind>S</kind><type>array 1..2 of boolean</type><notes></notes></signal>
+</signals><requirements>
+<requirement><name>InitEnv_0</name><property>!hready</property><kind>A</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>InitEnv_1</name><property>forall i in {0:2}: !hbusreq[i]</property><kind>A</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>InitEnv_2</name><property>forall i in {0:2}: !hlock[i]</property><kind>A</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>InitEnv_3</name><property>forall i in {0,1}: !hburst[i]</property><kind>A</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransEnv_0</name><property>forall i in {0:2}: always ( hlock[i] -&gt; hbusreq[i] )</property><kind>A</kind><notes> </notes><toggled>0</toggled></requirement>
+<requirement><name>FairEnv_0</name><property>always eventually! (!stateA1[0] &amp; !stateA1[1])</property><kind>A</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>FairEnv_1</name><property>always eventually! (hready)</property><kind>A</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>InitSys_0</name><property>forall i in {0:1}: !hmaster[i]</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>InitSys_1</name><property>!hmastlock</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>InitSys_2</name><property>start</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>InitSys_3</name><property>decide</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>InitSys_4</name><property>!hlocked</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>InitSys_5</name><property>hgrant[0] &amp; forall i in {1:2}: !hgrant[i]</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>InitSys_6</name><property>forall i in {0:2}: !stateA1[i]</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>InitSys_7</name><property>forall i in {0:2}: !stateG2[i]</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>InitSys_8</name><property>forall i in {0:2}: !stateG3[i]</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>InitSys_9</name><property>forall i in {1:2}: !stateG10[i]</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_0</name><property>always ((!stateA1[0] &amp; !stateA1[1]&amp; ((!hmastlock) | (hburst[0] | hburst[1]))) -&gt; next(!stateA1[0] &amp; !stateA1[1]))</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_1</name><property>always ((!stateA1[0] &amp; !stateA1[1] &amp; ((hmastlock) &amp; (!hmaster[0] &amp; !hmaster[1]) &amp; (!hburst[0] &amp; !hburst[1]))) -&gt; next(stateA1[0] &amp; !stateA1[1]))</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_2</name><property>always ((stateA1[0] &amp; !stateA1[1]&amp;  hbusreq[0]) -&gt; next(stateA1[0] &amp; !stateA1[1]))</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_3</name><property>always ((stateA1[0] &amp; !stateA1[1]&amp;  !hbusreq[0]) -&gt; next(!stateA1[0] &amp; !stateA1[1]))</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_4</name><property>always ((!stateA1[0] &amp; !stateA1[1] &amp; ((hmastlock) &amp; (hmaster[0] &amp; !hmaster[1]) &amp; (!hburst[0] &amp; !hburst[1]))) -&gt; next(!stateA1[0] &amp; stateA1[1]))</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_5</name><property>always ((!stateA1[0] &amp; stateA1[1]&amp;  hbusreq[1]) -&gt; next(!stateA1[0] &amp; stateA1[1]))</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_6</name><property>always ((!stateA1[0] &amp; stateA1[1]&amp;  !hbusreq[1]) -&gt; next(!stateA1[0] &amp; !stateA1[1]))</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_7</name><property>always ((!stateA1[0] &amp; !stateA1[1] &amp; ((hmastlock) &amp; (!hmaster[0] &amp; hmaster[1]) &amp; (!hburst[0] &amp; !hburst[1]))) -&gt; next(stateA1[0] &amp; stateA1[1]))</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_8</name><property>always ((stateA1[0] &amp; stateA1[1]&amp;  hbusreq[2]) -&gt; next(stateA1[0] &amp; stateA1[1]))</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_9</name><property>always ((stateA1[0] &amp; stateA1[1]&amp;  !hbusreq[2]) -&gt; next(!stateA1[0] &amp; !stateA1[1]))</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_10</name><property>always ((!hready) -&gt; next(!start))</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_11</name><property>always (( !stateG2[0] &amp; (!hmastlock)) -&gt; next !stateG2[0])</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_12</name><property>always (( !stateG2[0] &amp; (!start)) -&gt; next !stateG2[0])</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_13</name><property>always (( !stateG2[0] &amp; hburst[0]) -&gt; next !stateG2[0])</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_14</name><property>always (( !stateG2[0] &amp; hburst[1]) -&gt; next !stateG2[0])</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_15</name><property>always (( !stateG2[0] &amp; !(!hmaster[0] &amp; !hmaster[1])) -&gt; next !stateG2[0])</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_16</name><property>always (( !stateG2[0] &amp; (hmastlock) &amp; (start) &amp; !hburst[0] &amp; !hburst[1] &amp; (!hmaster[0] &amp; !hmaster[1])) -&gt; next stateG2[0])</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_17</name><property>always (( stateG2[0] &amp; (!start) &amp;  hbusreq[0]) -&gt; next stateG2[0])</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_18</name><property>always (( stateG2[0] &amp; start) -&gt; next FALSE)</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_19</name><property>always (( stateG2[0] &amp; (!start) &amp;  !hbusreq[0]) -&gt; next !stateG2[0])</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_20</name><property>always (( !stateG2[1] &amp; (!hmastlock)) -&gt; next !stateG2[1])</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_21</name><property>always (( !stateG2[1] &amp; (!start)) -&gt; next !stateG2[1])</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_22</name><property>always (( !stateG2[1] &amp; hburst[0]) -&gt; next !stateG2[1])</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_23</name><property>always (( !stateG2[1] &amp; hburst[1]) -&gt; next !stateG2[1])</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_24</name><property>always (( !stateG2[1] &amp; !(hmaster[0] &amp; !hmaster[1])) -&gt; next !stateG2[1])</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_25</name><property>always (( !stateG2[1] &amp; (hmastlock) &amp; (start) &amp; !hburst[0] &amp; !hburst[1] &amp; (hmaster[0] &amp; !hmaster[1])) -&gt; next stateG2[1])</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_26</name><property>always (( stateG2[1] &amp; (!start) &amp;  hbusreq[1]) -&gt; next stateG2[1])</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_27</name><property>always (( stateG2[1] &amp; start) -&gt; next FALSE)</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_28</name><property>always (( stateG2[1] &amp; (!start) &amp;  !hbusreq[1]) -&gt; next !stateG2[1])</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_29</name><property>always (( !stateG2[2] &amp; (!hmastlock)) -&gt; next !stateG2[2])</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_30</name><property>always (( !stateG2[2] &amp; (!start)) -&gt; next !stateG2[2])</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_31</name><property>always (( !stateG2[2] &amp; hburst[0]) -&gt; next !stateG2[2])</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_32</name><property>always (( !stateG2[2] &amp; hburst[1]) -&gt; next !stateG2[2])</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_33</name><property>always (( !stateG2[2] &amp; !(!hmaster[0] &amp; hmaster[1])) -&gt; next !stateG2[2])</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_34</name><property>always (( !stateG2[2] &amp; (hmastlock) &amp; (start) &amp; !hburst[0] &amp; !hburst[1] &amp; (!hmaster[0] &amp; hmaster[1])) -&gt; next stateG2[2])</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_35</name><property>always (( stateG2[2] &amp; (!start) &amp;  hbusreq[2]) -&gt; next stateG2[2])</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_36</name><property>always (( stateG2[2] &amp; start) -&gt; next FALSE)</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_37</name><property>always (( stateG2[2] &amp; (!start) &amp;  !hbusreq[2]) -&gt; next !stateG2[2])</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_38</name><property>always ((!stateG3[0] &amp; !stateG3[1] &amp; !stateG3[2] &amp;  ((!hmastlock) | (!start) | (hburst[0] | !hburst[1]))) -&gt; next(!stateG3[0] &amp; !stateG3[1] &amp; !stateG3[2]))</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_39</name><property>always ((!stateG3[0] &amp; !stateG3[1] &amp; !stateG3[2] &amp;  ((hmastlock) &amp; (start) &amp; (!hburst[0] &amp; hburst[1]) &amp; (!hready))) -&gt; next(stateG3[0] &amp; !stateG3[1] &amp; !stateG3[2]))</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_40</name><property>always ((!stateG3[0] &amp; !stateG3[1] &amp; !stateG3[2] &amp;  ((hmastlock) &amp; (start) &amp; (!hburst[0] &amp; hburst[1]) &amp; (hready))) -&gt; next(!stateG3[0] &amp; stateG3[1] &amp; !stateG3[2]))</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_41</name><property>always ((stateG3[0] &amp; !stateG3[1] &amp; !stateG3[2] &amp; ((!start) &amp; (!hready))) -&gt; next(stateG3[0] &amp; !stateG3[1] &amp; !stateG3[2]))</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_42</name><property>always ((stateG3[0] &amp; !stateG3[1] &amp; !stateG3[2] &amp; ((!start) &amp; (hready))) -&gt; next(!stateG3[0] &amp; stateG3[1] &amp; !stateG3[2]))</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+
+<requirement><name>TransSys_43</name><property>always ((stateG3[0] &amp; !stateG3[1] &amp; !stateG3[2] &amp; ((start))) -&gt; next FALSE)</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_44</name><property>always ((!stateG3[0] &amp; stateG3[1] &amp; !stateG3[2] &amp; ((!start) &amp; (!hready))) -&gt; next(!stateG3[0] &amp; stateG3[1] &amp; !stateG3[2]))</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_45</name><property>always ((!stateG3[0] &amp; stateG3[1] &amp; !stateG3[2] &amp; ((!start) &amp; (hready))) -&gt; next(stateG3[0] &amp; stateG3[1] &amp; !stateG3[2]))</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_46</name><property>always ((!stateG3[0] &amp; stateG3[1] &amp; !stateG3[2] &amp; ((start))) -&gt; next FALSE)</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_47</name><property>always ((stateG3[0] &amp; stateG3[1] &amp; !stateG3[2] &amp; ((!start) &amp; (!hready))) -&gt; next(stateG3[0] &amp; stateG3[1] &amp; !stateG3[2]))</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_48</name><property>always ((stateG3[0] &amp; stateG3[1] &amp; !stateG3[2] &amp; ((!start) &amp; (hready))) -&gt; next(!stateG3[0] &amp; !stateG3[1] &amp; stateG3[2]))</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_49</name><property>always ((stateG3[0] &amp; stateG3[1] &amp; !stateG3[2] &amp; ((start))) -&gt; next FALSE)</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_50</name><property>always ((!stateG3[0] &amp; !stateG3[1] &amp; stateG3[2] &amp; ((!start) &amp; (!hready))) -&gt; next(!stateG3[0] &amp; !stateG3[1] &amp; stateG3[2]))</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_51</name><property>always ((!stateG3[0] &amp; !stateG3[1] &amp; stateG3[2] &amp; ((!start) &amp; (hready))) -&gt; next(!stateG3[0] &amp; !stateG3[1] &amp; !stateG3[2]))</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_52</name><property>always ((!stateG3[0] &amp; !stateG3[1] &amp; stateG3[2] &amp; ((start))) -&gt; next FALSE)</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_53</name><property>always ((hready) -&gt; ((hgrant[0]=1) &lt;-&gt; next(!hmaster[0] &amp; !hmaster[1])))</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_54</name><property>always ((hready) -&gt; ((hgrant[1]=1) &lt;-&gt; next(hmaster[0] &amp; !hmaster[1])))</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_55</name><property>always ((hready) -&gt; ((hgrant[2]=1) &lt;-&gt; next(!hmaster[0] &amp; hmaster[1])))</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_56</name><property>always ((hready) -&gt; (!hlocked &lt;-&gt; next(!hmastlock)))</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_57</name><property>always (next(!start) -&gt; ((!hmaster[0] &amp; !hmaster[1]) &lt;-&gt; (next(!hmaster[0] &amp; !hmaster[1]))))</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_58</name><property>always (next(!start) -&gt; ((hmaster[0] &amp; !hmaster[1]) &lt;-&gt; (next(hmaster[0] &amp; !hmaster[1]))))</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_59</name><property>always (next(!start) -&gt; ((!hmaster[0] &amp; hmaster[1]) &lt;-&gt; (next(!hmaster[0] &amp; hmaster[1]))))</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_60</name><property>always (((next(!start))) -&gt; ((hmastlock) &lt;-&gt; next(hmastlock)))</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_61</name><property>always ((decide=1 &amp; hlock[0] &amp; next hgrant[0]) -&gt; next(hlocked=1))</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_62</name><property>always ((decide=1 &amp; !hlock[0] &amp; next hgrant[0]) -&gt; next(!hlocked))</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_63</name><property>always ((decide=1 &amp; hlock[1] &amp; next hgrant[1]) -&gt; next(hlocked=1))</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_64</name><property>always ((decide=1 &amp; !hlock[1] &amp; next hgrant[1]) -&gt; next(!hlocked))</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_65</name><property>always ((decide=1 &amp; hlock[2] &amp; next hgrant[2]) -&gt; next(hlocked=1))</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_66</name><property>always ((decide=1 &amp; !hlock[2] &amp; next hgrant[2]) -&gt; next(!hlocked))</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_67</name><property>always ((decide=1 &amp; !hbusreq[0] &amp; !hbusreq[1] &amp; !hbusreq[2]) -&gt; next hgrant[0])</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_68</name><property>always ((!decide)-&gt;(((!hgrant[0]) &lt;-&gt; next(!hgrant[0]))))</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_69</name><property>always ((!decide)-&gt;(((!hgrant[1]) &lt;-&gt; next(!hgrant[1]))))</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_70</name><property>always ((!decide)-&gt;(((!hgrant[2]) &lt;-&gt; next(!hgrant[2]))))</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_71</name><property>always ((!decide) -&gt; (!hlocked &lt;-&gt; next(!hlocked)))</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_72</name><property>always (( !stateG10[1] &amp; (( hgrant[1] |  hbusreq[1]))) -&gt; next !stateG10[1])</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_73</name><property>always (( !stateG10[1] &amp; ( !hgrant[1] &amp;  !hbusreq[1])) -&gt; next stateG10[1])</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_74</name><property>always (( stateG10[1] &amp; ( !hgrant[1] &amp;  !hbusreq[1])) -&gt; next stateG10[1])</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_75</name><property>always (( stateG10[1] &amp; (( hgrant[1]) &amp;  !hbusreq[1])) -&gt; next FALSE)</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_76</name><property>always (( stateG10[1] &amp;  hbusreq[1]) -&gt; next !stateG10[1])</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_77</name><property>always (( !stateG10[2] &amp; (( hgrant[2] |  hbusreq[2]))) -&gt; next !stateG10[2])</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_78</name><property>always (( !stateG10[2] &amp; ( !hgrant[2] &amp;  !hbusreq[2])) -&gt; next stateG10[2])</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_79</name><property>always (( stateG10[2] &amp; ( !hgrant[2] &amp;  !hbusreq[2])) -&gt; next stateG10[2])</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_80</name><property>always (( stateG10[2] &amp; (( hgrant[2]) &amp;  !hbusreq[2])) -&gt; next FALSE)</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>TransSys_81</name><property>always (( stateG10[2] &amp;  hbusreq[2]) -&gt; next !stateG10[2])</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>FairSys_0</name><property>always eventually!  !stateG2[0]</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>FairSys_1</name><property>always eventually!  !stateG2[1]</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>FairSys_2</name><property>always eventually!  !stateG2[2]</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>FairSys_3</name><property>always eventually! (!stateG3[0] &amp; !stateG3[1] &amp; !stateG3[2])</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>FairSys_4</name><property>always eventually! ((!hmaster[0] &amp; !hmaster[1]) | !hbusreq[0])</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>FairSys_5</name><property>always eventually! ((hmaster[0] &amp; !hmaster[1]) | !hbusreq[1])</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+<requirement><name>FairSys_6</name><property>always eventually! ((!hmaster[0] &amp; hmaster[1]) | !hbusreq[2])</property><kind>G</kind><notes></notes><toggled>0</toggled></requirement>
+</requirements>
+
+  <property_assurance> <possibilities/> <assertions/> </property_assurance> 
+  <property_simulation/>
+  <categories>
+    <category> <name> New </name> <editable> no </editable> <notes> This is the category of those traces that have been just created </notes> </category>
+    <category> <name> Default </name> <editable> no </editable> <notes> This is the default category for traces </notes> </category>
+    <category> <name> Out of Date </name> <editable> no </editable> <notes> Contains the traces whose dependencies might be no longer consistent </notes> </category>
+    <category> <name> Trash </name> <editable> no </editable> <notes> Contains the traces that have been deleted </notes> </category>
+  </categories>
+  <active_view> re </active_view>
+  <notes> an ARM AMBA AHB with 3 masters</notes>
+</project>

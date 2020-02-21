@@ -1,0 +1,125 @@
+<project>
+  <signals>
+    <signal>
+      <name>
+        sgn0
+      </name>
+      <kind>
+        E
+      </kind>
+      <type>
+        boolean
+      </type>
+      <notes>
+        
+      </notes>
+    </signal>
+    <signal>
+      <name>
+        sgn1
+      </name>
+      <kind>
+        S
+      </kind>
+      <type>
+        boolean
+      </type>
+      <notes>
+        
+      </notes>
+    </signal>
+  </signals>
+  <requirements>
+    <requirement>
+      <name>
+        req0
+      </name>
+      <property>
+        G sgn1
+      </property>
+      <kind>
+        G
+      </kind>
+      <notes>
+        
+      </notes>
+      <toggled>
+        1
+      </toggled>
+    </requirement>
+    <requirement>
+      <name>
+        req1
+      </name>
+      <property>
+        always (sgn0 -&gt; eventually! !sgn1)
+      </property>
+      <kind>
+        G
+      </kind>
+      <notes>
+        
+      </notes>
+      <toggled>
+        1
+      </toggled>
+    </requirement>
+  </requirements>
+  <property_assurance>
+    <possibilities/>
+    <assertions/>
+  </property_assurance>
+  <property_simulation/>
+  <categories>
+    <category>
+      <name>
+        New
+      </name>
+      <editable>
+        no
+      </editable>
+      <notes>
+        This is the category of those traces that have been just created
+      </notes>
+    </category>
+    <category>
+      <name>
+        Default
+      </name>
+      <editable>
+        no
+      </editable>
+      <notes>
+        This is the default category for traces
+      </notes>
+    </category>
+    <category>
+      <name>
+        Out of Date
+      </name>
+      <editable>
+        no
+      </editable>
+      <notes>
+        Contains the traces whose dependencies might be no longer consistent
+      </notes>
+    </category>
+    <category>
+      <name>
+        Trash
+      </name>
+      <editable>
+        no
+      </editable>
+      <notes>
+        Contains the traces that have been deleted
+      </notes>
+    </category>
+  </categories>
+  <active_view>
+    re
+  </active_view>
+  <notes>
+    
+  </notes>
+</project>

@@ -1,0 +1,288 @@
+<project>
+  <signals>
+    <signal>
+      <name>
+        r0
+      </name>
+      <kind>
+        E
+      </kind>
+      <type>
+        boolean
+      </type>
+      <notes>
+        resource request by entity 0
+      </notes>
+    </signal>
+    <signal>
+      <name>
+        r1
+      </name>
+      <kind>
+        E
+      </kind>
+      <type>
+        boolean
+      </type>
+      <notes>
+        resource request by entity 1
+      </notes>
+    </signal>
+    <signal>
+      <name>
+        startup_failed
+      </name>
+      <kind>
+        E
+      </kind>
+      <type>
+        boolean
+      </type>
+      <notes>
+        environment could not start up
+      </notes>
+    </signal>
+    <signal>
+      <name>
+        g0
+      </name>
+      <kind>
+        S
+      </kind>
+      <type>
+        boolean
+      </type>
+      <notes>
+        resource granted to entity 0
+      </notes>
+    </signal>
+    <signal>
+      <name>
+        g1
+      </name>
+      <kind>
+        S
+      </kind>
+      <type>
+        boolean
+      </type>
+      <notes>
+        resource granted to entity 1
+      </notes>
+    </signal>
+    <signal>
+      <name>
+        error
+      </name>
+      <kind>
+        S
+      </kind>
+      <type>
+        boolean
+      </type>
+      <notes>
+        something went wrong
+      </notes>
+    </signal>
+  </signals>
+  <requirements>
+    <requirement>
+      <name>
+        env init
+      </name>
+      <property>
+        r0=0 &amp;&amp; r1=0 &amp;&amp; startup_failed=0
+      </property>
+      <kind>
+        A
+      </kind>
+      <base_automaton_name>
+        
+      </base_automaton_name>
+      <notes>
+        initial condition
+      </notes>
+      <toggled>
+        1
+      </toggled>
+    </requirement>
+    <requirement>
+      <name>
+        sys init
+      </name>
+      <property>
+        g0=0 &amp;&amp; g1=0 &amp;&amp; error=0
+      </property>
+      <kind>
+        G
+      </kind>
+      <base_automaton_name>
+        
+      </base_automaton_name>
+      <notes>
+        initial condition
+      </notes>
+      <toggled>
+        1
+      </toggled>
+    </requirement>
+    <requirement>
+      <name>
+        sys tran 0
+      </name>
+      <property>
+        never(g0=1 &amp;&amp; g1=1)
+      </property>
+      <kind>
+        G
+      </kind>
+      <base_automaton_name>
+        
+      </base_automaton_name>
+      <notes>
+        never more than one grant
+      </notes>
+      <toggled>
+        1
+      </toggled>
+    </requirement>
+    <requirement>
+      <name>
+        sys tran 1
+      </name>
+      <property>
+        always(error=1 -&gt; (g0=0 &amp;&amp; g1=0))
+      </property>
+      <kind>
+        G
+      </kind>
+      <base_automaton_name>
+        
+      </base_automaton_name>
+      <notes>
+        no grant on error
+      </notes>
+      <toggled>
+        1
+      </toggled>
+    </requirement>
+    <requirement>
+      <name>
+        sys fair 0
+      </name>
+      <property>
+        always(eventually!(r0=0 || g0=1))
+      </property>
+      <kind>
+        G
+      </kind>
+      <base_automaton_name>
+        
+      </base_automaton_name>
+      <notes>
+        eventually a grant for entity 0
+      </notes>
+      <toggled>
+        1
+      </toggled>
+    </requirement>
+    <requirement>
+      <name>
+        sys fair 1
+      </name>
+      <property>
+        always(eventually!(r1=0 || g1=1))
+      </property>
+      <kind>
+        G
+      </kind>
+      <base_automaton_name>
+        
+      </base_automaton_name>
+      <notes>
+        eventually a grant for entity 1
+      </notes>
+      <toggled>
+        1
+      </toggled>
+    </requirement>
+    <requirement>
+      <name>
+        env fair
+      </name>
+      <property>
+        always(eventually!(TRUE))
+      </property>
+      <kind>
+        A
+      </kind>
+      <base_automaton_name>
+        
+      </base_automaton_name>
+      <notes>
+        no environment assumption
+      </notes>
+      <toggled>
+        1
+      </toggled>
+    </requirement>
+  </requirements>
+  <property_assurance>
+    <possibilities/>
+    <assertions/>
+  </property_assurance>
+  <property_simulation/>
+  <categories>
+    <category>
+      <name>
+        New
+      </name>
+      <editable>
+        no
+      </editable>
+      <notes>
+        This is the category of those traces that have been just created
+      </notes>
+    </category>
+    <category>
+      <name>
+        Default
+      </name>
+      <editable>
+        no
+      </editable>
+      <notes>
+        This is the default category for traces
+      </notes>
+    </category>
+    <category>
+      <name>
+        Out of Date
+      </name>
+      <editable>
+        no
+      </editable>
+      <notes>
+        Contains the traces whose dependencies might be no longer consistent
+      </notes>
+    </category>
+    <category>
+      <name>
+        Trash
+      </name>
+      <editable>
+        no
+      </editable>
+      <notes>
+        Contains the traces that have been deleted
+      </notes>
+    </category>
+  </categories>
+  <automata/>
+  <active_view>
+    ga
+  </active_view>
+  <notes>
+    
+  </notes>
+</project>

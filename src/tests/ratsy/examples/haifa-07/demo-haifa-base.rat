@@ -1,0 +1,489 @@
+<project>
+  <signals>
+    <signal>
+      <name>
+        input
+      </name>
+      <kind>
+        E
+      </kind>
+      <type>
+        array 0..1 of boolean
+      </type>
+      <notes>
+        Bits ot indicate data is available on the respecive channel
+      </notes>
+    </signal>
+    <signal>
+      <name>
+        data
+      </name>
+      <kind>
+        E
+      </kind>
+      <type>
+        array 0..1 of boolean
+      </type>
+      <notes>
+        Data channels
+      </notes>
+    </signal>
+    <signal>
+      <name>
+        cancel
+      </name>
+      <kind>
+        E
+      </kind>
+      <type>
+        boolean
+      </type>
+      <notes>
+        The signal to cancel the current transfer
+      </notes>
+    </signal>
+    <signal>
+      <name>
+        go
+      </name>
+      <kind>
+        E
+      </kind>
+      <type>
+        boolean
+      </type>
+      <notes>
+        The signal to enable transfer
+      </notes>
+    </signal>
+    <signal>
+      <name>
+        out
+      </name>
+      <kind>
+        S
+      </kind>
+      <type>
+        array 0..7 of boolean
+      </type>
+      <notes>
+        The output channel memory
+      </notes>
+    </signal>
+    <signal>
+      <name>
+        valid
+      </name>
+      <kind>
+        S
+      </kind>
+      <type>
+        boolean
+      </type>
+      <notes>
+        To know if the info on out is invalid
+      </notes>
+    </signal>
+  </signals>
+  <requirements>
+    <requirement>
+      <name>
+        SysInit1
+      </name>
+      <property>
+        forall i in {0:7}: (out[i] = 0)
+      </property>
+      <kind>
+        G
+      </kind>
+      <notes>
+        Initially all out[i] are zero
+      </notes>
+      <toggled>
+        0
+      </toggled>
+    </requirement>
+    <requirement>
+      <name>
+        SysTrans1
+      </name>
+      <property>
+        forall i in {0,1}: always (input[i] -&gt; (next(out[0]) &lt;-&gt; data[i]))
+      </property>
+      <kind>
+        G
+      </kind>
+      <notes>
+        If input[i] is true, data[i] is copies into out[0]
+      </notes>
+      <toggled>
+        0
+      </toggled>
+    </requirement>
+    <requirement>
+      <name>
+        SysTrans2
+      </name>
+      <property>
+        forall i in {0:7}: always (cancel -&gt; next(out[i] = 0))
+      </property>
+      <kind>
+        G
+      </kind>
+      <notes>
+        If a cancel occurs, the out buffer is reset to all 0
+      </notes>
+      <toggled>
+        0
+      </toggled>
+    </requirement>
+    <requirement>
+      <name>
+        SysTrans3.1
+      </name>
+      <property>
+        always (!cancel -&gt; (next(out[1]) &lt;-&gt; out[0]))
+      </property>
+      <kind>
+        G
+      </kind>
+      <notes>
+        If no cancel, the data[i] is copies in data[i+1]
+      </notes>
+      <toggled>
+        0
+      </toggled>
+    </requirement>
+    <requirement>
+      <name>
+        SysTrans3.2
+      </name>
+      <property>
+        always (!cancel -&gt; (next(out[2]) &lt;-&gt; out[1]))
+      </property>
+      <kind>
+        G
+      </kind>
+      <notes>
+        If no cancel, the data[i] is copies in data[i+1]
+      </notes>
+      <toggled>
+        0
+      </toggled>
+    </requirement>
+    <requirement>
+      <name>
+        SysTrans3.3
+      </name>
+      <property>
+        always (!cancel -&gt; (next(out[3]) &lt;-&gt; out[2]))
+      </property>
+      <kind>
+        G
+      </kind>
+      <notes>
+        If no cancel, the data[i] is copies in data[i+1]
+      </notes>
+      <toggled>
+        0
+      </toggled>
+    </requirement>
+    <requirement>
+      <name>
+        SysTrans3.4
+      </name>
+      <property>
+        always (!cancel -&gt; (next(out[4]) &lt;-&gt; out[3]))
+      </property>
+      <kind>
+        G
+      </kind>
+      <notes>
+        If no cancel, the data[i] is copies in data[i+1]
+      </notes>
+      <toggled>
+        0
+      </toggled>
+    </requirement>
+    <requirement>
+      <name>
+        SysTrans3.5
+      </name>
+      <property>
+        always (!cancel -&gt; (next(out[5]) &lt;-&gt; out[4]))
+      </property>
+      <kind>
+        G
+      </kind>
+      <notes>
+        If no cancel, the data[i] is copies in data[i+1]
+      </notes>
+      <toggled>
+        0
+      </toggled>
+    </requirement>
+    <requirement>
+      <name>
+        SysTrans3.6
+      </name>
+      <property>
+        always (!cancel -&gt; (next(out[6]) &lt;-&gt; out[5]))
+      </property>
+      <kind>
+        G
+      </kind>
+      <notes>
+        If no cancel, the data[i] is copies in data[i+1]
+      </notes>
+      <toggled>
+        0
+      </toggled>
+    </requirement>
+    <requirement>
+      <name>
+        SysTrans3.7
+      </name>
+      <property>
+        always (!cancel -&gt; (next(out[7]) &lt;-&gt; out[6]))
+      </property>
+      <kind>
+        G
+      </kind>
+      <notes>
+        If no cancel, the data[i] is copies in data[i+1]
+      </notes>
+      <toggled>
+        0
+      </toggled>
+    </requirement>
+    <requirement>
+      <name>
+        SysTrans4
+      </name>
+      <property>
+        always (cancel -&gt; next(!valid until! go))
+      </property>
+      <kind>
+        G
+      </kind>
+      <notes>
+        
+      </notes>
+      <toggled>
+        0
+      </toggled>
+    </requirement>
+    <requirement>
+      <name>
+        SysTrans8
+      </name>
+      <property>
+        always (cancel -&gt; next(!valid))
+      </property>
+      <kind>
+        G
+      </kind>
+      <notes>
+        
+      </notes>
+      <toggled>
+        0
+      </toggled>
+    </requirement>
+    <requirement>
+      <name>
+        SysTrans9
+      </name>
+      <property>
+        always((!cancel &amp; go) -&gt; next(valid))
+      </property>
+      <kind>
+        G
+      </kind>
+      <notes>
+        If a go is issued than the data value is high
+      </notes>
+      <toggled>
+        0
+      </toggled>
+    </requirement>
+    <requirement>
+      <name>
+        SysTrans10
+      </name>
+      <property>
+        always((!cancel &amp; valid) -&gt; next(valid))
+      </property>
+      <kind>
+        G
+      </kind>
+      <notes>
+        The data remain valid if no cancel are issued
+      </notes>
+      <toggled>
+        0
+      </toggled>
+    </requirement>
+    <requirement>
+      <name>
+        EnvAssumption1
+      </name>
+      <property>
+        never( input[1] &amp; input[0])
+      </property>
+      <kind>
+        A
+      </kind>
+      <notes>
+        
+      </notes>
+      <toggled>
+        0
+      </toggled>
+    </requirement>
+    <requirement>
+      <name>
+        EnvAssumption2
+      </name>
+      <property>
+        always (cancel -&gt; next_e[7:20](go))
+      </property>
+      <kind>
+        A
+      </kind>
+      <notes>
+        
+      </notes>
+      <toggled>
+        0
+      </toggled>
+    </requirement>
+    <requirement>
+      <name>
+        SysTrans1-Good
+      </name>
+      <property>
+        forall i in {0,1}: always ((input[i] &amp; !cancel) -&gt; (next(out[0]) &lt;-&gt; data[i]))
+      </property>
+      <kind>
+        G
+      </kind>
+      <notes>
+        If there is an input in channel input[i] its value is copied in out[0]
+      </notes>
+      <toggled>
+        0
+      </toggled>
+    </requirement>
+  </requirements>
+  <property_assurance>
+    <possibilities>
+      <possibility>
+        <name>
+          P1
+        </name>
+        <property>
+          eventually! valid
+        </property>
+        <status>
+          None
+        </status>
+        <notes>
+          
+        </notes>
+        <toggled>
+          0
+        </toggled>
+      </possibility>
+      <possibility>
+        <name>
+          P2
+        </name>
+        <property>
+          go &amp; data[0] &amp; next_a[0:8](input[0]) &amp; always (data[0] -&gt; eventually!(out[7]))
+        </property>
+        <status>
+          None
+        </status>
+        <notes>
+          
+        </notes>
+        <toggled>
+          0
+        </toggled>
+      </possibility>
+    </possibilities>
+    <assertions>
+      <assertion>
+        <name>
+          A1
+        </name>
+        <property>
+          forall i in {0:7}: ((always eventually! go) -&gt; always (cancel  -&gt; next(out[i] = 0)))
+        </property>
+        <status>
+          None
+        </status>
+        <notes>
+          
+        </notes>
+        <toggled>
+          0
+        </toggled>
+      </assertion>
+    </assertions>
+  </property_assurance>
+  <property_simulation/>
+  <categories>
+    <category>
+      <name>
+        New
+      </name>
+      <editable>
+        no
+      </editable>
+      <notes>
+        This is the category of those traces that have been just created
+      </notes>
+    </category>
+    <category>
+      <name>
+        Default
+      </name>
+      <editable>
+        no
+      </editable>
+      <notes>
+        This is the default category for traces
+      </notes>
+    </category>
+    <category>
+      <name>
+        Out of Date
+      </name>
+      <editable>
+        no
+      </editable>
+      <notes>
+        Contains the traces whose dependencies might be no longer consistent
+      </notes>
+    </category>
+    <category>
+      <name>
+        Trash
+      </name>
+      <editable>
+        no
+      </editable>
+      <notes>
+        Contains the traces that have been deleted
+      </notes>
+    </category>
+  </categories>
+  <active_view>
+    pa
+  </active_view>
+  <notes>
+    
+  </notes>
+</project>

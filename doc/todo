@@ -1,6 +1,5 @@
 TODO:
 =====
-- debug dd minimization on collector and genbuf, was yielding realizable automaton
 - review key mapping tree structure, it appears to be a bottleneck in composition
 - review konighoefer numbers
 - implement mutations on existing examples

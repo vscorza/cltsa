@@ -614,7 +614,7 @@ void parser_add_primed_variables(uint32_t primed_variable){
 	}
 	if((parser_primed_variables_count + 1) == parser_primed_variables_size){
 		uint32_t new_size		= parser_primed_variables_size * LIST_INCREASE_FACTOR;
-		uint32_t* ptr	= realloc(parser_primed_variables, new_size);
+		uint32_t* ptr	= realloc(parser_primed_variables, sizeof(uint32_t) * new_size);
 		if(ptr == NULL){
 			printf("Could not allocate more space for primed variables list\n");
 			exit(-1);

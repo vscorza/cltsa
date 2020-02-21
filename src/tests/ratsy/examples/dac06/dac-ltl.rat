@@ -1,0 +1,327 @@
+<project>
+  <signals>
+    <signal>
+      <name>
+        r[1]
+      </name>
+      <type>
+        boolean
+      </type>
+      <notes>
+        req for ack 1
+      </notes>
+    </signal>
+    <signal>
+      <name>
+        a[1]
+      </name>
+      <type>
+        boolean
+      </type>
+      <notes>
+        ack for req 1
+      </notes>
+    </signal>
+    <signal>
+      <name>
+        r[2]
+      </name>
+      <type>
+        boolean
+      </type>
+      <notes>
+        req for ack 2
+      </notes>
+    </signal>
+    <signal>
+      <name>
+        a[2]
+      </name>
+      <type>
+        boolean
+      </type>
+      <notes>
+        ack for req 2
+      </notes>
+    </signal>
+  </signals>
+  <requirements>
+    <requirement>
+      <name>
+        R1
+      </name>
+      <property>
+        G (forall i in {1:2}: (r[i] -&gt; F a[i]))
+      </property>
+      <notes>
+        Every request is eventually acknowledged
+      </notes>
+    </requirement>
+    <requirement>
+      <name>
+        R2
+      </name>
+      <property>
+        G !(a[1] &amp;&amp; a[2])
+      </property>
+      <notes>
+        There are never two ack at the same time
+      </notes>
+    </requirement>
+    <requirement>
+      <name>
+        R3
+      </name>
+      <property>
+        forall i in {1:2}: (!a[i] U r[i])
+      </property>
+      <notes>
+        
+      </notes>
+    </requirement>
+  </requirements>
+  <property_assurance>
+    <possibilities>
+      <possibility>
+        <name>
+          P1
+        </name>
+        <property>
+          forall i in {1:2}: F G !r[i]
+        </property>
+        <status>
+          passed
+        </status>
+        <notes>
+          
+        </notes>
+      </possibility>
+      <possibility>
+        <name>
+          P2
+        </name>
+        <property>
+          forall i in {1:2}: (r[i] &amp;&amp; F G !r[i])
+        </property>
+        <status>
+          passed
+        </status>
+        <notes>
+          
+        </notes>
+      </possibility>
+      <possibility>
+        <name>
+          P3
+        </name>
+        <property>
+          forall i in {1:2}: F ((!a[i] &amp; r[i]) &amp; X (((!a[i]) U ((r[i]) &amp; ((!a[i]) U (a[i] &amp; X G (!a[i])))))))
+        </property>
+        <status>
+          failed
+        </status>
+        <notes>
+          
+        </notes>
+      </possibility>
+    </possibilities>
+    <assertions>
+      <assertion>
+        <name>
+          A1
+        </name>
+        <property>
+          forall i in {1:2}: 
+      G ((a[i] &amp; X !r[i]) -&gt; X !a[i])
+        </property>
+        <status>
+          failed
+        </status>
+        <notes>
+          
+        </notes>
+      </assertion>
+    </assertions>
+  </property_assurance>
+  <property_simulation/>
+  <categories>
+    <category>
+      <name>
+        New
+      </name>
+      <editable>
+        no
+      </editable>
+      <notes>
+        This is the category of those traces that have been just created
+      </notes>
+      <trace>
+        <name>
+          Trace_0
+        </name>
+        <dependencies>
+          <dependency>
+            R1
+          </dependency>
+          <dependency>
+            R2
+          </dependency>
+          <dependency>
+            A1
+          </dependency>
+        </dependencies>
+        <loops>
+          1
+        </loops>
+        <stripe>
+          <name>
+            r[1]
+          </name>
+          <type>
+            boolean
+          </type>
+          <step>
+            <name>
+              0
+            </name>
+            <value>
+              0
+            </value>
+          </step>
+          <step>
+            <name>
+              1
+            </name>
+            <value>
+              0
+            </value>
+          </step>
+        </stripe>
+        <stripe>
+          <name>
+            a[1]
+          </name>
+          <type>
+            boolean
+          </type>
+          <step>
+            <name>
+              0
+            </name>
+            <value>
+              0
+            </value>
+          </step>
+          <step>
+            <name>
+              1
+            </name>
+            <value>
+              0
+            </value>
+          </step>
+        </stripe>
+        <stripe>
+          <name>
+            r[2]
+          </name>
+          <type>
+            boolean
+          </type>
+          <step>
+            <name>
+              0
+            </name>
+            <value>
+              0
+            </value>
+          </step>
+          <step>
+            <name>
+              1
+            </name>
+            <value>
+              0
+            </value>
+          </step>
+        </stripe>
+        <stripe>
+          <name>
+            a[2]
+          </name>
+          <type>
+            boolean
+          </type>
+          <step>
+            <name>
+              0
+            </name>
+            <value>
+              1
+            </value>
+          </step>
+          <step>
+            <name>
+              1
+            </name>
+            <value>
+              1
+            </value>
+          </step>
+        </stripe>
+        <notes>
+          
+        </notes>
+        <creation_info>
+          Created by 'NuSMV' on Mon Dec 19 19:28:22 2005
+Checking command was: 'check_pslspec -b'
+        </creation_info>
+        <formula>
+          (((G (forall i in {1:2}: (r[i] -&gt; F a[i]))) &amp; (never (a[1] &amp;&amp; a[2]))) -&gt; (forall i in {1:2}: G ((a[i] &amp; X !r[i]) -&gt; X !a[i])))
+        </formula>
+        <history>
+          Added to category 'New'
+        </history>
+      </trace>
+    </category>
+    <category>
+      <name>
+        Default
+      </name>
+      <editable>
+        no
+      </editable>
+      <notes>
+        This is the default category for traces
+      </notes>
+    </category>
+    <category>
+      <name>
+        Out of Date
+      </name>
+      <editable>
+        no
+      </editable>
+      <notes>
+        Contains the traces whose dependencies might be no longer consistent
+      </notes>
+    </category>
+    <category>
+      <name>
+        Trash
+      </name>
+      <editable>
+        no
+      </editable>
+      <notes>
+        Contains the traces that have been deleted
+      </notes>
+    </category>
+  </categories>
+  <active_view>
+    pa
+  </active_view>
+  <notes>
+    
+  </notes>
+</project>

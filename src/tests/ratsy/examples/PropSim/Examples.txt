@@ -1,0 +1,85 @@
+Property Simulation Examples
+============================
+
+This file contains some example formulas for testing the Property Simulation
+features of RAT. We present three example formulae, together with an
+informal interpretation and hint directions for the exploration of the
+property. The examples test the different sections of the Property
+Simulation features of RAT. We test a correct parsing of the formula
+(Example 3), the analysis window controls, the features for shaping the
+trace, and the Property Simulation methodology in general.
+The examples represent usual workflows when using Property Simulation.
+
+Example 1:
+==========
+
+
+Property: G(r->F(a))
+
+Informal description: 
+        This property states that at any time a request (signal r is true)
+        is acknowledged (signal a is true) eventually.
+
+Directions:
+        * Ask that r should be eventually true in the analysis window. 
+          Create a new witness
+        * Ask that r should be eventually true and false in the analysis window.
+          Create a new witness
+        
+        By exploring these directions you should come to the result that
+        this property does not need a request for an acknowledge to occur, 
+        that a single acknowledge can acknowledge multiple requests, and
+        that there is no need for a request to occur in a witness. Further
+        directions could be to try to enhance the property, such that the
+        length of an acknowledge is limited to one tick, and that there must be a
+        request for an acknowledge to occur. 
+
+
+
+Example 2:
+==========
+
+Property: [a U b]
+
+Informal description:
+        This property states that a has to hold until b holds. 
+
+Directions:
+        At this point we are not sure what this means. 
+        We now would like to test if a and b should be overlapping or
+        not:
+
+        * Ask for a witness and fix the values of the trace, such that
+          a is true for the first two steps and false for the third. 
+          Signal b shall be false for the first two steps, and true
+          for the third one.
+        * Ask for a new witness.
+
+        As we are able to obtain a witness with these restrictions we found
+        out that there is no need for a and b to overlap.
+
+
+Example 3:
+==========
+
+Property: G(r->F(a)) && F(r)
+
+Informal Description:
+        This property is derived from Example 1. For this example we however
+        state that the eventual occurence of a request is obligatory.
+
+Directions:
+        * Ask for a witness and consider the evaluation.
+        * Is the parse tree of the property reflected in the tree structure
+          of the property really correct ?
+        
+        We conclude that we forgot to put brackets around the G() part of the formula,
+        as now everything is global due to the unintended binding of the
+        logical and.
+        
+        * Reenter the property with brackets (G(r->F(a))) && F(a)
+        * Ask for a witness.
+        
+        A recheck of the evaluation shows that the new property reflects our
+        intention in a better way
+                  

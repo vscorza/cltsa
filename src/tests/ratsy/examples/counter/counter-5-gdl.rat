@@ -1,0 +1,225 @@
+<project>
+  <signals>
+    <signal>
+      <name>
+        inc
+      </name>
+      <type>
+        boolean
+      </type>
+      <notes>
+        this signal corresponds to an increment operation on the counter value
+      </notes>
+    </signal>
+    <signal>
+      <name>
+        dec
+      </name>
+      <type>
+        boolean
+      </type>
+      <notes>
+        this signal corresponds to an decrement operation on the counter value
+      </notes>
+    </signal>
+    <signal>
+      <name>
+        v
+      </name>
+      <type>
+        -6..6
+      </type>
+      <notes>
+        the value of the counter that has range -5..5, -6 and 6 are used to check for possible over/underflow
+      </notes>
+    </signal>
+  </signals>
+  <requirements>
+    <requirement>
+      <name>
+        R1
+      </name>
+      <property>
+        always (forall M in {-5:4}: ((v = M &amp; inc) -&gt; next (v = (M + 1))))
+      </property>
+      <notes>
+        each inc operation is immediately followed by an increment of the value of the counter
+      </notes>
+    </requirement>
+    <requirement>
+      <name>
+        R2
+      </name>
+      <property>
+        always (forall M in {-4:5}: (((v = M) &amp; dec) -&gt; next (v = (M - 1))))
+      </property>
+      <notes>
+        each dec operation is immediately followed by an decrement of the value of the counter
+      </notes>
+    </requirement>
+    <requirement>
+      <name>
+        R3
+      </name>
+      <property>
+        never (inc &amp; dec)
+      </property>
+      <notes>
+        inc and dec operations can never occur simultaneously
+      </notes>
+    </requirement>
+    <requirement>
+      <name>
+        R4
+      </name>
+      <property>
+        always ((!inc &amp; !dec) -&gt; forall M in {-5:5}: ((v = M) -&gt; next (v = M)))
+      </property>
+      <notes>
+        when neither an inc nor a dec occurs, the value of the counter remaines unchanged 
+- needed for A1
+      </notes>
+    </requirement>
+    <requirement>
+      <name>
+        R5
+      </name>
+      <property>
+        always ((v = 5 &amp; inc) -&gt; next (v = 5))
+      </property>
+      <notes>
+        inc operations do not change tha value of the counter beyound its limits of -MAXCOUNTER and MAXCOUNTER
+- needed to make P2 fail
+      </notes>
+    </requirement>
+    <requirement>
+      <name>
+        R6
+      </name>
+      <property>
+        always ((v = -5 &amp; dec) -&gt; next (v = -5))
+      </property>
+      <notes>
+        dec operations do not change tha value of the counter beyound its limits of -MAXCOUNTER and MAXCOUNTER
+- needed to make P2 fail
+      </notes>
+    </requirement>
+    <requirement>
+      <name>
+        R7
+      </name>
+      <property>
+        v = 0
+      </property>
+      <notes>
+        Initially the counter has value 0.
+      </notes>
+    </requirement>
+  </requirements>
+  <property_assurance>
+    <possibilities>
+      <possibility>
+        <name>
+          P1
+        </name>
+        <property>
+          always ( forall N in {-4:4}:  ((v = N) -&gt; eventually! ((v = (N + 1)) | (v = (N - 1)))))
+        </property>
+        <notes>
+          can it be the case that the counter value changes by one?
+        </notes>
+      </possibility>
+      <possibility>
+        <name>
+          P2
+        </name>
+        <property>
+          eventually! (v &gt; 5)
+        </property>
+        <notes>
+          can it be the case that the counter value grows greater than MAXCOUNTER?
+        </notes>
+      </possibility>
+      <possibility>
+        <name>
+          P3
+        </name>
+        <property>
+          eventually! ((v = -5) &amp; eventually! (v = 5))
+        </property>
+        <notes>
+          
+        </notes>
+      </possibility>
+      <possibility>
+        <name>
+          P4
+        </name>
+        <property>
+          eventually! (v &lt; -5)
+        </property>
+        <notes>
+          
+        </notes>
+      </possibility>
+    </possibilities>
+    <assertions>
+      <assertion>
+        <name>
+          A1
+        </name>
+        <property>
+          always ( forall N in { -5 : 5 }: ((v = N) -&gt; ((v = N) until ( inc | dec ))))
+        </property>
+        <notes>
+          the value of the counter remains unchanged until an inc/dec operation is issued
+        </notes>
+      </assertion>
+      <assertion>
+        <name>
+          A2
+        </name>
+        <property>
+          always (forall N in {1:5}:  ({((v = 0) &amp; !inc &amp; !dec);inc[*N];dec[*N]} (next(v = 0))))
+        </property>
+        <notes>
+          if the value of the counter is 0 and N consecutive inc operations occur followed by N consecutive dec operations, the value of the counter after the last dec operation is 0
+        </notes>
+      </assertion>
+      <assertion>
+        <name>
+          A2_alt
+        </name>
+        <property>
+          always (forall N in {1:5}:  ({{(v = 0)} : {inc[*N] ; dec[*N]}}(next(v = 0))))
+        </property>
+        <notes>
+          alternative versio of A2
+        </notes>
+      </assertion>
+      <assertion>
+        <name>
+          A2_wrong
+        </name>
+        <property>
+          always (forall N in {1:5}: ({(v = 0) ; inc[*N];dec[*N]}(next(v = 0))))
+        </property>
+        <notes>
+          wrong version of A2, does not take into account the possibility of having an inc command issued when v=0
+        </notes>
+      </assertion>
+      <assertion>
+        <name>
+          A3
+        </name>
+        <property>
+          never ((v = -6) | (v = 6))
+        </property>
+        <notes>
+          No under/over flow
+        </notes>
+      </assertion>
+    </assertions>
+  </property_assurance>
+  <property_synthesis/>
+</project>

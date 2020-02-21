@@ -1,0 +1,135 @@
+<project>
+  <signals>
+    <signal>
+      <name>
+        req
+      </name>
+      <kind>
+        E
+      </kind>
+      <type>
+        boolean
+      </type>
+      <notes>
+        
+      </notes>
+    </signal>
+    <signal>
+      <name>
+        ack
+      </name>
+      <kind>
+        S
+      </kind>
+      <type>
+        boolean
+      </type>
+      <notes>
+        
+      </notes>
+    </signal>
+  </signals>
+  <requirements/>
+  <property_assurance>
+    <possibilities/>
+    <assertions/>
+  </property_assurance>
+  <property_simulation/>
+  <categories>
+    <category>
+      <name>
+        New
+      </name>
+      <editable>
+        no
+      </editable>
+      <notes>
+        This is the category of those traces that have been just created
+      </notes>
+    </category>
+    <category>
+      <name>
+        Default
+      </name>
+      <editable>
+        no
+      </editable>
+      <notes>
+        This is the default category for traces
+      </notes>
+    </category>
+    <category>
+      <name>
+        Out of Date
+      </name>
+      <editable>
+        no
+      </editable>
+      <notes>
+        Contains the traces whose dependencies might be no longer consistent
+      </notes>
+    </category>
+    <category>
+      <name>
+        Trash
+      </name>
+      <editable>
+        no
+      </editable>
+      <notes>
+        Contains the traces that have been deleted
+      </notes>
+    </category>
+  </categories>
+  <automata>
+    <automaton_entry use_dead_state="True">
+      <name>
+        arbiter
+      </name>
+      <notes>
+        
+      </notes>
+      <automaton autocomplete="True">
+        <state accepting="True" index="0" initial="True" name="s0" x="128.0" y="289.0">
+          <waypoint x="78.0" y="339.0"/>
+        </state>
+        <state accepting="False" index="1" initial="False" name="s1" x="496.0" y="300.0">
+          <waypoint x="446.0" y="350.0"/>
+        </state>
+        <variable name="req"/>
+        <variable name="ack"/>
+        <edge dst_state="0" labelpos="0.481949987627" src_state="0">
+          <waypoint x="126.0" y="155.0"/>
+          <transitioncondition>
+            0-
+11
+          </transitioncondition>
+        </edge>
+        <edge dst_state="1" labelpos="0.5" src_state="1">
+          <waypoint x="500.0" y="166.0"/>
+          <transitioncondition>
+            -0
+          </transitioncondition>
+        </edge>
+        <edge dst_state="1" labelpos="1.1751002972" src_state="0">
+          <waypoint x="307.0" y="249.0"/>
+          <transitioncondition>
+            10
+          </transitioncondition>
+        </edge>
+        <edge dst_state="0" labelpos="1.17764275739" src_state="1">
+          <waypoint x="305.0" y="358.0"/>
+          <transitioncondition>
+            -1
+          </transitioncondition>
+        </edge>
+      </automaton>
+    </automaton_entry>
+  </automata>
+  <active_view>
+    re
+  </active_view>
+  <notes>
+    
+  </notes>
+</project>

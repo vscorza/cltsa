@@ -1,0 +1,429 @@
+<project>
+  <signals>
+    <signal>
+      <name>
+        r0
+      </name>
+      <kind>
+        E
+      </kind>
+      <type>
+        boolean
+      </type>
+      <notes>
+        resource request by entity 0
+      </notes>
+    </signal>
+    <signal>
+      <name>
+        r1
+      </name>
+      <kind>
+        E
+      </kind>
+      <type>
+        boolean
+      </type>
+      <notes>
+        resource request by entity 1
+      </notes>
+    </signal>
+    <signal>
+      <name>
+        startup_failed
+      </name>
+      <kind>
+        E
+      </kind>
+      <type>
+        boolean
+      </type>
+      <notes>
+        environment could not start up
+      </notes>
+    </signal>
+    <signal>
+      <name>
+        g0
+      </name>
+      <kind>
+        S
+      </kind>
+      <type>
+        boolean
+      </type>
+      <notes>
+        resource granted to entity 0
+      </notes>
+    </signal>
+    <signal>
+      <name>
+        g1
+      </name>
+      <kind>
+        S
+      </kind>
+      <type>
+        boolean
+      </type>
+      <notes>
+        resource granted to entity 1
+      </notes>
+    </signal>
+    <signal>
+      <name>
+        error
+      </name>
+      <kind>
+        S
+      </kind>
+      <type>
+        boolean
+      </type>
+      <notes>
+        something went wrong
+      </notes>
+    </signal>
+    <signal>
+      <name>
+        di_state0
+      </name>
+      <kind>
+        S
+      </kind>
+      <type>
+        boolean
+      </type>
+      <notes>
+        
+      </notes>
+    </signal>
+    <signal>
+      <name>
+        di_state1
+      </name>
+      <kind>
+        S
+      </kind>
+      <type>
+        boolean
+      </type>
+      <notes>
+        
+      </notes>
+    </signal>
+    <signal>
+      <name>
+        dead
+      </name>
+      <kind>
+        S
+      </kind>
+      <type>
+        boolean
+      </type>
+      <notes>
+        
+      </notes>
+    </signal>
+  </signals>
+  <requirements>
+    <requirement>
+      <name>
+        env init
+      </name>
+      <property>
+        r0=0 &amp;&amp; r1=0 &amp;&amp; startup_failed=0
+      </property>
+      <kind>
+        A
+      </kind>
+      <base_automaton_name>
+        
+      </base_automaton_name>
+      <notes>
+        initial condition
+      </notes>
+      <toggled>
+        1
+      </toggled>
+    </requirement>
+    <requirement>
+      <name>
+        sys init
+      </name>
+      <property>
+        g0=0 &amp;&amp; g1=0 &amp;&amp; error=0
+      </property>
+      <kind>
+        G
+      </kind>
+      <base_automaton_name>
+        
+      </base_automaton_name>
+      <notes>
+        initial condition
+      </notes>
+      <toggled>
+        1
+      </toggled>
+    </requirement>
+    <requirement>
+      <name>
+        sys tran 0
+      </name>
+      <property>
+        never(g0=1 &amp;&amp; g1=1)
+      </property>
+      <kind>
+        G
+      </kind>
+      <base_automaton_name>
+        
+      </base_automaton_name>
+      <notes>
+        never more than one grant
+      </notes>
+      <toggled>
+        1
+      </toggled>
+    </requirement>
+    <requirement>
+      <name>
+        sys tran 1
+      </name>
+      <property>
+        always(error=1 -&gt; (g0=0 &amp;&amp; g1=0))
+      </property>
+      <kind>
+        G
+      </kind>
+      <base_automaton_name>
+        
+      </base_automaton_name>
+      <notes>
+        no grant on error
+      </notes>
+      <toggled>
+        1
+      </toggled>
+    </requirement>
+    <requirement>
+      <name>
+        sys fair 0
+      </name>
+      <property>
+        always(eventually!(r0=0 || g0=1))
+      </property>
+      <kind>
+        G
+      </kind>
+      <base_automaton_name>
+        
+      </base_automaton_name>
+      <notes>
+        eventually a grant for entity 0
+      </notes>
+      <toggled>
+        1
+      </toggled>
+    </requirement>
+    <requirement>
+      <name>
+        sys fair 1
+      </name>
+      <property>
+        always(eventually!(r1=0 || g1=1))
+      </property>
+      <kind>
+        G
+      </kind>
+      <base_automaton_name>
+        
+      </base_automaton_name>
+      <notes>
+        eventually a grant for entity 1
+      </notes>
+      <toggled>
+        1
+      </toggled>
+    </requirement>
+    <requirement>
+      <name>
+        env fair
+      </name>
+      <property>
+        always(eventually!(TRUE))
+      </property>
+      <kind>
+        A
+      </kind>
+      <base_automaton_name>
+        
+      </base_automaton_name>
+      <notes>
+        no environment assumption
+      </notes>
+      <toggled>
+        1
+      </toggled>
+    </requirement>
+    <requirement>
+      <name>
+        di
+      </name>
+      <property>
+        (G(( ( (di_state0 = 1) &amp;&amp; (di_state1 = 1) ) &amp;&amp; ( TRUE ) ) -&gt; (X(( (di_state0 = 1) &amp;&amp; (di_state1 = 1) ))) )) &amp;&amp; (G(( ( (di_state0 = 0) &amp;&amp; (di_state1 = 0) ) &amp;&amp; ( TRUE ) ) -&gt; (X(( (di_state0 = 1) &amp;&amp; (di_state1 = 0) ))) )) &amp;&amp; (G(( ( (di_state0 = 1) &amp;&amp; (di_state1 = 0) ) &amp;&amp; ( ( (error = 1) &amp;&amp; (startup_failed = 1) ) ) ) -&gt; (X(( (di_state0 = 1) &amp;&amp; (di_state1 = 0) ))) )) &amp;&amp; (G(( ( (di_state0 = 1) &amp;&amp; (di_state1 = 0) ) &amp;&amp; ( ( (startup_failed = 0) ) ) ) -&gt; (X(( (di_state0 = 1) &amp;&amp; (di_state1 = 1) ))) )) &amp;&amp; (G(( ( (di_state0 = 1) &amp;&amp; (di_state1 = 0) ) &amp;&amp; ( ( (error = 0) &amp;&amp; (startup_failed = 1) ) ) ) -&gt; (X(( (di_state0 = 0) &amp;&amp; (di_state1 = 1) ))) )) &amp;&amp; (G(( ( (di_state0 = 0) &amp;&amp; (di_state1 = 1) ) &amp;&amp; ( ( (startup_failed = 0) ) ) ) -&gt; (X(( (di_state0 = 1) &amp;&amp; (di_state1 = 1) ))) )) &amp;&amp; (G(( ( (di_state0 = 0) &amp;&amp; (di_state1 = 1) ) &amp;&amp; ( ( (startup_failed = 1) ) ) ) -&gt; (X(( (di_state0 = 0) &amp;&amp; (di_state1 = 1) ))) )) &amp;&amp; (G(F( ( (di_state0 = 0) &amp;&amp; (di_state1 = 0) ) || ( (di_state0 = 1) &amp;&amp; (di_state1 = 0) ) || ( (di_state0 = 1) &amp;&amp; (di_state1 = 1) ) ))) &amp;&amp; (G(dead = 0)) &amp;&amp; ( ( (di_state0 = 0) &amp;&amp; (di_state1 = 0) ) )
+      </property>
+      <kind>
+        G
+      </kind>
+      <base_automaton_name>
+        design_intent0
+      </base_automaton_name>
+      <notes>
+        
+      </notes>
+      <toggled>
+        1
+      </toggled>
+    </requirement>
+  </requirements>
+  <property_assurance>
+    <possibilities/>
+    <assertions/>
+  </property_assurance>
+  <property_simulation/>
+  <categories>
+    <category>
+      <name>
+        New
+      </name>
+      <editable>
+        no
+      </editable>
+      <notes>
+        This is the category of those traces that have been just created
+      </notes>
+    </category>
+    <category>
+      <name>
+        Default
+      </name>
+      <editable>
+        no
+      </editable>
+      <notes>
+        This is the default category for traces
+      </notes>
+    </category>
+    <category>
+      <name>
+        Out of Date
+      </name>
+      <editable>
+        no
+      </editable>
+      <notes>
+        Contains the traces whose dependencies might be no longer consistent
+      </notes>
+    </category>
+    <category>
+      <name>
+        Trash
+      </name>
+      <editable>
+        no
+      </editable>
+      <notes>
+        Contains the traces that have been deleted
+      </notes>
+    </category>
+  </categories>
+  <automata>
+    <automaton_entry use_dead_state="False">
+      <name>
+        design_intent0
+      </name>
+      <notes>
+        Created automatically from a simulation run.
+      </notes>
+      <automaton autocomplete="True">
+        <state accepting="True" index="0" initial="True" name="V1" x="50.0" y="450.0">
+          <waypoint x="0.0" y="500.0"/>
+        </state>
+        <state accepting="True" index="1" initial="False" name="V2" x="310.9" y="444.2">
+          <waypoint x="260.9" y="494.2"/>
+        </state>
+        <state accepting="False" index="2" initial="False" name="R2" x="305.1" y="850.0">
+          <waypoint x="255.1" y="900.0"/>
+        </state>
+        <state accepting="True" index="3" initial="False" name="accept" x="299.3" y="50.0">
+          <waypoint x="249.3" y="100.0"/>
+        </state>
+        <variable name="r0"/>
+        <variable name="r1"/>
+        <variable name="startup_failed"/>
+        <variable name="g0"/>
+        <variable name="g1"/>
+        <variable name="error"/>
+        <edge dst_state="3" labelpos="0.5" src_state="3">
+          <waypoint x="249.3" y="100.0"/>
+          <transitioncondition>
+            ------
+          </transitioncondition>
+        </edge>
+        <edge dst_state="1" labelpos="0.5" src_state="0">
+          <transitioncondition>
+            ------
+          </transitioncondition>
+        </edge>
+        <edge dst_state="3" labelpos="0.162800948993" src_state="0">
+          <transitioncondition>
+            
+          </transitioncondition>
+        </edge>
+        <edge dst_state="2" labelpos="0.5" src_state="0">
+          <transitioncondition>
+            
+          </transitioncondition>
+        </edge>
+        <edge dst_state="1" labelpos="0.417975613382" src_state="1">
+          <waypoint x="260.9" y="494.2"/>
+          <transitioncondition>
+            --1--1
+          </transitioncondition>
+        </edge>
+        <edge dst_state="3" labelpos="0.263446500442" src_state="1">
+          <transitioncondition>
+            --0---
+          </transitioncondition>
+        </edge>
+        <edge dst_state="2" labelpos="0.268054855788" src_state="1">
+          <transitioncondition>
+            --1--0
+          </transitioncondition>
+        </edge>
+        <edge dst_state="3" labelpos="0.991670322346" src_state="2">
+          <waypoint x="462.55" y="848.25"/>
+          <waypoint x="458.2" y="49.3"/>
+          <transitioncondition>
+            --0---
+          </transitioncondition>
+        </edge>
+        <edge dst_state="2" labelpos="0.5" src_state="2">
+          <waypoint x="255.1" y="900.0"/>
+          <transitioncondition>
+            --1---
+          </transitioncondition>
+        </edge>
+      </automaton>
+    </automaton_entry>
+  </automata>
+  <active_view>
+    ga
+  </active_view>
+  <notes>
+    
+  </notes>
+</project>
