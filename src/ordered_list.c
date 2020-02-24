@@ -143,6 +143,8 @@ bool automaton_ordered_list_add_entry(automaton_ordered_list* list, void* entry)
 			new_size	= list->temporary_size;
 		}else{
 			new_size	= list->count * LIST_INCREASE_FACTOR;
+			if(new_size <= list->count)
+					new_size	= list->count * 2;
 		}
 		new_values		= malloc(list->sizeof_element * new_size);
 

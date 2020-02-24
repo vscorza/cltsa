@@ -27,8 +27,7 @@
 
 #define COMPOSE_SYNCH	1
 #define PARTIAL_SHARE	2
-#define FIXED_SIGNALS_COUNT	1//4
-#define SIGNALS_INCREASE_FACTOR 2
+#define SIGNALS_INCREASE_FACTOR (1.5f)//2
 #define TRANSITIONS_INITIAL_SIZE 2
 
 #define RANKING_INFINITY	-1
@@ -86,8 +85,9 @@
 
 typedef uint8_t signal_t;
 typedef uint8_t fluent_count_t;
-typedef uint64_t signal_bit_array_t;
-#define TRANSITION_ENTRY_SIZE 64
+typedef uint16_t signal_bit_array_t;
+#define TRANSITION_ENTRY_SIZE 16
+#define FIXED_SIGNALS_COUNT	3//4
 /****************
 ==== ENUMS ==== 
 ****************/
