@@ -109,7 +109,7 @@ typedef struct obdd_mgr_t {
 
 typedef struct obdd_node_t{
 	obdd_var_size_t 		var_ID;
-	uint32_t		node_ID;
+	//uint32_t		node_ID;
 	obdd_ref_count_size_t		ref_count;
 	struct obdd_node_t*	high_obdd;
 	struct obdd_node_t*	low_obdd;

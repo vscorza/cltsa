@@ -493,8 +493,8 @@ bool automaton_automaton_print_fsp(automaton_automaton* current_automaton, char*
 			if(signal_count > 1)fprintf(f, "<");
 			bool first_print = true;
 			for(k = 0; k < (TRANSITION_ENTRY_SIZE * FIXED_SIGNALS_COUNT) - 1; k++){
-				uint64_t check_value = (TEST_TRANSITION_BIT(current_transition, k));
-				if(check_value != (uint64_t)0){
+				signal_bit_array_t check_value = (TEST_TRANSITION_BIT(current_transition, k));
+				if(check_value != (signal_bit_array_t)0){
 					if(first_print)first_print = false;
 					else fprintf(f,",");
 					fprintf(f,"%s", ctx->global_alphabet->list[k].name);
@@ -3320,18 +3320,18 @@ bool automaton_automata_idxs_is_max(uint32_t *idxs, uint32_t automata_count){
  * @param alphabet_overlap a boolean array describing which elements should be considered in the check
  * @return 0 if overlapping is total, 1 if overlapping is partial, -1 if overlapping is empty
  */
-int32_t automaton_automata_check_overlap(uint64_t *accum_label, uint64_t *current_label, uint64_t *alphabet_overlap
+int32_t automaton_automata_check_overlap(signal_bit_array_t *accum_label, signal_bit_array_t *current_label, signal_bit_array_t *alphabet_overlap
 		, uint32_t alphabet_count){
 	uint32_t i;
 	bool at_least_one_overlaps	= false;
 	bool at_least_one_does_not	= false;
 	bool no_overlapping			= true;
-	uint64_t mask_all = ~((uint64_t)0x0);
-	uint64_t mask_not1 = ~((uint64_t)0x1);
-	uint64_t current_mask;
+	signal_bit_array_t mask_all = ~((signal_bit_array_t)0x0);
+	signal_bit_array_t mask_not1 = ~((signal_bit_array_t)0x1);
+	signal_bit_array_t current_mask;
 	for(i = 0; i < FIXED_SIGNALS_COUNT; i++){
 		current_mask = i==0? mask_not1 : mask_all;
-		if((alphabet_overlap[i]&current_mask)>(uint64_t)0x0){
+		if((alphabet_overlap[i]&current_mask)>(signal_bit_array_t)0x0){
 			if(
 					(
 							(alphabet_overlap[i]&current_mask) &
@@ -3339,10 +3339,10 @@ int32_t automaton_automata_check_overlap(uint64_t *accum_label, uint64_t *curren
 									(accum_label[i]&current_mask)| (current_label[i]&current_mask)
 							)
 					)
-					>(uint64_t)0x0)
+					>(signal_bit_array_t)0x0)
 				no_overlapping = false;
 			if(((alphabet_overlap[i]&accum_label[i]&current_mask) == (alphabet_overlap[i]&current_label[i]&current_mask))
-					&& ((alphabet_overlap[i]&accum_label[i]&current_mask)>(uint64_t)0x0)){
+					&& ((alphabet_overlap[i]&accum_label[i]&current_mask)>(signal_bit_array_t)0x0)){
 				at_least_one_overlaps = true;
 			}
 			if((alphabet_overlap[i]&accum_label[i]&current_mask) != (alphabet_overlap[i]&current_label[i]&current_mask)){
@@ -3400,15 +3400,15 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 	alphabet_count = ctx->global_alphabet->count;
 
 	// create boolean alphabets sigma_i,accumulated alphabet sigma_1..i-1 and the overlapping between the two
-	uint64_t **boolean_alphabet = calloc(automata_count, sizeof(uint64_t*));
-	uint64_t **accumulated_boolean_alphabet = calloc(automata_count, sizeof(uint64_t*));
-	uint64_t **accumulated_alphabet_overlap = calloc(automata_count, sizeof(uint64_t*));
-	uint64_t *current_label	= calloc(FIXED_SIGNALS_COUNT, sizeof(uint64_t));
+	signal_bit_array_t **boolean_alphabet = calloc(automata_count, sizeof(signal_bit_array_t*));
+	signal_bit_array_t **accumulated_boolean_alphabet = calloc(automata_count, sizeof(signal_bit_array_t*));
+	signal_bit_array_t **accumulated_alphabet_overlap = calloc(automata_count, sizeof(signal_bit_array_t*));
+	signal_bit_array_t *current_label	= calloc(FIXED_SIGNALS_COUNT, sizeof(signal_bit_array_t));
 
 	for(i = 0; i < automata_count; i++){
-		boolean_alphabet[i]	= calloc(FIXED_SIGNALS_COUNT, sizeof(uint64_t));
-		accumulated_boolean_alphabet[i] = calloc(FIXED_SIGNALS_COUNT, sizeof(uint64_t));
-		accumulated_alphabet_overlap[i] = calloc(FIXED_SIGNALS_COUNT, sizeof(uint64_t));
+		boolean_alphabet[i]	= calloc(FIXED_SIGNALS_COUNT, sizeof(signal_bit_array_t));
+		accumulated_boolean_alphabet[i] = calloc(FIXED_SIGNALS_COUNT, sizeof(signal_bit_array_t));
+		accumulated_alphabet_overlap[i] = calloc(FIXED_SIGNALS_COUNT, sizeof(signal_bit_array_t));
 		for(j = 0; j < automata[i]->local_alphabet_count; j++){
 			k	= automata[i]->local_alphabet[j];
 			SET_SIGNAL_ARRAY_BIT(boolean_alphabet[i], k);
@@ -3418,10 +3418,10 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 			for(k = 0; k < alphabet_count; k++){
 				if(TEST_SIGNAL_ARRAY_BIT(accumulated_boolean_alphabet[i-1],k))
 					SET_SIGNAL_ARRAY_BIT(accumulated_boolean_alphabet[i], k);
-				accumulated_alphabet_overlap[i][((k+1)/TRANSITION_ENTRY_SIZE)] &= ~(((uint64_t)1) << ((k+1)%TRANSITION_ENTRY_SIZE));
+				accumulated_alphabet_overlap[i][((k+1)/TRANSITION_ENTRY_SIZE)] &= ~(((signal_bit_array_t)1) << ((k+1)%TRANSITION_ENTRY_SIZE));
 				accumulated_alphabet_overlap[i][((k+1)/TRANSITION_ENTRY_SIZE)] |=
 						((boolean_alphabet[i][((k+1)/TRANSITION_ENTRY_SIZE)] & accumulated_boolean_alphabet[i - 1][((k+1)/TRANSITION_ENTRY_SIZE)] )
-								& (((uint64_t)1) << ((k+1)%TRANSITION_ENTRY_SIZE)));
+								& (((signal_bit_array_t)1) << ((k+1)%TRANSITION_ENTRY_SIZE)));
 			}
 		}
 	}
@@ -3481,12 +3481,12 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 	uint32_t* idxs	= calloc(automata_count, sizeof(uint32_t));
 	uint32_t* idxs_size	= calloc(automata_count, sizeof(uint32_t));
 	bool** idxs_skip	= calloc(automata_count, sizeof(bool*));
-	uint64_t** automata_accum	= calloc(automata_count, sizeof(uint64_t*));
+	signal_bit_array_t** automata_accum	= calloc(automata_count, sizeof(signal_bit_array_t*));
 	for(i = 0; i < automata_count; i++){
 		idxs_skip[i] 		= calloc(automata[i]->max_out_degree, sizeof(bool));
-		automata_accum[i]	= calloc(FIXED_SIGNALS_COUNT, sizeof(uint64_t));
+		automata_accum[i]	= calloc(FIXED_SIGNALS_COUNT, sizeof(signal_bit_array_t));
 	}
-	uint64_t* label_accum	= calloc(FIXED_SIGNALS_COUNT, sizeof(uint64_t));
+	signal_bit_array_t* label_accum	= calloc(FIXED_SIGNALS_COUNT, sizeof(signal_bit_array_t));
 
 
 	int32_t last_char	= -1;	signal_t current_signal, current_other_signal;
@@ -3550,7 +3550,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 			idxs_size[i]	= automata[i]->out_degree[current_state[i]] + 1;
 			idxs[i]			= 0;
 			//initialize label skips and automata label accum struct
-			for(j = 0; j < FIXED_SIGNALS_COUNT; j++)	automata_accum[i][j]	= (uint64_t)0x0;
+			for(j = 0; j < FIXED_SIGNALS_COUNT; j++)	automata_accum[i][j]	= (signal_bit_array_t)0x0;
 			for(j = 0; j < automata[i]->out_degree[current_state[i]]; j++)idxs_skip[i][j]	= false;
 			for(j = 0; j < automata[i]->out_degree[current_state[i]]; j++){
 				current_transition = &(automata[i]->transitions[current_state[i]][j]);
@@ -3583,7 +3583,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 			printf("\n");
 		}
 #endif
-		uint64_t current_mask;
+		signal_bit_array_t current_mask;
 		//set idxs_skip marks
 		bool transition_skipped = false;
 		for(i = 0; i < automata_count; i++){
@@ -3594,7 +3594,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 					if(k == i)continue;
 					//if l_i_j intersects sigma_k != l_i_j intersects automata_accum_k skip l_i_j
 					for(l = 0; l < FIXED_SIGNALS_COUNT; l++ && !transition_skipped){
-						current_mask	= l == 0 ? ~((uint64_t)1) : ~((uint64_t)0);
+						current_mask	= l == 0 ? ~((signal_bit_array_t)1) : ~((signal_bit_array_t)0);
 						if((boolean_alphabet[k][l]
 												& current_transition->signals[l] & current_mask)
 								!= (automata_accum[k][l]
@@ -3617,7 +3617,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 		}
 		printf("]\n");
 #endif
-		for(i = 0; i < FIXED_SIGNALS_COUNT; i++)label_accum[i]	= (uint64_t)0x0;
+		for(i = 0; i < FIXED_SIGNALS_COUNT; i++)label_accum[i]	= (signal_bit_array_t)0x0;
 
 
 		bool viable; bool not_considered; bool local_overlap;
@@ -3652,7 +3652,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 					label_accum[j]	= automata[0]->transitions[current_state[0]][idxs[0] - 1].signals[j];
 				accum_set = true;
 			}else{
-				for(j = 0; j < FIXED_SIGNALS_COUNT; j++)label_accum[j] = (uint64_t)0x0;
+				for(j = 0; j < FIXED_SIGNALS_COUNT; j++)label_accum[j] = (signal_bit_array_t)0x0;
 			}
 			viable = true;
 			//check if current combination is viable
@@ -3661,7 +3661,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 					is_input = is_input || TRANSITION_IS_INPUT(automata[j]->transitions[current_state[j]]);
 					not_considered = true;
 					for(k = 0; k < FIXED_SIGNALS_COUNT; k++)
-						current_label[k]	= (uint64_t)0x0;
+						current_label[k]	= (signal_bit_array_t)0x0;
 				}else{
 					is_input = is_input || TRANSITION_IS_INPUT(&(automata[j]->transitions[current_state[j]][idxs[j] - 1]));
 					not_considered = false;
@@ -3987,8 +3987,8 @@ bool automaton_automata_are_equivalent(automaton_automaton* left_automaton, auto
 			for(j = 0; j < right_automaton->out_degree[right_state]; j++){
 				label_mismatch = false;
 				for(k = 0; k < FIXED_SIGNALS_COUNT; k++){
-					if((left_automaton->transitions[left_state][i].signals[k]&~((uint64_t)1)) !=
-							(right_automaton->transitions[right_state][j].signals[k]&~((uint64_t)1))){
+					if((left_automaton->transitions[left_state][i].signals[k]&~((signal_bit_array_t)1)) !=
+							(right_automaton->transitions[right_state][j].signals[k]&~((signal_bit_array_t)1))){
 						label_mismatch = true;
 												break;
 					}

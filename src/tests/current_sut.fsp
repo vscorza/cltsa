@@ -1,102 +1,56 @@
-//AHB example taken from Synthesis of Reactive(1) Designs 2 masters (RATSY VERSION)
+//AHB example taken from Synthesis of Reactive(1) Designs 2 masters
+range Bool = 0..1
+range T_range = 0..2
 set Global_Alphabet = {}
 set Controllable_Alphabet = {}
-set Global_Signals	= {hready, hbusreq0, hbusreq1, hlock0, hlock1, hburst0, hburst1, hmaster, hmastlock, start, decide, hlocked, hgrant0, hgrant1,
-			stateA1_0, stateA1_1, stateG2_0, stateG2_1, stateG3_0, stateG3_1, stateG3_2, stateG10}
-set Output_Signals	= {hmaster, hmastlock, start, decide, hlocked, hgrant0, hgrant1, stateA1_0, stateA1_1, stateG2_0, stateG2_1, stateG3_0, stateG3_1,
-			stateG3_2, stateG10}
+
+set Global_Signals	= {hMastLock, hBurst_0, hBurst_1, t_0, t_1, start}
+set Output_Signals	= {hMastLock, hBurst_0, hBurst_1, t_0, t_1}
 order			= {}
 
 /***********
 **** THETA
 ***********/
-ltl env theta Init_AHB_e in AHB	= (!hready && !hbusreq0 && !hbusreq1 && !hlock0 && !hlock1 && !hburst0 && !hburst1).
-ltl sys theta Init_AHB_s in AHB	= (!hmaster && !hmastlock && start && decide && !hlocked && !hgrant0 && !hgrant1 && !stateA1_0 && !stateA1_1 && !stateG2_0 &&
-			!stateG2_1 && !stateG3_0 && !stateG3_1 && !stateG3_2 && !stateG10).
-/***********
-**** ENV RHO
-***********/
-ltl env rho TransEnv_0 in AHB	= []((hlock0 -> hbusreq0) && (hlock1 -> hbusreq1)).
+ltl env theta Init_AHB_e in AHB	= (start).
+ltl sys theta Init_AHB_s in AHB	= (hGrant_0 && !hBurst_0 && !hBurst_1 && start && !t_0 && !t_1).
 /***********
 **** SYS RHO
 ***********/
-ltl sys rho TransSys_0 in AHB	=   [] ((!stateA1_0 && !stateA1_1 && ((!hmastlock) || (hburst0 || hburst1))) -> X(!stateA1_0 && !stateA1_1)).
-ltl sys rho TransSys_1 in AHB	=   [] ((!stateA1_0 && !stateA1_1 && ((hmastlock) && (!hmaster) && (!hburst0 && !hburst1))) -> X(stateA1_0 && !stateA1_1)).
-ltl sys rho TransSys_2 in AHB	=   [] ((stateA1_0 && !stateA1_1 &&  hbusreq0) -> X(stateA1_0 && !stateA1_1)).
-ltl sys rho TransSys_3 in AHB	=   [] ((stateA1_0 && !stateA1_1 &&  !hbusreq0) -> X(!stateA1_0 && !stateA1_1)).
-ltl sys rho TransSys_4 in AHB	=   [] ((!stateA1_0 && !stateA1_1 && ((hmastlock) && (hmaster) && (!hburst0 && !hburst1))) -> X(!stateA1_0 && stateA1_1)).
-ltl sys rho TransSys_5 in AHB	=   [] ((!stateA1_0 && stateA1_1 &&  hbusreq1) -> X(!stateA1_0 && stateA1_1)).
-ltl sys rho TransSys_6 in AHB	=   [] ((!stateA1_0 && stateA1_1 &&  !hbusreq1) -> X(!stateA1_0 && !stateA1_1)).
-ltl sys rho TransSys_7 in AHB	=   [] ((!hready) -> X(!start)).
-ltl sys rho TransSys_8 in AHB	=   [] (( !stateG2_0 && (!hmastlock)) -> X !stateG2_0).
-ltl sys rho TransSys_9 in AHB	=   [] (( !stateG2_0 && (!start)) -> X !stateG2_0).
-ltl sys rho TransSys_10 in AHB	=   [] (( !stateG2_0 && hburst0) -> X !stateG2_0).
-ltl sys rho TransSys_11 in AHB	=   [] (( !stateG2_0 && hburst1) -> X !stateG2_0).
-ltl sys rho TransSys_12 in AHB	=   [] (( !stateG2_0 && !(!hmaster)) -> X !stateG2_0).
-ltl sys rho TransSys_13 in AHB	=   [] (( !stateG2_0 && (hmastlock) && (start) && !hburst0 && !hburst1 && (!hmaster)) -> X stateG2_0).
-ltl sys rho TransSys_14 in AHB	=   [] (( stateG2_0 && (!start) &&  hbusreq0) -> X stateG2_0).
-ltl sys rho TransSys_15 in AHB	=   [] (( stateG2_0 && start) -> X(start && !start)).
-ltl sys rho TransSys_16 in AHB	=   [] (( stateG2_0 && (!start) &&  !hbusreq0) -> X !stateG2_0).
-ltl sys rho TransSys_17 in AHB	=   [] (( !stateG2_1 && (!hmastlock)) -> X !stateG2_1).
-ltl sys rho TransSys_18 in AHB	=   [] (( !stateG2_1 && (!start)) -> X !stateG2_1).
-ltl sys rho TransSys_19 in AHB	=   [] (( !stateG2_1 && hburst0) -> X !stateG2_1).
-ltl sys rho TransSys_20 in AHB	=   [] (( !stateG2_1 && hburst1) -> X !stateG2_1).
-ltl sys rho TransSys_21 in AHB	=   [] (( !stateG2_1 && !(hmaster)) -> X !stateG2_1).
-ltl sys rho TransSys_22 in AHB	=   [] (( !stateG2_1 && (hmastlock) && (start) && !hburst0 && !hburst1 && (hmaster)) -> X stateG2_1).
-ltl sys rho TransSys_23 in AHB	=   [] (( stateG2_1 && (!start) &&  hbusreq1) -> X stateG2_1).
-ltl sys rho TransSys_24 in AHB	=   [] (( stateG2_1 && start) -> X (start && !start)).
-ltl sys rho TransSys_25 in AHB	=   [] (( stateG2_1 && (!start) &&  !hbusreq1) -> X !stateG2_1).
-ltl sys rho TransSys_26 in AHB	=   [] ((!stateG3_0 && !stateG3_1 && !stateG3_2 &&  ((!hmastlock) || (!start) || (hburst0 || !hburst1))) -> X(!stateG3_0 && !stateG3_1 && !stateG3_2)).
-ltl sys rho TransSys_27 in AHB	=   [] ((!stateG3_0 && !stateG3_1 && !stateG3_2 &&  ((hmastlock) && (start) && (!hburst0 && hburst1) && (!hready))) -> X(stateG3_0 && !stateG3_1 && !stateG3_2)).
-ltl sys rho TransSys_28 in AHB	=   [] ((!stateG3_0 && !stateG3_1 && !stateG3_2 &&  ((hmastlock) && (start) && (!hburst0 && hburst1) && (hready))) -> X(!stateG3_0 && stateG3_1 && !stateG3_2)).
-ltl sys rho TransSys_29 in AHB	=   [] ((stateG3_0 && !stateG3_1 && !stateG3_2 && ((!start) && (!hready))) -> X(stateG3_0 && !stateG3_1 && !stateG3_2)).
-ltl sys rho TransSys_30 in AHB	=   [] ((stateG3_0 && !stateG3_1 && !stateG3_2 && ((!start) && (hready))) -> X(!stateG3_0 && stateG3_1 && !stateG3_2)).
+//G2: when a locked unspecified length burst starts, a new access does not start until the current master releases the bus by lowering hBusReq[hMaster]
+ltl sys rho G_2_t00_t00 in AHB	= []((!t_0 && !t_1 && !(hMastLock && !hBurst_0 && hBurst_1 && start))-> X(!t_0 && !t_1)).
+ltl sys rho G_2_t00_t01 in AHB	= []((!t_0 && !t_1 && hMastLock && !hBurst_0 && hBurst_1 && start)-> X(t_0 && !t_1)).
+ltl sys rho G_2_t01_t01 in AHB	= []((t_0 && !t_1 && busReq && !start)-> X(t_0 && !t_1)).
+ltl sys rho G_2_t01_t00 in AHB	= []((t_0 && !t_1 && !busReq && !start)-> X(!t_0 && !t_1)).
+ltl sys rho G_2_t01_t10 in AHB	= []((t_0 && !t_1 && start)-> X(!t_0 && t_1)).
+ltl sys rho G_2_t10_t10 in AHB	= []((!t_0 && t_1)-> X(!t_0 && t_1)).
 
-ltl sys rho TransSys_31 in AHB	=   [] ((stateG3_0 && !stateG3_1 && !stateG3_2 && ((start))) -> X (start && !start)).
-ltl sys rho TransSys_32 in AHB	=   [] ((!stateG3_0 && stateG3_1 && !stateG3_2 && ((!start) && (!hready))) -> X(!stateG3_0 && stateG3_1 && !stateG3_2)).
-ltl sys rho TransSys_33 in AHB	=   [] ((!stateG3_0 && stateG3_1 && !stateG3_2 && ((!start) && (hready))) -> X(stateG3_0 && stateG3_1 && !stateG3_2)).
-ltl sys rho TransSys_34 in AHB	=   [] ((!stateG3_0 && stateG3_1 && !stateG3_2 && ((start))) -> X (start && !start)).
-ltl sys rho TransSys_35 in AHB	=   [] ((stateG3_0 && stateG3_1 && !stateG3_2 && ((!start) && (!hready))) -> X(stateG3_0 && stateG3_1 && !stateG3_2)).
-ltl sys rho TransSys_36 in AHB	=   [] ((stateG3_0 && stateG3_1 && !stateG3_2 && ((!start) && (hready))) -> X(!stateG3_0 && !stateG3_1 && stateG3_2)).
-ltl sys rho TransSys_37 in AHB	=   [] ((stateG3_0 && stateG3_1 && !stateG3_2 && ((start))) -> X (start && !start)).
-ltl sys rho TransSys_38 in AHB	=   [] ((!stateG3_0 && !stateG3_1 && stateG3_2 && ((!start) && (!hready))) -> X(!stateG3_0 && !stateG3_1 && stateG3_2)).
-ltl sys rho TransSys_39 in AHB	=   [] ((!stateG3_0 && !stateG3_1 && stateG3_2 && ((!start) && (hready))) -> X(!stateG3_0 && !stateG3_1 && !stateG3_2)).
-ltl sys rho TransSys_40 in AHB	=   [] ((!stateG3_0 && !stateG3_1 && stateG3_2 && ((start))) -> X (start && !start)).
-ltl sys rho TransSys_41 in AHB	=   [] ((hready) -> ((hgrant0) <-> X(!hmaster))).
-ltl sys rho TransSys_42 in AHB	=   [] ((hready) -> ((hgrant1) <-> X(hmaster))).
-ltl sys rho TransSys_43 in AHB	=   [] ((hready) -> (!hlocked <-> X(!hmastlock))).
-ltl sys rho TransSys_44 in AHB	=   [] (X(!start) -> ((!hmaster) <-> (X(!hmaster)))).
-ltl sys rho TransSys_45 in AHB	=   [] (X(!start) -> ((hmaster) <-> (X(hmaster)))).
-ltl sys rho TransSys_46 in AHB	=   [] (((X(!start))) -> ((hmastlock) <-> X(hmastlock))).
-ltl sys rho TransSys_47 in AHB	=   [] ((decide && hlock0 && X hgrant0) -> X(hlocked)).
-ltl sys rho TransSys_48 in AHB	=   [] ((decide && !hlock0 && X hgrant0) -> X(!hlocked)).
-ltl sys rho TransSys_49 in AHB	=   [] ((decide && hlock1 && X hgrant1) -> X(hlocked)).
-ltl sys rho TransSys_50 in AHB	=   [] ((decide && !hlock1 && X hgrant1) -> X(!hlocked)).
-ltl sys rho TransSys_51 in AHB	=   [] ((decide && !hbusreq0 && !hbusreq1) -> X hgrant0).
-ltl sys rho TransSys_52 in AHB	=   [] ((!decide)->(((!hgrant0) <-> X(!hgrant0)))).
-ltl sys rho TransSys_53 in AHB	=   [] ((!decide)->(((!hgrant1) <-> X(!hgrant1)))).
-ltl sys rho TransSys_54 in AHB	=   [] ((!decide) -> (!hlocked <-> X(!hlocked))).
-ltl sys rho TransSys_55 in AHB	=   [] (( !stateG10 && (( hgrant1 ||  hbusreq1))) -> X !stateG10).
-ltl sys rho TransSys_56 in AHB	=   [] (( !stateG10 && ( !hgrant1 &&  !hbusreq1)) -> X stateG10).
-ltl sys rho TransSys_57 in AHB	=   [] (( stateG10 && ( !hgrant1 &&  !hbusreq1)) -> X stateG10).
-ltl sys rho TransSys_58 in AHB	=   [] (( stateG10 && (( hgrant1) &&  !hbusreq1)) -> X (start && !start)).
-ltl sys rho TransSys_59 in AHB	=   [] (( stateG10 &&  hbusreq1) -> X !stateG10).
+ltl env rho E_1 in AHB = [](start || !start).
+
+
+ltl env theta Init_AHB_e in AHB_b	= (start).
+ltl sys theta Init_AHB_s in AHB_b	= (hGrant_0 && !hBurst_0 && !hBurst_1 && start && !t_0 && !t_1).
 /***********
-**** FLUENTS
+**** SYS RHO
 ***********/
-ltl fluent FairEnv_0		= (!stateA1_0 && !stateA1_1).
-ltl fluent FairEnv_1		= (hready).
+//G2: when a locked unspecified length burst starts, a new access does not start until the current master releases the bus by lowering hBusReq[hMaster]
+ltl sys rho G_2_t00_t00 in AHB_b	= [](!t_0 || t_0).
+ltl env rho E_1 in AHB_b = [](start || !start).
 
-ltl fluent FairSys_0   		= (!stateG2_0).
-ltl fluent FairSys_1  		= (!stateG2_1).
-ltl fluent FairSys_2  		= (!stateG3_0 && !stateG3_1 && !stateG3_2).
-ltl fluent FairSys_3   		= ((!hmaster) || !hbusreq0).
-ltl fluent FairSys_4   		= ((hmaster) || !hbusreq1).
-
-
-/***********
-**** SYNTHESIS
-***********/
-|f| ENV =(AHB).
-|gr1| <{FairEnv_0,FairEnv_1}><{FairSys_0,FairSys_1,FairSys_2,FairSys_3,FairSys_4}> STRAT = ENV.
-
+//0->0 (!t_0 && !t_1 && !(hMastLock && !hBurst_0 && hBurst_1 && start))-> X(!t_0 && !t_1)).
+//0->1 (!t_0 && !t_1 && hMastLock && !hBurst_0 && hBurst_1 && start)-> X(t_0 && !t_1).
+RESTRICT = R[0][0][0][0][0],
+R[t:T_range][mLock:Bool][hB_0:Bool][hB_1:Bool][s:Bool] = (
+	when ((t == 0) * )  
+	).
+	
+	//Concrete
+MAZE = M[1][1],
+M[r:Pos][c:Pos] = ( 
+				when(r > Min) n->M[r-1][c] 
+				| when(r < Max) s->M[r+1][c]
+				| when(c > Min) w->M[r][c-1]
+				| when(c < Max) e->M[r][c+1]
+				| when((r == Max) * (c == Max)) load->M[r][c]
+				| when((r == Min) * (c == Min)) unload->M[r][c]
+				| when(r == c) stall -> M[r][c]
+).

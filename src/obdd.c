@@ -272,7 +272,7 @@ obdd_node* obdd_mgr_mk_node_ID(obdd_mgr* mgr, obdd_var_size_t var_ID, obdd_node*
 	obdd_node* new_node	= calloc(1, sizeof(obdd_node));
 #endif
 	new_node->var_ID	= var_ID;
-	new_node->node_ID	= obdd_mgr_get_next_node_ID(mgr);
+	//new_node->node_ID	= obdd_mgr_get_next_node_ID(mgr);
 	obdd_add_high_successor(new_node, high);
 	obdd_add_low_successor(new_node, low);
 	new_node->ref_count	= 0;
@@ -580,7 +580,7 @@ void obdd_merge_redundant_nodes(obdd_mgr* mgr, obdd_node* root){
 	obdd_merge_redundant_nodes(mgr, root->low_obdd);
 	int32_t i;
 	if(!obdd_is_constant(mgr, root->high_obdd)){
-		if(root->high_obdd->high_obdd->node_ID == root->high_obdd->low_obdd->node_ID){
+		if(root->high_obdd->high_obdd == root->high_obdd->low_obdd){
 			obdd_node* to_remove	= root->high_obdd;
 			obdd_node* to_add		= root->high_obdd->high_obdd;
 			obdd_remove_high_successor(root->high_obdd, root->high_obdd->high_obdd);
@@ -591,7 +591,7 @@ void obdd_merge_redundant_nodes(obdd_mgr* mgr, obdd_node* root){
 		}
 	}
 	if(!obdd_is_constant(mgr, root->low_obdd)){
-		if(root->low_obdd->high_obdd->node_ID == root->low_obdd->low_obdd->node_ID){
+		if(root->low_obdd->high_obdd == root->low_obdd->low_obdd){
 			obdd_node* to_remove	= root->low_obdd;
 			obdd_node* to_add		= root->low_obdd->low_obdd;
 			obdd_remove_high_successor(root->low_obdd, root->low_obdd->high_obdd);
@@ -1388,7 +1388,7 @@ void obdd_node_destroy(obdd_mgr* mgr, obdd_node* node){
 			node->low_obdd = NULL;
 		}
 		node->var_ID	= 0;
-		node->node_ID	= 0;
+		//node->node_ID	= 0;
 		//free(node);
 #if OBDD_USE_POOL
 		automaton_fast_pool_release_instance(mgr->nodes_pool, node->fragment_ID);

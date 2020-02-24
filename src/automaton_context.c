@@ -2148,7 +2148,7 @@ bool automaton_add_transition_from_valuations(obdd_mgr* mgr, automaton_automaton
 	if(signal_count > __global_max_signals){
 		__global_max_signals = signal_count;
 	}
-	if(__global_signals_count % 10000 == 0){
+	if(__global_signals_count % 100000 == 0){
 		printf("transition load: %" PRIu64 "\t(%d / %d) max: %d\n", __global_signals_count / automaton->transitions_composite_count
 				, __global_signals_count, automaton->transitions_composite_count, __global_max_signals);
 	}

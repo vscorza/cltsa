@@ -63,17 +63,17 @@
 #define SET_BITVECTOR_BIT(arr,index)     ( arr[(index/BITVECTOR_ENTRY_SIZE)] |= (1 << (index%BITVECTOR_ENTRY_SIZE)) )
 #define CLEAR_BITVECTOR_BIT(arr,index)   ( arr[(index/BITVECTOR_ENTRY_SIZE)] &= ~(1 << (index%BITVECTOR_ENTRY_SIZE)) )
 
-#define TRANSITION_ENTRY_SIZE 64
-#define TEST_TRANSITION_BIT(t,index)    ( (t->signals[((index+1)/TRANSITION_ENTRY_SIZE)]) & ((uint64_t)1 << ((index+1)%TRANSITION_ENTRY_SIZE)) )
-#define SET_TRANSITION_BIT(t,index)     ( (t->signals[((index+1)/TRANSITION_ENTRY_SIZE)]) |= ((uint64_t)1 << ((index+1)%TRANSITION_ENTRY_SIZE)) )
-#define CLEAR_TRANSITION_BIT(t,index)   ( (t->signals[((index+1)/TRANSITION_ENTRY_SIZE)]) &= ~(((uint64_t)1 << ((index+1)%TRANSITION_ENTRY_SIZE))) )
-#define TEST_SIGNAL_ARRAY_BIT(arr,index)    ( (arr[((index+1)/TRANSITION_ENTRY_SIZE)]) & ((uint64_t)1 << ((index+1)%TRANSITION_ENTRY_SIZE)) )
-#define SET_SIGNAL_ARRAY_BIT(arr,index)     ( (arr[((index+1)/TRANSITION_ENTRY_SIZE)]) |= ((uint64_t)1 << ((index+1)%TRANSITION_ENTRY_SIZE)) )
-#define CLEAR_SIGNAL_ARRAY_BIT(arr,index)   ( (arr[((index+1)/TRANSITION_ENTRY_SIZE)]) &= ~(((uint64_t)1 << ((index+1)%TRANSITION_ENTRY_SIZE))) )
+
+#define TEST_TRANSITION_BIT(t,index)    ( (t->signals[((index+1)/TRANSITION_ENTRY_SIZE)]) & ((signal_bit_array_t)1 << ((index+1)%TRANSITION_ENTRY_SIZE)) )
+#define SET_TRANSITION_BIT(t,index)     ( (t->signals[((index+1)/TRANSITION_ENTRY_SIZE)]) |= ((signal_bit_array_t)1 << ((index+1)%TRANSITION_ENTRY_SIZE)) )
+#define CLEAR_TRANSITION_BIT(t,index)   ( (t->signals[((index+1)/TRANSITION_ENTRY_SIZE)]) &= ~(((signal_bit_array_t)1 << ((index+1)%TRANSITION_ENTRY_SIZE))) )
+#define TEST_SIGNAL_ARRAY_BIT(arr,index)    ( (arr[((index+1)/TRANSITION_ENTRY_SIZE)]) & ((signal_bit_array_t)1 << ((index+1)%TRANSITION_ENTRY_SIZE)) )
+#define SET_SIGNAL_ARRAY_BIT(arr,index)     ( (arr[((index+1)/TRANSITION_ENTRY_SIZE)]) |= ((signal_bit_array_t)1 << ((index+1)%TRANSITION_ENTRY_SIZE)) )
+#define CLEAR_SIGNAL_ARRAY_BIT(arr,index)   ( (arr[((index+1)/TRANSITION_ENTRY_SIZE)]) &= ~(((signal_bit_array_t)1 << ((index+1)%TRANSITION_ENTRY_SIZE))) )
 #define GET_TRANSITION_SIGNAL_COUNT(transition) uint32_t signal_count = 0,_p_ = 0;for(_p_ = 0; _p_ < (TRANSITION_ENTRY_SIZE * FIXED_SIGNALS_COUNT) - 1; _p_++){if(TEST_TRANSITION_BIT((transition), _p_))signal_count++;}
-#define TRANSITION_IS_INPUT(transition)	(((transition)->signals[0]&((uint64_t)0x1))==true)
-#define TRANSITION_SET_INPUT(transition)	(transition)->signals[0] |= ((uint64_t)0x1);
-#define TRANSITION_CLEAR_INPUT(transition)	(transition)->signals[0] &= ~((uint64_t)0x1);
+#define TRANSITION_IS_INPUT(transition)	(((transition)->signals[0]&((signal_bit_array_t)0x1))==true)
+#define TRANSITION_SET_INPUT(transition)	(transition)->signals[0] |= ((signal_bit_array_t)0x1);
+#define TRANSITION_CLEAR_INPUT(transition)	(transition)->signals[0] &= ~((signal_bit_array_t)0x1);
 #define TRANSITION_EQUALS(t1, t2, result) result = true; result &= t1->state_from == t2->state_from; result &= t1->state_to == t2->state_to; uint32_t _p_ = 0;  for(_p_ = 0; _p_ < FIXED_SIGNALS_COUNT; _p_++)result &= t1->signals[_p_] == t2->signals[_p_];
 
 
@@ -86,6 +86,8 @@
 
 typedef uint8_t signal_t;
 typedef uint8_t fluent_count_t;
+typedef uint64_t signal_bit_array_t;
+#define TRANSITION_ENTRY_SIZE 64
 /****************
 ==== ENUMS ==== 
 ****************/
@@ -148,7 +150,7 @@ typedef struct automaton_alphabet_str{
 typedef struct automaton_transition_str{
 	uint32_t	state_from;
 	uint32_t	state_to;
-	uint64_t	signals[FIXED_SIGNALS_COUNT];
+	signal_bit_array_t	signals[FIXED_SIGNALS_COUNT];
 } automaton_transition;
 typedef struct automaton_fluent_str{
 	char*		name;
