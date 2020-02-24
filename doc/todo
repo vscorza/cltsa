@@ -1,17 +1,18 @@
 TODO:
 =====
-- env_rho composition is taking too long
-- review konighoefer numbers
-- implement mutations on existing examples
-	- remove assumption
-	- add non controllable transition
-	- remove controllable transition
-	- mutate assumption formula using operators
-	- mutate goal formula using operators
-	- add conjuction of goals as new goal
-- review relation between minimization, original plant and controller either on structure or syntax
-- reason about general diagnosis 
-- diagnose mutation over small parameters, produce hypothesis, scale both hypothesis and parameter to see if it holds
+- try to restrict ahb behavior under reasonable assumptions
+- next deliverable
+	- review konighoefer numbers
+	- implement mutations on existing examples
+		- remove assumption
+		- add non controllable transition
+		- remove controllable transition
+		- mutate assumption formula using operators
+		- mutate goal formula using operators
+		- add conjuction of goals as new goal
+	- review relation between minimization, original plant and controller either on structure or syntax
+	- reason about general diagnosis 
+	- diagnose mutation over small parameters, produce hypothesis, scale both hypothesis and parameter to see if it holds
 - dynamic order of obdd variables
 - run hardware cases
 	- behavior minimization based diagnosis over CLTS
