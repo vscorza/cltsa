@@ -2849,7 +2849,8 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 		fflush(stdout);
 #endif
 	}
-#if DEBUG_LTL_AUTOMATON
+
+#if VERBOSE || DEBUG_LTL_AUTOMATON
 	printf("\nComposing sys rho functions\n");
 #endif
 	for(i = 0; i < sys_rho_count; i++){
@@ -2880,6 +2881,8 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 #endif
 	env_sys_theta_composed				= obdd_apply_and(env_theta_composed, sys_theta_composed);
 	env_sys_rho_composed				= obdd_apply_and(env_rho_composed, sys_rho_composed);
+
+
 #if DEBUG_LTL_AUTOMATON
 	printf("\n");
 	buff[0]	= '\0';
@@ -2895,6 +2898,8 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 #if (VERBOSE || DEBUG_LTL_AUTOMATON) && OBDD_USE_POOL
 	printf("[%d] [%d]\n", previous_node_count, sys_rho_composed->mgr->nodes_pool->composite_count);
 #endif
+	if(env_rho_count > 1)obdd_destroy(env_rho_composed);
+	if(sys_rho_count > 1)obdd_destroy(sys_rho_composed);
 	/**
 	 * BEHAVIOUR CONSTRUCTION (RHO AND THETA)
 	 */
@@ -3056,7 +3061,17 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 			x_y_alphabet, x_y_x_p_alphabet, x_y_order, signals_count, hashed_valuation, adjusted_valuation, x_y_hash_table,
 			x_y_x_p_hash_table, obdd_on_signals_indexes, obdd_off_signals_indexes);
 
-	automaton_automaton_remove_unreachable_states(ltl_automaton);
+	uint32_t deadlocks = 0;
+	for(i = 0; i < ltl_automaton->transitions_count; i++)
+		if(ltl_automaton->out_degree[i] == 0 && ltl_automaton->in_degree[i] > 0)deadlocks++;
+	printf("\n\n %d DEADLOCKS before removal, %d states \n\n", deadlocks, ltl_automaton->transitions_count);
+	automaton_automaton_remove_deadlocks(ltl_automaton);
+	automaton_compact_states(ltl_automaton);
+	deadlocks = 0;
+	for(i = 0; i < ltl_automaton->transitions_count; i++)
+		if(ltl_automaton->out_degree[i] == 0 && ltl_automaton->in_degree[i] > 0)deadlocks++;
+	printf("\n\n %d DEADLOCKS after removal, %d states \n\n", deadlocks, ltl_automaton->transitions_count);
+
 
 
 /////////////////////////////////////
@@ -3090,8 +3105,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 
 	if(env_theta_count > 1)obdd_destroy(env_theta_composed);
 	if(sys_theta_count > 1)obdd_destroy(sys_theta_composed);
-	if(env_rho_count > 1)obdd_destroy(env_rho_composed);
-	if(sys_rho_count > 1)obdd_destroy(sys_rho_composed);
+
 	obdd_destroy(env_sys_theta_composed); obdd_destroy(env_sys_rho_composed);
 
 	automaton_bool_array_hash_table_destroy(x_y_hash_table);

@@ -1153,7 +1153,7 @@ int main (int argc, char** argv){
 		//run_parse_test("diagnoses/syntcomp/collector/collector_4_in_v1.fsp", "Collector 4 inputs");//Collector 4 inputs
 		//run_parse_test("diagnoses/syntcomp/collector/collector_5_in_v1.fsp", "Collector 5 inputs");//Collector 5 inputs
 		//run_parse_test("diagnoses/syntcomp/collector/collector_6_in_v3.fsp", "Collector 6 inputs");//Collector 6 inputs
-		//run_parse_test("diagnoses/syntcomp/collector/collector_9_in_v1.fsp", "Collector 9 inputs");//Collector 6 inputs
+		run_parse_test("diagnoses/syntcomp/collector/collector_9_in_v1.fsp", "Collector 9 inputs");//Collector 6 inputs
 		//run_parse_test("diagnoses/syntcomp/collector/collector_3_in_missing_assumption_v1.fsp", "Collector 3 inputs");//Collector 3 inputs missing 1 assumtpion
 		//run_parse_test("diagnoses/syntcomp/collector/collector_4_in_missing_assumption_v1.fsp", "Collector 4 inputs");//Collector 4 inputs missing 1 assumption
 
@@ -1168,7 +1168,7 @@ int main (int argc, char** argv){
 
 		//GENERAL TESTS
 		//run_all_tests();
-		run_functional_tests();
+		//run_functional_tests();
 
 		//run_parse_test("tests/current_sut.fsp", "current_SUT");
 

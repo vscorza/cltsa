@@ -3144,6 +3144,129 @@ void automaton_automaton_update_valuations(automaton_automaton* automaton){
 	}
 }
 
+void automaton_compact_states(automaton_automaton* automaton){
+	//get mapping from discontinous array to contiguous array
+	uint32_t* mapping	= calloc(automaton->transitions_count, sizeof(uint32_t));
+	uint32_t* inverted_mapping	= calloc(automaton->transitions_count, sizeof(uint32_t));
+	uint32_t i,j,k, last_offset = 0, real_count = 0;
+
+	for(i = 0; i < automaton->transitions_count; i++){
+		if(automaton->in_degree[i] == 0 && automaton->out_degree[i] == 0){
+			last_offset++;
+		}else{
+			real_count++;
+			mapping[i - last_offset]  = i;
+			inverted_mapping[i] = i - last_offset;
+		}
+	}
+	//update references
+	for(i = 0; i < real_count; i++){
+		if(mapping[i]  != i){
+			automaton->is_controllable[i] = automaton->is_controllable[mapping[i]];
+			automaton->out_degree[i] = automaton->out_degree[mapping[i]];
+			automaton->out_size[i] = automaton->out_degree[mapping[i]];
+			automaton->in_degree[i] = automaton->in_degree[mapping[i]];
+			automaton->in_size[i] = automaton->in_degree[mapping[i]];
+			free(automaton->transitions[i]); free(automaton->inverted_transitions[i]);
+			automaton->transitions[i]	= automaton->transitions[mapping[i]];
+			automaton->inverted_transitions[i]	= automaton->inverted_transitions[mapping[i]];
+			for(j = 0; j < automaton->out_degree[i]; j++)
+				automaton->transitions[i][j].state_from	= i;
+			for(j = 0; j < automaton->in_degree[i]; j++)
+				automaton->inverted_transitions[i][j].state_to	= i;
+			automaton_transition* out_trans = realloc(automaton->transitions[i], automaton->out_size[i] * sizeof(automaton_transition));
+			if(out_trans == NULL){
+				printf("Could not allocate memory\n");exit(-1);
+			}
+			else automaton->transitions[i] = out_trans;
+			automaton_transition* in_trans = realloc(automaton->inverted_transitions[i], automaton->in_size[i] * sizeof(automaton_transition));
+			if(in_trans == NULL){
+				printf("Could not allocate memory\n");exit(-1);
+			}
+			else automaton->inverted_transitions[i] = in_trans;
+		}
+	}
+	uint32_t fluent_index, mapped_index;
+	if(automaton->is_game){
+		if(automaton->context->global_fluents_count > 0){
+			for(i = 0; i < automaton->context->global_fluents_count; i++){
+				for(j = 0; j < real_count; j++){
+					fluent_index		= GET_STATE_FLUENT_INDEX(automaton->context->global_fluents_count, j, i);
+					mapped_index		= GET_STATE_FLUENT_INDEX(automaton->context->global_fluents_count, mapping[j], i);
+					if(TEST_FLUENT_BIT(automaton->valuations, mapped_index)){
+						SET_FLUENT_BIT(automaton->valuations, fluent_index);
+					}else{
+						CLEAR_FLUENT_BIT(automaton->valuations, fluent_index);
+					}
+				}
+				for(j = 0; j < automaton->inverted_valuations[i]->count; j++){
+					for(k = 0; k < automaton->inverted_valuations[i]->bucket_count[j]; k++){
+						automaton->inverted_valuations[i]->buckets[j][k] = inverted_mapping[automaton->inverted_valuations[i]->buckets[j][k]];
+					}
+				}
+			}
+			automaton->valuations_size			= GET_FLUENTS_ARR_SIZE(automaton->context->global_fluents_count, real_count);
+			uint32_t* valuations_new	= realloc(automaton->valuations, automaton->valuations_size);
+			if(valuations_new == NULL){
+				printf("Could not allocate memory\n");exit(-1);
+			}
+			else automaton->valuations = valuations_new;
+		}
+		if(automaton->context->liveness_valuations_count > 0){
+			for(i = 0; i < automaton->context->liveness_valuations_count; i++){
+				for(j = 0; j < real_count; j++){
+					fluent_index		= GET_STATE_FLUENT_INDEX(automaton->context->global_fluents_count, j, i);
+					mapped_index		= GET_STATE_FLUENT_INDEX(automaton->context->global_fluents_count, mapping[j], i);
+					if(TEST_FLUENT_BIT(automaton->liveness_valuations, mapped_index)){
+						SET_FLUENT_BIT(automaton->liveness_valuations, fluent_index);
+					}else{
+						CLEAR_FLUENT_BIT(automaton->liveness_valuations, fluent_index);
+					}
+				}
+				for(j = 0; j < automaton->liveness_inverted_valuations[i]->count; j++){
+					for(k = 0; k < automaton->liveness_inverted_valuations[i]->bucket_count[j]; k++){
+						automaton->liveness_inverted_valuations[i]->buckets[j][k] = inverted_mapping[automaton->liveness_inverted_valuations[i]->buckets[j][k]];
+					}
+				}
+			}
+			automaton->liveness_valuations_size			= GET_FLUENTS_ARR_SIZE(automaton->context->liveness_valuations_count, real_count);
+			uint32_t* liveness_valuations_new	= realloc(automaton->liveness_valuations, automaton->liveness_valuations_size);
+			if(liveness_valuations_new == NULL){
+				printf("Could not allocate memory\n");exit(-1);
+			}
+			else automaton->liveness_valuations = liveness_valuations_new;
+		}
+	}
+	//update structures
+	automaton->transitions_count	= real_count;
+	automaton->transitions_size		= real_count;
+	bool* new_controllable			= realloc(automaton->is_controllable, sizeof(bool) * automaton->transitions_count);
+	if(new_controllable == NULL){
+		printf("Could not allocate memory\n");exit(-1);
+	}
+	else automaton->is_controllable = new_controllable;
+	uint32_t* new_out_degree			= realloc(automaton->out_degree, sizeof(uint32_t) * automaton->transitions_count);
+	if(new_out_degree == NULL){printf("Could not allocate memory\n");exit(-1);	}
+	else automaton->out_degree = new_out_degree;
+	uint32_t* new_out_size			= realloc(automaton->out_size, sizeof(uint32_t) * automaton->transitions_count);
+	if(new_out_size == NULL){printf("Could not allocate memory\n");exit(-1);	}
+	else automaton->out_size = new_out_size;
+	uint32_t* new_in_degree			= realloc(automaton->in_degree, sizeof(uint32_t) * automaton->transitions_count);
+	if(new_in_degree == NULL){printf("Could not allocate memory\n");exit(-1);	}
+	else automaton->in_degree = new_in_degree;
+	uint32_t* new_in_size			= realloc(automaton->in_size, sizeof(uint32_t) * automaton->transitions_count);
+	if(new_in_size == NULL){printf("Could not allocate memory\n");exit(-1);	}
+	else automaton->in_size = new_in_size;
+	automaton_transition** new_transitions			= realloc(automaton->transitions, sizeof(automaton_transition*) * automaton->transitions_count);
+	if(new_transitions == NULL){printf("Could not allocate memory\n");exit(-1);	}
+	else automaton->transitions = new_transitions;
+	automaton_transition** new_inverted_transitions			= realloc(automaton->inverted_transitions, sizeof(automaton_transition*) * automaton->transitions_count);
+	if(new_inverted_transitions == NULL){printf("Could not allocate memory\n");exit(-1);	}
+	else automaton->inverted_transitions = new_inverted_transitions;
+	//cleanup
+	free(mapping);
+}
+
 uint32_t automaton_automata_get_composite_state(uint32_t states_count, uint32_t* states){
 	return 0;
 }
@@ -3385,6 +3508,9 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 	alphabet_count	= 0;
 	// get union of alphabets check ctx and compute alphabet size
 	automaton_automata_context* ctx	= NULL;
+
+	for(i = 0; i < automata_count; i++)
+		automaton_compact_states(automata[i]);
 
 	alphabet = automaton_automata_get_union_alphabet(&ctx, automata, automata_count, &alphabet_count);
 	// create automaton

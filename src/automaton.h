@@ -37,7 +37,7 @@
 #define DEBUG_SYNTHESIS 0
 #define DEBUG_STRATEGY_BUILD 0
 #define DEBUG_COMPOSITE_TREE 0
-#define DEBUG_UNREAL 1
+#define DEBUG_UNREAL 0
 
 #define BUCKET_SIZE		10000//1000000
 #define FLUENT_BUCKET_SIZE 1000//10000
@@ -388,6 +388,7 @@ uint32_t* automaton_automaton_distance_to_state(automaton_automaton* automaton, 
 void automaton_automaton_remove_unreachable_states(automaton_automaton* automaton);
 void automaton_automaton_remove_deadlocks(automaton_automaton* automaton);
 void automaton_automaton_update_valuations(automaton_automaton* automaton);
+void automaton_compact_states(automaton_automaton* automaton);
 /** AUTOMATON RANKING AND PENDING **/
 uint32_t automaton_ranking_key_extractor(void* ranking);
 int32_t automaton_pending_state_compare(void* left_pending_state, void* right_pending_state);
