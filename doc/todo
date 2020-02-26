@@ -1,6 +1,6 @@
 TODO:
 =====
-- try to restrict ahb behavior under reasonable assumptions
+- restrict ahb removing burst4 mode
 - next deliverable
 	- review konighoefer numbers
 	- implement mutations on existing examples
