@@ -16,8 +16,8 @@ TODO:
 - dynamic order of obdd variables
 - run hardware cases
 	- behavior minimization based diagnosis over CLTS
-	- run genbuf 2, 4, 10 clients
-	- run amba 2, 4, 10 clients
+	- run genbuf 2, 4, 6 clients
+	- run amba 2, 4 clients
 - explore controllable simplification
 	- hide queue in genbuf (hide signals, tau reduction)
 	- review konighoefer work
