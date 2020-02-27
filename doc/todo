@@ -1,6 +1,5 @@
 TODO:
 =====
-- restrict ahb removing burst4 mode
 - next deliverable
 	- review konighoefer numbers
 	- implement mutations on existing examples
@@ -13,14 +12,16 @@ TODO:
 	- review relation between minimization, original plant and controller either on structure or syntax
 	- reason about general diagnosis 
 	- diagnose mutation over small parameters, produce hypothesis, scale both hypothesis and parameter to see if it holds
-- dynamic order of obdd variables
 - run hardware cases
 	- behavior minimization based diagnosis over CLTS
 	- run genbuf 2, 4, 6 clients
-	- run amba 2, 4 clients
+	- run amba 2, 4 clients (simplify as needed)
 - explore controllable simplification
 	- hide queue in genbuf (hide signals, tau reduction)
 	- review konighoefer work
+- implement formulaic labels, [!lock && !start]G2 = ( lock && start -> G2), 
+	will create an automaton by initializing variables as defined in [v] and defining transitions by those who satisfhy
+	rho(v, v', s, s')
 - graph the way removed transitions increment in the lineal minimization
 - split functionality into several files, refactor
 - synthesis improvements
@@ -30,6 +31,8 @@ TODO:
 - compare against konighoefer and jvts systems, write experimental claim
 - implement fluent consistency check
 - implement IS_REALIZABLE(gr1). on parser
+POST PHD
+========
 - develop mixed structures 
 	- EROBDD (enumerative ROBDD) first node determines current state
 	  s -[s1] -> s_1 | ... | s -[sk] -> s_k, the seconde node

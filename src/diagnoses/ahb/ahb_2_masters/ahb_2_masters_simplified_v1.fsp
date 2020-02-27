@@ -3,39 +3,30 @@
 set Global_Alphabet = {}
 set Controllable_Alphabet = {}
 
-set Global_Signals	= {hBusReq_0, hBusReq_1, hLock_0, hLock_1, hMaster_0, hReady, hGrant_0, hGrant_1, hMastLock, hBurst_0, hBurst_1,
-			start, locked, decide, s_0, s_1, t_0, t_1, u_0, u_1,  busReq, g_1}
-set Output_Signals	= {hMaster_0, hGrant_0, hGrant_1, hMastLock, hBurst_0, hBurst_1, start, locked, decide, s_0, s_1, t_0, t_1, u_0, u_1, g_1}
+set Global_Signals	= {hBusReq_0, hBusReq_1, hLock_0, hLock_1, hMaster_0, hReady, hGrant_0, hGrant_1, hMastLock, hBurst_0,
+			start, locked, decide, s_0, s_1, t_0, t_1,  busReq, g_1}
+set Output_Signals	= {hMaster_0, hGrant_0, hGrant_1, hMastLock, hBurst_0, start, locked, decide, s_0, s_1, t_0, t_1, g_1}
 order			= {}
 
 /***********
 **** THETA
 ***********/
 ltl env theta Init_AHB_e in AHB	= (!hBusReq_0 && !hBusReq_1 && !hLock_0 && !hLock_1 && !hReady).
-ltl sys theta Init_AHB_s in AHB	= (!hMaster_0 && hGrant_0 && !hBurst_0 && !hBurst_1 && start && !locked && decide && !s_0 && !s_1 && !t_0 && !t_1 && !u_0 && !u_1).
+ltl sys theta Init_AHB_s in AHB	= (!hMaster_0 && hGrant_0 && !hBurst_0 && start && !locked && decide && !s_0 && !s_1 && !t_0 && !t_1).
 /***********
 **** SYS RHO
 ***********/
 //G1: a new access can only start when hReady is high
 ltl sys rho G_1 in AHB		= [](!hReady -> X(!start)).
 //G2: when a locked unspecified length burst starts, a new access does not start until the current master releases the bus by lowering hBusReq[hMaster]
-ltl sys rho G_2_t00_t00 in AHB	= []((!t_0 && !t_1 && !(hMastLock && !hBurst_0 && hBurst_1 && start))-> X(!t_0 && !t_1)).
-ltl sys rho G_2_t00_t01 in AHB	= []((!t_0 && !t_1 && hMastLock && !hBurst_0 && hBurst_1 && start)-> X(t_0 && !t_1)).
+ltl sys rho G_2_t00_t00 in AHB	= []((!t_0 && !t_1 && !(hMastLock && !hBurst_0 && start))-> X(!t_0 && !t_1)).
+ltl sys rho G_2_t00_t01 in AHB	= []((!t_0 && !t_1 && hMastLock && !hBurst_0 && start)-> X(t_0 && !t_1)).
 ltl sys rho G_2_t01_t01 in AHB	= []((t_0 && !t_1 && busReq && !start)-> X(t_0 && !t_1)).
 ltl sys rho G_2_t01_t00 in AHB	= []((t_0 && !t_1 && !busReq && !start)-> X(!t_0 && !t_1)).
 ltl sys rho G_2_t01_t10 in AHB	= []((t_0 && !t_1 && start)-> X(!t_0 && t_1)).
 ltl sys rho G_2_t10_t10 in AHB	= []((!t_0 && t_1)-> X(!t_0 && t_1)).
 //G3: when a length-four locked burst starts no other accesses start until the end of the burst, we can only transfer data when hReady is high,
-//so the current burst ends at the fourth occurrence of hReady
-ltl sys rho G_3_u00_u00 in AHB	= []((!u_0 && !u_1 && !(hMastLock && hBurst_0 && !hBurst_1 && start)) -> X(!u_0 && !u_1)).
-ltl sys rho G_3_u00_u01 in AHB	= []((!u_0 && !u_1 && hMastLock && hBurst_0 && !hBurst_1 && start && !hReady) -> X(u_0 && !u_1)).
-ltl sys rho G_3_u00_u10 in AHB	= []((!u_0 && !u_1 && hMastLock && hBurst_0 && !hBurst_1 && start && hReady) -> X(!u_0 && u_1)).
-ltl sys rho G_3_u01_u01 in AHB	= []((u_0 && !u_1 && !start && !hReady) -> X(u_0 && !u_1)).
-ltl sys rho G_3_u01_u11 in AHB		= []((u_0 && !u_1 && start) -> X(u_0 && u_1)).
-ltl sys rho G_3_u01_u10 in AHB	= []((u_0 && !u_1 && !start && hReady) -> X(!u_0 && u_1)).
-ltl sys rho G_3_u10_u10 in AHB	= []((!u_0 && u_1 && !start && !hReady) -> X(!u_0 && u_1)).
-ltl sys rho G_3_u10_u00 in AHB	= []((!u_0 && u_1 && !start && hReady) -> X(!u_0 && !u_1)).
-ltl sys rho G_3_u10_u11 in AHB	= []((!u_0 && u_1 && start) -> X(u_0 && u_1)).
+//removed
 //G4: hMaster follows the grants, when hRady is high hMaster is set to the master that is currently granted
 ltl sys rho G4 in AHB		= [](hReady -> ((hGrant_0 <->X(hMaster_0))&&(hGrant_1 <->X(hMaster_1)))).
 //G5: whenever hReady is high the signal hMastLock copies locked
@@ -60,12 +51,12 @@ ltl sys rho G10_2 in AHB	= []((decide && !hBusReq_1)-> X(hGrant_0)).
 **** ENV RHO
 ***********/
 //A1: during a locked unspecified length burst, leaving hBusReq_i high locks the bus
-ltl env rho A_1_1 in AHB	= []((!hMaster_0 -> ((hMastLock && !hBurst_0 && hBurst_1)<-> hBusReq_0)) && (hMaster_0 -> ((hMastLock && !hBurst_0 && hBurst_1)<-> hBusReq_1))).
-ltl env rho A_1_2_s00_s00 in AHB	= []((!s_0 && !s_1 && !(hMastLock && !hBurst_0 && hBurst_1))->X(!s_0 && !s_1)).
-ltl env rho A_1_2_s00_s01 in AHB	= []((!s_0 && !s_1 && hMastLock && !hBurst_0 && hBurst_1)->X(s_0 && !s_1)).
+ltl env rho A_1_1 in AHB	= []((!hMaster_0 -> ((hMastLock && !hBurst_0)<-> hBusReq_0)) && (hMaster_0 -> ((hMastLock && !hBurst_0)<-> hBusReq_1))).
+ltl env rho A_1_2_s00_s00 in AHB	= []((!s_0 && !s_1 && !(hMastLock && !hBurst_0))->X(!s_0 && !s_1)).
+ltl env rho A_1_2_s00_s01 in AHB	= []((!s_0 && !s_1 && hMastLock && !hBurst_0)->X(s_0 && !s_1)).
 ltl env rho A_1_2_sX_s01 in AHB		= [](((((s_0 && !s_1)||(!s_0 && s_1))) && busReq)->X(s_0 && !s_1)).
-ltl env rho A_1_2_sX_s10 in AHB		= [](((((s_0 && !s_1)||(!s_0 && s_1))) && !busReq && hMastLock && !hBurst_0 && hBurst_1)->X(!s_0 && s_1)).
-ltl env rho A_1_2_sX_s00 in AHB		= [](((((s_0 && !s_1)||(!s_0 && s_1))) && !busReq && !(hMastLock && !hBurst_0 && hBurst_1))->X(!s_0 && !s_1)).
+ltl env rho A_1_2_sX_s10 in AHB		= [](((((s_0 && !s_1)||(!s_0 && s_1))) && !busReq && hMastLock && !hBurst_0)->X(!s_0 && s_1)).
+ltl env rho A_1_2_sX_s00 in AHB		= [](((((s_0 && !s_1)||(!s_0 && s_1))) && !busReq && !(hMastLock && !hBurst_0))->X(!s_0 && !s_1)).
 //A3: the lock signal is asserted by a master at the same time as the bus request signal
 ltl env rho A_3 in AHB			= []((hLock_0 -> hBusReq_0) && (hLock_1 -> hBusReq_1)).
 ltl env rho A_3_x in AHB		= [](X((hLock_0 -> hBusReq_0) && (hLock_1 -> hBusReq_1))).
