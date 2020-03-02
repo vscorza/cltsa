@@ -1582,7 +1582,7 @@ void automaton_automaton_resize_to_state(automaton_automaton* current_automaton,
 		if(current_automaton->context->liveness_valuations_count > 0){
 			old_valuations_size						= GET_FLUENTS_ARR_SIZE(current_automaton->context->liveness_valuations_count, old_size);
 			current_automaton->liveness_valuations_size	= GET_FLUENTS_ARR_SIZE(current_automaton->context->liveness_valuations_count, current_automaton->transitions_size);
-			new_valuations 							= malloc(sizeof(uint32_t) * current_automaton->liveness_valuations_size);
+			new_valuations 							= calloc(current_automaton->liveness_valuations_size, sizeof(uint32_t));
 			for(i = 0; i < old_valuations_size; i++){
 				new_valuations[i]					= current_automaton->liveness_valuations[i];
 			}
@@ -3143,7 +3143,7 @@ void automaton_automaton_update_valuations(automaton_automaton* automaton){
 		}
 	}
 }
-
+/*
 void automaton_compact_states(automaton_automaton* automaton){
 	//get mapping from discontinous array to contiguous array
 	uint32_t* mapping	= calloc(automaton->transitions_count, sizeof(uint32_t));
@@ -3164,10 +3164,13 @@ void automaton_compact_states(automaton_automaton* automaton){
 		if(mapping[i]  != i){
 			automaton->is_controllable[i] = automaton->is_controllable[mapping[i]];
 			automaton->out_degree[i] = automaton->out_degree[mapping[i]];
-			automaton->out_size[i] = automaton->out_degree[mapping[i]];
+			automaton->out_size[i] = automaton->out_size[mapping[i]];
 			automaton->in_degree[i] = automaton->in_degree[mapping[i]];
-			automaton->in_size[i] = automaton->in_degree[mapping[i]];
-			free(automaton->transitions[i]); free(automaton->inverted_transitions[i]);
+			automaton->in_size[i] = automaton->in_size[mapping[i]];
+			if(automaton->transitions[i] != NULL)
+				free(automaton->transitions[i]);
+			if(automaton->inverted_transitions[i] != NULL)
+				free(automaton->inverted_transitions[i]);
 			automaton->transitions[i]	= automaton->transitions[mapping[i]];
 			automaton->inverted_transitions[i]	= automaton->inverted_transitions[mapping[i]];
 			for(j = 0; j < automaton->out_degree[i]; j++)
@@ -3265,7 +3268,9 @@ void automaton_compact_states(automaton_automaton* automaton){
 	else automaton->inverted_transitions = new_inverted_transitions;
 	//cleanup
 	free(mapping);
+	free(inverted_mapping);
 }
+*/
 
 uint32_t automaton_automata_get_composite_state(uint32_t states_count, uint32_t* states){
 	return 0;
@@ -3509,9 +3514,10 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 	// get union of alphabets check ctx and compute alphabet size
 	automaton_automata_context* ctx	= NULL;
 
+	/*
 	for(i = 0; i < automata_count; i++)
 		automaton_compact_states(automata[i]);
-
+	 */
 	alphabet = automaton_automata_get_union_alphabet(&ctx, automata, automata_count, &alphabet_count);
 	// create automaton
 	automaton_automaton* composition;

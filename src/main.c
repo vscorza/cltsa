@@ -1148,7 +1148,7 @@ int main (int argc, char** argv){
 		//run_parse_test("tests/automata_load_test_1.fsp",  "automata load test");
 		//run_parse_test("tests/automata_load_test_2.fsp",  "automata load test");
 		//run_parse_test("diagnoses/ahb/ahb_2_masters/ahb_2_masters_v1.fsp", "AHB 2 Masters");//AHB 2 Masters
-		run_parse_test("diagnoses/ahb/ahb_2_masters/ahb_2_masters_simplified_v1.fsp", "AHB 2 Masters");//AHB 2 Masters
+		//run_parse_test("diagnoses/ahb/ahb_2_masters/ahb_2_masters_simplified_v1.fsp", "AHB 2 Masters");//AHB 2 Masters
 		//run_parse_test("diagnoses/syntcomp/collector/collector_2_in_v1.fsp", "Collector 2 inputs");//Collector 2 inputs
 		//run_parse_test("diagnoses/syntcomp/collector/collector_3_in_v1.fsp", "Collector 3 inputs");//Collector 3 inputs
 		//run_parse_test("diagnoses/syntcomp/collector/collector_4_in_v1.fsp", "Collector 4 inputs");//Collector 4 inputs
@@ -1162,7 +1162,7 @@ int main (int argc, char** argv){
 		//run_parse_test("tests/genbuf_2_sndrs_unreal_missing_assumption_simplified.fsp", "GenBuf 2 sndrs (missing assumption_simplified)");
 		//run_parse_test("tests/genbuf_2_sndrs_unreal_missing_assumption_no_queue.fsp", "GenBuf 2 sndrs (missing assumption no queue)");//GENBUF 2 Sndrs
 		//run_parse_test("tests/genbuf_2_sndrs_no_queue.fsp", "GenBuf 2 sndrs (no queue)");//GENBUF 2 Sndrs
-		//run_parse_test("tests/genbuf_2_sndrs_no_automaton_missing_assumption_simplified.fsp", "GenBuf 2 sndrs(no automaton)");
+		run_parse_test("tests/genbuf_2_sndrs_no_automaton_missing_assumption_simplified.fsp", "GenBuf 2 sndrs(no automaton)");
 		//run_parse_test("diagnoses/mtsa/exploration_robot/exploration-robot-v1.lts", "Exploration robot");
 
 		//run_parse_test("diagnoses/ahb/ahb_2_masters/ahb_2_masters_v1.fsp", "AHB 2 Masters");//AHB 2 Masters

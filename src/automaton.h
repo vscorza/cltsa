@@ -87,7 +87,7 @@ typedef uint8_t signal_t;
 typedef uint8_t fluent_count_t;
 typedef uint16_t signal_bit_array_t;
 #define TRANSITION_ENTRY_SIZE 16
-#define FIXED_SIGNALS_COUNT	3//4
+#define FIXED_SIGNALS_COUNT	6//4
 /****************
 ==== ENUMS ==== 
 ****************/
@@ -388,7 +388,7 @@ uint32_t* automaton_automaton_distance_to_state(automaton_automaton* automaton, 
 void automaton_automaton_remove_unreachable_states(automaton_automaton* automaton);
 void automaton_automaton_remove_deadlocks(automaton_automaton* automaton);
 void automaton_automaton_update_valuations(automaton_automaton* automaton);
-void automaton_compact_states(automaton_automaton* automaton);
+//void automaton_compact_states(automaton_automaton* automaton);
 /** AUTOMATON RANKING AND PENDING **/
 uint32_t automaton_ranking_key_extractor(void* ranking);
 int32_t automaton_pending_state_compare(void* left_pending_state, void* right_pending_state);

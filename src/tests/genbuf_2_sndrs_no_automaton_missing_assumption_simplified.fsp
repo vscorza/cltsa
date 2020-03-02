@@ -78,8 +78,8 @@ ltl env rho A_2_sndr_1_a1_a0 in GENBUF		= []((a_1 && rToB_ACK_1)->(X(!a_1))).
 ltl env rho A_3_2_sndr_0 in GENBUF		= []((!bToR_REQ_0) -> X(!rToB_ACK_0)).
 ltl env rho A_3_2_sndr_1 in GENBUF		= []((!bToR_REQ_1) -> X(!rToB_ACK_1)).
 //rToB_ACK if REQ'd
-ltl env rho A_4_rcvr_0 in GENBUF		= []((bToR_REQ_0 && rToB_ACK0)->X(rToB_ACK_0)).
-ltl env rho A_4_rcvr_1 in GENBUF		= []((bToR_REQ_1 && rToB_ACK1)->X(rToB_ACK_1)).
+ltl env rho A_4_rcvr_0 in GENBUF		= []((bToR_REQ_0 && rToB_ACK_0)->X(rToB_ACK_0)).
+ltl env rho A_4_rcvr_1 in GENBUF		= []((bToR_REQ_1 && rToB_ACK_1)->X(rToB_ACK_1)).
 /***********
 **** FLUENTS
 ***********/

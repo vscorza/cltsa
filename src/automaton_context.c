@@ -2684,6 +2684,10 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 				if(parser_primed_variables[j] == alphabet_element_index){is_primed	= true;	break;}
 			strcpy(current_key, mgr->vars_dict->entries[i].key);strcat(current_key, SIGNAL_ON_SUFFIX);
 			global_index	= automaton_alphabet_get_value_index(ctx->global_alphabet, current_key);
+			if(global_index < 0){
+				printf("%s not found on signals's dictionary\n", current_key);
+				exit(-1);
+			}
 			is_input		= ctx->global_alphabet->list[global_index].type == INPUT_SIG;
 			if(!is_primed && !is_input){
 				not_x_p_alphabet_o[not_x_p_count++] = i;
@@ -2706,6 +2710,10 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 			if(parser_primed_variables[j] == alphabet_element_index){is_primed	= true;	break;}
 		strcpy(current_key, mgr->vars_dict->entries[i].key);strcat(current_key, SIGNAL_ON_SUFFIX);
 		global_index	= automaton_alphabet_get_value_index(ctx->global_alphabet, current_key);
+		if(global_index < 0){
+						printf("%s not found on signals's dictionary\n", current_key);
+						exit(-1);
+					}
 		is_input		= ctx->global_alphabet->list[global_index].type == INPUT_SIG;
 		if(is_primed && is_input){
 			not_y_p_alphabet_o[not_y_p_count++] = i;
@@ -2722,6 +2730,10 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 			if(parser_primed_variables[j] == alphabet_element_index){is_primed	= true;	break;}
 		strcpy(current_key, mgr->vars_dict->entries[i].key);strcat(current_key, SIGNAL_ON_SUFFIX);
 		global_index	= automaton_alphabet_get_value_index(ctx->global_alphabet, current_key);
+		if(global_index < 0){
+						printf("%s not found on signals's dictionary\n", current_key);
+						exit(-1);
+					}
 		is_input		= ctx->global_alphabet->list[global_index].type == INPUT_SIG;
 		if(is_primed && !is_input){
 			not_x_p_alphabet_o[not_x_p_count++] = i;
@@ -3066,7 +3078,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 		if(ltl_automaton->out_degree[i] == 0 && ltl_automaton->in_degree[i] > 0)deadlocks++;
 	printf("\n\n %d DEADLOCKS before removal, %d states \n\n", deadlocks, ltl_automaton->transitions_count);
 	automaton_automaton_remove_deadlocks(ltl_automaton);
-	automaton_compact_states(ltl_automaton);
+	//automaton_compact_states(ltl_automaton);
 	deadlocks = 0;
 	for(i = 0; i < ltl_automaton->transitions_count; i++)
 		if(ltl_automaton->out_degree[i] == 0 && ltl_automaton->in_degree[i] > 0)deadlocks++;
