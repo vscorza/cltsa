@@ -2891,8 +2891,33 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 #if (VERBOSE || DEBUG_LTL_AUTOMATON) && OBDD_USE_POOL
 	uint32_t previous_node_count = sys_rho_composed->mgr->nodes_pool->composite_count;
 #endif
-	env_sys_theta_composed				= obdd_apply_and(env_theta_composed, sys_theta_composed);
-	env_sys_rho_composed				= obdd_apply_and(env_rho_composed, sys_rho_composed);
+	if(env_theta_composed == NULL){
+		env_sys_theta_composed			= obdd_clone(sys_theta_composed);
+		env_theta_composed				= obdd_clone(mgr->true_obdd);
+	}else if(sys_theta_composed == NULL){
+		env_sys_theta_composed			= obdd_clone(env_theta_composed);
+		sys_theta_composed				= obdd_clone(mgr->true_obdd);
+	}else if(sys_theta_composed == NULL && env_theta_composed == NULL){
+		env_sys_theta_composed			= obdd_clone(mgr->true_obdd);
+		env_theta_composed				= obdd_clone(mgr->true_obdd);
+		sys_theta_composed				= obdd_clone(mgr->true_obdd);
+	}else{
+		env_sys_theta_composed				= obdd_apply_and(env_theta_composed, sys_theta_composed);
+	}
+	if(env_rho_composed == NULL){
+		env_sys_rho_composed		= obdd_clone(sys_rho_composed);
+		env_rho_composed			= obdd_clone(mgr->true_obdd);
+	}else if(sys_rho_composed == NULL){
+		env_sys_rho_composed		= obdd_clone(env_rho_composed);
+		sys_rho_composed			= obdd_clone(mgr->true_obdd);
+	}else if(sys_rho_composed == NULL && env_rho_composed == NULL){
+		env_sys_rho_composed			= obdd_clone(mgr->true_obdd);
+		env_rho_composed			= obdd_clone(mgr->true_obdd);
+		sys_rho_composed			= obdd_clone(mgr->true_obdd);
+	}else{
+		env_sys_rho_composed				= obdd_apply_and(env_rho_composed, sys_rho_composed);
+	}
+
 
 
 #if DEBUG_LTL_AUTOMATON
@@ -3072,7 +3097,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 			dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, env_state, sys_state, obdd_state_map, x_count, y_count, x_y_count, x_y_x_p_count,
 			x_y_alphabet, x_y_x_p_alphabet, x_y_order, signals_count, hashed_valuation, adjusted_valuation, x_y_hash_table,
 			x_y_x_p_hash_table, obdd_on_signals_indexes, obdd_off_signals_indexes);
-
+/*
 	uint32_t deadlocks = 0;
 	for(i = 0; i < ltl_automaton->transitions_count; i++)
 		if(ltl_automaton->out_degree[i] == 0 && ltl_automaton->in_degree[i] > 0)deadlocks++;
@@ -3083,7 +3108,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	for(i = 0; i < ltl_automaton->transitions_count; i++)
 		if(ltl_automaton->out_degree[i] == 0 && ltl_automaton->in_degree[i] > 0)deadlocks++;
 	printf("\n\n %d DEADLOCKS after removal, %d states \n\n", deadlocks, ltl_automaton->transitions_count);
-
+*/
 
 
 /////////////////////////////////////

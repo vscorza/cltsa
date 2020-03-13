@@ -1904,7 +1904,7 @@ bool automaton_state_is_stable(automaton_automaton* game_automaton, uint32_t sta
 			, guarantee_count, guarantees_indexes);
 
 	fluent_index				= GET_STATE_FLUENT_INDEX(fluent_count, state, assumptions_indexes[current_ranking->assumption_to_satisfy]);
-	bool satisfies_assumption	= TEST_FLUENT_BIT(game_automaton->valuations, fluent_index);
+	bool satisfies_assumption	= assumptions_count == 0 || TEST_FLUENT_BIT(game_automaton->valuations, fluent_index);
 	j = satisfies_guarantee? (current_guarantee + 1) % guarantee_count : current_guarantee;
 	if(sr == NULL){
 #if DEBUG_SYNTHESIS
@@ -2007,7 +2007,7 @@ void automaton_ranking_increment(automaton_automaton* game_automaton, automaton_
 	}
 	//assumption being satisfied increments ranking
 	fluent_index				= GET_STATE_FLUENT_INDEX(fluent_count, ref_state, assumptions_indexes[current_ranking->assumption_to_satisfy]);
-	satisfies_assumption		= TEST_FLUENT_BIT(game_automaton->valuations, fluent_index);
+	satisfies_assumption		= assumptions_count == 0 || TEST_FLUENT_BIT(game_automaton->valuations, fluent_index);
 	if(satisfies_assumption){
 		if(current_ranking->assumption_to_satisfy < (int32_t)(assumptions_count - 1)){
 			target_ranking->assumption_to_satisfy++;
@@ -2168,7 +2168,7 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 				automaton_concrete_bucket_add_entry(ranking_list[j], &concrete_ranking);
 				//g falsifies one guarantee and satisfies ass_1 then add to pending
 				fluent_index	= GET_STATE_FLUENT_INDEX(fluent_count, i, assumptions_indexes[first_assumption_index]);
-				if(TEST_FLUENT_BIT(game_automaton->valuations, fluent_index)){
+				if(assumptions_count == 0 ||  (TEST_FLUENT_BIT(game_automaton->valuations, fluent_index))){
 					for(l = 0; l < guarantees_count; l++){
 						fluent_index	= GET_STATE_FLUENT_INDEX(fluent_count, i, guarantees_indexes[l]);
 						if(!TEST_FLUENT_BIT(game_automaton->valuations, fluent_index)){
@@ -2403,7 +2403,7 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 									&&
 									current_ranking->value == succ_ranking->value
 									&&
-									!automaton_bucket_has_entry(game_automaton->inverted_valuations[assumptions_indexes[current_ranking->assumption_to_satisfy]], current_ranking->state)
+									(!automaton_bucket_has_entry(game_automaton->inverted_valuations[assumptions_indexes[current_ranking->assumption_to_satisfy]], current_ranking->state))
 								)
 							)
 						))
@@ -2632,7 +2632,7 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2(automaton_a
 	automaton_automaton *return_automaton	= NULL;
 	for(i = 0; i < t_count; i++){
 		current_transition	= &(master->transitions[t_states[i]][t_indexes[i]]);
-		if(!(TEST_BITVECTOR_BIT(partition_bit_vector, i))){
+		if(!(TEST_BITVECTOR_BIT(partition_bit_vector, i)) && (inner_automaton->out_degree[current_transition->state_from] > 1)){
 			if(automaton_automaton_has_transition(inner_automaton, current_transition)){
 				removed++;
 				automaton_automaton_remove_transition(inner_automaton, current_transition);
@@ -2641,6 +2641,7 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2(automaton_a
 			transitions_kept_size++;
 		}
 	}
+
 #if DEBUG_UNREAL
 	printf("\tDD, kept:[%d]\tn:[%d]\td(s_0):[%d]", transitions_kept_size,partitions_count,inner_automaton->out_degree[inner_automaton->initial_states[0]]);
 #endif
@@ -2665,9 +2666,11 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2(automaton_a
 			if(TEST_BITVECTOR_BIT(partition_bit_vector, i)){
 				current_linear_index++;
 			}
-			if((current_linear_index < first_linear_index || current_linear_index > last_linear_index)&& TEST_BITVECTOR_BIT(partition_bit_vector, i)){
-				current_transition	= &(master->transitions[t_states[i]][t_indexes[i]]);
+			current_transition	= &(master->transitions[t_states[i]][t_indexes[i]]);
+			if((current_linear_index < first_linear_index || current_linear_index > last_linear_index)
+					&& TEST_BITVECTOR_BIT(partition_bit_vector, i)  && (minimization->out_degree[current_transition->state_from] > 1)){
 				automaton_automaton_remove_transition(minimization, current_transition);
+				removed++;
 			}
 		}
 
@@ -2681,7 +2684,15 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2(automaton_a
 #if DEBUG_UNREAL
 			printf("(part. %d unreal.)\n", dd);
 #endif
+			if(removed == 0){
+#if DEBUG_UNREAL
+				printf("(minimal)\n");
+#endif
+				automaton_automaton_destroy(minimization);
+				return inner_automaton;
 
+			}
+			removed = 0;
 			current_linear_index = -1; transitions_kept_size = 0;
 			//bit vector sets to false anything outside the range
 			for(i = 0; i < t_count; i++){
@@ -2695,6 +2706,7 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2(automaton_a
 					transitions_kept_size++;
 				}
 			}
+
 			partitions_count = 2;
 			return_automaton = automaton_get_gr1_unrealizable_minimization_dd2(master, minimization, assumptions, assumptions_count, guarantees, guarantees_count
 					, partition_bit_vector, transitions_kept_size, partitions_count, t_count, t_size, t_states, t_indexes);
@@ -2717,8 +2729,10 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2(automaton_a
 				current_linear_index++;
 			}
 			current_transition	= &(master->transitions[t_states[i]][t_indexes[i]]);
-			if(!(TEST_BITVECTOR_BIT(partition_bit_vector, i)) || (current_linear_index >= first_linear_index && current_linear_index <= last_linear_index)){
+			if((!(TEST_BITVECTOR_BIT(partition_bit_vector, i)) || (current_linear_index >= first_linear_index && current_linear_index <= last_linear_index))
+					 && (minimization->out_degree[current_transition->state_from] > 1)){
 				automaton_automaton_remove_transition(minimization, current_transition);
+				removed++;
 			}
 		}
 		//if non-realizable:update structs, perform recursive call and return
@@ -2731,6 +2745,15 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2(automaton_a
 #if DEBUG_UNREAL
 			printf("(compl. to part. %d unreal.)\n", dd);
 #endif
+			if(removed == 0){
+#if DEBUG_UNREAL
+				printf("(minimal)\n");
+#endif
+				automaton_automaton_destroy(minimization);
+				return inner_automaton;
+
+			}
+			removed = 0;
 			current_linear_index = -1; transitions_kept_size = 0;
 			//bit vector sets to false anything outside the range
 			for(i = 0; i < t_count; i++){

@@ -810,6 +810,8 @@ obdd* obdd_restrict_vector(obdd* root, uint32_t* var_ids, bool* values, uint32_t
 			acum_obdd	= tmp_obdd;
 		}
 	}
+	if(acum_obdd == NULL)
+		acum_obdd = obdd_node_clone(root->mgr, root->mgr->true_obdd->root_obdd);
 	//TODO: here's the issue applying and against restricted vector gives nothing back (null->1 | !null->0 tree)
 
 	/*

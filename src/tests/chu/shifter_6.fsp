@@ -1,0 +1,34 @@
+//6-bit-shifter
+set Global_Alphabet = {}
+set Controllable_Alphabet = {}
+
+set Global_Signals	= {d, d1, d2, d3, d4, d5, d6, reset}
+set Output_Signals	= {d1, d2, d3, d4, d5, d6, reset}
+order 				= {}
+/***********
+**** THETA
+***********/
+ltl env theta Init_shifter_e in SHIFTER	= (!d).
+ltl sys theta Init_shifter_s in SHIFTER	= (!d1 && !d2 && !d3 && !d4 && !d5 && !d6 && !reset).
+/***********
+**** SYS RHO
+***********/
+ltl sys rho Module_1 in SHIFTER		= [](!reset -> (X(d1) <-> d)).
+ltl sys rho Module_2 in SHIFTER		= [](!reset -> (X(d2) <-> d1)).
+ltl sys rho Module_3 in SHIFTER		= [](!reset -> (X(d3) <-> d2)).
+ltl sys rho Module_4 in SHIFTER		= [](!reset -> (X(d4) <-> d3)).
+ltl sys rho Module_5 in SHIFTER		= [](!reset -> (X(d5) <-> d4)).
+ltl sys rho Module_6 in SHIFTER		= [](!reset -> (X(d6) <-> d5)).
+ltl sys rho Reset in SHIFTER		= [](reset -> X(!d1 && !d2 && !d3 && !d4 && !d5 && !d6)).
+
+/***********
+**** ENV RHO
+***********/
+/***********
+**** SYNTHESIS
+***********/
+ltl fluent A			= (d || !d).
+ltl fluent G			= (d6).
+
+|f| ENV =(SHIFTER).
+|gr1| <{A}><{G}> STRAT = ENV.

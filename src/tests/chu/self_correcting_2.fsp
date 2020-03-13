@@ -1,0 +1,30 @@
+//2-self_correcting ring counter
+set Global_Alphabet = {}
+set Controllable_Alphabet = {}
+
+set Global_Signals	= {init_d, init_d1, init_d_correct, d, d1, d_correct}
+set Output_Signals	= {d, d1, d_correct}
+order 				= {}
+/***********
+**** THETA
+***********/
+ltl env theta Init_shifter_e in RING	= (init_d || !init_d).
+ltl sys theta Init_shifter_s in RING	= ((d <-> init_d) && (d1 <-> init_d1) && (d_correct <-> init_d_correct)).
+/***********
+**** SYS RHO
+***********/
+ltl sys rho Module_1 in RING		= [](X(d1) <-> d).
+ltl sys rho Module_2 in RING		= [](X(d_correct) <-> d1).
+
+ltl sys rho Correct in RING			= [](X(d) <-> (!d1 && !d_correct)).
+/***********
+**** ENV RHO
+***********/
+/***********
+**** SYNTHESIS
+***********/
+ltl fluent A			= (d || !d).
+ltl fluent G			= (d_correct).
+
+|f| ENV =(RING).
+|gr1| <{A}><{G}> STRAT = ENV.

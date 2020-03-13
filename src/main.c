@@ -1162,11 +1162,16 @@ int main (int argc, char** argv){
 		//run_parse_test("tests/genbuf_2_sndrs_unreal_missing_assumption_simplified.fsp", "GenBuf 2 sndrs (missing assumption_simplified)");
 		//run_parse_test("tests/genbuf_2_sndrs_unreal_missing_assumption_no_queue.fsp", "GenBuf 2 sndrs (missing assumption no queue)");//GENBUF 2 Sndrs
 		//run_parse_test("tests/genbuf_2_sndrs_no_queue.fsp", "GenBuf 2 sndrs (no queue)");//GENBUF 2 Sndrs
-		run_parse_test("tests/genbuf_2_sndrs_no_automaton_missing_assumption_simplified.fsp", "GenBuf 2 sndrs(no automaton)");
+		//run_parse_test("tests/genbuf_2_sndrs_no_automaton_missing_assumption_simplified.fsp", "GenBuf 2 sndrs(no automaton)");
 		//run_parse_test("diagnoses/mtsa/exploration_robot/exploration-robot-v1.lts", "Exploration robot");
-
 		//run_parse_test("diagnoses/ahb/ahb_2_masters/ahb_2_masters_v1.fsp", "AHB 2 Masters");//AHB 2 Masters
 
+		//run_parse_test("tests/genbuf_2_sndrs_no_automaton_missing_assumption_v2.fsp", "GenBuf 2 sndrs V2");
+		run_parse_test("tests/genbuf_2_sndrs_no_automaton_v2.fsp", "GenBuf 2 sndrs V2");
+		//run_parse_test("tests/chu/shifter_2.fsp", "shifter 2 (CHU)");
+		//run_parse_test("tests/chu/shifter_6.fsp", "shifter 6 (CHU)");
+		//run_parse_test("tests/chu/self_correcting_2.fsp", "self correcting ring counter 2 (CHU)");
+		//run_parse_test("tests/chu/self_correcting_2_v2.fsp", "self correcting ring counter 2 (CHU)");
 		//GENERAL TESTS
 		//run_all_tests();
 		//run_functional_tests();

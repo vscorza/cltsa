@@ -1,56 +1,43 @@
-//AHB example taken from Synthesis of Reactive(1) Designs 2 masters
-range Bool = 0..1
-range T_range = 0..2
+//GenBuf example taken from Synthesis of Reactive(1) Designs 2 senders
 set Global_Alphabet = {}
 set Controllable_Alphabet = {}
 
-set Global_Signals	= {hMastLock, hBurst_0, hBurst_1, t_0, t_1, start}
-set Output_Signals	= {hMastLock, hBurst_0, hBurst_1, t_0, t_1}
-order			= {}
-
+set Global_Signals	= {bToR_REQ_0, bToR_REQ_1, s_0}
+set Output_Signals	= {bToR_REQ_0, bToR_REQ_1, s_0}
+order 				= {}
 /***********
 **** THETA
 ***********/
-ltl env theta Init_AHB_e in AHB	= (start).
-ltl sys theta Init_AHB_s in AHB	= (hGrant_0 && !hBurst_0 && !hBurst_1 && start && !t_0 && !t_1).
+//ltl env theta Init_Buffer_e in GENBUF	= (!sToB_REQ_0 && !sToB_REQ_1 && !rToB_ACK_0 && !rToB_ACK_1 && !a_0 && !a_1 && !full && empty).
+ltl sys theta Init_Buffer_s in GENBUF	= (!bToR_REQ_0 && !bToR_REQ_1 && !s_0).
 /***********
 **** SYS RHO
 ***********/
-//G2: when a locked unspecified length burst starts, a new access does not start until the current master releases the bus by lowering hBusReq[hMaster]
-ltl sys rho G_2_t00_t00 in AHB	= []((!t_0 && !t_1 && !(hMastLock && !hBurst_0 && hBurst_1 && start))-> X(!t_0 && !t_1)).
-ltl sys rho G_2_t00_t01 in AHB	= []((!t_0 && !t_1 && hMastLock && !hBurst_0 && hBurst_1 && start)-> X(t_0 && !t_1)).
-ltl sys rho G_2_t01_t01 in AHB	= []((t_0 && !t_1 && busReq && !start)-> X(t_0 && !t_1)).
-ltl sys rho G_2_t01_t00 in AHB	= []((t_0 && !t_1 && !busReq && !start)-> X(!t_0 && !t_1)).
-ltl sys rho G_2_t01_t10 in AHB	= []((t_0 && !t_1 && start)-> X(!t_0 && t_1)).
-ltl sys rho G_2_t10_t10 in AHB	= []((!t_0 && t_1)-> X(!t_0 && t_1)).
+//serving receivers in round robin fashion
+ltl sys rho G_7_mutex in GENBUF				= [](!(bToR_REQ_0 && bToR_REQ_1)). 
+ltl sys rho G_7_0_1 in GENBUF				= []((!s_0 && bToR_REQ_0 && X(!bToR_REQ_0)) -> X(s_0)).//advance state
+ltl sys rho G_7_0_2 in GENBUF				= []((!s_0 && !(bToR_REQ_0 && X(!bToR_REQ_0))) -> X(!s_0)).//keep state
+ltl sys rho G_7_0_3 in GENBUF				= []((!s_0) -> (!bToR_REQ_1)).//restrict
+ltl sys rho G_7_0_1 in GENBUF				= []((s_0 && bToR_REQ_1 && X(!bToR_REQ_1)) -> X(!s_0)).//advance state
+ltl sys rho G_7_0_2 in GENBUF				= []((s_0 && !(bToR_REQ_1 && X(!bToR_REQ_1))) -> X(s_0)).//keep state
+ltl sys rho G_7_1_3 in GENBUF				= []((s_0) -> (!bToR_REQ_0)).
 
-ltl env rho E_1 in AHB = [](start || !start).
-
-
-ltl env theta Init_AHB_e in AHB_b	= (start).
-ltl sys theta Init_AHB_s in AHB_b	= (hGrant_0 && !hBurst_0 && !hBurst_1 && start && !t_0 && !t_1).
 /***********
-**** SYS RHO
+**** ENV RHO
 ***********/
-//G2: when a locked unspecified length burst starts, a new access does not start until the current master releases the bus by lowering hBusReq[hMaster]
-ltl sys rho G_2_t00_t00 in AHB_b	= [](!t_0 || t_0).
-ltl env rho E_1 in AHB_b = [](start || !start).
+//A1
+/***********
+**** FLUENTS
+***********/
+//G_12 was turned into a fluent
+//fluent A_2_sndr_0 = <rToB_ACK_0.on, bToR_REQ_0.on> initially 1
+//fluent A_2_sndr_1 = <rToB_ACK_1.on, bToR_REQ_1.on> initially 1
 
-//0->0 (!t_0 && !t_1 && !(hMastLock && !hBurst_0 && hBurst_1 && start))-> X(!t_0 && !t_1)).
-//0->1 (!t_0 && !t_1 && hMastLock && !hBurst_0 && hBurst_1 && start)-> X(t_0 && !t_1).
-RESTRICT = R[0][0][0][0][0],
-R[t:T_range][mLock:Bool][hB_0:Bool][hB_1:Bool][s:Bool] = (
-	when ((t == 0) * )  
-	).
-	
-	//Concrete
-MAZE = M[1][1],
-M[r:Pos][c:Pos] = ( 
-				when(r > Min) n->M[r-1][c] 
-				| when(r < Max) s->M[r+1][c]
-				| when(c > Min) w->M[r][c-1]
-				| when(c < Max) e->M[r][c+1]
-				| when((r == Max) * (c == Max)) load->M[r][c]
-				| when((r == Min) * (c == Min)) unload->M[r][c]
-				| when(r == c) stall -> M[r][c]
-).
+ltl fluent A_1		= (!s_0 || s_0).
+
+ltl fluent G_7				= (!s_0).
+/***********
+**** SYNTHESIS
+***********/
+|f| ENV =(GENBUF).
+|gr1| <{A_1}><{G_7}> STRAT = ENV.
