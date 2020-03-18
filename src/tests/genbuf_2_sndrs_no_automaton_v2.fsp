@@ -114,7 +114,15 @@ ltl fluent G_rToB_ACK_1		= (rToB_ACK_1).
 |f| ENV =(GENBUF).
 //|gr1| <{A_rcvr_0, A_rcvr_1}><{G_1_2_sndr_0, G_1_2_sndr_1, G_12, G_7}> STRAT = ENV.
 
-|gr1| <{A_rcvr_0}><{G_bToR_REQ_0}> STRAT = ENV.
+//|gr1| <{A_rcvr_0}><{G_bToR_REQ_0}> STRAT = ENV.
+
+//R |gr1| <{G_rToB_ACK_1}><{G_Empty}> STRAT = ENV.
+|gr1| <{G_rToB_ACK_0}><{G_Empty}> STRAT = ENV.
+
+//R |gr1| <{G_rToB_ACK_1}><{G_bToR_REQ_1}> STRAT = ENV.
+//R |gr1| <{G_rToB_ACK_0}><{G_bToR_REQ_1}> STRAT = ENV.
+//R |gr1| <{G_rToB_ACK_0}><{G_bToR_REQ_0}> STRAT = ENV.
+//R |gr1| <{G_rToB_ACK_1}><{G_bToR_REQ_0}> STRAT = ENV.
 
 //U |gr1| <{G_Trivial}><{G_bToR_REQ_1}> STRAT = ENV.
 //U |gr1| <{G_Trivial}><{G_bToR_REQ_0}> STRAT = ENV.
@@ -133,5 +141,3 @@ ltl fluent G_rToB_ACK_1		= (rToB_ACK_1).
 //R |gr1| <{A_rcvr_0}><{G_bToS_ACK_1}> STRAT = ENV.
 //R |gr1| <{A_rcvr_0}><{G_1_2_sndr_1}> STRAT = ENV.
 //R |gr1| <{A_rcvr_0}><{G_1_2_sndr_0}> STRAT = ENV.
-//U |gr1| <{A_rcvr_0}><{G_a_0}> STRAT = ENV.
-//U |gr1| <{G_Trivial}><{G_a_0}> STRAT = ENV.

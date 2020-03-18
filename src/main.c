@@ -1167,7 +1167,6 @@ int main (int argc, char** argv){
 		//run_parse_test("diagnoses/ahb/ahb_2_masters/ahb_2_masters_v1.fsp", "AHB 2 Masters");//AHB 2 Masters
 
 		//run_parse_test("tests/genbuf_2_sndrs_no_automaton_missing_assumption_v2.fsp", "GenBuf 2 sndrs V2");
-		run_parse_test("tests/genbuf_2_sndrs_no_automaton_v2.fsp", "GenBuf 2 sndrs V2");
 		//run_parse_test("tests/chu/shifter_2.fsp", "shifter 2 (CHU)");
 		//run_parse_test("tests/chu/shifter_6.fsp", "shifter 6 (CHU)");
 		//run_parse_test("tests/chu/self_correcting_2.fsp", "self correcting ring counter 2 (CHU)");
@@ -1176,7 +1175,8 @@ int main (int argc, char** argv){
 		//run_all_tests();
 		//run_functional_tests();
 
-		//run_parse_test("tests/current_sut.fsp", "current_SUT");
+		//run_parse_test("tests/genbuf_2_sndrs_no_automaton_v2.fsp", "GenBuf 2 sndrs V2");
+		run_parse_test("tests/current_sut.fsp", "current_SUT");
 
 		//TODO
 
