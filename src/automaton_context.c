@@ -2075,7 +2075,7 @@ uint32_t __global_max_signals	= 0;
 bool automaton_add_transition_from_valuations(obdd_mgr* mgr, automaton_automaton* automaton, uint32_t from_state, uint32_t to_state, bool* from_valuation,
 		bool* to_valuation, bool* adjusted_valuation, bool is_initial, bool is_input, uint32_t x_count, uint32_t y_count, uint32_t* obdd_on_indexes, uint32_t* obdd_off_indexes,
 		uint32_t* x_y_alphabet, uint32_t* x_y_x_p_alphabet, uint32_t* x_y_order){
-	uint32_t i, fluent_index, fluent_count	= automaton->context->liveness_valuations_count;
+	uint32_t i, j, fluent_index, fluent_count	= automaton->context->liveness_valuations_count;
 	automaton_transition* transition		= automaton_transition_create(from_state, to_state);
 	//TODO: optimize alphabet indexes computation
 #if DEBUG_LTL_AUTOMATON
@@ -2168,6 +2168,10 @@ bool automaton_add_transition_from_valuations(obdd_mgr* mgr, automaton_automaton
 				if(is_input){
 					//TODO:
 					//restrict x according to x' in to_valuation
+					for(j = 0; j < x_count; j++)
+						adjusted_valuation[j]	= to_valuation[x_count + y_count + j];
+					for(j = 0; j < y_count; j++)
+						adjusted_valuation[x_count + j]	= from_valuation[x_count + j];
 					obdd_sat_vector	= obdd_satisfies_vector(automaton->context->liveness_valuations[i],
 							x_y_alphabet, adjusted_valuation, x_count + y_count, x_y_order);
 
@@ -3059,7 +3063,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 				hashed_valuation		= automaton_bool_array_hash_table_add_or_get_entry(x_y_hash_table, sys_state->valuation, true);
 
 				has_transition	= automaton_add_transition_from_valuations(mgr, ltl_automaton, env_state->state, sys_state->state
-						, env_state->valuation, hashed_valuation, env_state->valuation, true, false
+						, env_state->valuation, hashed_valuation, adjusted_valuation, true, false
 						, x_count, y_count
 						, obdd_on_signals_indexes, obdd_off_signals_indexes, x_y_alphabet, x_y_x_p_alphabet, x_y_order);
 #if DEBUG_LTL_AUTOMATON

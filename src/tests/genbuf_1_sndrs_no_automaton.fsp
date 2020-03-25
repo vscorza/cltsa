@@ -1,0 +1,71 @@
+//GenBuf example taken from Synthesis of Reactive(1) Designs 2 senders
+set Global_Alphabet = {}
+set Controllable_Alphabet = {}
+set Global_Signals	= {bREQ0, rACK0, a, g, sREQ0, bACK0, enq, deq, full, empty, t}
+set Output_Signals	= {bREQ0, g, bACK0, enq, deq, t}
+order 				= {}
+//*********** THETA
+ltl env theta Init_Buffer_e in GENBUF	= (!sREQ0 && !rACK0 && !a && !full && empty).
+ltl sys theta Init_Buffer_s in GENBUF	= (!bACK0 && !g && !bREQ0 && !enq && !deq && !t).
+//*********** SYS RHO
+ltl sys rho G_1_sndr_0_g_g in GENBUF		= []((!g && !(sREQ0 && !bACK0))->(X(!g))).
+ltl sys rho G_1_sndr_0_g_g1 in GENBUF		= []((!g && sREQ0 && !bACK0)->(X(g))).
+ltl sys rho G_1_sndr_0_g1_g1 in GENBUF		= []((g && !bACK0)->(X(g))).
+ltl sys rho G_1_sndr_0_g1_g in GENBUF		= []((g && bACK0)->(X(!g))).
+//sToB_REQ then not bToS_ACK
+ltl sys rho G_2_sndr_0 in GENBUF		= []((!sREQ0 && X(sREQ0)) -> (X(!bACK0))).
+ltl sys rho G_2_b_sndr_0 in GENBUF		= []((!bACK0 && !sREQ0) -> (X(!bACK0))).
+//bToS_ACK only if sToB_REQ
+ltl sys rho G_3_sndr_0 in GENBUF		= []((!bACK0 && X(bACK0)) -> sREQ0).
+//keep bToS_ACK up if sToB_REQ still going
+ltl sys rho G_4_sndr_0 in GENBUF		= []((bACK0 && sREQ0) -> X(bACK0)).
+//keep bToR_REQ if not yet ack
+ltl sys rho G_6_1_rcvr_0 in GENBUF		= []((bREQ0 && !rACK0) -> X(bREQ0)).
+//serving receivers in round robin fashion
+//lower bToR_REQ when rToB_ACK received
+ltl sys rho G_8_rcvr_0 in GENBUF		= [](rACK0 -> X(!bREQ0)).
+ltl sys rho G_AD_HOC_rcvr_0 in GENBUF		= [](bREQ0 -> sREQ0).
+//bToS_ACK raises iff enq
+ltl sys rho G_9_1 in GENBUF			= [](X(enq) <-> (!bACK0 && X(bACK0))).
+//only deq if rToB_ACK'd
+ltl sys rho G_10 in GENBUF			= [](X(deq) ->	(!X(rACK0) && rACK0)).
+//restrict eng/deq operations
+ltl sys rho G_11_1 in GENBUF			= []((full && !deq)-> !enq).
+ltl sys rho G_11_1_X in GENBUF			= [](X((full && !deq)-> !enq)).
+ltl sys rho G_11_2 in GENBUF			= [](empty-> !deq).
+ltl sys rho G_11_2_X in GENBUF			= [](X(empty-> !deq)).
+ltl sys rho G_12_t0_t0 in GENBUF		= []((!t && (empty || deq))->(X(!t))).
+ltl sys rho G_12_t0_t1 in GENBUF		= []((!t && (!empty && !deq))->(X(t))).
+ltl sys rho G_12_t1_t1 in GENBUF		= []((t && !deq)->(X(t))).
+ltl sys rho G_12_t1_t0 in GENBUF		= []((t && deq)->(X(!t))).
+//*********** ENV RHO
+//A1
+ltl env rho A_1_1_sndr_0 in GENBUF			= []((sREQ0 && !bACK0)->X(sREQ0)).
+ltl env rho A_1_2_sndr_0 in GENBUF			= [](bACK0 -> X(!sREQ0)).
+//keep sToB_REQ if not yet ACK'd
+ltl env rho A_2_sndr_0_a0_a0 in GENBUF		= []((!a && !((bREQ0) && !rACK0))->(X(!a))).
+ltl env rho A_2_sndr_0_a0_a1 in GENBUF		= []((!a && (bREQ0) && !rACK0)->(X(a))).
+ltl env rho A_2_sndr_0_a1_a1 in GENBUF		= []((a && !((rACK0)))->(X(a))).
+ltl env rho A_2_sndr_0_a1_a0 in GENBUF		= []((a && (rACK0))->(X(!a))).
+//lower rToB_ACK if no bToR_REQ
+ltl env rho A_3_2_sndr_0 in GENBUF		= []((!bREQ0) -> X(!rACK0)).
+//rToB_ACK if REQ'd
+ltl env rho A_4_rcvr_0 in GENBUF		= []((bREQ0 && rACK0)->X(rACK0)).
+//keep empty / full fixed if deq == enq
+ltl env rho A_5_1 in GENBUF			= []((deq <-> enq) -> (empty <-> X(empty))).
+ltl env rho A_5_2 in GENBUF			= []((deq <-> enq) -> (full <-> X(full))).
+ltl env rho A_5_3 in GENBUF			= []((enq && !deq) -> !X(empty)).
+ltl env rho A_5_4 in GENBUF			= []((deq && !enq) -> !X(full)).
+//*********** FLUENTS
+//G_12 was turned into a fluent
+//ltl fluent A_rcvr_0		= (!a).
+//ltl fluent G_bREQ0		= (bREQ0).
+ltl fluent G_1_2_sndr_0		= (!g).
+ltl fluent G_True		= (bREQ0 || !bREQ0).
+ltl fluent G_12				= (!t).
+ltl fluent G_7				= (empty || deq).
+
+//*********** SYNTHESIS
+|f| ENV =(GENBUF).
+//|gr1| <{A_rcvr_0}><{G_1_2_sndr_0}> STRAT = ENV.
+|gr1| <{G_True}><{G_1_2_sndr_0, G_12, G_7}> STRAT = ENV.

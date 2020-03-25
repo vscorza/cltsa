@@ -749,12 +749,17 @@ void automaton_ranking_automata_context_serialize_report(FILE *f, automaton_auto
 }
 void automaton_ranking_transition_serialize_report(FILE *f, automaton_transition *transition,uint32_t ranking_value){
 	fprintf(f, "%s%d%s%d%s%d%s%s", AUT_SER_OBJ_START, transition->state_from, AUT_SER_SEP, transition->state_to, AUT_SER_SEP, 1 /*transition->signals_count + 1*/, AUT_SER_SEP, AUT_SER_ARRAY_START);
-	uint32_t i;
-	/*
-	for(i = 0; i < transition->signals_count; i++){
-		fprintf(f, "%d%s", ((i >= FIXED_SIGNALS_COUNT) ? (transition->other_signals[i - FIXED_SIGNALS_COUNT]) : transition->signals[i]),AUT_SER_SEP);
+	uint32_t i, k;
+	bool first_print = true;
+	for(k = 0; k < (TRANSITION_ENTRY_SIZE * FIXED_SIGNALS_COUNT) - 1; k++){
+		if(TEST_TRANSITION_BIT(transition, k)){
+			if(first_print)first_print = false;
+			else fprintf(f, "%s", AUT_SER_SEP);
+			fprintf(f,"%d", k);
+		}
 	}
-	*/
+	if(first_print)first_print = false;
+	else fprintf(f, "%s", AUT_SER_SEP);
 	fprintf(f,"%d", ranking_value);
 	fprintf(f, "%s%s%s%s", AUT_SER_ARRAY_END, AUT_SER_SEP, TRANSITION_IS_INPUT(transition)? "1" :"0",AUT_SER_OBJ_END);
 }

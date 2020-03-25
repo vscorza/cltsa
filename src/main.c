@@ -1176,7 +1176,11 @@ int main (int argc, char** argv){
 		//run_functional_tests();
 
 		//run_parse_test("tests/genbuf_2_sndrs_no_automaton_v2.fsp", "GenBuf 2 sndrs V2");
-		run_parse_test("tests/current_sut.fsp", "current_SUT");
+
+		//run_parse_test("tests/genbuf_1_sndrs_simplified.fsp", "GenBuf 1 sndrs (simplified)");
+		run_parse_test("tests/genbuf_1_sndrs_no_automaton.fsp", "GenBuf 1 sndrs");
+
+		//run_parse_test("tests/current_sut.fsp", "current_SUT");
 
 		//TODO
 

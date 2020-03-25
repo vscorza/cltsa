@@ -16,10 +16,10 @@ ltl sys rho G_8_rcvr_0 in GENBUF		= [](rToB_ACK_0 -> X(!bToR_REQ_0)).
 //bToS_ACK raises iff enq
 //*********** ENV RHO
 //keep sToB_REQ if not yet ACK'd
-ltl env rho A_2_sndr_0_a0_a0 in GENBUF		= []((!a_0 && !(X(bToR_REQ_0) && !rToB_ACK_0))->(X(!a_0))).
-ltl env rho A_2_sndr_0_a0_a1 in GENBUF		= []((!a_0 && X(bToR_REQ_0) && !rToB_ACK_0)->(X(a_0))).
-ltl env rho A_2_sndr_0_a1_a1 in GENBUF		= []((a_0 && !(X(rToB_ACK_0)))->(X(a_0))).
-ltl env rho A_2_sndr_0_a1_a0 in GENBUF		= []((a_0 && X(rToB_ACK_0))->(X(!a_0))).
+ltl env rho A_2_sndr_0_a0_a0 in GENBUF		= []((!a_0 && !((bToR_REQ_0) && !rToB_ACK_0))->(X(!a_0))).
+ltl env rho A_2_sndr_0_a0_a1 in GENBUF		= []((!a_0 && (bToR_REQ_0) && !rToB_ACK_0)->(X(a_0))).
+ltl env rho A_2_sndr_0_a1_a1 in GENBUF		= []((a_0 && !((rToB_ACK_0)))->(X(a_0))).
+ltl env rho A_2_sndr_0_a1_a0 in GENBUF		= []((a_0 && (rToB_ACK_0))->(X(!a_0))).
 //lower rToB_ACK if no bToR_REQ
 ltl env rho A_3_2_sndr_0 in GENBUF		= []((!bToR_REQ_0) -> X(!rToB_ACK_0)).
 //rToB_ACK if REQ'd
@@ -28,8 +28,10 @@ ltl env rho A_4_rcvr_0 in GENBUF		= []((bToR_REQ_0 && rToB_ACK_0)->X(rToB_ACK_0)
 //G_12 was turned into a fluent
 ltl fluent A_rcvr_0		= (!a_0).
 ltl fluent G_bToR_REQ_0		= (bToR_REQ_0).
+ltl fluent G_True		= (bToR_REQ_0 || !bToR_REQ_0).
 
 //*********** SYNTHESIS
 |f| ENV =(GENBUF).
-|gr1| <{A_rcvr_0}><{G_bToR_REQ_0}> STRAT = ENV.
+//|gr1| <{A_rcvr_0}><{G_1_2_sndr_0}> STRAT = ENV.
+|gr1| <{A_rcvr_0, G_True}><{G_bToR_REQ_0}> STRAT = ENV.
 
