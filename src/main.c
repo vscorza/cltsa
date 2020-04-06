@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <dirent.h>
 #include "automaton_context.h"
 //#include "minuint.h"
 
@@ -1123,8 +1124,39 @@ int main (int argc, char** argv){
 		if(argc > 2){
 			if(strcmp(argv[1], "-r") == 0){
 				char const *folder = getenv("TMPDIR");
-				if (folder == 0)
+				if (folder == 0){
 					folder = "/tmp";
+				}
+				//remove previous rep files
+			    DIR *di;
+			    char *ptr1,*ptr2,*last = NULL;
+			    int retn;
+			    struct dirent *dir;
+			    char curr_file[1024];
+			    di = opendir(folder); //specify the directory name
+			    if (di)
+			    {
+			        while ((dir = readdir(di)) != NULL)
+			        {
+			        	last = NULL;
+			        	snprintf(curr_file, sizeof(curr_file),"%s/%s", folder, 	dir->d_name);;
+			            strtok(dir->d_name,".");
+			            ptr2=strtok(NULL,".");
+			            while(ptr2!=NULL)
+			            {
+			            	last = ptr2;
+			            	ptr2=strtok(NULL,".");
+			            }
+			            if(last != NULL){
+			                if(strcmp(last,"rep")==0 || strcmp(last,"fsp") == 0)
+			                {
+			                    remove(curr_file);
+			                    printf("Removing %s\n", curr_file);
+			                }
+			            }
+			        }
+			        closedir(di);
+			    }
 				char result_buff[255];
 				char *result_name;
 				for(i = 2; i < argc; i++){
