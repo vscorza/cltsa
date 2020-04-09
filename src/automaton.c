@@ -2224,6 +2224,7 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 #endif
 	automaton_pending_state* state_location;
 	uint32_t goal_to_satisfy;
+	bool ranking_was_infinity;
 	while(pending_list->count > 0){
 		//current_pending_state	= (automaton_pending_state*)automaton_ptr_bucket_pop_entry(pending_list);
 		automaton_max_heap_pop_entry(pending_list, &current_pending_state);
@@ -2251,6 +2252,7 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 			pending_processed++;
 			continue;
 		}
+		ranking_was_infinity	= current_ranking->value == RANKING_INFINITY;
 
 		automaton_ranking_update(game_automaton, ranking_list,
 				current_ranking
@@ -2264,6 +2266,18 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 		automaton_add_unstable_predecessors(game_automaton, pending_list, key_lists[goal_to_satisfy], current_pending_state.state
 				, ranking_list, current_pending_state.goal_to_satisfy, guarantees_count
 				, assumptions_count, guarantees_indexes, assumptions_indexes, first_assumption_index, pending_processed);
+		//if ranking reached infinity, update other rankings for the same state
+		if(!ranking_was_infinity && current_ranking->value == RANKING_INFINITY){
+			for(i = 0; i < guarantees_count; i++){
+				if(i != current_pending_state.goal_to_satisfy){
+					current_ranking			= (automaton_ranking*)automaton_concrete_bucket_get_entry(ranking_list[i], current_pending_state.state);
+					current_ranking->value	= RANKING_INFINITY;
+					automaton_add_unstable_predecessors(game_automaton, pending_list, key_lists[i], current_pending_state.state
+									, ranking_list, current_pending_state.goal_to_satisfy, guarantees_count
+									, assumptions_count, guarantees_indexes, assumptions_indexes, first_assumption_index, pending_processed);
+				}
+			}
+		}
 		pending_processed++;
 #if PRINT_PARTIAL_SYNTHESIS
 		if((pending_processed % 900000) == 0){
