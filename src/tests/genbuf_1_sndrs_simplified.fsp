@@ -12,8 +12,9 @@ ltl sys rho G_1_sndr_0_g0_g0 in GENBUF		= []((!g && !(sREQ0 && !bACK0))->(X(!g))
 ltl sys rho G_1_sndr_0_g0_g1 in GENBUF		= []((!g && sREQ0 && !bACK0)->(X(g))).
 ltl sys rho G_1_sndr_0_g1_g1 in GENBUF		= []((g && !bACK0)->(X(g))).
 ltl sys rho G_1_sndr_0_g1_g0 in GENBUF		= []((g && bACK0)->(X(!g))).
-//sToB_REQ then not bToS_ACK
+//inmediate ack are forbidden
 ltl sys rho G_2_sndr_0 in GENBUF		= []((!sREQ0 && X(sREQ0)) -> (X(!bACK0))).
+//if no req pending keep bACK low
 ltl sys rho G_2_b_sndr_0 in GENBUF		= []((!bACK0 && !sREQ0) -> (X(!bACK0))).
 //bToS_ACK only if sToB_REQ
 ltl sys rho G_3_sndr_0 in GENBUF		= []((!bACK0 && X(bACK0)) -> sREQ0).
@@ -51,4 +52,5 @@ ltl fluent G_True		= (bREQ0 || !bREQ0).
 |f| ENV =(GENBUF).
 //|gr1| <{A_rcvr_0}><{G_1_2_sndr_0}> STRAT = ENV.
 |gr1| <{G_True}><{G_1_2_sndr_0}> STRAT = ENV.
+//we should check for strong reactivity relation on the system: [](rACK <-> <>bACK)
 

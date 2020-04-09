@@ -2,31 +2,31 @@
 set Global_Alphabet = {}
 set Controllable_Alphabet = {}
 
-set Global_Signals	= {sToB_REQ_0, bToS_ACK_0, bToR_REQ_0, rToB_ACK_0, enq, deq, full, empty}
-set Output_Signals	= {bToS_ACK_0, bToR_REQ_0, enq, deq}
-order			= {sToB_REQ_0 < rToB_ACK_0 < full < empty < bToS_ACK_0 < bToR_REQ_0 < enq < deq}
+set Global_Signals	= {sREQ0, bACK0, bREQ0, rACK0, enq, deq, full, empty}
+set Output_Signals	= {bACK0, bREQ0, enq, deq}
+order			= {sREQ0 < rACK0 < full < empty < bACK0 < bREQ0 < enq < deq}
 
 /***********
 **** THETA
 ***********/
-ltl env theta Init_Buffer_e in GENBUF	= (!sToB_REQ_0 && !rToB_ACK_0 && !full && empty).
-ltl sys theta Init_Buffer_s in GENBUF	= (!bToS_ACK_0 && !bToR_REQ_0 && !enq && !deq).
+ltl env theta Init_Buffer_e in GENBUF	= (!sREQ0 && !rACK0 && !full && empty).
+ltl sys theta Init_Buffer_s in GENBUF	= (!bACK0 && !bREQ0 && !enq && !deq).
 /***********
 **** SYS RHO
 ***********/
 //bToS_ACK only if sToB_REQ
-ltl sys rho G_3_sndr_0 in GENBUF		= []((!bToS_ACK_0 && X(bToS_ACK_0)) -> sToB_REQ_0).
+ltl sys rho G_3_sndr_0 in GENBUF		= []((!bACK0 && X(bACK0)) -> sREQ0).
 //keep bToS_ACK up if sToB_REQ still going
-ltl sys rho G_4_sndr_0 in GENBUF		= []((bToS_ACK_0 && sToB_REQ_0) -> X(bToS_ACK_0)).
+ltl sys rho G_4_sndr_0 in GENBUF		= []((bACK0 && sREQ0) -> X(bACK0)).
 //keep bToR_REQ if not yet ack
-ltl sys rho G_6_1_rcvr_0 in GENBUF		= []((bToR_REQ_0 && !rToB_ACK_0) -> X(bToR_REQ_0)).
+ltl sys rho G_6_1_rcvr_0 in GENBUF		= []((bREQ0 && !rACK0) -> X(bREQ0)).
 //lower bToR_REQ when rToB_ACK received
-ltl sys rho G_8_rcvr_0 in GENBUF		= [](rToB_ACK_0 -> X(!bToR_REQ_0)).
+ltl sys rho G_8_rcvr_0 in GENBUF		= [](rACK0 -> X(!bREQ0)).
 //bToS_ACK raises iff enq
 
-ltl sys rho G_9_1 in GENBUF			= [](X(enq) <-> ((!bToS_ACK_0 && X(bToS_ACK_0)))).
+ltl sys rho G_9_1 in GENBUF			= [](X(enq) <-> ((!bACK0 && X(bACK0)))).
 //only deq if rToB_ACK'd
-ltl sys rho G_10 in GENBUF			= [](X(deq) -> ((!X(rToB_ACK_0) && rToB_ACK_0))).
+ltl sys rho G_10 in GENBUF			= [](X(deq) -> ((!X(rACK0) && rACK0))).
 //restrict eng/deq operations
 ltl sys rho G_11_1 in GENBUF			= []((full && !deq)-> !enq).
 ltl sys rho G_11_1_X in GENBUF			= [](X((full && !deq)-> !enq)).
@@ -34,21 +34,21 @@ ltl sys rho G_11_2 in GENBUF			= [](empty-> !deq).
 ltl sys rho G_11_2_X in GENBUF			= [](X(empty-> !deq)).
 
 //if sToB_REQ and not full then should ENQ
-//ltl sys rho G_13 in GENBUF			= []((!full && (sToB_REQ_0)) -> (enq || X(enq))).
+//ltl sys rho G_13 in GENBUF			= []((!full && (sREQ0)) -> (enq || X(enq))).
 
 /***********
 **** ENV RHO
 ***********/
 
 //keep sToB_REQ if not yet ACK'd
-ltl env rho A_1_1_sndr_0 in GENBUF		= []((sToB_REQ_0 && !bToS_ACK_0) -> X(sToB_REQ_0)).
+ltl env rho A_1_1_sndr_0 in GENBUF		= []((sREQ0 && !bACK0) -> X(sREQ0)).
 //lower sToB_REQ once ACK'd
-ltl env rho A_1_2_sndr_0 in GENBUF		= [](bToS_ACK_0 -> X(!sToB_REQ_0)).
+ltl env rho A_1_2_sndr_0 in GENBUF		= [](bACK0 -> X(!sREQ0)).
 
 //keep rToB_ACK if still REQ's
-ltl env rho A_3_rcvr_0 in GENBUF		= []((bToR_REQ_0 && rToB_ACK_0) -> X(rToB_ACK_0)).
+ltl env rho A_3_rcvr_0 in GENBUF		= []((bREQ0 && rACK0) -> X(rACK0)).
 //rToB_ACK if REQ'd
-ltl env rho A_4_rcvr_0 in GENBUF		= [](X(rToB_ACK_0) -> bToR_REQ_0).
+ltl env rho A_4_rcvr_0 in GENBUF		= [](X(rACK0) -> bREQ0).
 //keep empty / full fixed if deq == enq
 ltl env rho A_5_1 in GENBUF			= []((deq <-> enq) -> (empty <-> X(empty))).
 ltl env rho A_5_2 in GENBUF			= []((deq <-> enq) -> (full <-> X(full))).
@@ -60,7 +60,7 @@ ltl env rho A_5_4 in GENBUF			= []((deq && !enq) -> !X(full)).
 **** AUTOMATA
 ***********/
 //G_7 was turned into an automaton
-//G_7_ROUND_ROBIN	= (bToR_REQ_0.on -> bToR_REQ_1.on -> G_7_ROUND_ROBIN).
+//G_7_ROUND_ROBIN	= (bREQ0.on -> bToR_REQ_1.on -> G_7_ROUND_ROBIN).
 
 /***********
 **** FLUENTS
@@ -68,9 +68,9 @@ ltl env rho A_5_4 in GENBUF			= []((deq && !enq) -> !X(full)).
 //G_12 was turned into a fluent
 //fluent F_Goal_12 = <deq.on, empty.off> initially 1
 
-//ltl fluent G_1_2_sndr_0		= (sToB_REQ_0 <-> bToS_ACK_0).
+//ltl fluent G_1_2_sndr_0		= (sREQ0 <-> bACK0).
 //ltl fluent G_1_2_sndr_1		= (sToB_REQ_1 <-> bToS_ACK_1).
-//ltl fluent A_2_sndr_0		= (bToR_REQ_0 <-> rToB_ACK_0).
+//ltl fluent A_2_sndr_0		= (bREQ0 <-> rACK0).
 //ltl fluent A_2_sndr_1		= (bToR_REQ_1 <-> rToB_ACK_1).
 
 /***********
