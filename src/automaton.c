@@ -843,7 +843,7 @@ bool automaton_ranking_print_report(automaton_automaton *automaton,
 					fluent_index	= GET_STATE_FLUENT_INDEX(liveness_count, i, j);
 					fprintf(f, "%s%s", TEST_FLUENT_BIT(automaton->liveness_valuations, fluent_index) ? "1" : "0", j == (liveness_count - 1)? "" :  AUT_SER_SEP);
 				}else{
-					fprintf(f, "%s%s", "0", j == (fluent_count - 1)? "" :  AUT_SER_SEP);
+					fprintf(f, "%s%s", "0", j == (liveness_count - 1)? "" :  AUT_SER_SEP);
 				}
 
 			}

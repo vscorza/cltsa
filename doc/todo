@@ -1,15 +1,9 @@
 TODO:
 =====
-- write documentation on this
-"Te paso el lineamiento de lo que voy a escribir para el viernes, hay dos limitaciones fuertes para no presentar otro tipo de experimento para probar la adecuación de la técnica,
-
-    no vamos a realizar un estudio controlado con sujetos que escriban y diagnostiquen especificaciones
-    no hay una noción clara para comparar las técnicas existentes (minimización de fórmulas ltl) que de hecho agregan comportamiento, con nuestra técnica
-
-
-Es por esto que vamos a utilizar un proxy para aproximar la calidad del recorte o minimización, la idea es utilizar el volumen (cantidad de transiciones) en comparación con la planta original. Suponiendo que E es la planta original, E' la planta minimizada y C el controlador del caso realizable vamos a presentar y analizar las relaciones |C|/|E| y |E'|/|E| donde |S| reporta la cantidad de transiciones de E.
-
-Habrá que definir una magnitud que exprese que tan controlabe es un sistema y evaluar como se relaciona con la medida anterior. Por ejemplo |U|/|S| donde |U| expresa la cantidad de transiciones no controlables de E y |S| la cantidad de transiciones controlables."
+- de efectividad hacer alguna mención a la implementación y la linealidad, comparar con ejemplos comparables
+- explicar ejemplos nuevos
+- armar tabla
+- armar ejemplo que compare nuestra tecnica con konighoefer y maoz
 - next deliverable
 	- review konighoefer numbers
 	- implement mutations on existing examples
