@@ -293,7 +293,7 @@ void automaton_alphabet_print(automaton_alphabet* alphabet, char* prefix, char* 
 		printf("%s", suffix);
 }
 
-void automaton_transition_print(automaton_transition* transition, automaton_automata_context* ctx, char* prefix, char* suffix){
+void automaton_transition_print(automaton_transition* transition, automaton_automata_context* ctx, char* prefix, char* suffix, int link_id){
 	if(prefix != NULL)
 		printf("%s", prefix);
 	uint32_t i,j;
@@ -308,7 +308,10 @@ void automaton_transition_print(automaton_transition* transition, automaton_auto
 			printf("%s", ctx->global_alphabet->list[i].name);
 		}
 	}
-	printf("}-> %d)", transition->state_to);
+	if(link_id >= 0)
+		printf("}-> <a href='#to_%d_%d'>%d</a>)", link_id, transition->state_to, transition->state_to);
+	else
+		printf("}-> %d)", transition->state_to);
 	if(suffix != NULL)
 		printf("%s", suffix);
 }
@@ -387,8 +390,10 @@ void automaton_automata_context_print(automaton_automata_context* ctx, char* pre
 		printf("%s", suffix);	
 }
 
+int __automaton_global_print_id  = -1;
 
 void automaton_automaton_print(automaton_automaton* current_automaton, bool print_ctx, bool print_alphabet, bool print_valuations, char* prefix, char* suffix){
+	__automaton_global_print_id++;
 	if(prefix != NULL)
 		printf("%s", prefix);
 	uint32_t i, j;
@@ -451,8 +456,9 @@ void automaton_automaton_print(automaton_automaton* current_automaton, bool prin
 	printf("%sTransitions:\n", prefix2);
 	for(i = 0; i < current_automaton->transitions_count; i++){
 		if(!current_automaton->is_controllable[i])printf("(!)");
+		printf("<span id='to_%d_%d'></span>", __automaton_global_print_id, i);
 		for(j = 0; j < current_automaton->out_degree[i]; j++)
-		automaton_transition_print(&(current_automaton->transitions[i][j]), ctx, prefix2, "\n");
+		automaton_transition_print(&(current_automaton->transitions[i][j]), ctx, prefix2, "\n", __automaton_global_print_id);
 	}
 	printf("%sInitial States:{", prefix2);
 	for(i = 0; i < current_automaton->initial_states_count; i++){
@@ -764,13 +770,14 @@ void automaton_ranking_transition_serialize_report(FILE *f, automaton_transition
 	fprintf(f, "%s%s%s%s", AUT_SER_ARRAY_END, AUT_SER_SEP, TRANSITION_IS_INPUT(transition)? "1" :"0",AUT_SER_OBJ_END);
 }
 bool automaton_ranking_print_report(automaton_automaton *automaton,
-		automaton_concrete_bucket_list** ranking_list, uint32_t* max_delta, uint32_t guarantee_count){
-	uint32_t name_len = strlen(automaton->name) + 30;
+		automaton_concrete_bucket_list** ranking_list, uint32_t* max_delta, uint32_t guarantee_count,
+		char** guarantees){
+	uint32_t name_len = strlen(automaton->name) + 60;
 	char *filename = calloc(name_len, sizeof(char));
 	FILE *f = NULL;
 	uint32_t r;
 	for(r = 0; r < guarantee_count; r++){
-		snprintf(filename, name_len, "results/%s_ranking_%d.rep", automaton->name, r);
+		snprintf(filename, name_len, "/tmp/%s_ranking_%s.rep", automaton->name, guarantees[r]);
 		f = fopen(filename, "w");
 
 		if (f == NULL)
@@ -779,7 +786,7 @@ bool automaton_ranking_print_report(automaton_automaton *automaton,
 			return false;
 		}
 
-		fprintf(f, "%s%s_ranking_%d%s", AUT_SER_OBJ_START, automaton->name, r, AUT_SER_SEP);
+		fprintf(f, "%s%s_ranking_%s%s", AUT_SER_OBJ_START, automaton->name, guarantees[r], AUT_SER_SEP);
 		automaton_ranking_automata_context_serialize_report(f, automaton->context, max_delta[r]);
 		fprintf(f, "%s%d%s%s", AUT_SER_SEP, automaton->local_alphabet_count + max_delta[r], AUT_SER_SEP, AUT_SER_ARRAY_START);
 		uint32_t i, j;
@@ -2077,9 +2084,12 @@ void automaton_ranking_update(automaton_automaton* game_automaton, automaton_con
 #endif
 }
 
+int __ranking_link_id = -1;
+
 automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automaton, char** assumptions, uint32_t assumptions_count
 		, char** guarantees, uint32_t guarantees_count, bool print_ranking){
 	clock_t begin = clock();
+	__ranking_link_id++;
 	_print_ranking	= print_ranking;
 	uint32_t pending_processed	= 0;
 	//TODO: preallocate pending states and rankings
@@ -2122,6 +2132,7 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 	uint32_t* max_delta	= malloc(sizeof(uint32_t) * guarantees_count);
 	uint32_t current_delta;
 #if DEBUG_SYNTHESIS
+	printf("<a id='synthesis'>Starting synthesis</a>[<a href='#synthesis'>Synthesis start</a>|<a href='#synthesis_completed'>Synthesis end</a>|<a href='#game'>Game</a>|<a href='#strategy'>Strategy</a>]\n");
 	if(_print_ranking)
 		printf("!!COMPUTING INFINITY!!\n");
 #endif
@@ -2289,15 +2300,30 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 	}
 #if DEBUG_SYNTHESIS || DEBUG_STRATEGY_BUILD
 	if(_print_ranking){
-		printf("!!RANKING STABILIZATION ACHIEVED FOR %s!!\n", strategy_name);
+		printf("<a id='synthesis_completed'>RANKING STABILIZATION ACHIEVED FOR %s</a>[<a href='#synthesis'>Synthesis start</a>|<a href='#synthesis_completed'>Synthesis end</a>|<a href='#game'>Game</a>|<a href='#strategy'>Strategy</a>]\n", strategy_name);
 		for(i = 0; i < game_automaton->transitions_count; i++){
 			//if(game_automaton->out_degree[i] <= 0) continue;
-			printf("[S %d:", i);
+			printf("[%s][<a id='rank_%d_%d'>S %d</a>:", game_automaton->is_controllable[i]? "C" : "U",
+					__ranking_link_id, i, i);
 			for(j = 0; j < guarantees_count; j++){
 				current_ranking	= ((automaton_ranking*)automaton_concrete_bucket_get_entry(ranking_list[j], i));
 				printf("(g:%d,<%d,%d>)", j, current_ranking->value, current_ranking->assumption_to_satisfy);
 			}
-			printf("]\n");
+			printf("]");
+			for(j = 0; j < game_automaton->out_degree[i]; j++){
+				if(j > 0)printf("|");
+				printf("<a href='#rank_%d_%d'>{", __ranking_link_id, game_automaton->transitions[i][j].state_to);
+				bool first_print = true;
+				for(k = 0; k < (TRANSITION_ENTRY_SIZE * FIXED_SIGNALS_COUNT) - 1; k++){
+					if(TEST_TRANSITION_BIT((&(game_automaton->transitions[i][j])), k)){
+						if(first_print)first_print = false;
+						else printf(",");
+						printf("%s", ctx->global_alphabet->list[k].name);
+					}
+				}
+				printf("}->%d</a>", game_automaton->transitions[i][j].state_to);
+			}
+			printf("\n");
 		}
 		printf("\tpending:%d\n", pending_list->count);
 	}
@@ -2332,6 +2358,7 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 		}
 	}
 	if(is_winning){
+		__automaton_global_print_id++;
 		//keep winning states
 		uint32_t new_count;
 		void** new_list;
@@ -2467,16 +2494,20 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 							}
 							if((!is_controllable && (is_input || TRANSITION_IS_INPUT(current_transition))) || (succ_ranking->value != RANKING_INFINITY && !(!is_controllable && !is_input))){
 #if DEBUG_STRATEGY_BUILD
-								printf("(g:%d)[ADD] strategy transition: ", i);
-								automaton_transition_print(strategy_transition, strategy->context, "", "\n");
+								printf("(g:%d)[ADD] From (",i);
+								automaton_transition_print(current_transition, strategy->context, "", "", -1);
+								printf(") strategy transition: ");
+								automaton_transition_print(strategy_transition, strategy->context, "", "\n", __automaton_global_print_id);
 #endif
 								automaton_automaton_add_transition(strategy, strategy_transition);
 
 							}
 #if DEBUG_STRATEGY_BUILD
 							else{
-								printf("(g:%d)[INF] strategy transition: ", i);
-								automaton_transition_print(strategy_transition, strategy->context, "", "\n");
+								printf("(g:%d)[INF] From(",i);
+								automaton_transition_print(current_transition, strategy->context, "", "", -1);
+								printf(")strategy transition:");
+								automaton_transition_print(strategy_transition, strategy->context, "", "\n", __automaton_global_print_id);
 							}
 #endif
 
@@ -2504,15 +2535,17 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 	}
 	if(print_ranking){
 		automaton_automaton *clone = automaton_automaton_clone(game_automaton);
-		automaton_ranking_print_report(clone, ranking_list, max_delta, guarantees_count);
+		automaton_ranking_print_report(clone, ranking_list, max_delta, guarantees_count, guarantees);
+		/*
 		uint32_t clone_len	= strlen(clone->name)+30;
 		char *clone_name	= calloc(clone_len, sizeof(char));
 		snprintf(clone_name, clone_len, "%s_minimized", clone->name);
 		free(clone->name);
 		clone->name	= clone_name;
 		automaton_automaton_remove_deadlocks(clone);
-		automaton_ranking_print_report(clone, ranking_list, max_delta, guarantees_count);
+		automaton_ranking_print_report(clone, ranking_list, max_delta, guarantees_count, guarantees);
 		automaton_automaton_destroy(clone);
+		*/
 	}
 	//destroy structures
 	free(max_delta);
@@ -2528,11 +2561,12 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 	free(guarantees_indexes);
 	automaton_automaton_remove_unreachable_states(strategy);
 #if DEBUG_STRATEGY_BUILD
-	printf("Game\n=====\n");
+	printf("<a id='game'>Game</a>[<a href='#synthesis'>Synthesis start</a>|<a href='#synthesis_completed'>Synthesis end</a>|<a href='#game'>Game</a>|<a href='#strategy'>Strategy</a>]\n=====\n");
 	automaton_automaton_print(game_automaton, false, false, false, "", "\n");
 
-	printf("Built Strategy\n=====\n");
+	printf("<a id='strategy'>Built Strategy</a>[<a href='#synthesis'>Synthesis start</a>|<a href='#synthesis_completed'>Synthesis end</a>|<a href='#game'>Game</a>|<a href='#strategy'>Strategy</a>]\n=====\n");
 	automaton_automaton_print(strategy, false, false, false, "", "\n");
+	printf("<a href='#synthesis'>Synthesis start</a>|<a href='#synthesis_completed'>Synthesis end</a>|<a href='#game'>Game</a>|<a href='#strategy'>Strategy</a>\n=====\n");
 #endif
 	return strategy;
 
@@ -3809,7 +3843,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 			for(j = 0; j < automata_count; j++){
 				snprintf(buff, sizeof(buff) - strlen(buff) - 1, "\t\t i:[%d]", j);
 				if(idxs[j] > 0)
-					automaton_transition_print(&(automata[j]->transitions[current_state[j]][idxs[j] - 1]), ctx, buff,"\n");
+					automaton_transition_print(&(automata[j]->transitions[current_state[j]][idxs[j] - 1]), ctx, buff,"\n",-1);
 				else
 					printf("%s [not considered]\n", buff);
 			}

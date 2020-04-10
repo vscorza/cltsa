@@ -302,7 +302,7 @@ void automaton_indexes_valuation_destroy(automaton_indexes_valuation* valuation)
 void automaton_signal_type_print(automaton_signal_type type, char* prefix, char* suffix);
 void automaton_signal_event_print(automaton_signal_event* signal_event, char* prefix, char* suffix);
 void automaton_alphabet_print(automaton_alphabet* alphabet, char* prefix, char* suffix);
-void automaton_transition_print(automaton_transition* transition, automaton_automata_context* ctx, char* prefix, char* suffix);
+void automaton_transition_print(automaton_transition* transition, automaton_automata_context* ctx, char* prefix, char* suffix, int link_id);
 void automaton_fluent_print(automaton_fluent* fluent, automaton_automata_context* ctx, char* prefix, char* suffix);
 void automaton_valuation_print(automaton_valuation* valuation, automaton_automata_context* ctx, char* prefix, char* suffix);
 void automaton_automata_context_print(automaton_automata_context* ctx, char* prefix, char* suffix);
@@ -323,7 +323,8 @@ void automaton_ranking_alphabet_serialize_report(FILE *f, automaton_alphabet *al
 void automaton_ranking_automata_context_serialize_report(FILE *f, automaton_automata_context *ctx, uint32_t max_delta);
 void automaton_ranking_transition_serialize_report(FILE *f, automaton_transition *transition,uint32_t ranking_value);
 bool automaton_ranking_print_report(automaton_automaton *automaton,
-		automaton_concrete_bucket_list** ranking_list, uint32_t* max_delta, uint32_t guarantee_count);
+		automaton_concrete_bucket_list** ranking_list, uint32_t* max_delta, uint32_t guarantee_count,
+		char **guarantees);
 /** INDEXES VALUATION **/
 bool automaton_indexes_valuation_has_range(automaton_indexes_valuation* valuation, automaton_range* range);
 bool automaton_indexes_valuation_add_range(automaton_indexes_valuation* valuation, automaton_range* range);

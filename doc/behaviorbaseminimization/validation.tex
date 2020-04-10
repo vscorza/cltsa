@@ -1,5 +1,36 @@
- 
+\newpage 
 \section{Validation}
+The extent to which the technique serves it purpose is defined by its soundness, efficiency and, more importantly, information, understood as the ability to guide the engineer while writing a non trivial formal specification. The presented diagnosis should help by pointing out the causes of non realizability (expressed in a behavioral implicit language) that may appear while progressively gathering knowledge and building a complete and precise model.
+
+\textbf{<EFFICIENCY CLAIM>}
+
+The measure of information our technique may provide should ultimately be related to the impact it can have on the overall specification process, in particular how clear it is for the engineer  to interpret the diagnosis in terms of amount of data presented and its relevance in relation to the non realizability cause. The unavailability of skilled professionals and the amount of time and effort required to prepare a considerable set of external subjects to the point where they would be able to write non trivial formal specifications renders the perspective of a controlled experiment with external engineers writing specifications from scratch unfeasible. On the other hand, it is also imposible to propose a direct comparison with similar techniques, since, for instance, in ~\cite{DBLP:conf/hvc/KonighoferHB10} the minimization is applied on the set of environmental safety formulas, which in fact increments the volume of the plant when presented as an automaton. 
+
+\textbf{<REF. TO JTVS (MAOZ)>}
+
+Under the light of these facts we propose a small set of metrics to quantitatively evaluate our technique. The first metric is volume, defined as the relation of the minimized plant against the original instance.
+
+\[ v_{\mathcal{U}} = \dfrac{|E'|}{|E|} \]
+
+The number of transitions was chosen as the representation of size for each automaton. It also desirable to observe the relation of this metric with a similar notion of volume, but one defined between the size of the controller (for the realizable version of the problem) and the original plant.
+
+\[ v_{\mathcal{C}} = \dfrac{|C|}{|E|} \]
+
+A measure of controlability is defined, observed and related to each volume. Controlability is defined as the number of controllable transitions in the plant over the total number of transitions. The motivation behind it is that a plant with a higher controlability measure could be related to a more powerful system, against which the technique can not prune much behavior.
+
+\[ c = \dfrac{|T_{\mathcal{C}}|}{|E|} \]
+
+\newpage
+"Te paso el lineamiento de lo que voy a escribir para el viernes, hay dos limitaciones fuertes para no presentar otro tipo de experimento para probar la adecuación de la técnica,
+
+no vamos a realizar un estudio controlado con sujetos que escriban y diagnostiquen especificaciones
+no hay una noción clara para comparar las técnicas existentes (minimización de fórmulas ltl) que de hecho agregan comportamiento, con nuestra técnica
+
+
+Es por esto que vamos a utilizar un proxy para aproximar la calidad del recorte o minimización, la idea es utilizar el volumen (cantidad de transiciones) en comparación con la planta original. Suponiendo que E es la planta original, E' la planta minimizada y C el controlador del caso realizable vamos a presentar y analizar las relaciones |C|/|E| y |E'|/|E| donde |S| reporta la cantidad de transiciones de E.
+
+Habrá que definir una magnitud que exprese que tan controlabe es un sistema y evaluar como se relaciona con la medida anterior. Por ejemplo |U|/|S| donde |U| expresa la cantidad de transiciones no controlables de E y |S| la cantidad de transiciones controlables."
+
 
 The validation reported in this section is guided by two main concerns.  This first is the degree to which the initial control problem is reduced and the computational cost involved. The second is if the minimization offers insight into non realizability causes.
 In order to avoid bias, we prioritized using third-party developed unrealizable specifications that include explanations for the causes of unrealizability.
