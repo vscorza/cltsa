@@ -4,6 +4,8 @@ TODO:
 - explicar ejemplos nuevos
 - armar tabla
 - armar ejemplo que compare nuestra tecnica con konighoefer y maoz
+- revisar minimization dd, en los casos de functional tests deja trans. que no van
+- revisar diag. de genbuf_1_no_automaton con Ass. G_True
 - next deliverable
 	- review konighoefer numbers
 	- implement mutations on existing examples

@@ -34,10 +34,10 @@ ltl sys rho G_11_1 in GENBUF			= []((full && !deq)-> !enq).
 ltl sys rho G_11_1_X in GENBUF			= [](X((full && !deq)-> !enq)).
 ltl sys rho G_11_2 in GENBUF			= [](empty-> !deq).
 ltl sys rho G_11_2_X in GENBUF			= [](X(empty-> !deq)).
-ltl sys rho G_12_t0_t0 in GENBUF		= []((!t && (empty || deq))->(X(!t))).
-ltl sys rho G_12_t0_t1 in GENBUF		= []((!t && (!empty && !deq))->(X(t))).
-ltl sys rho G_12_t1_t1 in GENBUF		= []((t && !deq)->(X(t))).
-ltl sys rho G_12_t1_t0 in GENBUF		= []((t && deq)->(X(!t))).
+ltl sys rho G_12_t0_t0 in GENBUF		= []((!t && X(empty || deq))->(X(!t))).
+ltl sys rho G_12_t0_t1 in GENBUF		= []((!t && X(!empty && !deq))->(X(t))).
+ltl sys rho G_12_t1_t1 in GENBUF		= []((t && X(!deq))->(X(t))).
+ltl sys rho G_12_t1_t0 in GENBUF		= []((t && X(deq))->(X(!t))).
 //*********** ENV RHO
 //A1
 ltl env rho A_1_1_sndr_0 in GENBUF			= []((sREQ0 && !bACK0)->X(sREQ0)).
@@ -59,6 +59,7 @@ ltl env rho A_5_4 in GENBUF			= []((deq && !enq) -> !X(full)).
 //*********** FLUENTS
 //G_12 was turned into a fluent
 ltl fluent A_rcvr_0		= (!a).
+ltl fluent A_rcvr_0_b		= (a || empty).
 //ltl fluent G_bREQ0		= (bREQ0).
 ltl fluent G_1_2_sndr_0		= (!g).
 ltl fluent G_True		= (bREQ0 || !bREQ0).
@@ -67,5 +68,6 @@ ltl fluent G_7				= (empty || deq).
 
 //*********** SYNTHESIS
 |f| ENV =(GENBUF).
-|gr1| <{A_rcvr_0}><{G_1_2_sndr_0, G_12, G_7}> STRAT = ENV.
+//|gr1| <{A_rcvr_0, A_rcvr_0_b}><{G_1_2_sndr_0, G_12,G_7}> STRAT = ENV.
+|gr1| <{G_True}><{G_1_2_sndr_0, G_12,G_7}> STRAT = ENV.
 //|gr1| <{G_True}><{G_1_2_sndr_0, G_12, G_7}> STRAT = ENV.
