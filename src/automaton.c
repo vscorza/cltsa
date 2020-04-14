@@ -2284,7 +2284,7 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 					current_ranking			= (automaton_ranking*)automaton_concrete_bucket_get_entry(ranking_list[i], current_pending_state.state);
 					current_ranking->value	= RANKING_INFINITY;
 					automaton_add_unstable_predecessors(game_automaton, pending_list, key_lists[i], current_pending_state.state
-									, ranking_list, current_pending_state.goal_to_satisfy, guarantees_count
+									, ranking_list, i, guarantees_count
 									, assumptions_count, guarantees_indexes, assumptions_indexes, first_assumption_index, pending_processed);
 				}
 			}
@@ -2429,7 +2429,7 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 							(
 								(
 									(
-										current_ranking->value > succ_ranking->value
+										((succ_ranking->value != RANKING_INFINITY) && (current_ranking->value > succ_ranking->value))
 										||
 										(
 											current_ranking->value == RANKING_INFINITY
@@ -2438,16 +2438,16 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 									)
 									||
 									(
-										current_ranking->value == succ_ranking->value
+										(current_ranking->value == succ_ranking->value)
 										&&
-										current_ranking->assumption_to_satisfy > succ_ranking->assumption_to_satisfy
+										(current_ranking->assumption_to_satisfy > succ_ranking->assumption_to_satisfy)
 									)
 								)
 								||
 								(
-									current_ranking->assumption_to_satisfy == succ_ranking->assumption_to_satisfy
+									(current_ranking->assumption_to_satisfy == succ_ranking->assumption_to_satisfy)
 									&&
-									current_ranking->value == succ_ranking->value
+									(current_ranking->value == succ_ranking->value)
 									&&
 									(!automaton_bucket_has_entry(game_automaton->inverted_valuations[assumptions_indexes[current_ranking->assumption_to_satisfy]], current_ranking->state))
 								)
@@ -2544,8 +2544,8 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 		clone->name	= clone_name;
 		automaton_automaton_remove_deadlocks(clone);
 		automaton_ranking_print_report(clone, ranking_list, max_delta, guarantees_count, guarantees);
-		automaton_automaton_destroy(clone);
 		*/
+		automaton_automaton_destroy(clone);
 	}
 	//destroy structures
 	free(max_delta);

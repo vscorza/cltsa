@@ -58,7 +58,7 @@ ltl env rho A_5_3 in GENBUF			= []((enq && !deq) -> !X(empty)).
 ltl env rho A_5_4 in GENBUF			= []((deq && !enq) -> !X(full)).
 //*********** FLUENTS
 //G_12 was turned into a fluent
-//ltl fluent A_rcvr_0		= (!a).
+ltl fluent A_rcvr_0		= (!a).
 //ltl fluent G_bREQ0		= (bREQ0).
 ltl fluent G_1_2_sndr_0		= (!g).
 ltl fluent G_True		= (bREQ0 || !bREQ0).
@@ -67,5 +67,5 @@ ltl fluent G_7				= (empty || deq).
 
 //*********** SYNTHESIS
 |f| ENV =(GENBUF).
-//|gr1| <{A_rcvr_0}><{G_1_2_sndr_0}> STRAT = ENV.
-|gr1| <{G_True}><{G_1_2_sndr_0, G_12, G_7}> STRAT = ENV.
+|gr1| <{A_rcvr_0}><{G_1_2_sndr_0, G_12, G_7}> STRAT = ENV.
+//|gr1| <{G_True}><{G_1_2_sndr_0, G_12, G_7}> STRAT = ENV.
