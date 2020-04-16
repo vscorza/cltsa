@@ -3360,7 +3360,7 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 	//compute gr1 games
 	int32_t main_index;
 	automaton_gr1_game_syntax* gr1_game;
-	automaton_automaton *game_automaton, *winning_region_automaton;
+	automaton_automaton *game_automaton, *winning_region_automaton, *dd_automaton;
 	char **assumptions, **guarantees;
 	char set_name[255];
 	int32_t assumptions_count = 0, guarantees_count = 0;
@@ -3447,11 +3447,9 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 			if(winning_region_automaton->transitions_count == 0){
 				nonreal	= true;
 				automaton_automaton_destroy(winning_region_automaton);
-#if USE_DIAGNOSE_DD
-				winning_region_automaton = automaton_get_gr1_unrealizable_minimization_dd(game_automaton, assumptions, assumptions_count, guarantees, guarantees_count);
-#else
-				winning_region_automaton = automaton_get_gr1_unrealizable_minimization(game_automaton, assumptions, assumptions_count, guarantees, guarantees_count);
-#endif
+				dd_automaton = automaton_get_gr1_unrealizable_minimization_dd(game_automaton, assumptions, assumptions_count, guarantees, guarantees_count);
+				winning_region_automaton = automaton_get_gr1_unrealizable_minimization(dd_automaton, assumptions, assumptions_count, guarantees, guarantees_count);
+				automaton_automaton_destroy(dd_automaton);
 				automaton_automaton_remove_unreachable_states(winning_region_automaton);
 			}
 			main_index = automaton_parsing_tables_add_entry(tables, COMPOSITION_ENTRY_AUT, gr1_game->name, winning_region_automaton);

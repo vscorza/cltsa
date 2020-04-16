@@ -1,0 +1,41 @@
+//GenBuf example taken from Synthesis of Reactive(1) Designs 2 senders
+set Global_Alphabet = {n,s,e,w,load,unload,stall,releaseNorth, releaseSouth,g, a}
+set Controllable_Alphabet = {n,s,e,w,load,unload,g}
+
+order 				= {}
+//set Moves = {n,s,e,w}
+//set Actions = {load,unload}
+//set A = {Moves,Actions}
+const Min = 1 //this must always be odd
+const Max = 6
+range Pos = Min..Max
+
+//Concrete
+MAZE = M[1][1],
+M[r:Pos][c:Pos] = ( 
+				when(r > Min) n->M[r-1][c] 
+				| when(r < Max) s->M[r+1][c]
+				| when(c > Min) w->M[r][c-1]
+				| when(c < Max) e->M[r][c+1]
+				| when((r == Max) * (c == Max)) load->M[r][c]
+				| when((r == Min) * (c == Min)) unload->M[r][c]
+				| when((r == ((Max - Min)/2))) stall -> M[r][c]
+				| when((r > Min) * (r == ((Max - Min)/2))) <n, releaseNorth>->M[r-1][c] 
+				| when((r < Max) * (r == ((Max - Min)/2))) <s, releaseSouth>->M[r+1][c]		
+).
+
+G = ( load -> G_l | releaseNorth -> G | a -> G),
+G_l = (load -> G | releaseNorth -> G_n | a -> G),
+G_n = (load -> G | releaseNorth -> G | a -> G | g -> G).
+
+ARM = (load->unload->ARM).
+
+||C = (MAZE ||_c ARM ||_c G).
+
+|f|ROBOT_EXPLORE = (MAZE || ARM).
+
+fluent F_G = <g, {a, load, unload,n,s,e,w,stall,releaseNorth, releaseSouth}>
+fluent F_ReleaseNorth = <releaseNorth,{a,unload,load,n,s,e,w,stall,releaseSouth}> initially 1
+fluent F_ReleaseSouth = <releaseSouth,{a,unload,load,n,s,e,w,stall,releaseNorth}> initially 1
+
+|gr1| <{F_ReleaseNorth,F_ReleaseSouth}><{F_G}> STRAT = ROBOT_EXPLORE.

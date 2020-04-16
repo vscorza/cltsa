@@ -65,7 +65,8 @@ ltl fluent G_1_2_sndr_0		= (!g).
 ltl fluent G_True		= (bREQ0 || !bREQ0).
 ltl fluent G_12				= (!t).
 ltl fluent G_7				= (empty || deq).
+ltl fluent G_Strongest	= (a).
 
 //*********** SYNTHESIS
 |f| ENV =(GENBUF).
-|gr1| <{A_rcvr_0, A_rcvr_0_b}><{G_1_2_sndr_0, G_12,G_7}> STRAT = ENV.
+|gr1| <{A_rcvr_0, A_rcvr_0_b}><{G_Strongest}> STRAT = ENV.

@@ -2,23 +2,23 @@
 set Global_Alphabet = {}
 set Controllable_Alphabet = {}
 set Global_Signals	= {bREQ0, rACK0, a, g, sREQ0, bACK0, enq, deq, full, empty, t}
-set Output_Signals	= {bREQ0, g, bACK0, enq, deq, t}
+set Output_Signals	= {bREQ0, g, enq, deq, t}
 order 				= {}
 //*********** THETA
-ltl env theta Init_Buffer_e in GENBUF	= (!sREQ0 && !rACK0 && !a && !full && empty).
-ltl sys theta Init_Buffer_s in GENBUF	= (!bACK0 && !g && !bREQ0 && !enq && !deq && !t).
+ltl env theta Init_Buffer_e in GENBUF	= (!bACK0 && !sREQ0 && !rACK0 && !a && !full && empty).
+ltl sys theta Init_Buffer_s in GENBUF	= (!g && !bREQ0 && !enq && !deq && !t).
 //*********** SYS RHO
 ltl sys rho G_1_sndr_0_g_g in GENBUF		= []((!g && !(sREQ0 && !bACK0))->(X(!g))).
 ltl sys rho G_1_sndr_0_g_g1 in GENBUF		= []((!g && sREQ0 && !bACK0)->(X(g))).
 ltl sys rho G_1_sndr_0_g1_g1 in GENBUF		= []((g && !bACK0)->(X(g))).
 ltl sys rho G_1_sndr_0_g1_g in GENBUF		= []((g && bACK0)->(X(!g))).
 //sToB_REQ then not bToS_ACK
-ltl sys rho G_2_sndr_0 in GENBUF		= []((!sREQ0 && X(sREQ0)) -> (X(!bACK0))).
-ltl sys rho G_2_b_sndr_0 in GENBUF		= []((!bACK0 && !sREQ0) -> (X(!bACK0))).
+ltl env rho G_2_sndr_0 in GENBUF		= []((!sREQ0 && X(sREQ0)) -> (X(!bACK0))).
+ltl env rho G_2_b_sndr_0 in GENBUF		= []((!bACK0 && !sREQ0) -> (X(!bACK0))).
 //bToS_ACK only if sToB_REQ
 ltl sys rho G_3_sndr_0 in GENBUF		= []((!bACK0 && X(bACK0)) -> sREQ0).
 //keep bToS_ACK up if sToB_REQ still going
-ltl sys rho G_4_sndr_0 in GENBUF		= []((bACK0 && sREQ0) -> X(bACK0)).
+ltl env rho G_4_sndr_0 in GENBUF		= []((bACK0 && sREQ0) -> X(bACK0)).
 //keep bToR_REQ if not yet ack
 ltl sys rho G_6_1_rcvr_0 in GENBUF		= []((bREQ0 && !rACK0) -> X(bREQ0)).
 //serving receivers in round robin fashion
@@ -26,7 +26,7 @@ ltl sys rho G_6_1_rcvr_0 in GENBUF		= []((bREQ0 && !rACK0) -> X(bREQ0)).
 ltl sys rho G_8_rcvr_0 in GENBUF		= [](rACK0 -> X(!bREQ0)).
 ltl sys rho G_AD_HOC_rcvr_0 in GENBUF		= [](bREQ0 -> sREQ0).
 //bToS_ACK raises iff enq
-ltl sys rho G_9_1 in GENBUF			= [](X(enq) <-> (!bACK0 && X(bACK0))).
+ltl env rho G_9_1 in GENBUF			= [](X(enq) <-> (!bACK0 && X(bACK0))).
 //only deq if rToB_ACK'd
 ltl sys rho G_10 in GENBUF			= [](X(deq) ->	(!X(rACK0) && rACK0)).
 //restrict eng/deq operations

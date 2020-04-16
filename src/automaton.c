@@ -476,10 +476,18 @@ bool automaton_automaton_print_fsp(automaton_automaton* current_automaton, char*
 	    printf("Error opening file!\n");
 	    return false;
 	}
+	uint32_t i,j,k, controllable_transitions = 0;
 
-	fprintf(f, "/* AUTO-GENERATED_FILE\n\tAutomaton %s */\n", current_automaton->name);
+	for(i = 0; i < current_automaton->transitions_count; i++){
+		for(j = 0; j < current_automaton->out_degree[i]; j++){
+			if(!(TRANSITION_IS_INPUT(&(current_automaton->transitions[i][j]))))controllable_transitions++;
+		}
+	}
+
+	fprintf(f, "/* AUTO-GENERATED_FILE\n\tAutomaton %s(%d states, %d transitions, %d controllable transitions) */\n", current_automaton->name
+			, current_automaton->transitions_count, current_automaton->transitions_composite_count, controllable_transitions);
 	automaton_automata_context* ctx		= current_automaton->context;
-	uint32_t i,j,k;
+
 	for(i = 0; i < current_automaton->initial_states_count; i++){
 		fprintf(f, "A = S_%d,\n", current_automaton->initial_states[i]);
 	}
@@ -2846,7 +2854,9 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2(automaton_a
 				guarantees, guarantees_count) || inner_automaton->out_degree[inner_automaton->initial_states[0]] == 0){
 			printf("Inner automaton was realizable, minimization %s\n", automaton_is_gr1_realizable(minimized, assumptions, assumptions_count,
 					guarantees, guarantees_count)? "too" :"was not" );
-			exit(-1);
+			automaton_automaton_destroy(inner_automaton);
+			inner_automaton = automaton_automaton_clone(minimized);
+			//exit(-1);
 		}
 		return inner_automaton;
 	}
