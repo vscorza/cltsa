@@ -1,8 +1,9 @@
 TODO:
 =====
+- computar tiempo y agregar columna de C || E'
+- armar scatterplot
 - de efectividad hacer alguna mención a la implementación y la linealidad, comparar con ejemplos comparables
 - explicar ejemplos nuevos
-- armar tabla
 - armar ejemplo que compare nuestra tecnica con konighoefer y maoz
 - revisar minimization dd, en los casos de functional tests deja trans. que no van
 - revisar diag. de genbuf_1_no_automaton con Ass. G_True
