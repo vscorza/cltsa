@@ -215,6 +215,11 @@ obdd* obdd_forall(obdd* root, char* var);					//apply reduction based on shannon
 void obdd_print(obdd* root, char *buff, uint32_t buff_size);
 void obdd_node_print(obdd_mgr* mgr, obdd_node* root, uint32_t spaces, char *buff, uint32_t buff_size);
 
+/** REACHABLE STATES **/
+obdd* obdd_reachable_states(obdd* root);
+obdd* obdd_img(obdd *root, uint32_t *primed_vars, uint32_t *original_vars, uint32_t var_count);
+obdd* obdd_swap_vars(obdd* root, uint32_t *primed_vars, uint32_t *original_vars, uint32_t var_count);
+
 bool obdd_apply_equals_fkt(bool left, bool right);
 bool obdd_apply_xor_fkt(bool left, bool right);
 bool obdd_apply_and_fkt(bool left, bool right);

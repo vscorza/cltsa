@@ -45,7 +45,7 @@ void automaton_program_add_obdd_primed_variables(){
 	for (i = 2; i < old_size; i++){
 		strcpy(prime_name, dict->entries[i].key);
 		strcat(prime_name, SIGNAL_PRIME_SUFFIX);
-		parser_add_primed_variables(dictionary_add_entry(dict, prime_name));
+		parser_add_primed_variables(dictionary_add_entry(dict, prime_name), dict->entries[i].value);
 	}
 }
 automaton_set_syntax* automaton_set_syntax_create_concurrent(char* string_terminal, automaton_indexes_syntax* indexes){
@@ -594,17 +594,19 @@ void parser_reset_obdd_mgr(){
 uint32_t* parser_primed_variables	= NULL;
 uint32_t parser_primed_variables_size	= 0;
 uint32_t parser_primed_variables_count	= 0;
+uint32_t* parser_primed_original_variables	= NULL;
 
 uint32_t* parser_get_primed_variables(){
 	if(parser_primed_variables == NULL){
 		parser_primed_variables_size	= LIST_INITIAL_SIZE;
 		parser_primed_variables_count	= 0;
 		parser_primed_variables			= malloc(sizeof(uint32_t) * parser_primed_variables_size);
+		parser_primed_original_variables			= malloc(sizeof(uint32_t) * parser_primed_variables_size);
 	}
 	return parser_primed_variables;
 }
 
-void parser_add_primed_variables(uint32_t primed_variable){
+void parser_add_primed_variables(uint32_t primed_variable, uint32_t original_var_ID){
 	int32_t last_less_than		= -1;
 	int32_t i;
 	parser_get_primed_variables();
@@ -620,12 +622,20 @@ void parser_add_primed_variables(uint32_t primed_variable){
 			exit(-1);
 		}
 		parser_primed_variables			= ptr;
+		ptr	= realloc(parser_primed_original_variables, sizeof(uint32_t) * new_size);
+		if(ptr == NULL){
+			printf("Could not allocate more space for primed variables list\n");
+			exit(-1);
+		}
+		parser_primed_original_variables			= ptr;
 		parser_primed_variables_size	= new_size;
 	}
 	for(i = parser_primed_variables_count; i > last_less_than && i > 0; i--){
 		parser_primed_variables[i]		= parser_primed_variables[i - 1];
+		parser_primed_original_variables[i]		= parser_primed_original_variables[i - 1];
 	}
 	parser_primed_variables[last_less_than + 1]	= primed_variable;
+	parser_primed_original_variables[last_less_than + 1]	= original_var_ID;
 	parser_primed_variables_count++;
 }
 

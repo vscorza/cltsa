@@ -895,6 +895,26 @@ obdd* obdd_forall(obdd* root, char* var){
 	return var_and_no_var_obdd;
 }
 
+obdd* obdd_reachable_states(obdd* root){
+	printf("OBDD REACHABLE STATES NOT IMPLEMENTED\n");
+	exit(-1);
+	return NULL;
+}
+obdd* obdd_img(obdd *root, uint32_t *primed_vars, uint32_t *original_vars, uint32_t var_count){
+	obdd *exists_obdd	= obdd_exists_vector(root, original_vars, var_count);
+	obdd *return_obdd	= obdd_swap_vars(exists_obdd, primed_vars, original_vars, var_count);
+	obdd_destroy(exists_obdd);
+	return return_obdd;
+}
+obdd_node* obdd_node_swap_vars(obdd_node* root, uint32_t last_index, uint32_t *primed_vars, uint32_t *original_vars, uint32_t var_count){
+	printf("OBDD REACHABLE STATES NOT IMPLEMENTED\n");
+	exit(-1);
+	return NULL;
+}
+obdd* obdd_swap_vars(obdd* root, uint32_t *primed_vars, uint32_t *original_vars, uint32_t var_count){
+	return obdd_create(root->mgr, obdd_node_swap_vars(root->root_obdd, 0, primed_vars, original_vars, var_count));
+}
+
 void obdd_print(obdd* root, char *buff, uint32_t buff_size){
 	snprintf(buff + strlen(buff), buff_size - strlen(buff) - 1, "[OBDD]\nMgr_ID:%d\nValue:", root->mgr->ID);
 	obdd_node_print(root->mgr, root->root_obdd, 0, buff, buff_size);

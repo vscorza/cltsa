@@ -3584,6 +3584,8 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 	if(parser_primed_variables != NULL){
 		free(parser_primed_variables);
 		parser_primed_variables = NULL;
+		free(parser_primed_original_variables);
+		parser_primed_original_variables = NULL;
 	}
 #if VERBOSE
 	printf("\nDONE\n");

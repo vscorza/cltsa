@@ -18,6 +18,7 @@
 ==== SHARED VARS ====
 ****************/
 extern uint32_t* parser_primed_variables;
+extern uint32_t* parser_primed_original_variables;
 extern uint32_t parser_primed_variables_size;
 extern uint32_t parser_primed_variables_count;
 /****************
@@ -287,5 +288,5 @@ ltl_fluent_syntax* automaton_ltl_fluent_syntax_create(char* name, obdd* obdd);
 obdd_mgr* parser_get_obdd_mgr();
 void parser_reset_obdd_mgr();
 uint32_t* parser_get_primed_variables();
-void parser_add_primed_variables(uint32_t primed_variable);
+void parser_add_primed_variables(uint32_t primed_variable, uint32_t original_var_ID);
 #endif
