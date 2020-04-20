@@ -2855,7 +2855,8 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2(automaton_a
 			printf("Inner automaton was realizable, minimization %s\n", automaton_is_gr1_realizable(minimized, assumptions, assumptions_count,
 					guarantees, guarantees_count)? "too" :"was not" );
 			automaton_automaton_destroy(inner_automaton);
-			inner_automaton = automaton_automaton_clone(minimized);
+			inner_automaton = automaton_get_gr1_unrealizable_minimization(minimized, assumptions, assumptions_count, guarantees,
+					guarantees_count);
 			//exit(-1);
 		}
 		return inner_automaton;
