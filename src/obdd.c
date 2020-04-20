@@ -895,10 +895,29 @@ obdd* obdd_forall(obdd* root, char* var){
 	return var_and_no_var_obdd;
 }
 
-obdd* obdd_reachable_states(obdd* root){
-	printf("OBDD REACHABLE STATES NOT IMPLEMENTED\n");
-	exit(-1);
-	return NULL;
+obdd* obdd_reachable_states(obdd* theta, obdd* rho){
+	obdd_mgr *mgr	= theta->mgr;
+	obdd *reached = NULL, *frontier = NULL, *tmp_obdd = NULL, *tmp_obdd2 = NULL;
+
+	reached		= obdd_clone(theta);
+	frontier	= obdd_clone(theta);
+	uint32_t j	= 1;
+
+	while(!obdd_is_constant(mgr, frontier)){
+		j++;
+		tmp_obdd	= obdd_apply_not(reached);//!Y
+		tmp_obdd2	= obdd_img(frontier); //img(F)
+		obdd_destroy(frontier);
+		frontier	= obdd_apply_and(tmp_obdd, tmp_obdd2);// F <- img(F) && !Y
+		obdd_destroy(tmp_obdd);
+		obdd_destroy(tmp_obdd2);
+		tmp_obdd 	= obdd_apply_or(reached, frontier);
+		obdd_destroy(reached);
+		reached		= tmp_obdd;
+	}
+	obdd_destroy(frontier);
+
+	return reached;
 }
 obdd* obdd_img(obdd *root, uint32_t *primed_vars, uint32_t *original_vars, uint32_t var_count){
 	obdd *exists_obdd	= obdd_exists_vector(root, original_vars, var_count);
@@ -906,10 +925,14 @@ obdd* obdd_img(obdd *root, uint32_t *primed_vars, uint32_t *original_vars, uint3
 	obdd_destroy(exists_obdd);
 	return return_obdd;
 }
-obdd_node* obdd_node_swap_vars(obdd_node* root, uint32_t last_index, uint32_t *primed_vars, uint32_t *original_vars, uint32_t var_count){
-	printf("OBDD REACHABLE STATES NOT IMPLEMENTED\n");
-	exit(-1);
-	return NULL;
+obdd_node* obdd_node_swap_vars(obdd_mgr *mgr, obdd_node* root, uint32_t last_index, uint32_t *primed_vars, uint32_t *original_vars, uint32_t var_count){
+	if(obdd_is_constant(mgr, root))return root;
+	while(primed_vars[last_index] < root->var_ID && last_index < var_count)last_index++;
+	if(last_index == var_count || primed_vars[last_index] != root->var_ID)	exit(-1);
+	obdd_node *return_node	= obdd_mgr_mk_node_ID(mgr, original_vars[last_index],
+			obdd_node_swap_vars(mgr, root->high_obdd, last_index, primed_vars, original_vars, var_count),
+			obdd_node_swap_vars(mgr, root->low_obdd, last_index, primed_vars, original_vars, var_count));
+	return return_node;
 }
 obdd* obdd_swap_vars(obdd* root, uint32_t *primed_vars, uint32_t *original_vars, uint32_t var_count){
 	return obdd_create(root->mgr, obdd_node_swap_vars(root->root_obdd, 0, primed_vars, original_vars, var_count));
