@@ -902,11 +902,17 @@ obdd* obdd_reachable_states(obdd* theta, obdd* rho){
 	reached		= obdd_clone(theta);
 	frontier	= obdd_clone(theta);
 	uint32_t j	= 1;
-
-	while(!obdd_is_constant(mgr, frontier)){
+	//we check for bottom this way because minimization can leave just one node
+	//with both high and low pointing to false
+	while(!(frontier->root_obdd->var_ID == mgr->false_obdd->root_obdd->var_ID ||
+			(frontier->root_obdd->high_obdd->var_ID == mgr->false_obdd->root_obdd->var_ID &&
+			frontier->root_obdd->low_obdd->var_ID == mgr->false_obdd->root_obdd->var_ID))){
 		j++;
+		tmp_obdd	= obdd_apply_and(frontier, rho);
+		tmp_obdd2	= obdd_img(tmp_obdd, parser_primed_variables, parser_primed_original_variables,
+				parser_primed_variables_count); //img(F)
+		obdd_destroy(tmp_obdd);
 		tmp_obdd	= obdd_apply_not(reached);//!Y
-		tmp_obdd2	= obdd_img(frontier); //img(F)
 		obdd_destroy(frontier);
 		frontier	= obdd_apply_and(tmp_obdd, tmp_obdd2);// F <- img(F) && !Y
 		obdd_destroy(tmp_obdd);
@@ -935,7 +941,7 @@ obdd_node* obdd_node_swap_vars(obdd_mgr *mgr, obdd_node* root, uint32_t last_ind
 	return return_node;
 }
 obdd* obdd_swap_vars(obdd* root, uint32_t *primed_vars, uint32_t *original_vars, uint32_t var_count){
-	return obdd_create(root->mgr, obdd_node_swap_vars(root->root_obdd, 0, primed_vars, original_vars, var_count));
+	return obdd_create(root->mgr, obdd_node_swap_vars(root->mgr, root->root_obdd, 0, primed_vars, original_vars, var_count));
 }
 
 void obdd_print(obdd* root, char *buff, uint32_t buff_size){

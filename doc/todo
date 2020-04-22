@@ -1,5 +1,6 @@
 TODO:
 =====
+- resolver bug dd min
 - computar tiempo y agregar columna de C || E'
 - armar scatterplot
 - de efectividad hacer alguna mención a la implementación y la linealidad, comparar con ejemplos comparables

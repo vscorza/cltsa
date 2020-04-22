@@ -71,6 +71,11 @@ typedef uint32_t obdd_ref_count_size_t;
 #define GET_VAR_INDEX(variable_count, valuation_index, variable_index) ((((variable_count) * (valuation_index) + (variable_index)) * sizeof(bool)))
 #define GET_VAR_IN_VALUATION(arr, variable_count, valuation_index, variable_index)	(arr[GET_VAR_INDEX(variable_count, valuation_index, variable_index)])
 
+extern uint32_t* parser_primed_variables;
+extern uint32_t* parser_primed_original_variables;
+extern uint32_t parser_primed_variables_size;
+extern uint32_t parser_primed_variables_count;
+
 /** STRUCTS **/
 /** OBDD COMPOSITE STATE**/
 typedef struct obdd_composite_state_str{

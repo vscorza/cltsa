@@ -1,0 +1,34 @@
+set Global_Alphabet = {}
+set Controllable_Alphabet = {}
+
+set Global_Signals	= {x, y}
+set Output_Signals	= {y}
+order			= {x < y}
+
+/***********
+**** THETA
+***********/
+ltl env theta Init_E in TEST	= (!x).
+ltl sys theta Init_S in TEST	= (!y).
+/***********
+**** SYS RHO
+***********/
+ltl sys rho Sys_1 in TEST			= [](y || !y).
+/***********
+**** ENV RHO
+***********/
+ltl env rho Env_1 in TEST			= []((x && y) -> X(!x)).
+
+ltl fluent G_1		= (y).
+ltl fluent A_1		= (x).
+
+/***********
+**** SYNTHESIS
+***********/
+|f| ENV =(TEST).
+
+|gr1| <{A_1}><{G_1}> STRAT = ENV.
+
+
+
+
