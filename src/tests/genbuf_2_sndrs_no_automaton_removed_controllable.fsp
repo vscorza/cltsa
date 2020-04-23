@@ -3,14 +3,14 @@ set Global_Alphabet = {}
 set Controllable_Alphabet = {}
 
 set Global_Signals	= {sREQ0, sREQ1, bACK0, bACK1, bREQ0, bREQ1, rACK0, rACK1, enq, deq, full, empty, slc0, s0, g0, g1,t,a0,a1}
-set Output_Signals	= {bACK0, bACK1, bREQ0, bREQ1, enq, deq, slc0, s0, g0, g1,t}
+set Output_Signals	= {bACK1, bREQ0, bREQ1, enq, deq, slc0, s0, g0, g1,t}
 //order			= {s0 < sREQ0 < sREQ1 < sREQ_2 < sREQ_3 < rACK0 < rACK1 < full < empty < bACK0 < bACK1 < bACK_2 < bACK_3 < bREQ0 < bREQ1 < enq < deq < slc0}
 order 				= {}
 /***********
 **** THETA
 ***********/
-ltl env theta Init_Buffer_e in GENBUF	= (!sREQ0 && !sREQ1 && !rACK0 && !rACK1 && !full && empty).
-ltl sys theta Init_Buffer_s in GENBUF	= (!bACK0 && !bACK1 && !bREQ0 && !bREQ1 && !enq && !deq && !slc0 && !s0).
+ltl env theta Init_Buffer_e in GENBUF	= (!bACK0 && !sREQ0 && !sREQ1 && !rACK0 && !rACK1 && !full && empty).
+ltl sys theta Init_Buffer_s in GENBUF	= (!bACK1 && !bREQ0 && !bREQ1 && !enq && !deq && !slc0 && !s0).
 /***********
 **** SYS RHO
 ***********/
@@ -22,17 +22,12 @@ ltl sys rho G_1_sndr_1_g_g in GENBUF		= []((!g1 && !(sREQ1 && !bACK1))->(X(!g1))
 ltl sys rho G_1_sndr_1_g_g1 in GENBUF		= []((!g1 && sREQ1 && !bACK1)->(X(g1))).
 ltl sys rho G_1_sndr_1_g1_g1 in GENBUF		= []((g1 && !bACK1)->(X(g1))).
 ltl sys rho G_1_sndr_1_g1_g in GENBUF		= []((g1 && bACK1)->(X(!g1))).
-//sToB_REQ then not bToS_ACK
-ltl sys rho G_2_sndr_0 in GENBUF		= []((!sREQ0 && X(sREQ0)) -> (X(!bACK0))).
-ltl sys rho G_2_b_sndr_0 in GENBUF		= []((!bACK0 && !sREQ0) -> (X(!bACK0))).
-ltl sys rho G_2_sndr_1 in GENBUF		= []((!sREQ1 && X(sREQ1)) -> (X(!bACK1))).
-ltl sys rho G_2_b_sndr_1 in GENBUF		= []((!bACK1 && !sREQ1) -> (X(!bACK1))).
 //bACK only if sREQ
 ltl sys rho G_3_sndr0 in GENBUF		= []((!bACK0 && X(bACK0)) -> sREQ0).
 ltl sys rho G_3_sndr1 in GENBUF		= []((!bACK1 && X(bACK1)) -> sREQ1).
 //keep bACK up if sREQ still going
-ltl sys rho G_4_sndr0 in GENBUF		= []((bACK0 && sREQ0) -> X(bACK0)).
-ltl sys rho G_4_sndr1 in GENBUF		= []((bACK1 && sREQ1) -> X(bACK1)).
+ltl env rho G_4_sndr0 in GENBUF		= []((bACK0 && sREQ0) -> X(bACK0)).
+ltl env rho G_4_sndr1 in GENBUF		= []((bACK1 && sREQ1) -> X(bACK1)).
 //mutex bACK
 ltl sys rho G_5 in GENBUF			= []((!(bACK0 && bACK1))).
 ltl sys rho G_5_X in GENBUF			= [](X((!(bACK0 && bACK1)))).

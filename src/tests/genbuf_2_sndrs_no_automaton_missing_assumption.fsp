@@ -22,6 +22,11 @@ ltl sys rho G_1_sndr_1_g_g in GENBUF		= []((!g1 && !(sREQ1 && !bACK1))->(X(!g1))
 ltl sys rho G_1_sndr_1_g_g1 in GENBUF		= []((!g1 && sREQ1 && !bACK1)->(X(g1))).
 ltl sys rho G_1_sndr_1_g1_g1 in GENBUF		= []((g1 && !bACK1)->(X(g1))).
 ltl sys rho G_1_sndr_1_g1_g in GENBUF		= []((g1 && bACK1)->(X(!g1))).
+//sToB_REQ then not bToS_ACK
+ltl sys rho G_2_sndr_0 in GENBUF		= []((!sREQ0 && X(sREQ0)) -> (X(!bACK0))).
+ltl sys rho G_2_b_sndr_0 in GENBUF		= []((!bACK0 && !sREQ0) -> (X(!bACK0))).
+ltl sys rho G_2_sndr_1 in GENBUF		= []((!sREQ1 && X(sREQ1)) -> (X(!bACK1))).
+ltl sys rho G_2_b_sndr_1 in GENBUF		= []((!bACK1 && !sREQ1) -> (X(!bACK1))).
 //bACK only if sREQ
 ltl sys rho G_3_sndr0 in GENBUF		= []((!bACK0 && X(bACK0)) -> sREQ0).
 ltl sys rho G_3_sndr1 in GENBUF		= []((!bACK1 && X(bACK1)) -> sREQ1).
