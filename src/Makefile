@@ -3,8 +3,8 @@
 CC=clang
 CPARAMS = -Wall -Wextra -pedantic -Wno-unused-variable -Wno-unused-parameter
 CLIBS = -lm
-#CFLAGS= -g -O0
-CFLAGS= -g -O3
+CFLAGS= -g -O0
+#CFLAGS= -g -O3
 #CFLAGS= -fsanitize=address -g -O0 
 #CFLAGS= -fsanitize=address -g -O3
 #CFLAGS= -O3

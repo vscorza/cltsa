@@ -1206,9 +1206,9 @@ int main (int argc, char** argv){
 		//GENERAL TESTS
 		//run_all_tests();
 		//run_functional_tests();
-
+		run_parse_test("tests/nonreal_test_1.fsp", "non realizable test 1");
 		//run_parse_test("tests/genbuf_2_sndrs_no_automaton_v2.fsp", "GenBuf 2 sndrs V2");
-		run_parse_test("tests/genbuf_2_sndrs_no_automaton_missing_assumption.fsp", "GenBuf 2 sndrs V2 missing assumption");
+		//run_parse_test("tests/genbuf_2_sndrs_no_automaton_missing_assumption.fsp", "GenBuf 2 sndrs V2 missing assumption");
 		//run_parse_test("tests/genbuf_1_sndrs_no_automaton.fsp", "GenBuf 1 sndrs V2");
 		//run_parse_test("tests/img_test_1.fsp", "Img test 1");
 
