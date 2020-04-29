@@ -10,7 +10,7 @@ order 				= {}
 **** THETA
 ***********/
 ltl env theta Init_Buffer_e in GENBUF	= (!sREQ0 && !sREQ1 && !rACK0 && !rACK1 && !full && empty && !a0 && !a1).
-ltl sys theta Init_Buffer_s in GENBUF	= (!bACK0 && !bACK1 && !bREQ0 && !bREQ1 && !enq && !deq && !slc0 && !s0).
+ltl sys theta Init_Buffer_s in GENBUF	= (!bACK0 && !bACK1 && !bREQ0 && !bREQ1 && !enq && !deq && !slc0 && !s0 && !slc0 && !g0 && !g1 && !t).
 /***********
 **** SYS RHO
 ***********/

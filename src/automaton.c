@@ -2787,9 +2787,12 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2(automaton_a
 		if(automaton_is_gr1_realizable(minimization, assumptions, assumptions_count,
 				guarantees, guarantees_count) || minimization->out_degree[minimization->initial_states[0]] == 0){
 			automaton_automaton_destroy(minimization);
+#if DEBUG_UNREAL
+			printf("(part. %d realizable)\n", dd);
+#endif
 		}else{//update bit vector to keep only current partition and set n to 2
 #if DEBUG_UNREAL
-			printf("(part. %d unreal.)\n", dd);
+			printf("(part. %d unrealizable)\n", dd);
 #endif
 			if(removed == 0){
 #if DEBUG_UNREAL
@@ -2823,7 +2826,7 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2(automaton_a
 	}
 	last_linear_index = first_linear_index = 0, current_linear_index = 0;
 	//check if C_i complement achieves nonrealizability
-	for(dd = 0; dd < (partitions_count-1); dd++){
+	for(dd = 0; dd <= (partitions_count-1); dd++){
 		first_linear_index	= floor(step * dd);
 		last_linear_index	= floor(step * (dd+1))-1;
 		minimization = automaton_automaton_clone(inner_automaton);
@@ -2847,9 +2850,12 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2(automaton_a
 		if(automaton_is_gr1_realizable(minimization, assumptions, assumptions_count,
 				guarantees, guarantees_count) || minimization->out_degree[minimization->initial_states[0]] == 0){
 			automaton_automaton_destroy(minimization);
+#if DEBUG_UNREAL
+			printf("(compl. to part. %d realizable)\n", dd);
+#endif
 		}else{//update bit vector to keep only current partition complement and set n to max(n-1, 2)
 #if DEBUG_UNREAL
-			printf("(compl. to part. %d unreal.)\n", dd);
+			printf("(compl. to part. %d unrealizable)\n", dd);
 #endif
 			if(removed == 0){
 #if DEBUG_UNREAL
