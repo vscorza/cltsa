@@ -367,8 +367,9 @@ obdd_table* obdd_table_create(obdd_mgr *mgr){
 	new_table->mgr	= mgr;
 	return new_table;
 }
-obdd_node* obdd_table_mk_node_ID(obdd_table* table, obdd_var_size_t var_ID, obdd_node* high, obdd_node* low){
-	obdd_node *current_node, *last_node = NULL, *next_node;
+
+void obdd_table_check_gc(obdd_table* table, obdd_var_size_t var_ID){
+	obdd_node *current_node = NULL, *next_node = NULL, *last_node = NULL;
 	//check if gc should be performed on dead nodes
 	if(table->dead_nodes[var_ID] > table->levels_counts[var_ID] * .3){
 		table->dead_nodes[var_ID]	= 0;
@@ -383,7 +384,32 @@ obdd_node* obdd_table_mk_node_ID(obdd_table* table, obdd_var_size_t var_ID, obdd
 				}
 				next_node = current_node->next;
 				current_node->ref_count--;
-				if(current_node->ref_count == 0)obdd_node_destroy(current_node);
+				if(current_node->ref_count == 0){
+#if DEBUG_OBDD
+						printf(ANSI_COLOR_RED"[XX]\n"ANSI_COLOR_RESET);
+#endif
+						if(current_node->high_obdd != NULL){
+							obdd_node* to_remove = current_node->high_obdd;
+							obdd_remove_high_successor(current_node, to_remove);
+							obdd_node_destroy(table->mgr, to_remove);
+							current_node->high_obdd = NULL;
+						}
+						if(current_node->low_obdd != NULL){
+							obdd_node* to_remove = current_node->low_obdd;
+							obdd_remove_low_successor(current_node, to_remove);
+							obdd_node_destroy(table->mgr, to_remove);
+							current_node->low_obdd = NULL;
+						}
+						current_node->var_ID	= 0;
+						current_node->next		= NULL;
+						//node->node_ID	= 0;
+						//free(node);
+#if OBDD_USE_POOL
+						automaton_fast_pool_release_instance(table->mgr->nodes_pool, current_node->fragment_ID);
+#else
+						free(node);
+#endif
+				}
 				current_node	= next_node;
 			}else{
 				last_node = current_node;
@@ -392,19 +418,60 @@ obdd_node* obdd_table_mk_node_ID(obdd_table* table, obdd_var_size_t var_ID, obdd
 			}
 		}
 	}
-	//check if node exists
+}
 
+obdd_node* obdd_table_mk_node_ID(obdd_table* table, obdd_var_size_t var_ID, obdd_node* high, obdd_node* low){
 	//resize if needed
+	uint32_t i;
+	if(var_ID >= table->size){
+		uint32_t old_size	= table->size;
+		while(table->size <= var_ID)table->size *= 2;
+		obdd_node** ptr	= realloc(table->levels, sizeof(obdd_node*) * (table->size));
+		if(ptr == NULL){
+			printf("Could not allocate memory\n");
+			exit(-1);
+		}else table->levels	= ptr;
+		uint32_t *uint_ptr	= realloc(table->dead_nodes, sizeof(uint32_t) * table->size);
+		if(uint_ptr == NULL){
+			printf("Could not allocate memory\n");
+			exit(-1);
+		}else table->dead_nodes	= uint_ptr;
+		uint_ptr	= realloc(table->levels_counts, sizeof(uint32_t) * table->size);
+		if(uint_ptr == NULL){
+			printf("Could not allocate memory\n");
+			exit(-1);
+		}else table->levels_counts	= uint_ptr;
+		for(i = old_size; i < table->size; i++){
+			table->levels[i]		= NULL;
+			table->dead_nodes[i]	= 0;
+			table->levels_counts[i]	= 0;
+		}
+	}
+	obdd_node *current_node, *last_node = NULL, *next_node;
+	obdd_table_check_gc(table, var_ID);
+	//check if node exists
+	current_node = table->levels[var_ID];
+	obdd_node *last_node	= NULL;
+	while(current_node != NULL){
+		if((current_node->low_obdd < low) || ((current_node->low_obdd == low) && (current_node->high_obdd < high))){
+			last_node	= current_node;
+			current_node	= current_node->next;
+		}else if((current_node->low_obdd == low) && (current_node->high_obdd == high)){
+			return current_node;
+		}else{
+			break;//no node found matching lexicographical order invariant
+		}
+	}
+
 
 	//return new node
 #if OBDD_USE_POOL
 	uint32_t fragment_ID;
-	obdd_node* new_node	= automaton_fast_pool_get_instance(mgr->nodes_pool, &fragment_ID);
+	obdd_node* new_node	= automaton_fast_pool_get_instance(table->mgr->nodes_pool, &fragment_ID);
 #else
 	obdd_node* new_node	= calloc(1, sizeof(obdd_node));
 #endif
 	new_node->var_ID	= var_ID;
-	//new_node->node_ID	= obdd_mgr_get_next_node_ID(mgr);
 	obdd_add_high_successor(new_node, high);
 	obdd_add_low_successor(new_node, low);
 	new_node->ref_count	= 0;
@@ -414,6 +481,13 @@ obdd_node* obdd_table_mk_node_ID(obdd_table* table, obdd_var_size_t var_ID, obdd
 #if DEBUG_OBDD
 		printf("(create)[%d]%p <%s>\n",new_node->var_ID, (void*)new_node, var);
 #endif
+	new_node->ref_count++;
+	if(table->levels[var_ID] == NULL){
+		table->levels[var_ID] = new_node;
+	}else{
+		if(last_node != NULL)last_node->next 	= new_node;
+		new_node->next	= current_node;
+	}
 	return new_node;
 
 	return NULL;

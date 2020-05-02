@@ -281,7 +281,9 @@ void obdd_cache_resize(obdd_cache *cache);
 void obdd_cache_flush(obdd_cache *cache);
 void obdd_cache_destroy(obdd_cache *cache);
 
+/** OBDD CACHE TABLE **/
 obdd_table* obdd_table_create(obdd_mgr *mgr);
 obdd_node* obdd_table_mk_node_ID(obdd_table* table, obdd_var_size_t var_ID, obdd_node* high, obdd_node* low);
+void obdd_table_check_gc(obdd_table* table, obdd_var_size_t var_ID);
 void obdd_table_destroy(obdd_table *table);
 #endif
