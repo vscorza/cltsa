@@ -774,6 +774,27 @@ void run_obdd_tree_tests(){
 	obdd_state_tree_destroy(tree);
 }
 
+void run_obdd_cache_tests(){
+	obdd_mgr* new_mgr	= obdd_mgr_create();
+	//compare x1 & !(x2 | x3) == x1 & !x2 & !x3
+	obdd* x1_obdd		= obdd_mgr_var(new_mgr, "x1");
+	obdd* x2_obdd		= obdd_mgr_var(new_mgr, "x2");
+	obdd* x1_and_x2_obdd	= obdd_apply_and(x1_obdd, x2_obdd);
+	obdd* x1_and_x2_obdd_bis= obdd_apply_and(x1_obdd, x2_obdd);
+
+#if PRINT_TEST_OUTPUT
+	printf("CHECK NODE EQUALITY X1 && X2 USING CACHE\n");
+#endif
+
+	print_test_result(x1_and_x2_obdd->root_obdd == x1_and_x2_obdd_bis->root_obdd, "OBDD CACHE TEST", "obdd cache test");
+
+	obdd_destroy(x1_obdd);
+	obdd_destroy(x2_obdd);
+	obdd_destroy(x1_and_x2_obdd);
+	obdd_destroy(x1_and_x2_obdd_bis);
+	obdd_mgr_destroy(new_mgr);
+}
+
 void run_tree_tests(){
 	automaton_composite_tree* tree	= automaton_composite_tree_create(3);
 	uint32_t key1[3]				= {1,2,3};
@@ -1072,6 +1093,7 @@ void run_functional_tests(){
 	run_report_tests();
 	run_fast_pool_tests();
 	run_bool_array_hash_table_tests();
+	run_obdd_cache_tests();
 	//DRY TESTS
 	run_parse_test("tests/composition_types.fsp", "compositions type");
 	run_parse_test("tests/biscotti.fsp", "biscotti");
@@ -1203,19 +1225,23 @@ int main (int argc, char** argv){
 		//run_parse_test("tests/chu/shifter_6.fsp", "shifter 6 (CHU)");
 		//run_parse_test("tests/chu/self_correcting_2.fsp", "self correcting ring counter 2 (CHU)");
 		//run_parse_test("tests/chu/self_correcting_2_v2.fsp", "self correcting ring counter 2 (CHU)");
-		//GENERAL TESTS
-		//run_all_tests();
-		//run_functional_tests();
 		//run_parse_test("tests/nonreal_test_1.fsp", "non realizable test 1");
-		//run_parse_test("tests/genbuf_2_sndrs_no_automaton_v2.fsp", "GenBuf 2 sndrs V2");
+		run_parse_test("tests/genbuf_2_sndrs_no_automaton.fsp", "GenBuf 2 sndrs");
 		//run_parse_test("tests/genbuf_2_sndrs_no_automaton_missing_assumption.fsp", "GenBuf 2 sndrs V2 missing assumption");
 		//run_parse_test("tests/genbuf_2_sndrs_no_automaton_removed_controllable.fsp", "GenBuf 2 sndrs V2 removed controllable");
 		//run_parse_test("tests/genbuf_1_sndrs_no_automaton.fsp", "GenBuf 1 sndrs V2");
 		//run_parse_test("tests/img_test_1.fsp", "Img test 1");
-		run_parse_test("tests/genbuf_3_sndrs_no_automaton.fsp", "GenBuf 3 sndrs V2");
+		//run_parse_test("tests/genbuf_3_sndrs_no_automaton.fsp", "GenBuf 3 sndrs V2");
 
 		//run_parse_test("tests/genbuf_1_sndrs_simplified.fsp", "GenBuf 1 sndrs (simplified)");
 		//run_parse_test("tests/genbuf_1_sndrs_no_automaton.fsp", "GenBuf 1 sndrs");
+
+		//GENERAL TESTS
+		//run_all_tests();
+		//run_functional_tests();
+
+		//run_obdd_cache_tests();
+
 
 		//run_parse_test("tests/current_sut.fsp", "current_SUT");
 

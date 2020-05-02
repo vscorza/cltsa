@@ -215,6 +215,7 @@ obdd_mgr*	obdd_mgr_create(){
 	false_obdd->fragment_ID	= fragment_ID;
 	new_mgr->false_obdd	= false_obdd;
 	new_mgr->cache		= obdd_cache_create(new_mgr, OBDD_CACHE_SIZE, OBDD_CACHE_MAX_SIZE);
+	new_mgr->table		= obdd_table_create(new_mgr);
 	return new_mgr;
 }
 
@@ -234,6 +235,8 @@ void obdd_mgr_destroy(obdd_mgr* mgr){
 	obdd_cache_destroy(mgr->cache);
 	free(mgr->cache);
 	mgr->cache		= NULL;
+	obdd_table_destroy(mgr->table);
+	mgr->table		= NULL;
 #if OBDD_USE_POOL
 	automaton_fast_pool_destroy(mgr->obdd_pool);
 	automaton_fast_pool_destroy(mgr->nodes_pool);
@@ -623,6 +626,7 @@ obdd* obdd_apply(bool (*apply_fkt)(bool,bool), obdd *left, obdd* right){
 }	
 
 obdd_node* obdd_node_apply(bool (*apply_fkt)(bool,bool), obdd_mgr* mgr, obdd_node* left_node, obdd_node* right_node, bool first_call){
+
 	if(first_call){
 		obdd_node* cached_node	= obdd_cache_lookup2(mgr->cache, apply_fkt, left_node, right_node);
 
@@ -1439,6 +1443,7 @@ void obdd_node_destroy(obdd_mgr* mgr, obdd_node* node){
 			node->low_obdd = NULL;
 		}
 		node->var_ID	= 0;
+		node->next		= NULL;
 		//node->node_ID	= 0;
 		//free(node);
 #if OBDD_USE_POOL

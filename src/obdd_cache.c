@@ -356,4 +356,83 @@ void obdd_cache_destroy(obdd_cache *cache){
 	cache->mgr			= NULL;
 }
 
+/** OBDD TABLE CACHE **/
+
+obdd_table* obdd_table_create(obdd_mgr *mgr){
+	obdd_table *new_table	= calloc(1, sizeof(obdd_table));
+	new_table->size	= LIST_INITIAL_SIZE;
+	new_table->levels	= calloc(new_table->size, sizeof(obdd_node*));
+	new_table->dead_nodes	= calloc(new_table->size, sizeof(uint32_t));
+	new_table->levels_counts	= calloc(new_table->size, sizeof(uint32_t));
+	new_table->mgr	= mgr;
+	return new_table;
+}
+obdd_node* obdd_table_mk_node_ID(obdd_table* table, obdd_var_size_t var_ID, obdd_node* high, obdd_node* low){
+	obdd_node *current_node, *last_node = NULL, *next_node;
+	//check if gc should be performed on dead nodes
+	if(table->dead_nodes[var_ID] > table->levels_counts[var_ID] * .3){
+		table->dead_nodes[var_ID]	= 0;
+		table->levels_counts[var_ID]= 0;
+		current_node = table->levels[var_ID];
+		while(current_node != NULL){
+			if(current_node->ref_count == 1){
+				if(last_node == NULL){
+					table->levels[var_ID]	= current_node->next;
+				}else{
+					last_node->next = current_node->next;
+				}
+				next_node = current_node->next;
+				current_node->ref_count--;
+				if(current_node->ref_count == 0)obdd_node_destroy(current_node);
+				current_node	= next_node;
+			}else{
+				last_node = current_node;
+				table->levels_counts[var_ID]++;
+				current_node	= current_node->next;
+			}
+		}
+	}
+	//check if node exists
+
+	//resize if needed
+
+	//return new node
+#if OBDD_USE_POOL
+	uint32_t fragment_ID;
+	obdd_node* new_node	= automaton_fast_pool_get_instance(mgr->nodes_pool, &fragment_ID);
+#else
+	obdd_node* new_node	= calloc(1, sizeof(obdd_node));
+#endif
+	new_node->var_ID	= var_ID;
+	//new_node->node_ID	= obdd_mgr_get_next_node_ID(mgr);
+	obdd_add_high_successor(new_node, high);
+	obdd_add_low_successor(new_node, low);
+	new_node->ref_count	= 0;
+#if OBDD_USE_POOL
+	new_node->fragment_ID = fragment_ID;
+#endif
+#if DEBUG_OBDD
+		printf("(create)[%d]%p <%s>\n",new_node->var_ID, (void*)new_node, var);
+#endif
+	return new_node;
+
+	return NULL;
+}
+void obdd_table_destroy(obdd_table *table){
+	uint32_t i,j;
+	obdd_node *current_node, *next_node;
+	for(i = 0; i < table->size; i++){
+		current_node	= table->levels[i];
+		while(current_node != NULL){
+			current_node->ref_count--;
+			next_node = current_node->next;
+			if(current_node->ref_count == 0)obdd_node_destroy(current_node);
+			current_node = next_node;
+		}
+	}
+	free(table->levels);
+	free(table->dead_nodes);
+	free(table->levels_counts);
+	free(table);
+}
 

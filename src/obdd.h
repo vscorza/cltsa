@@ -22,7 +22,7 @@
 
 #define OBDD_CACHE_DEBUG		0
 #define OBDD_CACHE_SIZE			16//262144
-#define OBDD_CACHE_MAX_SIZE		0
+#define OBDD_CACHE_MAX_SIZE		262144//0
 #define OBDD_USE_POOL			1
 
 typedef uintptr_t ptruint;
@@ -109,7 +109,8 @@ typedef struct obdd_mgr_t {
 	automaton_fast_pool*	obdd_pool;
 	automaton_fast_pool*	nodes_pool;
 #endif
-	struct obdd_cache_t*		cache;
+	struct obdd_cache_t*	cache;
+	struct obdd_table_t*	table;
 }obdd_mgr;
 
 typedef struct obdd_node_t{
@@ -118,6 +119,7 @@ typedef struct obdd_node_t{
 	obdd_ref_count_size_t		ref_count;
 	struct obdd_node_t*	high_obdd;
 	struct obdd_node_t*	low_obdd;
+	struct obdd_node_t*	next;
 	uint32_t 		fragment_ID;
 }obdd_node;
 
@@ -152,6 +154,13 @@ typedef struct obdd_cache_t{
 	obdd_node **cache_vars, **cache_neg_vars;
 }obdd_cache;
 
+typedef struct obdd_table_t{
+	obdd_mgr *mgr;
+	uint32_t size;
+	uint32_t *levels_counts;
+	uint32_t *dead_nodes;
+	obdd_node **levels;
+}obdd_table;
 /*
 typedef struct obdd_partial_automaton_t{
 	uint32_t			initial_state;
@@ -271,4 +280,8 @@ obdd_node* obdd_cache_lookup_neg_var(obdd_cache *cache, uint32_t var_id);
 void obdd_cache_resize(obdd_cache *cache);
 void obdd_cache_flush(obdd_cache *cache);
 void obdd_cache_destroy(obdd_cache *cache);
+
+obdd_table* obdd_table_create(obdd_mgr *mgr);
+obdd_node* obdd_table_mk_node_ID(obdd_table* table, obdd_var_size_t var_ID, obdd_node* high, obdd_node* low);
+void obdd_table_destroy(obdd_table *table);
 #endif

@@ -1,6 +1,13 @@
 TODO:
 =====
-- resolver bug dd min
+- resolver cache nodos internos obdd
+	-obdd_table_mk_node_ID
+		-check if node exists
+		-resize if needed
+		-return new node
+	-actualización node destroy
+	-tests individuales
+	-tests con specs
 - computar tiempo y agregar columna de C || E'
 - armar scatterplot
 - de efectividad hacer alguna mención a la implementación y la linealidad, comparar con ejemplos comparables
