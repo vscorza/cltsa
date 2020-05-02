@@ -1226,7 +1226,7 @@ int main (int argc, char** argv){
 		//run_parse_test("tests/chu/self_correcting_2.fsp", "self correcting ring counter 2 (CHU)");
 		//run_parse_test("tests/chu/self_correcting_2_v2.fsp", "self correcting ring counter 2 (CHU)");
 		//run_parse_test("tests/nonreal_test_1.fsp", "non realizable test 1");
-		run_parse_test("tests/genbuf_2_sndrs_no_automaton.fsp", "GenBuf 2 sndrs");
+		//run_parse_test("tests/genbuf_2_sndrs_no_automaton.fsp", "GenBuf 2 sndrs");
 		//run_parse_test("tests/genbuf_2_sndrs_no_automaton_missing_assumption.fsp", "GenBuf 2 sndrs V2 missing assumption");
 		//run_parse_test("tests/genbuf_2_sndrs_no_automaton_removed_controllable.fsp", "GenBuf 2 sndrs V2 removed controllable");
 		//run_parse_test("tests/genbuf_1_sndrs_no_automaton.fsp", "GenBuf 1 sndrs V2");
@@ -1234,7 +1234,7 @@ int main (int argc, char** argv){
 		//run_parse_test("tests/genbuf_3_sndrs_no_automaton.fsp", "GenBuf 3 sndrs V2");
 
 		//run_parse_test("tests/genbuf_1_sndrs_simplified.fsp", "GenBuf 1 sndrs (simplified)");
-		//run_parse_test("tests/genbuf_1_sndrs_no_automaton.fsp", "GenBuf 1 sndrs");
+		run_parse_test("tests/genbuf_1_sndrs_no_automaton.fsp", "GenBuf 1 sndrs");
 
 		//GENERAL TESTS
 		//run_all_tests();

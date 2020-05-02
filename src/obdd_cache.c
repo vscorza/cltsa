@@ -421,6 +421,10 @@ void obdd_table_check_gc(obdd_table* table, obdd_var_size_t var_ID){
 }
 
 obdd_node* obdd_table_mk_node_ID(obdd_table* table, obdd_var_size_t var_ID, obdd_node* high, obdd_node* low){
+	//if node is trivially redundant, solve redundancy in situ
+	if(high == low){
+		return high;
+	}
 	//resize if needed
 	uint32_t i;
 	if(var_ID >= table->size){
@@ -451,7 +455,6 @@ obdd_node* obdd_table_mk_node_ID(obdd_table* table, obdd_var_size_t var_ID, obdd
 	obdd_table_check_gc(table, var_ID);
 	//check if node exists
 	current_node = table->levels[var_ID];
-	obdd_node *last_node	= NULL;
 	while(current_node != NULL){
 		if((current_node->low_obdd < low) || ((current_node->low_obdd == low) && (current_node->high_obdd < high))){
 			last_node	= current_node;
@@ -488,6 +491,7 @@ obdd_node* obdd_table_mk_node_ID(obdd_table* table, obdd_var_size_t var_ID, obdd
 		if(last_node != NULL)last_node->next 	= new_node;
 		new_node->next	= current_node;
 	}
+	table->levels_counts[var_ID]++;
 	return new_node;
 
 	return NULL;
@@ -500,7 +504,7 @@ void obdd_table_destroy(obdd_table *table){
 		while(current_node != NULL){
 			current_node->ref_count--;
 			next_node = current_node->next;
-			if(current_node->ref_count == 0)obdd_node_destroy(current_node);
+			if(current_node->ref_count == 0)obdd_node_destroy(table->mgr, current_node);
 			current_node = next_node;
 		}
 	}

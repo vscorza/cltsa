@@ -268,6 +268,10 @@ obdd_node* obdd_mgr_mk_node(obdd_mgr* mgr, char* var, obdd_node* high, obdd_node
 }
 
 obdd_node* obdd_mgr_mk_node_ID(obdd_mgr* mgr, obdd_var_size_t var_ID, obdd_node* high, obdd_node* low){
+	if(var_ID > 1){
+		obdd_node *ret_node	=  obdd_table_mk_node_ID(mgr->table, var_ID, high, low);
+		return ret_node;
+	}
 #if OBDD_USE_POOL
 	uint32_t fragment_ID;
 	obdd_node* new_node	= automaton_fast_pool_get_instance(mgr->nodes_pool, &fragment_ID);
@@ -586,6 +590,7 @@ void obdd_merge_redundant_nodes(obdd_mgr* mgr, obdd_node* root){
 		if(root->high_obdd->high_obdd == root->high_obdd->low_obdd){
 			obdd_node* to_remove	= root->high_obdd;
 			obdd_node* to_add		= root->high_obdd->high_obdd;
+
 			obdd_remove_high_successor(root->high_obdd, root->high_obdd->high_obdd);
 			obdd_remove_low_successor(root->high_obdd, root->high_obdd->low_obdd);
 			obdd_remove_high_successor(root, to_remove);
