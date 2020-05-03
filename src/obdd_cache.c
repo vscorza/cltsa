@@ -374,7 +374,7 @@ obdd_table* obdd_table_create(obdd_mgr *mgr, uint32_t fast_lists_count){
 void obdd_table_node_destroy(obdd_table* table, obdd_node *node){
 	obdd_fast_node *current_fast_node = NULL, *last_fast_node = NULL, *to_remove = NULL;
 	uint32_t current_level	= 0;
-	while(current_fast_node == NULL)
+	while(current_fast_node == NULL && current_level < table->fast_lists_count)
 		current_fast_node		= table->levels[node->var_ID][current_level++];
 	current_level--;
 	while(current_fast_node != NULL){
@@ -549,6 +549,7 @@ void obdd_table_destroy(obdd_table *table){
 				current_fast_node = current_fast_node->next;
 			}
 		}
+		free(table->levels[i]);
 	}
 	free(table->levels);
 	free(table);
