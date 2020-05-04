@@ -1,8 +1,7 @@
 TODO:
 =====
-- resolver cache nodos internos obdd
-	-tests individuales
-	-tests con specs
+- internal nodes cache debugging
+	- check env_sys_rho_composed on lift 2 floors
 - computar tiempo y agregar columna de C || E'
 - armar scatterplot
 - de efectividad hacer alguna mención a la implementación y la linealidad, comparar con ejemplos comparables

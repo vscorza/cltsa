@@ -167,6 +167,11 @@ typedef struct obdd_table_t{
 	uint32_t size;
 	uint32_t fast_lists_count;
 	obdd_fast_node ***levels;
+	uint64_t *levels_counts;
+	uint64_t max_live_fast_nodes;
+	uint64_t live_fast_nodes;
+	uint64_t fast_hits;
+	uint64_t fast_misses;
 }obdd_table;
 /*
 typedef struct obdd_partial_automaton_t{
@@ -293,5 +298,6 @@ obdd_table* obdd_table_create(obdd_mgr *mgr, uint32_t fast_lists_count);
 obdd_fast_node* obdd_table_search_node_ID(obdd_table* table, obdd_var_size_t var_ID, obdd_node* high, obdd_node* low);
 obdd_node* obdd_table_mk_node_ID(obdd_table* table, obdd_var_size_t var_ID, obdd_node* high, obdd_node* low);
 void obdd_table_node_destroy(obdd_table* table, obdd_node *node);
+void obdd_table_node_add(obdd_table* table, obdd_node *node);
 void obdd_table_destroy(obdd_table *table);
 #endif

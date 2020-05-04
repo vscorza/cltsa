@@ -2425,7 +2425,7 @@ void automaton_add_transitions_from_valuations(obdd_mgr* mgr, obdd* root, automa
 			for(i = (current_index + 1); i < (int32_t)variables_count; i++)
 				dont_care_list[i]		= true;
 			if(current_node->var_ID == mgr->false_obdd->root_obdd->var_ID){//wrong branch
-				//?
+				printf("Should not be exploring this branch\n");exit(-1);
 			}else if(current_node->var_ID == mgr->true_obdd->root_obdd->var_ID){//found terminal
 				//add valuations
 				dont_cares_count	= 1;
@@ -3108,6 +3108,15 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 			dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, env_state, sys_state, obdd_state_map, x_count, y_count, x_y_count, x_y_x_p_count,
 			x_y_alphabet, x_y_x_p_alphabet, x_y_order, signals_count, hashed_valuation, adjusted_valuation, x_y_hash_table,
 			x_y_x_p_hash_table, obdd_on_signals_indexes, obdd_off_signals_indexes);
+#if VERBOSE || DEBUG_LTL_AUTOMATON
+	printf("[OBDD TABLE]live nodes:%d\t max live nodes:%d\t hits:%d\t misses:%d]\n",
+			mgr->table->live_fast_nodes, mgr->table->max_live_fast_nodes, mgr->table->fast_hits,
+			mgr->table->fast_misses);
+	for(i = 0; i < mgr->vars_dict->size; i++){
+		printf("t nodes for %s: \t %d\n", mgr->vars_dict->entries[i].key,
+				mgr->table->levels_counts[i]);
+	}
+#endif
 /*
 	uint32_t deadlocks = 0;
 	for(i = 0; i < ltl_automaton->transitions_count; i++)

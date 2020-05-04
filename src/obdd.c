@@ -586,6 +586,7 @@ void obdd_remove_duplicated_terminals(obdd_mgr* mgr, obdd_node* root, obdd_node*
 void obdd_merge_redundant_nodes(obdd_mgr* mgr, obdd_node* root){
 	if(obdd_is_constant(mgr, root))
 		return;
+	obdd_table_node_destroy(mgr->table, root);
 	obdd_merge_redundant_nodes(mgr, root->high_obdd);
 	obdd_merge_redundant_nodes(mgr, root->low_obdd);
 	int32_t i;
@@ -612,6 +613,7 @@ void obdd_merge_redundant_nodes(obdd_mgr* mgr, obdd_node* root){
 			obdd_node_destroy(mgr, to_remove);
 		}
 	}
+	obdd_table_node_add(mgr->table, root);
 }
 
 void obdd_reduce(obdd* root){
@@ -1433,6 +1435,35 @@ void obdd_node_destroy(obdd_mgr* mgr, obdd_node* node){
 	if(node->ref_count > 0)
 		printf("\n");
 #endif
+	//some nodes are not in the fast lists, if so the following condition should have no effect
+	if(node->ref_count == 1)
+		obdd_table_node_destroy(mgr->table, node);//if node was added to fast lists it should set ref to zero
+	if(node->ref_count == 0){
+		if(node->ref_count == 0){
+#if DEBUG_OBDD
+				printf(ANSI_COLOR_RED"[XX]\n"ANSI_COLOR_RESET);
+#endif
+				if(node->high_obdd != NULL){
+					obdd_node* to_remove = node->high_obdd;
+					obdd_remove_high_successor(node, to_remove);
+					obdd_node_destroy(mgr, to_remove);
+					node->high_obdd = NULL;
+				}
+				if(node->low_obdd != NULL){
+					obdd_node* to_remove = node->low_obdd;
+					obdd_remove_low_successor(node, to_remove);
+					obdd_node_destroy(mgr, to_remove);
+					node->low_obdd = NULL;
+				}
+				node->var_ID	= 0;
+				//node->node_ID	= 0;
+				//free(node);
+#if OBDD_USE_POOL
+				automaton_fast_pool_release_instance(mgr->nodes_pool, node->fragment_ID);
+#else
+				free(node);
+#endif
+			}
 
-	obdd_table_node_destroy(mgr->table, node);
+	}
 }
