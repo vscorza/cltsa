@@ -1293,8 +1293,7 @@ int main (int argc, char** argv){
 		//run_parse_test("tests/two_floors_lift.fsp", "lift 2 floors");//lift 2 floors
 		//GENERAL TESTS
 		//run_all_tests();
-		//run_functional_tests();
-		run_obdd_fast_lists_tests();
+		run_functional_tests();
 
 		//run_parse_test("tests/current_sut.fsp", "current_SUT");
 

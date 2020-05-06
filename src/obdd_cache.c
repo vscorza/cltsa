@@ -430,7 +430,9 @@ void obdd_table_node_add(obdd_table* table, obdd_node *node){
 			current_fast_node	= table->levels[node->var_ID][i];
 			previous_fast_node	= NULL;
 			while(current_fast_node != NULL){
-				if((current_fast_node->data->low_obdd < node->low_obdd) || ((current_fast_node->data->low_obdd == node->low_obdd) && (current_fast_node->data->high_obdd < node->high_obdd))){
+				if(((current_fast_node->data->low_obdd < node->low_obdd)
+						|| ((current_fast_node->data->low_obdd == node->low_obdd) && (current_fast_node->data->high_obdd < node->high_obdd)))
+						&& (current_fast_node->next != NULL)){
 					previous_fast_node	= current_fast_node;
 					current_fast_node	= current_fast_node->next;
 				}else{
@@ -477,6 +479,7 @@ void obdd_table_node_destroy(obdd_table* table, obdd_node *node){
 				current_fast_node	= current_fast_node->next;
 			else if(current_level < (table->fast_lists_count-1)){
 				current_fast_node		= table->levels[node->var_ID][++current_level];
+				last_fast_node = NULL;
 			}else{
 				break;
 			}
@@ -534,7 +537,10 @@ obdd_fast_node* obdd_table_search_node_ID(obdd_table* table, obdd_var_size_t var
 	while(current_node != NULL){
 		if((current_node->data->low_obdd < low) || ((current_node->data->low_obdd == low) && (current_node->data->high_obdd < high))){
 			last_node	= current_node;
-			if(current_node->next == NULL)current_node	= current_node->finer;
+			if(current_node->next == NULL){
+				current_node	= current_node->finer;
+				current_level++;
+			}
 			else current_node	= current_node->next;
 		}else if((current_node->data->low_obdd == low) && (current_node->data->high_obdd == high)){
 			table->fast_hits++;
