@@ -2291,7 +2291,7 @@ void automaton_add_transitions_from_valuations(obdd_mgr* mgr, obdd* root, automa
 		obdd_composite_state* env_state, obdd_composite_state* sys_state, obdd_state_tree* obdd_state_map, uint32_t x_count, uint32_t y_count, uint32_t x_y_count, uint32_t x_y_x_p_count,
 		uint32_t* x_y_alphabet, uint32_t* x_y_x_p_alphabet, uint32_t* x_y_order, uint32_t signals_count, bool* hashed_valuation, bool* adjusted_valuation, automaton_bool_array_hash_table* x_y_hash_table,
 		automaton_bool_array_hash_table* x_y_x_p_hash_table, uint32_t* obdd_on_signals_indexes, uint32_t* obdd_off_signals_indexes){
-	int32_t i, j, dont_cares_count, variable_index;
+	int32_t i, j, dont_cares_count = 0, variable_index;
 	uint32_t nodes_count;
 	bool* valuation	= calloc(img_count, sizeof(bool));
 	*valuations_count			= 0;
@@ -2425,7 +2425,7 @@ void automaton_add_transitions_from_valuations(obdd_mgr* mgr, obdd* root, automa
 			for(i = (current_index + 1); i < (int32_t)variables_count; i++)
 				dont_care_list[i]		= true;
 			if(current_node->var_ID == mgr->false_obdd->root_obdd->var_ID){//wrong branch
-				printf("Should not be exploring this branch\n");exit(-1);
+				//printf("Should not be exploring this branch\n");exit(-1);
 			}else if(current_node->var_ID == mgr->true_obdd->root_obdd->var_ID){//found terminal
 				//add valuations
 				dont_cares_count	= 1;
@@ -3097,12 +3097,13 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 #endif
 	//NEW RHO BUILD APPROACH
 	free(valuations);
-
+#if APPLY_OBDD_REACHABLE
 	obdd *tmp_obdd = obdd_reachable_states(env_sys_theta_composed, env_sys_rho_composed);
 	obdd *and_obdd = obdd_apply_and(env_sys_rho_composed, tmp_obdd);
 	obdd_destroy(tmp_obdd);
 	obdd_destroy(env_sys_rho_composed);
 	env_sys_rho_composed	= and_obdd;
+#endif
 
 	automaton_add_transitions_from_valuations(mgr, env_sys_rho_composed, ltl_automaton, &current_valuations_count, signals_alphabet, signals_count,
 			dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, env_state, sys_state, obdd_state_map, x_count, y_count, x_y_count, x_y_x_p_count,

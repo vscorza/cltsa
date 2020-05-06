@@ -25,6 +25,7 @@
 #define OBDD_CACHE_MAX_SIZE		262144//0
 #define OBDD_CACHE_TABLE_LEVELS	5
 #define OBDD_USE_POOL			1
+#define OBDD_MERGE_NODES		0
 
 typedef uintptr_t ptruint;
 
@@ -300,4 +301,5 @@ obdd_node* obdd_table_mk_node_ID(obdd_table* table, obdd_var_size_t var_ID, obdd
 void obdd_table_node_destroy(obdd_table* table, obdd_node *node);
 void obdd_table_node_add(obdd_table* table, obdd_node *node);
 void obdd_table_destroy(obdd_table *table);
+void obdd_table_print_fast_lists(obdd_table* table);
 #endif

@@ -314,6 +314,7 @@ obdd*	obdd_mgr_var_ID(obdd_mgr* mgr, obdd_var_size_t var_ID){
 		var_obdd->root_obdd = mgr->cache->cache_vars[var_ID];
 	}else{
 		var_obdd->root_obdd = obdd_cache_insert_var(mgr->cache, var_ID);
+		obdd_cache_insert_neg_var(mgr->cache, var_ID);
 	}
 	if(var_ID == 0)var_0_cache_var_ID++;
 	if(var_ID == 1)var_1_cache_var_ID++;
@@ -341,6 +342,7 @@ obdd*	obdd_mgr_not_var_ID(obdd_mgr* mgr, obdd_var_size_t var_ID){
 		var_obdd->root_obdd = mgr->cache->cache_neg_vars[var_ID];
 	}else{
 		var_obdd->root_obdd = obdd_cache_insert_neg_var(mgr->cache, var_ID);
+		obdd_cache_insert_var(mgr->cache, var_ID);
 	}
 	if(var_ID == 0)var_0_cache_var_ID++;
 	if(var_ID == 1)var_1_cache_var_ID++;
@@ -586,6 +588,7 @@ void obdd_remove_duplicated_terminals(obdd_mgr* mgr, obdd_node* root, obdd_node*
 void obdd_merge_redundant_nodes(obdd_mgr* mgr, obdd_node* root){
 	if(obdd_is_constant(mgr, root))
 		return;
+#if OBDD_MERGE_NODES
 	obdd_table_node_destroy(mgr->table, root);
 	obdd_merge_redundant_nodes(mgr, root->high_obdd);
 	obdd_merge_redundant_nodes(mgr, root->low_obdd);
@@ -614,6 +617,9 @@ void obdd_merge_redundant_nodes(obdd_mgr* mgr, obdd_node* root){
 		}
 	}
 	obdd_table_node_add(mgr->table, root);
+#else
+	return;
+#endif
 }
 
 void obdd_reduce(obdd* root){
@@ -918,7 +924,8 @@ obdd* obdd_reachable_states(obdd* theta, obdd* rho){
 	uint32_t j	= 1;
 	//we check for bottom this way because minimization can leave just one node
 	//with both high and low pointing to false
-	while(!(frontier->root_obdd->var_ID == mgr->false_obdd->root_obdd->var_ID ||
+	while(frontier->root_obdd->var_ID == mgr->true_obdd->root_obdd->var_ID ||
+			!(frontier->root_obdd->var_ID == mgr->false_obdd->root_obdd->var_ID ||
 			(frontier->root_obdd->high_obdd->var_ID == mgr->false_obdd->root_obdd->var_ID &&
 			frontier->root_obdd->low_obdd->var_ID == mgr->false_obdd->root_obdd->var_ID))){
 		j++;

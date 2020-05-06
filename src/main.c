@@ -795,6 +795,56 @@ void run_obdd_cache_tests(){
 	obdd_mgr_destroy(new_mgr);
 }
 
+#define FAST_LIST_VAR_COUNT	10000//10000
+
+void run_obdd_fast_lists_tests(){
+	obdd_mgr* new_mgr	= obdd_mgr_create();
+	//compare x1 & !(x2 | x3) == x1 & !x2 & !x3
+	char buff[255];
+	obdd** vars	= calloc(FAST_LIST_VAR_COUNT, sizeof(obdd*));
+	uint32_t i;
+	for(i = 0; i < FAST_LIST_VAR_COUNT; i++){
+		sprintf(buff, "x%d", i);
+		vars[i]	= obdd_mgr_var(new_mgr, buff);
+	}
+	bool met_search	= true;
+	obdd_fast_node *result;
+	for(i = 0; i < FAST_LIST_VAR_COUNT; i++){
+		if(!met_search)break;
+		result	= obdd_table_search_node_ID(new_mgr->table, vars[i]->root_obdd->var_ID,
+			vars[i]->root_obdd->high_obdd, vars[i]->root_obdd->low_obdd);
+		met_search	= met_search && (result != NULL);
+	}
+	print_test_result(met_search, "OBDD FAST LIST ADD TEST", "obdd fast list add test");
+	for(i = 0; i < FAST_LIST_VAR_COUNT; i++){
+		if(i % 2 == 0)
+			obdd_table_node_destroy(new_mgr->table, vars[i]->root_obdd);
+	}
+	met_search	= true;
+	for(i = 0; i < FAST_LIST_VAR_COUNT; i++){
+		if(!met_search)break;
+		result	= obdd_table_search_node_ID(new_mgr->table, vars[i]->root_obdd->var_ID,
+			vars[i]->root_obdd->high_obdd, vars[i]->root_obdd->low_obdd);
+		if(i % 2 == 1){
+			met_search	= met_search && (result != NULL);
+		}else{
+			met_search	= met_search && (result == NULL);
+		}
+	}
+	for(i = 0; i < FAST_LIST_VAR_COUNT; i++){
+		if(i % 2 == 1)
+			obdd_table_node_add(new_mgr->table, vars[i]->root_obdd);
+	}
+
+	print_test_result(met_search, "OBDD FAST LIST REMOVAL TEST", "obdd fast list removal test");
+
+	for(i = 0; i < FAST_LIST_VAR_COUNT; i++){
+		obdd_destroy(vars[i]);
+	}
+	free(vars);
+	obdd_mgr_destroy(new_mgr);
+}
+
 void run_tree_tests(){
 	automaton_composite_tree* tree	= automaton_composite_tree_create(3);
 	uint32_t key1[3]				= {1,2,3};
@@ -1094,6 +1144,7 @@ void run_functional_tests(){
 	run_fast_pool_tests();
 	run_bool_array_hash_table_tests();
 	run_obdd_cache_tests();
+	run_obdd_fast_lists_tests();
 	//DRY TESTS
 	run_parse_test("tests/composition_types.fsp", "compositions type");
 	run_parse_test("tests/biscotti.fsp", "biscotti");
@@ -1233,15 +1284,17 @@ int main (int argc, char** argv){
 		//run_parse_test("tests/img_test_1.fsp", "Img test 1");
 
 		//run_parse_test("tests/genbuf_1_sndrs_no_automaton.fsp", "GenBuf 1 sndrs");
-		run_parse_test("tests/genbuf_2_sndrs_no_automaton.fsp", "GenBuf 2 sndrs");
+		//run_parse_test("tests/genbuf_2_sndrs_no_automaton.fsp", "GenBuf 2 sndrs");
 		//run_parse_test("tests/genbuf_3_sndrs_no_automaton.fsp", "GenBuf 3 sndrs V2");
 		//run_parse_test("tests/genbuf_4_sndrs_no_automaton.fsp", "GenBuf 4 sndrs");
 
 		//run_parse_test("tests/genbuf_1_sndrs_simplified.fsp", "GenBuf 1 sndrs (simplified)");
-
+		//run_parse_test("tests/mixed_3_signals_2_labels.fsp", "mixed model 3 signals 2 labels");
+		//run_parse_test("tests/two_floors_lift.fsp", "lift 2 floors");//lift 2 floors
 		//GENERAL TESTS
 		//run_all_tests();
 		//run_functional_tests();
+		run_obdd_fast_lists_tests();
 
 		//run_parse_test("tests/current_sut.fsp", "current_SUT");
 
