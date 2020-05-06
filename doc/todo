@@ -1,7 +1,7 @@
 TODO:
 =====
-- internal nodes cache debugging
-	- check env_sys_rho_composed on lift 2 floors
+- internal nodes cache debugging, problem integrating with obdd node merge
+	- check env_sys_rho_composed on lift 2 floors, releaseing on empty bucket
 - computar tiempo y agregar columna de C || E'
 - armar scatterplot
 - de efectividad hacer alguna mención a la implementación y la linealidad, comparar con ejemplos comparables

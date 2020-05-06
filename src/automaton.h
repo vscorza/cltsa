@@ -23,7 +23,7 @@
 #define max(a,b) ({ __typeof__ (a) _a = (a); __typeof__ (b) _b = (b); _a > _b ? _a : _b; })
 #define min(a,b) ({ __typeof__ (a) _a = (a); __typeof__ (b) _b = (b); _a < _b ? _a : _b; })
 
-#define VERBOSE 1
+#define VERBOSE 0
 
 #define COMPOSE_SYNCH	1
 #define PARTIAL_SHARE	2

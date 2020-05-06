@@ -528,6 +528,7 @@ obdd_fast_node* obdd_table_search_node_ID(obdd_table* table, obdd_var_size_t var
 	obdd_fast_node *current_node	= NULL, *last_node = NULL,
 			*tmp_node = NULL;
 
+	if(var_ID >= (table->size)){return NULL;}
 	while(current_level < table->fast_lists_count){
 		current_node	= table->levels[var_ID][current_level];
 		if(current_node != NULL)break;
