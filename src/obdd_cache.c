@@ -527,7 +527,6 @@ obdd_fast_node* obdd_table_search_node_ID(obdd_table* table, obdd_var_size_t var
 	uint32_t current_level	= 0;
 	obdd_fast_node *current_node	= NULL, *last_node = NULL,
 			*tmp_node = NULL;
-
 	if(var_ID >= (table->size)){return NULL;}
 	while(current_level < table->fast_lists_count){
 		current_node	= table->levels[var_ID][current_level];
@@ -569,11 +568,25 @@ obdd_node* obdd_table_mk_node_ID(obdd_table* table, obdd_var_size_t var_ID, obdd
 	if(high == low){
 		return high;
 	}
+	//check if single var
+	if(high->var_ID == 0 && low->var_ID == 1 &&
+			table->mgr->cache->cache_vars[var_ID] != NULL){
+		table->mgr->cache->cache_vars[var_ID]->ref_count++;
+		return table->mgr->cache->cache_vars[var_ID];
+	}
+	if(high->var_ID == 1 && low->var_ID == 0 &&
+				table->mgr->cache->cache_neg_vars[var_ID] != NULL){
+		table->mgr->cache->cache_neg_vars[var_ID]->ref_count++;
+		return table->mgr->cache->cache_neg_vars[var_ID];
+	}
 	//check if node exists
 	obdd_node *current_node = NULL, *last_node = NULL;
 	obdd_fast_node *current_fast_node = NULL, *last_fast_node = NULL, *new_fast_node = NULL;
 	current_fast_node	= obdd_table_search_node_ID(table, var_ID, high, low);
-	if(current_fast_node != NULL)return current_fast_node->data;
+	if(current_fast_node != NULL){
+		current_fast_node->data->ref_count++;
+		return current_fast_node->data;
+	}
 	//return new node
 #if OBDD_USE_POOL
 	uint32_t fragment_ID;

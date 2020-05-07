@@ -275,6 +275,10 @@ obdd_node* obdd_mgr_mk_node_ID(obdd_mgr* mgr, obdd_var_size_t var_ID, obdd_node*
 		obdd_node *ret_node	=  obdd_table_mk_node_ID(mgr->table, var_ID, high, low);
 		return ret_node;
 	}
+	if(var_ID == TRUE_VAR && mgr->true_obdd->root_obdd != NULL)
+		return mgr->true_obdd->root_obdd;
+	if(var_ID == FALSE_VAR && mgr->false_obdd->root_obdd != NULL)
+			return mgr->false_obdd->root_obdd;
 #if OBDD_USE_POOL
 	uint32_t fragment_ID;
 	obdd_node* new_node	= automaton_fast_pool_get_instance(mgr->nodes_pool, &fragment_ID);
@@ -1446,31 +1450,28 @@ void obdd_node_destroy(obdd_mgr* mgr, obdd_node* node){
 	if(node->ref_count == 1)
 		obdd_table_node_destroy(mgr->table, node);//if node was added to fast lists it should set ref to zero
 	if(node->ref_count == 0){
-		if(node->ref_count == 0){
 #if DEBUG_OBDD
-				printf(ANSI_COLOR_RED"[XX]\n"ANSI_COLOR_RESET);
+			printf(ANSI_COLOR_RED"[XX]\n"ANSI_COLOR_RESET);
 #endif
-				if(node->high_obdd != NULL){
-					obdd_node* to_remove = node->high_obdd;
-					obdd_remove_high_successor(node, to_remove);
-					obdd_node_destroy(mgr, to_remove);
-					node->high_obdd = NULL;
-				}
-				if(node->low_obdd != NULL){
-					obdd_node* to_remove = node->low_obdd;
-					obdd_remove_low_successor(node, to_remove);
-					obdd_node_destroy(mgr, to_remove);
-					node->low_obdd = NULL;
-				}
-				node->var_ID	= 0;
-				//node->node_ID	= 0;
-				//free(node);
-#if OBDD_USE_POOL
-				automaton_fast_pool_release_instance(mgr->nodes_pool, node->fragment_ID);
-#else
-				free(node);
-#endif
+			if(node->high_obdd != NULL){
+				obdd_node* to_remove = node->high_obdd;
+				obdd_remove_high_successor(node, to_remove);
+				obdd_node_destroy(mgr, to_remove);
+				node->high_obdd = NULL;
 			}
-
+			if(node->low_obdd != NULL){
+				obdd_node* to_remove = node->low_obdd;
+				obdd_remove_low_successor(node, to_remove);
+				obdd_node_destroy(mgr, to_remove);
+				node->low_obdd = NULL;
+			}
+			node->var_ID	= 0;
+			//node->node_ID	= 0;
+			//free(node);
+#if OBDD_USE_POOL
+			automaton_fast_pool_release_instance(mgr->nodes_pool, node->fragment_ID);
+#else
+			free(node);
+#endif
 	}
 }
