@@ -1283,14 +1283,14 @@ int main (int argc, char** argv){
 		//run_parse_test("tests/genbuf_1_sndrs_no_automaton.fsp", "GenBuf 1 sndrs V2");
 		//run_parse_test("tests/img_test_1.fsp", "Img test 1");
 
-		//run_parse_test("tests/genbuf_1_sndrs_no_automaton.fsp", "GenBuf 1 sndrs");
+		run_parse_test("tests/genbuf_1_sndrs_no_automaton.fsp", "GenBuf 1 sndrs");
 		//run_parse_test("tests/genbuf_2_sndrs_no_automaton.fsp", "GenBuf 2 sndrs");
 		//run_parse_test("tests/genbuf_3_sndrs_no_automaton.fsp", "GenBuf 3 sndrs V2");
 		//run_parse_test("tests/genbuf_4_sndrs_no_automaton.fsp", "GenBuf 4 sndrs");
 
 		//run_parse_test("tests/genbuf_1_sndrs_simplified.fsp", "GenBuf 1 sndrs (simplified)");
 		//run_parse_test("tests/mixed_3_signals_2_labels.fsp", "mixed model 3 signals 2 labels");
-		run_parse_test("tests/two_floors_lift.fsp", "lift 2 floors");//lift 2 floors
+		//run_parse_test("tests/two_floors_lift.fsp", "lift 2 floors");//lift 2 floors
 		//GENERAL TESTS
 		//run_all_tests();
 		//run_functional_tests();

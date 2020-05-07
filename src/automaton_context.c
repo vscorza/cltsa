@@ -2309,7 +2309,10 @@ void automaton_add_transitions_from_valuations(obdd_mgr* mgr, obdd* root, automa
 	obdd_node* last_node;
 
 	//solve case where var_ID is 0 (obdd == true, retrieve all values for img)
-	if(current_node->var_ID == mgr->false_obdd->root_obdd->var_ID)return;
+	if(current_node->var_ID == mgr->false_obdd->root_obdd->var_ID){
+		free(valuation);
+		return;
+	}
 	if(current_node->var_ID == mgr->true_obdd->root_obdd->var_ID){
 		dont_cares_count	= 1;
 		for(i = 0; i < img_count; i++)
@@ -2386,6 +2389,7 @@ void automaton_add_transitions_from_valuations(obdd_mgr* mgr, obdd* root, automa
 
 
 		*valuations_count	+= dont_cares_count;
+		free(valuation);
 		return;
 	}
 	int32_t current_index		= current_node->var_ID - 2;
@@ -3146,7 +3150,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	 * and then ask for S_j = obdd_get_valuations, we build and add the transition between s_e and each s_j in S_j
 	 * once rho_env_bucket_list is empty we start again with rho_bucket_list until both lists are empty
 	 */
-
+	free(x_y_order);
 	free(adjusted_valuation);
 	free(initialized_values);
 	free(valuation_set);
