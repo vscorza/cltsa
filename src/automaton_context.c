@@ -3123,6 +3123,9 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	for(i = 0; i < mgr->vars_dict->size; i++){
 		printf("\t nodes for %s: \t %d\n", mgr->vars_dict->entries[i].key,
 				mgr->table->levels_composite_counts[i]);
+		for(j = 0; j < mgr->table->fast_lists_count; j++)
+			printf("\t\t Level %d:%d\n", j,
+					mgr->table->levels_counts[i][j]);
 	}
 #endif
 /*

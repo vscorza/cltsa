@@ -16,14 +16,14 @@
 
 #define OBDD_FRAGMENT_SIZE		100
 #define OBDD_FRAGMENTS_SIZE		100
-#define OBDD_NODE_FRAGMENT_SIZE	10000
-#define OBDD_NODE_FRAGMENTS_SIZE	10000
+#define OBDD_NODE_FRAGMENT_SIZE	100
+#define OBDD_NODE_FRAGMENTS_SIZE	100
 #define OBDD_NODE_LIST_SIZE		64
 
 #define OBDD_CACHE_DEBUG		0
 #define OBDD_CACHE_SIZE			16//262144
-#define OBDD_CACHE_MAX_SIZE		262144//0
-#define OBDD_CACHE_TABLE_LEVELS	12
+#define OBDD_CACHE_MAX_SIZE		2262144//0
+#define OBDD_CACHE_TABLE_LEVELS	5
 #define OBDD_USE_POOL			1
 #define OBDD_MERGE_NODES		1
 
@@ -128,6 +128,8 @@ typedef struct obdd_node_t{
 typedef struct obdd_fast_node_t{
 	struct obdd_fast_node_t *next;
 	struct obdd_fast_node_t *finer;
+	obdd_node *high;
+	obdd_node *low;
 	obdd_node *data;
 	uint32_t fragment_ID;
 }obdd_fast_node;
@@ -174,8 +176,7 @@ typedef struct obdd_table_t{
 	uint64_t live_fast_nodes;
 	uint64_t fast_hits;
 	uint64_t fast_misses;
-	uint64_t rand_value;
-	uint32_t rand_uses;
+	uint64_t rand_uses;
 }obdd_table;
 /*
 typedef struct obdd_partial_automaton_t{

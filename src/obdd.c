@@ -629,7 +629,7 @@ obdd_node* obdd_merge_redundant_nodes(obdd_mgr* mgr, obdd_node* root){
 	}
 	*/
 #else
-	return;
+	return root;
 #endif
 }
 
