@@ -436,5 +436,4 @@ int32_t automaton_int_compare(void* left_int, void* right_int);
 void automaton_int_copy(void* target_input, void* source_input);
 void automaton_pending_state_destroy(automaton_pending_state*  pending_state);
 /** AUTOMATA **/
-
 #endif

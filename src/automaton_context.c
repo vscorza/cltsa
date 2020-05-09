@@ -319,6 +319,7 @@ int32_t automaton_expression_syntax_evaluate(automaton_parsing_tables* tables, a
 	switch(expr->type){
 	case RANGE_DEF_TYPE_AUT:
 	case RANGE_TYPE_AUT:
+		printf("Range type not implemented ");
 		exit(-1);
 		break;
 	case PARENTHESIS_TYPE_AUT:
@@ -373,7 +374,10 @@ int32_t automaton_expression_syntax_evaluate(automaton_parsing_tables* tables, a
 			valuation = ref_entry->valuation.int_value;
 		}
 		break;
-	default:exit(-1);break;
+	default:
+		printf("Syntax expression could not be evaluated\n");
+		exit(-1);
+		break;
 	}
 	if(expr->type == CONST_TYPE_AUT){
 		if(index >= 0){
@@ -2545,7 +2549,6 @@ void automaton_add_transitions_from_valuations(obdd_mgr* mgr, obdd* root, automa
 #if DEBUG_OBDD_VALUATIONS
 	printf(ANSI_COLOR_RESET);
 #endif
-	free(x_y_order);
 	free(valuation);
 }
 
@@ -3118,8 +3121,8 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 			mgr->table->live_fast_nodes, mgr->table->max_live_fast_nodes, mgr->table->fast_hits,
 			mgr->table->fast_misses);
 	for(i = 0; i < mgr->vars_dict->size; i++){
-		printf("t nodes for %s: \t %d\n", mgr->vars_dict->entries[i].key,
-				mgr->table->levels_counts[i]);
+		printf("\t nodes for %s: \t %d\n", mgr->vars_dict->entries[i].key,
+				mgr->table->levels_composite_counts[i]);
 	}
 #endif
 /*

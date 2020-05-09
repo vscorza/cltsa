@@ -1,7 +1,9 @@
 TODO:
 =====
-- internal nodes cache debugging, problem integrating with obdd node merge
-	- check env_sys_rho_composed on lift 2 floors, releaseing on empty bucket
+- internal nodes cache debugging	
+	- fast list invariant is broken where a node appearing at level i should apper at each level j, i < j <= n
+		- it is either being partially added i..j, j < n or partially removed j..n, j > i
+	- computation spends most of its time traversing fast list, in particular the search condition check
 - computar tiempo y agregar columna de C || E'
 - armar scatterplot
 - de efectividad hacer alguna mención a la implementación y la linealidad, comparar con ejemplos comparables

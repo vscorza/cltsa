@@ -458,8 +458,10 @@ void obdd_add_low_successor(obdd_node* src, obdd_node* dst){
 	}
 }
 void obdd_remove_high_successor(obdd_node* src, obdd_node* dst){
-	if(src->high_obdd != dst)
+	if(src->high_obdd != dst){
+		printf("Node to be removed was not referred from the declared parent node\n");
 		exit(-2);
+	}
 	src->high_obdd	= NULL;
 	if(dst != NULL){
 		if(dst->var_ID == 0)var_0_cache_high_succ_off++;
@@ -471,8 +473,10 @@ void obdd_remove_high_successor(obdd_node* src, obdd_node* dst){
 	}
 }
 void obdd_remove_low_successor(obdd_node* src, obdd_node* dst){
-	if(src->low_obdd != dst)
+	if(src->low_obdd != dst){
+		printf("Node to be removed was not referred from the declared parent node\n");
 		exit(-2);
+	}
 	src->low_obdd	= NULL;
 	if(dst != NULL){
 		if(dst->var_ID == 0)var_0_cache_low_succ_off++;
@@ -589,13 +593,16 @@ void obdd_remove_duplicated_terminals(obdd_mgr* mgr, obdd_node* root, obdd_node*
 
 }
 
-void obdd_merge_redundant_nodes(obdd_mgr* mgr, obdd_node* root){
+obdd_node* obdd_merge_redundant_nodes(obdd_mgr* mgr, obdd_node* root){
 	if(obdd_is_constant(mgr, root))
-		return;
+		return root;
 #if OBDD_MERGE_NODES
-	obdd_table_node_destroy(mgr->table, root);
-	obdd_merge_redundant_nodes(mgr, root->high_obdd);
-	obdd_merge_redundant_nodes(mgr, root->low_obdd);
+	obdd_node *high_node	= obdd_merge_redundant_nodes(mgr, root->high_obdd);
+	obdd_node *low_node		= obdd_merge_redundant_nodes(mgr, root->low_obdd);
+	obdd_fast_node *search_node	= obdd_table_search_node_ID(mgr->table, root->var_ID, high_node, low_node);
+	if(search_node != NULL)return search_node->data;
+	return obdd_mgr_mk_node_ID(mgr, root->var_ID, high_node, low_node);
+	/*
 	int32_t i;
 	if(!obdd_is_constant(mgr, root->high_obdd)){
 		if(root->high_obdd->high_obdd == root->high_obdd->low_obdd){
@@ -620,7 +627,7 @@ void obdd_merge_redundant_nodes(obdd_mgr* mgr, obdd_node* root){
 			obdd_node_destroy(mgr, to_remove);
 		}
 	}
-	obdd_table_node_add(mgr->table, root);
+	*/
 #else
 	return;
 #endif
@@ -630,7 +637,12 @@ void obdd_reduce(obdd* root){
 	obdd_node* true_node	= NULL;
 	obdd_node* false_node	= NULL;
 	obdd_remove_duplicated_terminals(root->mgr, root->root_obdd, &true_node, &false_node);
-	obdd_merge_redundant_nodes(root->mgr, root->root_obdd);
+	obdd_node* current_node	= obdd_merge_redundant_nodes(root->mgr, root->root_obdd);
+	if(current_node != root->root_obdd){
+		root->root_obdd->ref_count--;
+		current_node->ref_count++;
+		root->root_obdd = current_node;
+	}
 }
 
 obdd* obdd_apply(bool (*apply_fkt)(bool,bool), obdd *left, obdd* right){
@@ -959,7 +971,10 @@ obdd* obdd_img(obdd *root, uint32_t *primed_vars, uint32_t *original_vars, uint3
 obdd_node* obdd_node_swap_vars(obdd_mgr *mgr, obdd_node* root, uint32_t last_index, uint32_t *primed_vars, uint32_t *original_vars, uint32_t var_count){
 	if(obdd_is_constant(mgr, root))return root;
 	while(primed_vars[last_index] < root->var_ID && last_index < var_count)last_index++;
-	if(last_index == var_count || primed_vars[last_index] != root->var_ID)	exit(-1);
+	if(last_index == var_count || primed_vars[last_index] != root->var_ID){
+		printf("Inconsistent parameters on obdd_node_swap_vars\n");
+		exit(-1);
+	}
 	obdd_node *return_node	= obdd_mgr_mk_node_ID(mgr, original_vars[last_index],
 			obdd_node_swap_vars(mgr, root->high_obdd, last_index, primed_vars, original_vars, var_count),
 			obdd_node_swap_vars(mgr, root->low_obdd, last_index, primed_vars, original_vars, var_count));
@@ -1446,13 +1461,12 @@ void obdd_node_destroy(obdd_mgr* mgr, obdd_node* node){
 	if(node->ref_count > 0)
 		printf("\n");
 #endif
-	//some nodes are not in the fast lists, if so the following condition should have no effect
-	if(node->ref_count == 1)
-		obdd_table_node_destroy(mgr->table, node);//if node was added to fast lists it should set ref to zero
 	if(node->ref_count == 0){
 #if DEBUG_OBDD
 			printf(ANSI_COLOR_RED"[XX]\n"ANSI_COLOR_RESET);
 #endif
+			//some nodes are not in the fast lists, if so the following condition should have no effect
+			obdd_table_node_destroy(mgr->table, node);//if node was added to fast lists it should set ref to zero
 			if(node->high_obdd != NULL){
 				obdd_node* to_remove = node->high_obdd;
 				obdd_remove_high_successor(node, to_remove);

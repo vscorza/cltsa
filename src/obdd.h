@@ -16,14 +16,14 @@
 
 #define OBDD_FRAGMENT_SIZE		100
 #define OBDD_FRAGMENTS_SIZE		100
-#define OBDD_NODE_FRAGMENT_SIZE	2000
-#define OBDD_NODE_FRAGMENTS_SIZE	2000
+#define OBDD_NODE_FRAGMENT_SIZE	10000
+#define OBDD_NODE_FRAGMENTS_SIZE	10000
 #define OBDD_NODE_LIST_SIZE		64
 
 #define OBDD_CACHE_DEBUG		0
 #define OBDD_CACHE_SIZE			16//262144
 #define OBDD_CACHE_MAX_SIZE		262144//0
-#define OBDD_CACHE_TABLE_LEVELS	7
+#define OBDD_CACHE_TABLE_LEVELS	12
 #define OBDD_USE_POOL			1
 #define OBDD_MERGE_NODES		1
 
@@ -168,11 +168,14 @@ typedef struct obdd_table_t{
 	uint32_t size;
 	uint32_t fast_lists_count;
 	obdd_fast_node ***levels;
-	uint64_t *levels_counts;
+	uint64_t *levels_composite_counts;
+	uint64_t **levels_counts;
 	uint64_t max_live_fast_nodes;
 	uint64_t live_fast_nodes;
 	uint64_t fast_hits;
 	uint64_t fast_misses;
+	uint64_t rand_value;
+	uint32_t rand_uses;
 }obdd_table;
 /*
 typedef struct obdd_partial_automaton_t{
@@ -263,7 +266,7 @@ obdd* obdd_apply_or(obdd* left, obdd* right);
 obdd* obdd_apply(bool (*apply_fkt)(bool,bool), obdd *left, obdd* right);	//if not canonical results should be reduced
 obdd_node* obdd_node_apply(bool (*apply_fkt)(bool,bool), obdd_mgr* mgr, obdd_node* left_node, obdd_node* right_node, bool first_call);
 void obdd_remove_duplicated_terminals(obdd_mgr* mgr, obdd_node* root, obdd_node** true_node, obdd_node** false_node);
-void obdd_merge_redundant_nodes(obdd_mgr* mgr, obdd_node* root);
+obdd_node* obdd_merge_redundant_nodes(obdd_mgr* mgr, obdd_node* root);
 void obdd_reduce(obdd* root);
 bool obdd_is_true(obdd_mgr* mgr, obdd_node* root);
 bool obdd_is_constant(obdd_mgr* mgr, obdd_node* root);						//checks if representation is constant
