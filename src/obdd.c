@@ -178,7 +178,6 @@ obdd_mgr*	obdd_mgr_create(){
 #if OBDD_USE_POOL
 	new_mgr->obdd_pool	= automaton_fast_pool_create(sizeof(obdd), OBDD_FRAGMENTS_SIZE, OBDD_FRAGMENT_SIZE);
 	new_mgr->nodes_pool	= automaton_fast_pool_create(sizeof(obdd_node), OBDD_NODE_FRAGMENTS_SIZE, OBDD_NODE_FRAGMENT_SIZE);
-	new_mgr->fast_nodes_pool	= automaton_fast_pool_create(sizeof(obdd_fast_node), OBDD_NODE_FRAGMENTS_SIZE, OBDD_NODE_FRAGMENT_SIZE);
 #endif
 	//is initialized in 1 so that we can later check for already deleted nodes
 	new_mgr->greatest_node_ID	= 1;
@@ -216,7 +215,7 @@ obdd_mgr*	obdd_mgr_create(){
 	false_obdd->fragment_ID	= fragment_ID;
 	new_mgr->false_obdd	= false_obdd;
 	new_mgr->cache		= obdd_cache_create(new_mgr, OBDD_CACHE_SIZE, OBDD_CACHE_MAX_SIZE);
-	new_mgr->table		= obdd_table_create(new_mgr, OBDD_CACHE_TABLE_LEVELS);
+	new_mgr->table		= obdd_table_create(new_mgr);
 	return new_mgr;
 }
 
@@ -241,10 +240,8 @@ void obdd_mgr_destroy(obdd_mgr* mgr){
 #if OBDD_USE_POOL
 	automaton_fast_pool_destroy(mgr->obdd_pool);
 	automaton_fast_pool_destroy(mgr->nodes_pool);
-	automaton_fast_pool_destroy(mgr->fast_nodes_pool);
 	mgr->obdd_pool	= NULL;
 	mgr->nodes_pool	= NULL;
-	mgr->fast_nodes_pool = NULL;
 #endif
 	free(mgr);	
 }
@@ -599,8 +596,8 @@ obdd_node* obdd_merge_redundant_nodes(obdd_mgr* mgr, obdd_node* root){
 #if OBDD_MERGE_NODES
 	obdd_node *high_node	= obdd_merge_redundant_nodes(mgr, root->high_obdd);
 	obdd_node *low_node		= obdd_merge_redundant_nodes(mgr, root->low_obdd);
-	obdd_fast_node *search_node	= obdd_table_search_node_ID(mgr->table, root->var_ID, high_node, low_node);
-	if(search_node != NULL)return search_node->data;
+	obdd_node *search_node	= obdd_table_search_node_ID(mgr->table, root->var_ID, high_node, low_node);
+	if(search_node != NULL)return search_node;
 	return obdd_mgr_mk_node_ID(mgr, root->var_ID, high_node, low_node);
 	/*
 	int32_t i;

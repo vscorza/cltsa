@@ -23,9 +23,10 @@
 #define OBDD_CACHE_DEBUG		0
 #define OBDD_CACHE_SIZE			16//262144
 #define OBDD_CACHE_MAX_SIZE		2262144//0
-#define OBDD_CACHE_TABLE_LEVELS	5
 #define OBDD_USE_POOL			1
 #define OBDD_MERGE_NODES		1
+#define OBDD_TABLE_SLOTS		256
+#define OBDD_TABLE_MAX_DENSITY	4
 
 typedef uintptr_t ptruint;
 
@@ -110,7 +111,6 @@ typedef struct obdd_mgr_t {
 #if OBDD_USE_POOL
 	automaton_fast_pool*	obdd_pool;
 	automaton_fast_pool*	nodes_pool;
-	automaton_fast_pool*	fast_nodes_pool;
 #endif
 	struct obdd_cache_t*	cache;
 	struct obdd_table_t*	table;
@@ -122,17 +122,9 @@ typedef struct obdd_node_t{
 	obdd_ref_count_size_t		ref_count;
 	struct obdd_node_t*	high_obdd;
 	struct obdd_node_t*	low_obdd;
+	struct obdd_node_t *next;
 	uint32_t 		fragment_ID;
 }obdd_node;
-
-typedef struct obdd_fast_node_t{
-	struct obdd_fast_node_t *next;
-	struct obdd_fast_node_t *finer;
-	obdd_node *high;
-	obdd_node *low;
-	obdd_node *data;
-	uint32_t fragment_ID;
-}obdd_fast_node;
 
 typedef struct obdd_t{
 	struct obdd_mgr_t*	mgr;
@@ -168,29 +160,17 @@ typedef struct obdd_cache_t{
 typedef struct obdd_table_t{
 	obdd_mgr *mgr;
 	uint32_t size;
-	uint32_t fast_lists_count;
-	obdd_fast_node ***levels;
+	uint32_t *slots;
+	uint32_t *shift;
+	uint32_t *max_keys;
+	obdd_node ***levels;
 	uint64_t *levels_composite_counts;
-	uint64_t **levels_counts;
 	uint64_t max_live_fast_nodes;
 	uint64_t live_fast_nodes;
 	uint64_t fast_hits;
 	uint64_t fast_misses;
-	uint64_t rand_uses;
 }obdd_table;
-/*
-typedef struct obdd_partial_automaton_t{
-	uint32_t			initial_state;
-	obdd_state_tree*	map_tree;
-	dictionary*			variables_dictionary;
-	uint32_t			transitions_count;
-	uint32_t			transitions_size;
-	uint32_t*			out_degree;
-	uint32_t*			out_size;
-	uint32_t**			outgoing_transitions;
-	uint32_t			valuations_size;
-	uint32_t*			valuations;
-}obdd_partial_automaton;*/
+
 /** OBDD COMPOSITE STATE **/
 obdd_composite_state* obdd_composite_state_create(uint32_t state, uint32_t valuation_count);
 uint32_t obdd_composite_state_extractor(void* value);
@@ -299,10 +279,11 @@ void obdd_cache_flush(obdd_cache *cache);
 void obdd_cache_destroy(obdd_cache *cache);
 
 /** OBDD CACHE TABLE **/
-obdd_table* obdd_table_create(obdd_mgr *mgr, uint32_t fast_lists_count);
-obdd_fast_node* obdd_table_search_node_ID(obdd_table* table, obdd_var_size_t var_ID, obdd_node* high, obdd_node* low);
+obdd_table* obdd_table_create(obdd_mgr *mgr);
+obdd_node* obdd_table_search_node_ID(obdd_table* table, obdd_var_size_t var_ID, obdd_node* high, obdd_node* low);
 obdd_node* obdd_table_mk_node_ID(obdd_table* table, obdd_var_size_t var_ID, obdd_node* high, obdd_node* low);
 void obdd_table_node_destroy(obdd_table* table, obdd_node *node);
+void obdd_table_resize(obdd_table* table, uint32_t level);
 void obdd_table_node_add(obdd_table* table, obdd_node *node);
 void obdd_table_destroy(obdd_table *table);
 void obdd_table_print_fast_lists(obdd_table* table);

@@ -808,7 +808,7 @@ void run_obdd_fast_lists_tests(){
 		vars[i]	= obdd_mgr_var(new_mgr, buff);
 	}
 	bool met_search	= true;
-	obdd_fast_node *result;
+	obdd_node *result;
 	for(i = 0; i < FAST_LIST_VAR_COUNT; i++){
 		if(!met_search)break;
 		result	= obdd_table_search_node_ID(new_mgr->table, vars[i]->root_obdd->var_ID,
@@ -1283,8 +1283,8 @@ int main (int argc, char** argv){
 		//run_parse_test("tests/genbuf_1_sndrs_no_automaton.fsp", "GenBuf 1 sndrs V2");
 		//run_parse_test("tests/img_test_1.fsp", "Img test 1");
 
-		//run_parse_test("tests/genbuf_1_sndrs_no_automaton.fsp", "GenBuf 1 sndrs");
-		run_parse_test("tests/genbuf_2_sndrs_no_automaton.fsp", "GenBuf 2 sndrs");
+		run_parse_test("tests/genbuf_1_sndrs_no_automaton.fsp", "GenBuf 1 sndrs");
+		//run_parse_test("tests/genbuf_2_sndrs_no_automaton.fsp", "GenBuf 2 sndrs");
 		//run_parse_test("tests/genbuf_3_sndrs_no_automaton.fsp", "GenBuf 3 sndrs V2");
 		//run_parse_test("tests/genbuf_4_sndrs_no_automaton.fsp", "GenBuf 4 sndrs");
 

@@ -358,21 +358,32 @@ void obdd_cache_destroy(obdd_cache *cache){
 
 /** OBDD TABLE CACHE **/
 
-obdd_table* obdd_table_create(obdd_mgr *mgr, uint32_t fast_lists_count){
-	uint32_t i;
+obdd_table* obdd_table_create(obdd_mgr *mgr){
+	uint32_t i, j;
+	uint32_t log_slot	= 1, log_value  = 0;
 	obdd_table *new_table	= calloc(1, sizeof(obdd_table));
 	new_table->size	= LIST_INITIAL_SIZE;
-	new_table->fast_lists_count	= fast_lists_count;
-	new_table->levels	= calloc(new_table->size, sizeof(obdd_fast_node**));
-	new_table->rand_uses	= 0;
+	new_table->slots = calloc(new_table->size, sizeof(uint32_t));
+	new_table->shift = calloc(new_table->size, sizeof(uint32_t));
+	new_table->max_keys = calloc(new_table->size, sizeof(uint32_t));
 	for(i = 0; i < new_table->size; i++){
-		new_table->levels[i]	= calloc(fast_lists_count, sizeof(obdd_fast_node*));
+		new_table->slots[i]	= 8;
+		while (new_table->slots[i] < OBDD_TABLE_SLOTS)new_table->slots[i] <<= 1;
+		log_slot = 1;
+		log_value = 0;
+		while(log_slot < new_table->slots[i]){
+			log_slot <<= 1;
+			log_value++;
+		}
+		new_table->shift[i] = sizeof(uint32_t) * 8 - log_value;
+		new_table->max_keys[i] = new_table->slots[i] * OBDD_TABLE_MAX_DENSITY;
+	}
+
+	new_table->levels	= calloc(new_table->size, sizeof(obdd_node**));
+	for(i = 0; i < new_table->size; i++){
+		new_table->levels[i]	= calloc(new_table->slots[i], sizeof(obdd_node*));
 	}
 	new_table->levels_composite_counts	= calloc(new_table->size, sizeof(uint64_t));
-	new_table->levels_counts	= calloc(new_table->size, sizeof(uint64_t*));
-	for(i = 0; i < new_table->size; i++){
-		new_table->levels_counts[i]	= calloc(new_table->fast_lists_count, sizeof(uint64_t));
-	}
 	new_table->mgr	= mgr;
 	new_table->max_live_fast_nodes = 0;
 	new_table->live_fast_nodes = 0;
@@ -380,17 +391,71 @@ obdd_table* obdd_table_create(obdd_mgr *mgr, uint32_t fast_lists_count){
 	new_table->fast_misses	= 0;
 	return new_table;
 }
+/*
+ typedef struct obdd_table_t{
+	obdd_mgr *mgr;
+	uint32_t size;
+	uint32_t *slots;
+	uint32_t *shift;
+	uint32_t *max_keys;
+	obdd_fast_node **levels;
+	uint64_t *levels_composite_counts;
+	uint64_t max_live_fast_nodes;
+	uint64_t live_fast_nodes;
+	uint64_t fast_hits;
+	uint64_t fast_misses;
+}obdd_table;
+ * */
+void obdd_table_resize(obdd_table* table, uint32_t level){
+	uint32_t old_slots	= table->slots[level];
+	uint32_t old_shift	= table->shift[level];
+	obdd_node **old_level	= table->levels[level];
+
+	/* Compute the new size of the subtable. */
+	table->slots[level] = old_slots << 1;
+	table->shift[level] = old_shift - 1;
+	table->max_keys[level] = table->slots[level] * OBDD_TABLE_MAX_DENSITY;
+	table->levels[level]	= calloc(table->slots[level], sizeof(obdd_node*));
+
+	uint32_t j, pos;
+	obdd_node **even_node, **odd_node, *current_node, *next_node;
+	/* Move the nodes from the old table to the new table.
+	** This code depends on the type of hash function.
+	** It assumes that the effect of doubling the size of the table
+	** is to retain one more bit of the 32-bit hash value.
+	** The additional bit is the LSB. */
+	for (j = 0; j < old_slots; j++) {
+	    current_node = old_level[j];
+	    even_node = &(table->levels[level][j<<1]);
+	    odd_node = &(table->levels[level][(j<<1)+1]);
+	    while (current_node != NULL) {
+		next_node = current_node->next;
+		pos = ddHash(current_node->high_obdd, current_node->low_obdd, table->shift[level]);
+		if (pos & 1) {
+		    *odd_node = current_node;
+		    odd_node = &(current_node->next);
+		} else {
+		    *even_node = current_node;
+		    even_node = &(current_node->next);
+		}
+		current_node = next_node;
+	    }
+	    *even_node = *odd_node = NULL;
+	}
+	free(old_level);
+
+}
 
 void obdd_table_node_add(obdd_table* table, obdd_node *node){
 	obdd_node *current_node = NULL, *last_node = NULL;
-	obdd_fast_node *current_fast_node = NULL, *coarser_fast_node = NULL,
-			*previous_fast_node = NULL, *new_fast_node = NULL;
+	obdd_node *current_fast_node = NULL,
+			*previous_fast_node = NULL;
 	uint32_t i, fragment_ID;
 	//resize if needed
 	if(node->var_ID >= (table->size-1)){
 		uint32_t old_size	= table->size;
 		while((table->size-1) <= node->var_ID)table->size *= 2;
-		obdd_node** ptr	= realloc(table->levels, sizeof(obdd_fast_node**) * (table->size));
+		obdd_node*** ptr	= realloc(table->levels, sizeof(obdd_node**) * (table->size));
 		if(ptr == NULL){
 			printf("Could not allocate memory\n");
 			exit(-1);
@@ -400,136 +465,108 @@ void obdd_table_node_add(obdd_table* table, obdd_node *node){
 			printf("Could not allocate memory\n");
 			exit(-1);
 		}else table->levels_composite_counts	= uint_ptr;
-		uint64_t** uint_ptr_ptr	= realloc(table->levels_counts, sizeof(uint64_t*) * (table->size));
-		if(uint_ptr_ptr == NULL){
+
+		uint32_t* uint32_ptr	= realloc(table->slots, sizeof(uint32_t) * table->size);
+		if(uint32_ptr == NULL){
 			printf("Could not allocate memory\n");
 			exit(-1);
-		}else table->levels_counts	= uint_ptr_ptr;
-
+		}else table->slots	= uint32_ptr;
+		uint32_ptr	= realloc(table->shift, sizeof(uint32_t) * table->size);
+		if(uint32_ptr == NULL){
+			printf("Could not allocate memory\n");
+			exit(-1);
+		}else table->shift	= uint32_ptr;
+		uint32_ptr	= realloc(table->max_keys, sizeof(uint32_t) * table->size);
+		if(uint32_ptr == NULL){
+			printf("Could not allocate memory\n");
+			exit(-1);
+		}else table->max_keys	= uint32_ptr;
+		uint32_t log_slot, log_value;
 		for(i = old_size; i < table->size; i++){
-			table->levels[i]		= calloc(table->fast_lists_count, sizeof(obdd_fast_node*));
+			table->slots[i]	= 8;
+			while (table->slots[i] < OBDD_TABLE_SLOTS)table->slots[i] <<= 1;
+			log_slot = 1;
+			log_value = 0;
+			while(log_slot < table->slots[i]){
+				log_slot <<= 1;
+				log_value++;
+			}
+			table->shift[i] = sizeof(uint32_t) * 8 - log_value;
+			table->max_keys[i] = table->slots[i] * OBDD_TABLE_MAX_DENSITY;
+			table->levels[i]		= calloc(table->slots[i], sizeof(obdd_node*));
 			table->levels_composite_counts[i]	= 0;
-			table->levels_counts[i]	= calloc(table->fast_lists_count, sizeof(uint64_t));
 		}
 	}
 	//pick entry level
-	uint32_t initial_level = table->fast_lists_count - 1;
-	table->rand_uses++;
-	uint64_t rand_value	= table->rand_uses;
-	for(i = 0; i < (table->fast_lists_count - 1); i++){
-		rand_value = ((uint32_t)rand_value >> 1) | (rand_value << 63);
-		if((rand_value & 0x1) == 0x1)break;
-		//if(rand() > (RAND_MAX / 2))break;
-		initial_level--;
-	}
-	uint32_t last_added = 0;
-	for(i = initial_level; i < table->fast_lists_count;i++){
-		if(table->levels[node->var_ID][i] == NULL){
-#if OBDD_USE_POOL
-			current_fast_node		= automaton_fast_pool_get_instance(table->mgr->fast_nodes_pool,
-					&fragment_ID);//malloc(sizeof(obdd));
-			current_fast_node->fragment_ID	= fragment_ID;
-#else
-			current_fast_node = calloc(1, sizeof(obdd_fast_node));
-#endif
-			table->live_fast_nodes++;
-			if(table->live_fast_nodes > table->max_live_fast_nodes)table->max_live_fast_nodes = table->live_fast_nodes;
-			table->levels_composite_counts[node->var_ID]++;
-			table->levels_counts[node->var_ID][i]++;
-			current_fast_node->high = node->high_obdd;
-			current_fast_node->low = node->low_obdd;
-			current_fast_node->data	= node;
-			current_fast_node->next	= NULL;
-			if(coarser_fast_node != NULL)coarser_fast_node->finer = current_fast_node;
-			table->levels[node->var_ID][i] = current_fast_node;
-			coarser_fast_node = current_fast_node;
-			last_added = i;
-		}else{
-			current_fast_node	= table->levels[node->var_ID][i];
-			previous_fast_node	= NULL;
-			while(current_fast_node != NULL){
-				if((current_fast_node->next != NULL) &&
-						((current_fast_node->low < node->low_obdd)
-						|| ((current_fast_node->low == node->low_obdd) && (current_fast_node->high < node->high_obdd)))){
-					previous_fast_node	= current_fast_node;
-					current_fast_node	= current_fast_node->next;
+	uint32_t pos	= ddHash(node->high_obdd, node->low_obdd, table->shift[node->var_ID]);
+
+	if(table->levels[node->var_ID][pos] == NULL){
+		table->live_fast_nodes++;
+		if(table->live_fast_nodes > table->max_live_fast_nodes)table->max_live_fast_nodes = table->live_fast_nodes;
+		table->levels_composite_counts[node->var_ID]++;
+		node->next	= NULL;
+		table->levels[node->var_ID][pos] = node;
+	}else{
+		current_fast_node	= table->levels[node->var_ID][pos];
+		previous_fast_node	= NULL;
+		while(current_fast_node != NULL){
+			if((current_fast_node->next != NULL) &&
+					((current_fast_node->low_obdd < node->low_obdd)
+					|| ((current_fast_node->low_obdd == node->low_obdd) && (current_fast_node->high_obdd < node->high_obdd)))){
+				previous_fast_node	= current_fast_node;
+				current_fast_node	= current_fast_node->next;
+			}else{
+				table->live_fast_nodes++;
+				if(table->live_fast_nodes > table->max_live_fast_nodes)table->max_live_fast_nodes = table->live_fast_nodes;
+				table->levels_composite_counts[node->var_ID]++;
+				//current_fast_node = node;
+				node->next	= current_fast_node;
+				if(previous_fast_node != NULL){
+					previous_fast_node->next	= node;
 				}else{
-#if OBDD_USE_POOL
-					new_fast_node		= automaton_fast_pool_get_instance(table->mgr->fast_nodes_pool,
-					&fragment_ID);//malloc(sizeof(obdd));
-					new_fast_node->fragment_ID	= fragment_ID;
-#else
-					new_fast_node = calloc(1, sizeof(obdd_fast_node));
-#endif
-					table->live_fast_nodes++;
-					if(table->live_fast_nodes > table->max_live_fast_nodes)table->max_live_fast_nodes = table->live_fast_nodes;
-					table->levels_composite_counts[node->var_ID]++;
-					table->levels_counts[node->var_ID][i]++;
-					current_fast_node->high = node->high_obdd;
-					current_fast_node->low 	= node->low_obdd;
-					current_fast_node->data = node;
-					new_fast_node->next	= current_fast_node;
-					if(previous_fast_node != NULL){
-						previous_fast_node->next	= new_fast_node;
-					}else{
-						table->levels[node->var_ID][i] = new_fast_node;
-					}
-					if(coarser_fast_node != NULL)coarser_fast_node->finer = new_fast_node;
-					current_fast_node	= new_fast_node;
-					coarser_fast_node = current_fast_node;
-					last_added = i;
-					break;
+					table->levels[node->var_ID][pos] = node;
 				}
+				current_fast_node	= node;
+				break;
 			}
 		}
+	}
+	if(table->levels_composite_counts[node->var_ID] > table->max_keys[node->var_ID]){
+		obdd_table_resize(table, node->var_ID);
 	}
 }
 
 void obdd_table_node_destroy(obdd_table* table, obdd_node *node){
-	obdd_fast_node *current_fast_node = NULL, *last_fast_node = NULL, *to_remove = NULL;
+	obdd_node *current_fast_node = NULL, *last_fast_node = NULL, *to_remove = NULL;
+	uint32_t pos	= ddHash(node->high_obdd, node->low_obdd, table->shift[node->var_ID]);
+	if(node->var_ID >= (table->size))return;
+	if(table->levels[node->var_ID][pos] == NULL)return;
+
 	uint32_t current_level	= 0;
 	bool found = false;
-	while(current_fast_node == NULL && current_level < table->fast_lists_count)
-		current_fast_node		= table->levels[node->var_ID][current_level++];
-	current_level--;
+	current_fast_node = table->levels[node->var_ID][pos];
 	while(current_fast_node != NULL){
-		if(current_level >= table->fast_lists_count)break;
-		if((current_fast_node->low < node->low_obdd) || ((current_fast_node->low == node->low_obdd) && (current_fast_node->high < node->high_obdd))){
+		if((current_fast_node->low_obdd < node->low_obdd) || ((current_fast_node->low_obdd == node->low_obdd) && (current_fast_node->high_obdd < node->high_obdd))){
 			last_fast_node	= current_fast_node;
-			if(current_fast_node->next != NULL)
+			if(current_fast_node->next != NULL){
 				current_fast_node	= current_fast_node->next;
-			else if(current_level < (table->fast_lists_count-1)){
-				current_fast_node		= table->levels[node->var_ID][++current_level];
-				last_fast_node = NULL;
 			}else{
 				break;
 			}
-		}else if((current_fast_node->low == node->low_obdd) && (current_fast_node->high == node->high_obdd)){
+		}else if((current_fast_node->low_obdd == node->low_obdd) && (current_fast_node->high_obdd == node->high_obdd)){
 			to_remove	= current_fast_node;
 			if(last_fast_node!= NULL){
 				last_fast_node->next	= current_fast_node->next;
-				current_fast_node	= last_fast_node->finer;
 			}
 			else{
-				table->levels[node->var_ID][current_level]	= current_fast_node->next;
-				if(current_level < (table->fast_lists_count - 1))
-					current_fast_node	= table->levels[node->var_ID][current_level+1];
-				else current_fast_node	= NULL;
+				table->levels[node->var_ID][pos]	= current_fast_node->next;
 			}
 			last_fast_node	= NULL;
-#if OBDD_USE_POOL
-			automaton_fast_pool_release_instance(table->mgr->fast_nodes_pool, to_remove->fragment_ID);
-#else
-			free(to_remove);
-#endif
 			table->live_fast_nodes--;
 			table->levels_composite_counts[node->var_ID]--;
-			table->levels_counts[node->var_ID][current_level]--;
 			current_level++;
 			found = true;
-		}else if(current_level < table->fast_lists_count - 1){//not found on this level
-			last_fast_node	= NULL;
-			current_level++;
+			break;
 		}else{
 			break;
 		}
@@ -537,40 +574,23 @@ void obdd_table_node_destroy(obdd_table* table, obdd_node *node){
 	if(found)node->ref_count--;
 }
 
-obdd_fast_node* obdd_table_search_node_ID(obdd_table* table, obdd_var_size_t var_ID, obdd_node* high, obdd_node* low){
+obdd_node* obdd_table_search_node_ID(obdd_table* table, obdd_var_size_t var_ID, obdd_node* high, obdd_node* low){
 	uint32_t current_level	= 0;
-	obdd_fast_node *current_node	= NULL, *last_node = NULL,
+	obdd_node *current_node	= NULL, *last_node = NULL,
 			*tmp_node = NULL;
 	if(var_ID >= (table->size)){return NULL;}
-	while(current_level < table->fast_lists_count){
-		current_node	= table->levels[var_ID][current_level];
-		if(current_node != NULL)break;
-		else current_level++;
-	}
+	uint32_t pos	= ddHash(high, low, table->shift[var_ID]);
 
+	current_node = table->levels[var_ID][pos];
 	while(current_node != NULL){
-		if((current_node->low < low) ||
-				((current_node->low == low) &&
-						(current_node->high < high))){
+		if((current_node->low_obdd < low) ||
+				((current_node->low_obdd == low) &&
+						(current_node->high_obdd < high))){
 			last_node	= current_node;
-			if(current_node->next == NULL){
-				current_node	= current_node->finer;
-				current_level++;
-			}
-			else current_node	= current_node->next;
-		}else if((current_node->low == low) && (current_node->high == high)){
+			current_node	= current_node->next;
+		}else if((current_node->low_obdd == low) && (current_node->high_obdd == high)){
 			table->fast_hits++;
 			return current_node;
-		}else if(current_level < table->fast_lists_count - 1){
-			if(last_node != NULL){
-				last_node	= last_node->finer;
-				current_node = last_node->next;
-			}else{
-				tmp_node	= current_node;
-				current_node = current_node->finer;
-				last_node	= tmp_node;
-			}
-			current_level++;
 		}else{
 			break;
 		}
@@ -597,11 +617,11 @@ obdd_node* obdd_table_mk_node_ID(obdd_table* table, obdd_var_size_t var_ID, obdd
 	}
 	//check if node exists
 	obdd_node *current_node = NULL, *last_node = NULL;
-	obdd_fast_node *current_fast_node = NULL, *last_fast_node = NULL, *new_fast_node = NULL;
+	obdd_node *current_fast_node = NULL, *last_fast_node = NULL, *new_fast_node = NULL;
 	current_fast_node	= obdd_table_search_node_ID(table, var_ID, high, low);
 	if(current_fast_node != NULL){
-		current_fast_node->data->ref_count++;
-		return current_fast_node->data;
+		current_fast_node->ref_count++;
+		return current_fast_node;
 	}
 	//return new node
 #if OBDD_USE_POOL
@@ -628,44 +648,42 @@ obdd_node* obdd_table_mk_node_ID(obdd_table* table, obdd_var_size_t var_ID, obdd
 }
 void obdd_table_destroy(obdd_table *table){
 	uint32_t i,j;
-	obdd_fast_node *current_fast_node;
+	obdd_node *current_fast_node, *next_fast_node;
 	for(i = 0; i < table->size; i++){
-		for(j = 0; j < table->fast_lists_count;j++){
+		for(j = 0; j < table->slots[i];j++){
 			current_fast_node	= table->levels[i][j];
 			while(current_fast_node != NULL){
-				if(j == table->fast_lists_count -1){
-					current_fast_node->data->ref_count--;
-					if(current_fast_node->data->ref_count == 0)
-						obdd_node_destroy(table->mgr, current_fast_node->data);
-				}
-				current_fast_node = current_fast_node->next;
+				next_fast_node = current_fast_node->next;
+				current_fast_node->ref_count--;
+				if(current_fast_node->ref_count == 0)
+					obdd_node_destroy(table->mgr, current_fast_node);
+				current_fast_node	= next_fast_node;
 			}
 		}
 	}
 	for(i = 0; i < table->size; i++){
 		free(table->levels[i]);
-		free(table->levels_counts[i]);
 	}
 	free(table->levels_composite_counts);
-	free(table->levels_counts);
+	free(table->slots);
+	free(table->shift);
+	free(table->max_keys);
 	free(table->levels);
 	free(table);
 }
 
 void obdd_table_print_fast_lists(obdd_table* table){
-	printf("Obdd chace table fast lists, nodes reported as [curr[19:4]:next[19:4]:finer[19:4]]\n");
+	printf("Obdd chace table fast lists, nodes reported as [curr[19:4]:next[19:4]]\n");
 	uint32_t i,j;
-	obdd_fast_node *current_fast_node;
+	obdd_node *current_fast_node;
 	for(i = 0; i < table->mgr->vars_dict->size; i++){
 		printf("\tList for var %s\n", table->mgr->vars_dict->entries[i].key);
-		for(j = 0; j < table->fast_lists_count; j++){
+		for(j = 0; j < table->slots[i]; j++){
 			if(table->levels[i][j] == NULL)continue;
-			printf("\t\tLevel %d (%d):", j, table->levels_counts[i][j]);
 			current_fast_node = table->levels[i][j];
 			while(current_fast_node != NULL){
-				printf("[0x%x:0x%x:0x%x]", (((uint64_t)current_fast_node) >> 4) % 0xFFFF,
-						(((uint64_t)current_fast_node->next) >> 4) % 0xFFFF,
-						(((uint64_t)current_fast_node->finer) >> 4) % 0xFFFF);
+				printf("[0x%x:0x%x]", (((uint64_t)current_fast_node) >> 4) % 0xFFFF,
+						(((uint64_t)current_fast_node->next) >> 4) % 0xFFFF);
 				current_fast_node	= current_fast_node->next;
 			}
 			printf("\n");

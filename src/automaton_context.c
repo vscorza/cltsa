@@ -3117,16 +3117,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 			x_y_alphabet, x_y_x_p_alphabet, x_y_order, signals_count, hashed_valuation, adjusted_valuation, x_y_hash_table,
 			x_y_x_p_hash_table, obdd_on_signals_indexes, obdd_off_signals_indexes);
 #if VERBOSE || DEBUG_LTL_AUTOMATON
-	printf("[OBDD TABLE]live nodes:%d\t max live nodes:%d\t hits:%d\t misses:%d]\n",
-			mgr->table->live_fast_nodes, mgr->table->max_live_fast_nodes, mgr->table->fast_hits,
-			mgr->table->fast_misses);
-	for(i = 0; i < mgr->vars_dict->size; i++){
-		printf("\t nodes for %s: \t %d\n", mgr->vars_dict->entries[i].key,
-				mgr->table->levels_composite_counts[i]);
-		for(j = 0; j < mgr->table->fast_lists_count; j++)
-			printf("\t\t Level %d:%d\n", j,
-					mgr->table->levels_counts[i][j]);
-	}
+	//TODO:print cache table info
 #endif
 /*
 	uint32_t deadlocks = 0;
