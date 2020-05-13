@@ -38,7 +38,6 @@ typedef uint32_t obdd_ref_count_size_t;
 #define DD_P2			4256249
 #define DD_P3			741457
 #define DD_P4			1618033999
-#define DD_MAX_CACHE_TO_SLOTS_RATIO 4
 
 #if SIZEOF_VOID_P == 8 && SIZEOF_INT == 4
 #define ddHash(f,g,s) \

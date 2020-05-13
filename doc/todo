@@ -1,7 +1,14 @@
 TODO:
 =====
-- change fast list into hash tables
-	-resize
+- change key tree with hash table
+	- write hash1
+	- write hash2
+	- write structs 
+		- order size and log_2 computation
+		- check available bits
+		- hash table
+		- node 
+	- insert
 - computar tiempo y agregar columna de C || E'
 - armar scatterplot
 - de efectividad hacer alguna mención a la implementación y la linealidad, comparar con ejemplos comparables
