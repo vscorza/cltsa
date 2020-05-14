@@ -173,6 +173,9 @@ uint32_t automaton_composite_hash_table_get_state(automaton_composite_hash_table
 	}
 	compound_key <<= table->order_bits;
 	compound_key |= table->previous_order_key;
+
+	//check if node exists
+
 #if CT_USE_POOL
 	uint32_t fragment_ID;
 	automaton_composite_hash_table_entry* new_entry	= automaton_fast_pool_get_instance(table->entries_pool, &fragment_ID);
