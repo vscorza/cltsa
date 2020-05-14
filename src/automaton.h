@@ -18,10 +18,8 @@
 #include "dictionary.h"
 #include "obdd.h"
 #include "bool_array_hash_table.h"
+#include "automaton_composite_hash_table.h"
 #include "y.tab.h"
-
-#define max(a,b) ({ __typeof__ (a) _a = (a); __typeof__ (b) _b = (b); _a > _b ? _a : _b; })
-#define min(a,b) ({ __typeof__ (a) _a = (a); __typeof__ (b) _b = (b); _a < _b ? _a : _b; })
 
 #define VERBOSE 1
 
@@ -89,9 +87,6 @@
 typedef uint8_t signal_t;
 typedef uint8_t fluent_count_t;
 typedef uint16_t signal_bit_array_t;
-
-typedef __int128 int128_t;
-typedef unsigned __int128 uint128_t;
 
 #define TRANSITION_ENTRY_SIZE 16
 #define FIXED_SIGNALS_COUNT	6//4

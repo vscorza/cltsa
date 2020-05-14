@@ -18,6 +18,12 @@
 #define LIST_INITIAL_SIZE		32
 #define LIST_INCREASE_FACTOR	2
 
+typedef __int128 int128_t;
+typedef unsigned __int128 uint128_t;
+
+#define max(a,b) ({ __typeof__ (a) _a = (a); __typeof__ (b) _b = (b); _a > _b ? _a : _b; })
+#define min(a,b) ({ __typeof__ (a) _a = (a); __typeof__ (b) _b = (b); _a < _b ? _a : _b; })
+
 #define TRUE_VAR			"1"
 #define FALSE_VAR			"0"
 

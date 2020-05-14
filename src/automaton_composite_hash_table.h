@@ -8,8 +8,8 @@
 #ifndef AUTOMATON_COMPOSITE_HASH_TABLE_H_
 #define AUTOMATON_COMPOSITE_HASH_TABLE_H_
 
-#include "automaton.h"
 #include "automaton_utils.h"
+#include "fast_pool.h"
 
 #define COMPOSITE_TABLE_SLOTS		256
 #define COMPOSITE_TABLE_MAX_DENSITY	4
@@ -40,6 +40,7 @@ typedef struct automaton_composite_hash_table_str{
 	uint32_t composite_count;
 	uint32_t max_keys;
 	automaton_composite_hash_table_entry **levels;
+	uint32_t max_state;
 	uint32_t *previous_order;//assume orders are mostly preserved between calls
 	uint32_t previous_order_key;
 #if CT_USE_POOL
@@ -48,7 +49,7 @@ typedef struct automaton_composite_hash_table_str{
 }automaton_composite_hash_table;
 
 automaton_composite_hash_table *automaton_composite_hash_table_create(uint32_t automata_count, uint32_t *automata_state_count);
-void automaton_composite_hash_table_resize(automaton_composite_hash_table* table){
+void automaton_composite_hash_table_resize(automaton_composite_hash_table* table);
 uint32_t automaton_composite_hash_table_get_state(automaton_composite_hash_table *table, uint32_t *composite_states);
 void automaton_composite_hash_table_destroy(automaton_composite_hash_table *table);
 #endif /* AUTOMATON_COMPOSITE_HASH_TABLE_H_ */

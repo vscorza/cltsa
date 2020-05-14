@@ -1129,6 +1129,66 @@ void run_bool_array_hash_table_tests(){
 	print_test_result(test_cmp, "BOOL_ARRAY_HASH", "bool array hash table");
 }
 
+#define COMPOSITE_TEST_STATE_COUNT	10
+#define COMPOSITE_TEST_AUTOMATA_COUNT	6
+void run_automaton_composite_hash_table_tests(){
+	uint32_t i,j, *current_composite_state = calloc(COMPOSITE_TEST_AUTOMATA_COUNT, sizeof(uint32_t));
+	for(i = 0; i < COMPOSITE_TEST_AUTOMATA_COUNT; i++)current_composite_state[i]	= COMPOSITE_TEST_STATE_COUNT;
+	automaton_composite_hash_table	*table	= automaton_composite_hash_table_create(COMPOSITE_TEST_AUTOMATA_COUNT,
+			current_composite_state);
+	for(i = 0; i < COMPOSITE_TEST_AUTOMATA_COUNT; i++)current_composite_state[i]	= 0;
+	uint32_t current_index = COMPOSITE_TEST_AUTOMATA_COUNT - 1;
+	uint32_t *witnesses	= calloc(COMPOSITE_TEST_STATE_COUNT, sizeof(uint32_t));
+	while(true){
+		if(current_composite_state[current_index] < COMPOSITE_TEST_STATE_COUNT - 1){
+			current_composite_state[current_index]++;
+		}else if(current_index == 0)
+			break;
+		else{
+			bool incremented = false;
+			current_index--;
+			do{
+				if(current_composite_state[current_index] < COMPOSITE_TEST_STATE_COUNT - 1){
+					current_composite_state[current_index]++;
+					incremented	= true;
+					break;
+				}else{
+					if(current_index == 0){
+						break;
+					}
+					current_composite_state[current_index] = 0;
+					current_index--;
+				}
+			}while(true);
+			current_index = COMPOSITE_TEST_AUTOMATA_COUNT - 1;
+			if(!incremented)break;
+		}
+		uint32_t current_state	= automaton_composite_hash_table_get_state(table, current_composite_state);
+		if(current_state % 1000000 == 0)printf("pip\n");
+		bool all_equal = true;
+		for(i = 1; i < COMPOSITE_TEST_AUTOMATA_COUNT; i++){
+			if(current_composite_state[i] != current_composite_state[0]){all_equal = false; break;}
+		}
+		if(all_equal)
+			witnesses[current_composite_state[0]]	= current_state;
+	}
+	bool tests_passed = true;
+	for(i = 0; i < COMPOSITE_TEST_STATE_COUNT; i++){
+		for(j = 0; j < COMPOSITE_TEST_AUTOMATA_COUNT; j++){
+			current_composite_state[j] = i;
+		}
+		if(witnesses[i] != automaton_composite_hash_table_get_state(table, current_composite_state)){
+			tests_passed	= false;
+			break;
+		}
+	}
+	print_test_result(tests_passed, "COMPOSITE_HASH_TABLE", "composite states hash table");
+	automaton_composite_hash_table_destroy(table);
+
+	free(current_composite_state);
+	free(witnesses);
+}
+
 void run_functional_tests(){
 	//MODULE TESTING
 	run_obdd_tree_tests();
@@ -1145,6 +1205,7 @@ void run_functional_tests(){
 	run_bool_array_hash_table_tests();
 	run_obdd_cache_tests();
 	run_obdd_fast_lists_tests();
+	run_automaton_composite_hash_table_tests();
 	//DRY TESTS
 	run_parse_test("tests/composition_types.fsp", "compositions type");
 	run_parse_test("tests/biscotti.fsp", "biscotti");
@@ -1285,8 +1346,9 @@ int main (int argc, char** argv){
 
 		//run_parse_test("tests/genbuf_1_sndrs_no_automaton.fsp", "GenBuf 1 sndrs");
 		//run_parse_test("tests/genbuf_2_sndrs_no_automaton.fsp", "GenBuf 2 sndrs");
+		run_automaton_composite_hash_table_tests();
 		//run_parse_test("tests/genbuf_3_sndrs_no_automaton.fsp", "GenBuf 3 sndrs V2");
-		run_parse_test("tests/genbuf_4_sndrs_no_automaton.fsp", "GenBuf 4 sndrs");
+		//run_parse_test("tests/genbuf_4_sndrs_no_automaton.fsp", "GenBuf 4 sndrs");
 
 		//run_parse_test("tests/genbuf_1_sndrs_simplified.fsp", "GenBuf 1 sndrs (simplified)");
 		//run_parse_test("tests/mixed_3_signals_2_labels.fsp", "mixed model 3 signals 2 labels");

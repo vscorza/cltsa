@@ -4,12 +4,13 @@ automaton_composite_hash_table *automaton_composite_hash_table_create(uint32_t a
 	automaton_composite_hash_table *hash_table	= calloc(1, sizeof(automaton_composite_hash_table));
 
 	uint32_t i;
+	hash_table->max_states	= 0;
 	hash_table->automata_count	= automata_count;
 	hash_table->slots	= 8;
 	while (hash_table->slots < COMPOSITE_TABLE_SLOTS)hash_table->slots <<= 1;
 	uint32_t log_slot = 1;
 	uint32_t log_value = 0;
-	while(log_slot < hash_table->slots[i]){
+	while(log_slot < hash_table->slots){
 		log_slot <<= 1;
 		log_value++;
 	}
@@ -43,7 +44,7 @@ automaton_composite_hash_table *automaton_composite_hash_table_create(uint32_t a
 		printf("Not enough bits in hash key to map composite states\n");
 		exit(-1);
 	}
-#if OBDD_USE_POOL
+#if CT_USE_POOL
 	hash_table->entries_pool	= automaton_fast_pool_create(sizeof(automaton_composite_hash_table_entry),
 			CT_FRAGMENTS_SIZE, CT_FRAGMENT_SIZE);
 #endif
@@ -175,7 +176,15 @@ uint32_t automaton_composite_hash_table_get_state(automaton_composite_hash_table
 	compound_key |= table->previous_order_key;
 
 	//check if node exists
-
+	automaton_composite_hash_table_entry *current_entry	= table->levels[pos], *last_entry	= NULL;
+	while(current_entry != NULL){
+		if(compound_key < current_entry->key){
+			last_entry	= current_entry;
+			current_entry	= current_entry->next;
+		}
+		else if(compound_key == current_entry->key)return current_entry->state;
+		else break;
+	}
 #if CT_USE_POOL
 	uint32_t fragment_ID;
 	automaton_composite_hash_table_entry* new_entry	= automaton_fast_pool_get_instance(table->entries_pool, &fragment_ID);
@@ -184,8 +193,13 @@ uint32_t automaton_composite_hash_table_get_state(automaton_composite_hash_table
 	automaton_composite_hash_table_entry* new_entry	= calloc(1, sizeof(automaton_composite_hash_table_entry));
 #endif
 	new_entry->original_key	= original_key;
+	new_entry->state	= table->max_state++;
+	table->composite_count++;
 
-	return 0;
+	if(last_entry != NULL)last_entry->next	= new_entry;
+	else table->levels[pos]	= new_entry;
+
+	return new_entry->state;
 }
 
 void automaton_composite_hash_table_destroy(automaton_composite_hash_table *table){
@@ -201,10 +215,13 @@ void automaton_composite_hash_table_destroy(automaton_composite_hash_table *tabl
 #else
 			free(next_entry);
 #endif
-			next_entry->next	= NULL;
+			//next_entry->next	= NULL;
 			current_entry	= next_entry;
 		}
 	}
+#if CT_USE_POOL
+	automaton_fast_pool_destroy(table->entries_pool);
+#endif
 	if(table->previous_order != NULL){
 		free(table->previous_order);
 	}
