@@ -1129,8 +1129,8 @@ void run_bool_array_hash_table_tests(){
 	print_test_result(test_cmp, "BOOL_ARRAY_HASH", "bool array hash table");
 }
 
-#define COMPOSITE_TEST_STATE_COUNT	10
-#define COMPOSITE_TEST_AUTOMATA_COUNT	5
+#define COMPOSITE_TEST_STATE_COUNT	100
+#define COMPOSITE_TEST_AUTOMATA_COUNT	2
 void run_automaton_composite_hash_table_tests(){
 	uint32_t i,j, *current_composite_state = calloc(COMPOSITE_TEST_AUTOMATA_COUNT, sizeof(uint32_t));
 	for(i = 0; i < COMPOSITE_TEST_AUTOMATA_COUNT; i++)current_composite_state[i]	= COMPOSITE_TEST_STATE_COUNT;

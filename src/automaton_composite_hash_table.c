@@ -53,6 +53,7 @@ automaton_composite_hash_table *automaton_composite_hash_table_create(uint32_t a
 			CT_FRAGMENTS_SIZE, CT_FRAGMENT_SIZE);
 #endif
 	hash_table->log_sizes	= calloc(automata_count, sizeof(uint32_t));
+	hash_table->order_processed	= calloc(automata_count, sizeof(bool));
 	hash_table->previous_order	= NULL;
 
 	return hash_table;
@@ -139,39 +140,43 @@ uint32_t automaton_composite_hash_table_get_state(automaton_composite_hash_table
 	for(i = 0; i < table->automata_count; i++)printf("%d ", composite_states[i]);
 #endif
 	uint32_t current_order_key, order_fact;
-	if(ordered && 0){
+	if(ordered){
 		current_order_key	= table->previous_order_key;
 	}else{
 #if DEBUG_CT
 	printf("(recomputed)");
 #endif
-		uint32_t previous_max_value = 0, max_value = 0, previous_max_order = 0, max_order = 0;
+		uint32_t max_value = 0, max_order = 0, last_value = 0xFFFFFFFF;
 		table->previous_order_key	= 0;
 		order_fact = 1;
+		for(i = 0; i < table->automata_count; i++)table->order_processed[i] = false;
 		for(j = 0; j < table->automata_count; j++){
 			order_fact *= j + 1;
 			max_order = 0;
+			max_value = 0;
+
 			for(i = 0; i < table->automata_count; i++){
+				if(table->order_processed[i])continue;
 				//review this, default order is kept to all zeroes
-				if(composite_states[i] > max_value &&
-						((composite_states[i] < previous_max_value) || (previous_max_value == 0))){
+				if(composite_states[i] >= max_value){
 					max_value = composite_states[i];
 					max_order = i;
-					table->previous_equality[i]	= false;
-				}else if(composite_states[i] == previous_max_value && i > max_order &&
-						((i < previous_max_order) || (previous_max_order == 0))){
-					max_order = i;
-					table->previous_equality[i]	= true;
 				}
 			}
-			previous_max_value = max_value;
-			previous_max_order	= max_order;
+			table->previous_equality[j]	= max_value == last_value;
+			last_value	= max_value;
+			table->order_processed[max_order]	= true;
 			table->previous_order[j]	= max_order;
 		}
-		//get index of current ordering within n!
+#if DEBUG_CT
+	printf("Order:");
+#endif		//get index of current ordering within n!
 		for(j = 0; j < table->automata_count; j++){
 			order_fact /= (table->automata_count - j);
 			table->previous_order_key += table->previous_order[j] * order_fact;
+#if DEBUG_CT
+			printf("%d %s", table->previous_order[j], j < table->automata_count -1? "<" : "\n");
+#endif
 		}
 	}
 	//compute compound key (concatenation of states plus order key)
@@ -256,6 +261,7 @@ void automaton_composite_hash_table_destroy(automaton_composite_hash_table *tabl
 		free(table->previous_equality);
 	}
 	free(table->log_sizes);
+	free(table->order_processed);
 	free(table->levels);
 	free(table);
 }

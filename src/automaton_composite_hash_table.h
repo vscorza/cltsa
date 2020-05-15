@@ -46,6 +46,7 @@ typedef struct automaton_composite_hash_table_str{
 	uint32_t *previous_order;//assume orders are mostly preserved between calls
 	uint32_t previous_order_key;
 	bool	*previous_equality;
+	bool *order_processed;
 #if CT_USE_POOL
 	automaton_fast_pool*	entries_pool;
 #endif
