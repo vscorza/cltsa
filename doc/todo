@@ -1,14 +1,8 @@
 TODO:
 =====
 - change key tree with hash table
-	- write hash1
-	- write hash2
-	- write structs 
-		- order size and log_2 computation
-		- check available bits
-		- hash table
-		- node 
-	- insert
+	- order signature is being broken by equalities, must finde something finer than order sequence
+		otherwise we can find concatenations being equal under lexicographical ordering
 - computar tiempo y agregar columna de C || E'
 - armar scatterplot
 - de efectividad hacer alguna mención a la implementación y la linealidad, comparar con ejemplos comparables

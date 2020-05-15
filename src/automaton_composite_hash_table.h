@@ -15,6 +15,8 @@
 #define COMPOSITE_TABLE_MAX_DENSITY	4
 #define CT_USE_POOL 1
 
+#define DEBUG_CT	1
+
 /* Primes for cache hash functions. */
 #define CT_P1			12582917
 #define CT_P2			4256249
@@ -40,7 +42,7 @@ typedef struct automaton_composite_hash_table_str{
 	uint32_t composite_count;
 	uint32_t max_keys;
 	automaton_composite_hash_table_entry **levels;
-	uint32_t max_state;
+	uint32_t max_value;
 	uint32_t *previous_order;//assume orders are mostly preserved between calls
 	uint32_t previous_order_key;
 #if CT_USE_POOL

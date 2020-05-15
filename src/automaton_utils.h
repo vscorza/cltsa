@@ -8,6 +8,7 @@
 #ifndef AUTOMATON_UTILS_H_
 #define AUTOMATON_UTILS_H_
 
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>

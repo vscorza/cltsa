@@ -3735,9 +3735,24 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 #endif
 
 	// create key tree,frontier bucket list, get current state transitions list harness
-
+#if USE_COMPOSITE_HASH_TABLE
+	uint32_t *sizes	= calloc(is_game?
+			automata_count + ctx->global_fluents_count :automata_count, sizeof(uint32_t));
+	for(i = 0; i < automata_count; i++){
+		sizes[i]	= automata[i]->transitions_count;
+	}
+	if(is_game){
+		for(i = automata_count; i < automata_count + ctx->global_fluents_count; i++)
+			sizes[i]	= 2;
+	}
+	automaton_composite_hash_table* tree	= automaton_composite_hash_table_create(is_game?
+			automata_count + ctx->global_fluents_count :automata_count, sizes);
+	free(sizes);
+#else
 	automaton_composite_tree* tree	= automaton_composite_tree_create(is_game?
 			automata_count + ctx->global_fluents_count :automata_count);
+#endif
+
 	automaton_bucket_list* bucket_list	= automaton_bucket_list_create(BUCKET_SIZE);
 	uint32_t max_degree_sum		= 0;	uint32_t max_signals_count	= 0;
 	uint32_t max_out_degree		= 0;
@@ -4222,7 +4237,11 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 	free(current_label);free(frontier);free(composite_frontier);free(current_state);free(current_to_state);
 	free(idxs);free(idxs_size);free(label_accum);free(idxs_skip);free(automata_accum);
 	free(alphabet);
+#if USE_COMPOSITE_HASH_TABLE
+	automaton_composite_hash_table_destroy(tree);
+#else
 	automaton_composite_tree_destroy(tree);
+#endif
 	automaton_bucket_destroy(bucket_list);
 
 	return composition;
