@@ -233,6 +233,10 @@ uint32_t automaton_composite_hash_table_get_state(automaton_composite_hash_table
 	if(last_entry != NULL)last_entry->next	= new_entry;
 	else table->levels[pos]	= new_entry;
 
+	if(table->composite_count > table->max_keys){
+		automaton_composite_hash_table_resize(table);
+	}
+
 	return new_entry->state;
 }
 

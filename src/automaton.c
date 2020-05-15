@@ -3799,7 +3799,12 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 		for(i = 0; i < ctx->global_fluents_count; i++)
 			frontier[automata_count + i]	= ctx->global_fluents[i].initial_valuation? 1 : 0;
 	}
+#if USE_COMPOSITE_HASH_TABLE
+	uint32_t composite_initial_state	= automaton_composite_hash_table_get_state(tree, frontier);
+#else
 	uint32_t composite_initial_state	= automaton_composite_tree_get_key(tree, frontier);
+#endif
+
 	composite_frontier[0]			= composite_initial_state;
 	automaton_bucket_add_entry(bucket_list, composite_initial_state);
 	automaton_automaton_add_initial_state(composition, composite_initial_state);
@@ -4103,7 +4108,11 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 						}
 					}
 				}
+#if USE_COMPOSITE_HASH_TABLE
+				uint32_t composite_to			= automaton_composite_hash_table_get_state(tree, current_to_state);
+#else
 				uint32_t composite_to			= automaton_composite_tree_get_key(tree, current_to_state);
+#endif
 				automaton_transition *current_transition	= automaton_transition_create(from_state, composite_to);
 				for(k = 0; k < FIXED_SIGNALS_COUNT; k++){
 					current_transition->signals[k] = label_accum[k];

@@ -1129,7 +1129,7 @@ void run_bool_array_hash_table_tests(){
 	print_test_result(test_cmp, "BOOL_ARRAY_HASH", "bool array hash table");
 }
 
-#define COMPOSITE_TEST_STATE_COUNT	100
+#define COMPOSITE_TEST_STATE_COUNT	1000
 #define COMPOSITE_TEST_AUTOMATA_COUNT	2
 void run_automaton_composite_hash_table_tests(){
 	uint32_t i,j, *current_composite_state = calloc(COMPOSITE_TEST_AUTOMATA_COUNT, sizeof(uint32_t));
@@ -1357,7 +1357,7 @@ int main (int argc, char** argv){
 		//run_parse_test("tests/genbuf_1_sndrs_no_automaton.fsp", "GenBuf 1 sndrs");
 		//run_parse_test("tests/genbuf_2_sndrs_no_automaton.fsp", "GenBuf 2 sndrs");
 		//run_parse_test("tests/genbuf_3_sndrs_no_automaton.fsp", "GenBuf 3 sndrs V2");
-		//run_parse_test("tests/genbuf_4_sndrs_no_automaton.fsp", "GenBuf 4 sndrs");
+		run_parse_test("tests/genbuf_4_sndrs_no_automaton.fsp", "GenBuf 4 sndrs");
 
 		//run_parse_test("tests/genbuf_1_sndrs_simplified.fsp", "GenBuf 1 sndrs (simplified)");
 		//run_parse_test("tests/mixed_3_signals_2_labels.fsp", "mixed model 3 signals 2 labels");
@@ -1367,7 +1367,7 @@ int main (int argc, char** argv){
 		//run_functional_tests();
 
 		//run_parse_test("tests/current_sut.fsp", "current_SUT");
-		run_automaton_composite_hash_table_tests();
+		//run_automaton_composite_hash_table_tests();
 		//run_parse_test("tests/genbuf_2_sndrs_no_automaton.fsp", "GenBuf 2 sndrs");
 		//TODO
 
