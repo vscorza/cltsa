@@ -15,6 +15,7 @@ TODO:
 		- test functionality
 	- run tests
 	- generate report
+	- write missing test cases
 	- generate table
 	- generate plots
 		- minimization (original size x minimization %) (general, by type of fault)
