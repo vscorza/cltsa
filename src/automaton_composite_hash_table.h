@@ -12,7 +12,7 @@
 #include "fast_pool.h"
 
 #define COMPOSITE_TABLE_SLOTS		256
-#define COMPOSITE_TABLE_MAX_DENSITY	4
+#define COMPOSITE_TABLE_MAX_DENSITY	5
 #define CT_USE_POOL 1
 
 #define DEBUG_CT	0

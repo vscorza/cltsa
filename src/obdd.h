@@ -26,7 +26,7 @@
 #define OBDD_USE_POOL			1
 #define OBDD_MERGE_NODES		1
 #define OBDD_TABLE_SLOTS		256
-#define OBDD_TABLE_MAX_DENSITY	4
+#define OBDD_TABLE_MAX_DENSITY	5
 
 typedef uintptr_t ptruint;
 
@@ -162,6 +162,7 @@ typedef struct obdd_table_t{
 	uint32_t *slots;
 	uint32_t *shift;
 	uint32_t *max_keys;
+	uint32_t *min_keys;
 	obdd_node ***levels;
 	uint64_t *levels_composite_counts;
 	uint64_t max_live_fast_nodes;

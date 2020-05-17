@@ -1,14 +1,32 @@
 TODO:
 =====
-- change key tree with hash table
-	- order signature is being broken by equalities, must finde something finer than order sequence
-		otherwise we can find concatenations being equal under lexicographical ordering
+- build test data
+	- design values
+		- times (model build, composition, synthesis x each step)
+		- alphabet size, guarantees assumptions size, original states/(controllable)transitions, minimization states/(controllable)transitions x each step
+		- C || E' size
+	- report values
+		- extend automaton_automata_context_create_from_syntax with reporting (file destination, controller against E'  and writing)
+			- file destination
+			- controller || E' (provide controllable fsp, retrieve controller, compose against E', report size and resulting structure)
+			- write selected values
+		- extend run_parse_test_local
+		- add run_tests parameter to cltsa with list of tests
+		- test functionality
+	- run tests
+	- generate report
+	- generate table
+	- generate plots
+		- minimization (original size x minimization %) (general, by type of fault)
+		- controllable % x minimization %
+		
 - computar tiempo y agregar columna de C || E'
-- armar scatterplot
+- profile genbuf 2
+- write amba version
+- run tests for genbuf 5, 6
 - de efectividad hacer alguna mención a la implementación y la linealidad, comparar con ejemplos comparables
 - explicar ejemplos nuevos
 - armar ejemplo que compare nuestra tecnica con konighoefer y maoz
-- revisar minimization dd, en los casos de functional tests deja trans. que no van
 - revisar diag. de genbuf_1_no_automaton con Ass. G_True
 - next deliverable
 	- review konighoefer numbers
@@ -22,10 +40,6 @@ TODO:
 	- review relation between minimization, original plant and controller either on structure or syntax
 	- reason about general diagnosis 
 	- diagnose mutation over small parameters, produce hypothesis, scale both hypothesis and parameter to see if it holds
-- run hardware cases
-	- behavior minimization based diagnosis over CLTS
-	- run genbuf 2, 4, 6 clients
-	- run amba 2, 4 clients (simplify as needed)
 - explore controllable simplification
 	- hide queue in genbuf (hide signals, tau reduction)
 	- review konighoefer work
