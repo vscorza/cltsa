@@ -147,4 +147,5 @@ void automaton_add_transitions_from_valuations(obdd_mgr* mgr, obdd* root, automa
 		automaton_bool_array_hash_table* x_y_x_p_hash_table, uint32_t* obdd_on_signals_indexes, uint32_t* obdd_off_signals_indexes);
 automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_context* ctx, char* name, obdd** env_theta_obdd, uint32_t env_theta_count, obdd** sys_theta_obdd, uint32_t sys_theta_count
 		, obdd** env_rho_obdd, uint32_t env_rho_count, obdd** sys_rho_obdd, uint32_t sys_rho_count, automaton_parsing_tables* tables);
+
 #endif /* AUTOMATON_CONTEXT_H_ */

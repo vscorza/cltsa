@@ -1,5 +1,15 @@
 TODO:
 =====
+- importer
+	- test individual functions
+		- load int
+		- load string
+		- load int array
+		- load bool
+		- load bool array array
+		- load ctx
+	- test general
+	- test automaton
 - build test data
 	X design values
 		X times (model build, composition, synthesis x each step)

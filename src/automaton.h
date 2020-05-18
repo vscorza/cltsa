@@ -329,6 +329,9 @@ void automaton_ranking_transition_serialize_report(FILE *f, automaton_transition
 bool automaton_ranking_print_report(automaton_automaton *automaton,
 		automaton_concrete_bucket_list** ranking_list, uint32_t* max_delta, uint32_t guarantee_count,
 		char **guarantees);
+/** AUTOMATON IMPORTER **/
+char *automaton_automaton_load_string(FILE f, char *finalizers, uint32_t finalizers_count);
+automaton_automaton *automaton_automaton_load_report(automaton_automata_context *ctx, char *filename);
 /** INDEXES VALUATION **/
 bool automaton_indexes_valuation_has_range(automaton_indexes_valuation* valuation, automaton_range* range);
 bool automaton_indexes_valuation_add_range(automaton_indexes_valuation* valuation, automaton_range* range);

@@ -3223,8 +3223,6 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 		}
 	}
 
-	//import automata
-	//TODO:import automata
 	//get ltl rules
 	uint32_t ltl_automata_count = 0;
 	char** ltl_automata_names	= NULL;
@@ -3364,6 +3362,14 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 	printf("\nBuilding LTS automata\n");
 	fflush(stdout);
 #endif
+
+	//import automata
+	//TODO:import automata
+	for(i = 0; i < program->count; i++)
+		if(program->statements[i]->type == IMPORT_AUT){
+
+		}
+
 	//build automata
 	bool pending_statements	= true;
 	while(pending_statements){
