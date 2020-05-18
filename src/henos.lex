@@ -214,6 +214,24 @@ in				{
 					yylval.text=p;
 					return(t_IFF);
 				}
+\<\<			{
+					p=(char *)calloc(strlen(yytext)+1,sizeof(char));
+					strcpy(p,yytext);
+					#if DEBUG_LEX
+					printf("[keyword: <%s>]", yytext);
+					#endif
+					yylval.text=p;
+					return(t_IMPORT);
+				}
+\>\>			{
+					p=(char *)calloc(strlen(yytext)+1,sizeof(char));
+					strcpy(p,yytext);
+					#if DEBUG_LEX
+					printf("[keyword: <%s>]", yytext);
+					#endif
+					yylval.text=p;
+					return(t_EXPORT);
+				}				
 &&				{
 					p=(char *)calloc(strlen(yytext)+1,sizeof(char));
 					strcpy(p,yytext);

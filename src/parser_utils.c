@@ -375,7 +375,7 @@ automaton_program_syntax* automaton_program_syntax_add_statement(automaton_progr
 automaton_statement_syntax* automaton_statement_syntax_create(automaton_statement_type_syntax type, automaton_composition_syntax* composition_def,
 		automaton_expression_syntax* range_def, automaton_expression_syntax* const_def, automaton_fluent_syntax* fluent_def,
 		automaton_set_def_syntax* set_def, automaton_gr1_game_syntax* gr1_game_def, ltl_rule_syntax* ltl_rule, ltl_fluent_syntax* ltl_fluent,
-		automaton_equivalence_check_syntax* equivalence_check){
+		automaton_equivalence_check_syntax* equivalence_check, automaton_import_syntax* import_syntax){
 	automaton_statement_syntax* statement	= malloc(sizeof(automaton_statement_syntax));
 	statement->type	= type;
 	statement->composition_def	= composition_def;
@@ -387,6 +387,7 @@ automaton_statement_syntax* automaton_statement_syntax_create(automaton_statemen
 	statement->ltl_rule_def		= ltl_rule;
 	statement->ltl_fluent_def	= ltl_fluent;
 	statement->equivalence_check	= equivalence_check;
+	statement->import_def		= import_syntax;
 	return statement;
 }
 
@@ -407,6 +408,13 @@ ltl_fluent_syntax* automaton_ltl_fluent_syntax_create(char* name, obdd* obdd){
 	return ltl_fluent;
 }
 
+automaton_import_syntax *automaton_import_syntax_create(char *name, char *filename){
+	automaton_import_syntax *import_syntax	= malloc(sizeof(automaton_import_syntax));
+	aut_dupstr(&(import_syntax->name),name);
+	aut_dupstr(&(import_syntax->filename),filename);
+	return import_syntax;
+}
+
 void automaton_program_syntax_destroy(automaton_program_syntax* program){
 	uint32_t i;
 	for(i = 0; i < program->count; i++)	automaton_statement_syntax_destroy(program->statements[i]);
@@ -415,7 +423,9 @@ void automaton_program_syntax_destroy(automaton_program_syntax* program){
 }
 void automaton_statement_syntax_destroy(automaton_statement_syntax* statement){
 	switch (statement->type){
-	case IMPORT_AUT: break;
+	case IMPORT_AUT:
+	case EXPORT_AUT:
+		automaton_import_syntax_destroy(statement->import_def);break;
 	case MENU_AUT: break;
 	case CONST_AUT: automaton_expression_syntax_destroy(statement->const_def);break;
 	case RANGE_AUT: automaton_expression_syntax_destroy(statement->range_def);break;
@@ -658,4 +668,10 @@ void ltl_fluent_syntax_destroy(ltl_fluent_syntax* ltl_fluent){
 	if(ltl_fluent->name != NULL)free(ltl_fluent->name);
 	obdd_destroy(ltl_fluent->obdd);
 	free(ltl_fluent);
+}
+
+void automaton_import_syntax_destroy(automaton_import_syntax *import_syntax){
+	if(import_syntax->name != NULL)free(import_syntax->name);
+	if(import_syntax->filename != NULL)free(import_syntax->filename);
+	free(import_syntax);
 }

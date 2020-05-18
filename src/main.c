@@ -57,7 +57,8 @@ void print_test_result(bool passed, char* name, char* description){
 	fflush(stdout);
 }
 
-void run_parse_test_local(char* test_file, char* test_name, char* result_name){
+void run_parse_test_local(char* test_file, char* test_name, char* result_name,
+		diagnosis_search_method diagnosis_method){
 	FILE *fd;
     if (!(yyin = fopen(test_file, "r")))
     {
@@ -73,7 +74,7 @@ void run_parse_test_local(char* test_file, char* test_name, char* result_name){
 
 	bool PRINT_FSP				= true;
 
-	automaton_automata_context* ctx		= automaton_automata_context_create_from_syntax(parsed_program, result_name, PRINT_FSP);
+	automaton_automata_context* ctx		= automaton_automata_context_create_from_syntax(parsed_program, result_name, diagnosis_method);
     automaton_automata_context_destroy(ctx);
     automaton_program_syntax_destroy(parsed_program);
     fclose(yyin);
@@ -82,7 +83,13 @@ void run_parse_test_local(char* test_file, char* test_name, char* result_name){
 void run_parse_test(char* test_file, char* test_name){
 	char buf[255];
 	snprintf(buf, sizeof(buf),"results/%s", test_name);
-	run_parse_test_local(test_file, test_name, buf);
+	run_parse_test_local(test_file, test_name, buf, 0);
+}
+
+void run_diagnosis(char* test_file, char* test_name){
+	char buf[255];
+	snprintf(buf, sizeof(buf),"results/%s", test_name);
+	run_parse_test_local(test_file, test_name, buf, DD_SEARCH);
 }
 
 void run_obdd_exists(){
@@ -1309,7 +1316,7 @@ int main (int argc, char** argv){
 					else result_name++;
 					snprintf(result_buff, sizeof(result_buff),"%s/%s", folder, 	result_name);
 					snprintf(name_buff, sizeof(name_buff), "Running:%s", argv[i]);
-					run_parse_test_local(argv[i], name_buff, result_buff);
+					run_parse_test_local(argv[i], name_buff, result_buff, DD_SEARCH);
 				}
 			}
 		}
@@ -1354,9 +1361,9 @@ int main (int argc, char** argv){
 		//run_parse_test("tests/genbuf_1_sndrs_no_automaton.fsp", "GenBuf 1 sndrs V2");
 		//run_parse_test("tests/img_test_1.fsp", "Img test 1");
 
-		//run_parse_test("tests/genbuf_1_sndrs_no_automaton.fsp", "GenBuf 1 sndrs");
+		run_parse_test("tests/genbuf_1_sndrs_no_automaton.fsp", "GenBuf 1 sndrs");
 		//run_parse_test("tests/genbuf_2_sndrs_no_automaton.fsp", "GenBuf 2 sndrs");
-		run_parse_test("tests/genbuf_3_sndrs_no_automaton.fsp", "GenBuf 3 sndrs V2");
+		//run_parse_test("tests/genbuf_3_sndrs_no_automaton.fsp", "GenBuf 3 sndrs V2");
 		//run_parse_test("tests/genbuf_5_sndrs_no_automaton.fsp", "GenBuf 5 sndrs");
 		//run_parse_test("tests/genbuf_6_sndrs_no_automaton.fsp", "GenBuf 6 sndrs");
 

@@ -3186,7 +3186,8 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	return ltl_automaton;
 }
 
-automaton_automata_context* automaton_automata_context_create_from_syntax(automaton_program_syntax* program, char* ctx_name, bool print_fsp){
+automaton_automata_context* automaton_automata_context_create_from_syntax(automaton_program_syntax* program, char* ctx_name,
+		diagnosis_search_method is_diagnosis){
 	automaton_parsing_tables* tables	= automaton_parsing_tables_create();
 	automaton_automata_context* ctx		= malloc(sizeof(automaton_automata_context));
 #if VERBOSE
@@ -3222,6 +3223,8 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 		}
 	}
 
+	//import automata
+	//TODO:import automata
 	//get ltl rules
 	uint32_t ltl_automata_count = 0;
 	char** ltl_automata_names	= NULL;
@@ -3468,9 +3471,10 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 				//dd_automaton = automaton_get_gr1_unrealizable_minimization_dd(game_automaton, assumptions, assumptions_count, guarantees, guarantees_count);
 				//winning_region_automaton = automaton_get_gr1_unrealizable_minimization(dd_automaton, assumptions, assumptions_count, guarantees, guarantees_count);
 				//automaton_automaton_destroy(dd_automaton);
-
-				winning_region_automaton = automaton_get_gr1_unrealizable_minimization_dd(game_automaton, assumptions, assumptions_count, guarantees, guarantees_count);
-				//winning_region_automaton = automaton_get_gr1_unrealizable_minimization(game_automaton, assumptions, assumptions_count, guarantees, guarantees_count);
+				if(is_diagnosis & DD_SEARCH)
+					winning_region_automaton = automaton_get_gr1_unrealizable_minimization_dd(game_automaton, assumptions, assumptions_count, guarantees, guarantees_count);
+				else if(is_diagnosis & LINEAR_SEARCH)
+					winning_region_automaton = automaton_get_gr1_unrealizable_minimization(game_automaton, assumptions, assumptions_count, guarantees, guarantees_count);
 
 				automaton_automaton_remove_unreachable_states(winning_region_automaton);
 			}
@@ -3580,26 +3584,20 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 			fflush(stdout);
 		}
 	}
-	if(print_fsp){
-		char buf[150];
-		char cmd[350];
-		for(i = 0; i < tables->composition_count; i++){
-			if(tables->composition_entries[i]->solved){
-				//automaton_automaton_print(tables->composition_entries[i]->valuation.automaton_value, true, true, true, "*\t", "*\t");
+	//export automata
+	//TODO:export automata
+
+	char buf[150];
+	char cmd[350];
+	for(i = 0; i < tables->composition_count; i++){
+		if(tables->composition_entries[i]->solved){
 				sprintf(buf, "%s_%s.fsp", ctx_name, tables->composition_entries[i]->valuation.automaton_value->name);
 				automaton_automaton_print_fsp(tables->composition_entries[i]->valuation.automaton_value, buf);
 				sprintf(buf, "%s_%s.rep", ctx_name, tables->composition_entries[i]->valuation.automaton_value->name);
 				automaton_automaton_print_report(tables->composition_entries[i]->valuation.automaton_value, buf);
-				/*
-				sprintf(buf, "%s_%d_result_%s.dot", ctx_name, i, is_synchronous? "synch": "asynch");
-				automaton_automaton_print_dot(tables->composition_entries[i]->valuation.automaton_value, buf);
-				sprintf(cmd, "sfdp -Tsvg %s > %s.svg\n", buf, buf);
-				printf(cmd);
-				system(cmd);
-				*/
-			}
 		}
 	}
+
 	free(liveness_formulas); free(liveness_formulas_names);
 	automaton_parsing_tables_destroy(tables);
 

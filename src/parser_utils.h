@@ -58,6 +58,7 @@ typedef enum {
 } automaton_expression_operator_syntax;
 typedef enum {
 	IMPORT_AUT,
+	EXPORT_AUT,
 	MENU_AUT,
 	CONST_AUT,
 	RANGE_AUT,
@@ -194,6 +195,7 @@ typedef struct automaton_statement_syntax_str{
 	struct ltl_rule_syntax_str* ltl_rule_def;
 	struct ltl_fluent_syntax_str* ltl_fluent_def;
 	struct automaton_equivalence_check_syntax_str* equivalence_check;
+	struct automaton_import_syntax_str* import_def;
 }automaton_statement_syntax;
 typedef struct automaton_program_syntax_str{
 	uint32_t count;
@@ -210,6 +212,10 @@ typedef struct ltl_fluent_syntax_str{
 	char* name;
 	obdd* obdd;
 }ltl_fluent_syntax;
+typedef struct automaton_import_syntax_str{
+	char *name;
+	char *filename;
+}automaton_import_syntax;
 /****************
 ==== FUNCTIONS ====
 */
@@ -234,6 +240,7 @@ void automaton_set_def_syntax_destroy(automaton_set_def_syntax* set_def);
 void automaton_expression_syntax_destroy(automaton_expression_syntax* expr);
 void automaton_gr1_game_syntax_destroy(automaton_gr1_game_syntax* gr1_game);
 void automaton_equivalence_check_syntax_destroy(automaton_equivalence_check_syntax* check);
+void automaton_import_syntax_destroy(automaton_import_syntax* import_syntax);
 void ltl_rule_syntax_destroy(ltl_rule_syntax* ltl_rule);
 void ltl_fluent_syntax_destroy(ltl_fluent_syntax* ltl_fluent);
 automaton_expression_syntax* automaton_expression_syntax_create(automaton_expression_type_syntax type, automaton_expression_syntax* first
@@ -281,7 +288,8 @@ automaton_program_syntax* automaton_program_syntax_add_statement(automaton_progr
 automaton_statement_syntax* automaton_statement_syntax_create(automaton_statement_type_syntax type, automaton_composition_syntax* composition_def,
 		automaton_expression_syntax* range_def, automaton_expression_syntax* const_def, automaton_fluent_syntax* fluent_def,
 		automaton_set_def_syntax* set_def, automaton_gr1_game_syntax* gr1_game_def, ltl_rule_syntax* ltl_rule_def, ltl_fluent_syntax* ltl_fluent_def,
-		automaton_equivalence_check_syntax* equivalence_check);
+		automaton_equivalence_check_syntax* equivalence_check, automaton_import_syntax* import_syntax);
+automaton_import_syntax *automaton_import_syntax_create(char *name, char *filename);
 bool automaton_syntax_is_reserved(char* token);
 ltl_rule_syntax* ltl_rule_syntax_create(bool is_theta, bool is_env, char* name, char* game_structure_name, obdd* obdd);
 ltl_fluent_syntax* automaton_ltl_fluent_syntax_create(char* name, obdd* obdd);
