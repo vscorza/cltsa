@@ -2598,7 +2598,8 @@ bool automaton_is_gr1_realizable(automaton_automaton* game_automaton, char** ass
 }
 
 automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd(automaton_automaton* game_automaton, char** assumptions, uint32_t assumptions_count
-		, char** guarantees, uint32_t guarantees_count){
+		, char** guarantees, uint32_t guarantees_count, uint32_t *steps, uint32_t **steps_sizes
+		, struct timeval **steps_times, uint32_t *steps_size){
 	//candidate transitions lists
 	uint32_t t_size = LIST_INITIAL_SIZE, t_count = 0;
 	uint32_t *t_states	= calloc(t_size, sizeof(uint32_t)), *t_indexes = calloc(t_size, sizeof(uint32_t));
@@ -2668,6 +2669,17 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd(automaton_au
 	return result;
 }
 
+void automaton_minimization_adjust_steps_report(uint32_t *steps, uint32_t **steps_sizes,
+		struct timeval **steps_times, uint32_t *steps_size){
+	if(*steps < (*steps_size) - 1)return;
+	*steps_size	*= 2;
+	uint32_t *int_ptr	= realloc(*steps_sizes, sizeof(uint32_t) * *steps_size);
+	if(int_ptr == NULL){printf("Could not allocate memory\n"); exit(-1);}
+	*steps_sizes	= int_ptr;
+	struct timeval *time_ptr	= realloc(*steps_times, sizeof(struct timeval) * *steps_size);
+	if(time_ptr == NULL){printf("Could not allocate memory\n"); exit(-1);}
+	*steps_times	= time_ptr;
+}
 /**
 	 * Returns a minimal automaton preserving unrealizability by using a delta debugging approach over the set of non
 	 * controllable transitions
@@ -2689,12 +2701,16 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd(automaton_au
 	 */
 automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2(automaton_automaton* master, automaton_automaton* minimized, char** assumptions, uint32_t assumptions_count
 		, char** guarantees, uint32_t guarantees_count, uint8_t *partition_bit_vector, uint32_t transitions_kept_size
-		, uint32_t partitions_count, uint32_t t_count, uint32_t t_size, uint32_t *t_states, uint32_t *t_indexes){
+		, uint32_t partitions_count, uint32_t t_count, uint32_t t_size, uint32_t *t_states, uint32_t *t_indexes
+		, uint32_t *steps, uint32_t **steps_sizes, struct timeval **steps_times, uint32_t *steps_size){
+	(*steps)++;
+	automaton_minimization_adjust_steps_report(steps, steps_sizes, steps_times, steps_size);
+	struct timeval tval_before, tval_after;
+
 	int32_t i,j,k,dd, from_step = 0;
 	uint32_t new_size; uint32_t *ptr;
 	automaton_automaton *minimization	= NULL;
 	automaton_transition *current_transition	= NULL;
-	uint32_t steps = 0;
 	transitions_kept_size = 0;
 	uint32_t removed	= 0;
 	automaton_automaton *inner_automaton	= automaton_automaton_clone(minimized);
@@ -2750,6 +2766,7 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2(automaton_a
 	removed = 0;
 	int32_t current_linear_index = -1;
 	//check if C_i achieves nonrealizability
+	gettimeofday(&tval_before, NULL);
 	for(dd = 0; dd <= (partitions_count-1); dd++){
 		current_linear_index = -1;
 		first_linear_index	= (uint32_t)floor(step * dd);
@@ -2817,8 +2834,11 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2(automaton_a
 				}
 			}
 			partitions_count = 2;
+			gettimeofday(&tval_after, NULL);
+			timersub(&tval_after, &tval_before, (*steps_times)[*steps]);
+			(*steps_sizes)[*steps]	= minimization->transitions_composite_count;
 			return_automaton = automaton_get_gr1_unrealizable_minimization_dd2(master, minimization, assumptions, assumptions_count, guarantees, guarantees_count
-					, partition_bit_vector, transitions_kept_size, partitions_count, t_count, t_size, t_states, t_indexes);
+					, partition_bit_vector, transitions_kept_size, partitions_count, t_count, t_size, t_states, t_indexes, steps);
 			automaton_automaton_destroy(inner_automaton);
 			automaton_automaton_destroy(minimization);
 			return return_automaton;
@@ -2896,6 +2916,9 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2(automaton_a
 		printf("]/n");
 #endif
 			partitions_count = max(partitions_count - 1, 2);
+			gettimeofday(&tval_after, NULL);
+			timersub(&tval_after, &tval_before, (*steps_times)[*steps]);
+			(*steps_sizes)[*steps]	= minimization->transitions_composite_count;
 			return_automaton = automaton_get_gr1_unrealizable_minimization_dd2(master, minimization, assumptions, assumptions_count, guarantees, guarantees_count
 					, partition_bit_vector, transitions_kept_size, partitions_count, t_count, t_size, t_states, t_indexes);
 			automaton_automaton_destroy(inner_automaton);
@@ -2909,6 +2932,9 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2(automaton_a
 #if DEBUG_UNREAL
 			printf("(refining n)\n");
 #endif
+		gettimeofday(&tval_after, NULL);
+		timersub(&tval_after, &tval_before, (*steps_times)[*steps]);
+		(*steps_sizes)[*steps]	= minimization->transitions_composite_count;
 		return_automaton	= automaton_get_gr1_unrealizable_minimization_dd2(master, inner_automaton, assumptions, assumptions_count, guarantees, guarantees_count
 				, partition_bit_vector, transitions_kept_size, partitions_count, t_count, t_size, t_states, t_indexes);
 		automaton_automaton_destroy(inner_automaton);
@@ -2917,6 +2943,9 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2(automaton_a
 #if DEBUG_UNREAL
 			printf("(minimal)\n");
 #endif
+		gettimeofday(&tval_after, NULL);
+		timersub(&tval_after, &tval_before, (*steps_times)[*steps]);
+		(*steps_sizes)[*steps]	= minimized->transitions_composite_count;
 		if(automaton_is_gr1_realizable(inner_automaton, assumptions, assumptions_count,
 				guarantees, guarantees_count) || inner_automaton->out_degree[inner_automaton->initial_states[0]] == 0){
 			printf("Inner automaton was realizable, minimization %s\n", automaton_is_gr1_realizable(minimized, assumptions, assumptions_count,
@@ -2931,7 +2960,8 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2(automaton_a
 }
 
 automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_automaton* game_automaton, char** assumptions, uint32_t assumptions_count
-		, char** guarantees, uint32_t guarantees_count){
+		, char** guarantees, uint32_t guarantees_count, uint32_t *steps, uint32_t **steps_sizes
+		, struct timeval **steps_times, uint32_t *steps_size){
 
 	//candidate transitions lists
 	uint32_t t_size = LIST_INITIAL_SIZE, t_count = 0;

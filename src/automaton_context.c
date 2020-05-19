@@ -3187,9 +3187,30 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 }
 
 automaton_automata_context* automaton_automata_context_create_from_syntax(automaton_program_syntax* program, char* ctx_name,
-		diagnosis_search_method is_diagnosis){
+		diagnosis_search_method is_diagnosis, char *results_filename){
 	automaton_parsing_tables* tables	= automaton_parsing_tables_create();
 	automaton_automata_context* ctx		= malloc(sizeof(automaton_automata_context));
+	char buf[250];
+	FILE *experimental_results			= NULL;
+	struct timeval tval_before, tval_after, tval_ltl_model_build_result,
+		tval_model_build_result, tval_composition_result, tval_synthesis_result,
+		tval_minimization_result;
+	uint32_t results_minimization_steps, results_alphabet_size, results_guarantees_count,
+		results_assumptions_count, results_plant_states, results_plant_transitions,
+		results_minimization_states, results_minimization_transitions,
+		results_plant_controllable_transitions, results_minimization_controllable_transitions;
+	if(is_diagnosis != 0){
+		experimental_results = fopen(results_filename, "w");
+		if (experimental_results == NULL){
+			printf("Error opening file!\n");
+			return false;
+		}
+		fprintf(experimental_results, "name\trealizable\tltl_model_build_time\tmodel_build_time\tcomposition_time\t" \
+				"synthesis_time\tdiagnosis_time\tdiagnosis_steps\talphabet_size\tguarantees_count\t" \
+				"assumptions_count\tplant_states\tplant_transitions\tminimization_states\tminimizatoin_transitions\t" \
+				"plant_controllable_transitions\tminimization_controllable_transitions\tsearch_method\n");
+	}
+
 #if VERBOSE
 	printf("Creating automaton %s\n", ctx_name);
 #endif
@@ -3333,6 +3354,7 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 	printf("Building LTL automata\n");
 	fflush(stdout);
 #endif
+	gettimeofday(&tval_before, NULL);
 	//build automata from ltl
 	automaton_automaton* obdd_automaton;
 	for(i = 0; i < ltl_automata_count; i++){
@@ -3358,10 +3380,14 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 	free(sys_theta_count);		free(env_theta_count);
 	free(sys_rho_count);		free(env_rho_count);
 	free(ltl_automata_names);
+	gettimeofday(&tval_after, NULL);
+	timersub(&tval_after, &tval_before, &tval_ltl_model_build_result);
+
 #if VERBOSE
 	printf("\nBuilding LTS automata\n");
 	fflush(stdout);
 #endif
+	gettimeofday(&tval_before, NULL);
 	int32_t main_index;
 	//import automata
 	for(i = 0; i < program->count; i++)
@@ -3389,13 +3415,17 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 			}
 		}
 	}
+	gettimeofday(&tval_after, NULL);
+	timersub(&tval_after, &tval_before, &tval_model_build_result);
 	//compute gr1 games
-
+	gettimeofday(&tval_before, NULL);
 	automaton_gr1_game_syntax* gr1_game;
 	automaton_automaton *game_automaton, *winning_region_automaton, *dd_automaton;
 	char **assumptions, **guarantees;
 	char set_name[255];
 	int32_t assumptions_count = 0, guarantees_count = 0;
+	bool nonreal	= false;
+	uint32_t minimization_steps	= 0;
 #if VERBOSE
 	printf("\nSolving GR1\n");
 	fflush(stdout);
@@ -3474,7 +3504,7 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 			guarantees		= automaton_set_syntax_evaluate(tables, gr1_game->guarantees, &guarantees_count, set_name);
 			winning_region_automaton	= automaton_get_gr1_strategy(game_automaton, assumptions, assumptions_count
 					, guarantees, guarantees_count, true);
-			bool nonreal	= false;
+			nonreal	= false;
 			if(winning_region_automaton->transitions_count == 0){
 				nonreal	= true;
 				automaton_automaton_destroy(winning_region_automaton);
@@ -3541,6 +3571,12 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 			fflush(stdout);
 		}
 	}
+	gettimeofday(&tval_after, NULL);
+	if(nonreal){
+		timersub(&tval_after, &tval_before, &tval_minimization_result);
+	}else{
+		timersub(&tval_after, &tval_before, &tval_synthesis_result);
+	}
 	//run equivalence checks
 #if VERBOSE
 	printf("==========\n TESTS \n==========\n");
@@ -3580,7 +3616,6 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 		}
 	}
 	//export automata
-	char buf[150];
 	for(j = 0; j < program->count; j++){
 		if(program->statements[j]->type == EXPORT_AUT){
 			for(i = 0; i < tables->composition_count; i++){

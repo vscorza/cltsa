@@ -416,14 +416,19 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 		, char** guarantees, uint32_t guarantees_count, bool print_ranking);
 bool automaton_is_gr1_realizable(automaton_automaton* game_automaton, char** assumptions, uint32_t assumptions_count
 		, char** guarantees, uint32_t guarantees_count);
+void automaton_minimization_adjust_steps_report(uint32_t *steps, uint32_t **steps_sizes,
+		struct timeval **steps_times, uint32_t *steps_size);
 automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd(automaton_automaton* game_automaton, char** assumptions, uint32_t assumptions_count
-		, char** guarantees, uint32_t guarantees_count);
+		, char** guarantees, uint32_t guarantees_count, uint32_t *steps, uint32_t **steps_sizes
+		, struct timeval **steps_times, uint32_t *steps_size);
 automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2(automaton_automaton* master, automaton_automaton *minimized
 		, char** assumptions, uint32_t assumptions_count
 		, char** guarantees, uint32_t guarantees_count, uint8_t *partition_bit_vector, uint32_t transitions_kept_size, uint32_t paritions_count
-		, uint32_t t_count, uint32_t t_size, uint32_t *t_states, uint32_t *t_indexes);
+		, uint32_t t_count, uint32_t t_size, uint32_t *t_states, uint32_t *t_indexes, uint32_t *steps, uint32_t **steps_sizes
+		, struct timeval **steps_times, uint32_t *steps_size);
 automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_automaton* game_automaton, char** assumptions, uint32_t assumptions_count
-		, char** guarantees, uint32_t guarantees_count);
+		, char** guarantees, uint32_t guarantees_count, uint32_t *steps, uint32_t **steps_sizes
+		, struct timeval **steps_times, uint32_t *steps_size);
 /** AUTOMATA OPERATIONS **/
 uint32_t automaton_automata_get_composite_state(uint32_t states_count, uint32_t* states);
 automaton_automaton* automaton_automata_compose(automaton_automaton** automata, automaton_synchronization_type* synch_type, uint32_t automata_count, bool is_game, char *composition_name);
