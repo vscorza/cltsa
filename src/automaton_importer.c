@@ -29,8 +29,8 @@ char *automaton_automaton_load_string(FILE *f, char *finalizers, uint32_t finali
 			}
 		}
 		if(!is_finalizer){
-			*buf[pos++]	= c;
-		}
+			(*buf)[pos++]	= c;
+		}else break;
 		if(pos >= *buf_size){
 			*buf_size *= 2;
 			char *str_ptr	= realloc(*buf, *buf_size * sizeof(char));
@@ -38,7 +38,7 @@ char *automaton_automaton_load_string(FILE *f, char *finalizers, uint32_t finali
 			*buf	= str_ptr;
 		}
 	}
-	*buf[pos]	= '\0';
+	(*buf)[pos]	= '\0';
 	return *buf;
 }
 
@@ -58,6 +58,7 @@ void *automaton_automaton_load_array(FILE *f, void* (*load_function)(FILE*, char
 	uint32_t arr_size	= 32;
 	uint32_t arr_count	= 0;
 	uint32_t i, sizeof_element;
+	char array_finalizers[2]	= {AUT_SER_SEP_CHAR, AUT_SER_ARRAY_END_CHAR};
 	switch(type){
 		case IMPORT_BOOL:sizeof_element = sizeof(bool);	break;
 		case IMPORT_INT:sizeof_element = sizeof(uint32_t);	break;
@@ -69,26 +70,28 @@ void *automaton_automaton_load_array(FILE *f, void* (*load_function)(FILE*, char
 	}
 	void *arr	= calloc(arr_size, sizeof_element);
 	char current 	= 	fgetc(f);
-	if(current != AUT_SER_ARRAY_START || current == EOF) {
+	if(current != AUT_SER_ARRAY_START_CHAR || current == EOF) {
 		printf("Corrupted array\n");
 		exit(-1);
 	}
 	do {
 		current		= fgetc(f);
-		if(current == AUT_SER_ARRAY_END) {
+		if(current == AUT_SER_ARRAY_END_CHAR) {
 			break;
 		}
 		ungetc(current,f);
-		void *v	= load_function(f, finalizers, finalizers_count, buf, buf_size, last_finalizer);
+		void *v	= load_function(f, array_finalizers, 2, buf, buf_size, last_finalizer);
+		memcpy((void*)(((char*)arr) + (arr_count++ * sizeof_element)), &v, sizeof_element);
+		/*
 		switch(type){
-			case IMPORT_BOOL:*(bool *)(&arr + sizeof_element * (arr_count++))	= (bool)v;break;
-			case IMPORT_INT:*(uint32_t *)(&arr + sizeof_element * (arr_count++))	= (uint32_t)v;break;
-			case IMPORT_STRING:*(char**)(&arr + sizeof_element * (arr_count++))	= (char*)v;break;
+			case IMPORT_BOOL:*((bool *)(&arr + sizeof_element * arr_count++))	= (bool)v;break;
+			case IMPORT_INT:*((uint32_t *)(&arr + sizeof_element * arr_count++))	= (uint32_t)v;break;
+			case IMPORT_STRING:*((char**)(&arr + sizeof_element * arr_count++))	= (char*)v;break;
 			default:
 				printf("Import type not defined\n");
 				exit(-1);
 				break;
-		}
+		}*/
 
 		if(arr_count >= arr_size){
 			arr_size *= 2;
@@ -96,7 +99,7 @@ void *automaton_automaton_load_array(FILE *f, void* (*load_function)(FILE*, char
 			if(void_ptr == NULL){printf("Could not allocate enough memory\n");exit(-1);}
 			arr	= void_ptr;
 		}
-	}while(*last_finalizer != EOF && *last_finalizer != AUT_SER_ARRAY_END);
+	}while(*last_finalizer != EOF && *last_finalizer != AUT_SER_ARRAY_END_CHAR);
 
 	current 	= 	fgetc(f);
 	if(current != EOF) {
@@ -139,13 +142,13 @@ void **automaton_automaton_load_array_array(FILE *f, void* (*load_function)(FILE
 	if(*inner_count != NULL)free(*inner_count);
 	*inner_count	= calloc(arr_size, sizeof(uint32_t));
 	char current 	= 	fgetc(f);
-	if(current != AUT_SER_ARRAY_START || current == EOF) {
+	if(current != AUT_SER_ARRAY_START_CHAR || current == EOF) {
 		printf("Corrupted array\n");
 		exit(-1);
 	}
 	do {
 		current		= fgetc(f);
-		if(current == AUT_SER_ARRAY_END) {
+		if(current == AUT_SER_ARRAY_END_CHAR) {
 			break;
 		}
 		ungetc(current,f);
@@ -170,7 +173,7 @@ void **automaton_automaton_load_array_array(FILE *f, void* (*load_function)(FILE
 			if(int_ptr == NULL){printf("Could not allocate enough memory\n");exit(-1);}
 			*inner_count	= int_ptr;
 		}
-	}while(*last_finalizer != EOF && *last_finalizer != AUT_SER_ARRAY_END);
+	}while(*last_finalizer != EOF && *last_finalizer != AUT_SER_ARRAY_END_CHAR);
 
 	current 	= 	fgetc(f);
 	if(current != EOF) {
@@ -230,14 +233,14 @@ char ***automaton_automaton_load_string_array_array(FILE *f, char *finalizers, u
 automaton_signal_event *automaton_automaton_load_signal_event(FILE *f, char **buf, uint32_t *buf_size,
 		char *last_finalizer){
 	char current 	= 	fgetc(f);
-	if(current != AUT_SER_OBJ_START || current == EOF) {
+	if(current != AUT_SER_OBJ_START_CHAR || current == EOF) {
 		printf("Corrupted object\n");
 		exit(-1);
 	}
-	char sep_char	= AUT_SER_SEP;
-	char obj_end_char	= AUT_SER_OBJ_END;
+	char sep_char	= AUT_SER_SEP_CHAR;
+	char obj_end_char	= AUT_SER_OBJ_END_CHAR;
 	*last_finalizer	= '\0';
-	char *name			= automaton_automaton_load_string(f, &sep_char, 1, buf, buf_size, last_finalizer);
+	char *name			= automaton_automaton_copy_string(f, &sep_char, 1, buf, buf_size, last_finalizer);
 	uint32_t type_value	= automaton_automaton_load_int(f, &obj_end_char, 1, buf, buf_size, last_finalizer);
 	automaton_signal_type type;
 	switch(type_value) {
@@ -246,39 +249,43 @@ automaton_signal_event *automaton_automaton_load_signal_event(FILE *f, char **bu
 		case 2: type = INTERNAL_SIG; break;
 		default: printf("Corrupt signal event type"); exit(-1);break;
 	}
-	return automaton_signal_event_create(name, type);
+	automaton_signal_event *result = automaton_signal_event_create(name, type);
+	free(name);
+	return result;
 }
 
 void automaton_automaton_check_alphabet(FILE *f, automaton_alphabet *alphabet, char **buf, uint32_t *buf_size,
 		char *last_finalizer){
 	char current 	= 	fgetc(f);
-	if(current != AUT_SER_OBJ_START || current == EOF) {
+	if(current != AUT_SER_OBJ_START_CHAR || current == EOF) {
 		printf("Corrupted object\n");
 		exit(-1);
 	}
-	char separator = AUT_SER_SEP;
+	char separator = AUT_SER_SEP_CHAR;
 	*last_finalizer = '\0';
 	uint32_t signals_count	= automaton_automaton_load_int(f, &separator, 1, buf, buf_size, last_finalizer);
 	if(signals_count == 0){
 		printf("Corrupt signals count\n"); exit(-1);
 	}
 	current 	= 	fgetc(f);
-	if(current != AUT_SER_ARRAY_START || current == EOF) {
+	if(current != AUT_SER_ARRAY_START_CHAR || current == EOF) {
 		printf("Corrupted array\n");
 		exit(-1);
 	}
 	automaton_alphabet	*current_alphabet	= automaton_alphabet_create();
 	do {
-		automaton_alphabet_add_signal_event(current_alphabet, automaton_automaton_load_signal_event(f, buf, buf_size, last_finalizer));
+		automaton_signal_event *current_signal = automaton_automaton_load_signal_event(f, buf, buf_size, last_finalizer);
+		automaton_alphabet_add_signal_event(current_alphabet, current_signal);
+		automaton_signal_event_destroy(current_signal, true);
 		current = fgetc(f);
-		if(current != AUT_SER_ARRAY_END && current != AUT_SER_SEP) {
+		if(current != AUT_SER_ARRAY_END_CHAR && current != AUT_SER_SEP_CHAR) {
 			printf("Corrupted array\n");
 			exit(-1);
 		}
 
-	}while(current != AUT_SER_ARRAY_END);
+	}while(current != AUT_SER_ARRAY_END_CHAR);
 	current = fgetc(f);
-	if(current != AUT_SER_OBJ_END) {
+	if(current != AUT_SER_OBJ_END_CHAR) {
 		printf("Corrupted object\n");
 		exit(-1);
 	}
@@ -299,35 +306,36 @@ void automaton_automaton_check_alphabet(FILE *f, automaton_alphabet *alphabet, c
 void automaton_automaton_check_load_context(FILE *f, automaton_automata_context *ctx, char **buf, uint32_t *buf_size,
 		char *last_finalizer){
 	char current 	= 	fgetc(f);
-	if(current != AUT_SER_OBJ_START || current == EOF) {
+	if(current != AUT_SER_OBJ_START_CHAR || current == EOF) {
 		printf("Corrupted object\n");
 		exit(-1);
 	}
-	char sep_char = AUT_SER_SEP;
+	char sep_char = AUT_SER_SEP_CHAR;
 	char *name			= automaton_automaton_load_string(f, &sep_char, 1, buf, buf_size, last_finalizer);
 	uint32_t fluents_count = 0;
 	char **fluents		= NULL;
 	uint32_t liveness_count	= 0;
 	char **liveness_names		= NULL;
 	automaton_automaton_check_alphabet(f, ctx->global_alphabet, buf, buf_size, last_finalizer);
-	if(current != AUT_SER_SEP || current == EOF) {
+	current	= fgetc(f);
+	if(current != AUT_SER_SEP_CHAR || current == EOF) {
 		printf("Corrupted object\n");
 		exit(-1);
 	}
 	uint32_t count		= automaton_automaton_load_int(f, &sep_char, 1, buf, buf_size, last_finalizer);
 	if(count == 0){
 		current 	= 	fgetc(f);
-		if(current != AUT_SER_ARRAY_START || current == EOF) {
+		if(current != AUT_SER_ARRAY_START_CHAR || current == EOF) {
 			printf("Corrupted array\n");
 			exit(-1);
 		}
 		current 	= 	fgetc(f);
-		if(current != AUT_SER_ARRAY_END || current == EOF) {
+		if(current != AUT_SER_ARRAY_END_CHAR || current == EOF) {
 			printf("Corrupted array\n");
 			exit(-1);
 		}
 		current 	= 	fgetc(f);
-		if(current != AUT_SER_SEP || current == EOF) {
+		if(current != AUT_SER_SEP_CHAR || current == EOF) {
 			printf("Corrupted object\n");
 			exit(-1);
 		}
@@ -337,17 +345,17 @@ void automaton_automaton_check_load_context(FILE *f, automaton_automata_context 
 	count		= automaton_automaton_load_int(f, &sep_char, 1, buf, buf_size, last_finalizer);
 	if(count == 0){
 		current 	= 	fgetc(f);
-		if(current != AUT_SER_ARRAY_START || current == EOF) {
+		if(current != AUT_SER_ARRAY_START_CHAR || current == EOF) {
 			printf("Corrupted array\n");
 			exit(-1);
 		}
 		current 	= 	fgetc(f);
-		if(current != AUT_SER_ARRAY_END || current == EOF) {
+		if(current != AUT_SER_ARRAY_END_CHAR || current == EOF) {
 			printf("Corrupted array\n");
 			exit(-1);
 		}
 		current 	= 	fgetc(f);
-		if(current != AUT_SER_SEP || current == EOF) {
+		if(current != AUT_SER_OBJ_END_CHAR || current == EOF) {
 			printf("Corrupted object\n");
 			exit(-1);
 		}
@@ -386,12 +394,12 @@ automaton_transition *automaton_automaton_load_transition(FILE *f, automaton_aut
 		uint32_t *local_alphabet, bool *input_alphabet,
 		char **buf, uint32_t *buf_size, char *last_finalizer){
 	char current 	= 	fgetc(f);
-	if(current != AUT_SER_OBJ_START || current == EOF) {
+	if(current != AUT_SER_OBJ_START_CHAR || current == EOF) {
 		printf("Corrupted object\n");
 		exit(-1);
 	}
-	char sep_char = AUT_SER_SEP;
-	char obj_end_char	= AUT_SER_OBJ_END;
+	char sep_char = AUT_SER_SEP_CHAR;
+	char obj_end_char	= AUT_SER_OBJ_END_CHAR;
 	uint32_t from_state		= automaton_automaton_load_int(f, &sep_char, 1, buf, buf_size, last_finalizer);
 	uint32_t to_state		= automaton_automaton_load_int(f, &sep_char, 1, buf, buf_size, last_finalizer);
 	uint32_t signals_count	= automaton_automaton_load_int(f, &sep_char, 1, buf, buf_size, last_finalizer);
@@ -412,14 +420,14 @@ automaton_transition *automaton_automaton_load_transition(FILE *f, automaton_aut
 }
 
 automaton_automaton *automaton_automaton_load_report(automaton_automata_context *ctx, char *filename){
-	FILE *f = fopen(filename, "w");
+	FILE *f = fopen(filename, "r+");
 	char current, dst;
 	if (f == NULL){
 		printf("Error opening file!\n");
 		return false;
 	}
 	current = fgetc(f);
-	if(current != AUT_SER_OBJ_START || current == EOF){
+	if(current != AUT_SER_OBJ_START_CHAR || current == EOF){
 		printf("Corrupt file at %s\n", filename);
 		exit(-1);
 	}
@@ -428,28 +436,33 @@ automaton_automaton *automaton_automaton_load_report(automaton_automata_context 
 	uint32_t i;
 	char *buf	= calloc(buf_size, sizeof(char));
 	char last_finalizer = EOF;
-	char sep_char = AUT_SER_SEP;
-	char obj_end_char	= AUT_SER_OBJ_END;
+	char sep_char = AUT_SER_SEP_CHAR;
+	char obj_end_char	= AUT_SER_OBJ_END_CHAR;
 	char* name = automaton_automaton_copy_string(f, &sep_char, 1, &buf, &buf_size, &last_finalizer);
 	automaton_automaton_check_load_context(f, ctx, &buf, &buf_size, &last_finalizer);
 	uint32_t local_alphabet_count	= 0;
 	uint32_t *local_alphabet	= NULL;
 	bool *input_alphabet	= NULL;
+	current = fgetc(f);
+	if(current != AUT_SER_SEP_CHAR || current == EOF){
+		printf("Corrupted array\n");
+		exit(-1);
+	}
 	uint32_t count		= automaton_automaton_load_int(f, &sep_char, 1, &buf, &buf_size, &last_finalizer);
 
 	if(count == 0){
 		current 	= 	fgetc(f);
-		if(current != AUT_SER_ARRAY_START || current == EOF) {
+		if(current != AUT_SER_ARRAY_START_CHAR || current == EOF) {
 			printf("Corrupted array\n");
 			exit(-1);
 		}
 		current 	= 	fgetc(f);
-		if(current != AUT_SER_ARRAY_END || current == EOF) {
+		if(current != AUT_SER_ARRAY_END_CHAR || current == EOF) {
 			printf("Corrupted array\n");
 			exit(-1);
 		}
 		current 	= 	fgetc(f);
-		if(current != AUT_SER_SEP || current == EOF) {
+		if(current != AUT_SER_SEP_CHAR || current == EOF) {
 			printf("Corrupted object\n");
 			exit(-1);
 		}
@@ -465,23 +478,23 @@ automaton_automaton *automaton_automaton_load_report(automaton_automata_context 
 	count		= automaton_automaton_load_int(f, &sep_char, 1, &buf, &buf_size, &last_finalizer);
 	if(count == 0){
 		current 	= 	fgetc(f);
-		if(current != AUT_SER_ARRAY_START || current == EOF) {
+		if(current != AUT_SER_ARRAY_START_CHAR || current == EOF) {
 			printf("Corrupted array\n");
 			exit(-1);
 		}
 		current 	= 	fgetc(f);
-		if(current != AUT_SER_ARRAY_END || current == EOF) {
+		if(current != AUT_SER_ARRAY_END_CHAR || current == EOF) {
 			printf("Corrupted array\n");
 			exit(-1);
 		}
 		current 	= 	fgetc(f);
-		if(current != AUT_SER_SEP || current == EOF) {
+		if(current != AUT_SER_SEP_CHAR || current == EOF) {
 			printf("Corrupted object\n");
 			exit(-1);
 		}
 	}else{
 		current 	= fgetc(f);
-		if(current != AUT_SER_ARRAY_START) {
+		if(current != AUT_SER_ARRAY_START_CHAR) {
 			printf("Corrupted array\n");
 			exit(-1);
 		}
@@ -492,19 +505,19 @@ automaton_automaton *automaton_automaton_load_report(automaton_automata_context 
 			automaton_automaton_add_transition(result, current_transition);
 			automaton_transition_destroy(current_transition, true);
 			current = fgetc(f);
-			if(current != AUT_SER_ARRAY_END && current != AUT_SER_SEP) {
+			if(current != AUT_SER_ARRAY_END_CHAR && current != AUT_SER_SEP_CHAR) {
 				printf("Corrupted array\n");
 				exit(-1);
 			}
 
-		}while(current != AUT_SER_ARRAY_END);
+		}while(current != AUT_SER_ARRAY_END_CHAR);
 	}
 	if(local_alphabet != NULL){
 		free(local_alphabet);
 		free(input_alphabet);
 	}
 	current = fgetc(f);
-	if(current != AUT_SER_SEP) {
+	if(current != AUT_SER_SEP_CHAR) {
 		printf("Corrupted object\n");
 		exit(-1);
 	}
@@ -514,17 +527,17 @@ automaton_automaton *automaton_automaton_load_report(automaton_automata_context 
 	count		= automaton_automaton_load_int(f, &sep_char, 1, &buf, &buf_size, &last_finalizer);
 	if(count == 0){
 		current 	= 	fgetc(f);
-		if(current != AUT_SER_ARRAY_START || current == EOF) {
+		if(current != AUT_SER_ARRAY_START_CHAR || current == EOF) {
 			printf("Corrupted array\n");
 			exit(-1);
 		}
 		current 	= 	fgetc(f);
-		if(current != AUT_SER_ARRAY_END || current == EOF) {
+		if(current != AUT_SER_ARRAY_END_CHAR || current == EOF) {
 			printf("Corrupted array\n");
 			exit(-1);
 		}
 		current 	= 	fgetc(f);
-		if(current != AUT_SER_SEP || current == EOF) {
+		if(current != AUT_SER_SEP_CHAR || current == EOF) {
 			printf("Corrupted object\n");
 			exit(-1);
 		}
@@ -536,5 +549,8 @@ automaton_automaton *automaton_automaton_load_report(automaton_automata_context 
 
 	}
 	automaton_automaton_update_valuation(result);
+	free(initial_states);
+	free(buf);
+	fclose(f);
 	return result;
 }

@@ -80,11 +80,17 @@
 
 
 
-#define AUT_SER_OBJ_START '<'
-#define AUT_SER_OBJ_END '>'
-#define AUT_SER_ARRAY_START '['
-#define AUT_SER_ARRAY_END ']'
-#define AUT_SER_SEP ','
+#define AUT_SER_OBJ_START "<"
+#define AUT_SER_OBJ_END ">"
+#define AUT_SER_ARRAY_START "["
+#define AUT_SER_ARRAY_END "]"
+#define AUT_SER_SEP ","
+
+#define AUT_SER_OBJ_START_CHAR '<'
+#define AUT_SER_OBJ_END_CHAR '>'
+#define AUT_SER_ARRAY_START_CHAR '['
+#define AUT_SER_ARRAY_END_CHAR ']'
+#define AUT_SER_SEP_CHAR ','
 
 typedef uint8_t signal_t;
 typedef uint8_t fluent_count_t;

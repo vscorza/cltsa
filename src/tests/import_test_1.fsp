@@ -1,0 +1,11 @@
+// alphabets def.
+set Global_Alphabet = {move,remove,push,pop, goal,idle,fiddle}
+set Controllable_Alphabet = {move, goal}
+
+ENV << "export_test_env.fsp".
+
+fluent F_Ass = <idle, goal> initially 1
+fluent F_Goal = <goal, move>
+
+ENV >> "import_test_env.fsp".
+

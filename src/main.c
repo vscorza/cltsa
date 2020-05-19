@@ -92,6 +92,14 @@ void run_diagnosis(char* test_file, char* test_name){
 	run_parse_test_local(test_file, test_name, buf, DD_SEARCH);
 }
 
+void run_automaton_export_test(){
+	run_parse_test("tests/export_test_1.fsp", "export test");
+}
+
+void run_automaton_import_test(){
+	run_parse_test("tests/import_test_1.fsp", "import test");
+}
+
 void run_obdd_exists(){
 	obdd_mgr* new_mgr	= obdd_mgr_create();
 	//compare x1 & !(x2 | x3) == x1 & !x2 & !x3
@@ -1223,6 +1231,8 @@ void run_functional_tests(){
 	run_obdd_cache_tests();
 	run_obdd_fast_lists_tests();
 	run_automaton_composite_hash_table_tests();
+	run_automaton_import_test();
+	run_automaton_export_test();
 	//DRY TESTS
 	run_parse_test("tests/composition_types.fsp", "compositions type");
 	run_parse_test("tests/biscotti.fsp", "biscotti");
@@ -1361,11 +1371,13 @@ int main (int argc, char** argv){
 		//run_parse_test("tests/genbuf_1_sndrs_no_automaton.fsp", "GenBuf 1 sndrs V2");
 		//run_parse_test("tests/img_test_1.fsp", "Img test 1");
 
-		run_parse_test("tests/genbuf_1_sndrs_no_automaton.fsp", "GenBuf 1 sndrs");
+		//run_parse_test("tests/genbuf_1_sndrs_no_automaton.fsp", "GenBuf 1 sndrs");
 		//run_parse_test("tests/genbuf_2_sndrs_no_automaton.fsp", "GenBuf 2 sndrs");
 		//run_parse_test("tests/genbuf_3_sndrs_no_automaton.fsp", "GenBuf 3 sndrs V2");
 		//run_parse_test("tests/genbuf_5_sndrs_no_automaton.fsp", "GenBuf 5 sndrs");
 		//run_parse_test("tests/genbuf_6_sndrs_no_automaton.fsp", "GenBuf 6 sndrs");
+		run_automaton_export_test();
+		run_automaton_import_test();
 
 		//run_parse_test("tests/genbuf_1_sndrs_simplified.fsp", "GenBuf 1 sndrs (simplified)");
 		//run_parse_test("tests/mixed_3_signals_2_labels.fsp", "mixed model 3 signals 2 labels");

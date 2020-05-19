@@ -411,7 +411,8 @@ ltl_fluent_syntax* automaton_ltl_fluent_syntax_create(char* name, obdd* obdd){
 automaton_import_syntax *automaton_import_syntax_create(char *name, char *filename){
 	automaton_import_syntax *import_syntax	= malloc(sizeof(automaton_import_syntax));
 	aut_dupstr(&(import_syntax->name),name);
-	aut_dupstr(&(import_syntax->filename),filename);
+	filename[strlen(filename)-1] = '\0';
+	aut_dupstr(&(import_syntax->filename),&(filename[1]));
 	return import_syntax;
 }
 

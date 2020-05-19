@@ -154,10 +154,10 @@ fluentSet:
 	|setExp									{$$ = $1;}
 	;	
 import:
-	t_UPPER_IDENT t_IMPORT  t_STRING		{$$ = automaton_import_syntax_create($1,$3);free($1);free($2);free($3);}
+	t_UPPER_IDENT t_IMPORT  t_STRING '.'	{$$ = automaton_import_syntax_create($1,$3);free($1);free($2);free($3);}
 	;
 export:
-	t_UPPER_IDENT t_EXPORT  t_STRING		{$$ = automaton_import_syntax_create($1,$3);free($1);free($2);free($3);}
+	t_UPPER_IDENT t_EXPORT  t_STRING '.'	{$$ = automaton_import_syntax_create($1,$3);free($1);free($2);free($3);}
 	;	
 menu:
 	"menu" t_UPPER_IDENT '=' t_STRING	

@@ -3362,12 +3362,17 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 	printf("\nBuilding LTS automata\n");
 	fflush(stdout);
 #endif
-
+	int32_t main_index;
 	//import automata
-	//TODO:import automata
 	for(i = 0; i < program->count; i++)
 		if(program->statements[i]->type == IMPORT_AUT){
+			automaton_automaton *loaded_automaton	= automaton_automaton_load_report(ctx, program->statements[i]->import_def->filename);
+			main_index = automaton_parsing_tables_add_entry(tables, COMPOSITION_ENTRY_AUT, loaded_automaton->name,
+					loaded_automaton);
 
+			tables->composition_entries[main_index]->solved	= true;
+			tables->composition_entries[main_index]->valuation_count			= 1;
+			tables->composition_entries[main_index]->valuation.automaton_value	= loaded_automaton;
 		}
 
 	//build automata
@@ -3385,7 +3390,7 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 		}
 	}
 	//compute gr1 games
-	int32_t main_index;
+
 	automaton_gr1_game_syntax* gr1_game;
 	automaton_automaton *game_automaton, *winning_region_automaton, *dd_automaton;
 	char **assumptions, **guarantees;
@@ -3469,14 +3474,10 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 			guarantees		= automaton_set_syntax_evaluate(tables, gr1_game->guarantees, &guarantees_count, set_name);
 			winning_region_automaton	= automaton_get_gr1_strategy(game_automaton, assumptions, assumptions_count
 					, guarantees, guarantees_count, true);
-					//, guarantees, guarantees_count, false);
 			bool nonreal	= false;
 			if(winning_region_automaton->transitions_count == 0){
 				nonreal	= true;
 				automaton_automaton_destroy(winning_region_automaton);
-				//dd_automaton = automaton_get_gr1_unrealizable_minimization_dd(game_automaton, assumptions, assumptions_count, guarantees, guarantees_count);
-				//winning_region_automaton = automaton_get_gr1_unrealizable_minimization(dd_automaton, assumptions, assumptions_count, guarantees, guarantees_count);
-				//automaton_automaton_destroy(dd_automaton);
 				if(is_diagnosis & DD_SEARCH)
 					winning_region_automaton = automaton_get_gr1_unrealizable_minimization_dd(game_automaton, assumptions, assumptions_count, guarantees, guarantees_count);
 				else if(is_diagnosis & LINEAR_SEARCH)
@@ -3494,17 +3495,7 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 			tables->composition_entries[main_index]->solved	= true;
 			tables->composition_entries[main_index]->valuation_count			= 1;
 			tables->composition_entries[main_index]->valuation.automaton_value	= winning_region_automaton;
-			/*
-			if(print_fsp){
-				char buf[150];
-				char cmd[350];
-				//automaton_automaton_print(tables->composition_entries[i]->valuation.automaton_value, true, true, true, "*\t", "*\t");
 
-				sprintf(buf, "%s_%d_%s.fsp", ctx_name, i, nonreal? "diag" : "strat");
-				automaton_automaton_print_fsp(winning_region_automaton, buf);
-				sprintf(buf, "%s_%d_%s.rep", ctx_name, i, nonreal? "diag" : "strat");
-				automaton_automaton_print_report(winning_region_automaton, buf);
-			}*/
 			if(nonreal){
 				//clear everything game related from diagnosis
 				for(i = 0; i < winning_region_automaton->context->global_fluents_count; i++)
@@ -3538,8 +3529,6 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 				ctx->global_fluents_count			= old_fluents_count;
 				ctx->global_fluents					= old_fluents;
 			}
-//			if(winning_region_automaton != NULL)
-//				automaton_automaton_destroy(winning_region_automaton);
 			for(j = 0; j < assumptions_count; j++)
 				free(assumptions[j]);
 			free(assumptions);
@@ -3591,18 +3580,31 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 		}
 	}
 	//export automata
-	//TODO:export automata
-
 	char buf[150];
-	char cmd[350];
-	for(i = 0; i < tables->composition_count; i++){
-		if(tables->composition_entries[i]->solved){
-				sprintf(buf, "%s_%s.fsp", ctx_name, tables->composition_entries[i]->valuation.automaton_value->name);
-				automaton_automaton_print_fsp(tables->composition_entries[i]->valuation.automaton_value, buf);
-				sprintf(buf, "%s_%s.rep", ctx_name, tables->composition_entries[i]->valuation.automaton_value->name);
-				automaton_automaton_print_report(tables->composition_entries[i]->valuation.automaton_value, buf);
+	for(j = 0; j < program->count; j++){
+		if(program->statements[j]->type == EXPORT_AUT){
+			for(i = 0; i < tables->composition_count; i++){
+				if(tables->composition_entries[i]->solved &&
+						strncmp(program->statements[j]->import_def->name,
+								tables->composition_entries[i]->valuation.automaton_value->name,
+								strlen(program->statements[j]->import_def->name))== 0){
+						automaton_automaton_print_report(tables->composition_entries[i]->valuation.automaton_value,
+								program->statements[j]->import_def->filename);
+				}
+			}
 		}
 	}
+	/*
+	 * 			for(i = 0; i < tables->composition_count; i++){
+				if(tables->composition_entries[i]->solved &&
+						strcmp(program->statem)){
+						sprintf(buf, "%s_%s.fsp", ctx_name, tables->composition_entries[i]->valuation.automaton_value->name);
+						automaton_automaton_print_fsp(tables->composition_entries[i]->valuation.automaton_value, buf);
+						sprintf(buf, "%s_%s.rep", ctx_name, tables->composition_entries[i]->valuation.automaton_value->name);
+						automaton_automaton_print_report(tables->composition_entries[i]->valuation.automaton_value, buf);
+				}
+			}
+	 * */
 
 	free(liveness_formulas); free(liveness_formulas_names);
 	automaton_parsing_tables_destroy(tables);

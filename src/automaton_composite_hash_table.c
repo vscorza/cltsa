@@ -72,7 +72,6 @@ void automaton_composite_hash_table_resize(automaton_composite_hash_table* table
 #if DEBUG_CT
 	printf("Composite hash table resized to %d slots %d bits shift\n", table->slots, table->shift);
 #endif
-	printf("PLOP\n");
 	uint32_t j, pos;
 	automaton_composite_hash_table_entry **even_node, **odd_node, *current_node, *next_node;
 	/* Move the nodes from the old table to the new table.
