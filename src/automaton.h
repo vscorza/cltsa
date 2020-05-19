@@ -80,11 +80,11 @@
 
 
 
-#define AUT_SER_OBJ_START "<"
-#define AUT_SER_OBJ_END ">"
-#define AUT_SER_ARRAY_START "["
-#define AUT_SER_ARRAY_END "]"
-#define AUT_SER_SEP ","
+#define AUT_SER_OBJ_START '<'
+#define AUT_SER_OBJ_END '>'
+#define AUT_SER_ARRAY_START '['
+#define AUT_SER_ARRAY_END ']'
+#define AUT_SER_SEP ','
 
 typedef uint8_t signal_t;
 typedef uint8_t fluent_count_t;
@@ -96,18 +96,23 @@ typedef uint16_t signal_bit_array_t;
 ==== ENUMS ==== 
 ****************/
 
-typedef enum aumaton_signal_type_enum{
+typedef enum automaton_signal_type_enum{
 	INPUT_SIG 	= 0,
 	OUTPUT_SIG	= 1,
 	INTERNAL_SIG	= 2
 } automaton_signal_type;
 
-typedef enum aumaton_synchronization_type_enum{
+typedef enum automaton_synchronization_type_enum{
 	CONCURRENT 	= 0,
 	ASYNCHRONOUS	= 1,
 	SYNCHRONOUS = 2
 } automaton_synchronization_type;
 
+typedef enum automaton_import_type_enum{
+	IMPORT_INT = 0,
+	IMPORT_BOOL = 1,
+	IMPORT_STRING = 2
+}automaton_import_type;
 /****************
 ==== STRUCTS ==== 
 ****************/
@@ -330,7 +335,41 @@ bool automaton_ranking_print_report(automaton_automaton *automaton,
 		automaton_concrete_bucket_list** ranking_list, uint32_t* max_delta, uint32_t guarantee_count,
 		char **guarantees);
 /** AUTOMATON IMPORTER **/
-char *automaton_automaton_load_string(FILE f, char *finalizers, uint32_t finalizers_count);
+char *automaton_automaton_copy_string(FILE *f, char *finalizers, uint32_t finalizers_count, char **buf, uint32_t *buf_size,
+		char *last_finalizer);
+char *automaton_automaton_load_string(FILE *f, char *finalizers, uint32_t finalizers_count, char **buf, uint32_t *buf_size,
+		char *last_finalizer);
+uint32_t automaton_automaton_load_int(FILE *f, char *finalizers, uint32_t finalizers_count, char **buf, uint32_t *buf_size,
+		char *last_finalizer);
+bool automaton_automaton_load_bool(FILE *f, char *finalizers, uint32_t finalizers_count, char **buf, uint32_t *buf_size,
+		char *last_finalizer);
+void *automaton_automaton_load_array(FILE *f, void* (*load_function)(FILE*, char*, uint32_t, char**, uint32_t*, char*),
+		char *finalizers, uint32_t finalizers_count, char **buf, uint32_t *buf_size,
+		char *last_finalizer, uint32_t *count, automaton_import_type type) ;
+void **automaton_automaton_load_array_array(FILE *f, void* (*load_function)(FILE*, char*, uint32_t, char**, uint32_t*, char*),
+		char *finalizers, uint32_t finalizers_count, char **buf, uint32_t *buf_size,
+		char *last_finalizer, uint32_t *count, uint32_t **inner_count, automaton_import_type type);
+bool *automaton_automaton_load_bool_array(FILE *f, char *finalizers, uint32_t finalizers_count, char **buf, uint32_t *buf_size,
+		char *last_finalizer, uint32_t *count);
+bool **automaton_automaton_load_bool_array_array(FILE *f, char *finalizers, uint32_t finalizers_count, char **buf, uint32_t *buf_size,
+		char *last_finalizer, uint32_t *count, uint32_t *inner_count);
+uint32_t *automaton_automaton_load_int_array(FILE *f, char *finalizers, uint32_t finalizers_count, char **buf, uint32_t *buf_size,
+		char *last_finalizer, uint32_t *count);
+uint32_t *automaton_automaton_load_int_array_array(FILE *f, char *finalizers, uint32_t finalizers_count, char **buf, uint32_t *buf_size,
+		char *last_finalizer, uint32_t *count, uint32_t *inner_count);
+char **automaton_automaton_load_string_array(FILE *f, char *finalizers, uint32_t finalizers_count, char **buf, uint32_t *buf_size,
+		char *last_finalizer, uint32_t *count);
+char ***automaton_automaton_load_string_array_array(FILE *f, char *finalizers, uint32_t finalizers_count, char **buf, uint32_t *buf_size,
+		char *last_finalizer, uint32_t *count, uint32_t *inner_count);
+void automaton_automaton_check_alphabet(FILE *f, automaton_alphabet *alphabet, char **buf, uint32_t *buf_size,
+		char *last_finalizer);
+void automaton_automaton_check_load_context(FILE *f, automaton_automata_context *ctx, char **buf, uint32_t *buf_size,
+		char *last_finalizer);
+automaton_signal_event *automaton_automaton_load_signal_event(FILE *f, char **buf, uint32_t *buf_size,
+		char *last_finalizer);
+automaton_transition *automaton_automaton_load_transition(FILE *f, automaton_automata_context *ctx,
+		uint32_t *local_alphabet, bool *input_alphabet,
+		char **buf, uint32_t *buf_size, char *last_finalizer);
 automaton_automaton *automaton_automaton_load_report(automaton_automata_context *ctx, char *filename);
 /** INDEXES VALUATION **/
 bool automaton_indexes_valuation_has_range(automaton_indexes_valuation* valuation, automaton_range* range);
