@@ -410,10 +410,10 @@ automaton_transition *automaton_automaton_load_transition(FILE *f, automaton_aut
 
 	automaton_transition	*transition	= automaton_transition_create(from_state, to_state);
 	uint32_t i;
-	for(i = 0; i < signals_count; i++)
+	for(i = 0; i < signals_count; i++){
 		automaton_transition_add_signal_event_ID(transition, ctx, local_alphabet[signals[i]],
-				input_alphabet[i]?INPUT_SIG:OUTPUT_SIG);
-
+				input_alphabet[signals[i]]?INPUT_SIG:OUTPUT_SIG);
+	}
 	free(signals);
 
 	return transition;
