@@ -3187,28 +3187,30 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 }
 
 automaton_automata_context* automaton_automata_context_create_from_syntax(automaton_program_syntax* program, char* ctx_name,
-		diagnosis_search_method is_diagnosis, char *results_filename){
+		diagnosis_search_method is_diagnosis, char *results_filename, bool append_result){
 	automaton_parsing_tables* tables	= automaton_parsing_tables_create();
 	automaton_automata_context* ctx		= malloc(sizeof(automaton_automata_context));
 	char buf[250];
 	FILE *experimental_results			= NULL;
-	struct timeval tval_before, tval_after, tval_ltl_model_build_result,
-		tval_model_build_result, tval_composition_result, tval_synthesis_result,
-		tval_minimization_result;
-	uint32_t results_minimization_steps, results_alphabet_size, results_guarantees_count,
-		results_assumptions_count, results_plant_states, results_plant_transitions,
-		results_minimization_states, results_minimization_transitions,
-		results_plant_controllable_transitions, results_minimization_controllable_transitions;
+	struct timeval tval_before = {0,0}, tval_after = {0,0}, tval_ltl_model_build_result = {0,0},
+		tval_model_build_result = {0,0}, tval_composition_result = {0,0}, tval_synthesis_result = {0,0},
+		tval_minimization_result = {0,0};
+	uint32_t results_minimization_steps = 0, results_alphabet_size = 0, results_guarantees_count = 0,
+		results_assumptions_count = 0, results_plant_states = 0, results_plant_transitions = 0,
+		results_minimization_states = 0, results_minimization_transitions = 0,
+		results_plant_controllable_transitions = 0, results_minimization_controllable_transitions = 0;
 	if(is_diagnosis != 0){
-		experimental_results = fopen(results_filename, "w");
+		experimental_results = fopen(results_filename, append_result?"a": "w");
 		if (experimental_results == NULL){
 			printf("Error opening file!\n");
 			return false;
 		}
-		fprintf(experimental_results, "name\trealizable\tltl_model_build_time\tmodel_build_time\tcomposition_time\t" \
-				"synthesis_time\tdiagnosis_time\tdiagnosis_steps\talphabet_size\tguarantees_count\t" \
-				"assumptions_count\tplant_states\tplant_transitions\tminimization_states\tminimizatoin_transitions\t" \
-				"plant_controllable_transitions\tminimization_controllable_transitions\tsearch_method\n");
+		if(!append_result)
+			fprintf(experimental_results, "name\trealizable\tltl_model_build_time\tmodel_build_time\tcomposition_time\t" \
+					"synthesis_time\tdiagnosis_time\talphabet_size\tguarantees_count\t" \
+					"assumptions_count\tplant_states\tplant_transitions\tminimization_states\tminimizatoin_transitions\t" \
+					"plant_controllable_transitions\tminimization_controllable_transitions\tsearch_method\n" \
+					"diagnosis_steps\tdiagnosis_times\tdiagnosis_sizes\n");
 	}
 
 #if VERBOSE
@@ -3430,6 +3432,10 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 	printf("\nSolving GR1\n");
 	fflush(stdout);
 #endif
+	uint32_t steps_size	= 32;
+	uint32_t steps	= 0;
+	uint32_t *steps_sizes = calloc(steps_size, sizeof(uint32_t));
+	struct timeval *steps_times	= calloc(steps_size, sizeof(struct timeval));
 	for(i = 0; i < program->count; i++){
 		if(program->statements[i]->type == GR_1_AUT){
 			gr1_game		= program->statements[i]->gr1_game_def;
@@ -3505,15 +3511,35 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 			winning_region_automaton	= automaton_get_gr1_strategy(game_automaton, assumptions, assumptions_count
 					, guarantees, guarantees_count, true);
 			nonreal	= false;
+			results_plant_states = game_automaton->transitions_count;
+			results_plant_transitions	= game_automaton->transitions_composite_count;
+			results_plant_controllable_transitions = 0;
+			for(j = 0; j < results_plant_states; j++){
+				for(k = 0; k < game_automaton->out_degree[j]; k++){
+					if( !(TRANSITION_IS_INPUT(&(game_automaton->transitions[j][k]))))
+						results_plant_controllable_transitions++;
+				}
+			}
 			if(winning_region_automaton->transitions_count == 0){
 				nonreal	= true;
 				automaton_automaton_destroy(winning_region_automaton);
 				if(is_diagnosis & DD_SEARCH)
-					winning_region_automaton = automaton_get_gr1_unrealizable_minimization_dd(game_automaton, assumptions, assumptions_count, guarantees, guarantees_count);
+					winning_region_automaton = automaton_get_gr1_unrealizable_minimization_dd(game_automaton, assumptions, assumptions_count, guarantees, guarantees_count,
+							&steps, &steps_sizes, &steps_times, &steps_size);
 				else if(is_diagnosis & LINEAR_SEARCH)
-					winning_region_automaton = automaton_get_gr1_unrealizable_minimization(game_automaton, assumptions, assumptions_count, guarantees, guarantees_count);
+					winning_region_automaton = automaton_get_gr1_unrealizable_minimization(game_automaton, assumptions, assumptions_count, guarantees, guarantees_count,
+							&steps, &steps_sizes, &steps_times, &steps_size);
 
 				automaton_automaton_remove_unreachable_states(winning_region_automaton);
+				results_minimization_states = winning_region_automaton->transitions_count;
+				results_minimization_transitions	= winning_region_automaton->transitions_composite_count;
+				results_minimization_controllable_transitions = 0;
+				for(j = 0; j < results_minimization_states; j++){
+					for(k = 0; k < winning_region_automaton->out_degree[j]; k++){
+						if( !(TRANSITION_IS_INPUT(&(winning_region_automaton->transitions[j][k]))))
+							results_minimization_controllable_transitions++;
+					}
+				}
 			}
 			main_index = automaton_parsing_tables_add_entry(tables, COMPOSITION_ENTRY_AUT, gr1_game->name, winning_region_automaton);
 
@@ -3641,6 +3667,34 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 			}
 	 * */
 
+	//PRINT RESULTS
+	if(is_diagnosis != 0){
+		fprintf(experimental_results, "%s\t%s\t%ld.%06ld\t%ld.%06ld\t%ld.%06ld\t" \
+				"%ld.%06ld\t%ld.%06ld\t%d\t%d\t" \
+				"%d\t%d\t%d\t%d\t%d\t" \
+				"%d\t%d\t%s\t" \
+				"%d\t[",
+				ctx_name, nonreal? "false":"true", tval_ltl_model_build_result.tv_sec, tval_ltl_model_build_result.tv_usec,
+						tval_model_build_result.tv_sec, tval_model_build_result.tv_usec,
+						tval_composition_result.tv_sec, tval_composition_result.tv_usec,
+						tval_synthesis_result.tv_sec, tval_synthesis_result.tv_usec,
+						tval_minimization_result.tv_sec, tval_minimization_result.tv_usec,
+						ctx->global_alphabet->count, guarantees_count, assumptions_count,
+						results_plant_states, results_plant_transitions, results_plant_controllable_transitions,
+						results_minimization_states, results_minimization_transitions, results_minimization_controllable_transitions,
+						is_diagnosis & DD_SEARCH ? "DD" : "linear",
+						steps);
+		for(i = 0; i < steps; i++){
+			fprintf(experimental_results, "%ld.%06ld%s", steps_times[i].tv_sec, steps_times[i].tv_usec,
+					i == steps - 1 ?"]\t[" : ",");
+		}
+		for(i = 0; i < steps; i++){
+			fprintf(experimental_results, "%d%s", steps_sizes[i], i == steps - 1 ?"]\n" : ",");
+		}
+		if(steps == 0)fprintf(experimental_results,"]\t[]\n");
+		fclose(experimental_results);
+	}
+	free(steps_times); free(steps_sizes);
 	free(liveness_formulas); free(liveness_formulas_names);
 	automaton_parsing_tables_destroy(tables);
 

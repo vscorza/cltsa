@@ -2657,7 +2657,8 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd(automaton_au
 #endif
 	automaton_automaton *minimized	= automaton_automaton_clone(master);
 	automaton_automaton *result 	= automaton_get_gr1_unrealizable_minimization_dd2(master, minimized, assumptions, assumptions_count, guarantees, guarantees_count
-			, partition_bit_vector, transitions_kept_size, partitions_count, t_count, t_size, t_states, t_indexes);
+			, partition_bit_vector, transitions_kept_size, partitions_count, t_count, t_size, t_states, t_indexes, steps
+			, steps_sizes, steps_times, steps_size);
 	free(t_states); free(t_indexes); free(partition_bit_vector);
 	//print rankings
 	automaton_automaton* strategy = automaton_get_gr1_strategy(result, assumptions, assumptions_count,
@@ -2835,10 +2836,11 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2(automaton_a
 			}
 			partitions_count = 2;
 			gettimeofday(&tval_after, NULL);
-			timersub(&tval_after, &tval_before, (*steps_times)[*steps]);
+			timersub(&tval_after, &tval_before, &((*steps_times)[*steps]));
 			(*steps_sizes)[*steps]	= minimization->transitions_composite_count;
 			return_automaton = automaton_get_gr1_unrealizable_minimization_dd2(master, minimization, assumptions, assumptions_count, guarantees, guarantees_count
-					, partition_bit_vector, transitions_kept_size, partitions_count, t_count, t_size, t_states, t_indexes, steps);
+					, partition_bit_vector, transitions_kept_size, partitions_count, t_count, t_size, t_states, t_indexes, steps
+					, steps_sizes, steps_times, steps_size);
 			automaton_automaton_destroy(inner_automaton);
 			automaton_automaton_destroy(minimization);
 			return return_automaton;
@@ -2917,10 +2919,11 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2(automaton_a
 #endif
 			partitions_count = max(partitions_count - 1, 2);
 			gettimeofday(&tval_after, NULL);
-			timersub(&tval_after, &tval_before, (*steps_times)[*steps]);
+			timersub(&tval_after, &tval_before, &((*steps_times)[*steps]));
 			(*steps_sizes)[*steps]	= minimization->transitions_composite_count;
 			return_automaton = automaton_get_gr1_unrealizable_minimization_dd2(master, minimization, assumptions, assumptions_count, guarantees, guarantees_count
-					, partition_bit_vector, transitions_kept_size, partitions_count, t_count, t_size, t_states, t_indexes);
+					, partition_bit_vector, transitions_kept_size, partitions_count, t_count, t_size, t_states, t_indexes
+					, steps, steps_sizes, steps_times, steps_size);
 			automaton_automaton_destroy(inner_automaton);
 			automaton_automaton_destroy(minimization);
 			return return_automaton;
@@ -2933,10 +2936,11 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2(automaton_a
 			printf("(refining n)\n");
 #endif
 		gettimeofday(&tval_after, NULL);
-		timersub(&tval_after, &tval_before, (*steps_times)[*steps]);
+		timersub(&tval_after, &tval_before, &((*steps_times)[*steps]));
 		(*steps_sizes)[*steps]	= minimization->transitions_composite_count;
 		return_automaton	= automaton_get_gr1_unrealizable_minimization_dd2(master, inner_automaton, assumptions, assumptions_count, guarantees, guarantees_count
-				, partition_bit_vector, transitions_kept_size, partitions_count, t_count, t_size, t_states, t_indexes);
+				, partition_bit_vector, transitions_kept_size, partitions_count, t_count, t_size, t_states, t_indexes
+				, steps, steps_sizes, steps_times, steps_size);
 		automaton_automaton_destroy(inner_automaton);
 		return return_automaton;
 	}else{
@@ -2944,15 +2948,15 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2(automaton_a
 			printf("(minimal)\n");
 #endif
 		gettimeofday(&tval_after, NULL);
-		timersub(&tval_after, &tval_before, (*steps_times)[*steps]);
+		timersub(&tval_after, &tval_before, &((*steps_times)[*steps]));
 		(*steps_sizes)[*steps]	= minimized->transitions_composite_count;
 		if(automaton_is_gr1_realizable(inner_automaton, assumptions, assumptions_count,
 				guarantees, guarantees_count) || inner_automaton->out_degree[inner_automaton->initial_states[0]] == 0){
 			printf("Inner automaton was realizable, minimization %s\n", automaton_is_gr1_realizable(minimized, assumptions, assumptions_count,
 					guarantees, guarantees_count)? "too" :"was not" );
 			automaton_automaton_destroy(inner_automaton);
-			inner_automaton = automaton_get_gr1_unrealizable_minimization(minimized, assumptions, assumptions_count, guarantees,
-					guarantees_count);
+			inner_automaton = automaton_get_gr1_unrealizable_minimization(minimized, assumptions, assumptions_count,
+					guarantees, guarantees_count, steps, steps_sizes, steps_times, steps_size);
 			//exit(-1);
 		}
 		return inner_automaton;
@@ -2962,7 +2966,6 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2(automaton_a
 automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_automaton* game_automaton, char** assumptions, uint32_t assumptions_count
 		, char** guarantees, uint32_t guarantees_count, uint32_t *steps, uint32_t **steps_sizes
 		, struct timeval **steps_times, uint32_t *steps_size){
-
 	//candidate transitions lists
 	uint32_t t_size = LIST_INITIAL_SIZE, t_count = 0;
 	uint32_t *t_states	= calloc(t_size, sizeof(uint32_t)), *t_indexes = calloc(t_size, sizeof(uint32_t));
@@ -3011,8 +3014,11 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_autom
 	automaton_automaton *minimization	= automaton_automaton_clone(master);
 
 	bool minimized	= false;
-	uint32_t steps = 0;
+	struct timeval tval_before, tval_after;
 	while(t_count > 0){
+		(*steps)++;
+		automaton_minimization_adjust_steps_report(&steps, steps_sizes, steps_times, steps_size);
+		gettimeofday(&tval_before, NULL);
 		//get next candidate
 		current_transition	= &(master->transitions[t_states[t_count - 1]][t_indexes[t_count - 1]]); t_count--;
 		//do not consider missing transitions or transitions that would induce deadlocks
@@ -3022,7 +3028,6 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_autom
 				break;
 			}
 
-			steps++;
 			current_transition	= &(master->transitions[t_states[t_count - 1]][t_indexes[t_count - 1]]); t_count--;
 		}
 		if(minimized){
@@ -3045,7 +3050,7 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_autom
 			r_indexes	= ptr;					r_size		= new_size;
 		}
 		r_states[r_count]	= t_states[t_count];	r_indexes[r_count++]	= t_indexes[t_count];
-		steps++;
+
 		automaton_automaton_remove_transition(minimization, current_transition);
 		automaton_automaton_remove_deadlocks(minimization);
 		automaton_automaton_update_valuations(minimization);
@@ -3077,6 +3082,9 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_autom
 			printf("Minimizing [%d,%d,N,%d]\n", t_count, r_count, from_step);
 #endif
 		}
+		gettimeofday(&tval_after, NULL);
+		timersub(&tval_after, &tval_before, &((*steps_times)[*steps]));
+		(*steps_sizes)[*steps]	= minimization->transitions_composite_count;
 		fflush(stdout);
 	}
 

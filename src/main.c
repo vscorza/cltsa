@@ -74,7 +74,10 @@ void run_parse_test_local(char* test_file, char* test_name, char* result_name,
 
 	bool PRINT_FSP				= true;
 
-	automaton_automata_context* ctx		= automaton_automata_context_create_from_syntax(parsed_program, result_name, diagnosis_method);
+	char dat_name[256];
+	sprintf(dat_name, "%s.dat", result_name);
+	automaton_automata_context* ctx		= automaton_automata_context_create_from_syntax(parsed_program, result_name,
+			diagnosis_method, dat_name, false);
     automaton_automata_context_destroy(ctx);
     automaton_program_syntax_destroy(parsed_program);
     fclose(yyin);
@@ -1378,12 +1381,14 @@ int main (int argc, char** argv){
 		//run_parse_test("tests/genbuf_6_sndrs_no_automaton.fsp", "GenBuf 6 sndrs");
 
 
+		run_diagnosis("tests/genbuf_1_sndrs_no_automaton.fsp", "GenBuf 1 sndrs");
+
 		//run_parse_test("tests/genbuf_1_sndrs_simplified.fsp", "GenBuf 1 sndrs (simplified)");
 		//run_parse_test("tests/mixed_3_signals_2_labels.fsp", "mixed model 3 signals 2 labels");
 		//run_parse_test("tests/two_floors_lift.fsp", "lift 2 floors");//lift 2 floors
 		//GENERAL TESTS
 		//run_all_tests();
-		run_functional_tests();
+		//run_functional_tests();
 
 		//run_parse_test("tests/current_sut.fsp", "current_SUT");
 		//run_automaton_composite_hash_table_tests();

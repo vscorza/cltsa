@@ -10,13 +10,13 @@ TODO:
 		- extend automaton_automata_context_create_from_syntax with reporting (search method, file destination, controller against E'  and writing)
 			X file destination
 			X search method selection (dd, linear, both)
-			X controller || E' (provide controllable fsp, retrieve controller, compose against E', report size and resulting structure)
+			- controller || E' (provide controllable fsp, retrieve controller, compose against E', report size and resulting structure)
 			- write selected values, search method included
 		X extend run_parse_test_local
 		- add run_tests parameter to cltsa with list of tests
 		- test functionality
 		
-	- add report to linear minimization
+	X add report to linear minimization
 	- write missing params to results
 	- integrate with main
 **********************	

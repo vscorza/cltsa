@@ -10,6 +10,7 @@
 #include <time.h>
 #include <inttypes.h>
 #include <math.h>
+#include <sys/time.h>
 #include "automaton_utils.h"
 #include "parser_utils.h"
 #include "bucket_list.h"
@@ -65,7 +66,6 @@
 #define SET_BITVECTOR_BIT(arr,index)     ( arr[(index/BITVECTOR_ENTRY_SIZE)] |= (1 << (index%BITVECTOR_ENTRY_SIZE)) )
 #define CLEAR_BITVECTOR_BIT(arr,index)   ( arr[(index/BITVECTOR_ENTRY_SIZE)] &= ~(1 << (index%BITVECTOR_ENTRY_SIZE)) )
 
-
 #define TEST_TRANSITION_BIT(t,index)    ( (t->signals[((index+1)/TRANSITION_ENTRY_SIZE)]) & ((signal_bit_array_t)1 << ((index+1)%TRANSITION_ENTRY_SIZE)) )
 #define SET_TRANSITION_BIT(t,index)     ( (t->signals[((index+1)/TRANSITION_ENTRY_SIZE)]) |= ((signal_bit_array_t)1 << ((index+1)%TRANSITION_ENTRY_SIZE)) )
 #define CLEAR_TRANSITION_BIT(t,index)   ( (t->signals[((index+1)/TRANSITION_ENTRY_SIZE)]) &= ~(((signal_bit_array_t)1 << ((index+1)%TRANSITION_ENTRY_SIZE))) )
@@ -77,8 +77,6 @@
 #define TRANSITION_SET_INPUT(transition)	(transition)->signals[0] |= ((signal_bit_array_t)0x1);
 #define TRANSITION_CLEAR_INPUT(transition)	(transition)->signals[0] &= ~((signal_bit_array_t)0x1);
 #define TRANSITION_EQUALS(t1, t2, result) result = true; result &= t1->state_from == t2->state_from; result &= t1->state_to == t2->state_to; uint32_t _p_ = 0;  for(_p_ = 0; _p_ < FIXED_SIGNALS_COUNT; _p_++)result &= t1->signals[_p_] == t2->signals[_p_];
-
-
 
 #define AUT_SER_OBJ_START "<"
 #define AUT_SER_OBJ_END ">"
