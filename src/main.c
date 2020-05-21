@@ -58,7 +58,7 @@ void print_test_result(bool passed, char* name, char* description){
 }
 
 void run_parse_test_local(char* test_file, char* test_name, char* result_name,
-		diagnosis_search_method diagnosis_method){
+		diagnosis_search_method diagnosis_method, bool append_results){
 	FILE *fd;
     if (!(yyin = fopen(test_file, "r")))
     {
@@ -77,7 +77,7 @@ void run_parse_test_local(char* test_file, char* test_name, char* result_name,
 	char dat_name[256];
 	sprintf(dat_name, "%s.dat", result_name);
 	automaton_automata_context* ctx		= automaton_automata_context_create_from_syntax(parsed_program, result_name,
-			diagnosis_method, dat_name, false);
+			diagnosis_method, dat_name, append_results);
     automaton_automata_context_destroy(ctx);
     automaton_program_syntax_destroy(parsed_program);
     fclose(yyin);
@@ -86,13 +86,13 @@ void run_parse_test_local(char* test_file, char* test_name, char* result_name,
 void run_parse_test(char* test_file, char* test_name){
 	char buf[255];
 	snprintf(buf, sizeof(buf),"results/%s", test_name);
-	run_parse_test_local(test_file, test_name, buf, 0);
+	run_parse_test_local(test_file, test_name, buf, DD_SEARCH, false);
 }
 
-void run_diagnosis(char* test_file, char* test_name){
+void run_diagnosis(char* test_file, char* test_name, bool append_results){
 	char buf[255];
 	snprintf(buf, sizeof(buf),"results/%s", test_name);
-	run_parse_test_local(test_file, test_name, buf, DD_SEARCH);
+	run_parse_test_local(test_file, test_name, buf, DD_SEARCH, append_results);
 }
 
 void run_automaton_export_test(){
@@ -1267,7 +1267,7 @@ void run_all_tests(){
 void print_help(){
 	printf("CLTS modeling and synthesis tool usage\n");
 	printf("\t-h\tprints this help message\n");
-	printf("\t-r filename\t inteprets specification located at [filename]\n");
+	printf("\t-r filename [...] \t interprets specification located at [filename [...]]\n");
 	printf("\t--all-tests\t runs all tests\n");
 	printf("\t--func-tests\t runs functional tests\n");
 	printf("\t--load-tests\t runs load tests\n");
@@ -1327,9 +1327,11 @@ int main (int argc, char** argv){
 					result_name = strrchr(argv[i], '/');
 					if(result_name == NULL)result_name = argv[i];
 					else result_name++;
-					snprintf(result_buff, sizeof(result_buff),"%s/%s", folder, 	result_name);
-					snprintf(name_buff, sizeof(name_buff), "Running:%s", argv[i]);
-					run_parse_test_local(argv[i], name_buff, result_buff, DD_SEARCH);
+					if(i == 2){
+						snprintf(result_buff, sizeof(result_buff),"%s/%s", folder, 	result_name);
+						snprintf(name_buff, sizeof(name_buff), "Running:%s", argv[i]);
+					}
+					run_parse_test_local(argv[i], name_buff, result_buff, DD_SEARCH, i != 2);
 				}
 			}
 		}
@@ -1375,17 +1377,17 @@ int main (int argc, char** argv){
 		//run_parse_test("tests/img_test_1.fsp", "Img test 1");
 
 		//run_parse_test("tests/genbuf_1_sndrs_no_automaton.fsp", "GenBuf 1 sndrs");
-		//run_parse_test("tests/genbuf_2_sndrs_no_automaton.fsp", "GenBuf 2 sndrs");
-		//run_parse_test("tests/genbuf_3_sndrs_no_automaton.fsp", "GenBuf 3 sndrs V2");
+		run_parse_test("tests/genbuf_2_sndrs_no_automaton.fsp", "GenBuf 2 sndrs");
+		//run_parse_test("tests/genbuf_4_sndrs_no_automaton.fsp", "GenBuf 3 sndrs V2");
+		//run_parse_test_local("tests/genbuf_3_sndrs_no_automaton.fsp", "GenBuf 3 sndrs V2", "tests/genbuf_3_sndrs_no_automaton.dat", 0, true);
+		//run_parse_test_local("tests/genbuf_3_sndrs_no_automaton.fsp", "GenBuf 3 sndrs V2", "tests/genbuf_3_sndrs_no_automaton.dat", DD_SEARCH, false);
 		//run_parse_test("tests/genbuf_5_sndrs_no_automaton.fsp", "GenBuf 5 sndrs");
 		//run_parse_test("tests/genbuf_6_sndrs_no_automaton.fsp", "GenBuf 6 sndrs");
-
-
-		run_diagnosis("tests/genbuf_1_sndrs_no_automaton.fsp", "GenBuf 1 sndrs");
 
 		//run_parse_test("tests/genbuf_1_sndrs_simplified.fsp", "GenBuf 1 sndrs (simplified)");
 		//run_parse_test("tests/mixed_3_signals_2_labels.fsp", "mixed model 3 signals 2 labels");
 		//run_parse_test("tests/two_floors_lift.fsp", "lift 2 floors");//lift 2 floors
+		//run_parse_test("tests/nonreal_test_1.fsp", "non realizable test 1");
 		//GENERAL TESTS
 		//run_all_tests();
 		//run_functional_tests();

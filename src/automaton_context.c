@@ -3199,19 +3199,7 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 		results_assumptions_count = 0, results_plant_states = 0, results_plant_transitions = 0,
 		results_minimization_states = 0, results_minimization_transitions = 0,
 		results_plant_controllable_transitions = 0, results_minimization_controllable_transitions = 0;
-	if(is_diagnosis != 0){
-		experimental_results = fopen(results_filename, append_result?"a": "w");
-		if (experimental_results == NULL){
-			printf("Error opening file!\n");
-			return false;
-		}
-		if(!append_result)
-			fprintf(experimental_results, "name\trealizable\tltl_model_build_time\tmodel_build_time\tcomposition_time\t" \
-					"synthesis_time\tdiagnosis_time\talphabet_size\tguarantees_count\t" \
-					"assumptions_count\tplant_states\tplant_transitions\tminimization_states\tminimizatoin_transitions\t" \
-					"plant_controllable_transitions\tminimization_controllable_transitions\tsearch_method\n" \
-					"diagnosis_steps\tdiagnosis_times\tdiagnosis_sizes\n");
-	}
+
 
 #if VERBOSE
 	printf("Creating automaton %s\n", ctx_name);
@@ -3510,6 +3498,9 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 			guarantees		= automaton_set_syntax_evaluate(tables, gr1_game->guarantees, &guarantees_count, set_name);
 			winning_region_automaton	= automaton_get_gr1_strategy(game_automaton, assumptions, assumptions_count
 					, guarantees, guarantees_count, true);
+			free(winning_region_automaton->name);
+			winning_region_automaton->name	= NULL;
+			aut_dupstr(&(winning_region_automaton->name), gr1_game->name);
 			nonreal	= false;
 			results_plant_states = game_automaton->transitions_count;
 			results_plant_transitions	= game_automaton->transitions_composite_count;
@@ -3520,7 +3511,7 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 						results_plant_controllable_transitions++;
 				}
 			}
-			if(winning_region_automaton->transitions_count == 0){
+			if(winning_region_automaton->transitions_count == 0 && is_diagnosis != 0){
 				nonreal	= true;
 				automaton_automaton_destroy(winning_region_automaton);
 				if(is_diagnosis & DD_SEARCH)
@@ -3669,6 +3660,17 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 
 	//PRINT RESULTS
 	if(is_diagnosis != 0){
+		experimental_results = fopen(results_filename, append_result?"a": "w");
+		if (experimental_results == NULL){
+			printf("Error opening file!\n");
+			return false;
+		}
+		if(!append_result)
+			fprintf(experimental_results, "name\trealizable\tltl_model_build_time\tmodel_build_time\tcomposition_time\t" \
+					"synthesis_time\tdiagnosis_time\talphabet_size\tguarantees_count\t" \
+					"assumptions_count\tplant_states\tplant_transitions\tminimization_states\tminimizatoin_transitions\t" \
+					"plant_controllable_transitions\tminimization_controllable_transitions\tsearch_method\n" \
+					"diagnosis_steps\tdiagnosis_times\tdiagnosis_sizes\n");
 		fprintf(experimental_results, "%s\t%s\t%ld.%06ld\t%ld.%06ld\t%ld.%06ld\t" \
 				"%ld.%06ld\t%ld.%06ld\t%d\t%d\t" \
 				"%d\t%d\t%d\t%d\t%d\t" \

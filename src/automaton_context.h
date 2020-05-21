@@ -10,6 +10,7 @@
 
 #include "automaton.h"
 #include "parser_utils.h"
+#include "automaton_utils.h"
 
 #define GLOBAL_ALPHABET_NAME_AUT		"Global_Alphabet"
 #define CONTROLLABLE_ALPHABET_NAME_AUT	"Controllable_Alphabet"

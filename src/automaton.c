@@ -2937,7 +2937,7 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2(automaton_a
 #endif
 		gettimeofday(&tval_after, NULL);
 		timersub(&tval_after, &tval_before, &((*steps_times)[*steps]));
-		(*steps_sizes)[*steps]	= minimization->transitions_composite_count;
+		(*steps_sizes)[*steps]	= inner_automaton->transitions_composite_count;
 		return_automaton	= automaton_get_gr1_unrealizable_minimization_dd2(master, inner_automaton, assumptions, assumptions_count, guarantees, guarantees_count
 				, partition_bit_vector, transitions_kept_size, partitions_count, t_count, t_size, t_states, t_indexes
 				, steps, steps_sizes, steps_times, steps_size);

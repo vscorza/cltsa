@@ -1,4 +1,4 @@
-//GenBuf example taken from Synthesis of Reactive(1) Designs 3 senders
+//GenBuf example taken from Synthesis of Reactive(1) Designs 4 senders
 set Global_Alphabet = {}
 set Controllable_Alphabet = {}
 

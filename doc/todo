@@ -11,40 +11,14 @@ TODO:
 			X file destination
 			X search method selection (dd, linear, both)
 			- controller || E' (provide controllable fsp, retrieve controller, compose against E', report size and resulting structure)
-			- write selected values, search method included
+			X write selected values, search method included
 		X extend run_parse_test_local
-		- add run_tests parameter to cltsa with list of tests
-		- test functionality
+		X add run_tests parameter to cltsa with list of tests
+		X test functionality
 		
 	X add report to linear minimization
 	- write missing params to results
 	- integrate with main
-**********************	
-	struct timeval tval_before, tval_after, tval_ltl_model_build_result,
-		tval_model_build_result, tval_composition_result, tval_synthesis_result,
-		tval_minimization_result;
-	uint32_t results_minimization_steps, results_alphabet_size, results_guarantees_count,
-		results_assumptions_count, results_plant_states, results_plant_transitions,
-		results_minimization_states, results_minimization_transitions,
-		results_plant_controllable_transitions, results_minimization_controllable_transitions;
-	if(is_diagnosis != 0){
-		experimental_results = fopen(results_filename, "w");
-		if (experimental_results == NULL){
-			printf("Error opening file!\n");
-			return false;
-		}
-		fprintf(experimental_results, "name\trealizable\tltl_model_build_time\tmodel_build_time\tcomposition_time\t" \
-				"synthesis_time\tdiagnosis_time\tdiagnosis_steps\talphabet_size\tguarantees_count\t" \
-				"assumptions_count\tplant_states\tplant_transitions\tminimization_states\tminimizatoin_transitions\t" \
-				"plant_controllable_transitions\tminimization_controllable_transitions\tsearch_method\n");
-	}
-
-	gettimeofday(&tval_before, NULL);
-	gettimeofday(&tval_after, NULL);
-	timersub(&tval_after, &tval_before, &tval_result);
-	printf("Time elapsed: %ld.%06ld\n", (long int)tval_result.tv_sec, (long int)tval_result.tv_usec);
-******************
-	
 	- run tests
 	- generate report
 	- write missing test cases

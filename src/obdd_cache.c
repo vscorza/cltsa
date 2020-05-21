@@ -432,7 +432,8 @@ void obdd_table_resize(obdd_table* table, uint32_t level){
 	table->levels[level]	= calloc(table->slots[level], sizeof(obdd_node*));
 
 	uint32_t j, pos;
-	obdd_node **even_node, **odd_node, *current_node, *next_node;
+	obdd_node **even_node, **odd_node, **last_node, *current_node, *next_node,
+	*even_holder = NULL, *odd_holder = NULL;
 	/* Move the nodes from the old table to the new table.
 	** This code depends on the type of hash function.
 	** It assumes that the effect of doubling the size of the table
@@ -440,16 +441,24 @@ void obdd_table_resize(obdd_table* table, uint32_t level){
 	** The additional bit is the LSB. */
 	if(table->levels_composite_counts[level] < table->min_keys[level]){
 		for (j = 0; j < old_slots; j++) {
+			if(table->levels[level][j>>1]!= NULL){
+				current_node = table->levels[level][j>>1];
+				while(current_node != NULL){
+					last_node	= &(current_node->next);
+					current_node	= current_node->next;
+				}
+			}else{
+				last_node = &(table->levels[level][j>>1]);
+			}
 			current_node = old_level[j];
-			even_node = &(table->levels[level][j>>1]);
+
 			while (current_node != NULL) {
 				next_node = current_node->next;
-				pos = ddHash(current_node->high_obdd, current_node->low_obdd, table->shift[level]);
-				*even_node = current_node;
-				even_node = &(current_node->next);
+				*last_node = current_node;
+				last_node = &(current_node->next);
 				current_node = next_node;
 			}
-			*even_node = NULL;
+			*last_node = NULL;
 		}
 	}else{
 		for (j = 0; j < old_slots; j++) {
@@ -461,9 +470,11 @@ void obdd_table_resize(obdd_table* table, uint32_t level){
 				pos = ddHash(current_node->high_obdd, current_node->low_obdd, table->shift[level]);
 				if (pos & 1) {
 					*odd_node = current_node;
+					odd_holder	= current_node;
 					odd_node = &(current_node->next);
 				} else {
 					*even_node = current_node;
+					even_holder	= current_node;
 					even_node = &(current_node->next);
 				}
 				current_node = next_node;
@@ -553,6 +564,8 @@ void obdd_table_node_add(obdd_table* table, obdd_node *node){
 					|| ((current_fast_node->low_obdd == node->low_obdd) && (current_fast_node->high_obdd < node->high_obdd)))){
 				previous_fast_node	= current_fast_node;
 				current_fast_node	= current_fast_node->next;
+			}else if(current_fast_node->low_obdd == node->low_obdd && current_fast_node->high_obdd == node->high_obdd){
+				return;
 			}else{
 				table->live_fast_nodes++;
 				if(table->live_fast_nodes > table->max_live_fast_nodes)table->max_live_fast_nodes = table->live_fast_nodes;
