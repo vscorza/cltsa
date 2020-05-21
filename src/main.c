@@ -1377,10 +1377,11 @@ int main (int argc, char** argv){
 		//run_parse_test("tests/img_test_1.fsp", "Img test 1");
 
 		//run_parse_test("tests/genbuf_1_sndrs_no_automaton.fsp", "GenBuf 1 sndrs");
-		run_parse_test("tests/genbuf_2_sndrs_no_automaton.fsp", "GenBuf 2 sndrs");
-		//run_parse_test("tests/genbuf_4_sndrs_no_automaton.fsp", "GenBuf 3 sndrs V2");
+		//run_parse_test("tests/genbuf_2_sndrs_no_automaton.fsp", "GenBuf 2 sndrs");
 		//run_parse_test_local("tests/genbuf_3_sndrs_no_automaton.fsp", "GenBuf 3 sndrs V2", "tests/genbuf_3_sndrs_no_automaton.dat", 0, true);
-		//run_parse_test_local("tests/genbuf_3_sndrs_no_automaton.fsp", "GenBuf 3 sndrs V2", "tests/genbuf_3_sndrs_no_automaton.dat", DD_SEARCH, false);
+		//run_parse_test("tests/genbuf_4_sndrs_no_automaton.fsp", "GenBuf 3 sndrs V2");
+
+		run_parse_test_local("tests/genbuf_3_sndrs_no_automaton.fsp", "GenBuf 3 sndrs V2", "tests/genbuf_3_sndrs_no_automaton.dat", DD_SEARCH, false);
 		//run_parse_test("tests/genbuf_5_sndrs_no_automaton.fsp", "GenBuf 5 sndrs");
 		//run_parse_test("tests/genbuf_6_sndrs_no_automaton.fsp", "GenBuf 6 sndrs");
 

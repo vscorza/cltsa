@@ -1,24 +1,7 @@
 TODO:
 =====
 - build test data
-	X design values
-		X times (model build, composition, synthesis x each step)
-		X alphabet size, guarantees assumptions size, original states/(controllable)transitions, minimization states/(controllable)transitions x each step
-		X C || E' size
-		X report for dd and for linear search
-	- report values
-		- extend automaton_automata_context_create_from_syntax with reporting (search method, file destination, controller against E'  and writing)
-			X file destination
-			X search method selection (dd, linear, both)
-			- controller || E' (provide controllable fsp, retrieve controller, compose against E', report size and resulting structure)
-			X write selected values, search method included
-		X extend run_parse_test_local
-		X add run_tests parameter to cltsa with list of tests
-		X test functionality
-		
-	X add report to linear minimization
-	- write missing params to results
-	- integrate with main
+	- controller || E' (provide controllable fsp, retrieve controller, compose against E', report size and resulting structure)
 	- run tests
 	- generate report
 	- write missing test cases

@@ -366,7 +366,6 @@ obdd_table* obdd_table_create(obdd_mgr *mgr){
 	new_table->slots = calloc(new_table->size, sizeof(uint32_t));
 	new_table->shift = calloc(new_table->size, sizeof(uint32_t));
 	new_table->max_keys = calloc(new_table->size, sizeof(uint32_t));
-	new_table->min_keys = calloc(new_table->size, sizeof(uint32_t));
 	for(i = 0; i < new_table->size; i++){
 		new_table->slots[i]	= 8;
 		while (new_table->slots[i] < OBDD_TABLE_SLOTS)new_table->slots[i] <<= 1;
@@ -378,7 +377,6 @@ obdd_table* obdd_table_create(obdd_mgr *mgr){
 		}
 		new_table->shift[i] = sizeof(uint32_t) * 8 - log_value;
 		new_table->max_keys[i] = new_table->slots[i] * OBDD_TABLE_MAX_DENSITY;
-		new_table->min_keys[i] = new_table->slots[i] / OBDD_TABLE_MAX_DENSITY;
 	}
 
 	new_table->levels	= calloc(new_table->size, sizeof(obdd_node**));
@@ -409,82 +407,41 @@ obdd_table* obdd_table_create(obdd_mgr *mgr){
 }obdd_table;
  * */
 void obdd_table_resize(obdd_table* table, uint32_t level){
-	/* Compute the new size of the subtable. */
-	if(table->levels_composite_counts[level] >= table->min_keys[level]
-		&& table->levels_composite_counts[level] <= table->max_keys[level]){
-		return;
-	}
-
 	uint32_t old_slots	= table->slots[level];
 	uint32_t old_shift	= table->shift[level];
 	obdd_node **old_level	= table->levels[level];
 
-	if(table->levels_composite_counts[level] < table->min_keys[level]){
-		if(old_slots <= 64)return;
-		table->slots[level] = old_slots >> 1;
-		table->shift[level] = old_shift + 1;
-
-	}else{
-		table->slots[level] = old_slots << 1;
-		table->shift[level] = old_shift - 1;
-	}
-
+	/* Compute the new size of the subtable. */
+	table->slots[level] = old_slots << 1;
+	table->shift[level] = old_shift - 1;
+	table->max_keys[level] = table->slots[level] * OBDD_TABLE_MAX_DENSITY;
 	table->levels[level]	= calloc(table->slots[level], sizeof(obdd_node*));
 
 	uint32_t j, pos;
-	obdd_node **even_node, **odd_node, **last_node, *current_node, *next_node,
-	*even_holder = NULL, *odd_holder = NULL;
+	obdd_node **even_node, **odd_node, *current_node, *next_node;
 	/* Move the nodes from the old table to the new table.
 	** This code depends on the type of hash function.
 	** It assumes that the effect of doubling the size of the table
 	** is to retain one more bit of the 32-bit hash value.
 	** The additional bit is the LSB. */
-	if(table->levels_composite_counts[level] < table->min_keys[level]){
-		for (j = 0; j < old_slots; j++) {
-			if(table->levels[level][j>>1]!= NULL){
-				current_node = table->levels[level][j>>1];
-				while(current_node != NULL){
-					last_node	= &(current_node->next);
-					current_node	= current_node->next;
-				}
-			}else{
-				last_node = &(table->levels[level][j>>1]);
-			}
-			current_node = old_level[j];
-
-			while (current_node != NULL) {
-				next_node = current_node->next;
-				*last_node = current_node;
-				last_node = &(current_node->next);
-				current_node = next_node;
-			}
-			*last_node = NULL;
+	for (j = 0; j < old_slots; j++) {
+	    current_node = old_level[j];
+	    even_node = &(table->levels[level][j<<1]);
+	    odd_node = &(table->levels[level][(j<<1)+1]);
+	    while (current_node != NULL) {
+		next_node = current_node->next;
+		pos = ddHash(current_node->high_obdd, current_node->low_obdd, table->shift[level]);
+		if (pos & 1) {
+		    *odd_node = current_node;
+		    odd_node = &(current_node->next);
+		} else {
+		    *even_node = current_node;
+		    even_node = &(current_node->next);
 		}
-	}else{
-		for (j = 0; j < old_slots; j++) {
-			current_node = old_level[j];
-			even_node = &(table->levels[level][j<<1]);
-			odd_node = &(table->levels[level][(j<<1)+1]);
-			while (current_node != NULL) {
-				next_node = current_node->next;
-				pos = ddHash(current_node->high_obdd, current_node->low_obdd, table->shift[level]);
-				if (pos & 1) {
-					*odd_node = current_node;
-					odd_holder	= current_node;
-					odd_node = &(current_node->next);
-				} else {
-					*even_node = current_node;
-					even_holder	= current_node;
-					even_node = &(current_node->next);
-				}
-				current_node = next_node;
-			}
-			*even_node = *odd_node = NULL;
-		}
+		current_node = next_node;
+	    }
+	    *even_node = *odd_node = NULL;
 	}
-	table->max_keys[level] = table->slots[level] * OBDD_TABLE_MAX_DENSITY;
-	table->min_keys[level] = table->slots[level] / OBDD_TABLE_MAX_DENSITY;
-
 	free(old_level);
 
 }
@@ -524,11 +481,6 @@ void obdd_table_node_add(obdd_table* table, obdd_node *node){
 			printf("Could not allocate memory\n");
 			exit(-1);
 		}else table->max_keys	= uint32_ptr;
-		uint32_ptr	= realloc(table->min_keys, sizeof(uint32_t) * table->size);
-		if(uint32_ptr == NULL){
-			printf("Could not allocate memory\n");
-			exit(-1);
-		}else table->min_keys	= uint32_ptr;
 		uint32_t log_slot, log_value;
 		for(i = old_size; i < table->size; i++){
 			table->slots[i]	= 8;
@@ -541,7 +493,6 @@ void obdd_table_node_add(obdd_table* table, obdd_node *node){
 			}
 			table->shift[i] = sizeof(uint32_t) * 8 - log_value;
 			table->max_keys[i] = table->slots[i] * OBDD_TABLE_MAX_DENSITY;
-			table->min_keys[i] = table->slots[i] / OBDD_TABLE_MAX_DENSITY;
 			table->levels[i]		= calloc(table->slots[i], sizeof(obdd_node*));
 			table->levels_composite_counts[i]	= 0;
 		}
@@ -564,8 +515,6 @@ void obdd_table_node_add(obdd_table* table, obdd_node *node){
 					|| ((current_fast_node->low_obdd == node->low_obdd) && (current_fast_node->high_obdd < node->high_obdd)))){
 				previous_fast_node	= current_fast_node;
 				current_fast_node	= current_fast_node->next;
-			}else if(current_fast_node->low_obdd == node->low_obdd && current_fast_node->high_obdd == node->high_obdd){
-				return;
 			}else{
 				table->live_fast_nodes++;
 				if(table->live_fast_nodes > table->max_live_fast_nodes)table->max_live_fast_nodes = table->live_fast_nodes;
@@ -622,10 +571,7 @@ void obdd_table_node_destroy(obdd_table* table, obdd_node *node){
 			break;
 		}
 	}
-	if(table->levels_composite_counts[node->var_ID] < table->min_keys[node->var_ID]){
-		obdd_table_resize(table, node->var_ID);
-	}
-	//if(found)node->ref_count--;
+	if(found)node->ref_count--;
 }
 
 obdd_node* obdd_table_search_node_ID(obdd_table* table, obdd_var_size_t var_ID, obdd_node* high, obdd_node* low){
@@ -661,12 +607,12 @@ obdd_node* obdd_table_mk_node_ID(obdd_table* table, obdd_var_size_t var_ID, obdd
 	//check if single var
 	if(high->var_ID == 0 && low->var_ID == 1 &&
 			table->mgr->cache->cache_vars[var_ID] != NULL){
-		//table->mgr->cache->cache_vars[var_ID]->ref_count++;
+		table->mgr->cache->cache_vars[var_ID]->ref_count++;
 		return table->mgr->cache->cache_vars[var_ID];
 	}
 	if(high->var_ID == 1 && low->var_ID == 0 &&
 				table->mgr->cache->cache_neg_vars[var_ID] != NULL){
-		//table->mgr->cache->cache_neg_vars[var_ID]->ref_count++;
+		table->mgr->cache->cache_neg_vars[var_ID]->ref_count++;
 		return table->mgr->cache->cache_neg_vars[var_ID];
 	}
 	//check if node exists
@@ -674,7 +620,7 @@ obdd_node* obdd_table_mk_node_ID(obdd_table* table, obdd_var_size_t var_ID, obdd
 	obdd_node *current_fast_node = NULL, *last_fast_node = NULL, *new_fast_node = NULL;
 	current_fast_node	= obdd_table_search_node_ID(table, var_ID, high, low);
 	if(current_fast_node != NULL){
-		//current_fast_node->ref_count++;
+		current_fast_node->ref_count++;
 		return current_fast_node;
 	}
 	//return new node
@@ -694,7 +640,7 @@ obdd_node* obdd_table_mk_node_ID(obdd_table* table, obdd_var_size_t var_ID, obdd
 #if DEBUG_OBDD
 		printf("(create)[%d]%p <%s>\n",new_node->var_ID, (void*)new_node, var);
 #endif
-	//new_node->ref_count++;
+	new_node->ref_count++;
 
 	obdd_table_node_add(table, new_node);
 
@@ -722,7 +668,6 @@ void obdd_table_destroy(obdd_table *table){
 	free(table->slots);
 	free(table->shift);
 	free(table->max_keys);
-	free(table->min_keys);
 	free(table->levels);
 	free(table);
 }
