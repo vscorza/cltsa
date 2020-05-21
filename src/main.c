@@ -1267,7 +1267,8 @@ void run_all_tests(){
 void print_help(){
 	printf("CLTS modeling and synthesis tool usage\n");
 	printf("\t-h\tprints this help message\n");
-	printf("\t-r filename [...] \t interprets specification located at [filename [...]]\n");
+	printf("\t-r [-o outputdir] filename [...] \t interprets specification(s) located at [filename [...]]\n" \
+			"\t\t if -o provided output will be sent to outputdir\n");
 	printf("\t--all-tests\t runs all tests\n");
 	printf("\t--func-tests\t runs functional tests\n");
 	printf("\t--load-tests\t runs load tests\n");
@@ -1287,9 +1288,16 @@ int main (int argc, char** argv){
 		char name_buff[700];
 		if(argc > 2){
 			if(strcmp(argv[1], "-r") == 0){
-				char const *folder = getenv("TMPDIR");
-				if (folder == 0){
-					folder = "/tmp";
+				uint32_t initial_index	= 2;
+				char const *folder;
+				if(strcmp(argv[2], "-o") == 0){
+					folder	= argv[3];
+					initial_index = 4;
+				}else{
+					folder = getenv("TMPDIR");
+					if (folder == 0){
+						folder = "/tmp";
+					}
 				}
 				//remove previous rep files
 			    DIR *di;
@@ -1323,15 +1331,15 @@ int main (int argc, char** argv){
 			    }
 				char result_buff[255];
 				char *result_name;
-				for(i = 2; i < argc; i++){
+				for(i = initial_index; i < argc; i++){
 					result_name = strrchr(argv[i], '/');
 					if(result_name == NULL)result_name = argv[i];
 					else result_name++;
-					if(i == 2){
+					if(i == initial_index){
 						snprintf(result_buff, sizeof(result_buff),"%s/%s", folder, 	result_name);
 					}
 					snprintf(name_buff, sizeof(name_buff), "Running:%s", argv[i]);
-					run_parse_test_local(argv[i], name_buff, result_buff, DD_SEARCH, i != 2);
+					run_parse_test_local(argv[i], name_buff, result_buff, DD_SEARCH, i != initial_index);
 				}
 			}
 		}
