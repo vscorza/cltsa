@@ -3187,7 +3187,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 }
 
 automaton_automata_context* automaton_automata_context_create_from_syntax(automaton_program_syntax* program, char* ctx_name,
-		diagnosis_search_method is_diagnosis, char *results_filename, bool append_result){
+		char* test_name, diagnosis_search_method is_diagnosis, char *results_filename, bool append_result){
 	automaton_parsing_tables* tables	= automaton_parsing_tables_create();
 	automaton_automata_context* ctx		= malloc(sizeof(automaton_automata_context));
 	char buf[250];
@@ -3633,6 +3633,7 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 		}
 	}
 	//export automata
+	char fsp_name[1024];
 	for(j = 0; j < program->count; j++){
 		if(program->statements[j]->type == EXPORT_AUT){
 			for(i = 0; i < tables->composition_count; i++){
@@ -3642,6 +3643,9 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 								strlen(program->statements[j]->import_def->name))== 0){
 						automaton_automaton_print_report(tables->composition_entries[i]->valuation.automaton_value,
 								program->statements[j]->import_def->filename);
+						sprintf(fsp_name, "%s.fsp", program->statements[j]->import_def->filename);
+						automaton_automaton_print_fsp(tables->composition_entries[i]->valuation.automaton_value,
+								fsp_name);
 				}
 			}
 		}
@@ -3668,15 +3672,15 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 		if(!append_result)
 			fprintf(experimental_results, "name\trealizable\tltl_model_build_time\tmodel_build_time\tcomposition_time\t" \
 					"synthesis_time\tdiagnosis_time\talphabet_size\tguarantees_count\t" \
-					"assumptions_count\tplant_states\tplant_transitions\tminimization_states\tminimizatoin_transitions\t" \
-					"plant_controllable_transitions\tminimization_controllable_transitions\tsearch_method\n" \
+					"assumptions_count\tplant_states\tplant_transitions\tplant_controllable_transitions\tminimization_states\t" \
+					"minimization_transitions\tminimization_controllable_transitions\tsearch_method\t" \
 					"diagnosis_steps\tdiagnosis_times\tdiagnosis_sizes\n");
 		fprintf(experimental_results, "%s\t%s\t%ld.%06ld\t%ld.%06ld\t%ld.%06ld\t" \
 				"%ld.%06ld\t%ld.%06ld\t%d\t%d\t" \
 				"%d\t%d\t%d\t%d\t%d\t" \
 				"%d\t%d\t%s\t" \
 				"%d\t[",
-				ctx_name, nonreal? "false":"true", tval_ltl_model_build_result.tv_sec, tval_ltl_model_build_result.tv_usec,
+				test_name, nonreal? "false":"true", tval_ltl_model_build_result.tv_sec, tval_ltl_model_build_result.tv_usec,
 						tval_model_build_result.tv_sec, tval_model_build_result.tv_usec,
 						tval_composition_result.tv_sec, tval_composition_result.tv_usec,
 						tval_synthesis_result.tv_sec, tval_synthesis_result.tv_usec,

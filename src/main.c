@@ -76,7 +76,7 @@ void run_parse_test_local(char* test_file, char* test_name, char* result_name,
 
 	char dat_name[256];
 	sprintf(dat_name, "%s.dat", result_name);
-	automaton_automata_context* ctx		= automaton_automata_context_create_from_syntax(parsed_program, result_name,
+	automaton_automata_context* ctx		= automaton_automata_context_create_from_syntax(parsed_program, result_name, test_name,
 			diagnosis_method, dat_name, append_results);
     automaton_automata_context_destroy(ctx);
     automaton_program_syntax_destroy(parsed_program);
@@ -1329,8 +1329,8 @@ int main (int argc, char** argv){
 					else result_name++;
 					if(i == 2){
 						snprintf(result_buff, sizeof(result_buff),"%s/%s", folder, 	result_name);
-						snprintf(name_buff, sizeof(name_buff), "Running:%s", argv[i]);
 					}
+					snprintf(name_buff, sizeof(name_buff), "Running:%s", argv[i]);
 					run_parse_test_local(argv[i], name_buff, result_buff, DD_SEARCH, i != 2);
 				}
 			}
