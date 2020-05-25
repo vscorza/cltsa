@@ -1780,24 +1780,7 @@ automaton_pending_state* automaton_pending_state_create(uint32_t state, int32_t 
 	pending->timestamp		= timestamp;
 	return pending;
 }
-int32_t automaton_pending_state_compare(void* left_pending_state, void* right_pending_state){
-	automaton_pending_state* left	= (automaton_pending_state*)left_pending_state;
-	automaton_pending_state* right= (automaton_pending_state*)right_pending_state;
 
-	if(left->assumption_to_satisfy > right->assumption_to_satisfy){
-		return 1;
-	}else if(left->value > right->value){
-		return 1;
-	}else if(left->value < right->value){
-		return -1;
-	}else if(left->timestamp > right->timestamp){
-		return 1;
-	}else if(left->timestamp < right->timestamp){
-		return -1;
-	}else{
-		return 0;
-	}
-}
 void automaton_pending_state_copy(void* target_input, void* source_input){
 	automaton_pending_state* target	= (automaton_pending_state*)target_input;
 	automaton_pending_state* source	= (automaton_pending_state*)source_input;
@@ -1966,7 +1949,7 @@ bool automaton_state_is_stable(automaton_automaton* game_automaton, uint32_t sta
 	return is_stable;
 }
 
-void automaton_add_unstable_predecessors(automaton_automaton* game_automaton, automaton_max_heap* pending_list, automaton_concrete_bucket_list* key_list
+void automaton_add_unstable_predecessors(automaton_automaton* game_automaton, automaton_pending_state_max_heap* pending_list, automaton_concrete_bucket_list* key_list
 		, uint32_t state, automaton_concrete_bucket_list** ranking
 		, uint32_t current_guarantee, uint32_t guarantee_count, uint32_t assumptions_count
 		, uint32_t* guarantees_indexes, uint32_t* assumptions_indexes, int32_t first_assumption_index
@@ -2002,7 +1985,7 @@ void automaton_add_unstable_predecessors(automaton_automaton* game_automaton, au
 				current_pending_state.assumption_to_satisfy	= current_ranking->assumption_to_satisfy;
 				current_pending_state.value				= current_ranking->value;
 				current_pending_state.timestamp			= timestamp;
-				void* new_entry							= automaton_max_heap_add_entry(pending_list, &current_pending_state);
+				void* new_entry							= automaton_pending_state_max_heap_add_entry(pending_list, &current_pending_state);
 				automaton_concrete_bucket_add_entry(key_list, new_entry);
 			}
 		//}
@@ -2111,8 +2094,7 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 	automaton_automata_context* ctx				= game_automaton->context;
 	uint32_t i, j ,k, l, m;
 	automaton_concrete_bucket_list** ranking_list	= malloc(sizeof(automaton_concrete_bucket_list*) * guarantees_count);
-	automaton_max_heap* pending_list	= automaton_max_heap_create(sizeof(automaton_pending_state)
-			, automaton_pending_state_compare);
+	automaton_pending_state_max_heap* pending_list	= automaton_pending_state_max_heap_create();
 	automaton_concrete_bucket_list** key_lists		= calloc(guarantees_count, sizeof(automaton_concrete_bucket_list*));
 	for(i = 0; i < guarantees_count; i++)
 				key_lists[i]					= automaton_concrete_bucket_list_create(RANKING_BUCKET_SIZE, automaton_pending_state_extractor, sizeof(automaton_pending_state));
@@ -2210,7 +2192,7 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 							concrete_pending_state.state 	= i; concrete_pending_state.goal_to_satisfy	= j;//TODO: check this, was ...goal_to_satisfy = guarantees_indexes[j];
 							concrete_pending_state.value	= 0; concrete_pending_state.timestamp		= 0;
 							concrete_pending_state.assumption_to_satisfy = 0;
-							void* new_entry					= automaton_max_heap_add_entry(pending_list, &concrete_pending_state);
+							void* new_entry					= automaton_pending_state_max_heap_add_entry(pending_list, &concrete_pending_state);
 							automaton_concrete_bucket_add_entry(key_lists[j], new_entry);
 							break;
 						}
@@ -2253,7 +2235,7 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 	bool ranking_was_infinity;
 	while(pending_list->count > 0){
 		//current_pending_state	= (automaton_pending_state*)automaton_ptr_bucket_pop_entry(pending_list);
-		automaton_max_heap_pop_entry(pending_list, &current_pending_state);
+		automaton_pending_state_max_heap_pop_entry(pending_list, &current_pending_state);
 
 		goal_to_satisfy	= current_pending_state.goal_to_satisfy;
 
@@ -2568,7 +2550,7 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 		automaton_concrete_bucket_destroy(ranking_list[i]);
 	}
 	free(ranking_list);
-	automaton_max_heap_destroy(pending_list);
+	automaton_pending_state_max_heap_destroy(pending_list);
 	for(i = 0; i < guarantees_count; i++)
 		automaton_concrete_bucket_destroy(key_lists[i]);
 	free(key_lists);

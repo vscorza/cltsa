@@ -640,6 +640,18 @@ void run_max_heap_tests(){
 	for(i = 0; i < cycles; i++){
 		current_item.b = i; current_item.a = i + cycles;
 		automaton_max_heap_add_entry(heap, &current_item);
+	}
+	for(i = 0; i < cycles; i++){
+		current_item.b = i; current_item.a = i;
+		automaton_max_heap_add_entry(heap, &current_item);
+	}
+	for(i = 0; i < cycles * 2; i++){
+		automaton_max_heap_pop_entry(heap, &current_item);
+	}
+
+	for(i = 0; i < cycles; i++){
+		current_item.b = i; current_item.a = i + cycles;
+		automaton_max_heap_add_entry(heap, &current_item);
 		snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "PUSHING ITEM <%d,%d>\n", current_item.a, current_item.b);
 	}
 	for(i = 0; i < cycles; i++){
@@ -651,6 +663,7 @@ void run_max_heap_tests(){
 		automaton_max_heap_pop_entry(heap, &current_item);
 		snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "POPPING ITEM: <%d,%d>\n", i, current_item.a, current_item.b);
 	}
+
 	automaton_max_heap_destroy(heap);
 
 	FILE *ftest = fopen("tests/expected_output/run_max_heap_tests.exp", "w");
@@ -664,6 +677,52 @@ void run_max_heap_tests(){
 	free(expected);
 	free(buff);
 
+}
+void run_max_heap_tests_2(){
+	automaton_pending_state_max_heap* heap	= automaton_pending_state_max_heap_create();
+	automaton_pending_state current_item;
+	uint32_t i;
+	uint32_t cycles = 100;
+	char *buff = calloc(150 * cycles, sizeof(char));
+	for(i = 0; i < cycles; i++){
+		current_item.assumption_to_satisfy = i; current_item.value = i + cycles;
+		automaton_pending_state_max_heap_add_entry(heap, &current_item);
+	}
+	for(i = 0; i < cycles; i++){
+		current_item.assumption_to_satisfy = i; current_item.value = i;
+		automaton_pending_state_max_heap_add_entry(heap, &current_item);
+	}
+	for(i = 0; i < cycles * 2; i++){
+		automaton_pending_state_max_heap_pop_entry(heap, &current_item);
+	}
+
+	for(i = 0; i < cycles; i++){
+		current_item.assumption_to_satisfy = i; current_item.value = i + cycles;
+		automaton_pending_state_max_heap_add_entry(heap, &current_item);
+		snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "PUSHING ITEM <%d,%d>\n", current_item.value, current_item.assumption_to_satisfy);
+	}
+	for(i = 0; i < cycles; i++){
+		current_item.assumption_to_satisfy = i; current_item.value = i;
+		automaton_pending_state_max_heap_add_entry(heap, &current_item);
+		snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "PUSHING ITEM <%d,%d>\n", current_item.value, current_item.assumption_to_satisfy);
+	}
+	for(i = 0; i < cycles * 2; i++){
+		automaton_pending_state_max_heap_pop_entry(heap, &current_item);
+		snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "POPPING ITEM: <%d,%d>\n", i, current_item.value, current_item.assumption_to_satisfy);
+	}
+
+	automaton_pending_state_max_heap_destroy(heap);
+
+	FILE *ftest = fopen("tests/expected_output/run_max_heap_tests.exp", "w");
+	fprintf(ftest, "%s", buff);
+	fclose(ftest);
+
+	char * expected = test_get_output_content("tests/expected_output/run_max_heap_tests.exp");
+	bool txt_cmp = strcmp(buff, expected) == 0;
+	print_test_result(txt_cmp, "MAX HEAP", "max heap test");
+
+	free(expected);
+	free(buff);
 }
 
 void run_concrete_bucket_list_tests(){
@@ -1267,8 +1326,9 @@ void run_all_tests(){
 void print_help(){
 	printf("CLTS modeling and synthesis tool usage\n");
 	printf("\t-h\tprints this help message\n");
-	printf("\t-r [-o outputdir] filename [...] \t interprets specification(s) located at [filename [...]]\n" \
-			"\t\t if -o provided output will be sent to outputdir\n");
+	printf("\t-r [-o outputdir] [-s suffix] filename [...] \t interprets specification(s) located at [filename [...]]\n" \
+			"\t\t if -o provided output will be sent to [outputdir]\n" \
+			"\t\t if -s provided output will be added suffix [suffix]\n");
 	printf("\t--all-tests\t runs all tests\n");
 	printf("\t--func-tests\t runs functional tests\n");
 	printf("\t--load-tests\t runs load tests\n");
@@ -1289,15 +1349,23 @@ int main (int argc, char** argv){
 		if(argc > 2){
 			if(strcmp(argv[1], "-r") == 0){
 				uint32_t initial_index	= 2;
+				uint32_t next_index = 2;
 				char const *folder;
+				char *suffix = NULL;
 				if(strcmp(argv[2], "-o") == 0){
 					folder	= argv[3];
 					initial_index = 4;
+					next_index	= 4;
 				}else{
 					folder = getenv("TMPDIR");
 					if (folder == 0){
 						folder = "/tmp";
 					}
+				}
+				if(strcmp(argv[next_index], "-s") == 0){
+					suffix	= argv[next_index + 1];
+					initial_index	= next_index + 2;
+					next_index += 2;
 				}
 				//remove previous rep files
 			    DIR *di;
@@ -1336,7 +1404,8 @@ int main (int argc, char** argv){
 					if(result_name == NULL)result_name = argv[i];
 					else result_name++;
 					if(i == initial_index){
-						snprintf(result_buff, sizeof(result_buff),"%s/%s", folder, 	result_name);
+						snprintf(result_buff, sizeof(result_buff),"%s/%s%s", folder, 	result_name,
+								suffix != NULL? suffix : "");
 					}
 					snprintf(name_buff, sizeof(name_buff), "Running:%s", argv[i]);
 					run_parse_test_local(argv[i], name_buff, result_buff, DD_SEARCH, i != initial_index);
@@ -1379,7 +1448,7 @@ int main (int argc, char** argv){
 		//run_parse_test("tests/chu/self_correcting_2_v2.fsp", "self correcting ring counter 2 (CHU)");
 		//run_parse_test("tests/nonreal_test_1.fsp", "non realizable test 1");
 
-		//run_parse_test("tests/genbuf_2_sndrs_no_automaton_missing_assumption.fsp", "GenBuf 2 sndrs V2 missing assumption");
+
 		//run_parse_test("tests/genbuf_2_sndrs_no_automaton_removed_controllable.fsp", "GenBuf 2 sndrs V2 removed controllable");
 		//run_parse_test("tests/genbuf_1_sndrs_no_automaton.fsp", "GenBuf 1 sndrs V2");
 		//run_parse_test("tests/img_test_1.fsp", "Img test 1");
@@ -1389,7 +1458,8 @@ int main (int argc, char** argv){
 		//run_parse_test_local("tests/genbuf_3_sndrs_no_automaton.fsp", "GenBuf 3 sndrs V2", "tests/genbuf_3_sndrs_no_automaton.dat", 0, true);
 		//run_parse_test("tests/genbuf_4_sndrs_no_automaton.fsp", "GenBuf 3 sndrs V2");
 
-		run_parse_test_local("tests/genbuf_3_sndrs_no_automaton.fsp", "GenBuf 3 sndrs V2", "tests/genbuf_3_sndrs_no_automaton.dat", DD_SEARCH, false);
+		//run_parse_test_local("tests/genbuf_3_sndrs_no_automaton.fsp", "GenBuf 3 sndrs V2", "tests/genbuf_3_sndrs_no_automaton.dat", DD_SEARCH, false);
+		//run_parse_test_local("tests/genbuf_4_sndrs_no_automaton_missing_assumption.fsp", "GenBuf 3 sndrs V2", "tests/genbuf_4_sndrs_no_automaton_missing_assumption.dat", DD_SEARCH, false);
 		//run_parse_test("tests/genbuf_5_sndrs_no_automaton.fsp", "GenBuf 5 sndrs");
 		//run_parse_test("tests/genbuf_6_sndrs_no_automaton.fsp", "GenBuf 6 sndrs");
 
@@ -1397,6 +1467,9 @@ int main (int argc, char** argv){
 		//run_parse_test("tests/mixed_3_signals_2_labels.fsp", "mixed model 3 signals 2 labels");
 		//run_parse_test("tests/two_floors_lift.fsp", "lift 2 floors");//lift 2 floors
 		//run_parse_test("tests/nonreal_test_1.fsp", "non realizable test 1");
+		//run_max_heap_tests();
+		//run_max_heap_tests_2();
+		run_parse_test("tests/genbuf_2_sndrs_no_automaton_missing_assumption.fsp", "GenBuf 2 sndrs V2 missing assumption");
 		//GENERAL TESTS
 		//run_all_tests();
 		//run_functional_tests();

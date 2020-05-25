@@ -3,6 +3,9 @@ TODO:
 - build test data
 	- controller || E' (provide controllable fsp, retrieve controller, compose against E', report size and resulting structure)
 	- run tests
+		- second non real genbuf
+		- collector
+		- exploration robot
 	- generate report
 	- write missing test cases
 	- generate table
@@ -12,9 +15,11 @@ TODO:
 		- controllable % x minimization %
 		
 - computar tiempo y agregar columna de C || E'
-- profile genbuf 2
+- for non-realizability reduce diagnosis to single liveness goal not being satisfied
+- in dd minimization keep track of mins. tested as tested: bitvector -> 0 not tested, 1 realizable, 2 non realizable
+	should be able to only keep as many in terms of the dd step
 - write amba version
-- run tests for genbuf 5, 6
+- run tests for genbuf 4, 5, 6
 - improve reports
 	- report separate synthesis cases individually within same file
 	- report composition times independently from model build
@@ -22,19 +27,8 @@ TODO:
 - de efectividad hacer alguna mención a la implementación y la linealidad, comparar con ejemplos comparables
 - explicar ejemplos nuevos
 - armar ejemplo que compare nuestra tecnica con konighoefer y maoz
-- revisar diag. de genbuf_1_no_automaton con Ass. G_True
-- next deliverable
-	- review konighoefer numbers
-	- implement mutations on existing examples
-		- remove assumption
-		- add non controllable transition
-		- remove controllable transition
-		- mutate assumption formula using operators
-		- mutate goal formula using operators
-		- add conjuction of goals as new goal
-	- review relation between minimization, original plant and controller either on structure or syntax
-	- reason about general diagnosis 
-	- diagnose mutation over small parameters, produce hypothesis, scale both hypothesis and parameter to see if it holds
+- add exception when FIXED_SIGNALS_COUNT or BITVECTOR_ENTRY_SIZE is not enough, add parameters to make
+- diagnose mutation over small parameters, produce hypothesis, scale both hypothesis and parameter to see if it holds
 - explore controllable simplification
 	- hide queue in genbuf (hide signals, tau reduction)
 	- review konighoefer work
