@@ -2643,9 +2643,11 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd(automaton_au
 			, steps_sizes, steps_times, steps_size);
 	free(t_states); free(t_indexes); free(partition_bit_vector);
 	//print rankings
+	/*
 	automaton_automaton* strategy = automaton_get_gr1_strategy(result, assumptions, assumptions_count,
 			guarantees, guarantees_count, true);
 	automaton_automaton_destroy(strategy);
+	*/
 	automaton_automaton_destroy(minimized);
 	automaton_automaton_destroy(master);
 

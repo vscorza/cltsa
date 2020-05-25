@@ -3497,7 +3497,7 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 			sprintf(set_name, "Guarantees %s", gr1_game->name);
 			guarantees		= automaton_set_syntax_evaluate(tables, gr1_game->guarantees, &guarantees_count, set_name);
 			winning_region_automaton	= automaton_get_gr1_strategy(game_automaton, assumptions, assumptions_count
-					, guarantees, guarantees_count, true);
+					, guarantees, guarantees_count, false);
 			free(winning_region_automaton->name);
 			winning_region_automaton->name	= NULL;
 			aut_dupstr(&(winning_region_automaton->name), gr1_game->name);

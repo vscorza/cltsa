@@ -7,28 +7,33 @@ TODO:
 		- collector
 		- exploration robot
 	- generate report
-	- write missing test cases
 	- generate table
 		- decide on whether to use r + markup or python
 	- generate plots
 		- minimization (original size x minimization %) (general, by type of fault)
-		- controllable % x minimization %
-		
-- computar tiempo y agregar columna de C || E'
+		- controllable % x minimization %		
+- agregar columna de C || E'
 - for non-realizability reduce diagnosis to single liveness goal not being satisfied
 - in dd minimization keep track of mins. tested as tested: bitvector -> 0 not tested, 1 realizable, 2 non realizable
 	should be able to only keep as many in terms of the dd step
+	- check current minimization bitvector m with previous minimization bitvector p
+		if at any step p_i & m_i != p_i skip p (was not less or equal than m)
+		if check completes then use p result for m
+- start check refining previous case (complement or partition, and refined slots)
+	- it usually keeps refining the same complement when one is hard to find
 - write amba version
 - run tests for genbuf 4, 5, 6
 - improve reports
 	- report separate synthesis cases individually within same file
 	- report composition times independently from model build
 	- report realizability individually
+	- automatize report pipeline
 - de efectividad hacer alguna mención a la implementación y la linealidad, comparar con ejemplos comparables
 - explicar ejemplos nuevos
 - armar ejemplo que compare nuestra tecnica con konighoefer y maoz
-- add exception when FIXED_SIGNALS_COUNT or BITVECTOR_ENTRY_SIZE is not enough, add parameters to make
 - diagnose mutation over small parameters, produce hypothesis, scale both hypothesis and parameter to see if it holds
+- add exception when FIXED_SIGNALS_COUNT or BITVECTOR_ENTRY_SIZE is not enough, add parameters to make
+
 - explore controllable simplification
 	- hide queue in genbuf (hide signals, tau reduction)
 	- review konighoefer work

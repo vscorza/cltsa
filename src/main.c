@@ -89,6 +89,12 @@ void run_parse_test(char* test_file, char* test_name){
 	run_parse_test_local(test_file, test_name, buf, DD_SEARCH, false);
 }
 
+void run_parse_test_linear(char* test_file, char* test_name){
+	char buf[255];
+	snprintf(buf, sizeof(buf),"results/%s", test_name);
+	run_parse_test_local(test_file, test_name, buf, LINEAR_SEARCH, false);
+}
+
 void run_diagnosis(char* test_file, char* test_name, bool append_results){
 	char buf[255];
 	snprintf(buf, sizeof(buf),"results/%s", test_name);
@@ -1469,7 +1475,12 @@ int main (int argc, char** argv){
 		//run_parse_test("tests/nonreal_test_1.fsp", "non realizable test 1");
 		//run_max_heap_tests();
 		//run_max_heap_tests_2();
-		run_parse_test("tests/genbuf_2_sndrs_no_automaton_missing_assumption.fsp", "GenBuf 2 sndrs V2 missing assumption");
+		//run_parse_test("tests/genbuf_2_sndrs_no_automaton_missing_assumption.fsp", "GenBuf 2 sndrs V2 missing assumption");
+		//run_parse_test("tests/genbuf_1_sndrs_no_automaton_joined_goals.fsp", "GenBuf 1 sndrs V2 joined goals");
+		//run_parse_test("tests/genbuf_2_sndrs_no_automaton_joined_goals.fsp", "GenBuf 2 sndrs V2 joined goals");
+		//run_parse_test_linear("tests/genbuf_2_sndrs_no_automaton_joined_goals.fsp", "GenBuf 2 sndrs V2 joined goals");
+		//run_parse_test("tests/genbuf_2_sndrs_no_automaton_removed_controllable.fsp", "GenBuf 2 sndrs V2 removed controllable");
+		run_parse_test("tests/genbuf_2_sndrs_no_automaton_removed_env_safety.fsp", "GenBuf 2 sndrs V2 removed env safety");
 		//GENERAL TESTS
 		//run_all_tests();
 		//run_functional_tests();
