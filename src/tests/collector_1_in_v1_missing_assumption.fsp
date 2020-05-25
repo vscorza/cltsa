@@ -7,15 +7,15 @@
 set Global_Alphabet = {}
 set Controllable_Alphabet = {}
 
-set Global_Signals	= {in_0, in_1, allFinished, latch_0, latch_1}
-set Output_Signals	= {allFinished, latch_0, latch_1}
+set Global_Signals	= {in_0, allFinished, latch_0}
+set Output_Signals	= {allFinished, latch_0}
 order			= {}
 
 /***********
 **** THETA
 ***********/
-ltl env theta Init_Collector_e in COLLECTOR	= (!in_0 && !in_1).
-ltl sys theta Init_Collector_s in COLLECTOR	= (!allFinished && !latch_0 && !latch_1).
+ltl env theta Init_Collector_e in COLLECTOR	= (!in_0).
+ltl sys theta Init_Collector_s in COLLECTOR	= (!allFinished && !latch_0).
 /***********
 **** SYS RHO
 ***********/
@@ -23,11 +23,8 @@ ltl sys theta Init_Collector_s in COLLECTOR	= (!allFinished && !latch_0 && !latc
 ltl sys rho Latch_0_up in COLLECTOR		= [](in_0 -> X(latch_0)).
 ltl sys rho Latch_0_keep in COLLECTOR		= [](!(allFinished || in_0) -> (latch_0 <-> X(latch_0))).
 ltl sys rho Latch_0_down in COLLECTOR		= [](in_0 && allFinished && !in_0 -> X(!latch_0)).
-ltl sys rho Latch_1_up in COLLECTOR		= [](in_1 -> X(latch_1)).
-ltl sys rho Latch_1_keep in COLLECTOR		= [](!(allFinished || in_1) -> (latch_1 <-> X(latch_1))).
-ltl sys rho Latch_1_down in COLLECTOR		= [](in_1 && allFinished && !in_1 -> X(!latch_1)).
 //only set allFinished if every latch is up
-ltl sys rho Restrict_AllFinished in COLLECTOR	= [](allFinished -> (latch_0 && latch_1)).
+ltl sys rho Restrict_AllFinished in COLLECTOR	= [](allFinished -> (latch_0)).
 
 /***********
 **** ENV RHO
@@ -36,13 +33,12 @@ ltl env rho Dummy_e in COLLECTOR		= [](in_0 || !in_0).
 /***********
 **** FLUENTS
 ***********/
-ltl fluent A_in_0		= (in_0).
-ltl fluent A_in_1		= (in_1).
+ltl fluent A_True		= (in_0 || !in_0).
 ltl fluent G			= (allFinished).
 /***********
 **** SYNTHESIS
 ***********/
 |f| ENV =(COLLECTOR).
-|gr1| <{A_in_1}><{G}> STRAT = ENV.
+|gr1| <{A_True}><{G}> STRAT = ENV.
 
-STRAT >> "/home/mariano/code/henos-automata/src/results/collector_2_strat_missing_assumption.rep".
+STRAT >> "/home/mariano/code/henos-automata/src/results/collector_2_strat.rep".
