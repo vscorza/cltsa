@@ -1,0 +1,7 @@
+name	realizable	ltl_model_build_time	model_build_time	composition_time	synthesis_time	diagnosis_time	alphabet_size	guarantees_count	assumptions_count	plant_states	plant_transitions	plant_controllable_transitions	minimization_states	minimization_transitions	minimization_controllable_transitions	search_method	diagnosis_steps
+Running:/home/mariano/code/henos-automata/src/tests/genbuf_1_sndrs_no_automaton_removed_env_safety.fsp	false	0.013281	0.001456	0.000000	0.000000	0.054400	44	3	2	569	1388	927	569	8	4	DD	10
+Running:/home/mariano/code/henos-automata/src/tests/genbuf_1_sndrs_no_automaton_removed_env_safety.fsp	false	0.009682	0.001283	0.000000	0.000000	0.046152	44	3	2	569	1388	927	569	8	4	DD	10
+Running:/home/mariano/code/henos-automata/src/tests/genbuf_1_sndrs_no_automaton_removed_env_safety.fsp	false	0.011909	0.001316	0.000000	0.000000	0.050264	44	3	2	569	1388	927	569	8	4	DD	10
+Running:/home/mariano/code/henos-automata/src/tests/genbuf_1_sndrs_no_automaton_removed_env_safety.fsp	false	0.009655	0.001284	0.000000	0.000000	0.050479	44	3	2	569	1388	927	569	8	4	DD	10
+Running:/home/mariano/code/henos-automata/src/tests/genbuf_1_sndrs_no_automaton_removed_env_safety.fsp	false	0.009562	0.001295	0.000000	0.000000	0.048578	44	3	2	569	1388	927	569	8	4	DD	10
+Running:/home/mariano/code/henos-automata/src/tests/genbuf_2_sndrs_no_automaton_removed_env_safety.fsp	false	0.898590	0.194232	0.000000	0.000000	2504.565972	76	4	4	31766	142850	114433	31766	1984	1595	DD	198

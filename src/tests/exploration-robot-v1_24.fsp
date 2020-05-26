@@ -7,7 +7,7 @@ order 				= {}
 //set Actions = {load,unload}
 //set A = {Moves,Actions}
 const Min = 1 //this must always be odd
-const Max = 6
+const Max = 24
 range Pos = Min..Max
 
 //Concrete
@@ -38,4 +38,4 @@ fluent F_ReleaseSouth = <releaseSouth,{unload,load,n,s,e,w,stall,releaseNorth}> 
 
 |gr1| <{F_ReleaseNorth,F_ReleaseSouth}><{F_Load, F_Unload}> STRAT = ROBOT_EXPLORE.
 
-STRAT >> "/home/mariano/code/henos-automata/src/results/exploration_robot_6_strat.rep".
+STRAT >> "/home/mariano/code/henos-automata/src/results/exploration_robot_24_strat.rep".

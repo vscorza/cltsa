@@ -2,10 +2,11 @@ TODO:
 =====
 - build test data
 	- controller || E' (provide controllable fsp, retrieve controller, compose against E', report size and resulting structure)
-	- run tests
-		- second non real genbuf
-		- collector
-		- exploration robot
+	X run tests
+		X second non real genbuf
+		X collector
+		X exploration robot
+	- separate times and sizes for diagnosis in new file
 	- generate report
 	- generate table
 		- decide on whether to use r + markup or python
@@ -24,6 +25,7 @@ TODO:
 - write amba version
 - run tests for genbuf 4, 5, 6
 - improve reports
+	- write as json
 	- report separate synthesis cases individually within same file
 	- report composition times independently from model build
 	- report realizability individually
@@ -33,6 +35,7 @@ TODO:
 - armar ejemplo que compare nuestra tecnica con konighoefer y maoz
 - diagnose mutation over small parameters, produce hypothesis, scale both hypothesis and parameter to see if it holds
 - add exception when FIXED_SIGNALS_COUNT or BITVECTOR_ENTRY_SIZE is not enough, add parameters to make
+- re run and stabilize functional tests
 
 - explore controllable simplification
 	- hide queue in genbuf (hide signals, tau reduction)

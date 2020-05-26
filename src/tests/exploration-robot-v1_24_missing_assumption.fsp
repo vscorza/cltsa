@@ -7,7 +7,7 @@ order 				= {}
 //set Actions = {load,unload}
 //set A = {Moves,Actions}
 const Min = 1 //this must always be odd
-const Max = 6
+const Max = 24
 range Pos = Min..Max
 
 //Concrete
@@ -36,6 +36,7 @@ fluent F_Unload = <unload, {load,n,s,e,w,stall,releaseNorth, releaseSouth}>
 fluent F_ReleaseNorth = <releaseNorth,{unload,load,n,s,e,w,stall,releaseSouth}> initially 1
 fluent F_ReleaseSouth = <releaseSouth,{unload,load,n,s,e,w,stall,releaseNorth}> initially 1
 
-|gr1| <{F_ReleaseNorth,F_ReleaseSouth}><{F_Load, F_Unload}> STRAT = ROBOT_EXPLORE.
+ltl fluent A_True = (dummy || !dummy).
+|gr1| <{A_True}><{F_Load, F_Unload}> STRAT = ROBOT_EXPLORE.
 
-STRAT >> "/home/mariano/code/henos-automata/src/results/exploration_robot_6_strat.rep".
+STRAT >> "/home/mariano/code/henos-automata/src/results/exploration_robot_24_strat_missing_assumption.rep".
