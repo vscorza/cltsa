@@ -16,7 +16,8 @@ lex.yy.c
 y.tab.c
 y.output
 y.tab.h
-cachegrind.out*
+*cachegrind.out*
+*.html
 *.out
 *.soc
 .cproject
