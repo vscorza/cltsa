@@ -168,10 +168,50 @@ control_robot <- ggplot(robot_samples, aes(x=c_coeff_r, y=m_coeff_r)) +
 	scale_x_log10() +	
 	geom_point(color='red') +
 	geom_smooth(method='lm')	
+m_c_coeff_ga = genbuf_missing$minimization_controllable_transitions / genbuf_missing$plant_transitions	
+m_m_coeff_ga = genbuf_missing$minimization_transitions / genbuf_missing$plant_transitions	
+m_control_g_ass <- ggplot(genbuf_missing, aes(x=m_c_coeff_ga, y=m_m_coeff_ga)) +
+	labs(title="Genbuf.ass") +
+	xlab("Min. Cont.") +
+	ylab("Reduction") +
+	scale_y_log10() +
+	scale_x_log10() +	
+	geom_point(color='red') +
+	geom_smooth(method='lm')	
+m_c_coeff_gs = genbuf_removed$minimization_controllable_transitions / genbuf_removed$plant_transitions	
+m_m_coeff_gs = genbuf_removed$minimization_transitions / genbuf_removed$plant_transitions	
+m_control_safety <- ggplot(genbuf_removed, aes(x=m_c_coeff_gs, y=m_m_coeff_gs)) +
+	labs(title="Genbuf.safety") +
+	xlab("Min. Cont.") +
+	ylab("Reduction") +
+	scale_y_log10() +
+	scale_x_log10() +	
+	geom_point(color='red') +
+	geom_smooth(method='lm')
+m_c_coeff_c = collector_missing$minimization_controllable_transitions / collector_missing$plant_transitions	
+m_m_coeff_c = collector_missing$minimization_transitions / collector_missing$plant_transitions	
+m_control_collector <- ggplot(collector_missing, aes(x=m_c_coeff_c, y=m_m_coeff_c)) +
+	labs(title="Collector") +
+	xlab("Min. Cont.") +
+	ylab("Reduction") +
+	scale_y_log10() +
+	scale_x_log10() +	
+	geom_point(color='red') +
+  geom_smooth(method='lm')
+m_c_coeff_r = robot_samples$minimization_controllable_transitions / robot_samples$plant_transitions	
+m_m_coeff_r = robot_samples$minimization_transitions / robot_samples$plant_transitions	
+m_control_robot <- ggplot(robot_samples, aes(x=m_c_coeff_r, y=m_m_coeff_r)) +
+	labs(title="Robot") +
+	xlab("Min. Cont.") +
+	ylab("Reduction") +
+	scale_y_log10() +
+	scale_x_log10() +	
+	geom_point(color='red') +
+	geom_smooth(method='lm')	
 ```
 
 ```{r echo=FALSE}
-grid.arrange(sizediag_g_ass, sizediag_safety, sizediag_collector, sizediag_exploration, plantminsize_g_ass, plantminsize_safety, plantminsize_collector, plantminsize_exploration, control_g_ass, control_safety, control_collector, control_robot, ncol=4)
+grid.arrange(sizediag_g_ass, sizediag_safety, sizediag_collector, sizediag_exploration, plantminsize_g_ass, plantminsize_safety, plantminsize_collector, plantminsize_exploration, control_g_ass, control_safety, control_collector, control_robot, m_control_g_ass, m_control_safety, m_control_collector, m_control_robot, ncol=4)
 ```
 
 

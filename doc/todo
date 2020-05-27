@@ -1,19 +1,10 @@
 TODO:
 =====
 - build test data
-	- controller || E' (provide controllable fsp, retrieve controller, compose against E', report size and resulting structure)
-	X run tests
-		X second non real genbuf
-		X collector
-		X exploration robot
 	- separate times and sizes for diagnosis in new file
 	- generate report
+	- controller || E' (provide controllable fsp, retrieve controller, compose against E', report size and resulting structure)
 	- generate table
-		- decide on whether to use r + markup or python
-	- generate plots
-		- minimization (original size x minimization %) (general, by type of fault)
-		- controllable % x minimization %		
-- agregar columna de C || E'
 - for non-realizability reduce diagnosis to single liveness goal not being satisfied
 - in dd minimization keep track of mins. tested as tested: bitvector -> 0 not tested, 1 realizable, 2 non realizable
 	should be able to only keep as many in terms of the dd step
