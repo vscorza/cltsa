@@ -28,6 +28,153 @@ collector_missing <- subset(experimental_composite, grepl("v1_missing_assumption
 robot_samples <- subset(experimental_composite, grepl("robot", name, fixed=TRUE))
 
 ```
+
+#Selected Graphs
+
+## Minimization and controllability
+```{r echo=FALSE}
+#sive vs diagnosis time
+ggplot(experimental_composite, aes(x=plant_transitions, y=diagnosis_time)) +
+	labs(title="Size vs diagnosis time") +
+	xlab(expression(paste("|",Delta["E"],"|"))) +
+	ylab("Diagnosis time (s)") +
+	scale_y_log10() +
+	scale_x_log10() +	
+	geom_point(color='red') +	
+	geom_smooth(method='lm')
+```
+
+## Minimization and minimization controllability
+
+```{r echo=FALSE}
+#plant controllability vs minimization amount
+c_coeff = experimental_composite$minimization_controllable_transitions / experimental_composite$plant_transitions	
+m_coeff = experimental_composite$minimization_transitions / experimental_composite$plant_transitions	
+ggplot(experimental_composite, aes(x=c_coeff, y=m_coeff)) +
+	labs(title="Minimization controllability vs minimization amount") +
+	xlab("Minimization controllability") +
+	ylab("Reduction") +
+	scale_y_log10() +
+	scale_x_log10() +	
+	geom_point(color='red') +
+	geom_smooth(method='lm')	
+```
+
+# Compared graphs
+
+```{r echo=FALSE}
+#rows, cols
+sizediag_g_ass <- ggplot(genbuf_missing, aes(x=plant_transitions, y=diagnosis_time)) +
+	labs(title="Genbuf.ass.") +
+	xlab(expression(paste("|",Delta["E"],"|"))) +
+	ylab("Diagnosis time (s)") +
+	scale_y_log10() +
+	scale_x_log10() +	
+	geom_point(color='red') +	
+	geom_smooth(method='lm')
+sizediag_safety <- ggplot(genbuf_removed, aes(x=plant_transitions, y=diagnosis_time)) +
+	labs(title="Genbuf.safety") +
+	xlab(expression(paste("|",Delta["E"],"|"))) +
+	ylab("Diagnosis time (s)") +
+	scale_y_log10() +
+	scale_x_log10() +	
+	geom_point(color='red') +	
+	geom_smooth(method='lm')
+sizediag_collector <- ggplot(collector_missing, aes(x=plant_transitions, y=diagnosis_time)) +
+	labs(title="Collector") +
+	xlab(expression(paste("|",Delta["E"],"|"))) +
+	ylab("Diagnosis time (s)") +
+	scale_y_log10() +
+	scale_x_log10() +	
+	geom_point(color='red') +	
+	geom_smooth(method='lm')	
+sizediag_exploration <- ggplot(robot_samples, aes(x=plant_transitions, y=diagnosis_time)) +
+	labs(title="Robot") +
+	xlab(expression(paste("|",Delta["E"],"|"))) +
+	ylab("Diagnosis time (s)") +
+	scale_y_log10() +
+	scale_x_log10() +	
+	geom_point(color='red') +	
+	geom_smooth(method='lm')
+plantminsize_g_ass <- ggplot(genbuf_missing, aes(x=plant_transitions, y=minimization_transitions)) +
+	labs(title="Genbuf.ass.") +
+	xlab(expression(paste("|",Delta[E],"|"))) +
+	ylab(expression(paste("|",Delta[paste("E","'")],"|"))) +
+	scale_y_log10() +
+	scale_x_log10() +	
+	geom_point(color='red') +	
+	geom_smooth(method='lm')	
+plantminsize_safety <- ggplot(genbuf_removed, aes(x=plant_transitions, y=minimization_transitions)) +
+	labs(title="Genbuf.safety") +
+	xlab(expression(paste("|",Delta[E],"|"))) +
+	ylab(expression(paste("|",Delta[paste("E","'")],"|"))) +
+	scale_y_log10() +
+	scale_x_log10() +	
+	geom_point(color='red') +	
+	geom_smooth(method='lm')		
+plantminsize_collector <- ggplot(collector_missing, aes(x=plant_transitions, y=minimization_transitions)) +
+	labs(title="Collector") +
+	xlab(expression(paste("|",Delta[E],"|"))) +
+	ylab(expression(paste("|",Delta[paste("E","'")],"|"))) +
+	scale_y_log10() +
+	scale_x_log10() +	
+	geom_point(color='red') 
+#+	geom_smooth(method='lm')	
+plantminsize_exploration <- ggplot(robot_samples, aes(x=plant_transitions, y=minimization_transitions)) +
+	labs(title="Robot") +
+	xlab(expression(paste("|",Delta[E],"|"))) +
+	ylab(expression(paste("|",Delta[paste("E","'")],"|"))) +
+	scale_y_log10() +
+	scale_x_log10() +	
+	geom_point(color='red') +	
+	geom_smooth(method='lm')	
+c_coeff_ga = genbuf_missing$plant_controllable_transitions / genbuf_missing$plant_transitions	
+m_coeff_ga = genbuf_missing$minimization_transitions / genbuf_missing$plant_transitions	
+control_g_ass <- ggplot(genbuf_missing, aes(x=c_coeff_ga, y=m_coeff_ga)) +
+	labs(title="Genbuf.ass") +
+	xlab("Controllability") +
+	ylab("Reduction") +
+	scale_y_log10() +
+	scale_x_log10() +	
+	geom_point(color='red') +
+	geom_smooth(method='lm')	
+c_coeff_gs = genbuf_removed$plant_controllable_transitions / genbuf_removed$plant_transitions	
+m_coeff_gs = genbuf_removed$minimization_transitions / genbuf_removed$plant_transitions	
+control_safety <- ggplot(genbuf_removed, aes(x=c_coeff_gs, y=m_coeff_gs)) +
+	labs(title="Genbuf.safety") +
+	xlab("Controllability") +
+	ylab("Reduction") +
+	scale_y_log10() +
+	scale_x_log10() +	
+	geom_point(color='red') +
+	geom_smooth(method='lm')
+c_coeff_c = collector_missing$plant_controllable_transitions / collector_missing$plant_transitions	
+m_coeff_c = collector_missing$minimization_transitions / collector_missing$plant_transitions	
+control_collector <- ggplot(collector_missing, aes(x=c_coeff_c, y=m_coeff_c)) +
+	labs(title="Collector") +
+	xlab("Controllability") +
+	ylab("Reduction") +
+	scale_y_log10() +
+	scale_x_log10() +	
+	geom_point(color='red') 
+# +	geom_smooth(method='lm')
+c_coeff_r = robot_samples$plant_controllable_transitions / robot_samples$plant_transitions	
+m_coeff_r = robot_samples$minimization_transitions / robot_samples$plant_transitions	
+control_robot <- ggplot(robot_samples, aes(x=c_coeff_r, y=m_coeff_r)) +
+	labs(title="Robot") +
+	xlab("Controllability") +
+	ylab("Reduction") +
+	scale_y_log10() +
+	scale_x_log10() +	
+	geom_point(color='red') +
+	geom_smooth(method='lm')	
+```
+
+```{r echo=FALSE}
+grid.arrange(sizediag_g_ass, sizediag_safety, sizediag_collector, sizediag_exploration, plantminsize_g_ass, plantminsize_safety, plantminsize_collector, plantminsize_exploration, control_g_ass, control_safety, control_collector, control_robot, ncol=4)
+```
+
+
 # Composite graphs
 
 ## Minimization distribution
@@ -152,13 +299,12 @@ ggplot(experimental_composite, aes(x=plant_transitions, y=minimization_transitio
 	ylab(expression(paste("|",Delta[paste("E","'")],"|"))) +
 	scale_y_log10() +
 	scale_x_log10() +	
-	geom_point(color='red') +	
-	geom_smooth(method='lm')
+	geom_point(color='red') 
 ```
 
 ```{r echo=FALSE}
 #plant size vs minimization time w labels
-ggplot(experimental_composite, aes(x=plant_transitions, y=minimization_transitions, label=name)) +
+hidden <- ggplot(experimental_composite, aes(x=plant_transitions, y=minimization_transitions, label=name)) +
 	labs(title="Plant size vs minimization size") +
 	xlab(expression(paste("|",Delta[E],"|"))) +
 	ylab(expression(paste("|",Delta[paste("E","'")],"|"))) +
@@ -168,26 +314,25 @@ ggplot(experimental_composite, aes(x=plant_transitions, y=minimization_transitio
 	geom_text(aes(label=as.character(name)),hjust=0,vjust=0) +
 	geom_smooth(method='lm')
 ```
-## Minimization and controllability
+## Minimization and plant controllability
 ```{r echo=FALSE}
 #plant controllability vs minimization amount
 c_coeff = experimental_composite$plant_controllable_transitions / experimental_composite$plant_transitions	
 m_coeff = experimental_composite$minimization_transitions / experimental_composite$plant_transitions	
 ggplot(experimental_composite, aes(x=c_coeff, y=m_coeff)) +
 	labs(title="Plant controllability vs minimization amount") +
-	xlab("Controllability") +
+	xlab("Plant controllability") +
 	ylab("Reduction") +
 	scale_y_log10() +
 	scale_x_log10() +	
-	geom_point(color='red') +
-	geom_smooth(method='lm')	
+	geom_point(color='red') 
 ```
 
 ```{r echo=FALSE}
 #plant controllability vs minimization amount w labels
 c_coeff = experimental_composite$plant_controllable_transitions / experimental_composite$plant_transitions	
 m_coeff = experimental_composite$minimization_transitions / experimental_composite$plant_transitions	
-ggplot(experimental_composite, aes(x=c_coeff, y=m_coeff, label=name)) +
+hidden <- ggplot(experimental_composite, aes(x=c_coeff, y=m_coeff, label=name)) +
 	labs(title="Plant controllability vs minimization amount") +
 	xlab("Controllability") +
 	ylab("Reduction") +
@@ -199,109 +344,15 @@ ggplot(experimental_composite, aes(x=c_coeff, y=m_coeff, label=name)) +
     
 ```
 
-# Compared graphs
+## Minimization and minimization controllability
 
 ```{r echo=FALSE}
-#rows, cols
-sizediag_g_ass <- ggplot(genbuf_missing, aes(x=plant_transitions, y=diagnosis_time)) +
-	labs(title="Genbuf.ass.") +
-	xlab(expression(paste("|",Delta["E"],"|"))) +
-	ylab("Diagnosis time (s)") +
-	scale_y_log10() +
-	scale_x_log10() +	
-	geom_point(color='red') +	
-	geom_smooth(method='lm')
-sizediag_safety <- ggplot(genbuf_removed, aes(x=plant_transitions, y=diagnosis_time)) +
-	labs(title="Genbuf.safety") +
-	xlab(expression(paste("|",Delta["E"],"|"))) +
-	ylab("Diagnosis time (s)") +
-	scale_y_log10() +
-	scale_x_log10() +	
-	geom_point(color='red') +	
-	geom_smooth(method='lm')
-sizediag_collector <- ggplot(collector_missing, aes(x=plant_transitions, y=diagnosis_time)) +
-	labs(title="Collector") +
-	xlab(expression(paste("|",Delta["E"],"|"))) +
-	ylab("Diagnosis time (s)") +
-	scale_y_log10() +
-	scale_x_log10() +	
-	geom_point(color='red') +	
-	geom_smooth(method='lm')	
-sizediag_exploration <- ggplot(robot_samples, aes(x=plant_transitions, y=diagnosis_time)) +
-	labs(title="Robot") +
-	xlab(expression(paste("|",Delta["E"],"|"))) +
-	ylab("Diagnosis time (s)") +
-	scale_y_log10() +
-	scale_x_log10() +	
-	geom_point(color='red') +	
-	geom_smooth(method='lm')
-plantminsize_g_ass <- ggplot(genbuf_missing, aes(x=plant_transitions, y=minimization_transitions)) +
-	labs(title="Genbuf.ass.") +
-	xlab(expression(paste("|",Delta[E],"|"))) +
-	ylab(expression(paste("|",Delta[paste("E","'")],"|"))) +
-	scale_y_log10() +
-	scale_x_log10() +	
-	geom_point(color='red') +	
-	geom_smooth(method='lm')	
-plantminsize_safety <- ggplot(genbuf_removed, aes(x=plant_transitions, y=minimization_transitions)) +
-	labs(title="Genbuf.safety") +
-	xlab(expression(paste("|",Delta[E],"|"))) +
-	ylab(expression(paste("|",Delta[paste("E","'")],"|"))) +
-	scale_y_log10() +
-	scale_x_log10() +	
-	geom_point(color='red') +	
-	geom_smooth(method='lm')		
-plantminsize_collector <- ggplot(collector_missing, aes(x=plant_transitions, y=minimization_transitions)) +
-	labs(title="Collector") +
-	xlab(expression(paste("|",Delta[E],"|"))) +
-	ylab(expression(paste("|",Delta[paste("E","'")],"|"))) +
-	scale_y_log10() +
-	scale_x_log10() +	
-	geom_point(color='red') +	
-	geom_smooth(method='lm')	
-plantminsize_exploration <- ggplot(robot_samples, aes(x=plant_transitions, y=minimization_transitions)) +
-	labs(title="Robot") +
-	xlab(expression(paste("|",Delta[E],"|"))) +
-	ylab(expression(paste("|",Delta[paste("E","'")],"|"))) +
-	scale_y_log10() +
-	scale_x_log10() +	
-	geom_point(color='red') +	
-	geom_smooth(method='lm')	
-c_coeff_ga = genbuf_missing$plant_controllable_transitions / genbuf_missing$plant_transitions	
-m_coeff_ga = genbuf_missing$minimization_transitions / genbuf_missing$plant_transitions	
-control_g_ass <- ggplot(genbuf_missing, aes(x=c_coeff_ga, y=m_coeff_ga)) +
-	labs(title="Genbuf.ass") +
-	xlab("Controllability") +
-	ylab("Reduction") +
-	scale_y_log10() +
-	scale_x_log10() +	
-	geom_point(color='red') +
-	geom_smooth(method='lm')	
-c_coeff_gs = genbuf_removed$plant_controllable_transitions / genbuf_removed$plant_transitions	
-m_coeff_gs = genbuf_removed$minimization_transitions / genbuf_removed$plant_transitions	
-control_safety <- ggplot(genbuf_removed, aes(x=c_coeff_gs, y=m_coeff_gs)) +
-	labs(title="Genbuf.safety") +
-	xlab("Controllability") +
-	ylab("Reduction") +
-	scale_y_log10() +
-	scale_x_log10() +	
-	geom_point(color='red') +
-	geom_smooth(method='lm')
-c_coeff_c = collector_missing$plant_controllable_transitions / collector_missing$plant_transitions	
-m_coeff_c = collector_missing$minimization_transitions / collector_missing$plant_transitions	
-control_collector <- ggplot(collector_missing, aes(x=c_coeff_c, y=m_coeff_c)) +
-	labs(title="Collector") +
-	xlab("Controllability") +
-	ylab("Reduction") +
-	scale_y_log10() +
-	scale_x_log10() +	
-	geom_point(color='red') +
-	geom_smooth(method='lm')
-c_coeff_r = robot_samples$plant_controllable_transitions / robot_samples$plant_transitions	
-m_coeff_r = robot_samples$minimization_transitions / robot_samples$plant_transitions	
-control_robot <- ggplot(robot_samples, aes(x=c_coeff_r, y=m_coeff_r)) +
-	labs(title="Robot") +
-	xlab("Controllability") +
+#plant controllability vs minimization amount
+c_coeff = experimental_composite$minimization_controllable_transitions / experimental_composite$plant_transitions	
+m_coeff = experimental_composite$minimization_transitions / experimental_composite$plant_transitions	
+ggplot(experimental_composite, aes(x=c_coeff, y=m_coeff)) +
+	labs(title="Minimization controllability vs minimization amount") +
+	xlab("Minimization controllability") +
 	ylab("Reduction") +
 	scale_y_log10() +
 	scale_x_log10() +	
@@ -309,9 +360,6 @@ control_robot <- ggplot(robot_samples, aes(x=c_coeff_r, y=m_coeff_r)) +
 	geom_smooth(method='lm')	
 ```
 
-```{r echo=FALSE}
-grid.arrange(sizediag_g_ass, sizediag_safety, sizediag_collector, sizediag_exploration, plantminsize_g_ass, plantminsize_safety, plantminsize_collector, plantminsize_exploration, control_g_ass, control_safety, control_collector, control_robot, ncol=4)
-```
 
 # Genbuf missing assumption
 
