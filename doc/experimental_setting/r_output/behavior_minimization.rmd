@@ -8,7 +8,8 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE,
+                      results= "hide")
 #install.packages("dplyr")
 #install.packages("magrittr")
 #install.packages("ggplot2")
@@ -28,6 +29,108 @@ robot_samples <- subset(experimental_composite, grepl("robot", name, fixed=TRUE)
 
 ```
 # Composite graphs
+
+## Minimization distribution
+
+```{r echo=FALSE}
+experimental_composite$m_coeff = experimental_composite$minimization_transitions / experimental_composite$plant_transitions
+experimental_composite$relative_time = experimental_composite$diagnosis_time / experimental_composite$plant_transitions
+experimental_composite$relative_time_liveness = experimental_composite$diagnosis_time / (experimental_composite$plant_transitions + experimental_composite$assumptions_count + experimental_composite$guarantees_count)
+ggplot(experimental_composite, aes(x=m_coeff)) + 
+  labs(title="Minimization distribution", subtitle="Overall") +
+  xlab("Minimization rate") +
+  ylab("Count") + 
+    geom_histogram(color="black",fill="white")
+ggplot(experimental_composite, aes(x=relative_time)) + 
+  labs(title=expression(paste("Min. time / |",Delta["E"],"|")), subtitle="Overall") +
+  xlab("Minimization rate") +
+  ylab("Count") + 
+    geom_histogram(color="black",fill="white")
+ggplot(experimental_composite, aes(x=relative_time_liveness)) + 
+  labs(title=expression(paste("Min. time / (|",Delta["E"],"|* liveness)")), subtitle="Overall") +
+  xlab("Minimization rate") +
+  ylab("Count") + 
+    geom_histogram(color="black",fill="white")
+genbuf_missing$m_coeff = genbuf_missing$minimization_transitions / genbuf_missing$plant_transitions
+genbuf_missing$relative_time = genbuf_missing$diagnosis_time / genbuf_missing$plant_transitions
+genbuf_missing$relative_time_liveness = genbuf_missing$diagnosis_time / (genbuf_missing$plant_transitions + genbuf_missing$assumptions_count + genbuf_missing$guarantees_count)
+hist_g_ass <- ggplot(genbuf_missing, aes(x=m_coeff)) + 
+  labs(title="Minimization distribution", subtitle="Genbuf miss. ass.") +
+  xlab("Minimization rate") +
+  ylab("Count") + 
+    geom_histogram(color="black",fill="white")
+hist_g_ass_rel <- ggplot(genbuf_missing, aes(x=relative_time)) + 
+  labs(title=expression(paste("Min. time / |",Delta["E"],"|")), subtitle="Genbuf miss. ass.") +
+  xlab("Minimization rate") +
+  ylab("Count") + 
+    geom_histogram(color="black",fill="white")
+hist_g_ass_rel_liv <- ggplot(genbuf_missing, aes(x=relative_time_liveness)) + 
+  labs(title=expression(paste("Min. time / (|",Delta["E"],"|* liveness)")), subtitle="Genbuf miss. ass.") +
+  xlab("Minimization rate") +
+  ylab("Count") + 
+    geom_histogram(color="black",fill="white")
+genbuf_removed$m_coeff = genbuf_removed$minimization_transitions / genbuf_removed$plant_transitions
+genbuf_removed$relative_time = genbuf_removed$diagnosis_time / genbuf_removed$plant_transitions
+genbuf_removed$relative_time_liveness = genbuf_removed$diagnosis_time / (genbuf_removed$plant_transitions + genbuf_removed$assumptions_count + genbuf_removed$guarantees_count)
+hist_g_safety <- ggplot(genbuf_removed, aes(x=m_coeff)) + 
+  labs(title="Minimization distribution", subtitle="Genbuf removed env. safety") +
+  xlab("Minimization rate") +
+  ylab("Count") + 
+    geom_histogram(color="black",fill="white")
+hist_g_safety_rel <- ggplot(genbuf_removed, aes(x=relative_time)) + 
+  labs(title=expression(paste("Min. time / |",Delta["E"],"|")), subtitle="Genbuf removed env. safety") +
+  xlab("Minimization rate") +
+  ylab("Count") + 
+    geom_histogram(color="black",fill="white")
+hist_g_safety_rel_liv<- ggplot(genbuf_removed, aes(x=relative_time_liveness)) + 
+  labs(title=expression(paste("Min. time / (|",Delta["E"],"|* liveness)")), subtitle="Genbuf removed env. safety") +
+  xlab("Minimization rate") +
+  ylab("Count") + 
+    geom_histogram(color="black",fill="white")
+collector_missing$m_coeff = collector_missing$minimization_transitions / collector_missing$plant_transitions
+collector_missing$relative_time = collector_missing$diagnosis_time / collector_missing$plant_transitions
+collector_missing$relative_time_liveness = collector_missing$diagnosis_time / (collector_missing$plant_transitions + collector_missing$assumptions_count + collector_missing$guarantees_count)
+hist_collector <- ggplot(collector_missing, aes(x=m_coeff)) + 
+  labs(title="Minimization distribution", subtitle="Collector") +
+  xlab("Minimization rate") +
+  ylab("Count") + 
+    geom_histogram(color="black",fill="white")
+hist_collector_rel <- ggplot(collector_missing, aes(x=relative_time)) + 
+  labs(title=expression(paste("Min. time / |",Delta["E"],"|")), subtitle="Collector") +
+  xlab("Minimization rate") +
+  ylab("Count") + 
+    geom_histogram(color="black",fill="white")
+hist_collector_rel_liv <- ggplot(collector_missing, aes(x=relative_time_liveness)) + 
+  labs(title=expression(paste("Min. time / (|",Delta["E"],"|* liveness)")), subtitle="Collector") +
+  xlab("Minimization rate") +
+  ylab("Count") + 
+    geom_histogram(color="black",fill="white")
+robot_samples$m_coeff = robot_samples$minimization_transitions / robot_samples$plant_transitions
+robot_samples$relative_time = robot_samples$diagnosis_time / robot_samples$plant_transitions
+robot_samples$relative_time_liveness = robot_samples$diagnosis_time / (robot_samples$plant_transitions + robot_samples$assumptions_count + robot_samples$guarantees_count)
+hist_robot <- ggplot(robot_samples, aes(x=m_coeff)) + 
+  labs(title="Minimization distribution", subtitle="Robot Explorer") +
+  xlab("Minimization rate") +
+  ylab("Count") + 
+    geom_histogram(color="black",fill="white")
+hist_robot_rel <- ggplot(robot_samples, aes(x=relative_time)) + 
+  labs(title=expression(paste("Min. time / |",Delta["E"],"|")), subtitle="Robot Explorer") +
+  xlab("Minimization rate") +
+  ylab("Count") + 
+    geom_histogram(color="black",fill="white")
+hist_robot_rel_liv <- ggplot(robot_samples, aes(x=relative_time_liveness)) + 
+  labs(title=expression(paste("Min. time / (|",Delta["E"],"|* liveness)")), subtitle="Robot Explorer") +
+  xlab("Minimization rate") +
+  ylab("Count") + 
+    geom_histogram(color="black",fill="white")
+
+grid.arrange(hist_g_ass, hist_g_safety, hist_collector, hist_robot, ncol=2)
+
+grid.arrange(hist_g_ass_rel, hist_g_safety_rel, hist_collector_rel, hist_robot_rel, ncol=2)
+
+grid.arrange(hist_g_ass_rel_liv, hist_g_safety_rel_liv, hist_collector_rel_liv, hist_robot_rel_liv, ncol=2)
+```
+
 ## Minimization and controllability
 ```{r echo=FALSE}
 #sive vs diagnosis time
@@ -213,6 +316,7 @@ grid.arrange(sizediag_g_ass, sizediag_safety, sizediag_collector, sizediag_explo
 # Genbuf missing assumption
 
 ## Minimization and controllability
+
 ```{r echo=FALSE}
 #sive vs diagnosis time
 ggplot(genbuf_missing, aes(x=plant_transitions, y=diagnosis_time)) +
@@ -224,7 +328,9 @@ ggplot(genbuf_missing, aes(x=plant_transitions, y=diagnosis_time)) +
 	geom_point(color='red') +	
 	geom_smooth(method='lm')
 ```
-## Minimization and controllability
+
+## Plant vs minimization time
+
 ```{r echo=FALSE}
 #plant size vs minimization time	
 ggplot(genbuf_missing, aes(x=plant_transitions, y=minimization_transitions)) +
@@ -237,7 +343,8 @@ ggplot(genbuf_missing, aes(x=plant_transitions, y=minimization_transitions)) +
 	geom_smooth(method='lm')
 ```
 
-## Minimization and controllability
+## Plant controllability vs minimization rate
+
 ```{r echo=FALSE}
 #plant controllability vs minimization amount
 c_coeff = genbuf_missing$plant_controllable_transitions / genbuf_missing$plant_transitions	
@@ -255,6 +362,7 @@ ggplot(genbuf_missing, aes(x=c_coeff, y=m_coeff)) +
 # Genbuf removed env. safety
 
 ## Minimization and controllability
+
 ```{r echo=FALSE}
 #sive vs diagnosis time
 ggplot(genbuf_removed, aes(x=plant_transitions, y=diagnosis_time)) +
@@ -266,7 +374,9 @@ ggplot(genbuf_removed, aes(x=plant_transitions, y=diagnosis_time)) +
 	geom_point(color='red') +	
 	geom_smooth(method='lm')
 ```
-## Minimization and controllability
+
+## Plant vs minimization time
+
 ```{r echo=FALSE}
 #plant size vs minimization time	
 ggplot(genbuf_removed, aes(x=plant_transitions, y=minimization_transitions)) +
@@ -279,7 +389,8 @@ ggplot(genbuf_removed, aes(x=plant_transitions, y=minimization_transitions)) +
 	geom_smooth(method='lm')
 ```
 
-## Minimization and controllability
+## Plant controllability vs minimization rate
+
 ```{r echo=FALSE}
 #plant controllability vs minimization amount
 c_coeff = genbuf_removed$plant_controllable_transitions / genbuf_removed$plant_transitions	
@@ -298,6 +409,7 @@ ggplot(genbuf_removed, aes(x=c_coeff, y=m_coeff)) +
 # Collector missing assumption
 
 ## Minimization and controllability
+
 ```{r echo=FALSE}
 #sive vs diagnosis time
 ggplot(collector_missing, aes(x=plant_transitions, y=diagnosis_time)) +
@@ -309,7 +421,9 @@ ggplot(collector_missing, aes(x=plant_transitions, y=diagnosis_time)) +
 	geom_point(color='red') +	
 	geom_smooth(method='lm')
 ```
-## Minimization and controllability
+
+## Plant vs minimization time
+
 ```{r echo=FALSE}
 #plant size vs minimization time	
 ggplot(collector_missing, aes(x=plant_transitions, y=minimization_transitions)) +
@@ -322,7 +436,8 @@ ggplot(collector_missing, aes(x=plant_transitions, y=minimization_transitions)) 
 	geom_smooth(method='lm')
 ```
 
-## Minimization and controllability
+## Plant controllability vs minimization rate
+
 ```{r echo=FALSE}
 #plant controllability vs minimization amount
 c_coeff = collector_missing$plant_controllable_transitions / collector_missing$plant_transitions	
@@ -340,6 +455,7 @@ ggplot(collector_missing, aes(x=c_coeff, y=m_coeff)) +
 # Exploration robot missing assumption
 
 ## Minimization and controllability
+
 ```{r echo=FALSE}
 #sive vs diagnosis time
 ggplot(robot_samples, aes(x=plant_transitions, y=diagnosis_time)) +
@@ -351,7 +467,9 @@ ggplot(robot_samples, aes(x=plant_transitions, y=diagnosis_time)) +
 	geom_point(color='red') +	
 	geom_smooth(method='lm')
 ```
-## Minimization and controllability
+
+## Plant vs minimization time
+
 ```{r echo=FALSE}
 #plant size vs minimization time	
 ggplot(robot_samples, aes(x=plant_transitions, y=minimization_transitions)) +
@@ -364,7 +482,8 @@ ggplot(robot_samples, aes(x=plant_transitions, y=minimization_transitions)) +
 	geom_smooth(method='lm')
 ```
 
-## Minimization and controllability
+## Plant controllability vs minimization rate
+
 ```{r echo=FALSE}
 #plant controllability vs minimization amount
 c_coeff = robot_samples$plant_controllable_transitions / robot_samples$plant_transitions	
