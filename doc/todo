@@ -5,6 +5,7 @@ TODO:
 	X generate report
 	- controller || E' (provide controllable fsp, retrieve controller, compose against E', report size and resulting structure)
 	- generate table
+	- add narrative to each section
 - in dd minimization keep track of mins. tested as tested: bitvector -> 0 not tested, 1 realizable, 2 non realizable
 	should be able to only keep as many in terms of the dd step
 	- check current minimization bitvector m with previous minimization bitvector p
