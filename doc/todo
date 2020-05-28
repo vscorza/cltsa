@@ -1,11 +1,10 @@
 TODO:
 =====
 - build test data
-	- separate times and sizes for diagnosis in new file
-	- generate report
+	X separate times and sizes for diagnosis in new file
+	X generate report
 	- controller || E' (provide controllable fsp, retrieve controller, compose against E', report size and resulting structure)
 	- generate table
-- for non-realizability reduce diagnosis to single liveness goal not being satisfied
 - in dd minimization keep track of mins. tested as tested: bitvector -> 0 not tested, 1 realizable, 2 non realizable
 	should be able to only keep as many in terms of the dd step
 	- check current minimization bitvector m with previous minimization bitvector p
@@ -25,6 +24,8 @@ TODO:
 - explicar ejemplos nuevos
 - armar ejemplo que compare nuestra tecnica con konighoefer y maoz
 - diagnose mutation over small parameters, produce hypothesis, scale both hypothesis and parameter to see if it holds
+
+- for non-realizability reduce diagnosis to single liveness goal not being satisfied
 - add exception when FIXED_SIGNALS_COUNT or BITVECTOR_ENTRY_SIZE is not enough, add parameters to make
 - re run and stabilize functional tests
 

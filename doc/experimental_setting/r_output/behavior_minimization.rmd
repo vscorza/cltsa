@@ -5,6 +5,7 @@ date: "5/26/2020"
 output:
   html_document:
     df_print: paged
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -21,6 +22,8 @@ library(jsonlite)
 library(gridExtra)
 library(grid)
 library(lattice)
+suppressMessages(library(dplyr))
+suppressMessages(library(ggplot2))
 experimental_composite <- read.csv(file='/home/mariano/code/henos-automata/doc/experimental_setting/tmp_results/general_data_composite.csv')
 genbuf_missing <- subset(experimental_composite, grepl("automaton_missing_assumption", name, fixed=TRUE))
 genbuf_removed <- subset(experimental_composite, grepl("automaton_removed_env_safety", name, fixed=TRUE))
@@ -28,8 +31,15 @@ collector_missing <- subset(experimental_composite, grepl("v1_missing_assumption
 robot_samples <- subset(experimental_composite, grepl("robot", name, fixed=TRUE))
 
 ```
+<style type="text/css">
+.twoC {width: 100%}
+.clearer {clear: both}
+.twoC .table {max-width: 50%; float: right}
+.twoC img {max-width: 50%; float: left}
+</style>
 
 #Selected Graphs
+
 
 ## Minimization and controllability
 ```{r echo=FALSE}
@@ -59,6 +69,48 @@ ggplot(experimental_composite, aes(x=c_coeff, y=m_coeff)) +
 	geom_point(color='red') +
 	geom_smooth(method='lm')	
 ```
+
+## Minimization progression
+<div class="twoC">
+```{r echo=FALSE}
+steps_path = "/home/mariano/code/henos-automata/doc/experimental_setting/tmp_results/steps/"
+steps_files = list.files(path=steps_path, pattern="*.csv")
+#for (i in 1:length(steps_files)) steps_df[i] <- read.csv(steps_files[i])
+
+effective_plots <- 0
+for (i in 1:length(steps_files)){
+  df <- read.csv(file=paste(steps_path, steps_files[i], sep=''))
+  if(length(df$step) < 2){
+    next
+  }
+  effective_plots <- effective_plots + 1
+}
+#layout(matrix(1:effective_plots*2,nc=2, nr= effective_plots,byr=T))
+for (i in 1:length(steps_files)){
+  df <- read.csv(file=paste(steps_path, steps_files[i], sep=''))
+  if(length(df$step) < 2){
+    next
+  }
+  time_plot <- ggplot(df, aes(x=step, y=time, group=i)) +
+  geom_line(linetype="dashed", color="blue", size=1.2)+
+  geom_point(color="red", size=3) + 
+  labs(title=steps_files[i]) +
+	xlab("Steps") +
+	ylab("Time (s)") 
+  print(time_plot)
+  size_plot <- ggplot(df, aes(x=step, y=size, group=i)) +
+  geom_line(linetype="dashed", color="blue", size=1.2)+
+  geom_point(color="red", size=3) + 
+  labs(title=steps_files[i]) +
+	xlab("Steps") +
+	ylab(expression(paste("|",Delta[paste("E","'")],"|")))
+  print(size_plot)  
+}
+
+
+```
+</div>
+<div class="clearer"></div>
 
 # Compared graphs
 
