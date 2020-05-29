@@ -10,7 +10,7 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE,
-                      results= "hide")
+                      results= "asis")
 #install.packages("dplyr")
 #install.packages("magrittr")
 #install.packages("ggplot2")
@@ -22,6 +22,8 @@ library(jsonlite)
 library(gridExtra)
 library(grid)
 library(lattice)
+library(knitr)
+library(scales)
 suppressMessages(library(dplyr))
 suppressMessages(library(ggplot2))
 experimental_composite <- read.csv(file='/home/mariano/code/henos-automata/doc/experimental_setting/tmp_results/general_data_composite.csv')
@@ -36,12 +38,53 @@ robot_samples <- subset(experimental_composite, grepl("robot", name, fixed=TRUE)
 .clearer {clear: both}
 .twoC .table {max-width: 50%; float: right}
 .twoC img {max-width: 50%; float: left}
+table {
+  margin: auto;
+  border-top: 1px solid #666;
+  border-bottom: 1px solid #666;
+}
+table thead th { border-bottom: 1px solid #ddd; }
+th, td { padding: 5px; }
+thead, tfoot, tr:nth-child(even) { background: #eee; }
+pre{display:none;}
 </style>
 
-#Selected Graphs
+# Selected Graphs
+
+## General Table
+
+Specification sizes go from `r min(experimental_composite$plant_transitions)` transitions up to `r max(experimental_composite$plant_transitions)`.
+Minimization reduction goes from `r max(experimental_composite$minimization_transitions / experimental_composite$plant_transitions)` up to `r min(experimental_composite$minimization_transitions / experimental_composite$plant_transitions)`.
+
+```{r echo=FALSE}
+times_table <- experimental_composite[c(1,7)]
+times_table$liveness_count <- experimental_composite$guarantees_count + experimental_composite$assumptions_count
+times_table$plant_transitions <- experimental_composite$plant_transitions
+times_table$minimization_transitions <- experimental_composite$minimization_transitions
+times_table$reduction <- experimental_composite$minimization_transitions / experimental_composite$plant_transitions
+times_table$steps <- experimental_composite$diagnosis_steps
+times_table <- times_table %>%
+  group_by(name) %>%
+  summarize(diag <- mean(diagnosis_time), liveness <- max(liveness_count), plant_trans <- max(plant_transitions),
+            min_trans <- max(minimization_transitions), red <- mean(reduction), steps <- max(steps))
+kable(times_table, caption = "Times table", col.names=c("Specification","Diagnosis(s)","Liveness fluents", "Plant transitions", "Min. transitions","Minimization pct.(%)","Min. steps"))
+```
+
+## Minimization distribution (overall)
+
+```{r echo=FALSE}
+experimental_composite$m_coeff = experimental_composite$minimization_transitions / experimental_composite$plant_transitions
+experimental_composite$relative_time = experimental_composite$diagnosis_time / experimental_composite$plant_transitions
+experimental_composite$relative_time_liveness = experimental_composite$diagnosis_time / (experimental_composite$plant_transitions + experimental_composite$assumptions_count + experimental_composite$guarantees_count)
+ggplot(experimental_composite, aes(x=m_coeff)) + 
+  labs(title="Minimization distribution", subtitle="Overall") +
+  xlab("Minimization rate") +
+  ylab("Count") + 
+    geom_histogram(color="black",fill="white")
+```
 
 
-## Minimization and controllability
+## Minimization and diagnosis time
 ```{r echo=FALSE}
 #sive vs diagnosis time
 ggplot(experimental_composite, aes(x=plant_transitions, y=diagnosis_time)) +
@@ -69,48 +112,6 @@ ggplot(experimental_composite, aes(x=c_coeff, y=m_coeff)) +
 	geom_point(color='red') +
 	geom_smooth(method='lm')	
 ```
-
-## Minimization progression
-<div class="twoC">
-```{r echo=FALSE}
-steps_path = "/home/mariano/code/henos-automata/doc/experimental_setting/tmp_results/steps/"
-steps_files = list.files(path=steps_path, pattern="*.csv")
-#for (i in 1:length(steps_files)) steps_df[i] <- read.csv(steps_files[i])
-
-effective_plots <- 0
-for (i in 1:length(steps_files)){
-  df <- read.csv(file=paste(steps_path, steps_files[i], sep=''))
-  if(length(df$step) < 2){
-    next
-  }
-  effective_plots <- effective_plots + 1
-}
-#layout(matrix(1:effective_plots*2,nc=2, nr= effective_plots,byr=T))
-for (i in 1:length(steps_files)){
-  df <- read.csv(file=paste(steps_path, steps_files[i], sep=''))
-  if(length(df$step) < 2){
-    next
-  }
-  time_plot <- ggplot(df, aes(x=step, y=time, group=i)) +
-  geom_line(linetype="dashed", color="blue", size=1.2)+
-  geom_point(color="red", size=3) + 
-  labs(title=steps_files[i]) +
-	xlab("Steps") +
-	ylab("Time (s)") 
-  print(time_plot)
-  size_plot <- ggplot(df, aes(x=step, y=size, group=i)) +
-  geom_line(linetype="dashed", color="blue", size=1.2)+
-  geom_point(color="red", size=3) + 
-  labs(title=steps_files[i]) +
-	xlab("Steps") +
-	ylab(expression(paste("|",Delta[paste("E","'")],"|")))
-  print(size_plot)  
-}
-
-
-```
-</div>
-<div class="clearer"></div>
 
 # Compared graphs
 
@@ -265,6 +266,48 @@ m_control_robot <- ggplot(robot_samples, aes(x=m_c_coeff_r, y=m_m_coeff_r)) +
 ```{r echo=FALSE}
 grid.arrange(sizediag_g_ass, sizediag_safety, sizediag_collector, sizediag_exploration, plantminsize_g_ass, plantminsize_safety, plantminsize_collector, plantminsize_exploration, control_g_ass, control_safety, control_collector, control_robot, m_control_g_ass, m_control_safety, m_control_collector, m_control_robot, ncol=4)
 ```
+
+## Minimization progression
+<div class="twoC">
+```{r echo=FALSE}
+steps_path = "/home/mariano/code/henos-automata/doc/experimental_setting/tmp_results/steps/"
+steps_files = list.files(path=steps_path, pattern="*.csv")
+#for (i in 1:length(steps_files)) steps_df[i] <- read.csv(steps_files[i])
+
+effective_plots <- 0
+for (i in 1:length(steps_files)){
+  df <- read.csv(file=paste(steps_path, steps_files[i], sep=''))
+  if(length(df$step) < 2){
+    next
+  }
+  effective_plots <- effective_plots + 1
+}
+#layout(matrix(1:effective_plots*2,nc=2, nr= effective_plots,byr=T))
+for (i in 1:length(steps_files)){
+  df <- read.csv(file=paste(steps_path, steps_files[i], sep=''))
+  if(length(df$step) < 2){
+    next
+  }
+  time_plot <- ggplot(df, aes(x=step, y=time, group=i)) +
+  geom_line(linetype="dashed", color="blue", size=1.2)+
+  geom_point(color="red", size=3) + 
+  labs(title=steps_files[i]) +
+	xlab("Steps") +
+	ylab("Time (s)") 
+  print(time_plot)
+  size_plot <- ggplot(df, aes(x=step, y=size, group=i)) +
+  geom_line(linetype="dashed", color="blue", size=1.2)+
+  geom_point(color="red", size=3) + 
+  labs(title=steps_files[i]) +
+	xlab("Steps") +
+	ylab(expression(paste("|",Delta[paste("E","'")],"|")))
+  print(size_plot)  
+}
+
+
+```
+</div>
+<div class="clearer"></div>
 
 
 # Composite graphs
