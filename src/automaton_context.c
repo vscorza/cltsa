@@ -3534,9 +3534,9 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 			}
 			main_index = automaton_parsing_tables_add_entry(tables, COMPOSITION_ENTRY_AUT, gr1_game->name, winning_region_automaton);
 
-			uint32_t namelen	= strlen(winning_region_automaton->name) + 12;
+			uint32_t namelen	= strlen(gr1_game->name) + 12;
 			char *name = calloc(namelen, sizeof(char));
-			snprintf(name, namelen, "%s_%s", winning_region_automaton->name, nonreal? "diag" : "strat");
+			snprintf(name, namelen, "%s_%s", gr1_game->name, nonreal? "diag" : "strat");
 			free(winning_region_automaton->name);
 			winning_region_automaton->name	= name;
 			tables->composition_entries[main_index]->solved	= true;

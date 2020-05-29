@@ -4,7 +4,7 @@ TODO:
 	X separate times and sizes for diagnosis in new file
 	X generate report
 	X generate table
-	- add narrative to each section
+	X add narrative to each section
 	- controller || E' (provide controllable fsp, retrieve controller, compose against E', report size and resulting structure)
 - armar ejemplo que compare nuestra tecnica con konighoefer y maoz
 - in dd minimization keep track of mins. tested as tested: bitvector -> 0 not tested, 1 realizable, 2 non realizable
