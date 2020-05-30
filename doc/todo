@@ -1,11 +1,6 @@
 TODO:
 =====
-- build test data
-	X separate times and sizes for diagnosis in new file
-	X generate report
-	X generate table
-	X add narrative to each section
-	- controller || E' (provide controllable fsp, retrieve controller, compose against E', report size and resulting structure)
+- add transition disabling to speed up minimization time
 - armar ejemplo que compare nuestra tecnica con konighoefer y maoz
 - in dd minimization keep track of mins. tested as tested: bitvector -> 0 not tested, 1 realizable, 2 non realizable
 	should be able to only keep as many in terms of the dd step
@@ -14,6 +9,7 @@ TODO:
 		if check completes then use p result for m
 - start check refining previous case (complement or partition, and refined slots)
 	- it usually keeps refining the same complement when one is hard to find
+- update functional tests
 - write amba version
 - run tests for genbuf 4, 5, 6
 - improve reports
@@ -25,7 +21,10 @@ TODO:
 - diagnose mutation over small parameters, produce hypothesis, scale both hypothesis and parameter to see if it holds
 - de efectividad hacer alguna mención a la implementación y la linealidad, comparar con ejemplos comparables
 - explicar ejemplos nuevos
-
+- controller || E' 
+	- write files, import ctrol, diag, compose, export
+	- report size and structure
+	- show diff on composition
 - for non-realizability reduce diagnosis to single liveness goal not being satisfied
 - add exception when FIXED_SIGNALS_COUNT or BITVECTOR_ENTRY_SIZE is not enough, add parameters to make
 - re run and stabilize functional tests

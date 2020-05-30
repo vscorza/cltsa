@@ -30,3 +30,4 @@ y.tab.h
 *.blg
 .Rhistory
 cltsa
+.RData
