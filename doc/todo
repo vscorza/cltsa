@@ -2,11 +2,13 @@ TODO:
 =====
 - armar ejemplo que compare nuestra tecnica con konighoefer y maoz
 - update functional tests
+- review papers shield_synthesis, symbolic repair
 - write amba version
 - run tests for genbuf 4, 5, 6
 - improve reports
 	- write as being loaded from rmakrdon
 	- automatize report pipeline
+- review papers gr_1_star, performance_heuristics for gr1
 - diagnose mutation over small parameters, produce hypothesis, scale both hypothesis and parameter to see if it holds
 - de efectividad hacer alguna mención a la implementación y la linealidad, comparar con ejemplos comparables
 - explicar ejemplos nuevos
@@ -14,8 +16,8 @@ TODO:
 	- write files, import ctrol, diag, compose, export
 	- report size and structure
 	- show diff on composition
-- run tests with dd, linear, dd wo last_partition optimization
 - for non-realizability reduce diagnosis to single liveness goal not being satisfied
+- run tests with dd, linear, dd wo last_partition optimization, goal minimization
 - add exception when FIXED_SIGNALS_COUNT or BITVECTOR_ENTRY_SIZE is not enough, add parameters to make
 - see if following changes are worth the worry
 	- add transition disabling to speed up minimization time (should do enabled_in_degree and enabled_out_degree)
