@@ -1,22 +1,11 @@
 TODO:
 =====
-- add transition disabling to speed up minimization time
 - armar ejemplo que compare nuestra tecnica con konighoefer y maoz
-- in dd minimization keep track of mins. tested as tested: bitvector -> 0 not tested, 1 realizable, 2 non realizable
-	should be able to only keep as many in terms of the dd step
-	- check current minimization bitvector m with previous minimization bitvector p
-		if at any step p_i & m_i != p_i skip p (was not less or equal than m)
-		if check completes then use p result for m
-- start check refining previous case (complement or partition, and refined slots)
-	- it usually keeps refining the same complement when one is hard to find
 - update functional tests
 - write amba version
 - run tests for genbuf 4, 5, 6
 - improve reports
-	- write as json
-	- report separate synthesis cases individually within same file
-	- report composition times independently from model build
-	- report realizability individually
+	- write as being loaded from rmakrdon
 	- automatize report pipeline
 - diagnose mutation over small parameters, produce hypothesis, scale both hypothesis and parameter to see if it holds
 - de efectividad hacer alguna mención a la implementación y la linealidad, comparar con ejemplos comparables
@@ -25,10 +14,21 @@ TODO:
 	- write files, import ctrol, diag, compose, export
 	- report size and structure
 	- show diff on composition
+- run tests with dd, linear, dd wo last_partition optimization
 - for non-realizability reduce diagnosis to single liveness goal not being satisfied
 - add exception when FIXED_SIGNALS_COUNT or BITVECTOR_ENTRY_SIZE is not enough, add parameters to make
-- re run and stabilize functional tests
-
+- see if following changes are worth the worry
+	- add transition disabling to speed up minimization time (should do enabled_in_degree and enabled_out_degree)
+		- change seems to be too expensive in terms of refactoring to be worthy, since it may not prove useful once automaton copy is not as frequent
+	- in dd minimization keep track of mins. tested as tested: bitvector -> 0 not tested, 1 realizable, 2 non realizable
+		should be able to only keep as many in terms of the dd step
+		- check current minimization bitvector m with previous minimization bitvector p
+			if at any step p_i & m_i != p_i skip p (was not less or equal than m)
+			if check completes then use p result for m
+	
+- further improve reports
+	- report separate synthesis cases individually within same file
+	- report composition times independently from model build	
 - explore controllable simplification
 	- hide queue in genbuf (hide signals, tau reduction)
 	- review konighoefer work
@@ -43,6 +43,7 @@ TODO:
 	- keep inf scc over rankings
 - compare against konighoefer and jvts systems, write experimental claim
 - implement fluent consistency check
+- allow to define buchi fluent based on accepting state, for instance for automaton based properties in genbuf
 - implement IS_REALIZABLE(gr1). on parser
 POST PHD
 ========

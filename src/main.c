@@ -1481,6 +1481,7 @@ int main (int argc, char** argv){
 		//run_parse_test_linear("tests/genbuf_2_sndrs_no_automaton_joined_goals.fsp", "GenBuf 2 sndrs V2 joined goals");
 		//run_parse_test("tests/genbuf_2_sndrs_no_automaton_removed_controllable.fsp", "GenBuf 2 sndrs V2 removed controllable");
 		run_parse_test("tests/genbuf_2_sndrs_no_automaton_removed_env_safety.fsp", "GenBuf 2 sndrs V2 removed env safety");
+		//run_parse_test("tests/genbuf_1_sndrs_no_automaton_removed_env_safety.fsp", "GenBuf 2 sndrs V2 removed env safety");
 		//GENERAL TESTS
 		//run_all_tests();
 		//run_functional_tests();

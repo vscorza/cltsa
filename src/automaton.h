@@ -246,10 +246,22 @@ void automaton_minimization_adjust_steps_report(uint32_t *steps, uint32_t **step
 automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd(automaton_automaton* game_automaton, char** assumptions, uint32_t assumptions_count
 		, char** guarantees, uint32_t guarantees_count, uint32_t *steps, uint32_t **steps_sizes
 		, struct timeval **steps_times, uint32_t *steps_size);
+automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2_c_i_complement(automaton_automaton* master, automaton_automaton* minimized, automaton_automaton *inner_automaton
+		, char** assumptions, uint32_t assumptions_count
+		, char** guarantees, uint32_t guarantees_count, uint8_t *partition_bit_vector, uint32_t transitions_kept_size
+		, uint32_t partitions_count, uint32_t t_count, uint32_t t_size, uint32_t *t_states, uint32_t *t_indexes
+		, bool start_with_complement, uint32_t last_partition
+		, uint32_t *steps, uint32_t **steps_sizes, struct timeval **steps_times, uint32_t *steps_size);
+automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2_c_i(automaton_automaton* master, automaton_automaton* minimized, automaton_automaton *inner_automaton
+		, char** assumptions, uint32_t assumptions_count
+		, char** guarantees, uint32_t guarantees_count, uint8_t *partition_bit_vector, uint32_t transitions_kept_size
+		, uint32_t partitions_count, uint32_t t_count, uint32_t t_size, uint32_t *t_states, uint32_t *t_indexes
+		, bool start_with_complement, uint32_t last_partition
+		, uint32_t *steps, uint32_t **steps_sizes, struct timeval **steps_times, uint32_t *steps_size);
 automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2(automaton_automaton* master, automaton_automaton *minimized
 		, char** assumptions, uint32_t assumptions_count
 		, char** guarantees, uint32_t guarantees_count, uint8_t *partition_bit_vector, uint32_t transitions_kept_size, uint32_t paritions_count
-		, uint32_t t_count, uint32_t t_size, uint32_t *t_states, uint32_t *t_indexes, uint32_t *steps, uint32_t **steps_sizes
+		, uint32_t t_count, uint32_t t_size, uint32_t *t_states, uint32_t *t_indexes, bool start_with_complement, uint32_t last_partition, uint32_t *steps, uint32_t **steps_sizes
 		, struct timeval **steps_times, uint32_t *steps_size);
 automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_automaton* game_automaton, char** assumptions, uint32_t assumptions_count
 		, char** guarantees, uint32_t guarantees_count, uint32_t *steps, uint32_t **steps_sizes
