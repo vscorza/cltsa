@@ -3425,6 +3425,8 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 	uint32_t *steps_sizes = calloc(steps_size, sizeof(uint32_t));
 	struct timeval *steps_times	= calloc(steps_size, sizeof(struct timeval));
 	for(i = 0; i < program->count; i++){
+		assumptions_count = 0; guarantees_count = 0;
+		minimization_steps = 0;
 		if(program->statements[i]->type == GR_1_AUT){
 			gr1_game		= program->statements[i]->gr1_game_def;
 			main_index		= automaton_parsing_tables_get_entry_index(tables, COMPOSITION_ENTRY_AUT, gr1_game->composition_name);
@@ -3545,16 +3547,16 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 
 			if(nonreal){
 				//clear everything game related from diagnosis
-				for(i = 0; i < winning_region_automaton->context->global_fluents_count; i++)
-					automaton_bucket_destroy(winning_region_automaton->inverted_valuations[i]);
+				for(j = 0; j < winning_region_automaton->context->global_fluents_count; j++)
+					automaton_bucket_destroy(winning_region_automaton->inverted_valuations[j]);
 				if(winning_region_automaton->valuations_size > 0){
 					free(winning_region_automaton->inverted_valuations);winning_region_automaton->inverted_valuations = NULL;
 					free(winning_region_automaton->valuations);winning_region_automaton->valuations = NULL;
 					winning_region_automaton->valuations_size = 0;
 				}
 				if(winning_region_automaton->liveness_valuations_size > 0){
-					for(i = 0; i < winning_region_automaton->context->liveness_valuations_count; i++)
-						automaton_bucket_destroy(winning_region_automaton->liveness_inverted_valuations[i]);
+					for(j = 0; j < winning_region_automaton->context->liveness_valuations_count; j++)
+						automaton_bucket_destroy(winning_region_automaton->liveness_inverted_valuations[j]);
 					free(winning_region_automaton->liveness_inverted_valuations); winning_region_automaton->liveness_inverted_valuations = NULL;
 					free(winning_region_automaton->liveness_valuations); winning_region_automaton->liveness_valuations = NULL;
 					winning_region_automaton->liveness_valuations_size = 0;
@@ -3564,8 +3566,8 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 
 			//restore old liveness valuations and old context
 			if(was_merged){
-				for(i = 0; i < ctx->global_fluents_count; i++)
-					automaton_fluent_destroy(&(ctx->global_fluents[i]), false);
+				for(j = 0; j < ctx->global_fluents_count; j++)
+					automaton_fluent_destroy(&(ctx->global_fluents[j]), false);
 				free(ctx->global_fluents);
 				free(game_automaton->valuations);
 				free(game_automaton->inverted_valuations);
