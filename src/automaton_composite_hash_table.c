@@ -24,6 +24,7 @@ automaton_composite_hash_table *automaton_composite_hash_table_create(uint32_t a
 		if(automata_state_count[i] == 0){printf("Automaton state count was zero\n"); exit(-1);}
 		max_order *= i+1;
 	}
+	max_order *= automata_count + 1;
 	log_slot	= 1;
 	//get max order length in bits
 	hash_table->order_bits	= 0;
@@ -118,12 +119,9 @@ uint32_t automaton_composite_hash_table_get_state(automaton_composite_hash_table
 	}else{
 		uint32_t previous_state = composite_states[table->previous_order[0]];
 		for(i = 1; i < table->automata_count; i++){
-			if(previous_state >= composite_states[table->previous_order[i]]){
-				if(previous_state == composite_states[table->previous_order[i]] &&
-						i < table->previous_order[i]){
-					ordered = false;
-					break;
-				}
+			if(composite_states[table->previous_order[i]] > composite_states[table->previous_order[i-1]]){
+				ordered = false;
+				break;
 			}
 			if((composite_states[table->previous_order[i]] == composite_states[table->previous_order[i-1]])
 					!= table->previous_equality[i]){
@@ -171,12 +169,15 @@ uint32_t automaton_composite_hash_table_get_state(automaton_composite_hash_table
 	printf("Order:");
 #endif		//get index of current ordering within n!
 		for(j = 0; j < table->automata_count; j++){
-			order_fact /= (table->automata_count - j);
 			table->previous_order_key += table->previous_order[j] * order_fact;
+			order_fact /= (table->automata_count - j);
 #if DEBUG_CT
-			printf("%d %s", table->previous_order[j], j < table->automata_count -1? "<" : "\n");
+			printf("%d %s", table->previous_order[j], j < table->automata_count -1? "<" : "");
 #endif
 		}
+#if DEBUG_CT
+		printf(" key: %d\n", table->previous_order_key);
+#endif
 	}
 	//compute compound key (concatenation of states plus order key)
 	uint128_t compound_key	= 0;
@@ -235,7 +236,9 @@ uint32_t automaton_composite_hash_table_get_state(automaton_composite_hash_table
 	if(table->composite_count > table->max_keys){
 		automaton_composite_hash_table_resize(table);
 	}
-
+#if DEBUG_CT
+	printf("Value %d\n", new_entry->state);
+#endif
 	return new_entry->state;
 }
 

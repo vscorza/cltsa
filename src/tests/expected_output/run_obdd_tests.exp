@@ -14,19 +14,13 @@ x1^
 v(!x1)->0
 [OBDD]
 Mgr_ID:2
-Value:
-x1->0
-v(!x1)->0
+Value:->0
 [OBDD]
 Mgr_ID:2
-Value:
-x1->1
-v(!x1)->1
+Value:->1
 [OBDD]
 Mgr_ID:2
-Value:
-x1->1
-v(!x1)->1
+Value:->1
 [OBDD MANAGER]
 Mgr: 2
 Mgr.Dict:

@@ -23,15 +23,16 @@ ASYNCH_p_5 = (<a,b> -> ASYNCH_p_6),
 ASYNCH_p_6 = (e -> ASYNCH_p),
 ASYNCH_p_7 = (<f,g> -> ASYNCH_p_6).
 
-CONC_p = (<f,g> -> CONC_p_5 | <c,f,g> -> CONC_p_6 | c -> CONC_p_3| <a,b,c> -> CONC_p_2
-	| <a,b> -> CONC_p_1 | <a,b,f,g> -> CONC_p_7| <a,b,c,f,g> -> CONC_p_4),
-CONC_p_1 = (<f,g> -> CONC_p_7 | c -> CONC_p_2 | <c,f,g> -> CONC_p_4),
-CONC_p_2 = (<f,g> -> CONC_p_4),
-CONC_p_3 = (<f,g> -> CONC_p_6 | <a,b> -> CONC_p_2| <a,b,f,g> -> CONC_p_4),
-CONC_p_4 = (e -> CONC_p),
-CONC_p_5 = (<a,b,c> -> CONC_p_4 | <a,b> -> CONC_p_7 | c -> CONC_p_6),
-CONC_p_6 = (<a,b> -> CONC_p_4),
-CONC_p_7 = (c -> CONC_p_4).
+CONC_p = S_0,
+S_0 = (<f,g>-> S_1|c-> S_2|<c,f,g>-> S_3|<a,b>-> S_4|<a,b,f,g>-> S_5|<a,b,c>-> S_6|<a,b,c,f,g>-> S_7),
+S_1 = (c-> S_3|<a,b>-> S_5|<a,b,c>-> S_7),
+S_2 = (<f,g>-> S_3|<a,b>-> S_6|<a,b,f,g>-> S_7),
+S_3 = (<a,b>-> S_7),
+S_4 = (<f,g>-> S_5|c-> S_6|<c,f,g>-> S_7),
+S_5 = (c-> S_7),
+S_6 = (<f,g>-> S_7),
+S_7 = (e-> S_0).
+CONCURRENT >> "/tmp/compositiion_types_concurrent.fsp".
 
 // tests
 equals FATAL_Synch_Composition(SYNCHRONOUS, SYNCH_p).

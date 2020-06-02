@@ -1,6 +1,8 @@
 TODO:
 =====
 - update functional tests
+	- lift_2_strat	
+	- non_real_test
 - re-run tests
 - review papers Synthesis of AMBA AHB from Formal Specification:A Case Study, shield_synthesis, symbolic repair
 - write amba version
@@ -24,6 +26,7 @@ TODO:
 	- allow several specs to be loaded concurrently
 	- syntax highlight strings
 	- undo/redo 
+	- signals view as complement to automaton
 - add exception when FIXED_SIGNALS_COUNT or BITVECTOR_ENTRY_SIZE is not enough, add parameters to make
 - see if following changes are worth the worry
 	- add transition disabling to speed up minimization time (should do enabled_in_degree and enabled_out_degree)
