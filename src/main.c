@@ -878,7 +878,7 @@ void run_obdd_cache_tests(){
 	obdd_mgr_destroy(new_mgr);
 }
 
-#define FAST_LIST_VAR_COUNT	10000//10000
+#define FAST_LIST_VAR_COUNT	100//10000
 
 void run_obdd_fast_lists_tests(){
 	obdd_mgr* new_mgr	= obdd_mgr_create();
@@ -1212,7 +1212,7 @@ void run_bool_array_hash_table_tests(){
 	print_test_result(test_cmp, "BOOL_ARRAY_HASH", "bool array hash table");
 }
 
-#define COMPOSITE_TEST_STATE_COUNT	1000
+#define COMPOSITE_TEST_STATE_COUNT	100
 #define COMPOSITE_TEST_AUTOMATA_COUNT	2
 void run_automaton_composite_hash_table_tests(){
 	uint32_t i,j, *current_composite_state = calloc(COMPOSITE_TEST_AUTOMATA_COUNT, sizeof(uint32_t));
@@ -1299,8 +1299,8 @@ void run_functional_tests(){
 	run_obdd_cache_tests();
 	run_obdd_fast_lists_tests();
 	run_automaton_composite_hash_table_tests();
-	run_automaton_import_test();
 	run_automaton_export_test();
+	run_automaton_import_test();
 	//DRY TESTS
 	run_parse_test("tests/composition_types.fsp", "compositions type");
 	run_parse_test("tests/biscotti.fsp", "biscotti");
@@ -1482,10 +1482,10 @@ int main (int argc, char** argv){
 		//run_parse_test("tests/genbuf_2_sndrs_no_automaton_removed_controllable.fsp", "GenBuf 2 sndrs V2 removed controllable");
 		//run_parse_test("tests/genbuf_2_sndrs_no_automaton_removed_env_safety.fsp", "GenBuf 2 sndrs V2 removed env safety");
 		//run_parse_test("tests/genbuf_1_sndrs_no_automaton_removed_env_safety.fsp", "GenBuf 2 sndrs V2 removed env safety");
-		run_parse_test("tests/nonreal_test_1_konig.fsp", "non realizable test 1 konig");
+		//run_parse_test("tests/nonreal_test_1_konig.fsp", "non realizable test 1 konig");
 		//GENERAL TESTS
 		//run_all_tests();
-		//run_functional_tests();
+		run_functional_tests();
 
 		//run_parse_test("tests/current_sut.fsp", "current_SUT");
 		//run_automaton_composite_hash_table_tests();

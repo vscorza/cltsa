@@ -1,6 +1,7 @@
 TODO:
 =====
 - update functional tests
+- re-run tests
 - review papers Synthesis of AMBA AHB from Formal Specification:A Case Study, shield_synthesis, symbolic repair
 - write amba version
 - run tests for genbuf 4, 5, 6

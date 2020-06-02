@@ -14,4 +14,4 @@ fluent F_Goal = <goal, move>
 
 |f| ENV =((A ||_c B ||_c C)).
 
-ENV >> "export_test_env.fsp".
+ENV >> "/tmp/export_test_env.fsp".

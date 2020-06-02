@@ -515,6 +515,8 @@ void obdd_table_node_add(obdd_table* table, obdd_node *node){
 					|| ((current_fast_node->low_obdd == node->low_obdd) && (current_fast_node->high_obdd < node->high_obdd)))){
 				previous_fast_node	= current_fast_node;
 				current_fast_node	= current_fast_node->next;
+			}else if((current_fast_node->low_obdd == node->low_obdd) && (current_fast_node->high_obdd == node->high_obdd)){
+				return;
 			}else{
 				table->live_fast_nodes++;
 				if(table->live_fast_nodes > table->max_live_fast_nodes)table->max_live_fast_nodes = table->live_fast_nodes;
