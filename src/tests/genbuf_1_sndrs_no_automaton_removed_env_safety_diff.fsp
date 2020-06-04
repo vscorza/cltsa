@@ -1,0 +1,13 @@
+//GenBuf example taken from Synthesis of Reactive(1) Designs 2 senders
+set Global_Alphabet = {}
+set Controllable_Alphabet = {}
+set Global_Signals	= {bREQ0, rACK0, a, g, sREQ0, bACK0, enq, deq, full, empty, t}
+set Output_Signals	= {bREQ0, g, bACK0, enq, deq, t}
+order 				= {}
+
+DIAG << "/home/mariano/code/henos-automata/src/results/genbuf_1_strat_removed_env_safety.rep".
+STRAT << "/home/mariano/code/henos-automata/src/results/genbuf_1_strat.rep".
+
+||DIFF = (DIAG ||_s STRAT).
+
+DIFF >> "/home/mariano/code/henos-automata/src/results/genbuf_1_strat_removed_env_safety_diff.rep".

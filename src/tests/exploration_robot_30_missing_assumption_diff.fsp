@@ -1,0 +1,11 @@
+set Global_Alphabet = {n,s,e,w,load,unload,stall,releaseNorth, releaseSouth}
+set Controllable_Alphabet = {n,s,e,w,load,unload}
+set Global_Signals	= {Dummy}
+order 				= {}
+
+DIAG << "/home/mariano/code/henos-automata/src/results/exploration_robot_30_strat_missing_assumption.rep".
+STRAT << "/home/mariano/code/henos-automata/src/results/exploration_robot_30_strat.rep".
+
+||DIFF = (DIAG ||_s STRAT).
+
+DIFF >> "/home/mariano/code/henos-automata/src/results/exploration_robot_30_strat_missing_assumption_diff.rep".

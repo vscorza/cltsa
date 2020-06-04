@@ -1,0 +1,19 @@
+//  Parameterized Collector, Signals whether all input clients have delivered a token
+//  INPUTS {finished[n];} 
+//  OUTPUTS { allFinished;}
+//  ASSERT { &&[0 <= i < n](allFinished -> X (!allFinished W finished[i]));}
+//  GUARANTEES {G F allFinished <-> &&[0 <= i < n] G F finished[i];}
+
+set Global_Alphabet = {}
+set Controllable_Alphabet = {}
+
+set Global_Signals	= {in_0, in_1, allFinished, latch_0, latch_1}
+set Output_Signals	= {allFinished, latch_0, latch_1}
+order			= {}
+
+DIAG << "/home/mariano/code/henos-automata/src/results/collector_2_strat_missing_assumption.rep".
+STRAT << "/home/mariano/code/henos-automata/src/results/collector_2_strat.rep".
+
+||DIFF = (DIAG ||_s STRAT).
+
+DIFF >> "/home/mariano/code/henos-automata/src/results/collector_2_strat_missing_assumption_diff.rep".

@@ -1,0 +1,127 @@
+---
+title: "Behavior Minimization"
+author: "Mariano Cerrutti"
+date: "5/26/2020"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE,
+                      results= "asis")
+#install.packages("dplyr")
+#install.packages("magrittr")
+#install.packages("ggplot2")
+#install.packages("jsonlite")
+library(dplyr)
+library(magrittr)
+library(ggplot2)
+library(jsonlite)
+library(gridExtra)
+library(grid)
+library(lattice)
+library(knitr)
+library(scales)
+suppressMessages(library(dplyr))
+suppressMessages(library(ggplot2))
+experimental_composite <- read.csv(file='/home/mariano/code/henos-automata/doc/experimental_setting/tmp_results/general_data_composite_ctrl.csv')
+genbuf_missing <- subset(experimental_composite, grepl("automaton_missing_assumption", name, fixed=TRUE))
+genbuf_removed <- subset(experimental_composite, grepl("automaton_removed_env_safety", name, fixed=TRUE))
+collector_missing <- subset(experimental_composite, grepl("v1_missing_assumption", name, fixed=TRUE))
+robot_samples <- subset(experimental_composite, grepl("robot", name, fixed=TRUE))
+
+```
+<style type="text/css">
+.twoC {width: 100%}
+.clearer {clear: both}
+.twoC .table {max-width: 50%; float: right}
+.twoC img {max-width: 50%; float: left}
+table {
+  margin: auto;
+  border-top: 1px solid #666;
+  border-bottom: 1px solid #666;
+}
+table thead th { border-bottom: 1px solid #ddd; }
+th, td { padding: 5px; }
+thead, tfoot, tr:nth-child(even) { background: #eee; }
+pre{display:none;}
+</style>
+
+# Selected Graphs
+
+## General Table
+
+Controller sizes go from `r min(experimental_composite$ctrl_size)` transitions up to `r max(experimental_composite$ctrl_size)`.
+Minimization reduction relative to controller goes from `r max(experimental_composite$minimization_transitions / experimental_composite$ctrl_size)` up to `r min(experimental_composite$minimization_transitions / experimental_composite$ctrl_size)`.
+
+```{r echo=FALSE}
+times_table <- experimental_composite[c(1,7)]
+times_table$liveness_count <- experimental_composite$guarantees_count + experimental_composite$assumptions_count
+times_table$plant_transitions <- experimental_composite$plant_transitions
+times_table$minimization_transitions <- experimental_composite$minimization_transitions
+times_table$reduction <- experimental_composite$minimization_transitions / experimental_composite$ctrl_size
+times_table$ctrl_size <- experimental_composite$ctrl_size
+times_table$ctrl_comp_size <- experimental_composite$ctrl_comp_size
+times_table <- times_table %>%
+  group_by(name) %>%
+  summarize(diag <- mean(diagnosis_time), liveness <- max(liveness_count), plant_trans <- max(plant_transitions),
+            min_trans <- max(minimization_transitions), red <- mean(reduction), c_size <- max(ctrl_size), c_comp_size <- max(ctrl_comp_size))
+kable(times_table, caption = "Times table", col.names=c("Specification","Diagnosis(s)","Liveness fluents", "Plant transitions", "Min. transitions","Minimization pct.(%)", "Controller size", "C || E' size"))
+```
+
+## Controller and Minimization size
+```{r echo=FALSE}
+#sive vs diagnosis time
+ggplot(experimental_composite, aes(x=minimization_transitions, y=ctrl_size)) +
+	labs(title="Controller vs min. size") +
+	xlab(expression(paste("|",Delta[paste("E","'")],"|"))) +
+	ylab(expression(paste("|",Delta["C"],"|"))) +
+	scale_y_log10() +
+	scale_x_log10() +	
+	geom_point(color='red') +	
+	geom_smooth(method='lm')
+```
+
+## Controller composition w. min. and Minimization size
+```{r echo=FALSE}
+#sive vs diagnosis time
+ggplot(experimental_composite, aes(x=minimization_transitions, y=ctrl_comp_size)) +
+	labs(title="C || E' vs min. size") +
+	xlab(expression(paste("|",Delta[paste("E","'")],"|"))) +
+	ylab(expression(paste("|",Delta[paste("C","|","|","E","'")],"|"))) +
+	scale_y_log10() +
+	scale_x_log10() +	
+	geom_point(color='red') +	
+	geom_smooth(method='lm')
+```
+
+## Minimization and diagnosis time
+```{r echo=FALSE}
+#sive vs diagnosis time
+ggplot(experimental_composite, aes(x=plant_transitions, y=diagnosis_time)) +
+	labs(title="Size vs diagnosis time") +
+	xlab(expression(paste("|",Delta["E"],"|"))) +
+	ylab("Diagnosis time (s)") +
+	scale_y_log10() +
+	scale_x_log10() +	
+	geom_point(color='red') +	
+	geom_smooth(method='lm')
+```
+
+## Minimization and minimization controllability
+
+```{r echo=FALSE}
+#plant controllability vs minimization amount
+c_coeff = experimental_composite$minimization_controllable_transitions / experimental_composite$plant_transitions	
+m_coeff = experimental_composite$minimization_transitions / experimental_composite$plant_transitions	
+ggplot(experimental_composite, aes(x=c_coeff, y=m_coeff)) +
+	labs(title="Minimization controllability vs minimization amount") +
+	xlab("Minimization controllability") +
+	ylab("Reduction") +
+	scale_y_log10() +
+	scale_x_log10() +	
+	geom_point(color='red') +
+	geom_smooth(method='lm')	
+```

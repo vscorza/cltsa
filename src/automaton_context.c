@@ -3383,6 +3383,10 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 	for(i = 0; i < program->count; i++)
 		if(program->statements[i]->type == IMPORT_AUT){
 			automaton_automaton *loaded_automaton	= automaton_automaton_load_report(ctx, program->statements[i]->import_def->filename);
+			if(loaded_automaton->name != NULL)
+				free(loaded_automaton->name);
+			loaded_automaton->name	= NULL;
+			aut_dupstr(&(loaded_automaton->name), program->statements[i]->import_def->name);
 			main_index = automaton_parsing_tables_add_entry(tables, COMPOSITION_ENTRY_AUT, loaded_automaton->name,
 					loaded_automaton);
 

@@ -1554,9 +1554,10 @@ int main (int argc, char** argv){
 		//run_parse_test("tests/genbuf_1_sndrs_no_automaton_removed_env_safety.fsp", "GenBuf 2 sndrs V2 removed env safety");
 		//run_parse_test("tests/nonreal_test_1_konig.fsp", "non realizable test 1 konig");
 		//run_automaton_composite_hash_table_small_tests();
+		run_parse_test("tests/genbuf_3_sndrs_no_automaton_missing_assumption_diff.fsp", "Genbuf 1 miss. ass. diff");
 		//GENERAL TESTS
 		//run_all_tests();
-		run_functional_tests();
+		//run_functional_tests();
 
 		//run_parse_test("tests/current_sut.fsp", "current_SUT");
 		//run_automaton_composite_hash_table_tests();

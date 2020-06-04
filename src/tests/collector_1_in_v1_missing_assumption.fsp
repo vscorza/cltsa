@@ -41,4 +41,4 @@ ltl fluent G			= (allFinished).
 |f| ENV =(COLLECTOR).
 |gr1| <{A_True}><{G}> STRAT = ENV.
 
-STRAT >> "/home/mariano/code/henos-automata/src/results/collector_2_strat.rep".
+STRAT >> "/home/mariano/code/henos-automata/src/results/collector_1_strat_missing_assumption.rep".

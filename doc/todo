@@ -1,8 +1,11 @@
 TODO:
 =====
-- re-run tests
-- review papers Synthesis of AMBA AHB from Formal Specification:A Case Study, shield_synthesis, symbolic repair
-- write amba version
+- mostrar ejemplo donde le vaya bien a konighoefer
+- meeting
+- diagnosis time relative to synthesis time
+- controllability relative to distance to initial state
+- review papers symbolic repair
+- write amba version from Synthesis of AMBA AHB from Formal Specification:A Case Study
 - run tests for genbuf 4, 5, 6
 - improve reports
 	- write as being loaded from rmakrdon
@@ -12,10 +15,7 @@ TODO:
 - build konighoefer comparison graph over non_real_1_k.fsp
 - de efectividad hacer alguna mención a la implementación y la linealidad, comparar con ejemplos comparables
 - explicar ejemplos nuevos
-- controller || E' 
-	- write files, import ctrol, diag, compose, export
-	- report size and structure
-	- show diff on composition
+
 - for non-realizability reduce diagnosis to single liveness goal not being satisfied
 - write amba client version from synthesis of amba ahb from formal specification
 - run tests with dd, linear, dd wo last_partition optimization, goal minimization

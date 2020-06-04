@@ -1,5 +1,5 @@
 MAX_INSTANCE=3
-ITERATIONS=5
+ITERATIONS=1
 DST_DIR="/home/mariano/code/henos-automata/src/tests/"
 CLTSA_DIR="../../src/"
 INSTANCES=""

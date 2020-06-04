@@ -96,7 +96,9 @@ void *automaton_automaton_load_array(FILE *f, void* (*load_function)(FILE*, char
 		if(arr_count >= arr_size){
 			arr_size *= 2;
 			void *void_ptr	= realloc(arr, arr_size * sizeof_element);
-			if(void_ptr == NULL){printf("Could not allocate enough memory\n");exit(-1);}
+			if(void_ptr == NULL){
+				printf("Could not allocate enough memory\n");exit(-1);
+			}
 			arr	= void_ptr;
 		}
 	}while(*last_finalizer != EOF && *last_finalizer != AUT_SER_ARRAY_END_CHAR);
@@ -116,8 +118,14 @@ void *automaton_automaton_load_array(FILE *f, void* (*load_function)(FILE*, char
 			exit(-1);
 		}
 	}
+	if(arr_count == 0){
+		free(arr);
+		return NULL;
+	}
 	void *void_ptr	= realloc(arr, arr_count * sizeof_element);
-	if(void_ptr == NULL){printf("Could not allocate enough memory\n");exit(-1);}
+	if(void_ptr == NULL){
+		printf("Could not allocate enough memory\n");exit(-1);
+	}
 	arr	= void_ptr;
 	*count	= arr_count;
 	return arr;
@@ -292,13 +300,15 @@ void automaton_automaton_check_alphabet(FILE *f, automaton_alphabet *alphabet, c
 	//check current alphabet against parameter
 	if(alphabet->count != current_alphabet->count){
 		printf("Alphabet count differs from host\n");
-		exit(-1);
+		//exit(-1);
 	}
 	uint32_t i;
-	for(i = 0; i < alphabet->count; i++){
-		if(strcmp(alphabet->list[i].name, current_alphabet->list[i].name) != 0){
-			printf("Alphabet elements mismatch from host\n");
-			exit(-1);
+	if(alphabet->count == current_alphabet->count){
+		for(i = 0; i < alphabet->count; i++){
+			if(strcmp(alphabet->list[i].name, current_alphabet->list[i].name) != 0){
+				printf("Alphabet elements mismatch from host\n");
+				exit(-1);
+			}
 		}
 	}
 	automaton_alphabet_destroy(current_alphabet);
@@ -311,6 +321,7 @@ void automaton_automaton_check_load_context(FILE *f, automaton_automata_context 
 		exit(-1);
 	}
 	char sep_char = AUT_SER_SEP_CHAR;
+	char sep_chars[3]	= {AUT_SER_SEP_CHAR, AUT_SER_ARRAY_END_CHAR, AUT_SER_OBJ_END_CHAR};
 	char *name			= automaton_automaton_load_string(f, &sep_char, 1, buf, buf_size, last_finalizer);
 	uint32_t fluents_count = 0;
 	char **fluents		= NULL;
@@ -340,7 +351,7 @@ void automaton_automaton_check_load_context(FILE *f, automaton_automata_context 
 			exit(-1);
 		}
 	}else{
-		fluents	= automaton_automaton_load_string_array(f, &sep_char, 1, buf, buf_size, last_finalizer, &fluents_count);
+		fluents	= automaton_automaton_load_string_array(f, &sep_chars, 3, buf, buf_size, last_finalizer, &fluents_count);
 	}
 	count		= automaton_automaton_load_int(f, &sep_char, 1, buf, buf_size, last_finalizer);
 	if(count == 0){
@@ -360,29 +371,31 @@ void automaton_automaton_check_load_context(FILE *f, automaton_automata_context 
 			exit(-1);
 		}
 	}else{
-		liveness_names	= automaton_automaton_load_string_array(f, &sep_char, 1, buf, buf_size, last_finalizer,
+		liveness_names	= automaton_automaton_load_string_array(f, &sep_chars, 3, buf, buf_size, last_finalizer,
 				&liveness_count);
 	}
 	if(ctx->liveness_valuations_count != liveness_count){
 		printf("Liveness count mismatch\n");
-		exit(-1);
+		//exit(-1);
 	}
 	if(ctx->global_fluents_count != fluents_count){
 		printf("Fluents count mismatch\n");
-		exit(-1);
+		//exit(-1);
 	}
 	uint32_t i;
 	for(i = 0; i < liveness_count; i++){
-		if(strcmp(ctx->liveness_valuations_names[i], liveness_names[i]) != 0){
-			printf("Liveness instance mismatch\n");
-			exit(-1);
+		if(ctx->liveness_valuations_count == liveness_count){
+			if(strcmp(ctx->liveness_valuations_names[i], liveness_names[i]) != 0){
+				printf("Liveness instance mismatch\n");
+			}
 		}
 		free(liveness_names[i]);
 	}
 	for(i = 0; i < fluents_count; i++){
-		if(strcmp(ctx->global_fluents[i].name, fluents[i]) != 0){
-			printf("Fluents instance mismatch\n");
-			exit(-1);
+		if(ctx->global_fluents_count == fluents_count){
+			if(strcmp(ctx->global_fluents[i].name, fluents[i]) != 0){
+				printf("Fluents instance mismatch\n");
+			}
 		}
 		free(fluents[i]);
 	}
@@ -411,7 +424,7 @@ automaton_transition *automaton_automaton_load_transition(FILE *f, automaton_aut
 	automaton_transition	*transition	= automaton_transition_create(from_state, to_state);
 	uint32_t i;
 	for(i = 0; i < signals_count; i++){
-		automaton_transition_add_signal_event_ID(transition, ctx, local_alphabet[signals[i]],
+		automaton_transition_add_signal_event_ID(transition, ctx, signals[i],
 				input_alphabet[signals[i]]?INPUT_SIG:OUTPUT_SIG);
 	}
 	free(signals);

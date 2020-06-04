@@ -2,6 +2,8 @@
 set Global_Alphabet = {n,s,e,w,load,unload,stall,releaseNorth, releaseSouth}
 set Controllable_Alphabet = {n,s,e,w,load,unload}
 
+
+set Global_Signals	= {Dummy}
 order 				= {}
 //set Moves = {n,s,e,w}
 //set Actions = {load,unload}
