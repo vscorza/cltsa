@@ -97,6 +97,19 @@ ggplot(experimental_composite, aes(x=minimization_transitions, y=ctrl_comp_size)
 	geom_smooth(method='lm')
 ```
 
+## Controller size and diagnosis time
+```{r echo=FALSE}
+#sive vs diagnosis time
+ggplot(experimental_composite, aes(x=ctrl_size, y=diagnosis_time)) +
+	labs(title="Controller vs min. size") +
+	xlab(expression(paste("|",Delta["C"],"|"))) +
+	ylab("Diagnosis time (s)") +
+	scale_y_log10() +
+	scale_x_log10() +	
+	geom_point(color='red') +	
+	geom_smooth(method='lm')
+```
+
 ## Minimization and diagnosis time
 ```{r echo=FALSE}
 #sive vs diagnosis time

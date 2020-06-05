@@ -1,7 +1,12 @@
 TODO:
 =====
+- add pct min. against C || E'
+- minimization as diagnosis narrative
+	- take diff w. konighoefer technique
+	- diagnosis as simulation, play C || E' as exploration effort (desarrollar into action item)
+- try to justify behavior and diffs with remove env safety
+- diagnose mutation over small parameters, produce hypothesis, scale both hypothesis and parameter to see if it holds
 - mostrar ejemplo donde le vaya bien a konighoefer
-- meeting
 - diagnosis time relative to synthesis time
 - controllability relative to distance to initial state
 - review papers symbolic repair
@@ -11,11 +16,9 @@ TODO:
 	- write as being loaded from rmakrdon
 	- automatize report pipeline
 - review papers gr_1_star, performance_heuristics for gr1
-- diagnose mutation over small parameters, produce hypothesis, scale both hypothesis and parameter to see if it holds
 - build konighoefer comparison graph over non_real_1_k.fsp
 - de efectividad hacer alguna mención a la implementación y la linealidad, comparar con ejemplos comparables
 - explicar ejemplos nuevos
-
 - for non-realizability reduce diagnosis to single liveness goal not being satisfied
 - write amba client version from synthesis of amba ahb from formal specification
 - run tests with dd, linear, dd wo last_partition optimization, goal minimization
