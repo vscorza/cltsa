@@ -2331,8 +2331,6 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 #endif
 	strategy	= automaton_automaton_create(strategy_name, game_automaton->context, game_automaton->local_alphabet_count, game_automaton->local_alphabet, false, false);
 
-
-
 	bool is_winning = true;
 	bool one_option = false;
 	bool all_options	= true;
@@ -3011,7 +3009,7 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2(automaton_a
 			printf("Inner automaton was realizable, minimization %s\n", automaton_is_gr1_realizable(minimized, assumptions, assumptions_count,
 					guarantees, guarantees_count)? "too" :"was not" );
 			automaton_automaton_destroy(inner_automaton);
-			inner_automaton = automaton_get_gr1_unrealizable_minimization(minimized, assumptions, assumptions_count,
+			inner_automaton = automaton_get_gr1_unrealizable_minimization(master, assumptions, assumptions_count,
 					guarantees, guarantees_count, steps, steps_sizes, steps_times, steps_size);
 			//exit(-1);
 		}

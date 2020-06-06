@@ -1558,7 +1558,7 @@ int main (int argc, char** argv){
 		//run_parse_test("tests/konighoefer_examples.fsp", "non realizable test 1 konig");
 		//GENERAL TESTS
 		//run_all_tests();
-		//run_functional_tests();
+		run_functional_tests();
 
 		//run_parse_test("tests/current_sut.fsp", "current_SUT");
 		//run_automaton_composite_hash_table_tests();
