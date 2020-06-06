@@ -1,12 +1,11 @@
 TODO:
 =====
-- add pct min. against C || E'
 - minimization as diagnosis narrative
+	- use example 1-4 from debugging formal specifications (Könighoefer et al.)
 	- take diff w. konighoefer technique
 	- diagnosis as simulation, play C || E' as exploration effort (desarrollar into action item)
+- meeting
 - try to justify behavior and diffs with remove env safety
-- diagnose mutation over small parameters, produce hypothesis, scale both hypothesis and parameter to see if it holds
-- mostrar ejemplo donde le vaya bien a konighoefer
 - diagnosis time relative to synthesis time
 - controllability relative to distance to initial state
 - review papers symbolic repair
@@ -57,6 +56,7 @@ TODO:
 - implement fluent consistency check
 - allow to define buchi fluent based on accepting state, for instance for automaton based properties in genbuf
 - implement IS_REALIZABLE(gr1). on parser
+- diagnose mutation over small parameters, produce hypothesis, scale both hypothesis and parameter to see if it holds
 POST PHD
 ========
 - develop mixed structures 

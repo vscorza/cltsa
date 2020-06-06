@@ -64,11 +64,12 @@ times_table$minimization_transitions <- experimental_composite$minimization_tran
 times_table$reduction <- experimental_composite$minimization_transitions / experimental_composite$ctrl_size
 times_table$ctrl_size <- experimental_composite$ctrl_size
 times_table$ctrl_comp_size <- experimental_composite$ctrl_comp_size
+times_table$reduction_comp <- experimental_composite$minimization_transitions / experimental_composite$ctrl_comp_size
 times_table <- times_table %>%
   group_by(name) %>%
   summarize(diag <- mean(diagnosis_time), liveness <- max(liveness_count), plant_trans <- max(plant_transitions),
-            min_trans <- max(minimization_transitions), red <- mean(reduction), c_size <- max(ctrl_size), c_comp_size <- max(ctrl_comp_size))
-kable(times_table, caption = "Times table", col.names=c("Specification","Diagnosis(s)","Liveness fluents", "Plant transitions", "Min. transitions","Minimization pct.(%)", "Controller size", "C || E' size"))
+            min_trans <- max(minimization_transitions), red <- mean(reduction), c_size <- max(ctrl_size), c_comp_size <- max(ctrl_comp_size), c_comp_pct <- max(reduction_comp))
+kable(times_table, caption = "Times table", col.names=c("Specification","Diagnosis(s)","Liveness fluents", "Plant transitions", "Min. transitions","Minimization pct.", "Controller size", "C || E' size", "Minimization against composition pct."))
 ```
 
 ## Controller and Minimization size
