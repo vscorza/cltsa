@@ -1,8 +1,7 @@
 TODO:
 =====
-- debug minimization of konighoefer non minimized example
 - minimization as diagnosis narrative
-	- use example 1-4 from debugging formal specifications (Könighoefer et al.)
+	- build realizable case
 	- take diff w. konighoefer technique
 	- diagnosis as simulation, play C || E' as exploration effort (desarrollar into action item)
 - meeting
