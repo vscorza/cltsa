@@ -2972,12 +2972,6 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 			LTL_PROCESSED_BUCKET_SIZE, obdd_composite_state_extractor, sizeof(uint32_t) + sizeof(bool) * (x_count + y_count));
 	sys_state->state		= 0;//obdd_state_tree_get_key(obdd_state_map, sys_state->valuation, x_y_count);
 	automaton_automaton_add_initial_state(ltl_automaton, sys_state->state);
-	/*
-	uint32_t fluent_index;
-	for(i = 0; i < fluent_count; i++){
-		fluent_index	= GET_STATE_FLUENT_INDEX(fluent_count, sys_state->state, i);
-		CLEAR_FLUENT_BIT(ltl_automaton->valuations, fluent_index);
-	}*/
 	/**
 	 * THETA INITIAL CONDITION
 	 */

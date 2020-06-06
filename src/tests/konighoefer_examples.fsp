@@ -1,0 +1,68 @@
+set Global_Alphabet = {}
+set Controllable_Alphabet = {}
+
+set Global_Signals	= {h0, h1, p, e0, e1, latch}
+set Output_Signals	= {e0, e1, latch}
+order			= {}
+
+/***********
+**** THETAORIGINAL TEST
+***********/
+ltl env theta Init_E in TEST	= (!p || p).
+ltl sys theta Init_S in TEST	= (!latch && (!e0 || !e1) ).
+/***********
+**** SYS RHO
+***********/
+ltl sys rho G_1 in TEST			= [](!e0 || !e1).
+ltl sys rho G_1_p in TEST			= [](X(!e0 || !e1)).
+ltl sys rho G_LATCH in TEST			= []((p -> X(latch)) && ((!latch && !p) -> X(!latch)) && (latch -> X(latch))). 
+ltl sys rho G_4 in TEST			= [](latch -> (!e0 && !e1)).
+ltl sys rho G_4_p in TEST			= [](X(latch -> (!e0 && !e1))).
+
+/***********
+**** ENV RHO
+***********/
+ltl env rho A_1 in TEST			= [](p <-> X(p)).
+
+ltl fluent A_TRUE		= (!p|| p).
+ltl fluent G_2		= (!h0 || e0).
+ltl fluent G_3		= (!h1 || e1).
+
+/***********
+**** SYNTHESIS
+***********/
+|f| ENV =(TEST).
+|gr1| <{A_TRUE}><{G_2, G_3}> STRAT = ENV.
+
+
+TEST >> "/home/mariano/code/henos-automata/src/results/konighoefer_examples_game.rep".
+STRAT >> "/home/mariano/code/henos-automata/src/results/konighoefer_examples_strat.rep".
+
+/***********
+**** THETA KONIGHOEFER MINIMIZATION
+***********/
+ltl env theta Init_E in TEST_M	= (!p || p).
+ltl sys theta Init_S in TEST_M	= (!latch && (!e0 || !e1) ).
+/***********
+**** SYS RHO
+***********/
+ltl sys rho G_1 in TEST_M			= [](!e0 || !e1).
+ltl sys rho G_1_p in TEST_M			= [](X(!e0 || !e1)).
+ltl sys rho G_LATCH in TEST_M			= []((p -> X(latch)) && ((!latch && !p) -> X(!latch)) && (latch -> X(latch))). 
+ltl sys rho G_4 in TEST_M			= [](latch -> (!e0 && !e1)).
+ltl sys rho G_4_p in TEST_M			= [](X(latch -> (!e0 && !e1))).
+/***********
+**** ENV RHO
+***********/
+ltl env rho A_1 in TEST_M			= [](p || !p).
+
+/***********
+**** SYNTHESIS
+***********/
+|f| ENV_M =(TEST_M).
+|gr1| <{A_TRUE}><{G_3}> STRAT_M = ENV_M.
+
+
+TEST_M >> "/home/mariano/code/henos-automata/src/results/konighoefer_examples_game_m.rep".
+STRAT_M >> "/home/mariano/code/henos-automata/src/results/konighoefer_examples_strat_m.rep".
+

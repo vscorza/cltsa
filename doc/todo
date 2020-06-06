@@ -1,5 +1,6 @@
 TODO:
 =====
+- debug konighoefer example strat
 - minimization as diagnosis narrative
 	- use example 1-4 from debugging formal specifications (Könighoefer et al.)
 	- take diff w. konighoefer technique

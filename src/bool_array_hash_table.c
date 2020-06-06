@@ -29,7 +29,7 @@ void automaton_bool_array_hash_table_destroy(automaton_bool_array_hash_table* ta
 		if(table->entries[i] != NULL){
 			for(j = 0; j < (2 << BOOL_ARRAY_HASH_TABLE_SIZE); j++){
 				if(table->entries[i][j] != NULL){
-					for(k = 0; k < BOOL_ARRAY_HASH_TABLE_SIZE; k++){
+					for(k = 0; k < (2 << BOOL_ARRAY_HASH_TABLE_SIZE); k++){
 						if(table->entries[i][j][k] != NULL){
 							free(table->entries[i][j][k]);
 							table->entries[i][j][k] = NULL;
@@ -61,6 +61,7 @@ bool *automaton_bool_array_hash_table_add_or_get_entry(automaton_bool_array_hash
 	if(current_entry != NULL)return current_entry;
 
 	automaton_bool_array_hash_table_add_entry(table, entry, copy_entry);
+	if(copy_entry)	return automaton_bool_array_hash_table_get_entry(table, entry);
 	return entry;
 }
 /**
@@ -113,14 +114,14 @@ void automaton_bool_array_hash_table_add_entry(automaton_bool_array_hash_table* 
 		table->entries[first_level_index]	= calloc((2 << BOOL_ARRAY_HASH_TABLE_SIZE),sizeof(bool**));
 	}
 	if(table->entries[first_level_index][second_level_index] == NULL){
-		table->entries[first_level_index][second_level_index] = calloc(BOOL_ARRAY_HASH_TABLE_SIZE, sizeof(bool*));
+		table->entries[first_level_index][second_level_index] = calloc(2 << BOOL_ARRAY_HASH_TABLE_SIZE, sizeof(bool*));
 	}
 	//existing internal array is full shift all entries one position up and delete the last
 	bool **current_entry	= table->entries[first_level_index][second_level_index];
-	if(current_entry[BOOL_ARRAY_HASH_TABLE_SIZE - 1] != NULL){
-		free(current_entry[BOOL_ARRAY_HASH_TABLE_SIZE - 1]);
+	if(current_entry[(2 << BOOL_ARRAY_HASH_TABLE_SIZE) - 1] != NULL){
+		free(current_entry[(2 << BOOL_ARRAY_HASH_TABLE_SIZE) - 1]);
 	}
-	for(i = BOOL_ARRAY_HASH_TABLE_SIZE - 2; i >= 0; i--){
+	for(i = (2 << BOOL_ARRAY_HASH_TABLE_SIZE) - 2; i >= 0; i--){
 		current_entry[i + 1] = current_entry[i];
 	}
 	//copy entry
