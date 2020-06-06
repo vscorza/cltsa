@@ -102,10 +102,10 @@ void* automaton_max_heap_add_entry(automaton_max_heap* heap, void* entry) {
 	if(heap->count == heap->size){
 		uint32_t new_size	= heap->size * LIST_INCREASE_FACTOR;
 		void* new_values	= realloc(heap->values, heap->sizeof_element * new_size);
-		if(new_values == NULL){printf("Could not allocate memory"); exit(-1);}
+		if(new_values == NULL){printf("Could not allocate memory[automaton_max_heap_add_entry:1]"); exit(-1);}
 		heap->values	= new_values;
 		uint32_t *new_ptrs	= realloc(heap->values_ptrs, sizeof(uint32_t) * new_size);
-		if(new_ptrs == NULL){printf("Could not allocate memory"); exit(-1);}
+		if(new_ptrs == NULL){printf("Could not allocate memory[automaton_max_heap_add_entry:2]"); exit(-1);}
 		heap->values_ptrs	= new_ptrs;
 		for(i = heap->size; i < new_size; i++)heap->values_ptrs[i]	= i;
 		heap->size			= new_size;
@@ -192,10 +192,10 @@ automaton_pending_state* automaton_pending_state_max_heap_add_entry(automaton_pe
 	if(heap->count == heap->size){
 		uint32_t new_size	= heap->size * LIST_INCREASE_FACTOR;
 		void* new_values	= realloc(heap->values, sizeof(automaton_pending_state) * new_size);
-		if(new_values == NULL){printf("Could not allocate memory"); exit(-1);}
+		if(new_values == NULL){printf("Could not allocate memory[automaton_pending_state_max_heap_add_entry:1]"); exit(-1);}
 		heap->values	= new_values;
 		uint32_t *new_ptrs	= realloc(heap->values_ptrs, sizeof(uint32_t) * new_size);
-		if(new_ptrs == NULL){printf("Could not allocate memory"); exit(-1);}
+		if(new_ptrs == NULL){printf("Could not allocate memory[automaton_pending_state_max_heap_add_entry:2]"); exit(-1);}
 		heap->values_ptrs	= new_ptrs;
 		for(i = heap->size; i < new_size; i++)heap->values_ptrs[i]	= i;
 		heap->size			= new_size;

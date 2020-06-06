@@ -1417,10 +1417,10 @@ bool automaton_fluent_add_starting_signals(automaton_fluent* fluent, automaton_a
 	uint32_t i;
 	uint32_t new_count = fluent->starting_signals_count +1;
 	signal_t** ptr	= realloc(fluent->starting_signals, sizeof(signal_t*) * new_count);
-	if(ptr == NULL){printf("Could not allocate memory\n");exit(-1);	}
+	if(ptr == NULL){printf("Could not allocate memory[automaton_fluent_add_starting_signals:1]\n");exit(-1);	}
 	else fluent->starting_signals	= ptr;
 	uint32_t* i_ptr	= realloc(fluent->starting_signals_element_count, sizeof(uint32_t) * new_count);
-	if(ptr == NULL){printf("Could not allocate memory\n");exit(-1);}
+	if(ptr == NULL){printf("Could not allocate memory[automaton_fluent_add_starting_signals:2]\n");exit(-1);}
 	else fluent->starting_signals_element_count	= i_ptr;
 	signal_t *new_signals	= calloc(signals_count, sizeof(signal_t));
 	for(i = 0; i < signals_count; i++){
@@ -1459,10 +1459,10 @@ bool automaton_fluent_add_ending_signals(automaton_fluent* fluent, automaton_alp
 	uint32_t i;
 	uint32_t new_count = fluent->ending_signals_count +1;
 	signal_t** ptr	= realloc(fluent->ending_signals, sizeof(signal_t*) * new_count);
-	if(ptr == NULL){printf("Could not allocate memory\n");exit(-1);	}
+	if(ptr == NULL){printf("Could not allocate memory[automaton_fluent_add_ending_signals:1]\n");exit(-1);	}
 	else fluent->ending_signals	= ptr;
 	uint32_t* i_ptr	= realloc(fluent->ending_signals_element_count, sizeof(uint32_t) * new_count);
-	if(ptr == NULL){printf("Could not allocate memory\n");exit(-1);}
+	if(ptr == NULL){printf("Could not allocate memory[automaton_fluent_add_ending_signals:2]\n");exit(-1);}
 	else fluent->ending_signals_element_count	= i_ptr;
 	signal_t *new_signals	= calloc(signals_count, sizeof(signal_t));
 	for(i = 0; i < signals_count; i++){
@@ -2335,9 +2335,11 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 
 	bool is_winning = true;
 	bool one_option = false;
+	bool all_options	= true;
 	//check if all rankings have the initial state
 	for(i = 0; i < guarantees_count; i++){
 		one_option	= false;
+		all_options = true;
 		for(j = 0; j < game_automaton->out_degree[game_automaton->initial_states[0]]; j++){
 #if DEBUG_STRATEGY_BUILD
 			printf("[CHK] RANKING FOR %d: %d\n", game_automaton->transitions[game_automaton->initial_states[0]][j].state_to,
@@ -2347,9 +2349,11 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 																					 , game_automaton->transitions[game_automaton->initial_states[0]][j].state_to))->value != RANKING_INFINITY){
 
 				one_option = true;
+			}else{
+				all_options = false;
 			}
 		}
-		if(!one_option){
+		if(!one_option || (!(game_automaton->is_controllable[game_automaton->initial_states[0]]) && !all_options)){
 			is_winning = false;
 			//break;
 		}
@@ -2615,10 +2619,10 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd(automaton_au
 					if(t_count == t_size){
 						new_size	= t_size * LIST_INCREASE_FACTOR;
 						ptr	= realloc(t_states, new_size * sizeof(uint32_t));
-						if(ptr == NULL){printf("Could not allocate memory\n"); exit(-1);}
+						if(ptr == NULL){printf("Could not allocate memory[automaton_get_gr1_unrealizable_minimization_dd:1]\n"); exit(-1);}
 						t_states	= ptr;
 						ptr	= realloc(t_indexes, new_size * sizeof(uint32_t));
-						if(ptr == NULL){printf("Could not allocate memory\n"); exit(-1);}
+						if(ptr == NULL){printf("Could not allocate memory[automaton_get_gr1_unrealizable_minimization_dd:2]\n"); exit(-1);}
 						t_indexes	= ptr;					t_size		= new_size;
 					}
 					t_states[t_count]	= i;	t_indexes[t_count++]	= j;
@@ -2659,10 +2663,14 @@ void automaton_minimization_adjust_steps_report(uint32_t *steps, uint32_t **step
 	if(*steps < (*steps_size) - 1)return;
 	*steps_size	*= 2;
 	uint32_t *int_ptr	= realloc(*steps_sizes, sizeof(uint32_t) * *steps_size);
-	if(int_ptr == NULL){printf("Could not allocate memory\n"); exit(-1);}
+	if(int_ptr == NULL){
+		printf("Could not allocate memory[automaton_minimization_adjust_steps_report:1]\n"); exit(-1);
+	}
 	*steps_sizes	= int_ptr;
 	struct timeval *time_ptr	= realloc(*steps_times, sizeof(struct timeval) * *steps_size);
-	if(time_ptr == NULL){printf("Could not allocate memory\n"); exit(-1);}
+	if(time_ptr == NULL){
+		printf("Could not allocate memory[automaton_minimization_adjust_steps_report:2]\n"); exit(-1);
+	}
 	*steps_times	= time_ptr;
 }
 
@@ -2722,6 +2730,7 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2_c_i_complem
 				return inner_automaton;
 
 			}
+			gettimeofday(&tval_before, NULL);
 			removed = 0;
 			current_linear_index = -1; transitions_kept_size = 0;
 #if DEBUG_DD
@@ -3045,10 +3054,10 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_autom
 					if(t_count == t_size){
 						new_size	= t_size * LIST_INCREASE_FACTOR;
 						ptr	= realloc(t_states, new_size * sizeof(uint32_t));
-						if(ptr == NULL){printf("Could not allocate memory\n"); exit(-1);}
+						if(ptr == NULL){printf("Could not allocate memory[automaton_get_gr1_unrealizable_minimization:1]\n"); exit(-1);}
 						t_states	= ptr;
 						ptr	= realloc(t_indexes, new_size * sizeof(uint32_t));
-						if(ptr == NULL){printf("Could not allocate memory\n"); exit(-1);}
+						if(ptr == NULL){printf("Could not allocate memory[automaton_get_gr1_unrealizable_minimization:2]\n"); exit(-1);}
 						t_indexes	= ptr;					t_size		= new_size;
 					}
 					t_states[t_count]	= i;	t_indexes[t_count++]	= j;
@@ -3064,7 +3073,7 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_autom
 	struct timeval tval_before, tval_after;
 	while(t_count > 0){
 		(*steps)++;
-		automaton_minimization_adjust_steps_report(&steps, steps_sizes, steps_times, steps_size);
+		automaton_minimization_adjust_steps_report(steps, steps_sizes, steps_times, steps_size);
 		gettimeofday(&tval_before, NULL);
 		//get next candidate
 		current_transition	= &(master->transitions[t_states[t_count - 1]][t_indexes[t_count - 1]]); t_count--;
@@ -3090,10 +3099,10 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_autom
 		if(r_count == r_size){
 			new_size	= r_size * LIST_INCREASE_FACTOR;
 			ptr	= realloc(r_states, new_size * sizeof(uint32_t));
-			if(ptr == NULL){printf("Could not allocate memory\n"); exit(-1);}
+			if(ptr == NULL){printf("Could not allocate memory[automaton_get_gr1_unrealizable_minimization:3]\n"); exit(-1);}
 			r_states	= ptr;
 			ptr	= realloc(r_indexes, new_size * sizeof(uint32_t));
-			if(ptr == NULL){printf("Could not allocate memory\n"); exit(-1);}
+			if(ptr == NULL){printf("Could not allocate memory[automaton_get_gr1_unrealizable_minimization:4]\n"); exit(-1);}
 			r_indexes	= ptr;					r_size		= new_size;
 		}
 		r_states[r_count]	= t_states[t_count];	r_indexes[r_count++]	= t_indexes[t_count];
@@ -3382,134 +3391,6 @@ void automaton_automaton_update_valuations(automaton_automaton* automaton){
 		}
 	}
 }
-/*
-void automaton_compact_states(automaton_automaton* automaton){
-	//get mapping from discontinous array to contiguous array
-	uint32_t* mapping	= calloc(automaton->transitions_count, sizeof(uint32_t));
-	uint32_t* inverted_mapping	= calloc(automaton->transitions_count, sizeof(uint32_t));
-	uint32_t i,j,k, last_offset = 0, real_count = 0;
-
-	for(i = 0; i < automaton->transitions_count; i++){
-		if(automaton->in_degree[i] == 0 && automaton->out_degree[i] == 0){
-			last_offset++;
-		}else{
-			real_count++;
-			mapping[i - last_offset]  = i;
-			inverted_mapping[i] = i - last_offset;
-		}
-	}
-	//update references
-	for(i = 0; i < real_count; i++){
-		if(mapping[i]  != i){
-			automaton->is_controllable[i] = automaton->is_controllable[mapping[i]];
-			automaton->out_degree[i] = automaton->out_degree[mapping[i]];
-			automaton->out_size[i] = automaton->out_size[mapping[i]];
-			automaton->in_degree[i] = automaton->in_degree[mapping[i]];
-			automaton->in_size[i] = automaton->in_size[mapping[i]];
-			if(automaton->transitions[i] != NULL)
-				free(automaton->transitions[i]);
-			if(automaton->inverted_transitions[i] != NULL)
-				free(automaton->inverted_transitions[i]);
-			automaton->transitions[i]	= automaton->transitions[mapping[i]];
-			automaton->inverted_transitions[i]	= automaton->inverted_transitions[mapping[i]];
-			for(j = 0; j < automaton->out_degree[i]; j++)
-				automaton->transitions[i][j].state_from	= i;
-			for(j = 0; j < automaton->in_degree[i]; j++)
-				automaton->inverted_transitions[i][j].state_to	= i;
-			automaton_transition* out_trans = realloc(automaton->transitions[i], automaton->out_size[i] * sizeof(automaton_transition));
-			if(out_trans == NULL){
-				printf("Could not allocate memory\n");exit(-1);
-			}
-			else automaton->transitions[i] = out_trans;
-			automaton_transition* in_trans = realloc(automaton->inverted_transitions[i], automaton->in_size[i] * sizeof(automaton_transition));
-			if(in_trans == NULL){
-				printf("Could not allocate memory\n");exit(-1);
-			}
-			else automaton->inverted_transitions[i] = in_trans;
-		}
-	}
-	uint32_t fluent_index, mapped_index;
-	if(automaton->is_game){
-		if(automaton->context->global_fluents_count > 0){
-			for(i = 0; i < automaton->context->global_fluents_count; i++){
-				for(j = 0; j < real_count; j++){
-					fluent_index		= GET_STATE_FLUENT_INDEX(automaton->context->global_fluents_count, j, i);
-					mapped_index		= GET_STATE_FLUENT_INDEX(automaton->context->global_fluents_count, mapping[j], i);
-					if(TEST_FLUENT_BIT(automaton->valuations, mapped_index)){
-						SET_FLUENT_BIT(automaton->valuations, fluent_index);
-					}else{
-						CLEAR_FLUENT_BIT(automaton->valuations, fluent_index);
-					}
-				}
-				for(j = 0; j < automaton->inverted_valuations[i]->count; j++){
-					for(k = 0; k < automaton->inverted_valuations[i]->bucket_count[j]; k++){
-						automaton->inverted_valuations[i]->buckets[j][k] = inverted_mapping[automaton->inverted_valuations[i]->buckets[j][k]];
-					}
-				}
-			}
-			automaton->valuations_size			= GET_FLUENTS_ARR_SIZE(automaton->context->global_fluents_count, real_count);
-			uint32_t* valuations_new	= realloc(automaton->valuations, automaton->valuations_size);
-			if(valuations_new == NULL){
-				printf("Could not allocate memory\n");exit(-1);
-			}
-			else automaton->valuations = valuations_new;
-		}
-		if(automaton->context->liveness_valuations_count > 0){
-			for(i = 0; i < automaton->context->liveness_valuations_count; i++){
-				for(j = 0; j < real_count; j++){
-					fluent_index		= GET_STATE_FLUENT_INDEX(automaton->context->global_fluents_count, j, i);
-					mapped_index		= GET_STATE_FLUENT_INDEX(automaton->context->global_fluents_count, mapping[j], i);
-					if(TEST_FLUENT_BIT(automaton->liveness_valuations, mapped_index)){
-						SET_FLUENT_BIT(automaton->liveness_valuations, fluent_index);
-					}else{
-						CLEAR_FLUENT_BIT(automaton->liveness_valuations, fluent_index);
-					}
-				}
-				for(j = 0; j < automaton->liveness_inverted_valuations[i]->count; j++){
-					for(k = 0; k < automaton->liveness_inverted_valuations[i]->bucket_count[j]; k++){
-						automaton->liveness_inverted_valuations[i]->buckets[j][k] = inverted_mapping[automaton->liveness_inverted_valuations[i]->buckets[j][k]];
-					}
-				}
-			}
-			automaton->liveness_valuations_size			= GET_FLUENTS_ARR_SIZE(automaton->context->liveness_valuations_count, real_count);
-			uint32_t* liveness_valuations_new	= realloc(automaton->liveness_valuations, automaton->liveness_valuations_size);
-			if(liveness_valuations_new == NULL){
-				printf("Could not allocate memory\n");exit(-1);
-			}
-			else automaton->liveness_valuations = liveness_valuations_new;
-		}
-	}
-	//update structures
-	automaton->transitions_count	= real_count;
-	automaton->transitions_size		= real_count;
-	bool* new_controllable			= realloc(automaton->is_controllable, sizeof(bool) * automaton->transitions_count);
-	if(new_controllable == NULL){
-		printf("Could not allocate memory\n");exit(-1);
-	}
-	else automaton->is_controllable = new_controllable;
-	uint32_t* new_out_degree			= realloc(automaton->out_degree, sizeof(uint32_t) * automaton->transitions_count);
-	if(new_out_degree == NULL){printf("Could not allocate memory\n");exit(-1);	}
-	else automaton->out_degree = new_out_degree;
-	uint32_t* new_out_size			= realloc(automaton->out_size, sizeof(uint32_t) * automaton->transitions_count);
-	if(new_out_size == NULL){printf("Could not allocate memory\n");exit(-1);	}
-	else automaton->out_size = new_out_size;
-	uint32_t* new_in_degree			= realloc(automaton->in_degree, sizeof(uint32_t) * automaton->transitions_count);
-	if(new_in_degree == NULL){printf("Could not allocate memory\n");exit(-1);	}
-	else automaton->in_degree = new_in_degree;
-	uint32_t* new_in_size			= realloc(automaton->in_size, sizeof(uint32_t) * automaton->transitions_count);
-	if(new_in_size == NULL){printf("Could not allocate memory\n");exit(-1);	}
-	else automaton->in_size = new_in_size;
-	automaton_transition** new_transitions			= realloc(automaton->transitions, sizeof(automaton_transition*) * automaton->transitions_count);
-	if(new_transitions == NULL){printf("Could not allocate memory\n");exit(-1);	}
-	else automaton->transitions = new_transitions;
-	automaton_transition** new_inverted_transitions			= realloc(automaton->inverted_transitions, sizeof(automaton_transition*) * automaton->transitions_count);
-	if(new_inverted_transitions == NULL){printf("Could not allocate memory\n");exit(-1);	}
-	else automaton->inverted_transitions = new_inverted_transitions;
-	//cleanup
-	free(mapping);
-	free(inverted_mapping);
-}
-*/
 
 uint32_t automaton_automata_get_composite_state(uint32_t states_count, uint32_t* states){
 	return 0;
@@ -4481,13 +4362,13 @@ automaton_composite_tree_entry* automaton_composite_tree_entry_get_from_pool(aut
 		current_pool						= tree->entries_size_count - 1;
 
 		uint32_t* ptr	= realloc(tree->entries_size, sizeof(uint32_t) * tree->entries_size_count);
-		if(ptr == NULL){printf("Could not allocate memory\n");exit(-1);	}
+		if(ptr == NULL){printf("Could not allocate memory[automaton_composite_tree_entry_get_from_pool:1]\n");exit(-1);	}
 		else tree->entries_size	= ptr;
 		ptr	= realloc(tree->entries_count, sizeof(uint32_t) * tree->entries_size_count);
-		if(ptr == NULL){printf("Could not allocate memory\n");exit(-1);	}
+		if(ptr == NULL){printf("Could not allocate memory[automaton_composite_tree_entry_get_from_pool:2]\n");exit(-1);	}
 		else tree->entries_count	= ptr;
 		automaton_composite_tree_entry** ptr2	= realloc(tree->entries_pool, sizeof(automaton_composite_tree_entry*) * tree->entries_size_count);
-		if(ptr2 == NULL){printf("Could not allocate memory\n");exit(-1);	}
+		if(ptr2 == NULL){printf("Could not allocate memory[automaton_composite_tree_entry_get_from_pool:3]\n");exit(-1);	}
 		else tree->entries_pool	= ptr2;
 		tree->entries_size[current_pool]	= new_size;
 		tree->entries_count[current_pool]	= 0;

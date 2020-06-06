@@ -587,14 +587,14 @@ void automaton_indexes_valuation_add_indexes(automaton_indexes_valuation* valuat
 	new_count	+= valuation->count;
 	int32_t* ptr	= realloc(valuation->current_values, sizeof(int32_t) * (new_count));
 	if(ptr == NULL){
-		printf("Could not allocate memory\n");
+		printf("Could not allocate memory[automaton_indexes_valuation_add_indexes:1]\n");
 		exit(-1);
 	}else{
 		valuation->current_values	= ptr;
 	}
 	automaton_range** ranges_ptr	= realloc(valuation->ranges, sizeof(automaton_range*) * (new_count));
 	if(ptr == NULL){
-		printf("Could not allocate memory\n");
+		printf("Could not allocate memory[automaton_indexes_valuation_add_indexes:2]\n");
 		exit(-1);
 	}else{
 		valuation->ranges	= ranges_ptr;
@@ -1826,7 +1826,7 @@ void automaton_indexes_syntax_eval_strings(automaton_parsing_tables* tables, aut
 			*next_valuations_size = (*next_valuations_count + total_combinations);
 			automaton_indexes_valuation** ptr	= realloc(*next_valuations, sizeof(automaton_indexes_valuation*) * (*next_valuations_size));
 			if(ptr == NULL){
-				printf("Could not allocate memory\n");
+				printf("Could not allocate memory[automaton_indexes_syntax_eval_strings:1]\n");
 				exit(-1);
 			}else{
 				*next_valuations	= ptr;
@@ -1841,7 +1841,7 @@ void automaton_indexes_syntax_eval_strings(automaton_parsing_tables* tables, aut
 			*next_valuations_size	= total_combinations;
 			automaton_indexes_valuation** ptr	= realloc(*next_valuations, sizeof(automaton_indexes_valuation*) * (*next_valuations_size));
 			if(ptr == NULL){
-				printf("Could not allocate memory\n");
+				printf("Could not allocate memory[automaton_indexes_syntax_eval_strings:2]\n");
 				exit(-1);
 			}else{
 				*next_valuations	= ptr;
@@ -3246,7 +3246,7 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 				}else{
 					char** ptr	= realloc(ltl_automata_names, sizeof(char*) * (ltl_automata_count + 1));
 					if(ptr == NULL){
-						printf("Could not allocate memory\n");
+						printf("Could not allocate memory[automaton_automata_context_create_from_syntax:1]\n");
 						exit(-1);
 					}else{
 						ltl_automata_names	= ptr;
@@ -3497,7 +3497,7 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 			sprintf(set_name, "Guarantees %s", gr1_game->name);
 			guarantees		= automaton_set_syntax_evaluate(tables, gr1_game->guarantees, &guarantees_count, set_name);
 			winning_region_automaton	= automaton_get_gr1_strategy(game_automaton, assumptions, assumptions_count
-					, guarantees, guarantees_count, false);
+					, guarantees, guarantees_count, true);
 			free(winning_region_automaton->name);
 			winning_region_automaton->name	= NULL;
 			aut_dupstr(&(winning_region_automaton->name), gr1_game->name);

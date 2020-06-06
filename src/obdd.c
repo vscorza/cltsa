@@ -78,7 +78,7 @@ int32_t obdd_state_tree_entry_get_from_pool(obdd_state_tree* tree){
 #endif
 		obdd_state_tree_entry* ptr	= realloc(tree->entries_pool, sizeof(obdd_state_tree_entry) * new_size);
 		if(ptr == NULL){
-			printf("Could not allocate memory\n");
+			printf("Could not allocate memory[obdd_state_tree_entry_get_from_pool:1]\n");
 			exit(-1);
 		}else{
 			tree->entries_pool	= ptr;

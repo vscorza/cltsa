@@ -119,7 +119,7 @@ obdd_node* obdd_cache_insert_var(obdd_cache *cache, obdd_var_size_t var_id){
 		cache->vars_size = var_id * LIST_INCREASE_FACTOR;
 		obdd_node** ptr	= realloc(cache->cache_vars, sizeof(obdd_node*) * (cache->vars_size));
 		if(ptr == NULL){
-			printf("Could not allocate memory\n");
+			printf("Could not allocate memory[obdd_cache_insert_var:1]\n");
 			exit(-1);
 		}else{
 			cache->cache_vars	= ptr;
@@ -129,7 +129,7 @@ obdd_node* obdd_cache_insert_var(obdd_cache *cache, obdd_var_size_t var_id){
 		}
 		ptr	= realloc(cache->cache_neg_vars, sizeof(obdd_node*) * (cache->vars_size));
 		if(ptr == NULL){
-			printf("Could not allocate memory\n");
+			printf("Could not allocate memory[obdd_cache_insert_var:2]\n");
 			exit(-1);
 		}else{
 			cache->cache_neg_vars	= ptr;
@@ -151,7 +151,7 @@ obdd_node* obdd_cache_insert_neg_var(obdd_cache *cache, obdd_var_size_t var_id){
 		cache->vars_size = var_id  * LIST_INCREASE_FACTOR;
 		obdd_node** ptr	= realloc(cache->cache_vars, sizeof(obdd_node*) * (cache->vars_size));
 		if(ptr == NULL){
-			printf("Could not allocate memory\n");
+			printf("Could not allocate memory[obdd_cache_insert_neg_var:1]\n");
 			exit(-1);
 		}else{
 			cache->cache_vars	= ptr;
@@ -161,7 +161,7 @@ obdd_node* obdd_cache_insert_neg_var(obdd_cache *cache, obdd_var_size_t var_id){
 		}
 		ptr	= realloc(cache->cache_neg_vars, sizeof(obdd_node*) * (cache->vars_size));
 		if(ptr == NULL){
-			printf("Could not allocate memory\n");
+			printf("Could not allocate memory[obdd_cache_insert_neg_var:2]\n");
 			exit(-1);
 		}else{
 			cache->cache_neg_vars	= ptr;
@@ -457,28 +457,28 @@ void obdd_table_node_add(obdd_table* table, obdd_node *node){
 		while((table->size-1) <= node->var_ID)table->size *= 2;
 		obdd_node*** ptr	= realloc(table->levels, sizeof(obdd_node**) * (table->size));
 		if(ptr == NULL){
-			printf("Could not allocate memory\n");
+			printf("Could not allocate memory[obdd_table_node_add:1]\n");
 			exit(-1);
 		}else table->levels	= ptr;
 		uint64_t* uint_ptr	= realloc(table->levels_composite_counts, sizeof(uint64_t) * (table->size));
 		if(uint_ptr == NULL){
-			printf("Could not allocate memory\n");
+			printf("Could not allocate memory[obdd_table_node_add:2]\n");
 			exit(-1);
 		}else table->levels_composite_counts	= uint_ptr;
 
 		uint32_t* uint32_ptr	= realloc(table->slots, sizeof(uint32_t) * table->size);
 		if(uint32_ptr == NULL){
-			printf("Could not allocate memory\n");
+			printf("Could not allocate memory[obdd_table_node_add:3]\n");
 			exit(-1);
 		}else table->slots	= uint32_ptr;
 		uint32_ptr	= realloc(table->shift, sizeof(uint32_t) * table->size);
 		if(uint32_ptr == NULL){
-			printf("Could not allocate memory\n");
+			printf("Could not allocate memory[obdd_table_node_add:4]\n");
 			exit(-1);
 		}else table->shift	= uint32_ptr;
 		uint32_ptr	= realloc(table->max_keys, sizeof(uint32_t) * table->size);
 		if(uint32_ptr == NULL){
-			printf("Could not allocate memory\n");
+			printf("Could not allocate memory[obdd_table_node_add:5]\n");
 			exit(-1);
 		}else table->max_keys	= uint32_ptr;
 		uint32_t log_slot, log_value;
