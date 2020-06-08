@@ -1,4 +1,100 @@
+\clearpage
 \section{Motivation}\label{sec:motivation}
+
+We introduce a simple example to illustrate what we consider to be the complementary nature 
+of both the presented approach and that of ~\cite{DBLP:conf/hvc/KonighoferHB10}. This specification consists of two environmental boolean variables $x_1$ and $x_2$ and one system variable $y$. $x_2$ (initially false) is required to swap its valuation at each step of the execution, while $x_1$ remains free. The value of $y$ is derived from the conjunction of the two environmental variables.
+We assume that $x_1$ will be set to true infinitely often, and require that $y$ does the same. The set of LTL formulae corresponding to this specification is as follow: 
+	\[\theta_e = \neg x_1 \wedge \neg x_2, \theta_s = \neg y\]
+	\[\rho_e = \square(x_2 \leftrightarrow \bigcirc(\neg x_2))\]
+	\[\rho_s = \square((x_1 \wedge x_2) \leftrightarrow y)\]
+	\[\varphi_e = \square \Diamond x_1, \varphi_s = \square \Diamond y\]	
+
+The automaton induced from this set of formulae is depicted in Fig. ~\ref{fig:konig_original_plant}. The specification is non realizable because the environment can set $x_1$ to true only when $x_2$ is down thus honoring the environmental assumption. ~\cite{DBLP:conf/hvc/KonighoferHB10} removes $\rho_e$ since it is unnecessary for the environment to swap $x_2$ regularly in order to win the (non) realizability game. This approach can be characterized as a syntactic minimization, which purpose is to help the engineer when viewing the specification (in particular the safety part describing the behavior of the plant) as a set of LTL formulae. This approach, nonetheless, yields the automaton depicted in Fig. ~\ref{fig:konig_original_plant_k} which is, in fact, more complex behavior-wise. Our approach is designed to simplify the semantic view of the specification, producing the automaton depicted in Fig. ~\ref{fig:konig_original_plant_c}. 
+
+The syntactic minimization should help the engineer to focus on a smaller set of formulae while diagnosing the non realizability cause (in this case the too weak assumption $\varphi_e$) by getting rid of the irrelevant element $\rho_e$. Our approach simplifes the specification semantically, reducing the relevant behavior and showing that it is possible for the environment to avoid state 2 by never allowing $x_1$ and $x_2$ to happen simultaneously. 
+
+\begin{figure}[bt]
+\centering
+\SmallPicture
+%\ShowFrame
+\VCDraw{
+	\begin{VCPicture}{(-4,-2.5)(4,2.5)}
+		\SetEdgeLabelScale{1.4}
+		\StateVar[0:\overline{x_1 x_2 y}]{(-3,0)}{1}
+		\StateVar[2:x_1 x_2 y]{(0,-2)}{2}
+		\StateVar[1:\overline{x_1} x_2 \overline{y}]{(3,0)}{3}
+		\StateVar[3:x_1 \overline{x_2 y}]{(0,2)}{6}        
+		\Initial[w]{1}
+		\ArcR{1}{2}{}
+		\ArcR{2}{1}{}
+		\ArcR{6}{1}{}        
+		\ArcR{1}{6}{}
+		\ArcR{2}{3}{}
+		\ArcR{3}{2}{}
+		\ArcR{3}{6}{}
+		\ArcR{6}{3}{}
+	\end{VCPicture}
+}
+\caption{Original Plant}
+\label{fig:konig_original_plant}
+\MediumPicture
+\end{figure}
+\begin{figure}[bt]
+	\centering
+	\SmallPicture
+	%\ShowFrame
+	\VCDraw{
+		\begin{VCPicture}{(-4,-3)(4,3)}
+			\SetEdgeLabelScale{1.4}
+			\StateVar[0:\overline{x_1 x_2 y}]{(-3,0)}{1}
+			\StateVar[2:x_1 x_2 y]{(0,-2)}{2}
+			\StateVar[1:\overline{x_1} x_2 \overline{y}]{(3,0)}{3}
+			\StateVar[3:x_1 \overline{x_2 y}]{(0,2)}{6}        
+			\Initial[n]{1}
+			\LoopW{1}{}
+			\LoopN{6}{}
+			\LoopE{3}{}
+			\LoopS{2}{}
+			\ArcR{1}{2}{}
+			\EdgeL{2}{1}{}
+			\ArcR{1}{3}{}
+			\ArcR{3}{1}{}
+			\ArcR{6}{1}{}        
+			\EdgeL{1}{6}{}
+			\ArcR{2}{3}{}
+			\EdgeL{3}{2}{}
+			\ArcR{2}{6}{}
+			\ArcR{6}{2}{}
+			\ArcR{3}{6}{}
+			\EdgeL{6}{3}{}
+		\end{VCPicture}
+	}
+	\caption{Minimization according to Könighoefer}
+	\label{fig:konig_original_plant_k}
+	\MediumPicture
+\end{figure}
+\begin{figure}[bt]
+	\centering
+	\SmallPicture
+	%\ShowFrame
+	\VCDraw{
+		\begin{VCPicture}{(-4,-3)(4,3)}
+			\SetEdgeLabelScale{1.4}
+			\StateVar[0:\overline{x_1 x_2 y}]{(-3,0)}{1}
+			\StateVar[2:x_1 x_2 y]{(0,-2)}{2}
+			\StateVar[1:\overline{x_1} x_2 \overline{y}]{(3,0)}{3}
+			\StateVar[3:x_1 \overline{x_2 y}]{(0,2)}{6}        
+			\Initial[w]{1}       
+			\EdgeL{1}{6}{}
+			\ArcR{3}{6}{}
+			\ArcR{6}{3}{}
+		\end{VCPicture}
+	}
+	\caption{Behavior minimization}
+	\label{fig:konig_original_plant_c}
+	\MediumPicture
+\end{figure}
+\clearpage
 We motivate and informally introduce relevant concepts by discussing a small example inspired by~\cite{DBLP:conf/vmcai/PitermanPS06}. Suppose an engineer is writing the specification for an industrial
 controller that needs to coordinate communication between various devices consuming data from different sensors via a shared bus according to the scheduling policy defined by an arbiter. 
 A device acting as a master will raise a bus access requirement ($req$) 
