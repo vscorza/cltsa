@@ -1,29 +1,26 @@
 TODO:
 =====
-- minimization as diagnosis narrative
-	- build realizable case
-	- take diff w. konighoefer technique
-	- diagnosis as simulation, play C || E' as exploration effort (desarrollar into action item)
+- add clts versions of kripke plants
+- add new example removing rho_s and changing varphi_s to []<> x1 && x2 && y
+- review papers symbolic repair
+- improve reports
+	- write as being loaded from rmakrdon
+	- automatize report pipeline
 - meeting
 - try to justify behavior and diffs with remove env safety
 - diagnosis time relative to synthesis time
 - controllability relative to distance to initial state
-- review papers symbolic repair
 - write amba version from Synthesis of AMBA AHB from Formal Specification:A Case Study
 - run tests for genbuf 4, 5, 6
-- improve reports
-	- write as being loaded from rmakrdon
-	- automatize report pipeline
 - review papers gr_1_star, performance_heuristics for gr1
-- build konighoefer comparison graph over non_real_1_k.fsp
 - de efectividad hacer alguna mención a la implementación y la linealidad, comparar con ejemplos comparables
 - explicar ejemplos nuevos
 - for non-realizability reduce diagnosis to single liveness goal not being satisfied
 - write amba client version from synthesis of amba ahb from formal specification
 - run tests with dd, linear, dd wo last_partition optimization, goal minimization
 - java client
-	- improve report loading from java client
-	- allow several specs to be loaded concurrently
+	- improve report loading from java client (automatically load exports)
+	- allow several specs to be loaded concurrently (tabs)
 	- syntax highlight strings
 	- undo/redo 
 	- signals view as complement to automaton
