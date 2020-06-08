@@ -2,16 +2,22 @@
 \section{Motivation}\label{sec:motivation}
 
 We introduce a simple example to illustrate what we consider to be the complementary nature 
-of both the presented approach and that of ~\cite{DBLP:conf/hvc/KonighoferHB10}. This specification consists of two environmental boolean variables $x_1$ and $x_2$ and one system variable $y$. $x_2$ (initially false) is required to swap its valuation at each step of the execution, while $x_1$ remains free. The value of $y$ is derived from the conjunction of the two environmental variables.
-We assume that $x_1$ will be set to true infinitely often, and require that $y$ does the same. The set of LTL formulae corresponding to this specification is as follow: 
-	\[\theta_e = \neg x_1 \wedge \neg x_2, \theta_s = \neg y\]
-	\[\rho_e = \square(x_2 \leftrightarrow \bigcirc(\neg x_2))\]
-	\[\rho_s = \square((x_1 \wedge x_2) \leftrightarrow y)\]
-	\[\varphi_e = \square \Diamond x_1, \varphi_s = \square \Diamond y\]	
+of both the presented approach and that of ~\cite{DBLP:conf/hvc/KonighoferHB10}. Suppose that the engineer is working on a specification consisting of two environmental boolean variables $x_1$ and $x_2$ and one system variable $y$. $x_2$ (initially false) is required to swap its valuation at each step of the execution, while $x_1$ remains free. The value of $y$ is derived from the conjunction of the two environmental variables.
+It is assumed that $x_1$ will be set to true infinitely often while $y$ is required to also be satisfied infinitely often. The set of LTL formulae corresponding to this specification is as follow: 
+\begin{center}
+	\begin{tabular}{ r c l }
+	$\theta_e$& $=$ &$\neg x_1 \wedge \neg x_2$\\
+	$\theta_s$& $=$ &$\neg y$\\
+	$\rho_e$& $=$ &$\square(x_2 \leftrightarrow \bigcirc(\neg x_2))$\\
+	$\rho_s$& $=$ &$\square((x_1 \wedge x_2) \leftrightarrow y)$\\
+	$\varphi_e$& $=$ &$\square \Diamond x_1$\\
+	$\varphi_s$& $=$ &$\square \Diamond y$\\
+\end{tabular}
+\end{center}
 
-The automaton induced from this set of formulae is depicted in Fig. ~\ref{fig:konig_original_plant}. The specification is non realizable because the environment can set $x_1$ to true only when $x_2$ is down thus honoring the environmental assumption. ~\cite{DBLP:conf/hvc/KonighoferHB10} removes $\rho_e$ since it is unnecessary for the environment to swap $x_2$ regularly in order to win the (non) realizability game. This approach can be characterized as a syntactic minimization, which purpose is to help the engineer when viewing the specification (in particular the safety part describing the behavior of the plant) as a set of LTL formulae. This approach, nonetheless, yields the automaton depicted in Fig. ~\ref{fig:konig_original_plant_k} which is, in fact, more complex behavior-wise. Our approach is designed to simplify the semantic view of the specification, producing the automaton depicted in Fig. ~\ref{fig:konig_original_plant_c}. 
+The automaton induced from this set of formulae is depicted in Fig. ~\ref{fig:konig_original_plant}. The specification is not realizable because the environment can set $x_1$ to true only when $x_2$ is down, thus honoring the environmental assumption. The minimization presented in ~\cite{DBLP:conf/hvc/KonighoferHB10} removes $\rho_e$ since it is unnecessary for the environment to swap $x_2$ regularly in order to win the (non) realizability game. This approach can be characterized as a syntactic minimization, whose purpose is to help the engineer when viewing the specification (in particular the safety part describing the behavior of the plant) as a set of LTL formulae. This approach, nonetheless, yields the automaton depicted in Fig. ~\ref{fig:konig_original_plant_k} which is, in fact, more complex behavior-wise. Our approach is designed to simplify the semantic view of the specification, producing the automaton depicted in Fig. ~\ref{fig:konig_original_plant_c}. 
 
-The syntactic minimization should help the engineer to focus on a smaller set of formulae while diagnosing the non realizability cause (in this case the too weak assumption $\varphi_e$) by getting rid of the irrelevant element $\rho_e$. Our approach simplifes the specification semantically, reducing the relevant behavior and showing that it is possible for the environment to avoid state 2 by never allowing $x_1$ and $x_2$ to happen simultaneously. 
+The syntactic minimization should help the engineer to focus on a smaller set of formulae while diagnosing the non realizability cause (in this case the too weak assumption $\varphi_e$) by getting rid of the irrelevant element $\rho_e$. Our approach simplifes the specification semantically, reducing the relevant behavior and showing that it is possible for the environment to avoid state 2 by never allowing $x_1$ and $x_2$ to happen simultaneously. If we were allowed to add the assumption that both environmental variables occur infinitely often ($\rho'_s = \square \Diamond x_1 \wedge x_2$) the specification would be realizable and the plant as is would be a proper controller, since it allows the environment to move freely as long as it visits state 2 infinitely often. If the engineer has this behavior in mind as her design intent, it should be easy for her to see that in our minimization the desired state is unreachable, hopefully guiding her to the strengthening of the assumption.  
 
 \begin{figure}[bt]
 \centering
