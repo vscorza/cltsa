@@ -1,0 +1,62 @@
+set Global_Alphabet = {}
+set Controllable_Alphabet = {}
+
+set Global_Signals	= {x1,x2,y1}
+set Output_Signals	= {y1}
+order			= {x2 < x1 < y1}
+
+/***********
+**** THETAORIGINAL TEST
+***********/
+ltl env theta Init_E in TEST	= (!x1 && !x2).
+ltl sys theta Init_S in TEST	= (!y1 || y1).
+/***********
+**** SYS RHO
+***********/
+ltl sys rho Sys_1 in TEST			= [](y1 <-> X(y1)).
+/***********
+**** ENV RHO
+***********/
+ltl env rho Env_2 in TEST			= [](!x2 <-> X(x2)).
+
+
+/***********
+**** THETA REDUCTION
+***********/
+ltl env theta Init_E in TEST_K	= (!x1 && !x2).
+ltl sys theta Init_S in TEST_K	= (!y1 || y1).
+/***********
+**** SYS RHO
+***********/
+ltl sys rho Sys_1 in TEST_K			= [](y1 <-> X(y1)).
+/***********
+**** ENV RHO
+***********/
+ltl env rho Env_1 in TEST_K			= [](x1 || !x1).
+
+
+/***********
+**** SYNTHESIS
+***********/
+
+ltl fluent G_1		= (x1 && x2 && y1).
+ltl fluent A_1		= (x1).
+ltl fluent A_2		= (x2).
+ltl fluent A_3		= (x1 && x2).
+
+|f| ENV =(TEST).
+|gr1| <{A_1, A_2}><{G_1}> STRAT = ENV.
+
+|gr1| <{A_3}><{G_1}> STRAT_W = ENV.
+
+|f| ENV_K =(TEST_K).
+|gr1| <{A_1, A_2}><{G_1}> K_STRAT = ENV_K.
+
+||DIAG_COMP	= (K_STRAT || STRAT).
+
+STRAT_W >> "/home/mariano/code/henos-automata/src/results/nonreal_test_2_strat_winning.rep".
+TEST >> "/home/mariano/code/henos-automata/src/results/nonreal_test_2_game.rep".
+STRAT >> "/home/mariano/code/henos-automata/src/results/nonreal_test_2_strat.rep".
+ENV_K >> "/home/mariano/code/henos-automata/src/results/nonreal_test_2_k_game.rep".
+K_STRAT >> "/home/mariano/code/henos-automata/src/results/nonreal_test_2_k_strat.rep".
+DIAG_COMP >> "/home/mariano/code/henos-automata/src/results/nonreal_test_2_k_diag_comp.rep".

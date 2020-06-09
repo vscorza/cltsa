@@ -1,7 +1,6 @@
 TODO:
 =====
 - add clts versions of kripke plants
-- add new example removing rho_s and changing varphi_s to []<> x1 && x2 && y
 - review papers symbolic repair
 - improve reports
 	- write as being loaded from rmakrdon

@@ -3391,7 +3391,8 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 
 	//build automata
 	bool pending_statements	= true;
-	while(pending_statements){
+	uint32_t current_count = 0;
+	while(pending_statements && current_count < program->count){
 		pending_statements	= false;
 		for(i = 0; i < program->count; i++){
 			if(program->statements[i]->type == COMPOSITION_AUT){
@@ -3402,6 +3403,7 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 #endif
 			}
 		}
+		current_count++;
 	}
 	gettimeofday(&tval_after, NULL);
 	timersub(&tval_after, &tval_before, &tval_model_build_result);
@@ -3593,6 +3595,22 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 		timersub(&tval_after, &tval_before, &tval_minimization_result);
 	}else{
 		timersub(&tval_after, &tval_before, &tval_synthesis_result);
+	}
+	//build pending automat if needed for compositions needing gr1 solving
+	//build automata
+	pending_statements	= true;
+	while(pending_statements && current_count < program->count){
+		pending_statements	= false;
+		for(i = 0; i < program->count; i++){
+			if(program->statements[i]->type == COMPOSITION_AUT){
+				pending_statements = automaton_statement_syntax_to_automaton(ctx, program->statements[i]->composition_def, tables) || pending_statements;
+#if VERBOSE
+				printf(".");
+				fflush(stdout);
+#endif
+			}
+		}
+		current_count++;
 	}
 	//run equivalence checks
 #if VERBOSE

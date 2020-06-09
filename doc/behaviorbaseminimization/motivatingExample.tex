@@ -2,6 +2,238 @@
 \section{Motivation}\label{sec:motivation}
 
 We introduce a simple example to illustrate what we consider to be the complementary nature 
+of both the presented approach and that of ~\cite{DBLP:conf/hvc/KonighoferHB10}. Suppose that the engineer is working on a specification consisting of two environmental boolean variables $x_1$ and $x_2$ and one system variable $y$. $x_2$ (initially false) is required to swap its valuation at each step of the execution, while $x_1$ remains free. The value of $y$ is set at the start and kept fixed throughout the execution.
+It is assumed that $x_1$ will be set to true infinitely often while the valuation $x_1 \wedge x_2 \wedge y$ is required to also be satisfied infinitely often. The set of LTL formulae corresponding to this specification is as follow: 
+\begin{center}
+	\begin{tabular}{ r c l }
+		$\theta$& $=$ &$\neg x_1 \wedge \neg x_2$\\
+		$\rho_e$& $=$ &$\square(x_2 \leftrightarrow \bigcirc(\neg x_2))$\\
+		$\varphi_e$& $=$ &$\square \Diamond x_1$\\
+		$\varphi_s$& $=$ &$\square \Diamond (x_1 \wedge x_2 \wedge y)$\\
+	\end{tabular}
+\end{center}
+
+The automaton induced from this set of formulae is depicted in Fig. ~\ref{fig:konig_original_plant_2}. The specification is not realizable because the environment can set $x_1$ to true only when $x_2$ is down, thus honoring the environmental assumption. The minimization presented in ~\cite{DBLP:conf/hvc/KonighoferHB10} removes $\rho_e$ since it is unnecessary for the environment to swap $x_2$ regularly in order to win the (non) realizability game. This approach can be characterized as a syntactic minimization, whose purpose is to help the engineer when viewing the specification (in particular the safety part describing the behavior of the plant) as a set of LTL formulae. This approach, nonetheless, yields the automaton depicted in Fig. ~\ref{fig:konig_original_plant_k_2} which is, in fact, more complex behavior-wise. Our approach is designed to simplify the semantic view of the specification, producing the automaton depicted in Fig. ~\ref{fig:konig_original_plant_c_2}. 
+
+The syntactic minimization should help the engineer to focus on a smaller set of formulae while diagnosing the non realizability cause (in this case the too weak assumption $\varphi_e$) by getting rid of the irrelevant element $\rho_e$. Our approach simplifes the specification semantically, reducing the relevant behavior and showing that it is possible for the environment to avoid state 2 by never allowing $x_1$ and $x_2$ to happen simultaneously. If we were allowed to add the assumption that both environmental variables occur infinitely often ($\rho'_s = \square \Diamond x_1 \wedge x_2$) the specification would be realizable and the plant as is would be a proper controller, since it allows the environment to move freely as long as it visits state 2 infinitely often. If the engineer has this behavior in mind as her design intent, it should be easy for her to see that in our minimization the desired state is unreachable, hopefully guiding her to the strengthening of the assumption.  
+\clearpage
+\begin{figure}[bt]
+	\centering
+	\SmallPicture
+	%\ShowFrame
+	\VCDraw{
+		\begin{VCPicture}{(-4,-2.5)(4,9.5)}
+			\SetEdgeLabelScale{1.4}
+			\StateVar[0:\overline{x_1 x_2} y]{(-3,6)}{0}
+			\StateVar[1:x_1 x_2 y]{(0,8)}{1}
+			\StateVar[2:x_1 \overline{x_2} y]{(3,6)}{2}
+			\StateVar[3:\overline{x_1} x_2 y]{(0,4)}{3} 
+			\StateVar[4:\overline{x_1 x_2 y}]{(-3,0)}{4}			
+			\StateVar[5:x_1 x_2 \overline{y}]{(0,2)}{5}
+			\StateVar[6:x_1 \overline{x_2 y}]{(3,0)}{6}
+			\StateVar[7:\overline{x_1} x_2 \overline{y}]{(0,-2)}{7}   			  
+			\Initial[w]{0}
+			\Initial[w]{4}	
+			\ArcR{0}{1}{}
+			\ArcR{1}{0}{}
+			\ArcR{1}{2}{}						
+			\ArcR{2}{1}{}
+			\ArcR{2}{3}{}        
+			\ArcR{3}{2}{}
+			\ArcR{3}{0}{}
+			\ArcR{0}{3}{}
+			\ArcR{4}{5}{}
+			\ArcR{5}{4}{}
+			\ArcR{5}{6}{}						
+			\ArcR{6}{5}{}
+			\ArcR{6}{7}{}        
+			\ArcR{7}{6}{}
+			\ArcR{7}{4}{}
+			\ArcR{4}{7}{}			
+		\end{VCPicture}
+	}
+	\caption{Original Plant}
+\label{fig:konig_original_plant_2}
+\MediumPicture
+\end{figure}
+\begin{figure}[bt]
+\centering
+\SmallPicture
+%\ShowFrame
+	\VCDraw{
+	\begin{VCPicture}{(-4,-2.5)(4,9.5)}
+		\SetEdgeLabelScale{1.4}
+		\State[s]{(-5,3)}{S}
+		\State[0]{(-3,6)}{0}
+		\State[1]{(0,8)}{1}
+		\State[2]{(3,6)}{2}
+		\State[3]{(0,4)}{3} 
+		\State[4]{(-3,0)}{4}			
+		\State[5]{(0,2)}{5}
+		\State[6]{(3,0)}{6}
+		\State[7]{(0,-2)}{7} 			  
+		\Initial[w]{S}
+		\ArcL{S}{0}{\overline{x_1 x_2}/y}
+		\ArcR{S}{4}{\overline{x_1 x_2}/\overline{y}}	
+		\ArcR{0}{1}{}\LabelL[.5]{x_1 x_2}
+		\LArcR[.6]{1}{0}{\overline{x_1 x_2}}
+		\ArcR{1}{2}{}\LabelL[.5]{\overline{x_2}}
+		\LArcR[.6]{2}{1}{x_2}
+		\ArcR{2}{3}{}\LabelL[.5]{\overline{x_1}x_2}
+		\LArcR[.6]{3}{2}{x_1\overline{x_2}}
+		\ArcR{3}{0}{}\LabelL[.5]{\overline{x_2}}
+		\LArcR[.6]{0}{3}{x_2}
+		\ArcR{4}{5}{}\LabelL[.5]{x_1 x_2}
+		\LArcR[.6]{5}{4}{\overline{x_1 x_2}}
+		\ArcR{5}{6}{}\LabelL[.5]{\overline{x_2}}
+		\LArcR[.6]{6}{5}{x_2}
+		\ArcR{6}{7}{}\LabelL[.5]{\overline{x_1}x_2}
+		\LArcR[.6]{7}{6}{x_1\overline{x_2}}
+		\ArcR{7}{4}{}\LabelL[.5]{\overline{x_2}}
+		\LArcR[.6]{4}{7}{x_2}	
+	\end{VCPicture}
+}
+	\caption{Original Plant CLTS}
+	\label{fig:konig_original_plant_2_clts}
+	\MediumPicture
+\end{figure}
+\begin{figure}[bt]
+	\centering
+	\SmallPicture
+	%\ShowFrame
+	\VCDraw{
+		\begin{VCPicture}{(-4,-3.5)(4,11.5)}
+			\SetEdgeLabelScale{1.4}
+			\StateVar[0:\overline{x_1 x_2} y]{(-3,8)}{0}
+			\StateVar[1:x_1 x_2 y]{(0,10)}{1}
+			\StateVar[2:x_1 \overline{x_2} y]{(3,8)}{2}
+			\StateVar[3:\overline{x_1} x_2 y]{(0,6)}{3} 
+			\StateVar[4:\overline{x_1 x_2 y}]{(-3,0)}{4}			
+			\StateVar[5:x_1 x_2 \overline{y}]{(0,2)}{5}
+			\StateVar[6:x_1 \overline{x_2} \overline{y}]{(3,0)}{6}
+			\StateVar[7:\overline{x_1} x_2 \overline{y}]{(0,-2)}{7}   			  
+			\Initial[n]{0}
+			\Initial[n]{4}
+			\LoopW{0}{}
+			\LoopN{1}{}
+			\LoopE{2}{}
+			\LoopS{3}{}				
+			\LoopW{4}{}
+			\LoopN{5}{}
+			\LoopE{6}{}
+			\LoopS{7}{}			
+			\ArcL{0}{1}{}
+			\EdgeL{1}{0}{}
+			\ArcL{1}{2}{}						
+			\EdgeL{2}{1}{}
+			\ArcL{2}{3}{}        
+			\EdgeL{3}{2}{}
+			\ArcL{3}{0}{}
+			\EdgeL{0}{3}{}
+			\ArcL{4}{5}{}
+			\EdgeL{5}{4}{}
+			\ArcL{5}{6}{}						
+			\EdgeL{6}{5}{}
+			\ArcL{6}{7}{}        
+			\EdgeL{7}{6}{}
+			\ArcL{7}{4}{}
+			\EdgeL{4}{7}{}	
+			\ArcL{0}{2}{}	
+			\ArcL{2}{0}{}
+			\ArcL{1}{3}{}
+			\ArcL{3}{1}{}
+			\ArcL{4}{6}{}
+			\ArcL{6}{4}{}
+			\ArcL{5}{7}{}
+			\ArcL{7}{5}{}
+		\end{VCPicture}
+	}
+	\caption{Minimization according to Könighoefer}
+	\label{fig:konig_original_plant_k_2}
+	\MediumPicture
+\end{figure}
+\begin{figure}[bt]
+	\centering
+	\SmallPicture
+	%\ShowFrame
+	\VCDraw{
+		\begin{VCPicture}{(-4,-0.5)(4,9.5)}
+			\SetEdgeLabelScale{1.4}
+			\StateVar[0:\overline{x_1 x_2} y]{(-3,6)}{0}
+			\StateVar[1:x_1 x_2 y]{(0,8)}{1}
+			\StateVar[2:x_1 \overline{x_2} y]{(3,6)}{2}
+			\StateVar[3:\overline{x_1} x_2 y]{(0,4)}{3} 
+			\StateVar[4:\overline{x_1 x_2 y}]{(-3,0)}{4}			
+			\StateVar[5:x_1 x_2 \overline{y}]{(0,2)}{5}
+			\StateVar[6:x_1 \overline{x_2 y}]{(3,0)}{6}		  
+			\Initial[w]{0}
+			\Initial[w]{4}	
+			\EdgeL{0}{1}{}
+			\EdgeL{1}{2}{}						
+			\ArcR{2}{3}{}        
+			\ArcR{3}{2}{}
+			\EdgeL{4}{5}{}
+			\ArcR{5}{6}{}						
+			\ArcR{6}{5}{}			
+		\end{VCPicture}
+	}
+	\caption{Behavior minimization}
+	\label{fig:konig_original_plant_c_2}
+	\MediumPicture
+\end{figure}
+\begin{figure}[bt]
+	\centering
+	\SmallPicture
+	%\ShowFrame
+	\VCDraw{
+		\begin{VCPicture}{(-4,3.5)(4,8.5)}
+			\SetEdgeLabelScale{1.4}
+			\StateVar[0:\overline{x_1 x_2} y]{(-3,6)}{0}
+			\StateVar[1:x_1 x_2 y]{(0,8)}{1}
+			\StateVar[2:x_1 \overline{x_2} y]{(3,6)}{2}
+			\StateVar[3:\overline{x_1} x_2 y]{(0,4)}{3} 			  
+			\Initial[w]{0}
+			\ArcR{0}{1}{}
+			\ArcR{1}{0}{}
+			\ArcR{1}{2}{}						
+			\ArcR{2}{1}{}
+			\ArcR{2}{3}{}        
+			\ArcR{3}{2}{}
+			\ArcR{3}{0}{}
+			\ArcR{0}{3}{}		
+		\end{VCPicture}
+	}
+	\caption{Strategy to the realizable version}
+	\label{fig:konig_strategy_2}
+	\MediumPicture
+\end{figure}
+\begin{figure}[bt]
+	\centering
+	\SmallPicture
+	%\ShowFrame
+	\VCDraw{
+		\begin{VCPicture}{(-4,3.5)(4,8.5)}
+			\SetEdgeLabelScale{1.4}
+			\StateVar[0:\overline{x_1 x_2} y]{(-3,6)}{0}
+			\StateVar[1:x_1 x_2 y]{(0,8)}{1}
+			\StateVar[2:x_1 \overline{x_2} y]{(3,6)}{2}
+			\StateVar[3:\overline{x_1} x_2 y]{(0,4)}{3} 	  
+			\Initial[w]{0}
+			\Initial[w]{4}	
+			\EdgeL{0}{1}{}
+			\EdgeL{1}{2}{}						
+			\ArcR{2}{3}{}        
+			\ArcR{3}{2}{}		
+		\end{VCPicture}
+	}
+	\caption{Synchronous composition of the strategy with the minimization}
+	\label{fig:konig_composition_2}
+	\MediumPicture
+\end{figure}
+\clearpage
+
+
+We introduce a simple example to illustrate what we consider to be the complementary nature 
 of both the presented approach and that of ~\cite{DBLP:conf/hvc/KonighoferHB10}. Suppose that the engineer is working on a specification consisting of two environmental boolean variables $x_1$ and $x_2$ and one system variable $y$. $x_2$ (initially false) is required to swap its valuation at each step of the execution, while $x_1$ remains free. The value of $y$ is derived from the conjunction of the two environmental variables.
 It is assumed that $x_1$ will be set to true infinitely often while $y$ is required to also be satisfied infinitely often. The set of LTL formulae corresponding to this specification is as follow: 
 \begin{center}
