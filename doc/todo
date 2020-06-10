@@ -1,21 +1,27 @@
 TODO:
 =====
-- add clts versions of kripke plants
-- review papers symbolic repair
+- example
+	- pasar xy/y a dos estados y cambiar todo a clts
+	- agregar rho_s que falta en el ejemplo ltl
 - improve reports
 	- write as being loaded from rmakrdon
 	- automatize report pipeline
+- re run examples
+- data
+	- prepare table and evaluation section
+- prepare paper prototype
 - meeting
-- try to justify behavior and diffs with remove env safety
-- diagnosis time relative to synthesis time
-- controllability relative to distance to initial state
-- write amba version from Synthesis of AMBA AHB from Formal Specification:A Case Study
-- run tests for genbuf 4, 5, 6
+- add metrics
+	- diagnosis time relative to synthesis time
+	- controllability relative to distance to initial state
+- examples
+	- check spectra repository for unrealizable specs
+	- write amba version from Synthesis of AMBA AHB from Formal Specification:A Case Study
+	- write examples from symbolic repair paper
+	- run tests for genbuf 4, 5, 6
 - review papers gr_1_star, performance_heuristics for gr1
-- de efectividad hacer alguna mención a la implementación y la linealidad, comparar con ejemplos comparables
-- explicar ejemplos nuevos
+- explain cases
 - for non-realizability reduce diagnosis to single liveness goal not being satisfied
-- write amba client version from synthesis of amba ahb from formal specification
 - run tests with dd, linear, dd wo last_partition optimization, goal minimization
 - java client
 	- improve report loading from java client (automatically load exports)
@@ -52,6 +58,7 @@ TODO:
 - implement fluent consistency check
 - allow to define buchi fluent based on accepting state, for instance for automaton based properties in genbuf
 - implement IS_REALIZABLE(gr1). on parser
+- review and relate gamma sat notion from symbolic repair with non trivial controllers, add check, compare to mtsa
 - diagnose mutation over small parameters, produce hypothesis, scale both hypothesis and parameter to see if it holds
 POST PHD
 ========

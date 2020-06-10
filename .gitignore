@@ -1,5 +1,6 @@
 src/results/*.fsp
 *~
+*.loc
 *.o
 callgrind.out.*
 *.dat
