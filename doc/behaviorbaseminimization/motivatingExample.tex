@@ -8,54 +8,54 @@ It is assumed that $x_1$ will hold true infinitely often while $x_1 \wedge x_2 \
 	\begin{tabular}{ r c l }
 		$\theta$& $=$ &$\neg x_1 \wedge \neg x_2$\\
 		$\rho_e$& $=$ &$\square(x_2 \leftrightarrow \bigcirc(\neg x_2))$\\
+		$\rho_s$& $=$ &$\square(y \leftrightarrow \bigcirc(y))$\\		
 		$\varphi_e$& $=$ &$\square \Diamond x_1$\\
 		$\varphi_s$& $=$ &$\square \Diamond (x_1 \wedge x_2 \wedge y)$\\
 	\end{tabular}
 \end{center}
 
-The automaton induced from this set of formulae is depicted in Fig. ~\ref{fig:konig_original_plant_2}. Here the automaton is presented as a Kripke structure, the equivalent CLTS is shown in Fig. ~\ref{fig:konig_original_plant_2_clts}. All other instances are presented as Kripke structures too for readability purposes. At this point, the specification is not realizable because the environment can set $x_1$ to true only when $x_2$ is down, thus honoring the environmental assumption while avoiding the system to reach the winning valuation $x_1 \wedge x_2 \wedge y$. The minimization presented in ~\cite{DBLP:conf/hvc/KonighoferHB10} removes $\rho_e$ since it is unnecessary for the environment to swap $x_2$ regularly in order to win the (non) realizability game. This approach can be characterized as a syntactic minimization, whose purpose is to help the engineer when viewing the specification (in particular the safety part describing the behavior of the plant) as a set of LTL formulae. This approach, nonetheless, yields the automaton depicted in Fig. ~\ref{fig:konig_original_plant_k_2} which is, in fact, more complex in terms of its explicit behavior. Our approach is designed to simplify the semantic view of the specification, producing the automaton depicted in Fig. ~\ref{fig:konig_original_plant_c_2}. 
+The automaton induced from this set of formulae is depicted in Fig. ~\ref{fig:konig_original_plant_2_clts}. At this point, the specification is not realizable because the environment can set $x_1$ to true only when $x_2$ is down, thus honoring the environmental assumption while avoiding the system to reach the winning valuation $x_1 \wedge x_2 \wedge y$. The minimization presented in ~\cite{DBLP:conf/hvc/KonighoferHB10} removes $\rho_e$ since it is unnecessary for the environment to swap $x_2$ regularly in order to win the (non) realizability game. This approach can be characterized as a syntactic minimization, whose purpose is to help the engineer when viewing the specification (in particular the safety part describing the behavior of the plant) as a set of LTL formulae. This approach, nonetheless, yields the automaton depicted in Fig. ~\ref{fig:konig_original_plant_k_2} which is, in fact, more complex in terms of its explicit behavior. Our approach is designed to simplify the semantic view of the specification, producing the automaton depicted in Fig. ~\ref{fig:konig_original_plant_c_2}. 
 
 The syntactic minimization should help the engineer to focus on a smaller set of formulae while diagnosing the non realizability cause (in this case the too weak assumption $\varphi_e$) by getting rid of the irrelevant element $\rho_e$. Our approach simplifies the specification semantically instead, reducing the relevant behavior and showing that it is possible for the environment to avoid state 2 by never allowing $x_1$ and $x_2$ to happen simultaneously, while at the same time not restricting the system below its original capabilities. Notice that if we were allowed to add the assumption that both environmental variables occur simultaneously infinitely often ($\rho'_s = \square \Diamond x_1 \wedge x_2$) the specification would be realizable and choosing to raise $y$ at the beginning would be sufficient in order to guarantee our goal, as shown in Fig. ~\ref{fig:konig_strategy_2}. After fixing $y$ to true the environment can move freely as long as it visits state 2 infinitely often. If the engineer has this behavior in mind as her design intent, it should be easy to see that in the semantic minimization the desired state is unreachable, hopefully guiding her to the strengthening of the assumption.  In Fig. ~\ref{fig:konig_composition_2} we show the synchronous composition of the aforementioned strategy with our minimization. Note that after letting the system raise $y$ state 1 is visited only once and then the execution keeps moving between states 2 and 3 in order to keep the value of $x_2$ oscillating.
-\clearpage
-\begin{figure}[bt]
-	\centering
-	\SmallPicture
-	%\ShowFrame
-	\VCDraw{
-		\begin{VCPicture}{(-4,-2.5)(4,9.5)}
-			\SetEdgeLabelScale{1.4}
-			\StateVar[0:\overline{x_1 x_2} y]{(-3,6)}{0}
-			\StateVar[1:x_1 x_2 y]{(0,8)}{1}
-			\StateVar[2:x_1 \overline{x_2} y]{(3,6)}{2}
-			\StateVar[3:\overline{x_1} x_2 y]{(0,4)}{3} 
-			\StateVar[4:\overline{x_1 x_2 y}]{(-3,0)}{4}			
-			\StateVar[5:x_1 x_2 \overline{y}]{(0,2)}{5}
-			\StateVar[6:x_1 \overline{x_2 y}]{(3,0)}{6}
-			\StateVar[7:\overline{x_1} x_2 \overline{y}]{(0,-2)}{7}   			  
-			\Initial[w]{0}
-			\Initial[w]{4}	
-			\ArcR{0}{1}{}
-			\ArcR{1}{0}{}
-			\ArcR{1}{2}{}						
-			\ArcR{2}{1}{}
-			\ArcR{2}{3}{}        
-			\ArcR{3}{2}{}
-			\ArcR{3}{0}{}
-			\ArcR{0}{3}{}
-			\ArcR{4}{5}{}
-			\ArcR{5}{4}{}
-			\ArcR{5}{6}{}						
-			\ArcR{6}{5}{}
-			\ArcR{6}{7}{}        
-			\ArcR{7}{6}{}
-			\ArcR{7}{4}{}
-			\ArcR{4}{7}{}			
-		\end{VCPicture}
-	}
-	\caption{Original Plant}
-\label{fig:konig_original_plant_2}
-\MediumPicture
-\end{figure}
+%\begin{figure}[bt]
+%	\centering
+%	\SmallPicture
+%	%\ShowFrame
+%	\VCDraw{
+%		\begin{VCPicture}{(-4,-2.5)(4,9.5)}
+%			\SetEdgeLabelScale{1.4}
+%			\StateVar[0:\overline{x_1 x_2} y]{(-3,6)}{0}
+%			\StateVar[1:x_1 x_2 y]{(0,8)}{1}
+%			\StateVar[2:x_1 \overline{x_2} y]{(3,6)}{2}
+%			\StateVar[3:\overline{x_1} x_2 y]{(0,4)}{3} 
+%			\StateVar[4:\overline{x_1 x_2 y}]{(-3,0)}{4}			
+%			\StateVar[5:x_1 x_2 \overline{y}]{(0,2)}{5}
+%			\StateVar[6:x_1 \overline{x_2 y}]{(3,0)}{6}
+%			\StateVar[7:\overline{x_1} x_2 \overline{y}]{(0,-2)}{7}   			  
+%			\Initial[w]{0}
+%			\Initial[w]{4}	
+%			\ArcR{0}{1}{}
+%			\ArcR{1}{0}{}
+%			\ArcR{1}{2}{}						
+%			\ArcR{2}{1}{}
+%			\ArcR{2}{3}{}        
+%			\ArcR{3}{2}{}
+%			\ArcR{3}{0}{}
+%			\ArcR{0}{3}{}
+%			\ArcR{4}{5}{}
+%			\ArcR{5}{4}{}
+%			\ArcR{5}{6}{}						
+%			\ArcR{6}{5}{}
+%			\ArcR{6}{7}{}        
+%			\ArcR{7}{6}{}
+%			\ArcR{7}{4}{}
+%			\ArcR{4}{7}{}			
+%		\end{VCPicture}
+%	}
+%	\caption{Original Plant}
+%\label{fig:konig_original_plant_2}
+%\MediumPicture
+%\end{figure}
 \begin{figure}[bt]
 \centering
 \SmallPicture
@@ -63,18 +63,20 @@ The syntactic minimization should help the engineer to focus on a smaller set of
 	\VCDraw{
 	\begin{VCPicture}{(-4,-2.5)(4,9.5)}
 		\SetEdgeLabelScale{1.4}
-		\State[s]{(-5,3)}{S}
-		\State[0]{(-3,6)}{0}
-		\State[1]{(0,8)}{1}
-		\State[2]{(3,6)}{2}
-		\State[3]{(0,4)}{3} 
-		\State[4]{(-3,0)}{4}			
-		\State[5]{(0,2)}{5}
-		\State[6]{(3,0)}{6}
-		\State[7]{(0,-2)}{7} 			  
-		\Initial[w]{S}
-		\ArcL{S}{0}{\overline{x_1 x_2}/y}
-		\ArcR{S}{4}{\overline{x_1 x_2}/\overline{y}}	
+		\State[0]{(-5,3)}{init}
+		\State[1]{(-2.5,3)}{init_e}		
+		\State[2]{(-1.5,6)}{0}
+		\State[3]{(1.5,8)}{1}
+		\State[4]{(4.5,6)}{2}
+		\State[5]{(1.5,4)}{3} 
+		\State[6]{(-1.5,0)}{4}			
+		\State[7]{(1.5,2)}{5}
+		\State[8]{(4.5,0)}{6}
+		\State[9]{(1.5,-2)}{7} 			  
+		\Initial[w]{init}
+		\EdgeL{init}{init_e}{\overline{x_1 x_2}}
+		\ArcL{init_e}{0}{y}
+		\ArcR{init_e}{4}{\overline{y}}	
 		\ArcR{0}{1}{}\LabelL[.5]{x_1 x_2}
 		\LArcR[.6]{1}{0}{\overline{x_1 x_2}}
 		\ArcR{1}{2}{}\LabelL[.5]{\overline{x_2}}
@@ -93,7 +95,7 @@ The syntactic minimization should help the engineer to focus on a smaller set of
 		\LArcR[.6]{4}{7}{x_2}	
 	\end{VCPicture}
 }
-	\caption{Original Plant CLTS}
+	\caption{Original Plant}
 	\label{fig:konig_original_plant_2_clts}
 	\MediumPicture
 \end{figure}
@@ -102,52 +104,56 @@ The syntactic minimization should help the engineer to focus on a smaller set of
 	\SmallPicture
 	%\ShowFrame
 	\VCDraw{
-		\begin{VCPicture}{(-4,-3.5)(4,11.5)}
-			\SetEdgeLabelScale{1.4}
-			\StateVar[0:\overline{x_1 x_2} y]{(-3,8)}{0}
-			\StateVar[1:x_1 x_2 y]{(0,10)}{1}
-			\StateVar[2:x_1 \overline{x_2} y]{(3,8)}{2}
-			\StateVar[3:\overline{x_1} x_2 y]{(0,6)}{3} 
-			\StateVar[4:\overline{x_1 x_2 y}]{(-3,0)}{4}			
-			\StateVar[5:x_1 x_2 \overline{y}]{(0,2)}{5}
-			\StateVar[6:x_1 \overline{x_2} \overline{y}]{(3,0)}{6}
-			\StateVar[7:\overline{x_1} x_2 \overline{y}]{(0,-2)}{7}   			  
-			\Initial[n]{0}
-			\Initial[n]{4}
-			\LoopW{0}{}
-			\LoopN{1}{}
-			\LoopE{2}{}
-			\LoopS{3}{}				
-			\LoopW{4}{}
-			\LoopN{5}{}
-			\LoopE{6}{}
-			\LoopS{7}{}			
-			\ArcL{0}{1}{}
-			\EdgeL{1}{0}{}
-			\ArcL{1}{2}{}						
-			\EdgeL{2}{1}{}
-			\ArcL{2}{3}{}        
-			\EdgeL{3}{2}{}
-			\ArcL{3}{0}{}
-			\EdgeL{0}{3}{}
-			\ArcL{4}{5}{}
-			\EdgeL{5}{4}{}
-			\ArcL{5}{6}{}						
-			\EdgeL{6}{5}{}
-			\ArcL{6}{7}{}        
-			\EdgeL{7}{6}{}
-			\ArcL{7}{4}{}
-			\EdgeL{4}{7}{}	
-			\ArcL{0}{2}{}	
-			\ArcL{2}{0}{}
-			\ArcL{1}{3}{}
-			\ArcL{3}{1}{}
-			\ArcL{4}{6}{}
-			\ArcL{6}{4}{}
-			\ArcL{5}{7}{}
-			\ArcL{7}{5}{}
-		\end{VCPicture}
-	}
+	\begin{VCPicture}{(-4,-3.8)(4,10.3)}
+		\SetEdgeLabelScale{1.4}
+		\State[0]{(-5,3)}{init}
+		\State[1]{(-2.5,3)}{init_e}		
+		\State[2]{(-1.5,6.8)}{0}
+		\State[3]{(1.5,8.8)}{1}
+		\State[4]{(4.5,6.8)}{2}
+		\State[5]{(1.5,4.8)}{3} 
+		\State[6]{(-1.5,-.8)}{4}			
+		\State[7]{(1.5,1.2)}{5}
+		\State[8]{(4.5,-.8)}{6}
+		\State[9]{(1.5,-2.8)}{7} 			  
+		\Initial[w]{init}
+		\LoopW{0}{}
+		\LoopN{1}{}
+		\LoopE{2}{}
+		\LoopS{3}{}				
+		\LoopW{4}{}
+		\LoopN{5}{}
+		\LoopE{6}{}
+		\LoopS{7}{}			
+		\EdgeL{init}{init_e}{\overline{x_1 x_2}}
+		\ArcL{init_e}{0}{y}
+		\ArcR{init_e}{4}{\overline{y}}	
+		\VArcR{arcangle=10,ncurv=.9}{0}{1}{}\LabelL[.5]{x_1 x_2}
+		\VArcR{arcangle=-55,ncurv=.9}{1}{0}{\overline{x_1 x_2}}
+		\VArcR{arcangle=10,ncurv=.9}{1}{2}{}\LabelL[.5]{\overline{x_2}}
+		\VArcR{arcangle=-55,ncurv=.9}{2}{1}{x_2}
+		\VArcR{arcangle=10,ncurv=.9}{2}{3}{}\LabelL[.5]{\overline{x_1}x_2}
+		\VArcR{arcangle=-55,ncurv=.9}{3}{2}{x_1\overline{x_2}}
+		\VArcR{arcangle=10,ncurv=.9}{3}{0}{}\LabelL[.5]{\overline{x_2}}
+		\VArcR{arcangle=-55,ncurv=.9}{0}{3}{x_2}
+		\VArcR{arcangle=10,ncurv=.9}{4}{5}{}\LabelL[.5]{x_1 x_2}
+		\VArcR{arcangle=-55,ncurv=.9}{5}{4}{\overline{x_1 x_2}}
+		\VArcR{arcangle=10,ncurv=.9}{5}{6}{}\LabelL[.5]{\overline{x_2}}
+		\VArcR{arcangle=-55,ncurv=.9}{6}{5}{x_2}
+		\VArcR{arcangle=10,ncurv=.9}{6}{7}{}\LabelL[.5]{\overline{x_1}x_2}
+		\VArcR{arcangle=-55,ncurv=.9}{7}{6}{x_1\overline{x_2}}
+		\VArcR{arcangle=10,ncurv=.9}{7}{4}{}\LabelL[.5]{\overline{x_2}}
+		\VArcR{arcangle=-50,ncurv=.9}{4}{7}{x_2}	
+		\VArcL[.7]{arcangle=15,ncurv=.4}{0}{2}{x_1}
+		\VArcL[.7]{arcangle=15,ncurv=.4}{2}{0}{\overline{x_1}}
+		\VArcL[.7]{arcangle=15,ncurv=.4}{1}{3}{x_1}
+		\VArcL[.7]{arcangle=15,ncurv=.4}{3}{1}{\overline{x_1}}
+		\VArcL[.7]{arcangle=15,ncurv=.4}{4}{6}{x_1}
+		\VArcL[.7]{arcangle=15,ncurv=.4}{6}{4}{\overline{x_1}}
+		\VArcL[.7]{arcangle=15,ncurv=.4}{5}{7}{x_1}
+		\VArcL[.7]{arcangle=15,ncurv=.4}{7}{5}{\overline{x_1}}		
+	\end{VCPicture}
+}	
 	\caption{Minimization according to Könighoefer}
 	\label{fig:konig_original_plant_k_2}
 	\MediumPicture
@@ -157,26 +163,30 @@ The syntactic minimization should help the engineer to focus on a smaller set of
 	\SmallPicture
 	%\ShowFrame
 	\VCDraw{
-		\begin{VCPicture}{(-4,-0.5)(4,9.5)}
-			\SetEdgeLabelScale{1.4}
-			\StateVar[0:\overline{x_1 x_2} y]{(-3,6)}{0}
-			\StateVar[1:x_1 x_2 y]{(0,8)}{1}
-			\StateVar[2:x_1 \overline{x_2} y]{(3,6)}{2}
-			\StateVar[3:\overline{x_1} x_2 y]{(0,4)}{3} 
-			\StateVar[4:\overline{x_1 x_2 y}]{(-3,0)}{4}			
-			\StateVar[5:x_1 x_2 \overline{y}]{(0,2)}{5}
-			\StateVar[6:x_1 \overline{x_2 y}]{(3,0)}{6}		  
-			\Initial[w]{0}
-			\Initial[w]{4}	
-			\EdgeL{0}{1}{}
-			\EdgeL{1}{2}{}						
-			\ArcR{2}{3}{}        
-			\ArcR{3}{2}{}
-			\EdgeL{4}{5}{}
-			\ArcR{5}{6}{}						
-			\ArcR{6}{5}{}			
-		\end{VCPicture}
-	}
+	\begin{VCPicture}{(-4,.5)(4,8.5)}
+		\SetEdgeLabelScale{1.4}
+		\State[0]{(-5,4)}{init}
+		\State[1]{(-2.5,4)}{init_e}		
+		\State[2]{(-1.5,6)}{0}
+		\State[3]{(1.5,8)}{1}
+		\State[4]{(4.5,6)}{2}
+		\State[5]{(1.5,4)}{3} 
+		\State[6]{(-1.5,2)}{4}			
+		\State[7]{(1.5,1)}{5}
+		\State[8]{(4.5,1)}{6}			  
+		\Initial[w]{init}
+		\EdgeL{init}{init_e}{\overline{x_1 x_2}}
+		\ArcL{init_e}{0}{y}
+		\ArcR{init_e}{4}{\overline{y}}	
+		\ArcL{0}{1}{}\LabelL[.5]{x_1 x_2}
+		\ArcL{1}{2}{}\LabelL[.5]{\overline{x_2}}
+		\LArcR[.5]{2}{3}{\overline{x_1}x_2}
+		\LArcR[.6]{3}{2}{x_1\overline{x_2}}
+		\ArcR{4}{5}{}\LabelL[.5]{x_1 x_2}
+		\LArcR[.6]{6}{5}{x_2}
+		\LArcR[.6]{5}{6}{\overline{x_2}}
+	\end{VCPicture}
+}
 	\caption{Behavior minimization}
 	\label{fig:konig_original_plant_c_2}
 	\MediumPicture
@@ -186,21 +196,25 @@ The syntactic minimization should help the engineer to focus on a smaller set of
 	\SmallPicture
 	%\ShowFrame
 	\VCDraw{
-		\begin{VCPicture}{(-4,3.5)(4,8.5)}
+		\begin{VCPicture}{(-4,3.5)(4,9.5)}
 			\SetEdgeLabelScale{1.4}
-			\StateVar[0:\overline{x_1 x_2} y]{(-3,6)}{0}
-			\StateVar[1:x_1 x_2 y]{(0,8)}{1}
-			\StateVar[2:x_1 \overline{x_2} y]{(3,6)}{2}
-			\StateVar[3:\overline{x_1} x_2 y]{(0,4)}{3} 			  
-			\Initial[w]{0}
-			\ArcR{0}{1}{}
-			\ArcR{1}{0}{}
-			\ArcR{1}{2}{}						
-			\ArcR{2}{1}{}
-			\ArcR{2}{3}{}        
-			\ArcR{3}{2}{}
-			\ArcR{3}{0}{}
-			\ArcR{0}{3}{}		
+			\State[0]{(-5,6)}{init}
+			\State[1]{(-3,6)}{init_e}		
+			\State[2]{(-1,6)}{0}
+			\State[3]{(2,8)}{1}
+			\State[4]{(5,6)}{2}
+			\State[5]{(2,4)}{3} 		  
+			\Initial[w]{init}
+			\EdgeL{init}{init_e}{\overline{x_1 x_2}}
+			\EdgeL{init_e}{0}{y}
+			\ArcR{0}{1}{}\LabelL[.5]{x_1 x_2}
+			\LArcR[.6]{1}{0}{\overline{x_1 x_2}}
+			\ArcR{1}{2}{}\LabelL[.5]{\overline{x_2}}
+			\LArcR[.6]{2}{1}{x_2}
+			\ArcR{2}{3}{}\LabelL[.5]{\overline{x_1}x_2}
+			\LArcR[.6]{3}{2}{x_1\overline{x_2}}
+			\ArcR{3}{0}{}\LabelL[.5]{\overline{x_2}}
+			\LArcR[.6]{0}{3}{x_2}	
 		\end{VCPicture}
 	}
 	\caption{Realizable version strategy}
@@ -212,20 +226,23 @@ The syntactic minimization should help the engineer to focus on a smaller set of
 	\SmallPicture
 	%\ShowFrame
 	\VCDraw{
-		\begin{VCPicture}{(-4,3.5)(4,8.5)}
-			\SetEdgeLabelScale{1.4}
-			\StateVar[0:\overline{x_1 x_2} y]{(-3,6)}{0}
-			\StateVar[1:x_1 x_2 y]{(0,8)}{1}
-			\StateVar[2:x_1 \overline{x_2} y]{(3,6)}{2}
-			\StateVar[3:\overline{x_1} x_2 y]{(0,4)}{3} 	  
-			\Initial[w]{0}
-			\Initial[w]{4}	
-			\EdgeL{0}{1}{}
-			\EdgeL{1}{2}{}						
-			\ArcR{2}{3}{}        
-			\ArcR{3}{2}{}		
-		\end{VCPicture}
-	}
+	\begin{VCPicture}{(-4,3.5)(4,9.5)}
+		\SetEdgeLabelScale{1.4}
+		\State[0]{(-5,6)}{init}
+		\State[1]{(-3,6)}{init_e}		
+		\State[2]{(-1,6)}{0}
+		\State[3]{(2,8)}{1}
+		\State[4]{(5,6)}{2}
+		\State[5]{(2,4)}{3} 		  
+		\Initial[w]{init}
+		\EdgeL{init}{init_e}{\overline{x_1 x_2}}
+		\EdgeL{init_e}{0}{y}
+		\ArcL{0}{1}{x_1 x_2}
+		\ArcL{1}{2}{\overline{x_2}}
+		\ArcR{2}{3}{}\LabelL[.5]{\overline{x_1}x_2}
+		\LArcR[.6]{3}{2}{x_1\overline{x_2}}
+	\end{VCPicture}
+}
 	\caption{Composition of the strategy with the minimization}
 	\label{fig:konig_composition_2}
 	\MediumPicture

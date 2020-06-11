@@ -1,7 +1,6 @@
 TODO:
 =====
 - example
-	- pasar xy/y a dos estados y cambiar todo a clts
 	- agregar rho_s que falta en el ejemplo ltl
 - improve reports
 	- write as being loaded from rmakrdon
