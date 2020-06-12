@@ -2,10 +2,10 @@ TODO:
 =====
 - improve reports
 	- automatize report pipeline
-		- run all tests sequentially
-		- merge and remove first line except from the first
-		- add columns and values for ctrl values
+		- add columns and values for ctrl values in r
+		- export to latex from r
 		- add script to change chmod +x
+		- share params between sh files
 - re run examples
 - data
 	- prepare table and evaluation section
