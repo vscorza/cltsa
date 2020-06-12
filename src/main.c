@@ -57,16 +57,18 @@ void print_test_result(bool passed, char* name, char* description){
 	fflush(stdout);
 }
 
-void run_parse_test_local(char* test_file, char* test_name, char* result_name,
+void run_parse_test_local(char* test_file, char* test_name, char* result_name, char* steps_name,
 		diagnosis_search_method diagnosis_method, bool append_results){
 	FILE *fd;
+    char cwd[1024];
+    getcwd(cwd, sizeof(cwd));
+#if VERBOSE
+    printf("Current working dir:\t%s\nFile:\t%s\nCase name:\t%s\nResult name:\t%s\n", cwd, test_file, test_name, result_name);
+#endif
     if (!(yyin = fopen(test_file, "r")))
     {
-        char cwd[1024];
-        getcwd(cwd, sizeof(cwd));
-        printf("Current working dir: %s\n", cwd);
         perror("Error: ");
-        return;
+        exit(-1);
     }
 	parser_reset_obdd_mgr();
 	yyparse();
@@ -74,31 +76,32 @@ void run_parse_test_local(char* test_file, char* test_name, char* result_name,
 
 	bool PRINT_FSP				= true;
 
-	char dat_name[256];
-	sprintf(dat_name, "%s.dat", result_name);
 	automaton_automata_context* ctx		= automaton_automata_context_create_from_syntax(parsed_program, result_name, test_name,
-			diagnosis_method, dat_name, append_results);
+			diagnosis_method, result_name, steps_name, append_results);
     automaton_automata_context_destroy(ctx);
     automaton_program_syntax_destroy(parsed_program);
     fclose(yyin);
 }
 
 void run_parse_test(char* test_file, char* test_name){
-	char buf[255];
+	char buf[255], steps_buff[255];
 	snprintf(buf, sizeof(buf),"results/%s", test_name);
-	run_parse_test_local(test_file, test_name, buf, DD_SEARCH, false);
+	snprintf(steps_buff, sizeof(steps_buff),"results/%s_steps", steps_buff);
+	run_parse_test_local(test_file, test_name, buf, steps_buff, DD_SEARCH, false);
 }
 
 void run_parse_test_linear(char* test_file, char* test_name){
-	char buf[255];
+	char buf[255], steps_buff[255];
 	snprintf(buf, sizeof(buf),"results/%s", test_name);
-	run_parse_test_local(test_file, test_name, buf, LINEAR_SEARCH, false);
+	snprintf(steps_buff, sizeof(steps_buff),"results/%s_steps", steps_buff);
+	run_parse_test_local(test_file, test_name, buf, steps_buff, LINEAR_SEARCH, false);
 }
 
 void run_diagnosis(char* test_file, char* test_name, bool append_results){
-	char buf[255];
+	char buf[255], steps_buff[255];
 	snprintf(buf, sizeof(buf),"results/%s", test_name);
-	run_parse_test_local(test_file, test_name, buf, DD_SEARCH, append_results);
+	snprintf(steps_buff, sizeof(steps_buff),"results/%s_steps", steps_buff);
+	run_parse_test_local(test_file, test_name, buf, steps_buff, DD_SEARCH, append_results);
 }
 
 void run_automaton_export_test(){
@@ -1402,7 +1405,7 @@ void run_all_tests(){
 void print_help(){
 	printf("CLTS modeling and synthesis tool usage\n");
 	printf("\t-h\tprints this help message\n");
-	printf("\t-r [-o outputdir] [-s suffix] filename [...] \t interprets specification(s) located at [filename [...]]\n" \
+	printf("\t-r [-o outputdir] [-s suffix] filename case_name [...] \t interprets specification(s) located at filename with name case_name\n" \
 			"\t\t if -o provided output will be sent to [outputdir]\n" \
 			"\t\t if -s provided output will be added suffix [suffix]\n");
 	printf("\t--all-tests\t runs all tests\n");
@@ -1443,6 +1446,11 @@ int main (int argc, char** argv){
 					initial_index	= next_index + 2;
 					next_index += 2;
 				}
+				if(((argc - initial_index) % 2) != 0){
+					printf("Remember to provide filename and case name for each spec, found %d elements after config. params.\n", argc - initial_index);
+					exit(-1);
+				}
+
 				//remove previous rep files
 			    DIR *di;
 			    char *ptr1,*ptr2,*last = NULL;
@@ -1473,18 +1481,20 @@ int main (int argc, char** argv){
 			        }
 			        closedir(di);
 			    }
-				char result_buff[255];
+				char result_buff[255], steps_buff[255];
 				char *result_name;
-				for(i = initial_index; i < argc; i++){
-					result_name = strrchr(argv[i], '/');
-					if(result_name == NULL)result_name = argv[i];
+				for(i = 0; i < ((argc - initial_index) / 2); i++){
+					result_name = strrchr(argv[initial_index + i * 2], '/');
+					if(result_name == NULL)result_name = argv[initial_index + i * 2];
 					else result_name++;
-					if(i == initial_index){
+					if(i == 0){
 						snprintf(result_buff, sizeof(result_buff),"%s/%s%s", folder, 	result_name,
 								suffix != NULL? suffix : "");
 					}
-					snprintf(name_buff, sizeof(name_buff), "Running:%s", argv[i]);
-					run_parse_test_local(argv[i], name_buff, result_buff, DD_SEARCH, i != initial_index);
+					snprintf(steps_buff, sizeof(steps_buff),"%s/%s%s_steps", folder, 	result_name,
+													suffix != NULL? suffix : "");
+					run_parse_test_local(argv[initial_index + i * 2], argv[initial_index + i * 2 + 1],
+							result_buff, steps_buff, DD_SEARCH, i != 0);
 				}
 			}
 		}

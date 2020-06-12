@@ -14,7 +14,7 @@ for ((i=1; i<=$MAX_INSTANCE;i++))
 		for((j=1; j<=${ITERATIONS[i-1]};j++))
 			do 
 				i2=$((3+i*3))
-				INSTANCES="${INSTANCES} ${DST_DIR}exploration-robot-v1_${i2}_missing_assumption.fsp"; 
+				INSTANCES="${INSTANCES} ${DST_DIR}exploration-robot-v1_${i2}_missing_assumption.fsp Exploration.Robot.${i2}.(missing.assumption)"; 
 			done
 	done
 

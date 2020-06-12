@@ -13,7 +13,7 @@ for ((i=1; i<=$MAX_INSTANCE;i++))
 	do 
 		for((j=1; j<=${ITERATIONS[i-1]};j++))
 			do 
-				INSTANCES="${INSTANCES} ${DST_DIR}genbuf_${i}_sndrs_no_automaton_removed_env_safety.fsp"; 
+				INSTANCES="${INSTANCES} ${DST_DIR}genbuf_${i}_sndrs_no_automaton_removed_env_safety.fsp Genbuf.${i}.(removed.safety)"; 
 			done
 	done
 	

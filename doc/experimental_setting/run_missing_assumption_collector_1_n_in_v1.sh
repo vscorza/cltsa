@@ -13,7 +13,7 @@ for ((i=1; i<=$MAX_INSTANCE;i++))
 	do 
 		for((j=1; j<=${ITERATIONS[i-1]};j++))
 			do 
-				INSTANCES="${INSTANCES} ${DST_DIR}collector_${i}_in_v1_missing_assumption.fsp"; 
+				INSTANCES="${INSTANCES} ${DST_DIR}collector_${i}_in_v1_missing_assumption.fsp Collector.${i}.(missing.assumption)"; 
 				nice -20 ./cltsa -r -o $OUTPUT_DIR $INSTANCES
 			done
 	done

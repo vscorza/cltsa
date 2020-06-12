@@ -3181,7 +3181,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 }
 
 automaton_automata_context* automaton_automata_context_create_from_syntax(automaton_program_syntax* program, char* ctx_name,
-		char* test_name, diagnosis_search_method is_diagnosis, char *results_filename, bool append_result){
+		char* test_name, diagnosis_search_method is_diagnosis, char *results_filename, char* steps_filename, bool append_result){
 	automaton_parsing_tables* tables	= automaton_parsing_tables_create();
 	automaton_automata_context* ctx		= malloc(sizeof(automaton_automata_context));
 	char buf[250];
@@ -3668,36 +3668,28 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 			}
 		}
 	}
-	/*
-	 * 			for(i = 0; i < tables->composition_count; i++){
-				if(tables->composition_entries[i]->solved &&
-						strcmp(program->statem)){
-						sprintf(buf, "%s_%s.fsp", ctx_name, tables->composition_entries[i]->valuation.automaton_value->name);
-						automaton_automaton_print_fsp(tables->composition_entries[i]->valuation.automaton_value, buf);
-						sprintf(buf, "%s_%s.rep", ctx_name, tables->composition_entries[i]->valuation.automaton_value->name);
-						automaton_automaton_print_report(tables->composition_entries[i]->valuation.automaton_value, buf);
-				}
-			}
-	 * */
 
 	//PRINT RESULTS
 	if(is_diagnosis != 0){
-		experimental_results = fopen(results_filename, append_result?"a": "w");
+		uint32_t target_length	= strlen(results_filename);
+		char *target_name	= malloc(sizeof(char) * (target_length + 10));
+		sprintf(target_name, "%s.csv", results_filename);
+		experimental_results = fopen(target_name, append_result?"a": "w");
 		if (experimental_results == NULL){
 			printf("Error opening file!\n");
 			return false;
 		}
 		if(!append_result)
-			fprintf(experimental_results, "name\trealizable\tltl_model_build_time\tmodel_build_time\tcomposition_time\t" \
-					"synthesis_time\tdiagnosis_time\talphabet_size\tguarantees_count\t" \
-					"assumptions_count\tplant_states\tplant_transitions\tplant_controllable_transitions\tminimization_states\t" \
-					"minimization_transitions\tminimization_controllable_transitions\tsearch_method\t" \
-					"diagnosis_steps\tdiagnosis_times\tdiagnosis_sizes\n");
-		fprintf(experimental_results, "%s\t%s\t%ld.%06ld\t%ld.%06ld\t%ld.%06ld\t" \
-				"%ld.%06ld\t%ld.%06ld\t%d\t%d\t" \
-				"%d\t%d\t%d\t%d\t%d\t" \
-				"%d\t%d\t%s\t" \
-				"%d\t[",
+			fprintf(experimental_results, "name,realizable,ltl_model_build_time,model_build_time,composition_time," \
+					"synthesis_time,diagnosis_time,alphabet_size,guarantees_count," \
+					"assumptions_count,plant_states,plant_transitions,plant_controllable_transitions,minimization_states," \
+					"minimization_transitions,minimization_controllable_transitions,search_method," \
+					"diagnosis_steps\n");
+		fprintf(experimental_results, "%s,%s,%ld.%06ld,%ld.%06ld,%ld.%06ld," \
+				"%ld.%06ld,%ld.%06ld,%d,%d," \
+				"%d,%d,%d,%d,%d," \
+				"%d,%d,%s," \
+				"%d\n",
 				test_name, nonreal? "false":"true", tval_ltl_model_build_result.tv_sec, tval_ltl_model_build_result.tv_usec,
 						tval_model_build_result.tv_sec, tval_model_build_result.tv_usec,
 						tval_composition_result.tv_sec, tval_composition_result.tv_usec,
@@ -3708,15 +3700,18 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 						results_minimization_states, results_minimization_transitions, results_minimization_controllable_transitions,
 						is_diagnosis & DD_SEARCH ? "DD" : "linear",
 						steps);
-		for(i = 0; i < steps; i++){
-			fprintf(experimental_results, "%ld.%06ld%s", steps_times[i].tv_sec, steps_times[i].tv_usec,
-					i == steps - 1 ?"]\t[" : ",");
+		sprintf(target_name, "%s.csv", steps_filename);
+		FILE *experimental_steps_results = fopen(target_name, "w");
+		if (experimental_steps_results == NULL){
+			printf("Error opening file!\n");
+			return false;
 		}
+		fprintf(experimental_steps_results, "step,size,time\n");
 		for(i = 0; i < steps; i++){
-			fprintf(experimental_results, "%d%s", steps_sizes[i], i == steps - 1 ?"]\n" : ",");
+			fprintf(experimental_steps_results, "%d,%d,%ld.%06ld\n", i, steps_sizes[i], steps_times[i].tv_sec, steps_times[i].tv_usec);
 		}
-		if(steps == 0)fprintf(experimental_results,"]\t[]\n");
 		fclose(experimental_results);
+		fclose(experimental_steps_results);
 	}
 	free(steps_times); free(steps_sizes);
 	free(liveness_formulas); free(liveness_formulas_names);

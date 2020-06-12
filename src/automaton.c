@@ -2594,7 +2594,7 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd(automaton_au
 
 
 	//get a master copy of the game, remove controllable transitions from mixed states,
-		//initialize list of non controllable transitions
+	//initialize list of non controllable transitions
 	automaton_automaton *master	= automaton_automaton_clone(game_automaton);
 	automaton_automaton_add_initial_state(master, game_automaton->initial_states[0]);
 	automaton_transition *current_transition	= NULL;

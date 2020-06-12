@@ -1,15 +1,17 @@
 TODO:
 =====
-- example
-	- agregar rho_s que falta en el ejemplo ltl
 - improve reports
-	- write as being loaded from rmakrdon
 	- automatize report pipeline
+		- run all tests sequentially
+		- merge and remove first line except from the first
+		- add columns and values for ctrl values
+		- add script to change chmod +x
 - re run examples
 - data
 	- prepare table and evaluation section
 - prepare paper prototype
 - meeting
+- add readme for experimental data
 - add metrics
 	- diagnosis time relative to synthesis time
 	- controllability relative to distance to initial state

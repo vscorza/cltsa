@@ -95,7 +95,7 @@ void automaton_parsing_table_entry_destroy(automaton_parsing_table_entry* entry)
 int32_t automaton_parsing_tables_get_entry_index(automaton_parsing_tables* tables, automaton_parsing_table_entry_type type, char* value);
 int32_t automaton_parsing_tables_add_entry(automaton_parsing_tables* tables, automaton_parsing_table_entry_type type, char* key, void* value);
 automaton_automata_context* automaton_automata_context_create_from_syntax(automaton_program_syntax* program, char* ctx_name,
-		char *test_name, diagnosis_search_method diagnosis_method, char *results_filename, bool append_result);
+		char *test_name, diagnosis_search_method diagnosis_method, char *results_filename, char *steps_filename, bool append_result);
 void automaton_indexes_valuation_add_indexes(automaton_indexes_valuation* valuation, automaton_parsing_tables* tables, automaton_indexes_syntax* indexes);
 void automaton_indexes_valuation_fix_index(automaton_indexes_valuation* valuation, char* index_name, int32_t value);
 automaton_indexes_valuation* automaton_indexes_valuation_create_from_indexes(automaton_parsing_tables* tables, automaton_indexes_syntax* indexes);

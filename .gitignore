@@ -2,6 +2,7 @@ src/results/*.fsp
 *~
 *.loc
 *.o
+*.csv
 callgrind.out.*
 *.dat
 *.dot
