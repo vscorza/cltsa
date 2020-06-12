@@ -3524,14 +3524,14 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 							&steps, &steps_sizes, &steps_times, &steps_size);
 
 				automaton_automaton_remove_unreachable_states(winning_region_automaton);
-				results_minimization_states = winning_region_automaton->transitions_count;
-				results_minimization_transitions	= winning_region_automaton->transitions_composite_count;
-				results_minimization_controllable_transitions = 0;
-				for(j = 0; j < results_minimization_states; j++){
-					for(k = 0; k < winning_region_automaton->out_degree[j]; k++){
-						if( !(TRANSITION_IS_INPUT(&(winning_region_automaton->transitions[j][k]))))
-							results_minimization_controllable_transitions++;
-					}
+			}
+			results_minimization_states = winning_region_automaton->transitions_count;
+			results_minimization_transitions	= winning_region_automaton->transitions_composite_count;
+			results_minimization_controllable_transitions = 0;
+			for(j = 0; j < results_minimization_states; j++){
+				for(k = 0; k < winning_region_automaton->out_degree[j]; k++){
+					if( !(TRANSITION_IS_INPUT(&(winning_region_automaton->transitions[j][k]))))
+						results_minimization_controllable_transitions++;
 				}
 			}
 			main_index = automaton_parsing_tables_add_entry(tables, COMPOSITION_ENTRY_AUT, gr1_game->name, winning_region_automaton);

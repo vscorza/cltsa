@@ -1,4 +1,5 @@
 src/results/*.fsp
+*experimental_data.tex
 *~
 *.loc
 *.o
