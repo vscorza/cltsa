@@ -28,9 +28,11 @@ robot_real <- subset(summ_real, grepl("Robot", name))
 genbuf_missing$reduction_ctrl <- genbuf_missing$plant_trans / genbuf_real$plant_trans
 genbuf_missing$ctrl_states <- genbuf_real$plant_states
 genbuf_missing$ctrl_transitions <- genbuf_real$plant_trans
-genbuf_removed$reduction_ctrl <- genbuf_removed$plant_trans / genbuf_real$plant_trans
-genbuf_removed$ctrl_states <- genbuf_real$plant_states
-genbuf_removed$ctrl_transitions <- genbuf_real$plant_trans
+#removed env is missing the last value
+genbuf_real_b <- genbuf_real[1:(nrow(genbuf_real)-1),]
+genbuf_removed$reduction_ctrl <- genbuf_removed$plant_trans / genbuf_real_b$plant_trans
+genbuf_removed$ctrl_states <- genbuf_real_b$plant_states
+genbuf_removed$ctrl_transitions <- genbuf_real_b$plant_trans
 collector_missing$reduction_ctrl <- collector_missing$plant_trans / collector_real$plant_trans
 collector_missing$ctrl_states <- collector_real$plant_states
 collector_missing$ctrl_transitions <- collector_real$plant_trans
@@ -39,5 +41,6 @@ robot_samples$ctrl_states <- robot_real$plant_states
 robot_samples$ctrl_transitions <- robot_real$plant_trans
 
 composite_table <- rbind(collector_missing, robot_samples, genbuf_missing, genbuf_removed)
+table_contents <- xtable(composite_table, type = "latex")
 
-print(xtable(composite_table, type = "latex"), file = "/home/mariano/code/henos-automata/doc/experimental_setting/tmp_results/experimental_data.tex")
+print(table_contents, file = "/home/mariano/code/henos-automata/doc/experimental_setting/tmp_results/experimental_data.tex", floating= FALSE)

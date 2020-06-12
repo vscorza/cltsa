@@ -1,19 +1,18 @@
 TODO:
 =====
-- improve reports
-	- automatize report pipeline
-		- summarize data on tables
-		- join tables
-		- export to latex from r
-- re run examples
 - data
 	- prepare table and evaluation section
-- prepare paper prototype
+		- prepare table
+		- select graphs
+		- justify linearity
+		- explain results
+		- explain examples
+- review general paper prototype
 - meeting
 - improve reports
 	- automatize report pipeline
 		- add script to change chmod +x
-		- share params between sh files
+		- share params between sh files ($1, $n)
 	- add readme for experimental data
 	- test run r with install packages
 	- test everything on a docker image or vm
