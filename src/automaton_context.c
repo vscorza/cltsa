@@ -3500,6 +3500,8 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 			guarantees		= automaton_set_syntax_evaluate(tables, gr1_game->guarantees, &guarantees_count, set_name);
 			winning_region_automaton	= automaton_get_gr1_strategy(game_automaton, assumptions, assumptions_count
 					, guarantees, guarantees_count, true);
+			results_assumptions_count	= assumptions_count;
+			results_guarantees_count	= guarantees_count;
 			free(winning_region_automaton->name);
 			winning_region_automaton->name	= NULL;
 			aut_dupstr(&(winning_region_automaton->name), gr1_game->name);
@@ -3695,7 +3697,7 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 						tval_composition_result.tv_sec, tval_composition_result.tv_usec,
 						tval_synthesis_result.tv_sec, tval_synthesis_result.tv_usec,
 						tval_minimization_result.tv_sec, tval_minimization_result.tv_usec,
-						ctx->global_alphabet->count, guarantees_count, assumptions_count,
+						ctx->global_alphabet->count, results_guarantees_count, results_assumptions_count,
 						results_plant_states, results_plant_transitions, results_plant_controllable_transitions,
 						results_minimization_states, results_minimization_transitions, results_minimization_controllable_transitions,
 						is_diagnosis & DD_SEARCH ? "DD" : "linear",
