@@ -20,12 +20,10 @@ A measure of controlability is defined, observed and related to each volume. Con
 
 \[ c = \dfrac{|T_{\mathcal{C}}|}{|E|} \]
 
-\newpage
 "Te paso el lineamiento de lo que voy a escribir para el viernes, hay dos limitaciones fuertes para no presentar otro tipo de experimento para probar la adecuación de la técnica,
 
 no vamos a realizar un estudio controlado con sujetos que escriban y diagnostiquen especificaciones
 no hay una noción clara para comparar las técnicas existentes (minimización de fórmulas ltl) que de hecho agregan comportamiento, con nuestra técnica
-
 
 Es por esto que vamos a utilizar un proxy para aproximar la calidad del recorte o minimización, la idea es utilizar el volumen (cantidad de transiciones) en comparación con la planta original. Suponiendo que E es la planta original, E' la planta minimizada y C el controlador del caso realizable vamos a presentar y analizar las relaciones |C|/|E| y |E'|/|E| donde |S| reporta la cantidad de transiciones de E.
 
@@ -78,7 +76,16 @@ conflict.
   \caption{Quantitative results for minimized plants}
   \label{table:quantitative-results}
  \end{table*}
-
+\begin{figure}[bt]
+	\centering
+	\SmallPicture
+\includegraphics[width=0.3\textwidth, angle=-90]{../experimental_setting/tmp_results/min_ctrl_vs_min_pct.ps}
+	\vspace*{-2mm}
+	\caption{Minimization controllability vs. minimization percentage.}
+	\label{fig:min_ctr_vs_min_pct}
+	\vspace*{-4mm}
+	\MediumPicture
+\end{figure}
 %DD complexity, DFS reduction
 
 %\subsection{Optimization}

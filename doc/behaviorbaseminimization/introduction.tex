@@ -3,13 +3,13 @@
 
 
 Requirements are naturally split between goals the system-to-be is expected to achieve and
-assumptions that the system-to-be can rely on to fulfill its goals\cite{Jackson:1995,Letier:2002}. The question to be asked then is one of realizability: Is it possible to build a system that can monitor its environment and react through its actuators in order to guarantee its goals as long as the environment fulfils the assumptions?
+assumptions that the system-to-be can rely on to fulfill its goals ~\cite{Jackson:1995,Letier:2002}. The question to be asked then is one of realizability: Is it possible to build a system that can monitor its environment and react through its actuators in order to guarantee its goals as long as the environment fulfils the assumptions?
 
-At early stages specifications are usually unrealizable~\cite{Letier:2002}. There can be multiple causes for unrealizability including lack of monitorability and controllability, and over-idealized goals and assumptions. Goals in their first formulations tend to be stronger than what can be reasonably required and assumptions tend to be too weak, failing to rule out exceptional circumstances that the system cannot deal with~\cite{vanLamsweerde:2000}. 
+At early stages specifications are usually unrealizable ~\cite{Letier:2002}. There can be multiple causes for unrealizability including lack of monitorability and controllability, and over-idealized goals and assumptions. Goals in their first formulations tend to be stronger than what can be reasonably required and assumptions tend to be too weak, failing to rule out exceptional circumstances that the system cannot deal with ~\cite{vanLamsweerde:2000}. 
 
 Unfortunately, the cause for unrealizability tends to be the result of a combination of issues and is not easy to detect or understand. Providing engineers feedback that allows them to understand the cause for unrealizability is highly desired if specifications are to be evolved into realizable ones that can then be implemented. 
 
-In general the process of producing a running system from a specification is manual and laborious. However, in some settings this process can be done automatically, ensuring a correct by construction system. This is the case for systems studied by supervisory control~\cite{ramadge:1989}, FOND planning~\cite{daniele:2000} and controller synthesis~\cite{Maoz:2014,Bloem:2012}. 
+In general the process of producing a running system from a specification is manual and laborious. However, in some settings this process can be done automatically, ensuring a correct by construction system. This is the case for systems studied by supervisory control ~\cite{ramadge:1989}, FOND planning ~\cite{daniele:2000} and controller synthesis ~\cite{Maoz:2014,Bloem:2012}. 
 In these settings, given a specification, an algorithm produces a strategy (that can be encoded as an automaton) that by monitoring and acting over its environment can guarantee the goals as long as the environment satisfies the assumptions. 
 
 Synthesis algorithms only produce a system strategy if the original specification is realizable. 

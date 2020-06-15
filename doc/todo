@@ -2,9 +2,6 @@ TODO:
 =====
 - data
 	- prepare table and evaluation section
-		- prepare table
-		- select graphs
-		- justify linearity
 		- explain results
 		- explain examples
 - review general paper prototype
@@ -24,6 +21,7 @@ TODO:
 	- write amba version from Synthesis of AMBA AHB from Formal Specification:A Case Study
 	- write examples from symbolic repair paper
 	- run tests for genbuf 4, 5, 6
+	- review https://www.cl.cam.ac.uk/~sf502/regressions/rmem/help.html for examples
 - review papers gr_1_star, performance_heuristics for gr1
 - explain cases
 - for non-realizability reduce diagnosis to single liveness goal not being satisfied
@@ -43,7 +41,7 @@ TODO:
 		- check current minimization bitvector m with previous minimization bitvector p
 			if at any step p_i & m_i != p_i skip p (was not less or equal than m)
 			if check completes then use p result for m
-	
+
 - further improve reports
 	- report separate synthesis cases individually within same file
 	- report composition times independently from model build	
