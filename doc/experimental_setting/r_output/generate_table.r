@@ -58,21 +58,25 @@ experimental_composite$reduction <- experimental_composite$minimization_transiti
 summ_unreal <- experimental_composite %>%
   group_by(name) %>%
   summarize(liveness = max(liveness_count), diag = mean(diagnosis_time), steps = max(diagnosis_steps), plant_trans = max(plant_transitions),
-            min_trans = max(minimization_transitions), red = mean(reduction), min_ctrl_trans = max(minimization_controllable_transitions))
+            min_trans = max(minimization_transitions), red = mean(reduction))
 realizable_composite = read.csv(file='/home/mariano/code/henos-automata/doc/experimental_setting/tmp_results/realizable_data_composite.csv')
 summ_real <- realizable_composite %>%
   group_by(name) %>%
   summarize(plant_trans = max(plant_transitions),  min_trans = max(minimization_transitions))
 
+lift <- subset(summ_unreal, grepl("Lift\\.Controller\\.\\d\\.\\(missing", name))
 genbuf_missing <- subset(summ_unreal, grepl("Genbuf\\.\\d\\.\\(missing", name))
 genbuf_removed <- subset(summ_unreal, grepl("Genbuf\\.\\d\\.\\(removed", name))
 collector_missing <- subset(summ_unreal, grepl("Collector\\.\\d\\.\\(missing", name))
-robot_samples <- subset(summ_unreal, grepl("Robot", name))
+robot_samples <- subset(summ_unreal, grepl("Robot\\.\\d*\\.\\(missing", name))
 
+lift_real <- subset(summ_real, grepl("Lift", name))
 genbuf_real <- subset(summ_real, grepl("Genbuf", name))
 collector_real <- subset(summ_real, grepl("Collector", name))
 robot_real <- subset(summ_real, grepl("Robot", name))
 
+lift$ctrl_transitions <- lift_real$min_trans
+lift$reduction_ctrl <- lift$plant_trans / lift_real$min_trans
 genbuf_missing$ctrl_transitions <- genbuf_real$min_trans
 genbuf_missing$reduction_ctrl <- genbuf_missing$plant_trans / genbuf_real$min_trans
 #removed env is missing the last value
@@ -83,7 +87,7 @@ collector_missing$ctrl_transitions <- collector_real$min_trans
 collector_missing$reduction_ctrl <- collector_missing$min_trans / collector_real$min_trans
 robot_samples$ctrl_transitions <- robot_real$min_trans
 robot_samples$reduction_ctrl <- robot_samples$min_trans / robot_real$min_trans
-composite_table <- rbind(collector_missing, robot_samples, genbuf_missing, genbuf_removed)
+composite_table <- rbind(lift,collector_missing, robot_samples, genbuf_missing, genbuf_removed)
 composite_table$name <- gsub("\\.", " ", composite_table$name)
 table_contents <- xtable(composite_table, type = "latex", align = "r|l|rrr|r|rr|rr|",caption="Quantitative results for minimization plants"
                          ,digits=c(0,0,0,3,0,0,0,4,0,4))
@@ -96,13 +100,11 @@ ggplot(experimental_composite, aes(x=plant_transitions, y=diagnosis_time)) +
   labs(title="Size vs diagnosis time") +
   xlab(expression(paste("|",Delta["E"],"|"))) +
   ylab("Diagnosis time (s)") +
-  scale_y_log10() +
-  scale_x_log10() +	
+  scale_y_log10(labels=comma) +
+  scale_x_log10(labels=comma) +	
   geom_point(color='red') +	
   geom_smooth(method='lm') +
-  scale_colour_Publication()+ theme_Publication() + 
-  scale_x_continuous(labels = comma) + 
-  scale_y_continuous(labels = comma)
+  scale_colour_Publication()+ theme_Publication()
 dev.off()
 
 #plant controllability vs minimization amount
@@ -114,18 +116,16 @@ ggplot(experimental_composite, aes(x=c_coeff, y=m_coeff)) +
   labs(title="Minimization controllability vs minimization amount") +
   xlab("Minimization controllability") +
   ylab("Reduction") +
-  scale_y_log10() +
-  scale_x_log10() +	
+  scale_y_log10(labels=comma) +
+  scale_x_log10(labels=comma) +	
   geom_point(color='red') +
   geom_smooth(method='lm') +
-  scale_colour_Publication()+ theme_Publication() + 
-  scale_x_continuous(labels = comma) + 
-  scale_y_continuous(labels = comma)
+  scale_colour_Publication()+ theme_Publication() 
 dev.off()
 
-size_diag = lm(c_coeff ~ m_coeff, data= experimental_composite)
-summary(size_diag)
-coef(size_diag)["diagnosis_time"] + 2* summary(size_diag)$coef["diagnosis_time", "Std. Error"]
+#size_diag = lm(c_coeff ~ m_coeff, data= experimental_composite)
+#summary(size_diag)
+#coef(size_diag)["diagnosis_time"] + 2* summary(size_diag)$coef["diagnosis_time", "Std. Error"]
 
 #rows, cols
 sizediag_g_ass <- ggplot(genbuf_missing, aes(x=plant_trans, y=diag)) +
