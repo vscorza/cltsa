@@ -1,6 +1,6 @@
 #!/bin/bash
-MAX_INSTANCE=5
-ITERATIONS=(7 5 3 2 1)
+MAX_INSTANCE=6
+ITERATIONS=(7 5 3 2 1 1)
 DST_DIR="/home/mariano/code/henos-automata/src/tests/"
 OUTPUT_DIR="/home/mariano/code/henos-automata/doc/experimental_setting/tmp_results/"
 CLTSA_DIR="../../src/"
