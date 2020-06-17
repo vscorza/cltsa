@@ -5,8 +5,6 @@ TODO:
 		- explain results
 		- explain examples
 		- justify lineality using lm p-value
-		- change several points in graphs for whiskers
-		- add label for column grouping in table
 - review general paper prototype
 - meeting
 - improve reports
@@ -20,11 +18,14 @@ TODO:
 	- diagnosis time relative to synthesis time
 	- controllability relative to distance to initial state
 - examples
-	- check spectra repository for unrealizable specs
 	- write amba version from Synthesis of AMBA AHB from Formal Specification:A Case Study
 	- write examples from symbolic repair paper
-	- run tests for genbuf 4, 5, 6
+	- ivy (kenneth mcmillan)
+		- add leader election/multi paxos example (https://www.discotec.org/2020/invited#kenneth-mcmillan)
+		- risc v memory coherence
+	- check spectra (maoz) repository for unrealizable specs
 	- review https://www.cl.cam.ac.uk/~sf502/regressions/rmem/help.html for examples
+	- run tests for genbuf 4, 5, 6
 - review papers gr_1_star, performance_heuristics for gr1
 - explain cases
 - for non-realizability reduce diagnosis to single liveness goal not being satisfied
@@ -45,9 +46,11 @@ TODO:
 			if at any step p_i & m_i != p_i skip p (was not less or equal than m)
 			if check completes then use p result for m
 
-- further improve reports
-	- report separate synthesis cases individually within same file
-	- report composition times independently from model build	
+- see if following changes are worth the worry
+	- further improve reports
+		- report separate synthesis cases individually within same file
+		- report composition times independently from model build	
+- jvts for clts
 - explore controllable simplification
 	- hide queue in genbuf (hide signals, tau reduction)
 	- review konighoefer work

@@ -57,7 +57,7 @@ experimental_composite$liveness_count <- experimental_composite$guarantees_count
 experimental_composite$reduction <- experimental_composite$minimization_transitions / experimental_composite$plant_transitions
 summ_unreal <- experimental_composite %>%
   group_by(name) %>%
-  summarize(liveness = max(liveness_count), diag = mean(diagnosis_time), steps = max(diagnosis_steps), plant_trans = max(plant_transitions),
+  summarize(diag = mean(diagnosis_time), steps = max(diagnosis_steps), liveness = max(liveness_count), plant_trans = max(plant_transitions),
             min_trans = max(minimization_transitions), red = mean(reduction))
 realizable_composite = read.csv(file='/home/mariano/code/henos-automata/doc/experimental_setting/tmp_results/realizable_data_composite.csv')
 summ_real <- realizable_composite %>%
@@ -89,14 +89,24 @@ robot_samples$ctrl_transitions <- robot_real$min_trans
 robot_samples$reduction_ctrl <- robot_samples$min_trans / robot_real$min_trans
 composite_table <- rbind(lift,collector_missing, robot_samples, genbuf_missing, genbuf_removed)
 composite_table$name <- gsub("\\.", " ", composite_table$name)
-table_contents <- xtable(composite_table, type = "latex", align = "r|l|rrr|r|rr|rr|",caption="Quantitative results for minimization plants"
+table_contents <- xtable(composite_table, type = "latex", align = "r|l|rr|rr|rr|rr|",caption="Quantitative results for minimization plants"
                          ,digits=c(0,0,0,3,0,0,0,4,0,4))
-names(table_contents) <- c('Name', "$|\\varphi_e + \\varphi_s|$", 'Diag. time(s)', "Diag. steps", '$|\\Delta_E|$', "$|\\Delta_{E'}|$", "$|\\Delta_{E'}|/|\\Delta_{E}|$", "$|\\Delta_{C}|$", "$|\\Delta_{E'}|/|\\Delta_{C}|$")
-print(table_contents, file = "/home/mariano/code/henos-automata/doc/experimental_setting/tmp_results/experimental_data.tex", floating= FALSE, include.rownames=FALSE, sanitize.text.function=function(x){x})
+names(table_contents) <- c('Name', 'Diag. time(s)', "Diag. steps", '$|\\Delta_E|$', "$|\\Delta_{E'}|$", "$|\\Delta_{E'}|/|\\Delta_{E}|$", "$|\\Delta_{C}|$", "$|\\Delta_{E'}|/|\\Delta_{C}|$")
+addtorow <- list()
+addtorow$pos <- list(-1)
+addtorow$command <- paste0(paste0('\\hline & \\multicolumn{2}{c|}{Diagnosis}&\\multicolumn{2}{c|}{Plant} & \\multicolumn{2}{c|}{Minimization} & \\multicolumn{2}{c|}{Controller}', collapse=''), '\\\\')
+
+print(table_contents, file = "/home/mariano/code/henos-automata/doc/experimental_setting/tmp_results/experimental_data.tex", 
+      add.to.row = addtorow, floating= FALSE, include.rownames=FALSE, sanitize.text.function=function(x){x})
 
 #sive vs diagnosis time
+time_summ <- experimental_composite %>% group_by(plant_transitions) %>%
+  summarize(ymin = min(diagnosis_time),
+            ymax = max(diagnosis_time),
+            ymean = mean(diagnosis_time))
+
 postscript(file="/home/mariano/code/henos-automata/doc/experimental_setting/tmp_results/size_vs_diag_time.ps")
-ggplot(experimental_composite, aes(x=plant_transitions, y=diagnosis_time)) +
+ggplot(time_summ, aes(x=plant_transitions, y=ymean)) +
   labs(title="Size vs diagnosis time") +
   xlab(expression(paste("|",Delta["E"],"|"))) +
   ylab("Diagnosis time (s)") +
@@ -104,7 +114,9 @@ ggplot(experimental_composite, aes(x=plant_transitions, y=diagnosis_time)) +
   scale_x_log10(labels=comma) +	
   geom_point(color='red') +	
   geom_smooth(method='lm') +
-  scale_colour_Publication()+ theme_Publication()
+  scale_colour_Publication()+ theme_Publication()+
+  geom_errorbar(aes(ymin = ymin, ymax = ymax), width=.05,
+                position=position_dodge(0.05))
 dev.off()
 
 #plant controllability vs minimization amount
