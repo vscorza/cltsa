@@ -90,11 +90,11 @@ robot_samples$reduction_ctrl <- robot_samples$min_trans / robot_real$min_trans
 composite_table <- rbind(lift,collector_missing, robot_samples, genbuf_missing, genbuf_removed)
 composite_table$name <- gsub("\\.", " ", composite_table$name)
 table_contents <- xtable(composite_table, type = "latex", align = "r|l|rr|rr|rr|rr|",caption="Quantitative results for minimization plants"
-                         ,digits=c(0,0,0,3,0,0,0,4,0,4))
+                         ,digits=c(0,0,3,0,0,0,0,4,0,4))
 names(table_contents) <- c('Name', 'Diag. time(s)', "Diag. steps", '$|\\Delta_E|$', "$|\\Delta_{E'}|$", "$|\\Delta_{E'}|/|\\Delta_{E}|$", "$|\\Delta_{C}|$", "$|\\Delta_{E'}|/|\\Delta_{C}|$")
 addtorow <- list()
 addtorow$pos <- list(-1)
-addtorow$command <- paste0(paste0('\\hline & \\multicolumn{2}{c|}{Diagnosis}&\\multicolumn{2}{c|}{Plant} & \\multicolumn{2}{c|}{Minimization} & \\multicolumn{2}{c|}{Controller}', collapse=''), '\\\\')
+addtorow$command <- paste0(paste0('\\hline & \\multicolumn{2}{c|}{Diagnosis}&\\multicolumn{2}{c|}{Plant ($E$)} & \\multicolumn{2}{c|}{Minimization ($v_{\\mathcal{U}}$)} & \\multicolumn{2}{c|}{Controller ($v_{\\mathcal{C}}$)}', collapse=''), '\\\\')
 
 print(table_contents, file = "/home/mariano/code/henos-automata/doc/experimental_setting/tmp_results/experimental_data.tex", 
       add.to.row = addtorow, floating= FALSE, include.rownames=FALSE, sanitize.text.function=function(x){x})

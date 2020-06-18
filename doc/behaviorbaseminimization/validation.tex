@@ -2,54 +2,40 @@
 \section{Validation}
 The extent to which the technique serves it purpose is defined by its soundness, efficiency and, more importantly, information, understood as the ability to guide the engineer while writing a non trivial formal specification. The presented diagnosis should help by pointing out the causes of non realizability (expressed in a behavioral implicit language) that may appear while progressively gathering knowledge and building a complete and precise model.
 
-\textbf{<EFFICIENCY CLAIM>}
+The measure of information our technique may provide should ultimately be related to the impact it can have on the overall specification process, in particular how clear it is for the engineer  to interpret the diagnosis in terms of amount of data presented and its relevance in relation to the non realizability cause. The unavailability of skilled professionals and the amount of time and effort required to prepare a considerable set of external subjects to the point where they would be able to write non trivial formal specifications renders the perspective of a controlled experiment with external engineers writing specifications from scratch unfeasible. On the other hand, it is also impossible to propose a direct comparison with similar techniques, since, for instance, in ~\cite{DBLP:conf/hvc/KonighoferHB10} the minimization is applied on the set of environmental safety formulas, which in fact increments the volume of the plant when presented as an automaton, and in ~\cite{DBLP:conf/sigsoft/KuventMR17} a simplification of the symbolic counter strategy is presented as a LTS composed of attractors and trap states. We think that our technique adds a complimentary view to the non realizability diagnosis problem.
 
-The measure of information our technique may provide should ultimately be related to the impact it can have on the overall specification process, in particular how clear it is for the engineer  to interpret the diagnosis in terms of amount of data presented and its relevance in relation to the non realizability cause. The unavailability of skilled professionals and the amount of time and effort required to prepare a considerable set of external subjects to the point where they would be able to write non trivial formal specifications renders the perspective of a controlled experiment with external engineers writing specifications from scratch unfeasible. On the other hand, it is also imposible to propose a direct comparison with similar techniques, since, for instance, in ~\cite{DBLP:conf/hvc/KonighoferHB10} the minimization is applied on the set of environmental safety formulas, which in fact increments the volume of the plant when presented as an automaton. 
+We now explain two of the metrics used to quantitatively evaluate our technique. The first metric is relative minimization volume ($v_{\mathcal{U}}$), defined as the size of the minimized plant against the original instance ($|\Delta_{E'}|/|\Delta_{E}|$). The number of transitions is used as the representation of absolute volume since it is the defining parameter in the complexity of the synthesis algorithms. The other metric we compute is minimization volume relative to the controller volume ($v_{\mathcal{C}}=|\Delta_{E'}|/|\Delta_{C}|$). The controller $C$ is the automaton representation of the strategy for the realizable version of each specification. The rationale behind this is that the size of the controller is a good proxy for the volume of the engineer's design intent in terms of concrete behavior. The motivation for taking the controller as a proxy of volume is that sometimes an ongoing specification is under defined, with weaker conditions than it will eventually have when reaching realizability. We expect for our minimization to be at least comparable to the controller in terms of volume.
 
-\textbf{<REF. TO JTVS (MAOZ)>}
+%A measure of controlability is defined, observed and related to each volume. Controlability is defined as the number of controllable transitions in the plant over the total number of transitions. The motivation behind it is that a plant with a higher controlability measure could be related to a more powerful system, against which the technique can not prune much behavior.
+%
+%\[ c = \dfrac{|T_{\mathcal{C}}|}{|E|} \]
 
-Under the light of these facts we propose a small set of metrics to quantitatively evaluate our technique. The first metric is volume, defined as the relation of the minimized plant against the original instance.
-
-\[ v_{\mathcal{U}} = \dfrac{|E'|}{|E|} \]
-
-The number of transitions was chosen as the representation of size for each automaton. It also desirable to observe the relation of this metric with a similar notion of volume, but one defined between the size of the controller (for the realizable version of the problem) and the original plant.
-
-\[ v_{\mathcal{C}} = \dfrac{|C|}{|E|} \]
-
-A measure of controlability is defined, observed and related to each volume. Controlability is defined as the number of controllable transitions in the plant over the total number of transitions. The motivation behind it is that a plant with a higher controlability measure could be related to a more powerful system, against which the technique can not prune much behavior.
-
-\[ c = \dfrac{|T_{\mathcal{C}}|}{|E|} \]
-
-"Te paso el lineamiento de lo que voy a escribir para el viernes, hay dos limitaciones fuertes para no presentar otro tipo de experimento para probar la adecuación de la técnica,
-
-no vamos a realizar un estudio controlado con sujetos que escriban y diagnostiquen especificaciones
-no hay una noción clara para comparar las técnicas existentes (minimización de fórmulas ltl) que de hecho agregan comportamiento, con nuestra técnica
-
-Es por esto que vamos a utilizar un proxy para aproximar la calidad del recorte o minimización, la idea es utilizar el volumen (cantidad de transiciones) en comparación con la planta original. Suponiendo que E es la planta original, E' la planta minimizada y C el controlador del caso realizable vamos a presentar y analizar las relaciones |C|/|E| y |E'|/|E| donde |S| reporta la cantidad de transiciones de E.
-
-Habrá que definir una magnitud que exprese que tan controlabe es un sistema y evaluar como se relaciona con la medida anterior. Por ejemplo |U|/|S| donde |U| expresa la cantidad de transiciones no controlables de E y |S| la cantidad de transiciones controlables."
 
 
 The validation reported in this section is guided by two main concerns.  This first is the degree to which the initial control problem is reduced and the computational cost involved. The second is if the minimization offers insight into non realizability causes.
-In order to avoid bias, we prioritized using third-party developed unrealizable specifications that include explanations for the causes of unrealizability.
-Unfortunately, third party controller synthesis problems that are found in the literature are typically realizable. The only sources we found were from ~\cite{DBLP:conf/hvc/KonighoferHB10,DBLP:conf/kbse/DegiovanniRACA16,DBLP:conf/fmcad/AlurMT13}. More specifically, we used Generalized Buffer case study from~\cite{DBLP:conf/hvc/KonighoferHB10}, the Lift Controller case study from ~\cite{DBLP:conf/fmcad/AlurMT13} and the Mine Pump case study from~\cite{DBLP:conf/kbse/DegiovanniRACA16}.
-The case studies taken from~\cite{DBLP:conf/hvc/KonighoferHB10,DBLP:conf/kbse/DegiovanniRACA16,DBLP:conf/fmcad/AlurMT13} all have  the specification of the control problem  provided as a set of LTL formulas rather than automata. Hence, they required a translation of the safety formulae of these specifications into LTS. To complete our validation, we also included a series of case studies that were provided in their original formulation as a composition of automata: the t-strong fairness case study from \cite{DBLP:conf/icse/DIppolitoBPU11}, a game of tic-tac-toe. For these we were forced to manually seed unrealizability causes. Finally, we were provided an unrealizable specification for the CTvPlatform Controller~\cite{DBLP:journals/computer/OmmeringLKM00} which we analyzed. 
-In the following we report quantitatively on all case studies to show the degree to which the initial control problem is reduced and the computational cost involved. We also report qualitatively on the case studies taken from ~\cite{DBLP:conf/hvc/KonighoferHB10,DBLP:conf/kbse/DegiovanniRACA16,DBLP:conf/fmcad/AlurMT13} as they provide an unbiased basis against to which it is possible to evaluate the insight into non realizability causes that our technique provides. 
+In order to avoid bias, we prioritized using non realizable specifications present in the existing benchmarks and literature.
 
-%The case study described here comes
-%from automata based specifications and shows 
-%the existence of relatively simple
-%problems when highly modular specifications are involved.\\
+%update refs 
 
-All case studies were run using an extension of the MTSA tool \cite{DBLP:conf/kbse/DIppolitoFCU08}. MTSA natively supports specification of LTS \cite{DBLP:journals/cacm/Keller76} and properties using
- a textual, process algebraic notation and linear temporal logic.  The tool supports synthesis of controllers for GR(1) control problems where the safety part of the problem can be specified as an composition of LTS, and the liveness goals and assumptions are provided using temporal logic.   
- %Prior to this work the only feedback given to the user  when specifying an unrealizable problem was a legend  reading that \textit{there was no controller for the given
- %specification}.  
-  The extension builds a minimized unrealizable version of the environment that can then be inspected through various methods including animations and visualization of the state space.
-  
-%\subsection{Quantitative Evaluation}
+ ~\cite{DBLP:conf/hvc/KonighoferHB10,DBLP:conf/kbse/DegiovanniRACA16,DBLP:conf/fmcad/AlurMT13}. More specifically, we used Generalized Buffer case study from~\cite{DBLP:conf/hvc/KonighoferHB10}, the Lift Controller case study from ~\cite{DBLP:conf/fmcad/AlurMT13} and the Mine Pump case study from~\cite{DBLP:conf/kbse/DegiovanniRACA16}.
+
+%tool support - tool/translation/diagnosis
+
+%All case studies were run using an extension of the MTSA tool \cite{DBLP:conf/kbse/DIppolitoFCU08}. MTSA natively supports specification of LTS \cite{DBLP:journals/cacm/Keller76} and properties using
+%a textual, process algebraic notation and linear temporal logic.  The tool supports synthesis of controllers for GR(1) control problems where the safety part of the problem can be specified as an composition of LTS, and the liveness goals and assumptions are provided using temporal logic.   
+%%Prior to this work the only feedback given to the user  when specifying an unrealizable problem was a legend  reading that \textit{there was no controller for the given
+%%specification}.  
+%The extension builds a minimized unrealizable version of the environment that can then be inspected through various methods including animations and visualization of the state space.
 
 
+
+
+In the following we report quantitatively on all case studies to show the degree to which the initial control problem is reduced and the computational cost involved. We also report qualitatively on the case studies taken from
+%update this refs
+ ~\cite{DBLP:conf/hvc/KonighoferHB10,DBLP:conf/kbse/DegiovanniRACA16,DBLP:conf/fmcad/AlurMT13} as they provide an unbiased basis against to which it is possible to evaluate the insight into non realizability causes that our technique provides. 
+
+
+%update technical text
   
   
 The quantitative results of our experiments are shown in table 
@@ -103,173 +89,15 @@ conflict.
 %\subsection{Experimental Framework}
 %\subsection{Results}
 
+
+%update quantitative analysis and explain graphs
+
 From the results it is possible to argue that the minimization technique can be applied to control problems of similar size to those reported in the literature. 
 %In addition, it is possible to observe, as expected, that the  that spatial and temporal limitation behave linearly with respect to the realizability query. 
 In addition, it can be seen that the technique can achieve a significant reduction in terms of states and transitions.
 
 
-\subsection{CTvPlatform Controller}\label{section:validation-ctv}
-In \cite{DBLP:journals/computer/OmmeringLKM00} the authors
-introduce a modular specification for a TV System using
-their Koala model. At the time of this writing  
-another member of our group was working on a 
-specification inspired in this particular system
-and introducing some abstractions, such as the user 
-module, from \cite{DBLP:conf/sigsoft/UchitelCKM04}.
-As in the original scenario the specification was decoupled
-in several modules to achieve cohesion.  
-Relevant to this case study is the
-TV set that can display random noise while
-tuning, set the output to the specified channel afterwards
-or eventually reset the channel selection and
-go blank. The other modules describe the
-behavior of the user (selecting a particular channel), 
-the tuning sub-system (linking user selection with
-frequency filtering) and the screen driver (that outputs
-the corresponding image, be it a channel, random noise
-or simply nothing when going blank). 
-The goal was to synthesize a 
-controller for a TV that must satisfy the following
-liveness requirement: $\square \Diamond (select.i \implies display.i)$. 
-In this example we found that 
-compositionality trades cohesion for behavioral abstraction.
-This means that even when the behavior of each component is fairly simple their concurrent interaction is difficult to
-grasp.  Applying our minimization technique to several ongoing
-specifications within our group we found that even though
-the automaton exposed a complex potential behavior (in terms
-of its state space) unrealizability could be explained without going too far away from the starting point.
-The first CTvPlatform TV Controller diagnosis, as depicted in figure
-\ref{fig:tv-controller-minimization} showed that the tuner
-introduced a non controllable self loop where the environment
-could flood the execution with incoming tuning signals ($signal.i$) and that
-even if a controllable action was allowed to escape the
-looping state the screen was allowed to produce 
-the $blank$ action indefinitely. \\
-\begin{figure}[bt]
-\centering
-\SmallPicture
-%\ShowFrame
-\VCDraw{
-    \begin{VCPicture}{(-4,-4)(4,4)}
-        \SetEdgeLabelScale{1.4}
-        \State[1]{(-4,0)}{1}
-        \State[2]{(0,0)}{2}
-        \State[3]{(4,0)}{3}              
-        \State[4]{(2,-3)}{4}
-		\Initial[w]{1}
-		\LoopN{1}{signal.1}
-		\LoopN{2}{signal.1}		
-		\ArcR{2}{3}{blank}				
-		\LoopN{3}{blank}								
-		\ArcR{2}{4}{unblank}
-		\ArcR[.75]{4}{3}{blank}		
-		\ArcR[.6]{3}{4}{unblank}				
-        \ChgEdgeLineStyle{dashed} 
-		\EdgeL{1}{2}{tick}		
-		\ArcR{3}{2}{tick}						        
-    \end{VCPicture}
-}
-\vspace*{-2mm}
-\caption{CTvPlatform TV Controller minimization.}
-\label{fig:tv-controller-minimization}
-\vspace*{-4mm}
-\MediumPicture
-\end{figure}
 
-\subsection{Mine Pump Controller (MPC)}
-%introduce translation for GS specs
-The Mine Pump Controller (MPC)
- originally presented in
-\cite{:/content/journals/10.1049/ip-e.1983.0001} describes a controller that should
-drain water from a mine whenever its level surpassed
-a certain threshold, with the restriction that it should
-stop the pump if the sensors indicated that a high level
-of methane was present due to the risk of ignition.\\
-
-We used the variant specification of the problem provided  in \cite{DBLP:conf/kbse/DegiovanniRACA16}
-where they highlight that two safety goals ($\square(methane.hi \implies \Circle(\neg running))$
-and $\square(water.hi \implies \Circle(running))$) are logically consistent but there is a \textit{boundary condition} 
-that if true, makes the conjunction of the two safety goals impossible. The GR(1) liveness requirement states that the
- water level to be kept within reasonable limits infinitely often ($\square \Diamond \neg water.Hi$).
- %, as
- %already stated in \cite{:/content/journals/10.1049/ip-e.1983.0001}
- %when expecting that \emph{“the pump
- %shall be on when the water level is above the high threshold”}.
-
-
-We applied our minimization on the translated specification from \cite{DBLP:conf/kbse/DegiovanniRACA16}
-to get the LTS depicted in Figure
- \ref{fig:mine-pump-minimization}.  We can see here that
- the minimization properly slices the LTS to expose what
- is characterized
- as the boundary condition $(\Diamond hw \wedge m)$ and in our
- case is preventing the system from achieving its goal.
- \\
-
- 
- This slice should lead the engineer towards adding
- the missing assumption $\square \Diamond (\neg methane.hi \wedge \neg water.hi)$.
- If the original problem and the implementation proposed in 
-the appendix from \cite{:/content/journals/10.1049/ip-e.1983.0001}
-are expected to be deployed, this assumption should be added for
-the problem to be realizable.\\
-
-
-Now we explain the behavior depicted in Figure \ref{fig:mine-pump-minimization}.
- After the initial condition is met (between states 1 and 
- 5) the environment can then raise the water level (transition
- from state 6 to 7) forcing the system to start the pump
- (transition from state 7 to 8) but then raise the
- methane level (transition from 8 to 9) giving to option
- to the system but to turn off the pump (transition 9
- to 10).  After this the environment can keep the
- signals constant denying the system the opportunity
- to satisfy its goal.\\
- 
-%This example shows the relevance of behavior base minimization
-%for unrealizable specifications initially described as
-%a set of LTL formulae over boolean variables.  This is
-%an explicit representation of the unrealizability cause
-%that gives immediate feedback about the interaction
-%of the system and the environment that leads to the
-%violation of the liveness guarantee.
-\begin{figure}[bt]
-\centering
-\SmallPicture
-%\ShowFrame
-\VCDraw{
-    \begin{VCPicture}{(-6,-3)(6,3)}
-        \SetEdgeLabelScale{1.4}
-        \State[1]{(-6,2)}{1}
-        \State[2]{(-2,2)}{2}
-        \State[3]{(2,2)}{3}
-        \State[4]{(6,2)}{4}
-        \State[5]{(6,0)}{5}        
-        \State[6]{(2,0)}{6}        
-        \State[7]{(-2,0)}{7}        
-        \State[8]{(-6,-2)}{8}        
-        \State[9]{(-2,-2)}{9}        
-        \State[10]{(2,-2)}{10}        
-		\Initial[w]{1}
-        \EdgeL{1}{2}{methane.hi \downarrow}		
-        \EdgeL{2}{3}{water.lo \downarrow}		        
-        \EdgeL{3}{4}{water.hi \downarrow}		                
-        \EdgeR{5}{6}{water.lo \uparrow}
-        \EdgeR{6}{7}{water.hi \uparrow}        
-        \EdgeL{8}{9}{methane.hi \uparrow}                        
-        \LoopE{10}{tick}                                
-        \ChgEdgeLineStyle{dashed} %\EdgeLineDouble
-        \EdgeL{9}{10}{running \downarrow}                        
-        \EdgeR{4}{5}{running \downarrow}		                
-        \ArcR{7}{8}{running \uparrow}                        
-    \end{VCPicture}
-}
-\vspace*{-2mm}
-\caption{Mine Pump Controller (MPC) minimization.}
-\label{fig:mine-pump-minimization}
-\vspace*{-4mm}
-\MediumPicture
-\end{figure} 
 \subsection{Modified Lift Controller}
 Another example that has been evaluated is that
 of the Modified Lift Controller from 
@@ -363,6 +191,10 @@ LTS depicted in Figures~\ref{fig:lift-controller-minimization}.
 %system allows noncontrollable cycle to avoid deadlock
 %\input{t_strong_fairness_validation}
 
+\subsection{Collector}
+
+\subsection{Exploration Robot}
+
 \subsection{Generalized Buffer (GenBuf)}
 Non realizable specifications of the Generalized Buffer Case Study~\cite{DBLP:journals/entcs/BloemGJPPW07} were studied in~\cite{DBLP:conf/fmcad/KonighoferHB09}.  
 %Original LTL specifications were automatically translated to produce the expected LTS input.  
@@ -448,38 +280,4 @@ adding a new safety requirement $\square \neg ENQ$. This already reduces the siz
 problem significantly (39 states) leaving little room for minimization (resulting in 26 states). Indeed, in both the original and minimized environment LTS it is straightforward to visualize the deadlock state which is reached after the first
 $BtoS\_ACK(i)$ message. This acknowledgement is required to be followed by raising the $ENQ$ signal which would violate the new requirement. 
 
-%\begin{figure}[bt]
-%\centering
-%\SmallPicture
-%%\ShowFrame
-%\VCDraw{
-%    \begin{VCPicture}{(-4,-2)(4,2)}
-%        \SetEdgeLabelScale{1.4}
-%        \LargeState\FinalState[\neg s]{(-4,0)}{1}
-%        \LargeState\State[s]{(4,0)}{2}
-%		\Initial[w]{1}
-%		\LoopN[.5]{1}{EMPTY \vee DEQ}
-%		\LoopN[.5]{2}{\neg DEQ}		
-%		\ArcL[.5]{1}{2}{\neg EMPTY \vee \neg DEQ}				
-%		\ArcL[.5]{2}{1}{DEQ}						
-%    \end{VCPicture}
-%}
-%\vspace*{-2mm}
-%\caption{Monitor for Guarantee 12.}
-%\label{fig:genbuf_g12}
-%\vspace*{-4mm}
-%\MediumPicture
-%\end{figure}
-
-%\subsection{Tic Tac Toe}
-
-%introduce optimizations
-
-%brief explanation of examples
-
-%explanation of representative minimizations
-
-%table: time, sizes
-
-%table explanation
 

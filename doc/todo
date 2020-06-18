@@ -2,11 +2,18 @@ TODO:
 =====
 - data
 	- prepare table and evaluation section
-		- explain results
-		- explain examples
-		- justify lineality using lm p-value
+		- update refs
+		- explain tool support
+		- update technical text
+		- update quantitative analysis and explain graphs
+		- update modified lift controller
+		- explain collector
+		- explain exploration robot
+		- update generalized buffer
 - review general paper prototype
-- meeting
+- meeting (discuss background section)
+- update background section
+- update related work with new publications
 - improve reports
 	- automatize report pipeline
 		- add script to change chmod +x
@@ -25,6 +32,7 @@ TODO:
 		- risc v memory coherence
 	- check spectra (maoz) repository for unrealizable specs
 	- review https://www.cl.cam.ac.uk/~sf502/regressions/rmem/help.html for examples
+	- update values and validation section
 	- run tests for genbuf 4, 5, 6
 - review papers gr_1_star, performance_heuristics for gr1
 - explain cases
