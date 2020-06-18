@@ -38,6 +38,16 @@
 \providecommand\natexlab[1]{#1}
 \providecommand\showeprint[2][]{arXiv:#2}
 
+\bibitem[\protect\citeauthoryear{??}{SYN}{2020}]%
+        {SYNTCOMP}
+ \bibinfo{year}{2020}\natexlab{}.
+\newblock \bibinfo{title}{The Reactive Synthesis Competition}.
+\newblock   (\bibinfo{year}{2020}).
+\newblock
+\showURL{%
+\url{http://www.syntcomp.org/}}
+
+
 \bibitem[\protect\citeauthoryear{Alur, Moarref, and Topcu}{Alur
   et~al\mbox{.}}{2013}]%
         {DBLP:conf/fmcad/AlurMT13}
@@ -276,25 +286,6 @@
 
 
 \bibitem[\protect\citeauthoryear{D'Ippolito, Braberman, Piterman, and
-  Uchitel}{D'Ippolito et~al\mbox{.}}{2011}]%
-        {DBLP:conf/icse/DIppolitoBPU11}
-\bibfield{author}{\bibinfo{person}{Nicol{\'{a}}s D'Ippolito},
-  \bibinfo{person}{V{\'{\i}}ctor~A. Braberman}, \bibinfo{person}{Nir Piterman},
-  {and} \bibinfo{person}{Sebasti{\'{a}}n Uchitel}.}
-  \bibinfo{year}{2011}\natexlab{}.
-\newblock \showarticletitle{Synthesis of live behaviour models for fallible
-  domains}. In \bibinfo{booktitle}{{\em Proceedings of the 33rd International
-  Conference on Software Engineering, {ICSE} 2011, Waikiki, Honolulu , HI, USA,
-  May 21-28, 2011}}, \bibfield{editor}{\bibinfo{person}{Richard~N. Taylor},
-  \bibinfo{person}{Harald~C. Gall}, {and} \bibinfo{person}{Nenad Medvidovic}}
-  (Eds.). \bibinfo{publisher}{{ACM}}, \bibinfo{pages}{211--220}.
-\newblock
-\showISBNx{978-1-4503-0445-0}
-\showDOI{%
-\url{http://dx.doi.org/10.1145/1985793.1985823}}
-
-
-\bibitem[\protect\citeauthoryear{D'Ippolito, Braberman, Piterman, and
   Uchitel}{D'Ippolito et~al\mbox{.}}{2013}]%
         {DIppolito:2013}
 \bibfield{author}{\bibinfo{person}{Nicol{\'{a}}s D'Ippolito},
@@ -309,23 +300,6 @@
 \newblock
 \showDOI{%
 \url{http://dx.doi.org/10.1145/2430536.2430543}}
-
-
-\bibitem[\protect\citeauthoryear{D'Ippolito, Fischbein, Chechik, and
-  Uchitel}{D'Ippolito et~al\mbox{.}}{2008}]%
-        {DBLP:conf/kbse/DIppolitoFCU08}
-\bibfield{author}{\bibinfo{person}{Nicol{\'{a}}s D'Ippolito},
-  \bibinfo{person}{Dario Fischbein}, \bibinfo{person}{Marsha Chechik}, {and}
-  \bibinfo{person}{Sebasti{\'{a}}n Uchitel}.} \bibinfo{year}{2008}\natexlab{}.
-\newblock \showarticletitle{{MTSA:} The Modal Transition System Analyser}. In
-  \bibinfo{booktitle}{{\em 23rd {IEEE/ACM} International Conference on
-  Automated Software Engineering {(ASE} 2008), 15-19 September 2008, L'Aquila,
-  Italy}}. \bibinfo{publisher}{{IEEE} Computer Society},
-  \bibinfo{pages}{475--476}.
-\newblock
-\showISBNx{978-1-4244-2187-9}
-\showDOI{%
-\url{http://dx.doi.org/10.1109/ASE.2008.78}}
 
 
 \bibitem[\protect\citeauthoryear{Giannakopoulou and Magee}{Giannakopoulou and
@@ -418,28 +392,16 @@
 \url{http://dx.doi.org/10.1145/225014.225041}}
 
 
-\bibitem[\protect\citeauthoryear{Keller}{Keller}{1976a}]%
+\bibitem[\protect\citeauthoryear{Keller}{Keller}{1976}]%
         {Keller:1976}
 \bibfield{author}{\bibinfo{person}{Robert~M. Keller}.}
-  \bibinfo{year}{1976}\natexlab{a}.
+  \bibinfo{year}{1976}\natexlab{}.
 \newblock \showarticletitle{Formal verification of parallel programs}.
 \newblock \bibinfo{journal}{{\it Commun. ACM}}  \bibinfo{volume}{19}
   (\bibinfo{date}{July} \bibinfo{year}{1976}), \bibinfo{pages}{371--384}.
 \newblock
 Issue 7.
 \showISSN{0001-0782}
-\showDOI{%
-\url{http://dx.doi.org/10.1145/360248.360251}}
-
-
-\bibitem[\protect\citeauthoryear{Keller}{Keller}{1976b}]%
-        {DBLP:journals/cacm/Keller76}
-\bibfield{author}{\bibinfo{person}{Robert~M. Keller}.}
-  \bibinfo{year}{1976}\natexlab{b}.
-\newblock \showarticletitle{Formal Verification of Parallel Programs}.
-\newblock \bibinfo{journal}{{\em Commun. {ACM}\/}} \bibinfo{volume}{19},
-  \bibinfo{number}{7} (\bibinfo{year}{1976}), \bibinfo{pages}{371--384}.
-\newblock
 \showDOI{%
 \url{http://dx.doi.org/10.1145/360248.360251}}
 
@@ -516,22 +478,6 @@ Issue 7.
 \showISBNx{978-3-642-19582-2}
 \showDOI{%
 \url{http://dx.doi.org/10.1007/978-3-642-19583-9\_8}}
-
-
-\bibitem[\protect\citeauthoryear{Kramer}{Kramer}{1983}]%
-        {:/content/journals/10.1049/ip-e.1983.0001}
-\bibfield{author}{\bibinfo{person}{J. Kramer}.}
-  \bibinfo{year}{1983}\natexlab{}.
-\newblock \showarticletitle{CONIC: an integrated approach to distributed
-  computer control systems}.
-\newblock \bibinfo{journal}{{\em IEE Proceedings E (Computers and Digital
-  Techniques)\/}}  \bibinfo{volume}{130} (\bibinfo{date}{January}
-  \bibinfo{year}{1983}), \bibinfo{pages}{1--10(9)}.
-\newblock
-Issue 1.
-\showISSN{0143-7062}
-\showURL{%
-\url{http://digital-library.theiet.org/content/journals/10.1049/ip-e.1983.0001}}
 
 
 \bibitem[\protect\citeauthoryear{Kupferman and Vardi}{Kupferman and
@@ -750,25 +696,6 @@ Issue 1.
 \showISBNx{978-3-540-68235-6}
 
 
-\bibitem[\protect\citeauthoryear{Uchitel, Chatley, Kramer, and Magee}{Uchitel
-  et~al\mbox{.}}{2004}]%
-        {DBLP:conf/sigsoft/UchitelCKM04}
-\bibfield{author}{\bibinfo{person}{Sebasti{\'{a}}n Uchitel},
-  \bibinfo{person}{Robert Chatley}, \bibinfo{person}{Jeff Kramer}, {and}
-  \bibinfo{person}{Jeff Magee}.} \bibinfo{year}{2004}\natexlab{}.
-\newblock \showarticletitle{System architecture: the context for scenario-based
-  model synthesis}. In \bibinfo{booktitle}{{\em Proceedings of the 12th {ACM}
-  {SIGSOFT} International Symposium on Foundations of Software Engineering,
-  2004, Newport Beach, CA, USA, October 31 - November 6, 2004}},
-  \bibfield{editor}{\bibinfo{person}{Richard~N. Taylor} {and}
-  \bibinfo{person}{Matthew~B. Dwyer}} (Eds.). \bibinfo{publisher}{{ACM}},
-  \bibinfo{pages}{33--42}.
-\newblock
-\showISBNx{1-58113-855-5}
-\showDOI{%
-\url{http://dx.doi.org/10.1145/1029894.1029903}}
-
-
 \bibitem[\protect\citeauthoryear{van Lamsweerde and Letier}{van Lamsweerde and
   Letier}{2000}]%
         {vanLamsweerde:2000}
@@ -786,19 +713,19 @@ Issue 10.
 \url{http://dx.doi.org/10.1109/32.879820}}
 
 
-\bibitem[\protect\citeauthoryear{van Ommering, van~der Linden, Kramer, and
-  Magee}{van Ommering et~al\mbox{.}}{2000}]%
-        {DBLP:journals/computer/OmmeringLKM00}
-\bibfield{author}{\bibinfo{person}{Rob~C. van Ommering}, \bibinfo{person}{Frank
-  van~der Linden}, \bibinfo{person}{Jeff Kramer}, {and} \bibinfo{person}{Jeff
-  Magee}.} \bibinfo{year}{2000}\natexlab{}.
-\newblock \showarticletitle{The Koala Component Model for Consumer Electronics
-  Software}.
-\newblock \bibinfo{journal}{{\em {IEEE} Computer\/}} \bibinfo{volume}{33},
-  \bibinfo{number}{3} (\bibinfo{year}{2000}), \bibinfo{pages}{78--85}.
+\bibitem[\protect\citeauthoryear{Zudaire, Garrett, and Uchitel}{Zudaire
+  et~al\mbox{.}}{2020}]%
+        {DBLP:journals/corr/abs-2001-07678}
+\bibfield{author}{\bibinfo{person}{Sebasti{\'{a}}n Zudaire},
+  \bibinfo{person}{Mart{\'{\i}}n Garrett}, {and}
+  \bibinfo{person}{Sebasti{\'{a}}n Uchitel}.} \bibinfo{year}{2020}\natexlab{}.
+\newblock \showarticletitle{Iterator-Based Temporal Logic Task Planning}.
+\newblock \bibinfo{journal}{{\em CoRR\/}}  \bibinfo{volume}{abs/2001.07678}
+  (\bibinfo{year}{2020}).
 \newblock
-\showDOI{%
-\url{http://dx.doi.org/10.1109/2.825699}}
+\showeprint[arxiv]{2001.07678}
+\showURL{%
+\url{https://arxiv.org/abs/2001.07678}}
 
 
 \end{thebibliography}

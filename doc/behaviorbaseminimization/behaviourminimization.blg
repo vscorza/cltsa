@@ -1,20 +1,21 @@
-This is BibTeX, Version 0.99d (TeX Live 2013/Debian)
-Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
+This is BibTeX, Version 0.99d (TeX Live 2019/Debian)
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
 The top-level auxiliary file: behaviourminimization.aux
 The style file: ACM-Reference-Format.bst
 Reallocated singl_function (elt_size=4) to 100 items from 50.
 Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
 Database file #1: bibliography.bib
-Warning--I'm ignoring :/content/journals/10.1049/ip-e.1983.0001's extra "author" field
---line 359 of file bibliography.bib
-Warning--I'm ignoring :/content/journals/10.1049/ip-e.1983.0001's extra "author" field
---line 360 of file bibliography.bib
-Warning--I'm ignoring :/content/journals/10.1049/ip-e.1983.0001's extra "author" field
---line 361 of file bibliography.bib
 Warning--I didn't find a database entry for "shahar"
+Warning--no key, author in SYNTCOMP
+Warning--no author, editor, organization, or key in SYNTCOMP
+Warning--to sort, need author or key in SYNTCOMP
 Warning--no key, author in DBLP:conf/hvc/2010
 Warning--no key, author in DBLP:conf/hvc/2010
+Warning--no key, author in SYNTCOMP
+Warning--no key, author in SYNTCOMP
 Reallocated singl_function (elt_size=4) to 100 items from 50.
+Warning--no key, author in SYNTCOMP
+Warning--no author, editor, organization, or key in SYNTCOMP
 Warning--empty address in DBLP:conf/fmcad/AlurMT13
 Warning--empty publisher in beer1996rulebase
 Warning--empty address in beer1996rulebase
@@ -30,8 +31,6 @@ Warning--no number and no volume in daniele:2000
 Warning--page numbers missing in both pages and numpages fields in daniele:2000
 Warning--empty address in DBLP:conf/sigsoft/AlfaroH01
 Warning--empty address in DBLP:conf/kbse/DegiovanniRACA16
-Warning--empty address in DBLP:conf/icse/DIppolitoBPU11
-Warning--empty address in DBLP:conf/kbse/DIppolitoFCU08
 Warning--empty address in DBLP:conf/sigsoft/GiannakopoulouM03
 Warning--empty address in DBLP:conf/kbse/HagiharaESY14
 Warning--require articleno with numpages field in Hoare:1983
@@ -50,47 +49,47 @@ Warning--empty address in Maoz:2014
 Warning--empty address in DBLP:conf/vmcai/PitermanPS06
 Warning--empty address in DBLP:conf/popl/PnueliR89
 Warning--require articleno with numpages field in Torlak:2008
-Warning--empty address in DBLP:conf/sigsoft/UchitelCKM04
 Warning--require articleno with numpages field in vanLamsweerde:2000
-You've used 49 entries,
+Warning--page numbers missing in both pages and numpages fields in DBLP:journals/corr/abs-2001-07678
+You've used 45 entries,
             5551 wiz_defined-function locations,
-            1791 strings with 31936 characters,
-and the built_in function-call counts, 57730 in all, are:
-= -- 7180
-> -- 2208
+            1743 strings with 30073 characters,
+and the built_in function-call counts, 52249 in all, are:
+= -- 6445
+> -- 1984
 < -- 0
-+ -- 670
-- -- 1010
-* -- 4452
-:= -- 6243
-add.period$ -- 245
-call.type$ -- 49
-change.case$ -- 338
-chr.to.int$ -- 46
-cite$ -- 90
-duplicate$ -- 4511
-empty$ -- 3203
-format.name$ -- 896
-if$ -- 13438
-int.to.chr$ -- 4
++ -- 604
+- -- 921
+* -- 4031
+:= -- 5640
+add.period$ -- 224
+call.type$ -- 45
+change.case$ -- 308
+chr.to.int$ -- 43
+cite$ -- 95
+duplicate$ -- 4093
+empty$ -- 2914
+format.name$ -- 812
+if$ -- 12131
+int.to.chr$ -- 3
 int.to.str$ -- 0
-missing$ -- 214
-newline$ -- 514
-num.names$ -- 418
-pop$ -- 1625
+missing$ -- 191
+newline$ -- 473
+num.names$ -- 375
+pop$ -- 1503
 preamble$ -- 1
-purify$ -- 580
+purify$ -- 530
 quote$ -- 0
-skip$ -- 1313
+skip$ -- 1188
 stack$ -- 0
-substring$ -- 5281
-swap$ -- 502
-text.length$ -- 536
+substring$ -- 4762
+swap$ -- 447
+text.length$ -- 503
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 677
-warning$ -- 39
-while$ -- 436
+type$ -- 621
+warning$ -- 44
+while$ -- 391
 width$ -- 0
-write$ -- 1011
-(There were 43 warnings)
+write$ -- 927
+(There were 45 warnings)

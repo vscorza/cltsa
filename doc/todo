@@ -2,16 +2,13 @@ TODO:
 =====
 - data
 	- prepare table and evaluation section
-		- update refs
-		- explain tool support
-		- update technical text
 		- update quantitative analysis and explain graphs
 		- update modified lift controller
 		- explain collector
 		- explain exploration robot
 		- update generalized buffer
 - review general paper prototype
-- meeting (discuss background section)
+- meeting (discuss background section, tool)
 - update background section
 - update related work with new publications
 - improve reports

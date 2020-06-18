@@ -6,55 +6,31 @@ The measure of information our technique may provide should ultimately be relate
 
 We now explain two of the metrics used to quantitatively evaluate our technique. The first metric is relative minimization volume ($v_{\mathcal{U}}$), defined as the size of the minimized plant against the original instance ($|\Delta_{E'}|/|\Delta_{E}|$). The number of transitions is used as the representation of absolute volume since it is the defining parameter in the complexity of the synthesis algorithms. The other metric we compute is minimization volume relative to the controller volume ($v_{\mathcal{C}}=|\Delta_{E'}|/|\Delta_{C}|$). The controller $C$ is the automaton representation of the strategy for the realizable version of each specification. The rationale behind this is that the size of the controller is a good proxy for the volume of the engineer's design intent in terms of concrete behavior. The motivation for taking the controller as a proxy of volume is that sometimes an ongoing specification is under defined, with weaker conditions than it will eventually have when reaching realizability. We expect for our minimization to be at least comparable to the controller in terms of volume.
 
-%A measure of controlability is defined, observed and related to each volume. Controlability is defined as the number of controllable transitions in the plant over the total number of transitions. The motivation behind it is that a plant with a higher controlability measure could be related to a more powerful system, against which the technique can not prune much behavior.
-%
-%\[ c = \dfrac{|T_{\mathcal{C}}|}{|E|} \]
-
-
 
 The validation reported in this section is guided by two main concerns.  This first is the degree to which the initial control problem is reduced and the computational cost involved. The second is if the minimization offers insight into non realizability causes.
 In order to avoid bias, we prioritized using non realizable specifications present in the existing benchmarks and literature.
 
-%update refs 
-
- ~\cite{DBLP:conf/hvc/KonighoferHB10,DBLP:conf/kbse/DegiovanniRACA16,DBLP:conf/fmcad/AlurMT13}. More specifically, we used Generalized Buffer case study from~\cite{DBLP:conf/hvc/KonighoferHB10}, the Lift Controller case study from ~\cite{DBLP:conf/fmcad/AlurMT13} and the Mine Pump case study from~\cite{DBLP:conf/kbse/DegiovanniRACA16}.
+%refs 
+The Generic Buffer case study was taken from~\cite{DBLP:conf/hvc/KonighoferHB10}, the Lift Controller comes from ~\cite{DBLP:conf/fmcad/AlurMT13}, Collector is part of the SYNTCOMP competition ~\cite{SYNTCOMP} benchmark and the exploration robot case was adapted from ~\cite{DBLP:journals/corr/abs-2001-07678}.
 
 %tool support - tool/translation/diagnosis
+The diagnosis technique was implemented in a new tool that accepts specifications expressed as both LTL formulas or FSP constructs and operates internally on CLTS structures. Each case study was written in its original syntax, for signal based specifications we used LTL formulas (as presented in ~\cite{Bloem:2012}), and for those initially described using process-like syntax we used CFSP. This tool was written from scratch with the intention to model, verify and synthesize reactive systems over enumerative models in an effective fashion. Bear in mind that for each specification the diagnosis runs a number of synthesis checks (each one having its particular time complexity) linear in time in relation to the number of transitions of the original plant.
+Prior to this work the only feedback given to the user  when specifying an non realizable problem over an enumerative model was binary, either the problem was realizable or it was not.
+he extension builds a minimized non realizable version of the environment that can then be exported to different formats and inspected through various methods including animations and visualization of the state space.
 
-%All case studies were run using an extension of the MTSA tool \cite{DBLP:conf/kbse/DIppolitoFCU08}. MTSA natively supports specification of LTS \cite{DBLP:journals/cacm/Keller76} and properties using
-%a textual, process algebraic notation and linear temporal logic.  The tool supports synthesis of controllers for GR(1) control problems where the safety part of the problem can be specified as an composition of LTS, and the liveness goals and assumptions are provided using temporal logic.   
-%%Prior to this work the only feedback given to the user  when specifying an unrealizable problem was a legend  reading that \textit{there was no controller for the given
-%%specification}.  
-%The extension builds a minimized unrealizable version of the environment that can then be inspected through various methods including animations and visualization of the state space.
+In the following we report quantitatively on all case studies to show the degree to which the initial control problem is reduced and the computational cost involved. We also briefly explain the case studies and provide an interpretation of what we think are the hints extracted from the diagnosis. 
 
-
-
-
-In the following we report quantitatively on all case studies to show the degree to which the initial control problem is reduced and the computational cost involved. We also report qualitatively on the case studies taken from
-%update this refs
- ~\cite{DBLP:conf/hvc/KonighoferHB10,DBLP:conf/kbse/DegiovanniRACA16,DBLP:conf/fmcad/AlurMT13} as they provide an unbiased basis against to which it is possible to evaluate the insight into non realizability causes that our technique provides. 
-
-
-%update technical text
-  
-  
+%technical text
 The quantitative results of our experiments are shown in table 
 \ref{table:quantitative-results} and were run on an 
 \texttt{Intel\textsuperscript{\textregistered} Core\textsuperscript{\texttrademark}
- i7-4790} CPU with 8 processors of 3.60GHz frequency
-16 Gb of RAM memory and \texttt{ubuntu 14.04} as the operating system.
-Total time taken by the algorithm is measured in milliseconds and
-labeled as \emph{Time}, $|S_e|$ and $|S_{e\kappa}|$ stand for
-the size of the original and minimized LTSs in terms of states,
-\emph{State Reduction} is the reduction percentage of these.  
-$|\Delta_e|$ and $|\Delta_{e\kappa}|$ stand for
-the size of the original and minimized LTSs in terms of edges,
-\emph{Transition Reduction} is the reduction percentage of the later two.  
-%$Time/S_e$ is the relative measure of time taken per state.
-$steps$ reports how many iterations the algorithm needed before finding
-the first Minimal Alternating Sub-LTS. \emph{Edges Explored} reports the percentage of
-edges the algorithm needed to explore before finding the first
-conflict.
+ i7-8565U} CPU with 8 processors running at 1.80GHz frequency
+with 32 Gb of RAM memory over \texttt{Ubuntu 20.04 (Linux 5.4 kernel release)}.
+Total time taken by the diagnosis algorithm is measured in seconds and
+labeled as \emph{Diag. time(s)}, \emph{Diag. steps} shows the number of steps the diagnosis algorithm had to take to yield a minimal plant, this can be thought as de maximum depth of recursion reached while exploring the semi-lattice of alternating Sub-LTS structures.  The values in column $|\varphi_e + \varphi_s|$ are the sum of environmental and system liveness formulae, $|\Delta_{E}|$ the number of transitions in the original plant, $|\Delta_{E'}|$ the number of transitions in the minimization,
+, $|\Delta_{E'}|/|\Delta_{E}|$ is the relation of the minimization volume against the original plant, , $|\Delta_{C}|$ the number of transitions in the controller for the realizable specification,
+, $|\Delta_{E'}|/|\Delta_{C}|$ is the relation of the minimization volume against the controller.
+
 \begin{table*}
 	\resizebox{\textwidth}{!} {
 \input{../experimental_setting/tmp_results/experimental_data.tex}
@@ -91,7 +67,6 @@ conflict.
 
 
 %update quantitative analysis and explain graphs
-
 From the results it is possible to argue that the minimization technique can be applied to control problems of similar size to those reported in the literature. 
 %In addition, it is possible to observe, as expected, that the  that spatial and temporal limitation behave linearly with respect to the realizability query. 
 In addition, it can be seen that the technique can achieve a significant reduction in terms of states and transitions.

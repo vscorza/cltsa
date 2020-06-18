@@ -91,7 +91,7 @@ composite_table <- rbind(lift,collector_missing, robot_samples, genbuf_missing, 
 composite_table$name <- gsub("\\.", " ", composite_table$name)
 table_contents <- xtable(composite_table, type = "latex", align = "r|l|rr|rr|rr|rr|",caption="Quantitative results for minimization plants"
                          ,digits=c(0,0,3,0,0,0,0,4,0,4))
-names(table_contents) <- c('Name', 'Diag. time(s)', "Diag. steps", '$|\\Delta_E|$', "$|\\Delta_{E'}|$", "$|\\Delta_{E'}|/|\\Delta_{E}|$", "$|\\Delta_{C}|$", "$|\\Delta_{E'}|/|\\Delta_{C}|$")
+names(table_contents) <- c('Name', 'Diag. time(s)', "Diag. steps", '$|\\varphi_e + \\varphi_s|$', '$|\\Delta_E|$', "$|\\Delta_{E'}|$", "$|\\Delta_{E'}|/|\\Delta_{E}|$", "$|\\Delta_{C}|$", "$|\\Delta_{E'}|/|\\Delta_{C}|$")
 addtorow <- list()
 addtorow$pos <- list(-1)
 addtorow$command <- paste0(paste0('\\hline & \\multicolumn{2}{c|}{Diagnosis}&\\multicolumn{2}{c|}{Plant ($E$)} & \\multicolumn{2}{c|}{Minimization ($v_{\\mathcal{U}}$)} & \\multicolumn{2}{c|}{Controller ($v_{\\mathcal{C}}$)}', collapse=''), '\\\\')
