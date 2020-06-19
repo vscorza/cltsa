@@ -1,15 +1,8 @@
 TODO:
 =====
-- data
-	- prepare table and evaluation section
-		- update quantitative analysis and explain graphs
-		- update modified lift controller
-		- explain collector
-		- explain exploration robot
-		- update generalized buffer
-- review general paper prototype
 - meeting (discuss background section, tool)
 - update background section
+- update procedure technique with dd search approach
 - update related work with new publications
 - improve reports
 	- automatize report pipeline
@@ -18,9 +11,7 @@ TODO:
 	- add readme for experimental data
 	- test run r with install packages
 	- test everything on a docker image or vm
-- add metrics
-	- diagnosis time relative to synthesis time
-	- controllability relative to distance to initial state
+	- write rmd consistent with validation
 - examples
 	- write amba version from Synthesis of AMBA AHB from Formal Specification:A Case Study
 	- write examples from symbolic repair paper
@@ -32,7 +23,8 @@ TODO:
 	- update values and validation section
 	- run tests for genbuf 4, 5, 6
 - review papers gr_1_star, performance_heuristics for gr1
-- explain cases
+
+
 - for non-realizability reduce diagnosis to single liveness goal not being satisfied
 - run tests with dd, linear, dd wo last_partition optimization, goal minimization
 - java client

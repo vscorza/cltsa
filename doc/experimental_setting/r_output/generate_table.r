@@ -118,7 +118,9 @@ ggplot(time_summ, aes(x=plant_transitions, y=ymean)) +
   geom_errorbar(aes(ymin = ymin, ymax = ymax), width=.05,
                 position=position_dodge(0.05))
 dev.off()
-
+model <- lm(time_summ$plant_transitions ~ time_summ$ymean)
+summary(model)
+boxplot(model[['residuals']],main='Boxplot: Residuals',ylab='residual value')
 #plant controllability vs minimization amount
 c_coeff = experimental_composite$minimization_controllable_transitions / experimental_composite$plant_transitions	
 m_coeff = experimental_composite$minimization_transitions / experimental_composite$plant_transitions	
@@ -134,6 +136,31 @@ ggplot(experimental_composite, aes(x=c_coeff, y=m_coeff)) +
   geom_smooth(method='lm') +
   scale_colour_Publication()+ theme_Publication() 
 dev.off()
+
+df <- read.csv(file="/home/mariano/code/henos-automata/doc/experimental_setting/tmp_results/steps/genbuf_3_sndrs_no_automaton_missing_assumption.csv")
+postscript(file="/home/mariano/code/henos-automata/doc/experimental_setting/tmp_results/genbuf_3_time_plot.ps")
+time_plot <- ggplot(df, aes(x=step, y=time)) +
+  geom_line(linetype="dashed", color="blue", size=1.2)+
+  geom_point(color="red", size=3) + 
+  labs(title="GenBuf 3 senders time progression") +
+  xlab("Steps") +
+  ylab("Time (s)")  +
+  scale_y_continuous(label=comma) + scale_x_continuous(label=comma) + 
+  scale_colour_Publication()+ theme_Publication() 
+print(time_plot)
+dev.off()
+postscript(file="/home/mariano/code/henos-automata/doc/experimental_setting/tmp_results/genbuf_3_size_plot.ps")
+size_plot <- ggplot(df, aes(x=step, y=size)) +
+  geom_line(linetype="dashed", color="blue", size=1.2)+
+  geom_point(color="red", size=3) + 
+  labs(title="GenBuf 3 senders size progression") +
+  xlab("Steps") +
+  ylab(expression(paste("|",Delta[paste("E","'")],"|"))) +
+  scale_y_continuous(label=comma) + scale_x_continuous(label=comma) + 
+  scale_colour_Publication()+ theme_Publication() 
+print(size_plot)  
+dev.off()
+
 
 #size_diag = lm(c_coeff ~ m_coeff, data= experimental_composite)
 #summary(size_diag)

@@ -41,16 +41,6 @@ labeled as \emph{Diag. time(s)}, \emph{Diag. steps} shows the number of steps th
 \begin{figure}[bt]
 	\centering
 	\SmallPicture
-\includegraphics[width=0.3\textwidth, angle=-90]{../experimental_setting/tmp_results/min_ctrl_vs_min_pct.ps}
-	\vspace*{-2mm}
-	\caption{Minimization controllability vs. minimization percentage.}
-	\label{fig:min_ctr_vs_min_pct}
-	\vspace*{-4mm}
-	\MediumPicture
-\end{figure}
-\begin{figure}[bt]
-	\centering
-	\SmallPicture
 	\includegraphics[width=0.3\textwidth, angle=-90]{../experimental_setting/tmp_results/size_vs_diag_time.ps}
 	\vspace*{-2mm}
 	\caption{Minimization size vs. diagnosis time.}
@@ -58,201 +48,232 @@ labeled as \emph{Diag. time(s)}, \emph{Diag. steps} shows the number of steps th
 	\vspace*{-4mm}
 	\MediumPicture
 \end{figure}
-%DD complexity, DFS reduction
-
-%\subsection{Optimization}
-%\subsection{Test Cases}
-%\subsection{Experimental Framework}
-%\subsection{Results}
-
-
+\begin{figure}[bt]
+	\centering
+	\SmallPicture
+	\includegraphics[width=0.3\textwidth, angle=-90]{../experimental_setting/tmp_results/genbuf_2_time_plot.ps}
+	\vspace*{-2mm}
+	\caption{Generic buffer (2 senders) time progression.}
+	\label{fig:genbuf_2_time_plot}
+	\vspace*{-4mm}
+	\MediumPicture
+\end{figure}
+\begin{figure}[bt]
+	\centering
+	\SmallPicture
+	\includegraphics[width=0.3\textwidth, angle=-90]{../experimental_setting/tmp_results/genbuf_2_size_plot.ps}
+	\vspace*{-2mm}
+	\caption{Generic buffer (2 senders) size progression.}
+	\label{fig:genbuf_2_size_plot}
+	\vspace*{-4mm}
+	\MediumPicture
+\end{figure}
+\begin{figure}[bt]
+	\centering
+	\SmallPicture
+	\includegraphics[width=0.3\textwidth, angle=-90]{../experimental_setting/tmp_results/min_ctrl_vs_min_pct.ps}
+	\vspace*{-2mm}
+	\caption{Minimization controllability vs. minimization percentage.}
+	\label{fig:min_ctr_vs_min_pct}
+	\vspace*{-4mm}
+	\MediumPicture
+\end{figure}
 %update quantitative analysis and explain graphs
+%table
+%size
+The results we observe after applying the technique on this initial set of case studies show the proposed approach is feasible even for a significant number of signal based specifications. As expected with any algorithm working with enumerative models, the minimization technique still under performs against symbolic approaches on both size and time. 
+%time
+In figure ~\ref{fig:size_vs_diag_time} we expose the relation between diagnosis time and plant size (measured in number of initial transitions). We run each instance seven times and reported the mean as both the time value for the table and the central dot, the error bars show the distance to the maximum and minimum time in each case. We argue that the performance of the algorithm is linearly consistent (the lineal fit having a p-value of $< 3.387e^{-11}$) across the range of sizes present in the test set (going from tens to hundred thousands of transitions).
+We show the behavior of the technique while diagnosing the first non realizable version of the generic buffer for two senders, figure ~\ref{fig:genbuf_2_time_plot} shows the time taken at each step of the minimization and fig. ~\ref{fig:genbuf_2_size_plot} shows the incremental reduction of the plant as the minimization progresses. 
+%controllability and post processing
+We also found that the amount of minimization achievable seems to be related to how controllable the result expressed in figure  ~\ref{fig:min_ctr_vs_min_pct} as the number of controllable transitions in the minimization over the number of total transitions. The relation seems to fit a lineal model (p-value $< 2.2e^{-11}$).
+%final remarks
 From the results it is possible to argue that the minimization technique can be applied to control problems of similar size to those reported in the literature. 
 %In addition, it is possible to observe, as expected, that the  that spatial and temporal limitation behave linearly with respect to the realizability query. 
-In addition, it can be seen that the technique can achieve a significant reduction in terms of states and transitions.
+In addition, it can be seen that the technique can achieve a significant reduction in terms of states and transitions. Even when the reduction is significant in the bigger examples, as the 0.4\% reduction for 528650 transitions in the biggest generic buffer case, the resulting 2539 transitions are still enough to make manual inspection difficult. We assume that in this cases the technique can be used as the initial step of the diagnosis, allowing for other techniques to be applied afterwards, such as existential quantification or collapsing $\sigma$-traps.
 
-
-
-\subsection{Modified Lift Controller}
-Another example that has been evaluated is that
-of the Modified Lift Controller from 
-\cite{DBLP:conf/fmcad/AlurMT13} first presented in
-its realizable version in 
-\cite{DBLP:journals/jcss/BloemJPPS12}.
-In the original version a lift controller should serve
-several floors.  It has a button sensor for each floor 
-controlled by the environment.  There is an additional 
-restriction that allows the lift to move up only if there
-is a pending request in one of the floors 
-($\square \Diamond (b_j \implies f_j)$), and another that
-forces the system to visit the first floor infinitely
-often if no button was pressed.\\
-In the modified version from ~\cite{DBLP:conf/fmcad/AlurMT13} a new set of system liveness 
-requirements is added, where the system should 
-visit each floor infinitely often ($\square \Diamond f_j$).
-
-
-The problem here is that this requirement collides with
-the restriction that the lift will not move up if there
-is no pending request.\\
-We run the minimization over a simplified two floors
-specifications and produced the LTS depicted in Figure
-\ref{fig:lift-controller-minimization}.
-It shows that after initial variable setting on behalf of the
-environment (states 1 to 3) the system is free to choose 
-opposite values for the initial floor (either start at
-floor 1, states 3 to 5, or start at the second floor,
-states 3 to 8), if it chooses to start at the first floor
-the environment leaves the $b1, b2$ signals down, falsifying
-the $\square \Diamond f_j$ requirement, since it cannot 
-go up to visit the second floor unless $b2$ is up.  On the
-other hand if the system chooses the second floor as the
-initial configuration the environment keeps waiting until
-the lift descends to win by letting the signals down.
-The system is forced to descend eventually to satisfy
-the restriction that it should visit the first floor when
-$b1$ and $b2$ are down.  In this example we have to do
-some more interpretation after the LTS has been minimized,
-but we think this is a reasonable expectation.  The minimization removed 
-84 states out of the 95 in the original specification, so
-even if the engineer has to correlate liveness assumptions
-with the minimized LTS 
-the technique proves itself helpful by hiding
-irrelevant behavior.\\
-Going back to \cite{DBLP:conf/fmcad/AlurMT13} we see that our
-slice is consistent with the diagnosis presented by the authors
-where they say that \emph{(\ldots)A counter-strategy for the
-environment is to always keep all $b_i$'s low(\ldots)}.
-Indeed, this counter strategy is captured by the minimized 
-LTS depicted in Figures~\ref{fig:lift-controller-minimization}.
-% strategy for the environment can be expressed
-%n this case as $f_{1}^{\neg \varphi}(s_1)= b1 \downarrow$,
-% $f_{1}^{\neg \varphi}(s_2)= b2 \downarrow$.
-\begin{figure}[bt]
-\centering
-\SmallPicture
-%\ShowFrame
-\VCDraw{
-    \begin{VCPicture}{(-6,-3.5)(6,3.5)}
-        \SetEdgeLabelScale{1.4}
-        \State[1]{(-6,2)}{1}
-        \State[2]{(-2,2)}{2}
-        \State[3]{(2,2)}{3}
-        \State[6]{(6,2)}{6}
-        \State[4]{(-2,0)}{4}        
-        \State[5]{(-6,-2)}{5}        
-        \State[8]{(2,-2)}{8}        
-        \State[7]{(6,-2)}{7}        
-		\Initial[w]{1}
-        \EdgeL{1}{2}{b1 \downarrow}		
-        \EdgeL{2}{3}{b2 \downarrow}		        
-		\LoopW{5}{tick}                
-		\LoopE{7}{tick}                
-        \ChgEdgeLineStyle{dashed} %\EdgeLineDouble		
-        \EdgeL{3}{6}{f1 \downarrow}		                
-        \EdgeR{3}{4}{f1 \uparrow}		                       
-        \EdgeR{4}{5}{f2 \downarrow}                               	
-		\EdgeL{6}{7}{f2 \uparrow}                		
-		\EdgeR{7}{8}{f1 \uparrow}         		
-		\EdgeR{8}{5}{f2 \downarrow}         				
-    \end{VCPicture}
-}
-\vspace*{-2mm}
-\caption{Modified Lift Controller minimization.}
-\label{fig:lift-controller-minimization}
-\vspace*{-4mm}
-\MediumPicture
-\end{figure}
-%system allows noncontrollable cycle to avoid deadlock
-%\input{t_strong_fairness_validation}
-
-\subsection{Collector}
-
-\subsection{Exploration Robot}
-
-\subsection{Generalized Buffer (GenBuf)}
-Non realizable specifications of the Generalized Buffer Case Study~\cite{DBLP:journals/entcs/BloemGJPPW07} were studied in~\cite{DBLP:conf/fmcad/KonighoferHB09}.  
-%Original LTL specifications were automatically translated to produce the expected LTS input.  
-The original specification was introduced by 
-IBM with their Rulebase verification tool~\cite{beer1996rulebase}.
-It describes a family of buffers that transmit data from $n$ senders
-$Sender_0,Sender_1$$,\ldots$ $,Sender_n$ to two receivers $Receiver_0$ and
-$Receiver_1$.  Data is received from senders in a random order and should be
-delivered to the receivers in round-robin order.  
-It contains a handshake protocol to communicate with each sender/receiver device
-by exchanging $StoB\_REQ(i) \leftrightarrow BtoS\_ACK(i)$ messages on the senders side
-and $BtoR\_REQ(j) \leftrightarrow RtoB\_ACK(j)$ on the receivers.  
-A controller should arbitrate between the senders and the receivers to
-accomplish proper communication through a four slot FIFO queue.
-Several restrictions and assumptions are declared in order
-to ensure consistent behavior (e.g. \emph{G2: No request should be immediately
-acknowledged since it is valid at least one step 
-after the assertion of request}).\\
-
-\begin{figure}[bt]
-\centering
-\SmallPicture
-%\ShowFrame
-\VCDraw{
-    \begin{VCPicture}{(-6,-3.5)(6,3.5)}
-        \SetEdgeLabelScale{1.4}
-        \State[1]{(-7.5,0)}{1}
-        \State[80]{(3,2)}{80}
-        \State[79]{(6,2)}{79}
-        \State[81]{(1.5,0)}{81}        
-        \State[82]{(3,-2)}{82}        
-        \State[83]{(6,-2)}{83}        
-        \State[78]{(7.5,0)}{78}                
-		\Initial[w]{1}
-        \ArcR{81}{82}{tick\_e}		
-        \ArcR{78}{79}{tick\_e}		                                        
-        \ChgEdgeLineStyle{dashed} %\EdgeLineDouble				
-        \ArcR{82}{83}{SLC0\uparrow}		                
-        \ArcR{83}{78}{tick\_s}		                        
-        \ArcR{79}{78}{tick\_s}		                                
-        \ArcR{79}{80}{SLC0\downarrow}		                                      
-        \ArcR{82}{81}{tick\_s}		        
-        \ArcR[.35]{80}{81}{tick\_s}        
-        \ZZEdgeL{1}{81}{\ldots StoB\_REQ0\uparrow \ldots BtoR\_REQ0\uparrow \ldots}	        
-    \end{VCPicture}
-}
-\vspace*{-2mm}
-\caption{GenBuf (missing assumption) Terminal Set.}
-\label{fig:genbuf-terminal-set}
-\vspace*{-4mm}
-\MediumPicture
-\end{figure}
-
-We studied the three non-realizable specifications of GenBuf discussed in~\cite{DBLP:conf/fmcad/KonighoferHB09}. 
-The goal is captured by the LTL formula $\square\Diamond($ $StoB\_REQ0  \leftrightarrow$ $BtoS\_ACK0))$.
- In the first the authors consider removing the assumption 
-that expresses that always eventually if a request to read data
-has been sent from the controller to $Receiver_0$ ($BtoR\_REQ0$) then
-an acknowledge will be issued ($RtoB\_ACK0$).  
-The minimized environment decreased 80\%
-(from 10964 to 2235 states) and, amongst other things, excluded all actions related with $Receiver_1$,
-since they are irrelevant to the environment's strategy.
-In the minimized LTS we identified one terminal set
-depicted in Figure~\ref{fig:genbuf-terminal-set} in which one guarantee is being 
-neglected infinitely often: 
-  In the trace leading to the terminal set
-the buffer sends \\$BtoR\_REQ0$ message to $Receiver_0$ but
-never gets the expected acknowledge ($RtoB\_ACK0$), thus
-not being able to produce an acknowledge for the sender.  This
-diagnosis should point the engineer in the direction to
-enforce the specification by restricting the environment to always
-eventually produce an acknowledge message for each requirement
-sent to the receivers.\\
-The second variation studied in~\cite{DBLP:conf/fmcad/KonighoferHB09}  incorporated the goal 
-$\square \Diamond$ $(\neg EMPTY$ $\wedge$ $\neg DEQ)$.
-The minimized environment decreased 92\%
-(from 10964 to 850 states)
-with only one strongly connected component at which point the buffer remains empty and the environment keeps exchanging the value of the
-signal $SLC$ and never requests the bus ($StoB\_REQ(i)$), thus preventing the controller to achieve the new goal. This tells us that the problem is the lack of an assumption that states that the environment must always eventually achieve $ENQ$ thus lowering the $EMTPY$ signal. 
-\\
-The final variation analyzed in ~\cite{DBLP:conf/fmcad/KonighoferHB09} restricts specification by
-adding a new safety requirement $\square \neg ENQ$. This already reduces the size of the 
-problem significantly (39 states) leaving little room for minimization (resulting in 26 states). Indeed, in both the original and minimized environment LTS it is straightforward to visualize the deadlock state which is reached after the first
-$BtoS\_ACK(i)$ message. This acknowledgement is required to be followed by raising the $ENQ$ signal which would violate the new requirement. 
-
-
+%
+%
+%\subsection{Modified Lift Controller}
+%Another example that has been evaluated is that
+%of the Modified Lift Controller from 
+%\cite{DBLP:conf/fmcad/AlurMT13} first presented in
+%its realizable version in 
+%\cite{DBLP:journals/jcss/BloemJPPS12}.
+%In the original version a lift controller should serve
+%several floors.  It has a button sensor for each floor 
+%controlled by the environment.  There is an additional 
+%restriction that allows the lift to move up only if there
+%is a pending request in one of the floors 
+%($\square \Diamond (b_j \implies f_j)$), and another that
+%forces the system to visit the first floor infinitely
+%often if no button was pressed.\\
+%In the modified version from ~\cite{DBLP:conf/fmcad/AlurMT13} a new set of system liveness 
+%requirements is added, where the system should 
+%visit each floor infinitely often ($\square \Diamond f_j$).
+%
+%
+%The problem here is that this requirement collides with
+%the restriction that the lift will not move up if there
+%is no pending request.\\
+%We run the minimization over a simplified two floors
+%specifications and produced the LTS depicted in Figure
+%\ref{fig:lift-controller-minimization}.
+%It shows that after initial variable setting on behalf of the
+%environment (states 1 to 3) the system is free to choose 
+%opposite values for the initial floor (either start at
+%floor 1, states 3 to 5, or start at the second floor,
+%states 3 to 8), if it chooses to start at the first floor
+%the environment leaves the $b1, b2$ signals down, falsifying
+%the $\square \Diamond f_j$ requirement, since it cannot 
+%go up to visit the second floor unless $b2$ is up.  On the
+%other hand if the system chooses the second floor as the
+%initial configuration the environment keeps waiting until
+%the lift descends to win by letting the signals down.
+%The system is forced to descend eventually to satisfy
+%the restriction that it should visit the first floor when
+%$b1$ and $b2$ are down.  In this example we have to do
+%some more interpretation after the LTS has been minimized,
+%but we think this is a reasonable expectation.  The minimization removed 
+%84 states out of the 95 in the original specification, so
+%even if the engineer has to correlate liveness assumptions
+%with the minimized LTS 
+%the technique proves itself helpful by hiding
+%irrelevant behavior.\\
+%Going back to \cite{DBLP:conf/fmcad/AlurMT13} we see that our
+%slice is consistent with the diagnosis presented by the authors
+%where they say that \emph{(\ldots)A counter-strategy for the
+%environment is to always keep all $b_i$'s low(\ldots)}.
+%Indeed, this counter strategy is captured by the minimized 
+%LTS depicted in Figures~\ref{fig:lift-controller-minimization}.
+%% strategy for the environment can be expressed
+%%n this case as $f_{1}^{\neg \varphi}(s_1)= b1 \downarrow$,
+%% $f_{1}^{\neg \varphi}(s_2)= b2 \downarrow$.
+%\begin{figure}[bt]
+%\centering
+%\SmallPicture
+%%\ShowFrame
+%\VCDraw{
+%    \begin{VCPicture}{(-6,-3.5)(6,3.5)}
+%        \SetEdgeLabelScale{1.4}
+%        \State[1]{(-6,2)}{1}
+%        \State[2]{(-2,2)}{2}
+%        \State[3]{(2,2)}{3}
+%        \State[6]{(6,2)}{6}
+%        \State[4]{(-2,0)}{4}        
+%        \State[5]{(-6,-2)}{5}        
+%        \State[8]{(2,-2)}{8}        
+%        \State[7]{(6,-2)}{7}        
+%		\Initial[w]{1}
+%        \EdgeL{1}{2}{b1 \downarrow}		
+%        \EdgeL{2}{3}{b2 \downarrow}		        
+%		\LoopW{5}{tick}                
+%		\LoopE{7}{tick}                
+%        \ChgEdgeLineStyle{dashed} %\EdgeLineDouble		
+%        \EdgeL{3}{6}{f1 \downarrow}		                
+%        \EdgeR{3}{4}{f1 \uparrow}		                       
+%        \EdgeR{4}{5}{f2 \downarrow}                               	
+%		\EdgeL{6}{7}{f2 \uparrow}                		
+%		\EdgeR{7}{8}{f1 \uparrow}         		
+%		\EdgeR{8}{5}{f2 \downarrow}         				
+%    \end{VCPicture}
+%}
+%\vspace*{-2mm}
+%\caption{Modified Lift Controller minimization.}
+%\label{fig:lift-controller-minimization}
+%\vspace*{-4mm}
+%\MediumPicture
+%\end{figure}
+%%system allows noncontrollable cycle to avoid deadlock
+%%\input{t_strong_fairness_validation}
+%
+%\subsection{Collector}
+%
+%\subsection{Exploration Robot}
+%
+%\subsection{Generalized Buffer (GenBuf)}
+%Non realizable specifications of the Generalized Buffer Case Study~\cite{DBLP:journals/entcs/BloemGJPPW07} were studied in~\cite{DBLP:conf/fmcad/KonighoferHB09}.  
+%%Original LTL specifications were automatically translated to produce the expected LTS input.  
+%The original specification was introduced by 
+%IBM with their Rulebase verification tool~\cite{beer1996rulebase}.
+%It describes a family of buffers that transmit data from $n$ senders
+%$Sender_0,Sender_1$$,\ldots$ $,Sender_n$ to two receivers $Receiver_0$ and
+%$Receiver_1$.  Data is received from senders in a random order and should be
+%delivered to the receivers in round-robin order.  
+%It contains a handshake protocol to communicate with each sender/receiver device
+%by exchanging $StoB\_REQ(i) \leftrightarrow BtoS\_ACK(i)$ messages on the senders side
+%and $BtoR\_REQ(j) \leftrightarrow RtoB\_ACK(j)$ on the receivers.  
+%A controller should arbitrate between the senders and the receivers to
+%accomplish proper communication through a four slot FIFO queue.
+%Several restrictions and assumptions are declared in order
+%to ensure consistent behavior (e.g. \emph{G2: No request should be immediately
+%acknowledged since it is valid at least one step 
+%after the assertion of request}).\\
+%
+%\begin{figure}[bt]
+%\centering
+%\SmallPicture
+%%\ShowFrame
+%\VCDraw{
+%    \begin{VCPicture}{(-6,-3.5)(6,3.5)}
+%        \SetEdgeLabelScale{1.4}
+%        \State[1]{(-7.5,0)}{1}
+%        \State[80]{(3,2)}{80}
+%        \State[79]{(6,2)}{79}
+%        \State[81]{(1.5,0)}{81}        
+%        \State[82]{(3,-2)}{82}        
+%        \State[83]{(6,-2)}{83}        
+%        \State[78]{(7.5,0)}{78}                
+%		\Initial[w]{1}
+%        \ArcR{81}{82}{tick\_e}		
+%        \ArcR{78}{79}{tick\_e}		                                        
+%        \ChgEdgeLineStyle{dashed} %\EdgeLineDouble				
+%        \ArcR{82}{83}{SLC0\uparrow}		                
+%        \ArcR{83}{78}{tick\_s}		                        
+%        \ArcR{79}{78}{tick\_s}		                                
+%        \ArcR{79}{80}{SLC0\downarrow}		                                      
+%        \ArcR{82}{81}{tick\_s}		        
+%        \ArcR[.35]{80}{81}{tick\_s}        
+%        \ZZEdgeL{1}{81}{\ldots StoB\_REQ0\uparrow \ldots BtoR\_REQ0\uparrow \ldots}	        
+%    \end{VCPicture}
+%}
+%\vspace*{-2mm}
+%\caption{GenBuf (missing assumption) Terminal Set.}
+%\label{fig:genbuf-terminal-set}
+%\vspace*{-4mm}
+%\MediumPicture
+%\end{figure}
+%
+%We studied the three non-realizable specifications of GenBuf discussed in~\cite{DBLP:conf/fmcad/KonighoferHB09}. 
+%The goal is captured by the LTL formula $\square\Diamond($ $StoB\_REQ0  \leftrightarrow$ $BtoS\_ACK0))$.
+% In the first the authors consider removing the assumption 
+%that expresses that always eventually if a request to read data
+%has been sent from the controller to $Receiver_0$ ($BtoR\_REQ0$) then
+%an acknowledge will be issued ($RtoB\_ACK0$).  
+%The minimized environment decreased 80\%
+%(from 10964 to 2235 states) and, amongst other things, excluded all actions related with $Receiver_1$,
+%since they are irrelevant to the environment's strategy.
+%In the minimized LTS we identified one terminal set
+%depicted in Figure~\ref{fig:genbuf-terminal-set} in which one guarantee is being 
+%neglected infinitely often: 
+%  In the trace leading to the terminal set
+%the buffer sends \\$BtoR\_REQ0$ message to $Receiver_0$ but
+%never gets the expected acknowledge ($RtoB\_ACK0$), thus
+%not being able to produce an acknowledge for the sender.  This
+%diagnosis should point the engineer in the direction to
+%enforce the specification by restricting the environment to always
+%eventually produce an acknowledge message for each requirement
+%sent to the receivers.\\
+%The second variation studied in~\cite{DBLP:conf/fmcad/KonighoferHB09}  incorporated the goal 
+%$\square \Diamond$ $(\neg EMPTY$ $\wedge$ $\neg DEQ)$.
+%The minimized environment decreased 92\%
+%(from 10964 to 850 states)
+%with only one strongly connected component at which point the buffer remains empty and the environment keeps exchanging the value of the
+%signal $SLC$ and never requests the bus ($StoB\_REQ(i)$), thus preventing the controller to achieve the new goal. This tells us that the problem is the lack of an assumption that states that the environment must always eventually achieve $ENQ$ thus lowering the $EMTPY$ signal. 
+%\\
+%The final variation analyzed in ~\cite{DBLP:conf/fmcad/KonighoferHB09} restricts specification by
+%adding a new safety requirement $\square \neg ENQ$. This already reduces the size of the 
+%problem significantly (39 states) leaving little room for minimization (resulting in 26 states). Indeed, in both the original and minimized environment LTS it is straightforward to visualize the deadlock state which is reached after the first
+%$BtoS\_ACK(i)$ message. This acknowledgement is required to be followed by raising the $ENQ$ signal which would violate the new requirement. 
+%
+%
