@@ -17,8 +17,6 @@ Reallocated singl_function (elt_size=4) to 100 items from 50.
 Warning--no key, author in SYNTCOMP
 Warning--no author, editor, organization, or key in SYNTCOMP
 Warning--empty address in DBLP:conf/fmcad/AlurMT13
-Warning--empty publisher in beer1996rulebase
-Warning--empty address in beer1996rulebase
 Warning--empty address in DBLP:conf/cav/BloemCGHKRSS10
 Warning--empty publisher in DBLP:conf/tacas/CavezzaA17
 Warning--empty address in DBLP:conf/tacas/CavezzaA17
@@ -51,45 +49,45 @@ Warning--empty address in DBLP:conf/popl/PnueliR89
 Warning--require articleno with numpages field in Torlak:2008
 Warning--require articleno with numpages field in vanLamsweerde:2000
 Warning--page numbers missing in both pages and numpages fields in DBLP:journals/corr/abs-2001-07678
-You've used 45 entries,
+You've used 44 entries,
             5551 wiz_defined-function locations,
-            1743 strings with 30073 characters,
-and the built_in function-call counts, 52249 in all, are:
-= -- 6445
-> -- 1984
+            1735 strings with 29753 characters,
+and the built_in function-call counts, 51012 in all, are:
+= -- 6342
+> -- 1896
 < -- 0
-+ -- 604
-- -- 921
-* -- 4031
-:= -- 5640
-add.period$ -- 224
-call.type$ -- 45
-change.case$ -- 308
-chr.to.int$ -- 43
-cite$ -- 95
-duplicate$ -- 4093
-empty$ -- 2914
-format.name$ -- 812
-if$ -- 12131
++ -- 576
+- -- 897
+* -- 3904
+:= -- 5484
+add.period$ -- 219
+call.type$ -- 44
+change.case$ -- 296
+chr.to.int$ -- 42
+cite$ -- 92
+duplicate$ -- 3997
+empty$ -- 2846
+format.name$ -- 784
+if$ -- 11856
 int.to.chr$ -- 3
 int.to.str$ -- 0
-missing$ -- 191
-newline$ -- 473
-num.names$ -- 375
-pop$ -- 1503
+missing$ -- 186
+newline$ -- 466
+num.names$ -- 367
+pop$ -- 1452
 preamble$ -- 1
-purify$ -- 530
+purify$ -- 513
 quote$ -- 0
-skip$ -- 1188
+skip$ -- 1169
 stack$ -- 0
-substring$ -- 4762
-swap$ -- 447
+substring$ -- 4690
+swap$ -- 440
 text.length$ -- 503
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 621
-warning$ -- 44
-while$ -- 391
+type$ -- 607
+warning$ -- 42
+while$ -- 388
 width$ -- 0
-write$ -- 927
-(There were 45 warnings)
+write$ -- 910
+(There were 43 warnings)

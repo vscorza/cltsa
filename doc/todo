@@ -1,71 +1,77 @@
 TODO:
 =====
-- meeting (discuss background section, tool)
-- update background section
-- update procedure technique with dd search approach
-- update related work with new publications
-- improve reports
-	- automatize report pipeline
-		- add script to change chmod +x
-		- share params between sh files ($1, $n)
-	- add readme for experimental data
-	- test run r with install packages
-	- test everything on a docker image or vm
-	- write rmd consistent with validation
-- examples
-	- write amba version from Synthesis of AMBA AHB from Formal Specification:A Case Study
-	- write examples from symbolic repair paper
-	- ivy (kenneth mcmillan)
-		- add leader election/multi paxos example (https://www.discotec.org/2020/invited#kenneth-mcmillan)
-		- risc v memory coherence
-	- check spectra (maoz) repository for unrealizable specs
-	- review https://www.cl.cam.ac.uk/~sf502/regressions/rmem/help.html for examples
-	- update values and validation section
-	- run tests for genbuf 4, 5, 6
-- review papers gr_1_star, performance_heuristics for gr1
+- behavior minimization paper
+	- meeting (discuss background section, tool)
+	- run results for linear search
+		- add steps report for linear case
+		- modify command line params to allow for state space search selection
+		- update scripts
+		- update r
+		- run tests
+	- update related work with new publications
+	- review general structure and text of the paper
+	- improve reports
+		- automatize report pipeline
+			- add script to change chmod +x
+			- share params between sh files ($1, $n)
+		- add readme for experimental data
+		- write rmd consistent with validation
+	- examples
+		- write amba version from Synthesis of AMBA AHB from Formal Specification:A Case Study
+		- write examples from symbolic repair paper
+		- ivy (kenneth mcmillan)
+			- add leader election/multi paxos example (https://www.discotec.org/2020/invited#kenneth-mcmillan)
+			- risc v memory coherence
+		- check spectra (maoz) repository for unrealizable specs
+		- review https://www.cl.cam.ac.uk/~sf502/regressions/rmem/help.html for examples
+		- update values and validation section
+		- run tests for genbuf 4, 5, 6
+	- review papers gr_1_star, performance_heuristics for gr1
+	- reproductability
+		- test everything on a docker image or vm
 
+- after paper
+	- for non-realizability reduce diagnosis to single liveness goal not being satisfied
+	- run tests with dd, linear, dd wo last_partition optimization, goal minimization
+	- java client
+		- improve report loading from java client (automatically load exports)
+		- allow several specs to be loaded concurrently (tabs)
+		- syntax highlight strings
+		- undo/redo 
+		- signals view as complement to automaton
+	- add exception when FIXED_SIGNALS_COUNT or BITVECTOR_ENTRY_SIZE is not enough, add parameters to make
+	- see if following changes are worth the worry
+		- add transition disabling to speed up minimization time (should do enabled_in_degree and enabled_out_degree)
+			- change seems to be too expensive in terms of refactoring to be worthy, since it may not prove useful once automaton copy is not as frequent
+		- in dd minimization keep track of mins. tested as tested: bitvector -> 0 not tested, 1 realizable, 2 non realizable
+			should be able to only keep as many in terms of the dd step
+			- check current minimization bitvector m with previous minimization bitvector p
+				if at any step p_i & m_i != p_i skip p (was not less or equal than m)
+				if check completes then use p result for m
 
-- for non-realizability reduce diagnosis to single liveness goal not being satisfied
-- run tests with dd, linear, dd wo last_partition optimization, goal minimization
-- java client
-	- improve report loading from java client (automatically load exports)
-	- allow several specs to be loaded concurrently (tabs)
-	- syntax highlight strings
-	- undo/redo 
-	- signals view as complement to automaton
-- add exception when FIXED_SIGNALS_COUNT or BITVECTOR_ENTRY_SIZE is not enough, add parameters to make
-- see if following changes are worth the worry
-	- add transition disabling to speed up minimization time (should do enabled_in_degree and enabled_out_degree)
-		- change seems to be too expensive in terms of refactoring to be worthy, since it may not prove useful once automaton copy is not as frequent
-	- in dd minimization keep track of mins. tested as tested: bitvector -> 0 not tested, 1 realizable, 2 non realizable
-		should be able to only keep as many in terms of the dd step
-		- check current minimization bitvector m with previous minimization bitvector p
-			if at any step p_i & m_i != p_i skip p (was not less or equal than m)
-			if check completes then use p result for m
-
-- see if following changes are worth the worry
-	- further improve reports
-		- report separate synthesis cases individually within same file
-		- report composition times independently from model build	
-- jvts for clts
-- explore controllable simplification
-	- hide queue in genbuf (hide signals, tau reduction)
-	- review konighoefer work
-- implement formulaic labels, [!lock && !start]G2 = ( lock && start -> G2), 
-	will create an automaton by initializing variables as defined in [v] and defining transitions by those who satisfhy
-	rho(v, v', s, s')
-- graph the way removed transitions increment in the lineal minimization
-- split functionality into several files, refactor
-- synthesis improvements
-	- take bigger values first on synthesis
-	- take noncontrollable states first on synthesis
-	- keep inf scc over rankings
-- compare against konighoefer and jvts systems, write experimental claim
-- implement fluent consistency check
-- allow to define buchi fluent based on accepting state, for instance for automaton based properties in genbuf
-- implement IS_REALIZABLE(gr1). on parser
-- review and relate gamma sat notion from symbolic repair with non trivial controllers, add check, compare to mtsa
-- diagnose mutation over small parameters, produce hypothesis, scale both hypothesis and parameter to see if it holds
+	- see if following changes are worth the worry
+		- further improve reports
+			- report separate synthesis cases individually within same file
+			- report composition times independently from model build	
+	- jvts for clts
+	- explore controllable simplification
+		- hide queue in genbuf (hide signals, tau reduction)
+		- review konighoefer work
+	- implement formulaic labels, [!lock && !start]G2 = ( lock && start -> G2), 
+		will create an automaton by initializing variables as defined in [v] and defining transitions by those who satisfhy
+		rho(v, v', s, s')
+	- graph the way removed transitions increment in the lineal minimization
+	- split functionality into several files, refactor
+	- synthesis improvements
+		- take bigger values first on synthesis
+		- take noncontrollable states first on synthesis
+		- keep inf scc over rankings
+	- compare against konighoefer and jvts systems, write experimental claim
+	- implement fluent consistency check
+	- allow to define buchi fluent based on accepting state, for instance for automaton based properties in genbuf
+	- implement IS_REALIZABLE(gr1). on parser
+	- review and relate gamma sat notion from symbolic repair with non trivial controllers, add check, compare to mtsa
+	- diagnose mutation over small parameters, produce hypothesis, scale both hypothesis and parameter to see if it holds
 POST PHD
 ========
 - develop mixed structures 
@@ -92,6 +98,17 @@ POST PHD
 - implement relabeling and hiding (use half adder to full adder example)
 - implement symbolic synthesis
 - implement diagnosis of maximal realizable ltl spec (maximal set of ltl formula s.t. at least one liveness is satisfied)
+- aparte de <a,b,c> introducir >a,b,c< que define concurrencia débil, puede transicionar con un subconj de estos
+- implement reachability
+- yacc and automaton_context -> define a way to index concurrent labels, it is not the same to index particular labels (thus adding new transitions
+		for each index) than to add index to concurrent labels (adding new transitions on the whole concurrent set)
+- evaluation of expressions with free variables should be able to evaluate fluent valuations and constants, maybe even a random value generator with constant seed
+range R = 1..2
+A = ( <a, b[i:R], c[j:R]> -> A). should translate to A = ( {<a,b.1,c.1>, <a,b.2,c.1>, <a,b.1,c.2>, <a,b.2,c.2>}->A).
+A = ( <a, b[i], c[i]>[i:R] -> A). should translate to A = ( {<a,b.1,c.1>, <a,b.2,c.2>}->A).
+- add feedback for errors
+- partitioned composition, everything not on the frontier can be downloaded to a bucket list of files in order to free the memory
+- keep indexes and other information in the automaton structure (concolyc style)
 
 Meetings
 ========
@@ -100,26 +117,3 @@ Meetings
 - Where is the benefit when solving hardware specs? Is it in the formalism or the tool?
 - What happens with the language of the composition? does the components languages are included in the target?
 - Explain the motivation behind the availability of two composition semantics, motivate it as allowing encapsulation of synch component asynchronous composed with another (or viceversa)
-
-
-PRINT CODE
-==========
-enscript -2r -T=1 --line-numbers -p out.ps --font="Courier6" --highlight=c  automaton_context.c
-
-
-BACKLOG
-=======
-SPRINT2
-- aparte de <a,b,c> introducir >a,b,c< que define concurrencia débil, puede transicionar con un subconj de estos
-- implement reachability
-SPRINT3
-- yacc and automaton_context -> define a way to index concurrent labels, it is not the same to index particular labels (thus adding new transitions
-		for each index) than to add index to concurrent labels (adding new transitions on the whole concurrent set)
-- evaluation of expressions with free variables should be able to evaluate fluent valuations and constants, maybe even a random value generator with constant seed
-range R = 1..2
-A = ( <a, b[i:R], c[j:R]> -> A). should translate to A = ( {<a,b.1,c.1>, <a,b.2,c.1>, <a,b.1,c.2>, <a,b.2,c.2>}->A).
-A = ( <a, b[i], c[i]>[i:R] -> A). should translate to A = ( {<a,b.1,c.1>, <a,b.2,c.2>}->A).
-- add feedback for errors
-SPRINTX
-- partitioned composition, everything not on the frontier can be downloaded to a bucket list of files in order to free the memory
-- keep indexes and other information in the automaton structure (concolyc style)

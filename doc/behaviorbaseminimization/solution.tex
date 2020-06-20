@@ -1,10 +1,7 @@
-\section{A Behavior Minimization Procedure}\label{sect:solution}
+\section{Two Behavior Minimization Procedures}\label{sect:solution}
 
-The strategy to find a minimal unrealizable control problem is incrementally remove transitions preserving an alternating Sub-LTS relation until a local minimum has been reached.  
-The procedure explores the semi-lattice defined by Alternating Sub-LTS relation. It starts with the original automaton and moves downwards in the semi-lattice by performing minimal reductions. If a non-realizable Sub-LTS relation is reached for which any further reduction makes it realizable, then a minimal unrealizable control problem has been found.
-
-
-
+The strategy to find a minimal non realizable control problem is to incrementally remove transitions preserving an alternating Sub-LTS relation until a local minimum is reached.  
+The first procedure explores the semi-lattice defined by Alternating Sub-LTS relation starting with the original automaton and moving downwards by performing minimal reductions. A minimal non realizable control problem is reached when any further reduction of the current Sub-LTS renders the problem realizable.
   
 \begin{figure}[bt]
 \centering
@@ -254,3 +251,7 @@ $\mathcal{I}=<E,\mathcal{C}, \varphi>$, and $E_1$, $E_2$ two LTSs s.t.
 $E_2 \sublts E_1 \sublts E$ and
 $\mathcal{I}_1=<E_1, \mathcal{C}, \varphi>$, $\mathcal{I}_2=<E_2, \mathcal{C}, \varphi>$, if $\mathcal{I}_1$ is realizable then $\mathcal{I}_2$ is also realizable.
 \end{lemma}
+
+
+The second procedure uses the Delta Debugging technique presented in ~\cite{DBLP:journals/tse/ZellerH02} to accelerate the search space exploration. Instead of reducing the automaton by applying an atomic reduction at a time Delta Debugging tries to achieve a minimal diagnosis by partitioning the problem $\Delta$ into $n$ uniform subsets ($\Delta = \bigcup_{i=1}^n \Delta_i $) and then it first checks its elements $\Delta_i$ for a non realizable smaller case, if none is found it proceeds by looking at the complement $\Delta \setminus \Delta_i$ of each element in the partition. If no smaller candidate was found it increases the granularity by updating $n$ as $max(2n,|\Delta|)$. This cycle is repeated until $n$ can not be further increased ($n \geq |\Delta|$). 
+In our application of Delta Debugging the set $\Delta$ is the set of non controllable transitions in the original plant. Instead of descending regularly down the semi lattice, Delta Debugging tries to jump further down by removing a subset of transitions from the current candidate. We can briefly prove that the application of the technique is sound since Delta Debugging ensures 1-minimality, i.e. that removing any single element from the resulting minmization breaks non realizability which in conjunction with lemma ~\ref{def:induction-preserves} implies minimality.

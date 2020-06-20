@@ -80,18 +80,6 @@
 \url{http://dx.doi.org/10.1007/978-3-642-19583-9}}
 
 
-\bibitem[\protect\citeauthoryear{Beer, Ben-David, Eisner, and Landver}{Beer
-  et~al\mbox{.}}{1996}]%
-        {beer1996rulebase}
-\bibfield{author}{\bibinfo{person}{Ilan Beer}, \bibinfo{person}{Shoham
-  Ben-David}, \bibinfo{person}{Cindy Eisner}, {and} \bibinfo{person}{Avner
-  Landver}.} \bibinfo{year}{1996}\natexlab{}.
-\newblock \showarticletitle{RuleBase: An industry-oriented formal verification
-  tool}. In \bibinfo{booktitle}{{\em Proceedings of the 33rd annual Design
-  Automation Conference}}. ACM, \bibinfo{pages}{655--660}.
-\newblock
-
-
 \bibitem[\protect\citeauthoryear{Bloem, Cimatti, Greimel, Hofferek,
   K{\"{o}}nighofer, Roveri, Schuppan, and Seeber}{Bloem et~al\mbox{.}}{2010}]%
         {DBLP:conf/cav/BloemCGHKRSS10}
@@ -112,22 +100,6 @@
 \showISBNx{978-3-642-14294-9}
 \showDOI{%
 \url{http://dx.doi.org/10.1007/978-3-642-14295-6\_37}}
-
-
-\bibitem[\protect\citeauthoryear{Bloem, Galler, Jobstmann, Piterman, Pnueli,
-  and Weiglhofer}{Bloem et~al\mbox{.}}{2007}]%
-        {DBLP:journals/entcs/BloemGJPPW07}
-\bibfield{author}{\bibinfo{person}{Roderick Bloem}, \bibinfo{person}{Stefan~J.
-  Galler}, \bibinfo{person}{Barbara Jobstmann}, \bibinfo{person}{Nir Piterman},
-  \bibinfo{person}{Amir Pnueli}, {and} \bibinfo{person}{Martin Weiglhofer}.}
-  \bibinfo{year}{2007}\natexlab{}.
-\newblock \showarticletitle{Specify, Compile, Run: Hardware from {PSL}}.
-\newblock \bibinfo{journal}{{\em Electr. Notes Theor. Comput. Sci.\/}}
-  \bibinfo{volume}{190}, \bibinfo{number}{4} (\bibinfo{year}{2007}),
-  \bibinfo{pages}{3--16}.
-\newblock
-\showDOI{%
-\url{http://dx.doi.org/10.1016/j.entcs.2007.09.004}}
 
 
 \bibitem[\protect\citeauthoryear{Bloem, Jobstmann, Piterman, Pnueli, and
@@ -711,6 +683,20 @@ Issue 10.
 \showISSN{0098-5589}
 \showDOI{%
 \url{http://dx.doi.org/10.1109/32.879820}}
+
+
+\bibitem[\protect\citeauthoryear{Zeller and Hildebrandt}{Zeller and
+  Hildebrandt}{2002}]%
+        {DBLP:journals/tse/ZellerH02}
+\bibfield{author}{\bibinfo{person}{Andreas Zeller} {and} \bibinfo{person}{Ralf
+  Hildebrandt}.} \bibinfo{year}{2002}\natexlab{}.
+\newblock \showarticletitle{Simplifying and Isolating Failure-Inducing Input}.
+\newblock \bibinfo{journal}{{\em {IEEE} Trans. Software Eng.\/}}
+  \bibinfo{volume}{28}, \bibinfo{number}{2} (\bibinfo{year}{2002}),
+  \bibinfo{pages}{183--200}.
+\newblock
+\showDOI{%
+\url{http://dx.doi.org/10.1109/32.988498}}
 
 
 \bibitem[\protect\citeauthoryear{Zudaire, Garrett, and Uchitel}{Zudaire
