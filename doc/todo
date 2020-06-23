@@ -1,9 +1,9 @@
 TODO:
 =====
 - behavior minimization paper
-	- update preliminaries with cltsa
 	- update related work with new publications
 	- review general structure and text of the paper
+- meeting	
 	- improve reports
 		- automatize report pipeline
 			- add script to change chmod +x
