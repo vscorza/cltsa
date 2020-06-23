@@ -1,13 +1,7 @@
 TODO:
 =====
 - behavior minimization paper
-	- meeting (discuss background section, tool)
-	- run results for linear search
-		- add steps report for linear case
-		- modify command line params to allow for state space search selection
-		- update scripts
-		- update r
-		- run tests
+	- update preliminaries with cltsa
 	- update related work with new publications
 	- review general structure and text of the paper
 	- improve reports
