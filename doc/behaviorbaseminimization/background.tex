@@ -1,11 +1,11 @@
 \section{Preliminaries}
-%In this section we present background on realisability, which is linked to the problem of controller synthesis~\cite{DBLP:conf/popl/PnueliR89,DBLP:journals/jcss/BloemJPPS12} which, in turn, requires a formal specification that, in this paper, is assumed to be, as in~\cite{DBLP:conf/sigsoft/DIppolitoBPU10} provided as a labelled transition system and a subset of linear temporal logic formula called Generalised Reactivity 1~\cite{DBLP:journals/jcss/BloemJPPS12}.
+%In this section we present background on realisability, which is linked to the problem of controller synthesis~\cite{DBLP:conf/popl/PnueliR89,DBLP:journals/jcss/BloemJPPS12} which, in turn, requires a formal specification that, in this paper, is assumed to be, as in~\cite{DBLP:conf/sigsoft/DIppolitoBPU10} provided as a labeled transition system and a subset of linear temporal logic formula called Generalised Reactivity 1~\cite{DBLP:journals/jcss/BloemJPPS12}.
 
-We model safety assumptions on the environment and goals for the system as composition of Concurrent Labelled Transition Systems (LTS). 
+We model safety assumptions on the environment and goals for the system as composition of Concurrent Labeled Transition Systems (CLTS). 
 
 \begin{definition}
-	\label{def:CLTS} \emph{(Concurrent Labelled Transition Systems)} 
-	A \emph{Concurrent Labelled Transition System} (CLTS) is $E =  (S, \Sigma, \Delta, s_0)$, where $S$ is a finite set of states, $\Sigma \subseteq Act$ is its {\em communicating alphabet}, $\Delta \subseteq (S \times \mathcal{P}(\Sigma) \times S)$ is a transition relation, and $s_0 \in S$ is the initial state.  We denote $\Delta(s)=\{\act~|~(s,\act,s') \in \Delta\}$. 
+	\label{def:CLTS} \emph{(Concurrent Labeled Transition Systems)} 
+	A \emph{Concurrent Labeled Transition System} (CLTS) is $E =  (S, \Sigma, \Delta, s_0)$, where $S$ is a finite set of states, $\Sigma \subseteq Act$ is its {\em communicating alphabet}, $\Delta \subseteq (S \times \mathcal{P}(\Sigma) \times S)$ is a transition relation, and $s_0 \in S$ is the initial state.  We denote $\Delta(s)=\{\act~|~(s,\act,s') \in \Delta\}$. 
 	An CLTS is deterministic if $(s,\act,s')$ and $(s,\act,s'')$ are in $\Delta$ implies $s'=s''$.
 	An execution of $E$ is a word $\varepsilon=s_0, \act_0, s_1, \ldots$ where $(s_i, \act_i, s_{i+1}) \in \Delta$. 
 	A word $\pi$ is a trace (induced by $\varepsilon$) of $E$ if its the result of removing every $s_i$ from an execution $\varepsilon$ of $E$. 
@@ -231,7 +231,7 @@ Given an infinite sequence of states $p$, let $inf(p)$ denote the states that oc
 %\end{definition}
 
 \begin{definition}\label{def:lts-2-game}\emph{(($G_{\mathcal{I}}$) Two-Player Game for $\mathcal{I}$ )}
-We convert the GR(1) LTS control problem $\mathcal{I}=\langle E, \mathcal{C}, \varphi \rangle$ to a two-player GR(1) game $G (\mathcal{I})=(S_{g},\gamma{-},\gamma{+},s_{g0},\varphi)$ as follows: every state in $S_{g}$ encodes a state in $E$ and a valuation of all fluents
+We convert the GR(1) CLTS control problem $\mathcal{I}=\langle E, \mathcal{C}, \varphi \rangle$ to a two-player GR(1) game $G (\mathcal{I})=(S_{g},\gamma{-},\gamma{+},s_{g0},\varphi)$ as follows: every state in $S_{g}$ encodes a state in $E$ and a valuation of all fluents
 appearing in $\varphi$. We build $S_g$ from $E$ in such a way that states in the game encode a state in $E$ and truth values for all fluents in $\varphi$, let $S_g = S_e \times \Pi_{i=0}^{k}\{true,false\}$.  Consider state $s_g=(s_e,\alpha_1,\ldots,\alpha_k)$, given fluent $fl_i$ we say that $s_g$ satisfies $fl_i$ if and only if $\alpha_i$ is $true$. We generalize satisfaction to boolean combination of fluents in the natural way.  We build the transition relations $\gamma^{-}$,$\gamma^{+}$ through the following rules.  Consider state $s_g=(s_e,\alpha_1,\ldots,\alpha_k)$, for every transition $(s_e,l,s'_e) \in \Delta$ we include $(s_g,(s'_e,\alpha'_1,\ldots,\alpha'_k))$ in $\gamma^{\beta}$ where
 $\beta$ is $+$ if $l \in \mathcal{C}$ and in $\gamma^{-}$ otherwise.
 $\alpha'_i$ is $\alpha_i$ if $l \neg\in I_{fl_i} \cup T_{fl_i}$, $\alpha'_i$ is $true$ if $l \in I_{fl_i}$ and $false$ if $l \in T_{fl_i}$.  
