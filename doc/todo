@@ -1,8 +1,5 @@
 TODO:
 =====
-- behavior minimization paper
-	- update related work with new publications
-	- review general structure and text of the paper
 - meeting	
 	- improve reports
 		- automatize report pipeline
@@ -10,7 +7,8 @@ TODO:
 			- share params between sh files ($1, $n)
 		- add readme for experimental data
 		- write rmd consistent with validation
-	- review papers gr_1_star, performance_heuristics for gr1		
+	- reproductability
+		- test everything on a docker image or vm				
 	- examples
 		- write amba version from Synthesis of AMBA AHB from Formal Specification:A Case Study
 		- write examples from symbolic repair paper
@@ -21,8 +19,7 @@ TODO:
 		- review https://www.cl.cam.ac.uk/~sf502/regressions/rmem/help.html for examples
 		- update values and validation section
 		- run tests for genbuf 4, 5, 6
-	- reproductability
-		- test everything on a docker image or vm
+	- review papers gr_1_star, performance_heuristics for gr1		
 	- review minimal assumption refinement gr1 and synthesizing adaptive test stategies papers
 
 - after paper
