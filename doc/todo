@@ -2,7 +2,6 @@ TODO:
 =====
 - meeting	
 	- improve reports
-		- test everything on a docker image or vm	
 		- automatize report pipeline
 			- add new script (small numbers) to change chmod +x and run make clean make tool and run tests
 			- share params between sh files ($1, $n)
