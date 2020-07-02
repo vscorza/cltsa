@@ -1,6 +1,6 @@
 #!/bin/bash
 echo "[[Merging files]]"
-OUTPUT_DIR="/home/mariano/code/henos-automata/doc/experimental_setting/tmp_results/"
+OUTPUT_DIR=$1
 cd $OUTPUT_DIR
 echo 'name,realizable,ltl_model_build_time,model_build_time,composition_time,synthesis_time,diagnosis_time,alphabet_size,guarantees_count,assumptions_count,plant_states,plant_transitions,plant_controllable_transitions,minimization_states,minimization_transitions,minimization_controllable_transitions,search_method,diagnosis_steps' > unrealizable_data_composite.csv
 echo 'name,realizable,ltl_model_build_time,model_build_time,composition_time,synthesis_time,diagnosis_time,alphabet_size,guarantees_count,assumptions_count,plant_states,plant_transitions,plant_controllable_transitions,minimization_states,minimization_transitions,minimization_controllable_transitions,search_method,diagnosis_steps' > realizable_data_composite.csv

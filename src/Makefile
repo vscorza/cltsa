@@ -1,7 +1,8 @@
 #CC=gcc
 #CC=gcc-8
 CC=clang
-CPARAMS = -Wall -Wextra -pedantic -Wno-unused-variable -Wno-unused-parameter
+#CPARAMS = -Wall -Wextra -pedantic -Wno-unused-variable -Wno-unused-parameter
+CPARAMS =  -Wno-unused-variable -Wno-unused-parameter -Wno-format -Wno-incompatible-pointer-types -Wno-int-conversion -Wno-pointer-integer-compare -Wno-string-compare -Wno-switch
 CLIBS = -lm
 #CFLAGS= -g -O0
 CFLAGS= -g -O3

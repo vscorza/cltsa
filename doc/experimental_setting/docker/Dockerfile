@@ -20,6 +20,7 @@ RUN	apt-get update \
 		sudo \
 		unzip \
 		vim \
+		r-base \
 		wget;
 
 
@@ -32,10 +33,23 @@ RUN	pwd
 # Update APT sources from our local copy.
 COPY	sources.list /etc/apt/sources.list
 COPY	src.tar.gz src.tar.gz
+COPY	r_sh.tar.gz r_sh.tar.gz
 
 # Run updates again.
 RUN	pwd \
 	&& tar -xzvf src.tar.gz\
+	&& rm src.tar.gz \
+	&& tar -xzvf r_sh.tar.gz\
+	&& rm r_sh.tar.gz \	
+	&& cd r_sh \
+	&& chmod +x *.sh \
+	&& cd .. \
 	&& cd src \
 	&& make clean \
-	&& make
+	&& make \
+	&& chmod +x cltsa \
+	&& cd .. \
+	&& mkdir -p /tmp-results \
+	&& cd r_sh \
+	&& ./run_all_reports.sh "/src/tests/" "/tmp-results/" "/src/" 1
+	

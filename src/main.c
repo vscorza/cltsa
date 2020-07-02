@@ -67,6 +67,7 @@ void run_parse_test_local(char* test_file, char* test_name, char* result_name, c
 #endif
     if (!(yyin = fopen(test_file, "r")))
     {
+    	printf("Could not open %s\n", test_file);
         perror("Error: ");
         exit(-1);
     }

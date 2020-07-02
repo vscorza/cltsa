@@ -4,7 +4,6 @@ TODO:
 	- improve reports
 		- automatize report pipeline
 			- add new script (small numbers) to change chmod +x and run make clean make tool and run tests
-			- share params between sh files ($1, $n)
 		- add readme for experimental data
 		- write rmd consistent with validation
 	- examples

@@ -1,9 +1,10 @@
 #!/bin/bash
-MAX_INSTANCE=4
-ITERATIONS=(7 7 7 7)
-DST_DIR="/home/mariano/code/henos-automata/src/tests/"
-OUTPUT_DIR="/home/mariano/code/henos-automata/doc/experimental_setting/tmp_results/"
-CLTSA_DIR="../../src/"
+DST_DIR=$1
+OUTPUT_DIR=$2
+CLTSA_DIR=$3
+# 4
+MAX_INSTANCE=$4
+ITERATIONS=$5
 INSTANCES=""
 
 echo "::[Running added goal lift controller instances from size 1 to ${MAX_INSTANCE}]::"
@@ -11,7 +12,7 @@ cd ${CLTSA_DIR}
 
 for ((i=1; i<=$MAX_INSTANCE;i++)) 
 	do 
-		for((j=1; j<=${ITERATIONS[i-1]};j++))
+		for((j=1;j<=$ITERATIONS;j++))
 			do 
 				i2=$((i*2))
 				INSTANCES="${INSTANCES} ${DST_DIR}lift_controller_${i2}_missing_assumption.fsp Lift.Controller.${i2}.(missing.assumption)"; 

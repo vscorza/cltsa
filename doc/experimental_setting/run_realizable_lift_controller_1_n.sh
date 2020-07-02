@@ -1,9 +1,10 @@
 #!/bin/bash
-MAX_INSTANCE=4
-ITERATIONS=1
-DST_DIR="/home/mariano/code/henos-automata/src/tests/"
-OUTPUT_DIR="/home/mariano/code/henos-automata/doc/experimental_setting/tmp_results/"
-CLTSA_DIR="../../src/"
+DST_DIR=$1
+OUTPUT_DIR=$2
+CLTSA_DIR=$3
+# 4
+MAX_INSTANCE=$4
+ITERATIONS=$5
 INSTANCES=""
 
 for ((i=1; i<=$MAX_INSTANCE;i++)) 
@@ -13,7 +14,7 @@ for ((i=1; i<=$MAX_INSTANCE;i++))
 	done
 
 echo "Running realizable lift controller instances from size 1 to ${MAX_INSTANCE}"
-
+echo "Will run nice -20 ./cltsa -r -o ${OUTPUT_DIR} ${INSTANCES}"
 cd ${CLTSA_DIR}
 nice -20 ./cltsa -r -o $OUTPUT_DIR $INSTANCES
 
