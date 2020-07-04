@@ -480,7 +480,7 @@ bool automaton_automaton_print_fsp(automaton_automaton* current_automaton, char*
 	FILE *f = fopen(filename, "w");
 	if (f == NULL)
 	{
-	    printf("Error opening file!\n");
+	    printf("Error opening file!(%s)\n", filename);
 	    return false;
 	}
 	uint32_t i,j,k, controllable_transitions = 0;
@@ -536,7 +536,7 @@ bool automaton_automaton_print_dot(automaton_automaton* current_automaton, char*
 	FILE *f = fopen(filename, "w");
 	if (f == NULL)
 	{
-	    printf("Error opening file!\n");
+		printf("Error opening file!(%s)\n", filename);
 	    return false;
 	}
 
@@ -797,7 +797,7 @@ bool automaton_ranking_print_report(automaton_automaton *automaton,
 
 		if (f == NULL)
 		{
-			printf("Error opening file!\n");
+			printf("Error opening file!(%s)\n", filename);
 			return false;
 		}
 
@@ -874,7 +874,7 @@ bool automaton_automaton_print_report(automaton_automaton *automaton, char *file
 	FILE *f = fopen(filename, "w");
 	if (f == NULL)
 	{
-	    printf("Error opening file!\n");
+		printf("Error opening file!(%s)\n", filename);
 	    return false;
 	}
 	automaton_automaton_serialize_report(f, automaton);

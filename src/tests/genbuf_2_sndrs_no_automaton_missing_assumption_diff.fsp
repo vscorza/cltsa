@@ -8,9 +8,9 @@ set Output_Signals	= {bACK0, bACK1, bREQ0, bREQ1, enq, deq, slc0, s0, g0, g1,t}
 order 				= {}
 
 
-DIAG << "/home/mariano/code/henos-automata/src/results/genbuf_2_strat_missing_assumption.rep".
-STRAT << "/home/mariano/code/henos-automata/src/results/genbuf_2_strat.rep".
+DIAG << "/tmp/genbuf_2_strat_missing_assumption.rep".
+STRAT << "/tmp/genbuf_2_strat.rep".
 
 ||DIFF = (DIAG ||_s STRAT).
 
-DIFF >> "/home/mariano/code/henos-automata/src/results/genbuf_2_strat_missing_assumptions_diff.rep".
+DIFF >> "/tmp/genbuf_2_strat_missing_assumptions_diff.rep".

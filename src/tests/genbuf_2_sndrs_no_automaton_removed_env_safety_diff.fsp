@@ -6,9 +6,9 @@ set Output_Signals	= {bACK0, bACK1, bREQ0, bREQ1, enq, deq, slc0, s0, g0, g1,t}
 //order			= {s0 < sREQ0 < sREQ1 < sREQ_2 < sREQ_3 < rACK0 < rACK1 < full < empty < bACK0 < bACK1 < bACK_2 < bACK_3 < bREQ0 < bREQ1 < enq < deq < slc0}
 order 				= {}
 
-DIAG << "/home/mariano/code/henos-automata/src/results/genbuf_2_strat_removed_env_safety.rep".
-STRAT << "/home/mariano/code/henos-automata/src/results/genbuf_2_strat.rep".
+DIAG << "/tmp/genbuf_2_strat_removed_env_safety.rep".
+STRAT << "/tmp/genbuf_2_strat.rep".
 
 ||DIFF = (DIAG ||_s STRAT).
 
-DIFF >> "/home/mariano/code/henos-automata/src/results/genbuf_2_strat_removed_env_safety_diff.rep".
+DIFF >> "/tmp/genbuf_2_strat_removed_env_safety_diff.rep".

@@ -1,3 +1,7 @@
 #!/bin/bash
 echo "[[Generating LaTeX tables]]"
-Rscript r_output/generate_table.r
+if [ "$1" == "docker" ]; then
+	Rscript r_output/generate_table_docker.r
+else
+	Rscript r_output/generate_table.r
+fi

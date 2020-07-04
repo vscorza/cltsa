@@ -53,4 +53,4 @@ ltl fluent G			= (allFinished).
 |f| ENV =(COLLECTOR).
 |gr1| <{A_in_0,A_in_1,A_in_2,A_in_3}><{G}> STRAT = ENV.
 
-STRAT >> "/home/mariano/code/henos-automata/src/results/collector_4_strat.rep".
+STRAT >> "/tmp/collector_4_strat.rep".

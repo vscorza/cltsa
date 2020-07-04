@@ -3678,7 +3678,7 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 		sprintf(target_name, "%s.csv", results_filename);
 		experimental_results = fopen(target_name, append_result?"a": "w");
 		if (experimental_results == NULL){
-			printf("Error opening file!\n");
+			printf("Error opening file!(%s)\n", target_name);
 			return false;
 		}
 		if(!append_result)
@@ -3705,7 +3705,7 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 		sprintf(target_name, "%s.csv", steps_filename);
 		FILE *experimental_steps_results = fopen(target_name, "w");
 		if (experimental_steps_results == NULL){
-			printf("Error opening file!\n");
+			printf("Error opening file!(%s)\n", target_name);
 			return false;
 		}
 		fprintf(experimental_steps_results, "step,size,time\n");

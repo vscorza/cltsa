@@ -39,4 +39,4 @@ fluent F_ReleaseSouth = <releaseSouth,{unload,load,n,s,e,w,stall,releaseNorth}> 
 
 |gr1| <{F_ReleaseNorth,F_ReleaseSouth}><{F_Load, F_Unload}> STRAT = ROBOT_EXPLORE.
 
-STRAT >> "/home/mariano/code/henos-automata/src/results/exploration_robot_24_strat.rep".
+STRAT >> "/tmp/exploration_robot_24_strat.rep".

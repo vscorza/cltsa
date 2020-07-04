@@ -11,9 +11,9 @@ set Global_Signals	= {in_0, in_1, in_2, in_3, allFinished, latch_0, latch_1, lat
 set Output_Signals	= {allFinished, latch_0, latch_1, latch_2, latch_3}
 order			= {}
 
-DIAG << "/home/mariano/code/henos-automata/src/results/collector_4_strat_missing_assumption.rep".
-STRAT << "/home/mariano/code/henos-automata/src/results/collector_4_strat.rep".
+DIAG << "/tmp/collector_4_strat_missing_assumption.rep".
+STRAT << "/tmp/collector_4_strat.rep".
 
 ||DIFF = (DIAG ||_s STRAT).
 
-DIFF >> "/home/mariano/code/henos-automata/src/results/collector_4_strat_missing_assumption_diff.rep".
+DIFF >> "/tmp/collector_4_strat_missing_assumption_diff.rep".

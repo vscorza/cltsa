@@ -6,7 +6,7 @@ mkdir r_sh
 cp ../*.sh r_sh
 pushd r_sh
 mkdir -p r_output
-cp ../../r_output/generate_table.r r_output/generate_table.r
+cp ../../r_output/generate_table_docker.r r_output/generate_table_docker.r
 popd
 tar -cvzf r_sh.tar.gz r_sh
 tar --exclude='../../../src/results/*' -cvzf src.tar.gz ../../../src

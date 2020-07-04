@@ -54,8 +54,8 @@ ltl fluent A_3		= (x1 && x2).
 |f| ENV_K =(TEST_K).
 |gr1| <{A_1, A_2}><{G_1}> K_STRAT = ENV_K.
 
-STRAT_W >> "/home/mariano/code/henos-automata/src/results/nonreal_test_1_strat_winning.rep".
-TEST >> "/home/mariano/code/henos-automata/src/results/nonreal_test_1_game.rep".
-STRAT >> "/home/mariano/code/henos-automata/src/results/nonreal_test_1_strat.rep".
-ENV_K >> "/home/mariano/code/henos-automata/src/results/nonreal_test_1_k_game.rep".
-K_STRAT >> "/home/mariano/code/henos-automata/src/results/nonreal_test_1_k_strat.rep".
+STRAT_W >> "/tmp/nonreal_test_1_strat_winning.rep".
+TEST >> "/tmp/nonreal_test_1_game.rep".
+STRAT >> "/tmp/nonreal_test_1_strat.rep".
+ENV_K >> "/tmp/nonreal_test_1_k_game.rep".
+K_STRAT >> "/tmp/nonreal_test_1_k_strat.rep".

@@ -127,4 +127,4 @@ ltl fluent G_Strongest	= (a0 && a1).
 |f| ENV =(GENBUF).
 |gr1| <{A_rcvr_0, A_rcvr_0_b,A_rcvr_1, A_rcvr_1_b}><{G_Strongest}> STRAT = ENV.
 
-STRAT >> "/home/mariano/code/henos-automata/src/results/genbuf_2_strat_joined_goals.rep".
+STRAT >> "/tmp/genbuf_2_strat_joined_goals.rep".

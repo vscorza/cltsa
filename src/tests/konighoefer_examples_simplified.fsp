@@ -32,5 +32,5 @@ ltl fluent G_2		= (!h0 || e0).
 |gr1| <{A_TRUE}><{G_2}> STRAT = ENV.
 
 
-TEST >> "/home/mariano/code/henos-automata/src/results/konighoefer_examples_simplified_game.rep".
-STRAT >> "/home/mariano/code/henos-automata/src/results/konighoefer_examples_simplified_strat.rep".
+TEST >> "/tmp/konighoefer_examples_simplified_game.rep".
+STRAT >> "/tmp/konighoefer_examples_simplified_strat.rep".

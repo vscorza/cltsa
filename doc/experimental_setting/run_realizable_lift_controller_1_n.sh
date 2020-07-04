@@ -13,8 +13,6 @@ for ((i=1; i<=$MAX_INSTANCE;i++))
 		for((j=1; j<=$ITERATIONS;j++))do INSTANCES="${INSTANCES} ${DST_DIR}lift_controller_${i2}.fsp Lift.Controller.${i2}"; done
 	done
 
-echo "Running realizable lift controller instances from size 1 to ${MAX_INSTANCE}"
-echo "Will run nice -20 ./cltsa -r -o ${OUTPUT_DIR} ${INSTANCES}"
 cd ${CLTSA_DIR}
 nice -20 ./cltsa -r -o $OUTPUT_DIR $INSTANCES
 

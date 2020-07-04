@@ -32,7 +32,7 @@ ltl fluent A_2		= (x2).
 |gr1| <{A_1, A_2}><{G_1}> STRAT = ENV.
 
 
-STRAT >> "/home/mariano/code/henos-automata/src/results/nonreal_test_1.rep".
+STRAT >> "/tmp/nonreal_test_1.rep".
 
 
 DIAG = S_0,

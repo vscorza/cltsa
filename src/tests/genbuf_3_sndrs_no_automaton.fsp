@@ -137,4 +137,4 @@ ltl fluent G_7				= (empty || deq).
 |f| ENV =(GENBUF).
 |gr1| <{A_rcvr_0, A_rcvr_0_b,A_rcvr_1, A_rcvr_1_b}><{G_1_2_sndr_0,G_1_2_sndr_1,G_1_2_sndr_2, G_12,G_7}> STRAT = ENV.
 
-STRAT >> "/home/mariano/code/henos-automata/src/results/genbuf_3_strat.rep".
+STRAT >> "/tmp/genbuf_3_strat.rep".

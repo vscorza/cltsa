@@ -32,24 +32,22 @@ WORKDIR $INSTALL_PATH
 RUN	pwd 	
 # Update APT sources from our local copy.
 COPY	sources.list /etc/apt/sources.list
-COPY	src.tar.gz src.tar.gz
-COPY	r_sh.tar.gz r_sh.tar.gz
+ADD	src.tar.gz /
+ADD	r_sh.tar.gz /
+COPY	.Rprofile /r_sh/.Rprofile
+
+# Base image https://hub.docker.com/r/rocker/rstudio
+#FROM rocker/tidyverse:latest
+
+RUN R -e "install.packages(c('dplyr','xtable','magrittr'), repos = 'http://mirror.fcaglp.unlp.edu.ar/CRAN/')"
 
 # Run updates again.
-RUN	pwd \
-	&& tar -xzvf src.tar.gz\
-	&& rm src.tar.gz \
-	&& tar -xzvf r_sh.tar.gz\
-	&& rm r_sh.tar.gz \	
-	&& cd r_sh \
-	&& chmod +x *.sh \
-	&& cd .. \
-	&& cd src \
+RUN	mkdir -p /tmp-results \
+	&& cd /src \
 	&& make clean \
 	&& make \
 	&& chmod +x cltsa \
-	&& cd .. \
-	&& mkdir -p /tmp-results \
-	&& cd r_sh \
-	&& ./run_all_reports.sh "/src/tests/" "/tmp-results/" "/src/" 1
+	&& cd /r_sh \
+	&& chmod +x *.sh \
+	&& ./run_all_reports.sh "/src/tests/" "/tmp-results/" "/src/" 1 "docker"
 	

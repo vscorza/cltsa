@@ -35,8 +35,8 @@ ltl fluent G_3		= (!h1 || e1).
 |gr1| <{A_TRUE}><{G_2, G_3}> STRAT = ENV.
 
 
-TEST >> "/home/mariano/code/henos-automata/src/results/konighoefer_examples_game.rep".
-STRAT >> "/home/mariano/code/henos-automata/src/results/konighoefer_examples_strat.rep".
+TEST >> "/tmp/konighoefer_examples_game.rep".
+STRAT >> "/tmp/konighoefer_examples_strat.rep".
 
 /***********
 **** THETA KONIGHOEFER MINIMIZATION
@@ -63,6 +63,6 @@ ltl env rho A_1 in TEST_M			= [](p || !p).
 |gr1| <{A_TRUE}><{G_3}> STRAT_M = ENV_M.
 
 
-TEST_M >> "/home/mariano/code/henos-automata/src/results/konighoefer_examples_game_m.rep".
-STRAT_M >> "/home/mariano/code/henos-automata/src/results/konighoefer_examples_strat_m.rep".
+TEST_M >> "/tmp/konighoefer_examples_game_m.rep".
+STRAT_M >> "/tmp/konighoefer_examples_strat_m.rep".
 

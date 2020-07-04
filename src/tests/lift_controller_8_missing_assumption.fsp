@@ -43,5 +43,5 @@ ltl fluent Goal_Last_Floor				= (f8).
 |gr1| <{Ass_True}><{Goal_Serve_Request_1,Goal_Serve_Request_2,Goal_Serve_Request_3,Goal_Serve_Request_4,Goal_Serve_Request_5
 	,Goal_Serve_Request_6,Goal_Serve_Request_7,Goal_Serve_Request_8,Goal_Back_To_Ground,Goal_Last_Floor}> STRAT = ENV.
 
-STRAT >> "/home/mariano/code/henos-automata/src/results/lift_controller_8_missing_assumption.rep".
+STRAT >> "/tmp/lift_controller_8_missing_assumption.rep".
 

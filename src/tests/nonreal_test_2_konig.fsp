@@ -54,9 +54,9 @@ ltl fluent A_3		= (x1 && x2).
 
 ||DIAG_COMP	= (K_STRAT || STRAT).
 
-STRAT_W >> "/home/mariano/code/henos-automata/src/results/nonreal_test_2_strat_winning.rep".
-TEST >> "/home/mariano/code/henos-automata/src/results/nonreal_test_2_game.rep".
-STRAT >> "/home/mariano/code/henos-automata/src/results/nonreal_test_2_strat.rep".
-ENV_K >> "/home/mariano/code/henos-automata/src/results/nonreal_test_2_k_game.rep".
-K_STRAT >> "/home/mariano/code/henos-automata/src/results/nonreal_test_2_k_strat.rep".
-DIAG_COMP >> "/home/mariano/code/henos-automata/src/results/nonreal_test_2_k_diag_comp.rep".
+STRAT_W >> "/tmp/nonreal_test_2_strat_winning.rep".
+TEST >> "/tmp/nonreal_test_2_game.rep".
+STRAT >> "/tmp/nonreal_test_2_strat.rep".
+ENV_K >> "/tmp/nonreal_test_2_k_game.rep".
+K_STRAT >> "/tmp/nonreal_test_2_k_strat.rep".
+DIAG_COMP >> "/tmp/nonreal_test_2_k_diag_comp.rep".
