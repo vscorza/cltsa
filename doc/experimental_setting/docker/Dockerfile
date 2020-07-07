@@ -32,6 +32,7 @@ WORKDIR $INSTALL_PATH
 RUN	pwd 	
 # Update APT sources from our local copy.
 COPY	sources.list /etc/apt/sources.list
+COPY	README.rmd /README.rmd
 ADD	src.tar.gz /
 ADD	r_sh.tar.gz /
 COPY	.Rprofile /r_sh/.Rprofile
