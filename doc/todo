@@ -1,11 +1,7 @@
 TODO:
 =====
-- improve reports
-	- add readme for experimental data
-	- write rmd consistent with validation 
-	- test local and docker setups
 - meeting	
-- plan paper for clts, tool and general thesis layout		
+	- plan paper for clts, tool and general thesis layout		
 - examples
 	- write amba version from Synthesis of AMBA AHB from Formal Specification:A Case Study
 	- write examples from symbolic repair paper
