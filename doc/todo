@@ -1,5 +1,7 @@
 TODO:
 =====
+- examples
+	- write amba version from Synthesis of AMBA AHB from Formal Specification:A Case Study
 - meeting	
 	- plan paper for clts, tool and general thesis layout		
 - examples
@@ -15,8 +17,12 @@ TODO:
 	- run tests for genbuf 4, 5, 6
 - review papers gr_1_star, performance_heuristics for gr1, minimal assumption refinement gr1 and synthesizing adaptive test stategies papers
 
-
 - after paper
+	- allow to define buchi fluent based on accepting state, for instance for automaton based properties in genbuf
+		- add syntax support (state fluent XX = (s_i, ..., s_j) in name.
+		- transform values as in fluents
+		- write tests
+		- run test and profile
 	- for non-realizability reduce diagnosis to single liveness goal not being satisfied
 	- run tests with dd, linear, dd wo last_partition optimization, goal minimization
 	- java client
@@ -54,7 +60,6 @@ TODO:
 		- keep inf scc over rankings
 	- compare against konighoefer and jvts systems, write experimental claim
 	- implement fluent consistency check
-	- allow to define buchi fluent based on accepting state, for instance for automaton based properties in genbuf
 	- implement IS_REALIZABLE(gr1). on parser
 	- review and relate gamma sat notion from symbolic repair with non trivial controllers, add check, compare to mtsa
 	- diagnose mutation over small parameters, produce hypothesis, scale both hypothesis and parameter to see if it holds
