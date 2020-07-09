@@ -23,6 +23,7 @@ TODO:
 		- transform values as in fluents
 		- write tests
 		- run test and profile
+		- test genbuf and amba with automata
 	- for non-realizability reduce diagnosis to single liveness goal not being satisfied
 	- run tests with dd, linear, dd wo last_partition optimization, goal minimization
 	- java client

@@ -2,127 +2,71 @@
 set Global_Alphabet = {}
 set Controllable_Alphabet = {}
 
-set Global_Signals	= {hReq0, hReq1, hLock0, hLock1, hTrans0, hTrans1, hBurst0, hBurst1, hBurst2, hReady, hGrant0, hGrant1, hMaster0, hMaster1, hMastLock, decide, busReq}
-set Output_Signals	= {hGrant0, hGrant1, hMaster, hMaster1, hMastLock, decide, busReq}
+set Global_Signals	= {hReq0, hReq1, hLock0, hLock1, hTrans0, hTrans1, hBurst0, hBurst1, hReady, hGrant0, hGrant1, hMaster0, hMaster1, 
+	hMastLock, decide, busReq, granted, a1_0, g2_0, g2_1, g3_0, g3_1, g3_2, g11_0_0, g11_1_0}
+set Output_Signals	= {hGrant0, hGrant1, hMaster0, hMaster1, hMastLock, decide, busReq, granted, a1_0, g2_0, g2_1, g3_0, g3_1, g3_2, g11_0_0, g11_1_0}
 order 				= {}
+/*
+	HTRANS1	HTRANS0
+	0	0	nonseq
+	0	1	seq
+	1	0	idle
+	HBURST1	HBURST0
+	0	0	single
+	0	1	incr4
+	1	0	incr (undetermined length)
+*/
 /***********
 **** THETA
 ***********/
-ltl env theta Init_Buffer_e in GENBUF	= (!sREQ0 && !sREQ1 && !rACK0 && !rACK1 && !full && empty && !a0 && !a1).
-ltl sys theta Init_Buffer_s in GENBUF	= (!bACK0 && !bACK1 && !bREQ0 && !bREQ1 && !enq && !deq && !slc0 && !s0 && !slc0 && !g0 && !g1 && !t).
+//A9 (i)
+ltl env theta Init_Buffer_e in AHB	= (!hReq0 && !hReq1 && !hLock0 && !hLock1 && !hTrans0 && hTrans1 && !hBurst0 && !hBurst1 && !hReady).
+ltl sys theta Init_Buffer_s in AHB	= (!hGrant0 && !hGrant1 && !hMaster0 && !hMaster1 && !hMastLock && !decide && !busReq && !granted &&
+	!a1_0 && !g2_0 && !g2_1 && !g3_0 && !g3_1 && !g3_2 && !g11_0_0 && !g11_1_0).
 /***********
 **** SYS RHO
 ***********/
-ltl sys rho G_1_sndr_0_g_g in GENBUF		= []((!g0 && !(sREQ0 && !bACK0))->(X(!g0))).
-ltl sys rho G_1_sndr_0_g_g1 in GENBUF		= []((!g0 && sREQ0 && !bACK0)->(X(g0))).
-ltl sys rho G_1_sndr_0_g1_g1 in GENBUF		= []((g0 && !bACK0)->(X(g0))).
-ltl sys rho G_1_sndr_0_g1_g in GENBUF		= []((g0 && bACK0)->(X(!g0))).
-ltl sys rho G_1_sndr_1_g_g in GENBUF		= []((!g1 && !(sREQ1 && !bACK1))->(X(!g1))).
-ltl sys rho G_1_sndr_1_g_g1 in GENBUF		= []((!g1 && sREQ1 && !bACK1)->(X(g1))).
-ltl sys rho G_1_sndr_1_g1_g1 in GENBUF		= []((g1 && !bACK1)->(X(g1))).
-ltl sys rho G_1_sndr_1_g1_g in GENBUF		= []((g1 && bACK1)->(X(!g1))).
-//sToB_REQ then not bToS_ACK
-ltl sys rho G_2_sndr_0 in GENBUF		= []((!sREQ0 && X(sREQ0)) -> (X(!bACK0))).
-ltl sys rho G_2_b_sndr_0 in GENBUF		= []((!bACK0 && !sREQ0) -> (X(!bACK0))).
-ltl sys rho G_2_sndr_1 in GENBUF		= []((!sREQ1 && X(sREQ1)) -> (X(!bACK1))).
-ltl sys rho G_2_b_sndr_1 in GENBUF		= []((!bACK1 && !sREQ1) -> (X(!bACK1))).
-//bACK only if sREQ
-ltl sys rho G_3_sndr0 in GENBUF		= []((!bACK0 && X(bACK0)) -> sREQ0).
-ltl sys rho G_3_sndr1 in GENBUF		= []((!bACK1 && X(bACK1)) -> sREQ1).
-//keep bACK up if sREQ still going
-ltl sys rho G_4_sndr0 in GENBUF		= []((bACK0 && sREQ0) -> X(bACK0)).
-ltl sys rho G_4_sndr1 in GENBUF		= []((bACK1 && sREQ1) -> X(bACK1)).
-//mutex bACK
-ltl sys rho G_5 in GENBUF			= []((!(bACK0 && bACK1))).
-ltl sys rho G_5_X in GENBUF			= [](X((!(bACK0 && bACK1)))).
-//mutex bREQ
-ltl sys rho G_5_b1_rcvr0 in GENBUF		= [](!(bREQ0 && bREQ1)).
-ltl sys rho G_5_b1_rcvr0 in GENBUF		= [](X(!(bREQ0 && bREQ1))).
-//keep bREQ if not yet ack
-ltl sys rho G_61_rcvr0 in GENBUF		= []((bREQ0 && !rACK0) -> X(bREQ0)).
-ltl sys rho G_61_rcvr1 in GENBUF		= []((bREQ1 && !rACK1) -> X(bREQ1)).
-//serving receivers in round robin fashion 
-ltl sys rho G_701 in GENBUF				= []((!s0 && bREQ0) -> X(s0)).//advance state
-ltl sys rho G_70_2 in GENBUF				= []((!s0 && !bREQ0) -> X(!s0)).//keep state
-//ltl sys rho G_70_3 in GENBUF				= []((!s0) -> (!bREQ1)).//restrict
-//ltl sys rho G_70_4 in GENBUF				= [](X((!s0) -> (!bREQ1))).//restrict X
-ltl sys rho G_711 in GENBUF				= []((s0 && bREQ1) -> X(!s0)).
-ltl sys rho G_71_2 in GENBUF				= []((s0 && !bREQ1) -> X(s0)).
-//ltl sys rho G_71_3 in GENBUF				= []((s0) -> (!bREQ0)).
-//ltl sys rho G_71_4 in GENBUF				= [](X((s0) -> (!bREQ0))).
-//lower bREQ when rACK received
-ltl sys rho G_8_rcvr0 in GENBUF		= [](rACK0 -> X(!bREQ0)).
-ltl sys rho G_8_rcvr1 in GENBUF		= [](rACK1 -> X(!bREQ1)).
-//bACK raises iff enq
-ltl sys rho G_9_1 in GENBUF			= [](X(enq) <-> ((!bACK0 && X(bACK0)) || (!bACK1 && X(bACK1)) )).
-//update slc accordingly
-ltl sys rho G_9_2 in GENBUF			= [](((!bACK0 && X(bACK0)) -> (!X(slc0))) && ((!bACK1 && X(bACK1)) -> (X(slc0)))).
-//only deq if rACK'd
-ltl sys rho G10 in GENBUF			= [](X(deq) ->	((!X(rACK0) && rACK0)	||	(!X(rACK1) && rACK1))).
-//restrict eng/deq operations
-ltl sys rho G111 in GENBUF			= []((full && !deq)-> !enq).
-ltl sys rho G111_X in GENBUF			= [](X((full && !deq)-> !enq)).
-ltl sys rho G11_2 in GENBUF			= [](empty-> !deq).
-ltl sys rho G11_2_X in GENBUF			= [](X(empty-> !deq)).
-ltl sys rho G_12_t0_t0 in GENBUF		= []((!t && X(empty || deq))->(X(!t))).
-ltl sys rho G_12_t0_t1 in GENBUF		= []((!t && X(!empty && !deq))->(X(t))).
-ltl sys rho G_12_t1_t1 in GENBUF		= []((t && X(!deq))->(X(t))).
-ltl sys rho G_12_t1_t0 in GENBUF		= []((t && X(deq))->(X(!t))).
-
-//if sREQ and not full then should ENQ
-ltl sys rho G13 in GENBUF			= []((!full && (sREQ0 || sREQ1)) -> (enq || X(enq))).
+//G1 if hmaster set for i then busreq equals hbusreq_i (i)
+ltl sys rho G1_0 in AHB		= [](hMaster0 -> (busReq <-> hReq0)).
+ltl sys rho G1_1 in AHB		= [](hMaster1 -> (busReq <-> hReq1)).
 
 /***********
 **** ENV RHO
 ***********/
-
-//keep sREQ if not yet ACK'd
-ltl env rho A11_sndr0 in GENBUF		= []((sREQ0 && !bACK0) -> X(sREQ0)).
-ltl env rho A11_sndr1 in GENBUF		= []((sREQ1 && !bACK1) -> X(sREQ1)).
-//lower sREQ once ACK'd
-ltl env rho A1_2_sndr0 in GENBUF		= [](bACK0 -> X(!sREQ0)).
-ltl env rho A1_2_sndr1 in GENBUF		= [](bACK1 -> X(!sREQ1)).
-//keep sToB_REQ if not yet ACK'd
-ltl env rho A_2_sndr_0_a0_a0 in GENBUF		= []((!a0 && !((bREQ0) && !rACK0))->(X(!a0))).
-ltl env rho A_2_sndr_0_a0_a1 in GENBUF		= []((!a0 && (bREQ0) && !rACK0)->(X(a0))).
-ltl env rho A_2_sndr_0_a1_a1 in GENBUF		= []((a0 && !((rACK0)))->(X(a0))).
-ltl env rho A_2_sndr_0_a1_a0 in GENBUF		= []((a0 && (rACK0))->(X(!a0))).
-ltl env rho A_2_sndr_1_a0_a0 in GENBUF		= []((!a1 && !((bREQ1) && !rACK1))->(X(!a1))).
-ltl env rho A_2_sndr_1_a0_a1 in GENBUF		= []((!a1 && (bREQ1) && !rACK1)->(X(a1))).
-ltl env rho A_2_sndr_1_a1_a1 in GENBUF		= []((a1 && !((rACK1)))->(X(a1))).
-ltl env rho A_2_sndr_1_a1_a0 in GENBUF		= []((a1 && (rACK1))->(X(!a1))).
-//lower rACK if no bREQ
-ltl env rho A_2_2_sndr0 in GENBUF		= []((!bREQ0) -> X(!rACK0)).
-ltl env rho A_2_2_sndr1 in GENBUF		= []((!bREQ1) -> X(!rACK1)).
-//keep rACK if still REQ's
-ltl env rho A_3_rcvr0 in GENBUF		= []((bREQ0 && rACK0) -> X(rACK0)).
-ltl env rho A_3_rcvr1 in GENBUF		= []((bREQ1 && rACK1) -> X(rACK1)).
-//rACK if REQ'd
-ltl env rho A_4_rcvr0 in GENBUF		= [](X(rACK0) -> bREQ0).
-ltl env rho A_4_rcvr1 in GENBUF		= [](X(rACK1) -> bREQ1).
-//keep empty / full fixed if deq == enq
-ltl env rho A_51 in GENBUF			= []((deq <-> enq) -> (empty <-> X(empty))).
-ltl env rho A_5_2 in GENBUF			= []((deq <-> enq) -> (full <-> X(full))).
-ltl env rho A_5_3 in GENBUF			= []((enq && !deq) -> !X(empty)).
-ltl env rho A_5_4 in GENBUF			= []((deq && !enq) -> !X(full)).
-
+//A1 release busreq after incr
+ltl env rho A1_0_0 in AHB	= []((!a1_0 && (!hMastLock || !(!hBurst0 && hBurst1))) -> X(!a1_0)).
+ltl env rho A1_0_1 in AHB	= []((!a1_0 && (hMastLock && (!hBurst0 && hBurst1))) -> X(a1_0)).
+ltl env rho A1_1_1 in AHB	= []((a1_0 && busReq) -> X(a1_0)).
+ltl env rho A1_1_1 in AHB	= []((a1_0 && !busReq) -> X(!a1_0)).
+//A3 if requesting lock also request bus (i)
+ltl env rho A3_0 in AHB		= []((!hBusReq0 && !hLock0 && X(hLock0)) -> X(hBusReq0)).
+ltl env rho A3_1 in AHB		= []((!hBusReq1 && !hLock1 && X(hLock1)) -> X(hBusReq1)).
+//A4 keep trans and burst consistent while not released by slave
+ltl env rho A4_trans in AHB	= [](!hReady -> ((hTrans0 <-> X(hTrans0)) && (hTrans1 <-> X(hTrans1)))).
+ltl env rho A4_burst in AHB	= [](!hReady -> ((hBurst0 <-> X(hBurst0)) && (hBurst1 <-> X(hBurst1)))).
+//A5 htrans should not be followed by seq after idle
+ltl env rho A5 in AHB		= []((!hTrans0 && hTrans1) -> X(!(hTrans0 && !hTrans1))).
+//A6 update htrans from nonseq to seq after first hready from incr4
+ltl env rho A6 in AHB		= []((!hTrans0 && !hTrans1 && hBurst0 && !hBurst1 && hReady) 
+	-> X(hTrans0 && !hTrans1)).
+//A7 set nonseq trans if granted and hready
+ltl env rho A7 in AHB		= []((granted && hReady) -> X(!hTrans0 && !hTrans1)).
+//A8 if no busreq then htrans is set to idle (i)
+ltl env rho A8 in AHB		= []((!hBusReq0 && !hBusReq1) -> (!hTrans0 && hTrans1)).
 /***********
 **** FLUENTS
 ***********/
-ltl fluent A_rcvr_0		= (!a0).
-ltl fluent A_rcvr_0_b		= (a0 || empty).
-ltl fluent A_rcvr_1		= (!a1).
-ltl fluent A_rcvr_1_b		= (a1 || empty).
-//ltl fluent G_bREQ0		= (bREQ0).
-ltl fluent G_1_2_sndr_0		= (!g0).
-ltl fluent G_1_2_sndr_1		= (!g1).
-ltl fluent G_True		= (bREQ0 || !bREQ0).
-ltl fluent G_12				= (!t).
-ltl fluent G_7				= (empty || deq).
+ltl fluent A1			= (!a1).
+ltl fluent A2			= (hReady).
+ltl fluent G2			= (!g2_0 && !g2_1).
+ltl fluent G3			= (!g3_0 && !g3_1 && !g3_2).
+//G11 (i)
+ltl_fluent G11_0		= (!g11_0).
+ltl_fluent G11_1		= (!g11_1).
 /***********
 **** SYNTHESIS
 ***********/
-|f| ENV =(GENBUF).
-|gr1| <{A_rcvr_0, A_rcvr_0_b,A_rcvr_1, A_rcvr_1_b}><{G_1_2_sndr_0,G_1_2_sndr_1, G_12,G_7}> STRAT = ENV.
+|f| ENV =(AHB).
+|gr1| <{A1, A2}><{G2, G3, G11_0, G11_1}> STRAT = ENV.
 
-STRAT >> "/tmp/genbuf_2_strat.rep".
+STRAT >> "/tmp/ahb_2_strat.rep".
