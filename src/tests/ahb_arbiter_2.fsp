@@ -5,7 +5,7 @@ set Controllable_Alphabet = {}
 
 set Global_Signals	= {hReq0, hReq1, hLock0, hLock1, hTrans0, hTrans1, hBurst0, hBurst1, hReady, hGrant0, hGrant1, hMaster0, hMaster1, 
 	hMastLock, decide, busReq, granted, a1_0, g2_0, g2_1, g3_0, g3_1, g3_2, g10_1_0, g10_1_1, g11_0_0, g11_1_0}
-set Output_Signals	= {hGrant0, hGrant1, hMaster0, hMaster1, hMastLock, decide, busReq, granted, a1_0, g2_0, g2_1, g3_0, g3_1, g3_2, g10_1, g11_0_0, g11_1_0}
+set Output_Signals	= {hGrant0, hGrant1, hMaster0, hMaster1, hMastLock, decide, busReq, granted, a1_0, g2_0, g2_1, g3_0, g3_1, g3_2, g10_1_0, g10_1_1, g11_0_0, g11_1_0}
 order 				= {}
 /*
 	HTRANS1	HTRANS0
@@ -35,9 +35,9 @@ ltl sys rho G2_00_00 in AHB	= []((!g2_0 && !g2_1 &&
 	!(hMastLock && hBurst1 && !hBurst0 && hReady && !hTrans0 && !hTrans1)) -> X(!g2_0 && !g2_1)).
 ltl sys rho G2_00_01 in AHB	= []((!g2_0 && !g2_1 && 
 	hMastLock && hBurst1 && !hBurst0 && hReady && !hTrans0 && !hTrans1) -> X(g2_0 && !g2_1)).
-ltl sys rho G2_01_01 in AHB	= []((g2_0 && !g2_1 && hTrans0 && !Trans1 && busReq) -> X(g2_0 && !g2_1)).
-ltl sys rho G2_01_00 in AHB	= []((g2_0 && !g2_1 && hTrans0 && !busReq) -> X(!g2_0 && !g2_1)).
-ltl sys rho G2_01_10 in AHB	= []((g2_0 && !g2_1 && !(hTrans0 && !Trans1) && busReq) -> X(!g2_0 && g2_1)).
+ltl sys rho G2_01_01 in AHB	= []((g2_0 && !g2_1 && hTrans0 && !hTrans1 && busReq) -> X(g2_0 && !g2_1)).
+ltl sys rho G2_01_00 in AHB	= []((g2_0 && !g2_1 && !busReq) -> X(!g2_0 && !g2_1)).
+ltl sys rho G2_01_10 in AHB	= []((g2_0 && !g2_1 && !(hTrans0 && !hTrans1) && busReq) -> X(!g2_0 && g2_1)).
 //G3 if in incr4 burst mode keep trans as seq until the fourth hready was raised
 ltl sys rho G3_000_000 in AHB	= []((!g3_0 && !g3_1 && !g3_2 && !(hMastLock && hBurst0 && !hBurst1 && hReady &&
 	!hTrans0 && !hTrans1)) -> X(!g3_0 && !g3_1 && !g3_2)).
@@ -68,7 +68,7 @@ ltl sys rho G8_lock in AHB	= []((!hReady || !granted) -> ((hLock0 <-> X(hLock0))
 //G9 if not deciding keep hgrant fixed (i)
 ltl sys rho G9 in AHB		= [](!decide -> ((hGrant0 <-> X(hGrant0)) && (hGrant1 <-> X(hGrant1)))).
 //G10 do not grant before hbusreq / if no busreq grant 0 (i)
-ltl sys rho G10_1_00_00 in AHB	= []((!g10_1_0 && !g10_1_1 && hGrant1) -> X(!g10_1 && !g10_1_1)).
+ltl sys rho G10_1_00_00 in AHB	= []((!g10_1_0 && !g10_1_1 && hGrant1) -> X(!g10_1_0 && !g10_1_1)).
 ltl sys rho G10_1_00_01 in AHB	= []((!g10_1_0 && !g10_1_1 && !hGrant1) -> X(g10_1_0 && !g10_1_1)).
 ltl sys rho G10_1_01_01 in AHB	= []((g10_1_0 && !g10_1_1 && !hGrant1 && !hReq1) -> X(g10_1_0 && !g10_1_1)).
 ltl sys rho G10_1_01_00 in AHB	= []((g10_1_0 && !g10_1_1 && !hGrant1 && hReq1) -> X(!g10_1_0 && !g10_1_1)).
@@ -76,14 +76,14 @@ ltl sys rho G10_1_01_10 in AHB	= []((g10_1_0 && !g10_1_1 && hGrant1) -> X(!g10_1
 ltl sys rho G10_1_10_10 in AHB	= []((!g10_1_0 && g10_1_1) -> X(!g10_1_0 && g10_1_1)).
 ltl sys rho G10_grant0 in AHB	= []((decide && !hReq0 && !hReq1) -> X(hGrant0)).
 //G11 if hReq_i then evt. hReq_i is lowered or hMaster_i is selected (i)
-ltl sys rho G11_0_0_0 in AHB	= []((!g11_0 && !hReq0) -> X(!g11_0)).
-ltl sys rho G11_0_0_1 in AHB	= []((!g11_0 && hReq0) -> X(g11_0)).
-ltl sys rho G11_0_1_1 in AHB	= []((g11_0 && hReq0 && !hMaster0) -> X(g11_0)).
-ltl sys rho G11_0_1_0 in AHB	= []((g11_0 && (!hReq0 || hMaster0)) -> X(!g11_0)).
-ltl sys rho G11_1_0_0 in AHB	= []((!g11_1 && !hReq1) -> X(!g11_1)).
-ltl sys rho G11_1_0_1 in AHB	= []((!g11_1 && hReq1) -> X(g11_1)).
-ltl sys rho G11_1_1_1 in AHB	= []((g11_1 && hReq1 && !hMaster1) -> X(g11_1)).
-ltl sys rho G11_1_1_0 in AHB	= []((g11_1 && (!hReq1 || hMaster1)) -> X(!g11_1)).
+ltl sys rho G11_0_0_0 in AHB	= []((!g11_0_0 && !hReq0) -> X(!g11_0_0)).
+ltl sys rho G11_0_0_1 in AHB	= []((!g11_0_0 && hReq0) -> X(g11_0_0)).
+ltl sys rho G11_0_1_1 in AHB	= []((g11_0_0 && hReq0 && !hMaster0) -> X(g11_0_0)).
+ltl sys rho G11_0_1_0 in AHB	= []((g11_0_0 && (!hReq0 || hMaster0)) -> X(!g11_0_0)).
+ltl sys rho G11_1_0_0 in AHB	= []((!g11_1_0 && !hReq1) -> X(!g11_1_0)).
+ltl sys rho G11_1_0_1 in AHB	= []((!g11_1_0 && hReq1) -> X(g11_1_0)).
+ltl sys rho G11_1_1_1 in AHB	= []((g11_1_0 && hReq1 && !hMaster1) -> X(g11_1_0)).
+ltl sys rho G11_1_1_0 in AHB	= []((g11_1_0 && (!hReq1 || hMaster1)) -> X(!g11_1_0)).
 
 /***********
 **** ENV RHO
@@ -94,8 +94,8 @@ ltl env rho A1_0_1 in AHB	= []((!a1_0 && (hMastLock && (!hBurst0 && hBurst1))) -
 ltl env rho A1_1_1 in AHB	= []((a1_0 && busReq) -> X(a1_0)).
 ltl env rho A1_1_1 in AHB	= []((a1_0 && !busReq) -> X(!a1_0)).
 //A3 if requesting lock also request bus (i)
-ltl env rho A3_0 in AHB		= []((!hBusReq0 && !hLock0 && X(hLock0)) -> X(hBusReq0)).
-ltl env rho A3_1 in AHB		= []((!hBusReq1 && !hLock1 && X(hLock1)) -> X(hBusReq1)).
+ltl env rho A3_0 in AHB		= []((!hReq0 && !hLock0 && X(hLock0)) -> X(hReq0)).
+ltl env rho A3_1 in AHB		= []((!hReq1 && !hLock1 && X(hLock1)) -> X(hReq1)).
 //A4 keep trans and burst consistent while not released by slave
 ltl env rho A4_trans in AHB	= [](!hReady -> ((hTrans0 <-> X(hTrans0)) && (hTrans1 <-> X(hTrans1)))).
 ltl env rho A4_burst in AHB	= [](!hReady -> ((hBurst0 <-> X(hBurst0)) && (hBurst1 <-> X(hBurst1)))).
@@ -107,18 +107,18 @@ ltl env rho A6 in AHB		= []((!hTrans0 && !hTrans1 && hBurst0 && !hBurst1 && hRea
 //A7 set nonseq trans if granted and hready
 ltl env rho A7 in AHB		= []((granted && hReady) -> X(!hTrans0 && !hTrans1)).
 //A8 if no busreq then htrans is set to idle (i)
-ltl env rho A8 in AHB		= []((!hBusReq0 && !hBusReq1) -> (!hTrans0 && hTrans1)).
+ltl env rho A8 in AHB		= []((!hReq0 && !hReq1) -> (!hTrans0 && hTrans1)).
 /***********
 **** FLUENTS
 ***********/
-ltl fluent A1			= (!a1).
+ltl fluent A1			= (!a1_0).
 ltl fluent A2			= (hReady).
 ltl fluent G2			= (!g2_0 && !g2_1).
 ltl fluent G3			= (!g3_0 && !g3_1 && !g3_2).
 //G11 (i)
 ltl fluent G10_1		= (!g10_1_0 && !g10_1_1).
-ltl fluent G11_0		= (!g11_0).
-ltl fluent G11_1		= (!g11_1).
+ltl fluent G11_0		= (!g11_0_0).
+ltl fluent G11_1		= (!g11_1_0).
 /***********
 **** SYNTHESIS
 ***********/
