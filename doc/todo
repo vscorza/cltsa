@@ -2,7 +2,10 @@ TODO:
 =====
 - examples
 	- write amba version from Synthesis of AMBA AHB from Formal Specification:A Case Study
-- meeting	
+- meeting
+		- review and try to reduce arbiter
+		- specify master
+		- specify slave	
 	- plan paper for clts, tool and general thesis layout		
 - examples
 	- write examples from symbolic repair paper
