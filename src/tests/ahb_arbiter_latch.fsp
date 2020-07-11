@@ -1,4 +1,4 @@
-//AHB Arbiter 2 masters - Synthesis of AMBA AHB from Formal Specification:A Case Study
+//AHB Arbiter 2 masters - Grant latch - Synthesis of AMBA AHB from Formal Specification:A Case Study
 //Formulae marked with (i) means that part of it is parameterized
 set Global_Alphabet = {}
 set Controllable_Alphabet = {}
