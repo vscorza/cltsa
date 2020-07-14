@@ -4,6 +4,8 @@ TODO:
 	- write amba version from Synthesis of AMBA AHB from Formal Specification:A Case Study
 - meeting
 		- review and try to reduce arbiter
+			- mgr has 34725891 trans. synthesis took 217 s
+			- write scheduler
 		- specify master
 		- specify slave	
 	- plan paper for clts, tool and general thesis layout		
