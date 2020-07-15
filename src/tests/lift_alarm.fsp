@@ -1,0 +1,59 @@
+//LIFT CONTROLLER 3 FLOORS - WITH ALARM/STOP SIGNALS
+
+set Global_Alphabet = {}
+set Controllable_Alphabet = {}
+
+set Global_Signals	= {b1, b2, b3, alarm, stop, f1, f2, f3}
+set Output_Signals	= {stop, f1, f2, f3} //stop assigned as env. in original spec.
+order 				= {}
+
+/***********
+**** THETA
+***********/
+//A9 (i)
+ltl env theta Init_Buffer_e in LIFT	= (!b1 && !b2 && !b3 && !alarm). 
+ltl sys theta Init_Buffer_s in LIFT	= (f1 && !f2 && !f3 && !stop).
+/***********
+**** SYS RHO
+***********/
+ltl sys rho Lift_mutex in LIFT		= [](!(f1 && f2) && !(f1 && f3) && !(f2 && f3)).
+ltl sys rho Dont_jump_f3 in LIFT	= []((!stop && f2) -> X(f2 || f3)).
+//restriction for f2 not needed for this particular instance (be aware that larger parameters will break if omitted)
+ltl sys rho Dont_jump_f2 in LIFT	= []((!stop && f2) -> X(f1 || f2 || f3)).
+ltl sys rho Dont_jump_f1 in LIFT	= []((!stop && f1) -> X(f1 || f2)).
+//This one breaks the go back to first floor liveness guarantee
+ltl sys rho Only_when_requested in LIFT	= [](((f1 && X(f2)) || (f2 && X(f3)) || (f3 && X(f2) || (f2 && X(f1)))) -> (b1 || b2 || b3)).
+ltl sys rho Stop_if_alarm_set in LIFT	= [](alarm -> X(stop)).
+ltl sys rho Stop_fix_f1 in LIFT		= []((stop && f1) -> X(f1)).
+ltl sys rho Stop_fix_f2 in LIFT		= []((stop && f2) -> X(f2)).
+ltl sys rho Stop_fix_f3 in LIFT		= []((stop && f3) -> X(f3)).
+/***********
+**** ENV RHO
+***********/
+//A1 release busreq after incr
+ltl env rho Release_b1_when_served in AHB	= []((b1 && f1) -> X(!b1)).
+ltl env rho Release_b2_when_served in AHB	= []((b2 && f2) -> X(!b2)).
+ltl env rho Release_b3_when_served in AHB	= []((b3 && f3) -> X(!b3)).
+ltl env rho Mantain_b1_when_not_served in AHB	= []((b1 && !f1) -> X(b1)).
+ltl env rho Mantain_b2_when_not_served in AHB	= []((b2 && !f2) -> X(b2)).
+ltl env rho Mantain_b3_when_not_served in AHB	= []((b3 && !f3) -> X(b3)).
+/***********
+**** FLUENTS
+***********/
+ltl fluent Dummy_A	= (b1 || !b1).
+ltl fluent G1		= ((!stop && b1) -> f1).
+ltl fluent G2		= ((!stop && b2) -> f2).
+ltl fluent G3		= ((!stop && b3) -> f3).
+//Unrealizable due to Only_move_if_requested
+ltl fluent G1_Strong	= (f1).
+//Unrealizable due to missing assumptions[]<>bi
+ltl fluent G2_Strong	= (f2).
+ltl fluent G3_Strong	= (f3).
+/***********
+**** SYNTHESIS
+***********/
+|f| ENV =(LIFT).
+|gr1| <{Dummy_A}><{G1,G2,G3,G1_Strong,G2_Strong,G3_Strong}> STRAT = ENV.
+
+LIFT >> "/tmp/lift_alarm.rep".
+STRAT >> "/tmp/lift_alarm_diag.rep".
