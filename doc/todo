@@ -1,27 +1,46 @@
 TODO:
 =====
+- add changes from review
+- review validation
+	- explain cases and parameters (sizes and complexities)
+	- explain difference between industrial and toy cases
+	- explain non realizability modifications
+	- explain why exploration robot minimization is linear w.r.t. to the environment
+	- explain cutting criteria (take timeout from previous publication)
+	- move references to symbolic to discussion
+	- explain how phi sizes affect diagnosis time
+	- explain difference between lift controller 6-8, genbuf 2-3 (review profiler)
+	- review DeltaE'/ DeltaC lift 8 (error)
+	- explain why exploration robot DeltaE' / DeltaC > 1
+	- change missing assumption for missing liveness
+	- remove reference to 7 runs and whiskers
+	- fig 11. explain that since gr1 is non lineal w.r.t. to input, is of relevance that diagnosis is
+	- fig 13. would be better to check time instead of steps (comment 13, 12)
+	- review konighoefer thesis see removal prct. compare to our removing percentage
+- meeting
 - examples
 	- write amba version from Synthesis of AMBA AHB from Formal Specification:A Case Study
-- meeting
 		- review and try to reduce arbiter
 			- mgr has 34725891 trans. synthesis took 217 s
 			- write scheduler
 		- specify master
 		- specify slave	
-	- plan paper for clts, tool and general thesis layout		
-- examples
 	- write examples from symbolic repair paper
-	- write example from ltl_paxos_2 paper (Towards Modeling and Model Checking Fault-Tolerant Distributed Algorithms) (https://www.youtube.com/watch?v=-Bl5GleEN5s)
-	- ivy (kenneth mcmillan)
-		- add leader election/multi paxos example (https://www.discotec.org/2020/invited#kenneth-mcmillan)
-		- risc v memory coherence
-	- check spectra (maoz) repository for unrealizable specs
-	- review https://www.cl.cam.ac.uk/~sf502/regressions/rmem/help.html for examples
-	- update values and validation section
-	- run tests for genbuf 4, 5, 6
+- phd meeting	
+	- plan paper for clts, tool and general thesis layout	
 - review papers gr_1_star, performance_heuristics for gr1, minimal assumption refinement gr1 and synthesizing adaptive test stategies papers
 
 - after paper
+	- examples
+		- review ciolek thesis
+		- write example from ltl_paxos_2 paper (Towards Modeling and Model Checking Fault-Tolerant Distributed Algorithms) (https://www.youtube.com/watch?v=-Bl5GleEN5s)
+		- ivy (kenneth mcmillan)
+			- add leader election/multi paxos example (https://www.discotec.org/2020/invited#kenneth-mcmillan)
+			- risc v memory coherence
+		- check spectra (maoz) repository for unrealizable specs
+		- review https://www.cl.cam.ac.uk/~sf502/regressions/rmem/help.html for examples
+		- update values and validation section
+		- run tests for genbuf 4, 5, 6
 	- allow to define buchi fluent based on accepting state, for instance for automaton based properties in genbuf
 		- add syntax support (state fluent XX = (s_i, ..., s_j) in name.
 		- transform values as in fluents
