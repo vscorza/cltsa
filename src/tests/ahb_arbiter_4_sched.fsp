@@ -22,22 +22,22 @@ ltl sys rho G9 in AHB		= [](!decide -> ((sel0 <-> X(sel0)) && (sel1 <-> X(sel1))
 ltl sys rho G10_1_00_00 in AHB	= []((!g10_1_0 && !g10_1_1 && (sel0 && !sel1)) -> X(!g10_1_0 && !g10_1_1)).
 ltl sys rho G10_1_00_01 in AHB	= []((!g10_1_0 && !g10_1_1 && !(sel0 && !sel1)) -> X(g10_1_0 && !g10_1_1)).
 ltl sys rho G10_1_01_01 in AHB	= []((g10_1_0 && !g10_1_1 && !(sel0 && !sel1) && !hReq1) -> X(g10_1_0 && !g10_1_1)).
-ltl sys rho G10_1_01_00 in AHB	= []((g10_1_0 && !g10_1_1 && !(sel0 && !sel1) && hReq1) -> X(!g10_1_0 && !g10_1_1)).
-ltl sys rho G10_1_01_10 in AHB	= []((g10_1_0 && !g10_1_1 && (sel0 && !sel1)) -> X(!g10_1_0 && g10_1_1)).
+ltl sys rho G10_1_01_00 in AHB	= []((g10_1_0 && !g10_1_1 && hReq1) -> X(!g10_1_0 && !g10_1_1)).
+ltl sys rho G10_1_01_10 in AHB	= []((g10_1_0 && !g10_1_1 && (sel0 && !sel1) && !hReq1) -> X(!g10_1_0 && g10_1_1)).
 ltl sys rho G10_1_10_10 in AHB	= []((!g10_1_0 && g10_1_1) -> X(!g10_1_0 && g10_1_1)).
 
 ltl sys rho G10_2_00_00 in AHB	= []((!g10_2_0 && !g10_2_1 && (!sel0 && sel1)) -> X(!g10_2_0 && !g10_2_1)).
 ltl sys rho G10_2_00_01 in AHB	= []((!g10_2_0 && !g10_2_1 && !(!sel0 && sel1)) -> X(g10_2_0 && !g10_2_1)).
 ltl sys rho G10_2_01_01 in AHB	= []((g10_2_0 && !g10_2_1 && !(!sel0 && sel1) && !hReq2) -> X(g10_2_0 && !g10_2_1)).
-ltl sys rho G10_2_01_00 in AHB	= []((g10_2_0 && !g10_2_1 && !(!sel0 && sel1) && hReq2) -> X(!g10_2_0 && !g10_2_1)).
-ltl sys rho G10_2_01_10 in AHB	= []((g10_2_0 && !g10_2_1 && (!sel0 && sel1)) -> X(!g10_2_0 && g10_2_1)).
+ltl sys rho G10_2_01_00 in AHB	= []((g10_2_0 && !g10_2_1 && hReq2) -> X(!g10_2_0 && !g10_2_1)).
+ltl sys rho G10_2_01_10 in AHB	= []((g10_2_0 && !g10_2_1 && (!sel0 && sel1) && !hReq2) -> X(!g10_2_0 && g10_2_1)).
 ltl sys rho G10_2_10_10 in AHB	= []((!g10_2_0 && g10_2_1) -> X(!g10_2_0 && g10_2_1)).
 
 ltl sys rho G10_3_00_00 in AHB	= []((!g10_3_0 && !g10_3_1 && (sel0 && sel1)) -> X(!g10_3_0 && !g10_3_1)).
 ltl sys rho G10_3_00_01 in AHB	= []((!g10_3_0 && !g10_3_1 && !(sel0 && sel1)) -> X(g10_3_0 && !g10_3_1)).
 ltl sys rho G10_3_01_01 in AHB	= []((g10_3_0 && !g10_3_1 && !(sel0 && sel1) && !hReq3) -> X(g10_3_0 && !g10_3_1)).
-ltl sys rho G10_3_01_00 in AHB	= []((g10_3_0 && !g10_3_1 && !(sel0 && sel1) && hReq3) -> X(!g10_3_0 && !g10_3_1)).
-ltl sys rho G10_3_01_10 in AHB	= []((g10_3_0 && !g10_3_1 && (sel0 && sel1)) -> X(!g10_3_0 && g10_3_1)).
+ltl sys rho G10_3_01_00 in AHB	= []((g10_3_0 && !g10_3_1 && hReq3) -> X(!g10_3_0 && !g10_3_1)).
+ltl sys rho G10_3_01_10 in AHB	= []((g10_3_0 && !g10_3_1 && (sel0 && sel1) && !hReq3) -> X(!g10_3_0 && g10_3_1)).
 ltl sys rho G10_3_10_10 in AHB	= []((!g10_3_0 && g10_3_1) -> X(!g10_3_0 && g10_3_1)).
 
 ltl sys rho G10_grant0 in AHB	= []((decide && !hReq0 && !hReq1 && !hReq2 && !hReq3) -> X(!sel0 && !sel1)).
@@ -50,9 +50,9 @@ ltl sys rho G10_grant0 in AHB	= []((decide && !hReq0 && !hReq1 && !hReq2 && !hRe
 ***********/
 ltl fluent A10			= (decide).
 //G11 (i)
-ltl fluent G10_1		= (!g10_1_0 && !g10_1_1).
-ltl fluent G10_2		= (!g10_2_0 && !g10_2_1).
-ltl fluent G10_3		= (!g10_3_0 && !g10_3_1).
+ltl fluent G10_1		= ((!g10_1_0 && !g10_1_1) || (g10_1_0 && !g10_1_1)).
+ltl fluent G10_2		= ((!g10_2_0 && !g10_2_1) || (g10_2_0 && !g10_2_1)).
+ltl fluent G10_3		= ((!g10_3_0 && !g10_3_1) || (g10_3_0 && !g10_3_1)).
 ltl fluent G11_0		= (!hReq0 || (!sel0 && !sel1)).
 ltl fluent G11_1		= (!hReq1 || (sel0 && !sel1)).
 ltl fluent G11_2		= (!hReq2 || (!sel0 && sel1)).
