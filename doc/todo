@@ -1,35 +1,38 @@
 TODO:
 =====
-- add changes from review
 - review validation
-	- explain cases and parameters (sizes and complexities)
-	- explain difference between industrial and toy cases
-	- explain non realizability modifications
-	- explain why exploration robot minimization is linear w.r.t. to the environment
-	- explain cutting criteria (take timeout from previous publication)
+	- running tests
+		- review DeltaE'/ DeltaC lift 8 (error)
+		- define cutting criteria and re run 
+		- review konighoefer thesis see removal prct. compare to our removing percentage
+	- corrections
+		- change missing assumption for missing liveness
+		- remove reference to 7 runs and whiskers
+		- fig 11. explain that since gr1 is non lineal w.r.t. to input, is of relevance that diagnosis is
+		- fig 13. would be better to check time instead of steps (comment 13, 12)
+	- explain tests
+		- explain cases and parameters (sizes and complexities)
+		- explain difference between industrial and toy cases
+		- explain non realizability modifications
+		- explain cutting criteria (take timeout from previous publication)
+		- explain how phi sizes affect diagnosis time
+	- anecdotical 
+		- explain why exploration robot minimization is linear w.r.t. to the environment
+		- explain why exploration robot DeltaE' / DeltaC > 1
+		- explain difference between lift controller 6-8, genbuf 2-3 (review profiler)
+- discussion
 	- move references to symbolic to discussion
-	- explain how phi sizes affect diagnosis time
-	- explain difference between lift controller 6-8, genbuf 2-3 (review profiler)
-	- review DeltaE'/ DeltaC lift 8 (error)
-	- explain why exploration robot DeltaE' / DeltaC > 1
-	- change missing assumption for missing liveness
-	- remove reference to 7 runs and whiskers
-	- fig 11. explain that since gr1 is non lineal w.r.t. to input, is of relevance that diagnosis is
-	- fig 13. would be better to check time instead of steps (comment 13, 12)
-	- review konighoefer thesis see removal prct. compare to our removing percentage
 - meeting
 - examples
 	- write amba version from Synthesis of AMBA AHB from Formal Specification:A Case Study
-		- review and try to reduce arbiter
-			- mgr has 34725891 trans. synthesis took 217 s
-			- write scheduler
 		- specify master
 		- specify slave	
 	- write examples from symbolic repair paper
+	- prove correct decomposition of ahb arbiter into modules
 - phd meeting	
 	- plan paper for clts, tool and general thesis layout	
 - review papers gr_1_star, performance_heuristics for gr1, minimal assumption refinement gr1 and synthesizing adaptive test stategies papers
-
+- review jits from maoz, subash shankar work https://dblp.org/pers/s/Shankar:Subash.html, Modular Synthesis of Reactive Programs Aalok Thakkar, Kedar Namjoshi, Richard Trefler
 - after paper
 	- examples
 		- review ciolek thesis

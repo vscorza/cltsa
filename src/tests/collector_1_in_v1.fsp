@@ -22,7 +22,7 @@ ltl sys theta Init_Collector_s in COLLECTOR	= (!allFinished && !latch_0).
 //update latches, up with input, down with allFinished
 ltl sys rho Latch_0_up in COLLECTOR		= [](in_0 -> X(latch_0)).
 ltl sys rho Latch_0_keep in COLLECTOR		= [](!(allFinished || in_0) -> (latch_0 <-> X(latch_0))).
-ltl sys rho Latch_0_down in COLLECTOR		= [](in_0 && allFinished && !in_0 -> X(!latch_0)).
+ltl sys rho Latch_0_down in COLLECTOR		= [](in_0 && allFinished && X(!in_0) -> X(!latch_0)).
 //only set allFinished if every latch is up
 ltl sys rho Restrict_AllFinished in COLLECTOR	= [](allFinished -> (latch_0)).
 

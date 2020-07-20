@@ -7,15 +7,15 @@
 set Global_Alphabet = {}
 set Controllable_Alphabet = {}
 
-set Global_Signals	= {in_0, in_1, in_2, in_3, in_4, in_5, allFinished, latch_0, latch_1, latch_2, latch_3, latch_4}
-set Output_Signals	= {allFinished, latch_0, latch_1, latch_2, latch_3, latch_4}
+set Global_Signals	= {in_0, in_1, in_2, in_3, in_4, in_5, in_6, in_7, in_8, allFinished, latch_0, latch_1, latch_2, latch_3, latch_4, latch_5, latch_6, latch_7, latch_8}
+set Output_Signals	= {allFinished, latch_0, latch_1, latch_2, latch_3, latch_4, latch_5, latch_6, latch_7, latch_8}
 order			= {}
 
 /***********
 **** THETA
 ***********/
-ltl env theta Init_Collector_e in COLLECTOR	= (!in_0 && !in_1 && !in_2 && !in_3 && !in_4).
-ltl sys theta Init_Collector_s in COLLECTOR	= (!allFinished && !latch_0 && !latch_1 && !latch_2 && !latch_3 && !latch_4).
+ltl env theta Init_Collector_e in COLLECTOR	= (!in_0 && !in_1 && !in_2 && !in_3 && !in_4 && !in_5 && !in_6 && !in_7 && !in_8).
+ltl sys theta Init_Collector_s in COLLECTOR	= (!allFinished && !latch_0 && !latch_1 && !latch_2 && !latch_3 && !latch_4 && !latch_5 && !latch_6 && !latch_7 && !latch_8).
 /***********
 **** SYS RHO
 ***********/
@@ -35,8 +35,20 @@ ltl sys rho Latch_3_down in COLLECTOR		= [](in_3 && allFinished && X(!in_3) -> X
 ltl sys rho Latch_4_up in COLLECTOR		= [](in_4 -> X(latch_4)).
 ltl sys rho Latch_4_keep in COLLECTOR		= [](!(allFinished || in_4) -> (latch_4 <-> X(latch_4))).
 ltl sys rho Latch_4_down in COLLECTOR		= [](in_4 && allFinished && X(!in_4) -> X(!latch_4)).
+ltl sys rho Latch_5_up in COLLECTOR		= [](in_5 -> X(latch_5)).
+ltl sys rho Latch_5_keep in COLLECTOR		= [](!(allFinished || in_5) -> (latch_5 <-> X(latch_5))).
+ltl sys rho Latch_5_down in COLLECTOR		= [](in_5 && allFinished && X(!in_5) -> X(!latch_5)).
+ltl sys rho Latch_6_up in COLLECTOR		= [](in_6 -> X(latch_6)).
+ltl sys rho Latch_6_keep in COLLECTOR		= [](!(allFinished || in_6) -> (latch_6 <-> X(latch_6))).
+ltl sys rho Latch_6_down in COLLECTOR		= [](in_6 && allFinished && X(!in_6) -> X(!latch_6)).
+ltl sys rho Latch_7_up in COLLECTOR		= [](in_7 -> X(latch_7)).
+ltl sys rho Latch_7_keep in COLLECTOR		= [](!(allFinished || in_7) -> (latch_7 <-> X(latch_7))).
+ltl sys rho Latch_7_down in COLLECTOR		= [](in_7 && allFinished && X(!in_7) -> X(!latch_7)).
+ltl sys rho Latch_8_up in COLLECTOR		= [](in_8 -> X(latch_8)).
+ltl sys rho Latch_8_keep in COLLECTOR		= [](!(allFinished || in_8) -> (latch_8 <-> X(latch_8))).
+ltl sys rho Latch_8_down in COLLECTOR		= [](in_8 && allFinished && X(!in_8) -> X(!latch_8)).
 //only set allFinished if every latch is up
-ltl sys rho Restrict_AllFinished in COLLECTOR	= [](allFinished -> (latch_0 && latch_1 && latch_2 && latch_3 && latch_4)).
+ltl sys rho Restrict_AllFinished in COLLECTOR	= [](allFinished -> (latch_0 && latch_1 && latch_2 && latch_3 && latch_4 && latch_5 && latch_6 && latch_7 && latch_8)).
 
 /***********
 **** ENV RHO
@@ -50,11 +62,15 @@ ltl fluent A_in_1		= (in_1).
 ltl fluent A_in_2		= (in_2).
 ltl fluent A_in_3		= (in_3).
 ltl fluent A_in_4		= (in_4).
+ltl fluent A_in_5		= (in_5).
+ltl fluent A_in_6		= (in_6).
+ltl fluent A_in_7		= (in_7).
+ltl fluent A_in_8		= (in_8).
 ltl fluent G			= (allFinished).
 /***********
 **** SYNTHESIS
 ***********/
 |f| ENV =(COLLECTOR).
-|gr1| <{A_in_0,A_in_1,A_in_2,A_in_3,A_in_4}><{G}> STRAT = ENV.
+|gr1| <{A_in_0,A_in_1,A_in_2,A_in_3,A_in_4,A_in_5,A_in_6,A_in_7,A_in_8}><{G}> STRAT = ENV.
 
-STRAT >> "/tmp/collector_5_strat.rep".
+STRAT >> "/tmp/collector_8_strat.rep".

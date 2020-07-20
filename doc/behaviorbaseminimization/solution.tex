@@ -1,4 +1,4 @@
-\section{Two Behavior Minimization Procedures}\label{sect:solution}
+\section{Behavior Minimization Procedures}\label{sect:solution}
 
 The strategy to find a minimal non realizable control problem is to incrementally remove transitions preserving an alternating Sub-CLTS relation until a local minimum is reached.  A minimal non realizable control problem is reached when any further reduction of the current Sub-CLTS renders the problem realizable.
 The first procedure explores the semi-lattice defined by Alternating Sub-CLTS relation starting with the original automaton and moving downwards by performing minimal reductions. 
@@ -150,7 +150,7 @@ since it is realizable.
 %\input{Proof_CLTS_Preserves_Realizability}
 
 We can now describe the algorithm as
-presented in picture \ref{fig:dfs-code}. The algorithm first removes all controllable transitions from
+presented in figure \ref{fig:dfs-code}. The algorithm first removes all controllable transitions from
 mixed states \listRef{A}, this step can be performed since it
 can be interpreted as the successive removals of controllable 
 transitions with each satisfying the Alternating Sub-CLTS definition 

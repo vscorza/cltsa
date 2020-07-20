@@ -25,19 +25,19 @@ ltl sys rho Latch_0_keep in COLLECTOR		= [](!(allFinished || in_0) -> (latch_0 <
 ltl sys rho Latch_0_down in COLLECTOR		= [](in_0 && allFinished && !in_0 -> X(!latch_0)).
 ltl sys rho Latch_1_up in COLLECTOR		= [](in_1 -> X(latch_1)).
 ltl sys rho Latch_1_keep in COLLECTOR		= [](!(allFinished || in_1) -> (latch_1 <-> X(latch_1))).
-ltl sys rho Latch_1_down in COLLECTOR		= [](in_1 && allFinished && !in_1 -> X(!latch_1)).
+ltl sys rho Latch_1_down in COLLECTOR		= [](in_1 && allFinished && X(!in_1) -> X(!latch_1)).
 ltl sys rho Latch_2_up in COLLECTOR		= [](in_2 -> X(latch_2)).
 ltl sys rho Latch_2_keep in COLLECTOR		= [](!(allFinished || in_2) -> (latch_2 <-> X(latch_2))).
-ltl sys rho Latch_2_down in COLLECTOR		= [](in_2 && allFinished && !in_2 -> X(!latch_2)).
+ltl sys rho Latch_2_down in COLLECTOR		= [](in_2 && allFinished && X(!in_2) -> X(!latch_2)).
 ltl sys rho Latch_3_up in COLLECTOR		= [](in_3 -> X(latch_3)).
 ltl sys rho Latch_3_keep in COLLECTOR		= [](!(allFinished || in_3) -> (latch_3 <-> X(latch_3))).
-ltl sys rho Latch_3_down in COLLECTOR		= [](in_3 && allFinished && !in_3 -> X(!latch_3)).
+ltl sys rho Latch_3_down in COLLECTOR		= [](in_3 && allFinished && X(!in_3) -> X(!latch_3)).
 ltl sys rho Latch_4_up in COLLECTOR		= [](in_4 -> X(latch_4)).
 ltl sys rho Latch_4_keep in COLLECTOR		= [](!(allFinished || in_4) -> (latch_4 <-> X(latch_4))).
-ltl sys rho Latch_4_down in COLLECTOR		= [](in_4 && allFinished && !in_4 -> X(!latch_4)).
+ltl sys rho Latch_4_down in COLLECTOR		= [](in_4 && allFinished && X(!in_4) -> X(!latch_4)).
 ltl sys rho Latch_5_up in COLLECTOR		= [](in_5 -> X(latch_5)).
 ltl sys rho Latch_5_keep in COLLECTOR		= [](!(allFinished || in_5) -> (latch_5 <-> X(latch_5))).
-ltl sys rho Latch_5_down in COLLECTOR		= [](in_5 && allFinished && !in_5 -> X(!latch_5)).
+ltl sys rho Latch_5_down in COLLECTOR		= [](in_5 && allFinished && X(!in_5) -> X(!latch_5)).
 //only set allFinished if every latch is up
 ltl sys rho Restrict_AllFinished in COLLECTOR	= [](allFinished -> (latch_0 && latch_1 && latch_2 && latch_3 && latch_4 && latch_5)).
 

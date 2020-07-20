@@ -1,0 +1,84 @@
+//  Parameterized Collector, Signals whether all input clients have delivered a token
+//  INPUTS {finished[n];} 
+//  OUTPUTS { allFinished;}
+//  ASSERT { &&[0 <= i < n](allFinished -> X (!allFinished W finished[i]));}
+//  GUARANTEES {G F allFinished <-> &&[0 <= i < n] G F finished[i];}
+
+set Global_Alphabet = {}
+set Controllable_Alphabet = {}
+
+set Global_Signals	= {in_0, in_1, in_2, in_3, in_4, in_5, in_6, in_7, in_8, in_9, in_10, allFinished, latch_0, latch_1, latch_2, latch_3, latch_4, latch_5, latch_6, latch_7, latch_8, latch_9, latch_10}
+set Output_Signals	= {allFinished, latch_0, latch_1, latch_2, latch_3, latch_4, latch_5, latch_6, latch_7, latch_8, latch_9, latch_10}
+order			= {}
+
+/***********
+**** THETA
+***********/
+ltl env theta Init_Collector_e in COLLECTOR	= (!in_0 && !in_1 && !in_2 && !in_3 && !in_4 && !in_5 && !in_6 && !in_7 && !in_8 && !in_9 && !in_10).
+ltl sys theta Init_Collector_s in COLLECTOR	= (!allFinished && !latch_0 && !latch_1 && !latch_2 && !latch_3 && !latch_4 && !latch_5 && !latch_6 && !latch_7 && !latch_8 && !latch_9 && !latch_10).
+/***********
+**** SYS RHO
+***********/
+//update latches, up with input, down with allFinished
+ltl sys rho Latch_0_up in COLLECTOR		= [](in_0 -> X(latch_0)).
+ltl sys rho Latch_0_keep in COLLECTOR		= [](!(allFinished || in_0) -> (latch_0 <-> X(latch_0))).
+ltl sys rho Latch_0_down in COLLECTOR		= [](in_0 && allFinished && X(!in_0) -> X(!latch_0)).
+ltl sys rho Latch_1_up in COLLECTOR		= [](in_1 -> X(latch_1)).
+ltl sys rho Latch_1_keep in COLLECTOR		= [](!(allFinished || in_1) -> (latch_1 <-> X(latch_1))).
+ltl sys rho Latch_1_down in COLLECTOR		= [](in_1 && allFinished && X(!in_1) -> X(!latch_1)).
+ltl sys rho Latch_2_up in COLLECTOR		= [](in_2 -> X(latch_2)).
+ltl sys rho Latch_2_keep in COLLECTOR		= [](!(allFinished || in_2) -> (latch_2 <-> X(latch_2))).
+ltl sys rho Latch_2_down in COLLECTOR		= [](in_2 && allFinished && X(!in_2) -> X(!latch_2)).
+ltl sys rho Latch_3_up in COLLECTOR		= [](in_3 -> X(latch_3)).
+ltl sys rho Latch_3_keep in COLLECTOR		= [](!(allFinished || in_3) -> (latch_3 <-> X(latch_3))).
+ltl sys rho Latch_3_down in COLLECTOR		= [](in_3 && allFinished && X(!in_3) -> X(!latch_3)).
+ltl sys rho Latch_4_up in COLLECTOR		= [](in_4 -> X(latch_4)).
+ltl sys rho Latch_4_keep in COLLECTOR		= [](!(allFinished || in_4) -> (latch_4 <-> X(latch_4))).
+ltl sys rho Latch_4_down in COLLECTOR		= [](in_4 && allFinished && X(!in_4) -> X(!latch_4)).
+ltl sys rho Latch_5_up in COLLECTOR		= [](in_5 -> X(latch_5)).
+ltl sys rho Latch_5_keep in COLLECTOR		= [](!(allFinished || in_5) -> (latch_5 <-> X(latch_5))).
+ltl sys rho Latch_5_down in COLLECTOR		= [](in_5 && allFinished && X(!in_5) -> X(!latch_5)).
+ltl sys rho Latch_6_up in COLLECTOR		= [](in_6 -> X(latch_6)).
+ltl sys rho Latch_6_keep in COLLECTOR		= [](!(allFinished || in_6) -> (latch_6 <-> X(latch_6))).
+ltl sys rho Latch_6_down in COLLECTOR		= [](in_6 && allFinished && X(!in_6) -> X(!latch_6)).
+ltl sys rho Latch_7_up in COLLECTOR		= [](in_7 -> X(latch_7)).
+ltl sys rho Latch_7_keep in COLLECTOR		= [](!(allFinished || in_7) -> (latch_7 <-> X(latch_7))).
+ltl sys rho Latch_7_down in COLLECTOR		= [](in_7 && allFinished && X(!in_7) -> X(!latch_7)).
+ltl sys rho Latch_8_up in COLLECTOR		= [](in_8 -> X(latch_8)).
+ltl sys rho Latch_8_keep in COLLECTOR		= [](!(allFinished || in_8) -> (latch_8 <-> X(latch_8))).
+ltl sys rho Latch_8_down in COLLECTOR		= [](in_8 && allFinished && X(!in_8) -> X(!latch_8)).
+ltl sys rho Latch_9_up in COLLECTOR		= [](in_9 -> X(latch_9)).
+ltl sys rho Latch_9_keep in COLLECTOR		= [](!(allFinished || in_9) -> (latch_9 <-> X(latch_9))).
+ltl sys rho Latch_9_down in COLLECTOR		= [](in_9 && allFinished && X(!in_9) -> X(!latch_9)).
+ltl sys rho Latch_10_up in COLLECTOR		= [](in_10 -> X(latch_10)).
+ltl sys rho Latch_10_keep in COLLECTOR		= [](!(allFinished || in_10) -> (latch_10 <-> X(latch_10))).
+ltl sys rho Latch_10_down in COLLECTOR		= [](in_10 && allFinished && X(!in_10) -> X(!latch_10)).
+//only set allFinished if every latch is up
+ltl sys rho Restrict_AllFinished in COLLECTOR	= [](allFinished -> (latch_0 && latch_1 && latch_2 && latch_3 && latch_4 && latch_5 && latch_6 && latch_7 && latch_8 && latch_9 && latch_10)).
+
+/***********
+**** ENV RHO
+***********/
+ltl env rho Dummy_e in COLLECTOR		= [](in_0 || !in_0).
+/***********
+**** FLUENTS
+***********/
+ltl fluent A_in_0		= (in_0).
+ltl fluent A_in_1		= (in_1).
+ltl fluent A_in_2		= (in_2).
+ltl fluent A_in_3		= (in_3).
+ltl fluent A_in_4		= (in_4).
+ltl fluent A_in_5		= (in_5).
+ltl fluent A_in_6		= (in_6).
+ltl fluent A_in_7		= (in_7).
+ltl fluent A_in_8		= (in_8).
+ltl fluent A_in_9		= (in_9).
+ltl fluent A_in_10		= (in_10).
+ltl fluent G			= (allFinished).
+/***********
+**** SYNTHESIS
+***********/
+|f| ENV =(COLLECTOR).
+|gr1| <{A_in_0,A_in_1,A_in_2,A_in_3,A_in_4,A_in_5,A_in_6,A_in_7,A_in_8,A_in_9,A_in_10}><{G}> STRAT = ENV.
+
+STRAT >> "/tmp/collector_10_strat.rep".
