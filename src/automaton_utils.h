@@ -41,13 +41,27 @@ typedef unsigned __int128 uint128_t;
 #define ANSI_COLOR_CYAN    "\x1b[36m"
 #define ANSI_COLOR_RESET   "\x1b[0m"
 
+typedef struct automaton_string_list_str {
+    uint32_t size;
+    uint32_t count;
+    uint32_t raw_size;
+    uint32_t raw_count;
+    char **list;
+    uint32_t *counts;
+    char *raw_data;
+    bool sorted;
+    bool repeat_values;
+}automaton_string_list;
+
 /** LIST FUNCTIONS **/
 void aut_add_ptr_list(void*** list, void* element, uint32_t* count);
 void aut_add_incr_ptr_list(void*** list, void* element, uint32_t* size, uint32_t* count);
 void aut_free_ptr_list(void*** list, uint32_t* count);
 /** STRING FUNCTIONS **/
 void aut_dupstr(char** dst, char* src);
-void aut_merge_string_lists(char*** a, int32_t* a_count, char** b, int32_t b_count, bool sorted, bool repeat_values);
-bool aut_push_string_to_list(char*** list, int32_t* list_count, char* element, int32_t* position, bool sorted, bool repeat_values);
-int32_t aut_string_list_index_of(char** list, int32_t list_count, char* element);
+automaton_string_list *automaton_string_list_create(bool sorted, bool repeat_values);
+void automaton_string_list_destroy(automaton_string_list *list);
+void aut_merge_string_lists(automaton_string_list *a, char **b, uint32_t count);
+bool aut_push_string_to_list(automaton_string_list *a, char* element, int32_t* position);
+int32_t aut_string_list_index_of(automaton_string_list *a, char* element);
 #endif /* AUTOMATON_UTILS_H_ */

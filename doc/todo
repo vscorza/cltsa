@@ -1,5 +1,7 @@
 TODO:
 =====
+- write tests for automaton_string_list
+- validate automaton_string_list
 - review validation
 	- running tests
 		- review DeltaE'/ DeltaC lift 8 (error)
