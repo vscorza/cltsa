@@ -144,7 +144,7 @@ bool aut_push_string_to_list(automaton_string_list *list, char* element, int32_t
 	}
 	//copy raw data
 	list->list[*position]	= &(list->raw_data[list->raw_count]);
-	list->counts[list->raw_count];
+	list->counts[*position] = list->raw_count;
 	for(i = 0; i < element_length; i++){
 		list->raw_data[list->raw_count + i]	= element[i];
 	}
