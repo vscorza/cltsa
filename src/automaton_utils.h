@@ -19,6 +19,8 @@
 #define LIST_INITIAL_SIZE		32
 #define LIST_INCREASE_FACTOR	2
 
+#define DEBUG_STRING_LIST	0
+
 typedef __int128 int128_t;
 typedef unsigned __int128 uint128_t;
 
@@ -47,6 +49,7 @@ typedef struct automaton_string_list_str {
     uint32_t raw_size;
     uint32_t raw_count;
     char **list;
+    uint32_t *ordered_list;
     uint32_t *counts;
     char *raw_data;
     bool sorted;

@@ -59,6 +59,7 @@ automaton_string_list *automaton_string_list_create(bool sorted, bool repeat_val
 	ret_value->raw_count		= 0;
 	ret_value->raw_size			= LIST_INITIAL_SIZE * 32;
 	ret_value->list				= calloc(ret_value->size, sizeof(char*));
+	ret_value->ordered_list		= calloc(ret_value->size, sizeof(uint32_t));
 	ret_value->counts 			= calloc(ret_value->size, sizeof(uint32_t));
 	ret_value->raw_data			= calloc(ret_value->raw_size, sizeof(char));
 
@@ -67,6 +68,7 @@ automaton_string_list *automaton_string_list_create(bool sorted, bool repeat_val
 
 void automaton_string_list_destroy(automaton_string_list *list){
 	free(list->list);
+	free(list->ordered_list);
 	free(list->counts);
 	free(list->raw_data);
 	free(list);
@@ -91,23 +93,59 @@ bool aut_push_string_to_list(automaton_string_list *list, char* element, int32_t
 	int32_t a_b_cmp;
 	//get the position of the element to be added
 	*position	= -1;
-	for(i = 0; i < list->count; i++){
-		a_b_cmp	= strcmp(list->list[i], element);
-		if(a_b_cmp == 0){
-			*position = i;
-			if(!(list->repeat_values)){
-				return false;
+	int32_t ordered_position = -1;
+	//if sorted do bin search
+	if(list->count != 0){
+		uint32_t left	= 0, right = list->count - 1, medium = 0;
+		while(left <= right){
+			medium	= floor((left + right) / 2);
+			a_b_cmp	= strcmp(list->list[list->ordered_list[medium]], element);
+#if DEBUG_STRING_LIST
+			printf("l:%d\tr:%d\tm:%d\to[%d]:%d\tv[o[m]=%d]:%s\te:%s\n", left, right, medium, medium, list->ordered_list[medium], list->ordered_list[medium], list->list[list->ordered_list[medium]], element);
+#endif
+			if(a_b_cmp < 0){
+				if(medium >= right){
+					ordered_position = medium + 1;
+					break;
+				}
+				left	= medium + 1;
+			}else if(a_b_cmp > 0){
+				if(medium <= left){
+					ordered_position = medium;
+					break;
+				}
+				right	= medium - 1;
+			}else{
+				ordered_position = medium;
+				*position	= list->ordered_list[medium];
+				if(!(list->repeat_values)){
+#if DEBUG_STRING_LIST
+					printf("%s found at %d\n", element, *position);
+#endif
+					return false;
+				}
+				break;
 			}
-		}else if(list->sorted && a_b_cmp > 0){
-			*position		= i;
-			break;
 		}
+	}else{
+		ordered_position = 0;
 	}
-	if(!(list->sorted))*position = -1;
 
-	if(*position == -1){
-		*position	= list->count;
+#if DEBUG_STRING_LIST
+	for(i = 0; i < list->count; i++){
+		printf("%s%s ", i == *position ? "*" : "", list->list[i]);
 	}
+	printf("\n");
+#endif
+
+	if(!(list->sorted)){
+		*position = list->count;
+	}else{
+		*position	= ordered_position;
+	}
+#if DEBUG_STRING_LIST
+	printf("Position:%d\tOrdered pos.:%d\n", *position, ordered_position);
+#endif
 
 	list->count++;
 	//update count and list structs if needed
@@ -116,10 +154,12 @@ bool aut_push_string_to_list(automaton_string_list *list, char* element, int32_t
 		uint32_t *new_counts	= realloc(list->counts, sizeof(uint32_t) * list->size);
 		if(new_counts == NULL){printf("Could not reallocate memory [aut_push_string_to_list:1]\n"); exit(-1);}
 		list->counts	= new_counts;
+		uint32_t *new_ordered_list	= realloc(list->ordered_list, sizeof(uint32_t) * list->size);
+		if(new_ordered_list == NULL){printf("Could not reallocate memory [aut_push_string_to_list:4]\n"); exit(-1);}
+		list->ordered_list	= new_ordered_list;
 		char **new_list	= realloc(list->list, sizeof(char*) * list->size);
-		if(new_list == NULL){printf("Could not reallocate memory [aut_push_string_to_list:2]\n"); exit(-1);}
+		if(new_list == NULL){printf("Could not reallocate memory [aut_push_string_to_list:3]\n"); exit(-1);}
 		list->list	= new_list;
-
 	}
 	//compute raw size and update raw struct if needed
 	uint32_t element_length	= strlen(element);
@@ -127,24 +167,31 @@ bool aut_push_string_to_list(automaton_string_list *list, char* element, int32_t
 	if(new_length >= list->raw_size){
 		list->raw_size *= LIST_INCREASE_FACTOR;
 		char *new_raw_data	 = realloc(list->raw_data, sizeof(char) * list->raw_size);
-		if(new_raw_data == NULL){printf("Could not reallocate memory [aut_push_string_to_list:3]\n"); exit(-1);}
+		if(new_raw_data == NULL){printf("Could not reallocate memory [aut_push_string_to_list:5]\n"); exit(-1);}
 		list->raw_data	= new_raw_data;
 		for(i = 0; i < list->count; i++){
 			list->list[i]	= (char*)((uintptr_t)(list->raw_data) + (uintptr_t)(list->counts[i]));
 		}
 	}
 	//rearrange pointers if needed
-	if(list-> count > 0){
+	if(list->count > 0){
 		for(i = (list->count) - 1; i >= 0; i--){
 			if(i >= *position){
 				list->list[i+1]	= list->list[i];
 				list->counts[i+1]	= list->counts[i];
+			}
+			if(list->ordered_list[i] >= *position)
+				list->ordered_list[i]++;
+			if(i >= ordered_position){
+				list->ordered_list[i+1]	= list->ordered_list[i];
 			}
 		}
 	}
 	//copy raw data
 	list->list[*position]	= &(list->raw_data[list->raw_count]);
 	list->counts[*position] = list->raw_count;
+	list->ordered_list[ordered_position]	= *position;
+
 	for(i = 0; i < element_length; i++){
 		list->raw_data[list->raw_count + i]	= element[i];
 	}

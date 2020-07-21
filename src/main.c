@@ -626,7 +626,7 @@ void run_obdd_tests(){
 }
 
 #define STRING_LIST_SIZE	8
-void test_automaton_string_list(){
+void run_automaton_string_list_test(){
 	char test_list[STRING_LIST_SIZE][10] = {"dan","edward","carl","albert","zoe","dan","aark","zoe"};
 	uint32_t i, pos;
 	automaton_string_list *list;
@@ -635,7 +635,8 @@ void test_automaton_string_list(){
 	passed	= true;
 	char test_list_ns_nr[6][10] = {"dan","edward","carl","albert","zoe","aark"};
 	list	= automaton_string_list_create(false, false);
-	for(i = 0; i < STRING_LIST_SIZE; i++)aut_push_string_to_list(list, test_list[i], &pos);
+	for(i = 0; i < STRING_LIST_SIZE; i++)
+		aut_push_string_to_list(list, test_list[i], &pos);
 	if(list->count != 6){
 		passed	= false;
 	}else{
@@ -652,7 +653,8 @@ void test_automaton_string_list(){
 	passed	= true;
 	char test_list_s_nr[6][10] = {"aark", "albert", "carl", "dan", "edward", "zoe"};
 	list	= automaton_string_list_create(true, false);
-	for(i = 0; i < STRING_LIST_SIZE; i++)aut_push_string_to_list(list, test_list[i], &pos);
+	for(i = 0; i < STRING_LIST_SIZE; i++)
+		aut_push_string_to_list(list, test_list[i], &pos);
 	if(list->count != 6){
 		passed	= false;
 	}else{
@@ -663,6 +665,7 @@ void test_automaton_string_list(){
 			}
 		}
 	}
+
 	automaton_string_list_destroy(list);
 	print_test_result(passed, "STRING LIST SORTED !REPEAT", "string list insert sorted, not repeat");
 	//test non sorted no repeat
@@ -686,7 +689,8 @@ void test_automaton_string_list(){
 	passed	= true;
 	char test_list_s_r[8][10] =  {"aark", "albert", "carl", "dan", "dan", "edward", "zoe", "zoe"};
 	list	= automaton_string_list_create(true, true);
-	for(i = 0; i < STRING_LIST_SIZE; i++)aut_push_string_to_list(list, test_list[i], &pos);
+	for(i = 0; i < STRING_LIST_SIZE; i++)
+		aut_push_string_to_list(list, test_list[i], &pos);
 	if(list->count != 8){
 		passed	= false;
 	}else{
@@ -697,11 +701,12 @@ void test_automaton_string_list(){
 			}
 		}
 	}
+
 	automaton_string_list_destroy(list);
 	print_test_result(passed, "STRING LIST SORTED REPEAT", "string list insert sorted, allow repeat");
 	//load test
 	passed	= true;
-	uint32_t load = 200;
+	uint32_t load = 2000;
 	list	= automaton_string_list_create(true, true);
 	for(i = 0; i < load; i++)aut_push_string_to_list(list, i % 2 == 1? "zooland" : "albert", &pos);
 	if(list->count != load){
@@ -716,7 +721,6 @@ void test_automaton_string_list(){
 	}
 	automaton_string_list_destroy(list);
 	print_test_result(passed, "STRING LIST LOAD", "string list insert sorted, allow repeat, load test");
-
 }
 
 typedef struct test_item_bucket_str{
@@ -1457,7 +1461,7 @@ void run_functional_tests(){
 	run_obdd_tests();
 	run_obdd_valuations();
 	run_obdd_exists();
-	test_automaton_string_list();
+	run_automaton_string_list_test();
 	run_concrete_bucket_list_tests();
 	run_ordered_list_tests();
 	run_max_heap_tests();
@@ -1665,7 +1669,8 @@ int main (int argc, char** argv){
 		//run_parse_test("tests/konighoefer_examples.fsp", "non realizable test 1 konig");
 		//GENERAL TESTS
 		//run_all_tests();
-		run_functional_tests();
+		//run_functional_tests();
+		run_automaton_string_list_test();
 
 		//run_parse_test("tests/current_sut.fsp", "current_SUT");
 		//run_automaton_composite_hash_table_tests();

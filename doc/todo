@@ -1,7 +1,5 @@
 TODO:
 =====
-- write tests for automaton_string_list
-- validate automaton_string_list
 - review validation
 	- running tests
 		- review DeltaE'/ DeltaC lift 8 (error)
@@ -32,9 +30,7 @@ TODO:
 	- write examples from symbolic repair paper
 	- prove correct decomposition of ahb arbiter into modules
 - phd meeting	
-	- plan paper for clts, tool and general thesis layout	
-- review papers gr_1_star, performance_heuristics for gr1, minimal assumption refinement gr1 and synthesizing adaptive test stategies papers
-- review jits from maoz, subash shankar work https://dblp.org/pers/s/Shankar:Subash.html, Modular Synthesis of Reactive Programs Aalok Thakkar, Kedar Namjoshi, Richard Trefler
+	- plan paper for clts, tool and general thesis layout
 - after paper
 	- examples
 		- review ciolek thesis
@@ -61,6 +57,11 @@ TODO:
 		- undo/redo 
 		- signals view as complement to automaton
 	- add exception when FIXED_SIGNALS_COUNT or BITVECTOR_ENTRY_SIZE is not enough, add parameters to make
+	- review literature and tools
+		- review Interpolation-Based Semantic Gate Extraction and its Applications to QBF Preprocessing (https://www.ac.tuwien.ac.at/people/fslivovsky/)	
+		- review papers gr_1_star, performance_heuristics for gr1, minimal assumption refinement gr1 and synthesizing adaptive test stategies papers
+		- review jits from maoz, subash shankar work https://dblp.org/pers/s/Shankar:Subash.html, Modular Synthesis of Reactive Programs Aalok Thakkar, Kedar Namjoshi, Richard Trefler
+		- review minisat
 	- see if following changes are worth the worry
 		- add transition disabling to speed up minimization time (should do enabled_in_degree and enabled_out_degree)
 			- change seems to be too expensive in terms of refactoring to be worthy, since it may not prove useful once automaton copy is not as frequent
