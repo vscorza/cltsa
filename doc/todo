@@ -1,7 +1,10 @@
 TODO:
 =====
+- get previous functional tests running
 - review validation
 	- running tests
+		- review exploration robot
+		- review genbuf
 		- review DeltaE'/ DeltaC lift 8 (error)
 		- define cutting criteria and re run 
 		- review konighoefer thesis see removal prct. compare to our removing percentage

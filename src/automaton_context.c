@@ -1002,7 +1002,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 			automaton_indexes_valuation_set_label(current_valuation, state->label->name, label_indexes);
 			aut_push_string_to_list(labels_list, label_indexes, &label_position);
 #if DEBUG_PARSE_STATES
-		printf("%s ",labels_list[label_position]);
+		printf("%s ",labels_list->list[label_position]);
 #endif
 			if(current_valuation != NULL){
 				automaton_indexes_valuation_destroy(current_valuation);
@@ -1218,6 +1218,14 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 									//then inside the count cycle should take from current_valuations[current_valuations_count - count + n]
 									automaton_indexes_syntax_eval_strings(tables,implicit_valuation
 											,&next_valuations, &next_valuations_count, &next_valuations_size, &indexes_values, &ret_value, &count, atom_label->indexes);
+#if DEBUG_PARSE_STATES
+									if(next_valuations_count > 0){
+										printf("\t\t[v] next valuation %d of %d\n", next_valuations_count - count, next_valuations_count);
+										automaton_indexes_valuation_print(next_valuations[next_valuations_count - count], " ", " ");
+									}else{
+										printf("\t\t[v] No next valuation\n");
+									}
+#endif
 									automaton_indexes_valuation_destroy(implicit_valuation);
 									implicit_valuation = NULL;
 									for(n = 0; n < count; n++){
@@ -1253,7 +1261,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 
 												to_state	= (uint32_t)label_position;
 #if DEBUG_PARSE_STATES
-												printf("\t\t[<] to state reassigned as: %s(%d)\n", labels_list[label_position], label_position);
+												printf("\t\t[<] to state reassigned as: %s(%d)\n", labels_list->list[label_position], label_position);
 #endif
 											}else{
 												added_state++;
@@ -1261,7 +1269,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 												aut_push_string_to_list(labels_list, added_state_string, &label_position);
 												to_state	= (uint32_t)label_position;
 #if DEBUG_PARSE_STATES
-												printf("\t\t[<] to state reassigned as: %s(%d)\n", labels_list[label_position], to_state);
+												printf("\t\t[<] to state reassigned as: %s(%d)\n", labels_list->list[label_position], to_state);
 #endif
 
 											}
@@ -1355,7 +1363,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 											aut_push_string_to_list(labels_list, added_state_string, &label_position);
 											to_state	= (uint32_t)label_position;
 #if DEBUG_PARSE_STATES
-											printf("\t\t[<] to state reassigned as: %s(%d)\n", labels_list[label_position], to_state);
+											printf("\t\t[<] to state reassigned as: %s(%d)\n", labels_list->list[label_position], to_state);
 #endif
 										}else{
 											automaton_indexes_valuation_set_to_label(tables, current_valuations_count > 0 ? current_valuations[current_valuations_count -current_from_state_count + r]: NULL, next_valuations_count > 0 ? next_valuations[next_valuations_count - 1]: NULL
@@ -1363,7 +1371,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 											aut_push_string_to_list(labels_list, label_indexes, &label_position);
 											to_state	= (uint32_t)label_position;
 #if DEBUG_PARSE_STATES
-											printf("\t\t[<] to state reassigned as: %s(%d)\n", labels_list[label_position], label_position);
+											printf("\t\t[<] to state reassigned as: %s(%d)\n", labels_list->list[label_position], label_position);
 #endif
 										}
 										current_automaton_transition[automaton_transition_count++]	= automaton_transition_create(current_from_state[r], to_state);
@@ -1401,10 +1409,6 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 								//CONCURRENT ELEMENTS ITERATION (<a, b, c> -> ...)
 								for(n = 0; n < (int32_t)(atom_label->set->count); n++){
 #if DEBUG_PARSE_STATES
-									if(next_valuations_count > 0){
-										printf("\t\t[v] next valuation %d of %d:", next_valuations_count - count + n, next_valuations_count);
-										automaton_indexes_valuation_print(next_valuations[next_valuations_count - count + n], " ", " ");
-									}
 									if(current_valuations_count > 0){
 										printf("\t\t[v] current valuation %d of %d:", current_valuations_count -current_from_state_count + r, current_valuations_count);
 										if(current_valuations[current_valuations_count -current_from_state_count + r] != NULL){
@@ -1422,7 +1426,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 
 										to_state	= (uint32_t)label_position;
 #if DEBUG_PARSE_STATES
-										printf("\t\t[<] to state reassigned as: %s(%d)\n", labels_list[label_position], label_position);
+										printf("\t\t[<] to state reassigned as: %s(%d)\n", labels_list->list[label_position], label_position);
 #endif
 									}else{
 										added_state++;
@@ -1430,7 +1434,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 										aut_push_string_to_list(labels_list, added_state_string, &label_position);
 										to_state	= (uint32_t)label_position;
 #if DEBUG_PARSE_STATES
-										printf("\t\t[<] to state reassigned as: %s(%d)\n", labels_list[label_position], to_state);
+										printf("\t\t[<] to state reassigned as: %s(%d)\n", labels_list->list[label_position], to_state);
 #endif
 
 									}
@@ -1472,6 +1476,14 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 											//TODO: solve indexes on concurrent specs
 											automaton_indexes_syntax_eval_strings(tables,current_valuations_count > 0 ? current_valuations[current_valuations_count -current_from_state_count + r] : NULL
 													, &next_valuations, &next_valuations_count, &next_valuations_size, &indexes_values, &ret_value, &count, atom_label->set->labels[n][o]->indexes);
+#if DEBUG_PARSE_STATES
+											if(next_valuations_count > 0){
+												printf("\t\t[v] next valuation %d of %d\n", next_valuations_count - count + n, next_valuations_count);
+												automaton_indexes_valuation_print(next_valuations[next_valuations_count - count + n], " ", " ");
+											}else{
+												printf("\t\t[v] No next valuation\n");
+											}
+#endif
 											for(p = 0; p < count; p++){
 												element_to_find		= ret_value[p];
 												element_global_index= -1;
@@ -1532,7 +1544,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 						printf("\t\t\t[N] %d:", s);
 						automaton_indexes_valuation_print(next_valuations[s], " ", " ");
 					}
-					printf("\t\t[<] to state reassigned as: %s(%d)\n", labels_list[label_position], to_state);
+					printf("\t\t[<] to state reassigned as: %s(%d)\n", labels_list->list[label_position], to_state);
 #endif
 					for(s = 0; s < current_valuations_count; s++)
 						if(current_valuations[s] != NULL){
@@ -3691,43 +3703,41 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 		char *target_name	= malloc(sizeof(char) * (target_length + 10));
 		sprintf(target_name, "%s.csv", results_filename);
 		experimental_results = fopen(target_name, append_result?"a": "w");
-		if (experimental_results == NULL){
-			printf("Error opening file!(%s)\n", target_name);
-			return false;
+		if (experimental_results != NULL){
+			if(!append_result)
+				fprintf(experimental_results, "name,realizable,ltl_model_build_time,model_build_time,composition_time," \
+						"synthesis_time,diagnosis_time,alphabet_size,guarantees_count," \
+						"assumptions_count,plant_states,plant_transitions,plant_controllable_transitions,minimization_states," \
+						"minimization_transitions,minimization_controllable_transitions,search_method," \
+						"diagnosis_steps\n");
+			fprintf(experimental_results, "%s,%s,%ld.%06ld,%ld.%06ld,%ld.%06ld," \
+					"%ld.%06ld,%ld.%06ld,%d,%d," \
+					"%d,%d,%d,%d,%d," \
+					"%d,%d,%s," \
+					"%d\n",
+					test_name, nonreal? "false":"true", tval_ltl_model_build_result.tv_sec, tval_ltl_model_build_result.tv_usec,
+							tval_model_build_result.tv_sec, tval_model_build_result.tv_usec,
+							tval_composition_result.tv_sec, tval_composition_result.tv_usec,
+							tval_synthesis_result.tv_sec, tval_synthesis_result.tv_usec,
+							tval_minimization_result.tv_sec, tval_minimization_result.tv_usec,
+							ctx->global_alphabet->count, results_guarantees_count, results_assumptions_count,
+							results_plant_states, results_plant_transitions, results_plant_controllable_transitions,
+							results_minimization_states, results_minimization_transitions, results_minimization_controllable_transitions,
+							is_diagnosis & DD_SEARCH ? "DD" : "linear",
+							steps);
+			sprintf(target_name, "%s.csv", steps_filename);
+			FILE *experimental_steps_results = fopen(target_name, "w");
+			if (experimental_steps_results != NULL){
+				fprintf(experimental_steps_results, "step,size,time\n");
+				for(i = 0; i < steps; i++){
+					fprintf(experimental_steps_results, "%d,%d,%ld.%06ld\n", i, steps_sizes[i], steps_times[i].tv_sec, steps_times[i].tv_usec);
+				}
+				fclose(experimental_steps_results);
+			}
+			fclose(experimental_results);
+
 		}
-		if(!append_result)
-			fprintf(experimental_results, "name,realizable,ltl_model_build_time,model_build_time,composition_time," \
-					"synthesis_time,diagnosis_time,alphabet_size,guarantees_count," \
-					"assumptions_count,plant_states,plant_transitions,plant_controllable_transitions,minimization_states," \
-					"minimization_transitions,minimization_controllable_transitions,search_method," \
-					"diagnosis_steps\n");
-		fprintf(experimental_results, "%s,%s,%ld.%06ld,%ld.%06ld,%ld.%06ld," \
-				"%ld.%06ld,%ld.%06ld,%d,%d," \
-				"%d,%d,%d,%d,%d," \
-				"%d,%d,%s," \
-				"%d\n",
-				test_name, nonreal? "false":"true", tval_ltl_model_build_result.tv_sec, tval_ltl_model_build_result.tv_usec,
-						tval_model_build_result.tv_sec, tval_model_build_result.tv_usec,
-						tval_composition_result.tv_sec, tval_composition_result.tv_usec,
-						tval_synthesis_result.tv_sec, tval_synthesis_result.tv_usec,
-						tval_minimization_result.tv_sec, tval_minimization_result.tv_usec,
-						ctx->global_alphabet->count, results_guarantees_count, results_assumptions_count,
-						results_plant_states, results_plant_transitions, results_plant_controllable_transitions,
-						results_minimization_states, results_minimization_transitions, results_minimization_controllable_transitions,
-						is_diagnosis & DD_SEARCH ? "DD" : "linear",
-						steps);
-		sprintf(target_name, "%s.csv", steps_filename);
-		FILE *experimental_steps_results = fopen(target_name, "w");
-		if (experimental_steps_results == NULL){
-			printf("Error opening file!(%s)\n", target_name);
-			return false;
-		}
-		fprintf(experimental_steps_results, "step,size,time\n");
-		for(i = 0; i < steps; i++){
-			fprintf(experimental_steps_results, "%d,%d,%ld.%06ld\n", i, steps_sizes[i], steps_times[i].tv_sec, steps_times[i].tv_usec);
-		}
-		fclose(experimental_results);
-		fclose(experimental_steps_results);
+		free(target_name);
 	}
 	free(steps_times); free(steps_sizes);
 	free(liveness_formulas); free(liveness_formulas_names);

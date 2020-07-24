@@ -79,27 +79,28 @@ void run_parse_test_local(char* test_file, char* test_name, char* result_name, c
 
 	automaton_automata_context* ctx		= automaton_automata_context_create_from_syntax(parsed_program, result_name, test_name,
 			diagnosis_method, result_name, steps_name, append_results);
-    automaton_automata_context_destroy(ctx);
+	if(ctx != NULL)
+		automaton_automata_context_destroy(ctx);
     automaton_program_syntax_destroy(parsed_program);
     fclose(yyin);
 }
 
 void run_parse_test(char* test_file, char* test_name){
-	char buf[255], steps_buff[255];
+	char buf[255] = {'\0'}, steps_buff[255] = {'\0'};
 	snprintf(buf, sizeof(buf),"results/%s", test_name);
 	snprintf(steps_buff, sizeof(steps_buff),"results/%s_steps", steps_buff);
 	run_parse_test_local(test_file, test_name, buf, steps_buff, DD_SEARCH, false);
 }
 
 void run_parse_test_linear(char* test_file, char* test_name){
-	char buf[255], steps_buff[255];
+	char buf[255] = {'\0'}, steps_buff[255] = {'\0'};
 	snprintf(buf, sizeof(buf),"results/%s", test_name);
 	snprintf(steps_buff, sizeof(steps_buff),"results/%s_steps", steps_buff);
 	run_parse_test_local(test_file, test_name, buf, steps_buff, LINEAR_SEARCH, false);
 }
 
 void run_diagnosis(char* test_file, char* test_name, bool append_results){
-	char buf[255], steps_buff[255];
+	char buf[255] = {'\0'}, steps_buff[255] = {'\0'};
 	snprintf(buf, sizeof(buf),"results/%s", test_name);
 	snprintf(steps_buff, sizeof(steps_buff),"results/%s_steps", steps_buff);
 	run_parse_test_local(test_file, test_name, buf, steps_buff, DD_SEARCH, append_results);
@@ -1670,7 +1671,10 @@ int main (int argc, char** argv){
 		//GENERAL TESTS
 		//run_all_tests();
 		//run_functional_tests();
-		run_automaton_string_list_test();
+		run_parse_test("tests/ranges_1.fsp",  "range tests 1");
+		run_parse_test("tests/ranges_2.fsp",  "range 2 test");
+		run_parse_test("tests/ranges_3.fsp",  "range 3 test");
+		run_parse_test("tests/ranges_4.fsp",  "range 4 test");
 
 		//run_parse_test("tests/current_sut.fsp", "current_SUT");
 		//run_automaton_composite_hash_table_tests();
