@@ -23,6 +23,8 @@ D_p_2 = (input_1 -> D_p_3 | input_2 -> D_p_3 | input_3 -> D_p_3 | input_4 -> D_p
 D_p_3 = (out -> D_p_1).
 
 A >> "/tmp/composition_a.rep".
+B >> "/tmp/composition_b.rep".
+B_p >> "/tmp/composition_b_p.rep".
 C >> "/tmp/composition_c.rep".
 D >> "/tmp/composition_rng_a_c.rep".
 // tests
