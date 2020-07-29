@@ -88,21 +88,21 @@ void run_parse_test_local(char* test_file, char* test_name, char* result_name, c
 void run_parse_test(char* test_file, char* test_name){
 	char buf[255] = {'\0'}, steps_buff[255] = {'\0'};
 	snprintf(buf, sizeof(buf),"results/%s", test_name);
-	snprintf(steps_buff, sizeof(steps_buff),"results/%s_steps", steps_buff);
+	snprintf(steps_buff, sizeof(steps_buff),"results/%s_steps", test_name);
 	run_parse_test_local(test_file, test_name, buf, steps_buff, DD_SEARCH, false);
 }
 
 void run_parse_test_linear(char* test_file, char* test_name){
 	char buf[255] = {'\0'}, steps_buff[255] = {'\0'};
 	snprintf(buf, sizeof(buf),"results/%s", test_name);
-	snprintf(steps_buff, sizeof(steps_buff),"results/%s_steps", steps_buff);
+	snprintf(steps_buff, sizeof(steps_buff),"results/%s_steps", test_name);
 	run_parse_test_local(test_file, test_name, buf, steps_buff, LINEAR_SEARCH, false);
 }
 
 void run_diagnosis(char* test_file, char* test_name, bool append_results){
 	char buf[255] = {'\0'}, steps_buff[255] = {'\0'};
 	snprintf(buf, sizeof(buf),"results/%s", test_name);
-	snprintf(steps_buff, sizeof(steps_buff),"results/%s_steps", steps_buff);
+	snprintf(steps_buff, sizeof(steps_buff),"results/%s_steps", test_name);
 	run_parse_test_local(test_file, test_name, buf, steps_buff, DD_SEARCH, append_results);
 }
 
@@ -1670,8 +1670,8 @@ int main (int argc, char** argv){
 		//run_parse_test("tests/konighoefer_examples.fsp", "non realizable test 1 konig");
 		//GENERAL TESTS
 		//run_all_tests();
-		//run_functional_tests();
-		run_parse_test("tests/ranges_1.fsp",  "range tests 1");
+		run_functional_tests();
+		//run_parse_test("tests/ranges_1.fsp",  "range tests 1");
 		/*
 		run_parse_test("tests/ranges_2.fsp",  "range 2 test");
 		run_parse_test("tests/ranges_3.fsp",  "range 3 test");

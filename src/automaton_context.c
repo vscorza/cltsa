@@ -402,7 +402,6 @@ char** automaton_set_syntax_evaluate(automaton_parsing_tables* tables, automaton
 	int32_t index = -1;
 	uint32_t i, j,k;
 	char* current_entry;
-	automaton_string_list *ret_value			= automaton_string_list_create(true, false);
 	int32_t inner_count			= 0;
 	char** inner_value			= NULL;
 	bool is_set;
@@ -421,6 +420,7 @@ char** automaton_set_syntax_evaluate(automaton_parsing_tables* tables, automaton
 		if(tables->set_entries[index]->solved)
 			return tables->set_entries[index]->valuation.labels_value;
 	}
+	automaton_string_list *ret_value			= automaton_string_list_create(true, false);
 	//if proper set was not solved try to solve it
 	index						= automaton_parsing_tables_get_entry_index(tables, SET_ENTRY_AUT, set_def_key);
 	automaton_indexes_valuation **valuations	= NULL;
@@ -967,7 +967,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 		//add transitions
 		//map state label to int
 		//char** labels_list	= NULL;
-		automaton_string_list *labels_list	= automaton_string_list_create(true, false);
+		automaton_string_list *labels_list	= automaton_string_list_create(false, false);
 		int32_t label_position;
 		uint32_t from_state, to_state, *current_from_state, *next_from_state;
 		uint32_t current_from_state_size	= LIST_INITIAL_SIZE;
@@ -3700,7 +3700,7 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 	//PRINT RESULTS
 	if(is_diagnosis != 0){
 		uint32_t target_length	= strlen(results_filename);
-		char *target_name	= malloc(sizeof(char) * (target_length + 10));
+		char *target_name	= malloc(sizeof(char) * (target_length + 255));
 		sprintf(target_name, "%s.csv", results_filename);
 		experimental_results = fopen(target_name, append_result?"a": "w");
 		if (experimental_results != NULL){
