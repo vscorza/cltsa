@@ -1671,12 +1671,13 @@ int main (int argc, char** argv){
 		//GENERAL TESTS
 		//run_all_tests();
 		run_functional_tests();
-		//run_parse_test("tests/ranges_1.fsp",  "range tests 1");
 		/*
+		run_parse_test("tests/ranges_1.fsp",  "range tests 1");
 		run_parse_test("tests/ranges_2.fsp",  "range 2 test");
 		run_parse_test("tests/ranges_3.fsp",  "range 3 test");
 		run_parse_test("tests/ranges_4.fsp",  "range 4 test");
-*/
+		*/
+
 		//run_parse_test("tests/current_sut.fsp", "current_SUT");
 		//run_automaton_composite_hash_table_tests();
 		//run_parse_test("tests/genbuf_2_sndrs_no_automaton.fsp", "GenBuf 2 sndrs");

@@ -2,7 +2,6 @@
 set Global_Alphabet = {n,s,e,w,load,unload,stall,releaseNorth, releaseSouth}
 set Controllable_Alphabet = {n,s,e,w,load,unload}
 
-
 set Global_Signals	= {Dummy}
 order 				= {}
 //set Moves = {n,s,e,w}
@@ -13,19 +12,20 @@ const Max = 30
 range Pos = Min..Max
 
 //Concrete
-MAZE = M[1][1],
+MAZE = M[1][1], 
 M[r:Pos][c:Pos] = ( 
-				when(r > Min) n->M[r-1][c] 
-				| when(r < Max) s->M[r+1][c]
-				| when(c > Min) w->M[r][c-1]
-				| when(c < Max) e->M[r][c+1]
+				when(r > Min) n->n->n->n->n->n->n->n->n->n->M[r-1][c] 
+				| when(r < Max) s->s-> s->s-> s->s-> s->s-> s->s->M[r+1][c]
+				| when(c > Min) w->w->M[r][c-1]
+				| when(c < Max) e->e->M[r][c+1]
 				| when((r == Max) * (c == Max)) load->M[r][c]
 				| when((r == Min) * (c == Min)) unload->M[r][c]
 				| when((r == ((Max - Min)/2))) stall -> M[r][c]
-				| when((r > Min) * (r == ((Max - Min)/2))) <n, releaseNorth>->M[r-1][c] 
-				| when((r < Max) * (r == ((Max - Min)/2))) <s, releaseSouth>->M[r+1][c]		
+				| when((r > Min) * (r == ((Max - Min)/2))) <n, releaseNorth>->n->n->n->n->n->n->n->n->n->M[r-1][c] 
+				| when((r < Max) * (r == ((Max - Min)/2))) <s, releaseSouth>->s->s->s->s->s->s->s->s->s->M[r+1][c]		
 ).
 
+MAZE >> "/tmp/exploration_robot_30_maze.rep".
 
 ARM = (load->unload->ARM).
 

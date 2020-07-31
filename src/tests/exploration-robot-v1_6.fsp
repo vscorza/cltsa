@@ -12,12 +12,12 @@ const Max = 6
 range Pos = Min..Max
 
 //Concrete
-MAZE = M[1][1],
+MAZE = M[1][1], 
 M[r:Pos][c:Pos] = ( 
 				when(r > Min) n->n->n->n->n->n->n->n->n->n->M[r-1][c] 
-				| when(r < Max) s->s->s->s->s->s->s->s->s->s->M[r+1][c]
-				| when(c > Min) w->w->w->w->w->w->w->w->w->w->M[r][c-1]
-				| when(c < Max) e->e->e->e->e->e->e->e->e->e->M[r][c+1]
+				| when(r < Max) s->s-> s->s-> s->s-> s->s-> s->s->M[r+1][c]
+				| when(c > Min) w->w->M[r][c-1]
+				| when(c < Max) e->e->M[r][c+1]
 				| when((r == Max) * (c == Max)) load->M[r][c]
 				| when((r == Min) * (c == Min)) unload->M[r][c]
 				| when((r == ((Max - Min)/2))) stall -> M[r][c]
@@ -25,6 +25,7 @@ M[r:Pos][c:Pos] = (
 				| when((r < Max) * (r == ((Max - Min)/2))) <s, releaseSouth>->s->s->s->s->s->s->s->s->s->M[r+1][c]		
 ).
 
+MAZE >> "/tmp/exploration_robot_6_maze.rep".
 
 ARM = (load->unload->ARM).
 

@@ -1165,7 +1165,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 #if DEBUG_PARSE_STATES
 						printf("\t\t[>] current from state %d (%d)\n", current_from_state[r], current_from_state_count);
 #endif
-						if(transition->condition != NULL){
+						if(transition->condition != NULL && k == 0){
 							//if(!automaton_expression_syntax_evaluate(tables, transition->condition, current_valuations_count > 0 ? current_valuations[current_valuations_count - 1]: NULL)){
 							if(!automaton_expression_syntax_evaluate(tables, transition->condition, current_valuations_count > 0 ? current_valuations[current_valuations_count -current_from_state_count + r]: NULL)){
 								continue;
@@ -1241,7 +1241,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 											//TODO: set label_indexes according to current valuation values
 #if DEBUG_PARSE_STATES
 											if(next_valuations_count > 0){
-												printf("\t\t[v] valuation %d of %d:", next_valuations_count - count + n, next_valuations_count);
+												printf("\t\t[v] next valuation %d of %d:", next_valuations_count - count + n, next_valuations_count);
 												automaton_indexes_valuation_print(next_valuations[next_valuations_count - count + n], " ", " ");
 											}
 											if(current_valuations_count > 0){
@@ -1345,7 +1345,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 										}
 #if DEBUG_PARSE_STATES
 										if(next_valuations_count > 0){
-											printf("\t\t[v] valuation %d of %d:", next_valuations_count - 1, next_valuations_count);
+											printf("\t\t[v] next valuation %d of %d:", next_valuations_count - 1, next_valuations_count);
 											automaton_indexes_valuation_print(next_valuations[next_valuations_count - 1], " ", " ");
 										}
 										if(current_valuations_count > 0){
@@ -1376,18 +1376,30 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 										}
 										current_automaton_transition[automaton_transition_count++]	= automaton_transition_create(current_from_state[r], to_state);
 
-
 										if(next_from_state_count >= (next_from_state_size - 1)){
-											uint32_t new_size	= next_from_state_size * LIST_INCREASE_FACTOR;
-											uint32_t* new_next_from	= malloc(sizeof(uint32_t) * new_size);
-											for(l = 0; l < (int32_t)next_from_state_count; l++){
-												new_next_from[l]	= next_from_state[l];
-											}
-											free(next_from_state);
-											next_from_state_size	= new_size;
-											next_from_state			= new_next_from;
+											next_from_state_size *= LIST_INCREASE_FACTOR;
+											uint32_t* new_next_from	= realloc(next_from_state, sizeof(uint32_t) * next_from_state_size);
+											if(new_next_from == NULL){printf("Could not allocate memory [new_next_from:1]\n");exit(-1);}
+											next_from_state	= new_next_from;
 										}
 										next_from_state[next_from_state_count++]	= to_state;
+
+										if(!explicit_to_state){
+											if(next_valuations_size == 0){
+												next_valuations_size = LIST_INITIAL_SIZE;
+												next_valuations_count	= 0;
+												next_valuations	= calloc(next_valuations_size, sizeof(automaton_indexes_valuation*));
+											}
+											if(next_valuations_count >= (next_valuations_size - 1)){
+												next_valuations_size	*= LIST_INCREASE_FACTOR;
+												automaton_indexes_valuation** new_next_valuations	=
+														realloc(next_valuations, sizeof(automaton_indexes_valuation*) * next_valuations_size);
+												if(new_next_valuations == NULL){printf("Could not reallocate memory[next_valuations:1]\n");exit(-1);}
+												next_valuations	= new_next_valuations;
+											}
+											next_valuations[next_valuations_count++] = current_valuations[current_valuations_count -current_from_state_count + r] != NULL?
+													automaton_indexes_valuation_clone(current_valuations[current_valuations_count -current_from_state_count + r]) : NULL;
+										}
 										//do not add signal if transition is tau
 										if(atom_label->string_terminal != NULL)
 											automaton_transition_add_signal_event(current_automaton_transition[automaton_transition_count - 1], ctx, &(ctx->global_alphabet->list[element_global_index]));
@@ -1449,16 +1461,6 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 										current_automaton_transition		= new_transitions;
 									}
 									current_automaton_transition[automaton_transition_count++]	= automaton_transition_create(current_from_state[r], to_state);
-									if(next_from_state_count >= (next_from_state_size - 1)){
-										uint32_t new_size	= next_from_state_size * LIST_INCREASE_FACTOR;
-										uint32_t* new_next_from	= malloc(sizeof(uint32_t) * new_size);
-										for(l = 0; l < (int32_t)next_from_state_count; l++){
-											new_next_from[l]	= next_from_state[l];
-										}
-										free(next_from_state);
-										next_from_state_size	= new_size;
-										next_from_state			= new_next_from;
-									}
 									for(o = 0; o < (int32_t)(atom_label->set->labels_count[n]); o++){
 										if (atom_label->set->labels[n][o]->indexes != NULL){
 											//automaton_transition_destroy(current_automaton_transition[automaton_transition_count--], true);
@@ -1519,8 +1521,29 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 											}
 										}
 									}
+									if(next_from_state_count >= (next_from_state_size - 1)){
+										next_from_state_size *= LIST_INCREASE_FACTOR;
+										uint32_t* new_next_from	= realloc(next_from_state, sizeof(uint32_t) * next_from_state_size);
+										if(new_next_from == NULL){printf("Could not allocate memory [new_next_from:2]\n");exit(-1);}
+										next_from_state	= new_next_from;
+									}
 									next_from_state[next_from_state_count++]	= to_state;
-
+									if(!explicit_to_state){
+										if(next_valuations_size == 0){
+											next_valuations_size = LIST_INITIAL_SIZE;
+											next_valuations_count	= 0;
+											next_valuations	= calloc(next_valuations_size, sizeof(automaton_indexes_valuation*));
+										}
+										if(next_valuations_count >= (next_valuations_size - 1)){
+											next_valuations_size	*= LIST_INCREASE_FACTOR;
+											automaton_indexes_valuation** new_next_valuations	=
+													realloc(next_valuations, sizeof(automaton_indexes_valuation*) * next_valuations_size);
+											if(new_next_valuations == NULL){printf("Could not reallocate memory[next_valuations:2]\n");exit(-1);}
+											next_valuations	= new_next_valuations;
+										}
+										next_valuations[next_valuations_count++] = current_valuations[current_valuations_count -current_from_state_count + r] != NULL?
+												automaton_indexes_valuation_clone(current_valuations[current_valuations_count -current_from_state_count + r]) : NULL;
+									}
 								}
 							}
 
@@ -1530,7 +1553,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 							automaton_transition_destroy(current_automaton_transition[s], true);
 						}
 						automaton_transition_count	= 0;
-					}
+					}//end of r:current from state
 					free(current_from_state);
 					current_from_state_size		= next_from_state_size;
 					current_from_state_count	= 0;
@@ -1541,6 +1564,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 #if DEBUG_PARSE_STATES
 					printf("\t\t[W] next valuations\n");
 					for(s = 0; s < next_valuations_count; s++){
+						if(next_valuations[s] == NULL)continue;
 						printf("\t\t\t[N] %d:", s);
 						automaton_indexes_valuation_print(next_valuations[s], " ", " ");
 					}
@@ -1555,7 +1579,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 					current_valuations = next_valuations; current_valuations_count = next_valuations_count; current_valuations_size = next_valuations_size;
 					next_valuations = NULL; next_valuations_count = 0; next_valuations_size = 0;
 					next_from_state_count	= 0;
-				}
+				}//end of k:implicit transition
 				for(s = 0; s < current_valuations_count; s++)
 					if(current_valuations[s] != NULL){
 						automaton_indexes_valuation_destroy(current_valuations[s]);
@@ -1570,7 +1594,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 						next_valuations[s]	= NULL;
 					}
 				free(next_valuations);
-			}
+			}//end of j:piped transition
 			for(s = 0; s < explicit_start_state_count; s++){
 				if(explicit_start_valuations[s] != NULL)
 					automaton_indexes_valuation_destroy(explicit_start_valuations[s]);
