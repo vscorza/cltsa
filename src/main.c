@@ -1492,6 +1492,7 @@ void run_functional_tests(){
 	run_parse_test("tests/obdd_context_1.fsp", "OBDD NEXT IFF TEST");
 	run_parse_test("tests/genbuf_2_sndrs_debug.fsp", "GenBuf 2 sndrs(debug version)");//GENBUF 2 Sndrs debug version
 	run_parse_test("tests/nonreal_test_1.fsp", "non realizable test 1");
+	run_parse_test("tests/localizer.fsp", "non realizable localizer test");
 }
 
 void run_load_tests(){
@@ -1673,13 +1674,7 @@ int main (int argc, char** argv){
 		//GENERAL TESTS
 		//run_all_tests();
 		run_functional_tests();
-		/*
-		run_parse_test("tests/ranges_1.fsp",  "range tests 1");
-		run_parse_test("tests/ranges_2.fsp",  "range 2 test");
-		run_parse_test("tests/ranges_3.fsp",  "range 3 test");
-		run_parse_test("tests/ranges_4.fsp",  "range 4 test");
-		*/
-		//run_parse_test("tests/ranges_5.fsp",  "range 5 test");
+		//run_parse_test("tests/biscotti.fsp", "biscotti");
 
 		//run_parse_test("tests/current_sut.fsp", "current_SUT");
 		//run_automaton_composite_hash_table_tests();

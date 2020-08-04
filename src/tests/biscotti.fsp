@@ -24,3 +24,7 @@ STRAT_p_4 = (moveToBelt -> cook-> STRAT_p_1).
 
 // tests
 equals FATAL_Biscotti_Strategy(STRAT, STRAT_p).
+
+ENV_G >> "/tmp/biscotti_ENV_G.rep".
+STRAT >> "/tmp/biscotti_strat.rep".
+STRAT_p >> "/tmp/biscotti_strat_p.rep".

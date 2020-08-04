@@ -178,24 +178,40 @@ void automaton_automaton_copy(automaton_automaton* source, automaton_automaton* 
 	}
 	target->is_game					= source->is_game;
 	if(source->is_game){
-		target->valuations_size			= source->valuations_size;
-		target->valuations				= malloc(sizeof(uint32_t) * target->valuations_size);
+		if(source->valuations_size > 0){
+			target->valuations_size			= source->valuations_size;
+			target->valuations				= malloc(sizeof(uint32_t) * target->valuations_size);
+		}else{
+			target->valuations_size			= 0;
+			target->valuations				= NULL;
+		}
 		for(i = 0; i < target->valuations_size; i++){
 			target->valuations[i]		= source->valuations[i];
 		}
-		target->liveness_valuations_size	= source->liveness_valuations_size;
-		target->liveness_valuations			= calloc(target->liveness_valuations_size, sizeof(uint32_t));
-		for(i = 0; i < target->liveness_valuations_size; i++){
+		if(source->liveness_valuations_size > 0){
+			target->liveness_valuations_size	= source->liveness_valuations_size;
+			target->liveness_valuations			= calloc(target->liveness_valuations_size, sizeof(uint32_t));
+			for(i = 0; i < target->liveness_valuations_size; i++){
 				target->liveness_valuations[i]		= source->liveness_valuations[i];
 			}
-		target->inverted_valuations						= calloc(target->context->global_fluents_count, sizeof(automaton_bucket_list*));
-		for(i = 0; i < target->context->global_fluents_count; i++){
-			target->inverted_valuations[i]			= automaton_bucket_list_clone(source->inverted_valuations[i]);
+			target->liveness_inverted_valuations			= calloc(target->context->liveness_valuations_count, sizeof(automaton_bucket_list*));
+			for(i = 0; i < target->context->liveness_valuations_count; i++){
+				target->liveness_inverted_valuations[i]	= automaton_bucket_list_clone(source->liveness_inverted_valuations[i]);
+			}
+		}else{
+			target->liveness_valuations_size	= 0;
+			target->liveness_valuations			= NULL;
+			target->liveness_inverted_valuations= NULL;
 		}
-		target->liveness_inverted_valuations			= calloc(target->context->liveness_valuations_count, sizeof(automaton_bucket_list*));
-		for(i = 0; i < target->context->liveness_valuations_count; i++){
-			target->liveness_inverted_valuations[i]	= automaton_bucket_list_clone(source->liveness_inverted_valuations[i]);
+		if(source->context->global_fluents_count > 0){
+			target->inverted_valuations						= calloc(target->context->global_fluents_count, sizeof(automaton_bucket_list*));
+			for(i = 0; i < target->context->global_fluents_count; i++){
+				target->inverted_valuations[i]			= automaton_bucket_list_clone(source->inverted_valuations[i]);
+			}
+		}else{
+			target->inverted_valuations	= NULL;
 		}
+
 	}
 }
 automaton_automata* automaton_automata_clone(automaton_automata* source){
@@ -1202,8 +1218,10 @@ void automaton_automaton_destroy(automaton_automaton* automaton){
 			for(i = 0; i < automaton->context->liveness_valuations_count; i++)
 				automaton_bucket_destroy(automaton->liveness_inverted_valuations[i]);
 		}
-		free(automaton->liveness_inverted_valuations);
-		free(automaton->liveness_valuations);
+		if(automaton->liveness_inverted_valuations != NULL)
+			free(automaton->liveness_inverted_valuations);
+		if(automaton->liveness_valuations != NULL)
+			free(automaton->liveness_valuations);
 	}
 	automaton->name			= NULL;
 	automaton->context		= NULL;
@@ -1650,7 +1668,8 @@ bool automaton_automaton_add_transition(automaton_automaton* current_automaton, 
 		free(current_automaton->transitions[from_state]);
 		current_automaton->transitions[from_state]	= new_out;
 	}
-	if(TRANSITION_IS_INPUT(transition))current_automaton->is_controllable[from_state]	= false;
+	if(TRANSITION_IS_INPUT(transition))
+		current_automaton->is_controllable[from_state]	= false;
 	automaton_transition_copy(transition, &(current_automaton->transitions[from_state][old_out_degree]));
 	if(old_in_degree  >= old_in_size){
 		current_automaton->in_size[to_state]	= (old_in_size * LIST_INCREASE_FACTOR);
@@ -3913,7 +3932,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 
 #endif
 			//initialize label accumulator
-			bool accum_set = false; bool is_input = TRANSITION_IS_INPUT(automata[0]->transitions[current_state[0]]);
+			bool accum_set = false; bool is_input = false;//TRANSITION_IS_INPUT(automata[0]->transitions[current_state[0]]);
 			bool accum_input	= false;
 			if(idxs[0] > 0){
 				is_input = is_input || TRANSITION_IS_INPUT(&(automata[0]->transitions[current_state[0]][idxs[0] - 1]));
@@ -3928,7 +3947,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 			//check if current combination is viable
 			for(j = 1; j < automata_count; j++){
 				if(idxs[j] == 0){//transition not being considered
-					is_input = is_input || TRANSITION_IS_INPUT(automata[j]->transitions[current_state[j]]);
+					//is_input = is_input || TRANSITION_IS_INPUT(automata[j]->transitions[current_state[j]]);
 					not_considered = true;
 					for(k = 0; k < FIXED_SIGNALS_COUNT; k++)
 						current_label[k]	= (signal_bit_array_t)0x0;
@@ -4081,7 +4100,8 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 				for(k = 0; k < FIXED_SIGNALS_COUNT; k++){
 					current_transition->signals[k] = label_accum[k];
 				}
-				if(accum_input){
+				//if(accum_input){
+				if(is_input){
 					TRANSITION_SET_INPUT(current_transition);
 				}else{
 					TRANSITION_CLEAR_INPUT(current_transition);
