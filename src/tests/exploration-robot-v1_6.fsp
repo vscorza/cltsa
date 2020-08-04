@@ -46,8 +46,6 @@ fluent F_ReleaseNorth = <releaseNorth,{unload,load,n,s,e,w,stall,releaseSouth,co
 fluent F_ReleaseSouth = <releaseSouth,{unload,load,n,s,e,w,stall,releaseNorth,correct,bCast}> initially 1
 fluent F_Broadcast = <bCast,{unload,load,n,s,e,w,stall,releaseSouth,releaseNorth,correct}> initially 1
 ltl fluent A_Dummy = (true || !true).
-//|gr1| <{F_ReleaseNorth, F_ReleaseSouth}><{F_Load, F_Unload, F_Broadcast}> STRAT = PLANT.
-//|gr1| <{F_Broadcast,F_ReleaseNorth, F_ReleaseSouth}><{F_Load, F_Unload, F_Broadcast}> STRAT = PLANT.
 |gr1| <{F_Broadcast,F_ReleaseNorth, F_ReleaseSouth}><{F_Load, F_Unload, F_Broadcast}> STRAT = PLANT.
 
 LOCALIZER >> "/tmp/exploration_robot_6_localizer.rep".

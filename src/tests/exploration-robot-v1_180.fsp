@@ -5,7 +5,7 @@ set Controllable_Alphabet = {n,s,e,w,load,unload}
 set Global_Signals	= {Dummy}
 order 				= {}
 const Min = 1 //this must always be odd
-const Max = 200
+const Max = 180
 range Pos = Min..Max
 const MaxError	= 6
 range ErrorLimit	= 1..MaxError
@@ -44,4 +44,4 @@ fluent F_Broadcast = <bCast,{unload,load,n,s,e,w,stall,releaseSouth,releaseNorth
 ltl fluent A_Dummy = (true || !true).
 |gr1| <{F_Broadcast,F_ReleaseNorth, F_ReleaseSouth}><{F_Load, F_Unload, F_Broadcast}> STRAT = PLANT.
 
-STRAT >> "/tmp/exploration_robot_200_strat.rep".
+STRAT >> "/tmp/exploration_robot_180_strat.rep".

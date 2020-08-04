@@ -14,7 +14,7 @@
 #include "automaton_composite_hash_table.h"
 #include "y.tab.h"
 
-#define VERBOSE 0
+#define VERBOSE 1
 
 #define COMPOSE_SYNCH	1
 #define PARTIAL_SHARE	2
