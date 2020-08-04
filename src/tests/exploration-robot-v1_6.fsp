@@ -10,7 +10,7 @@ order 				= {}
 const Min = 1 //this must always be odd
 const Max = 6
 range Pos = Min..Max
-const MaxError	= 2
+const MaxError	= 6
 range ErrorLimit	= 1..MaxError
 
 //Concrete
@@ -29,15 +29,16 @@ M[r:Pos][c:Pos] = (
 
 ARM = (load->unload->ARM).
 
-LOCALIZER = L[1],
-L[e:ErrorLimit]	= (when(e < MaxError) {<bCast,n>,<bCast,s>,<bCast,e>,<bCast,w>} -> L[e+1]
-		| when(e == MaxError) {<bCast,n>,<bCast,s>,<bCast,e>,<bCast,w>} -> L_error
-		| correct -> L[1]),
-L_error	= ({<n,releaseNorth>,<s,releaseSouth>} -> L_error).
+LOCALIZER = L_B[1],
+L[e:ErrorLimit]	= (when(e < MaxError) {n,s,w,e,<n,releaseNorth>,<s,releaseSouth>,load,unload} -> L_B[e+1]
+		| when(e == MaxError) {n,s,w,e,<n,releaseNorth>,<s,releaseSouth>,load,unload} -> L_error),
+L_B[e:ErrorLimit]	= (bCast -> L[e] | correct -> L[1]),
+L_error	= ({n,s,w,e,<n,releaseNorth>,<s,releaseSouth>,load,unload} -> L_error).
 
 ||C = (MAZE ||_c ARM).
 
 |f|PLANT = (MAZE || ARM || LOCALIZER).
+//|f|PLANT = (MAZE || ARM).
 
 fluent F_Load = <load, {unload,n,s,e,w,stall,releaseNorth, releaseSouth,correct,bCast}>
 fluent F_Unload = <unload, {load,n,s,e,w,stall,releaseNorth, releaseSouth,correct,bCast}>
@@ -46,7 +47,8 @@ fluent F_ReleaseSouth = <releaseSouth,{unload,load,n,s,e,w,stall,releaseNorth,co
 fluent F_Broadcast = <bCast,{unload,load,n,s,e,w,stall,releaseSouth,releaseNorth,correct}> initially 1
 ltl fluent A_Dummy = (true || !true).
 //|gr1| <{F_ReleaseNorth, F_ReleaseSouth}><{F_Load, F_Unload, F_Broadcast}> STRAT = PLANT.
-|gr1| <{A_Dummy}><{F_Load, F_Unload, F_Broadcast}> STRAT = PLANT.
+//|gr1| <{F_Broadcast,F_ReleaseNorth, F_ReleaseSouth}><{F_Load, F_Unload, F_Broadcast}> STRAT = PLANT.
+|gr1| <{F_Broadcast,F_ReleaseNorth, F_ReleaseSouth}><{F_Load, F_Unload, F_Broadcast}> STRAT = PLANT.
 
 LOCALIZER >> "/tmp/exploration_robot_6_localizer.rep".
 MAZE >> "/tmp/exploration_robot_6_maze.rep".
