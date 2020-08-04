@@ -67,7 +67,7 @@ max_heap_c.o: max_heap.c automaton_utils_c.o parser_utils_c.o
 fast_pool_c.o: fast_pool.c automaton_utils_c.o
 	$(CC) $(CPARAMS) $(CFLAGS) -c $< -o $@ $(CLIBS)
 
-parser: y.tab.o lex.yy.o parser_utils_c.o automaton_utils_c.o obdd_c.o
+parser: y.tab.o lex.yy.o parser_utils_c.o automaton_utils_c.o obdd_c.o obdd_cache_c.o dictionary_c.o fast_pool_c.o
 	$(CC) $(CPARAMS) $(CFLAGS) $^ -o $@ $(CLIBS)
 
 parser_utils_c.o: parser_utils.c automaton_utils_c.o

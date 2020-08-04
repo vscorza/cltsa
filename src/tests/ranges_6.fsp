@@ -1,0 +1,31 @@
+// range def.
+const LIMIT = 3
+range R = 1..LIMIT
+range R2 = 2..LIMIT
+range R3 = 2..(LIMIT*2)
+
+// alphabets def.
+set Global_Alphabet = {back,s,t, t[i:R], t[i:R][j:R], back[i:R3]}
+set Controllable_Alphabet = {back, back[j:R3]}
+
+
+// automata def.
+TEST_S = ({s,t}->TEST_S).
+TEST_S_P = ( s->TEST_S_P | t ->TEST_S_P).
+
+TEST_S2 = ({s,<t_1,t_2>}->TEST_S2).
+TEST_S2_P = ( s->TEST_S2_P |<t_1,t_2> ->TEST_S2_P).
+
+TEST_S3 = ({s,t[i:R]}->TEST_S3).
+TEST_S3_P = ( s->TEST_S3_P | t_1 ->TEST_S3_P| t_2 ->TEST_S3_P| t_3 ->TEST_S3_P).
+
+TEST_S4 = ({s,t}->t[i:R]->TEST_S4).
+TEST_S4_P = ( s->TEST_S4_S | t->TEST_S4_T),
+TEST_S4_S = (t_1->TEST_S4_P | t_2->TEST_S4_P | t_3->TEST_S4_P),
+TEST_S4_T = (t_1->TEST_S4_P | t_2->TEST_S4_P | t_3->TEST_S4_P).
+
+// tests
+equals FATAL_Set(TEST_S, TEST_S_P).
+equals FATAL_Set_Concurrent(TEST_S2, TEST_S2_P).
+equals FATAL_Set_Range(TEST_S3, TEST_S3_P).
+equals FATAL_Set_Range_Implicit(TEST_S4, TEST_S4_P).

@@ -56,7 +56,7 @@ automaton_set_syntax* automaton_set_syntax_create_concurrent(char* string_termin
 	set->labels_count[0]= 1;
 	set->labels			= malloc(sizeof(automaton_label_syntax**) * set->count);
 	set->labels[0]		= malloc(sizeof(automaton_label_syntax*));
-	set->labels[0][0]	= automaton_label_syntax_create(false, NULL, string_terminal, indexes);
+	set->labels[0][0]	= automaton_label_syntax_create(false, false, NULL, string_terminal, indexes);
 	set->string_terminal= NULL;
 	return set;
 }
@@ -69,14 +69,15 @@ automaton_set_syntax* automaton_set_syntax_concat_concurrent(automaton_set_synta
 			new_labels[i]	= set->labels[0][i];
 		}
 	}
-	new_labels[set->labels_count[0] - 1]	= automaton_label_syntax_create(false, NULL, string_terminal, indexes);
+	new_labels[set->labels_count[0] - 1]	= automaton_label_syntax_create(false, false, NULL, string_terminal, indexes);
 	free(set->labels[0]);
 	set->labels[0] = new_labels;
 	return set;
 }
-automaton_label_syntax* automaton_label_syntax_create(bool is_set, automaton_set_syntax* set, char* string_terminal, automaton_indexes_syntax* indexes){
+automaton_label_syntax* automaton_label_syntax_create(bool is_set, bool is_concurrent, automaton_set_syntax* set, char* string_terminal, automaton_indexes_syntax* indexes){
 	automaton_label_syntax* label	= malloc(sizeof(automaton_label_syntax));
 	label->is_set	= is_set;
+	label->is_concurrent	= is_concurrent;
 	label->indexes	= indexes;
 	if(label->is_set){
 		label->set				= set;
@@ -90,6 +91,7 @@ automaton_label_syntax* automaton_label_syntax_create(bool is_set, automaton_set
 automaton_label_syntax* automaton_label_syntax_create_empty(){
 	automaton_label_syntax* label	= malloc(sizeof(automaton_label_syntax));
 	label->is_set	= false;
+	label->is_concurrent	= false;
 	label->indexes	= NULL;
 	label->string_terminal = NULL;
 	label->set		= NULL;

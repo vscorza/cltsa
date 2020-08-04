@@ -1,6 +1,7 @@
 %{
 #include <stdio.h>
 #include "parser_utils.h"
+#include "automaton_common_structs.h"
 #include "obdd.h"
 int yylex(void);
 void yyerror(char *);
@@ -55,6 +56,7 @@ automaton_program_syntax* parsed_program = NULL;
 %type<indexes>				indexes
 %type<trace_label_atom>		ltsSimpleTraceLabel
 %type<trace_label>			ltsTraceLabel
+%type<trace_label>			ltsTraceLabelSet
 %type<transition>			ltsTrace ltsTransition
 %type<state>				ltsState
 %type<state_label>			ltsStateLabel
@@ -97,9 +99,9 @@ statement:
 	;
 label:
 	concurrentLabel							{$$ = $1;}
-	|set									{$$ = automaton_label_syntax_create(true, $1, NULL, NULL);}
-	|t_IDENT indexes						{$$ = automaton_label_syntax_create(false, NULL, $1, $2);free($1);}
-	|t_UPPER_IDENT indexes					{$$ = automaton_label_syntax_create(false, NULL, $1, $2);free($1);}
+//	|set									{$$ = automaton_label_syntax_create(true, false, $1, NULL, NULL);}
+	|t_IDENT indexes						{$$ = automaton_label_syntax_create(false, false, NULL, $1, $2);free($1);}
+	|t_UPPER_IDENT indexes					{$$ = automaton_label_syntax_create(false, false, NULL, $1, $2);free($1);}
 	;
 labels:
 	labels ',' label						{$$ = automaton_set_syntax_concat_labels($1,$3);}
@@ -107,7 +109,7 @@ labels:
 	|										{$$	= NULL;}
 	;
 concurrentLabel:
-	'<' concurrentLabels '>' indexes		{$$ = automaton_label_syntax_create(true, $2, NULL, $4);}
+	'<' concurrentLabels '>' indexes		{$$ = automaton_label_syntax_create(true, true, $2, NULL, $4);}
 	|'<' '>'										{$$ = automaton_label_syntax_create_empty();}
 	;
 concurrentLabels:
@@ -235,7 +237,11 @@ ltsTrace:
 	;
 ltsTraceLabel:
 	ltsSimpleTraceLabel						{$$ = automaton_trace_label_syntax_create($1);}
-	|ltsTraceLabel '.' ltsSimpleTraceLabel	{$$ = automaton_trace_label_syntax_add_atom($1, $3);}
+	| '{' ltsTraceLabelSet '}'				{$$ = $2;}
+	
+ltsTraceLabelSet:
+	ltsSimpleTraceLabel						{$$ = automaton_trace_label_syntax_create($1);}
+	| ltsTraceLabelSet ',' ltsSimpleTraceLabel	{$$ = automaton_trace_label_syntax_add_atom($1, $3);}
 	;
 ltsSimpleTraceLabel:
 	label indexes							{$$ = automaton_trace_label_atom_syntax_create($1, $2);}

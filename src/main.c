@@ -1483,6 +1483,7 @@ void run_functional_tests(){
 	run_parse_test("tests/ranges_3.fsp",  "range 3 test");
 	run_parse_test("tests/ranges_4.fsp",  "range 4 test");
 	run_parse_test("tests/ranges_5.fsp",  "range 5 test");
+	run_parse_test("tests/ranges_6.fsp",  "range 6 test");
 	run_parse_test("tests/mixed_3_signals_2_labels.fsp", "mixed model 3 signals 2 labels");//mixed model 3 signals 2 labels
 	run_parse_test("tests/two_floors_lift.fsp", "lift 2 floors");//lift 2 floors
 	run_parse_test("tests/concurrency_equiv_test.fsp",  "Asynch composition equiv. test");
