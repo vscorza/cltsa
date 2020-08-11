@@ -503,5 +503,3 @@ S_902 = (s-> S_842|e-> S_848|n-> S_900).
 
 // tests
 equals FATAL_ROBOT_UNREALIZABLE(STRAT, STRAT_P).
-
-*/
