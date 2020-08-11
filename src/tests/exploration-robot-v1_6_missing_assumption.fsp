@@ -5,9 +5,9 @@ set Controllable_Alphabet = {n,s,e,w}
 set Global_Signals	= {Dummy}
 order 				= {}
 const Min = 1 //this must always be odd
-const Max = 2
+const Max = 6
 range Pos = Min..Max
-const MaxError	= 2
+const MaxError	= 6
 range ErrorLimit	= 1..MaxError
 
 //Concrete
@@ -36,24 +36,11 @@ L_error	= ({n,s,w,e,drop,load,unload} -> L_error).
 ||C = (MAZE ||_c ARM).
 
 |f|PLANT = (MAZE || ARM || LOCALIZER).
-||ARM_LOCALIZER = (ARM || LOCALIZER).
-|f|PLANT_2 = (MAZE || ARM).
 
 fluent F_Load = <load, {unload,n,s,e,w,drop,correct,bCast}>
 fluent F_Unload = <unload, {load,n,s,e,w,drop,correct,bCast}>
 fluent F_Dont_Drop = <load, drop> initially 1
-//fluent F_ReleaseNorth = <releaseNorth,{unload,load,n,s,e,w,stall,releaseSouth,correct,bCast}> initially 1
-//fluent F_ReleaseSouth = <releaseSouth,{unload,load,n,s,e,w,stall,releaseNorth,correct,bCast}> initially 1
 fluent F_Broadcast = <bCast,{unload,load,n,s,e,w,stall,correct}> initially 1
-//|gr1| <{F_Dont_Stall}><{F_Load, F_Unload, F_Broadcast}> STRAT = PLANT.
-//|gr1| <{F_Dont_Drop}><{F_Load}> STRAT = PLANT_2.
-ltl fluent A_Dummy = (true || !true).
-|gr1| <{A_Dummy}><{F_Load}> STRAT = PLANT_2.
+|gr1| <{F_Dont_Drop}><{F_Load, F_Unload, F_Broadcast}> STRAT = PLANT.
 
-MAZE >> "/tmp/exploration_robot_6_maze.rep".
-ARM >> "/tmp/exploration_robot_6_arm.rep".
-ARM_LOCALIZER >> "/tmp/exploration_robot_6_arm_localizer.rep".
-LOCALIZER >> "/tmp/exploration_robot_6_localizer.rep".
-PLANT >> "/tmp/exploration_robot_6_plant.rep".
-PLANT_2 >> "/tmp/exploration_robot_6_plant_2.rep".
 STRAT >> "/tmp/exploration_robot_6_diag.rep".

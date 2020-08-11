@@ -1,5 +1,6 @@
 TODO:
 =====
+- add tests for exploration robot realizable/unrealizable
 - review validation
 	- running tests
 		- review exploration robot
