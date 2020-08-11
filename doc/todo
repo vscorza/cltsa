@@ -35,6 +35,7 @@ TODO:
 	- plan paper for clts, tool and general thesis layout
 - after paper
 	- examples
+		- add syntax support (state fluent XX = (s_i, ..., s_j) in name.
 		- review ciolek thesis
 		- write example from ltl_paxos_2 paper (Towards Modeling and Model Checking Fault-Tolerant Distributed Algorithms) (https://www.youtube.com/watch?v=-Bl5GleEN5s)
 		- ivy (kenneth mcmillan)
@@ -45,7 +46,6 @@ TODO:
 		- update values and validation section
 		- run tests for genbuf 4, 5, 6
 	- allow to define buchi fluent based on accepting state, for instance for automaton based properties in genbuf
-		- add syntax support (state fluent XX = (s_i, ..., s_j) in name.
 		- transform values as in fluents
 		- write tests
 		- run test and profile

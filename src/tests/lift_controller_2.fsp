@@ -12,6 +12,7 @@ ltl env rho Env_Keep_B in GAME_LTL		= [](((b1 && !f1)-> X(b1)) &&((b2 && !f2)-> 
 ltl sys rho Sys_Mutex in GAME_LTL		= [](!(f1 && f2) && !(X(f1 && f2))).
 ltl sys rho Sys_Adj_Floors in GAME_LTL	= []((f1 -> X(f1 || f2)) && (f2 -> X(f1 || f2))).
 ltl sys rho Sys_Move_Iff_B in GAME_LTL	= []((f1 && X(f2))->(b1 || b2)).
+//ltl sys rho New_s in GAME_LTL	= [](f1 -> X(f1)).
 
 
 ltl fluent Ass_True = (b2||!b2).

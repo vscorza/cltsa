@@ -827,9 +827,9 @@ bool automaton_ranking_print_report(automaton_automaton *automaton,
 		for(i = 0; i < automaton->local_alphabet_count; i++){
 			fprintf(f, "%d%s", automaton->local_alphabet[i],AUT_SER_SEP);
 		}
-		fprintf(f, "%d%s", automaton->local_alphabet_count + 1, AUT_SER_SEP);
+		fprintf(f, "%d%s", automaton->context->global_alphabet->count + 1, AUT_SER_SEP);
 		for(i = 0; i < max_delta[r]; i++){
-			fprintf(f, "%d%s", automaton->local_alphabet_count + 1 + i, i == (max_delta[r] - 1)? "" :  AUT_SER_SEP);
+			fprintf(f, "%d%s", automaton->context->global_alphabet->count + 1 + i, i == (max_delta[r] - 1)? "" :  AUT_SER_SEP);
 		}
 		fprintf(f, "%s%s%d%s%s", AUT_SER_ARRAY_END, AUT_SER_SEP, automaton->transitions_count, AUT_SER_SEP, AUT_SER_ARRAY_START);
 		uint32_t current_count	= 0;
@@ -842,7 +842,7 @@ bool automaton_ranking_print_report(automaton_automaton *automaton,
 					else fprintf(f, "%s",AUT_SER_SEP);
 					ranking_value = ((automaton_ranking*)automaton_concrete_bucket_get_entry(ranking_list[r],automaton->transitions[i][j].state_to))->value;
 					automaton_ranking_transition_serialize_report(f, &(automaton->transitions[i][j]),
-							ranking_value == RANKING_INFINITY? automaton->local_alphabet_count :automaton->local_alphabet_count + ranking_value + 1);
+							ranking_value == RANKING_INFINITY? automaton->context->global_alphabet->count :automaton->context->global_alphabet->count + ranking_value + 1);
 				}else{
 					printf("ERROR: Transition was null at [%d][%d]\n", i, j);
 				}

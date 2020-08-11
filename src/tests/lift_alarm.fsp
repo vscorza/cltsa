@@ -31,12 +31,12 @@ ltl sys rho Stop_fix_f3 in LIFT		= []((stop && f3) -> X(f3)).
 **** ENV RHO
 ***********/
 //A1 release busreq after incr
-ltl env rho Release_b1_when_served in AHB	= []((b1 && f1) -> X(!b1)).
-ltl env rho Release_b2_when_served in AHB	= []((b2 && f2) -> X(!b2)).
-ltl env rho Release_b3_when_served in AHB	= []((b3 && f3) -> X(!b3)).
-ltl env rho Mantain_b1_when_not_served in AHB	= []((b1 && !f1) -> X(b1)).
-ltl env rho Mantain_b2_when_not_served in AHB	= []((b2 && !f2) -> X(b2)).
-ltl env rho Mantain_b3_when_not_served in AHB	= []((b3 && !f3) -> X(b3)).
+ltl env rho Release_b1_when_served in LIFT	= []((b1 && f1) -> X(!b1)).
+ltl env rho Release_b2_when_served in LIFT	= []((b2 && f2) -> X(!b2)).
+ltl env rho Release_b3_when_served in LIFT	= []((b3 && f3) -> X(!b3)).
+ltl env rho Mantain_b1_when_not_served in LIFT	= []((b1 && !f1) -> X(b1)).
+ltl env rho Mantain_b2_when_not_served in LIFT	= []((b2 && !f2) -> X(b2)).
+ltl env rho Mantain_b3_when_not_served in LIFT	= []((b3 && !f3) -> X(b3)).
 /***********
 **** FLUENTS
 ***********/
