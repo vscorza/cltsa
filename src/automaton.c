@@ -2763,7 +2763,8 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2_c_i_complem
 			removed = 0;
 			current_linear_index = -1; transitions_kept_size = 0;
 #if DEBUG_DD
-			printf("Partition (%d) complement vector: [", dd);
+			if(t_count < 256)
+				printf("Partition (%d) complement vector: [", dd);
 #endif
 			//bit vector sets to false anything outside the range
 			for(i = 0; i < t_count; i++){
@@ -2774,21 +2775,27 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2_c_i_complem
 					CLEAR_BITVECTOR_BIT(partition_bit_vector, i);
 					removed++;
 #if DEBUG_DD
-					printf("▫");
+					if(t_count < 256)
+						printf("▫");
 #endif
 				}else{
 					transitions_kept_size++;
 #if DEBUG_DD
-					if(automaton_automaton_has_transition(inner_automaton, current_transition)){
-						printf("▪");
-					}else{
-						printf("◦");
+					if(t_count < 256){
+						if(automaton_automaton_has_transition(inner_automaton, current_transition)){
+							printf("▪");
+						}else{
+							printf("◦");
+						}
 					}
 #endif
 				}
 			}
 #if DEBUG_DD
-		printf("]/n");
+		if(t_count < 256)
+			printf("]/n");
+		else
+			printf("Partition (%d) complement kept \t %d trans. from \t %d\n", dd, transitions_kept_size, t_count);
 #endif
 			uint32_t next_partitions_count = max(partitions_count - 1, 2);
 			//compute where to start the next step, project current ith position in the next partition size
@@ -2836,7 +2843,8 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2_c_i(automat
 		minimization = automaton_automaton_clone(inner_automaton);
 		removed = 0;
 #if DEBUG_DD
-		printf("Partition (%d) vector: [", dd);
+		if(t_count < 256)
+			printf("Partition (%d) vector: [", dd);
 #endif
 		//remove transitions as the range is evaluated traversing the transitions' list
 		for(i = 0; i < t_count; i++){
@@ -2849,16 +2857,22 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2_c_i(automat
 				automaton_automaton_remove_transition(minimization, current_transition);
 				removed++;
 #if DEBUG_DD
-				printf("▫");
+				if(t_count < 256)
+					printf("▫");
 			}	else if(automaton_automaton_has_transition(inner_automaton, current_transition)){
-				printf("▪");
+				if(t_count < 256)
+					printf("▪");
 			}else{
-				printf("◦");
+				if(t_count < 256)
+					printf("◦");
 #endif
 			}
 		}
 #if DEBUG_DD
-		printf("]\n");
+		if(t_count < 256)
+			printf("]\n");
+		else
+			printf("Partition (%d) Kept \t %d trans. from \t %d\n", dd, transitions_kept_size, t_count);
 #endif
 		//if non-realizable:update structs, perform recursive call and return
 		automaton_automaton_remove_deadlocks(minimization);
@@ -2949,14 +2963,16 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2(automaton_a
 	automaton_automaton *return_automaton	= NULL;
 
 #if DEBUG_DD
-	printf("Partition vector: [");
-	//remove transitions that are in the current partition
-	for(i = 0; i < t_count; i++){
-		if(TEST_BITVECTOR_BIT(partition_bit_vector, i))printf("▪");
-		else printf("▫");
+	if(t_count < 256){
+		printf("Partition vector: [");
+		//remove transitions that are in the current partition
+		for(i = 0; i < t_count; i++){
+			if(TEST_BITVECTOR_BIT(partition_bit_vector, i))printf("▪");
+			else printf("▫");
+		}
+		printf("]\n");
+		printf("Kept transitions: [");
 	}
-	printf("]\n");
-	printf("Kept transitions: [");
 #endif
 	//remove transitions that are in the current partition
 	for(i = 0; i < t_count; i++){
@@ -2967,22 +2983,27 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2(automaton_a
 				removed++;
 				automaton_automaton_remove_transition(inner_automaton, current_transition);
 #if DEBUG_DD
-				printf("▫");
+				if(t_count < 256)
+					printf("▫");
 #endif
 			}
 #if DEBUG_DD
-			else
+			else if(t_count < 256)
 				printf("◦");
 #endif
 		}else{
 			transitions_kept_size++;
 #if DEBUG_DD
+			if(t_count < 256)
 				printf("▪");
 #endif
 		}
 	}
 #if DEBUG_DD
-				printf("]\n");
+	if(t_count < 256)
+		printf("]\n");
+	else
+		printf("Kept \t %d trans. from \t %d\n", transitions_kept_size, t_count);
 				//automaton_automaton_print(inner_automaton, false, false, false, NULL, NULL);
 #endif
 
