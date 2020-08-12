@@ -33,7 +33,6 @@ L[e:ErrorLimit]	= (when(e < MaxError) {n,s,w,e,drop,load,unload} -> L_B[e+1]
 L_B[e:ErrorLimit]	= (bCast -> L[e] | correct -> L[1]),
 L_error	= ({n,s,w,e,drop,load,unload} -> L_error).
 
-||C = (MAZE ||_c ARM).
 
 |f|PLANT = (MAZE || ARM || LOCALIZER).
 

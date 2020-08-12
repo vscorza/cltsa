@@ -2254,7 +2254,7 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 	bool ranking_was_infinity;
 	while(pending_list->count > 0){
 		//current_pending_state	= (automaton_pending_state*)automaton_ptr_bucket_pop_entry(pending_list);
-		automaton_pending_state_max_heap_pop_entry(pending_list, &current_pending_state);
+		automaton_pending_state_max_heap_pop_entry(pending_list, &current_pending_state);//**30
 
 		goal_to_satisfy	= current_pending_state.goal_to_satisfy;
 
@@ -2275,7 +2275,7 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 
 		if(automaton_state_is_stable(game_automaton, current_pending_state.state, ranking_list
 				, current_pending_state.goal_to_satisfy, guarantees_count, assumptions_count
-				, guarantees_indexes, assumptions_indexes, first_assumption_index)){
+				, guarantees_indexes, assumptions_indexes, first_assumption_index)){//**20
 			pending_processed++;
 			continue;
 		}
@@ -2292,7 +2292,7 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 #endif
 		automaton_add_unstable_predecessors(game_automaton, pending_list, key_lists[goal_to_satisfy], current_pending_state.state
 				, ranking_list, current_pending_state.goal_to_satisfy, guarantees_count
-				, assumptions_count, guarantees_indexes, assumptions_indexes, first_assumption_index, pending_processed);
+				, assumptions_count, guarantees_indexes, assumptions_indexes, first_assumption_index, pending_processed);//**21
 		//if ranking reached infinity, update other rankings for the same state
 		if(!ranking_was_infinity && current_ranking->value == RANKING_INFINITY){
 			for(i = 0; i < guarantees_count; i++){

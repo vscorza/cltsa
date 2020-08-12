@@ -1,6 +1,5 @@
 TODO:
 =====
-- add tests for exploration robot realizable/unrealizable
 - review validation
 	- running tests
 		- review exploration robot
@@ -23,6 +22,13 @@ TODO:
 		- explain why exploration robot minimization is linear w.r.t. to the environment
 		- explain why exploration robot DeltaE' / DeltaC > 1
 		- explain difference between lift controller 6-8, genbuf 2-3 (review profiler)
+- note to discuss
+	- fluent should be treated carefully since the range |P_i - Q_j| is of the essence in determining the 
+		effective cost of the synthesis, check exploration robot case time diff between:
+		fluent F_Dont_Drop = <load, drop>
+		fluent F_Dont_Drop = <load, drop> initially 1
+		fluent F_Dont_Drop = <load, {unload,drop}>
+		fluent F_Dont_Drop = <load, {unload,drop}> initially 1
 - discussion
 	- move references to symbolic to discussion
 - meeting
@@ -37,6 +43,7 @@ TODO:
 - after paper
 	- examples
 		- add syntax support (state fluent XX = (s_i, ..., s_j) in name.
+		- use mm512 operations for ordered list in aut_push_string_to_list
 		- review ciolek thesis
 		- write example from ltl_paxos_2 paper (Towards Modeling and Model Checking Fault-Tolerant Distributed Algorithms) (https://www.youtube.com/watch?v=-Bl5GleEN5s)
 		- ivy (kenneth mcmillan)

@@ -174,14 +174,19 @@ bool aut_push_string_to_list(automaton_string_list *list, char* element, int32_t
 		}
 	}
 	//rearrange pointers if needed
+	int32_t position_value	= *position;
 	if(list->count > 0){
 		for(i = (list->count) - 1; i >= 0; i--){
-			if(i >= *position){
+			if(i >= position_value){
 				list->list[i+1]	= list->list[i];
 				list->counts[i+1]	= list->counts[i];
 			}
-			if(list->ordered_list[i] >= *position)
+		}
+		for(i = (list->count) - 1; i >= 0; i--){
+			if(list->ordered_list[i] >= position_value)
 				list->ordered_list[i]++;
+		}
+		for(i = (list->count) - 1; i >= 0; i--){
 			if(i >= ordered_position){
 				list->ordered_list[i+1]	= list->ordered_list[i];
 			}
