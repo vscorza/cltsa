@@ -2252,6 +2252,18 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 	automaton_pending_state* state_location;
 	uint32_t goal_to_satisfy;
 	bool ranking_was_infinity;
+
+	bool max_delta_set	= false;
+	for(l = 0; l < guarantees_count; l++){
+		if(max_delta[l] != 0){
+			max_delta_set	= true;
+			break;
+		}
+	}
+	if(!max_delta_set){
+		printf("[ERROR] CLTSA synthesis current implementation can not work when all states satisfy both all liveness assumptions and all guarantees (eq. to safety check)\n");
+		exit(-1);
+	}
 	while(pending_list->count > 0){
 		//current_pending_state	= (automaton_pending_state*)automaton_ptr_bucket_pop_entry(pending_list);
 		automaton_pending_state_max_heap_pop_entry(pending_list, &current_pending_state);//**30

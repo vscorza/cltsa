@@ -3548,6 +3548,9 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 			assumptions		= automaton_set_syntax_evaluate(tables, gr1_game->assumptions, &assumptions_count, set_name);
 			sprintf(set_name, "Guarantees %s", gr1_game->name);
 			guarantees		= automaton_set_syntax_evaluate(tables, gr1_game->guarantees, &guarantees_count, set_name);
+#if VERBOSE
+			printf("[Synthesizing] %s over %s\n", gr1_game->name, game_automaton->name);
+#endif
 			winning_region_automaton	= automaton_get_gr1_strategy(game_automaton, assumptions, assumptions_count
 					, guarantees, guarantees_count, true);
 			results_assumptions_count	= assumptions_count;
@@ -3565,7 +3568,17 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 						results_plant_controllable_transitions++;
 				}
 			}
+#if VERBOSE
+			if(winning_region_automaton->transitions_count == 0){
+				printf("[Unreal.] %s over %s is NOT REALIZABLE\n", gr1_game->name, game_automaton->name);
+			}else{
+				printf("[Real.] %s over %s is REALIZABLE\n", gr1_game->name, game_automaton->name);
+			}
+#endif
 			if(winning_region_automaton->transitions_count == 0 && is_diagnosis != 0){
+#if VERBOSE
+				printf("[Diagnosing] %s over %s\n", gr1_game->name, game_automaton->name);
+#endif
 				nonreal	= true;
 				automaton_automaton_destroy(winning_region_automaton);
 				if(is_diagnosis & DD_SEARCH)
