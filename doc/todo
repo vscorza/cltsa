@@ -5,8 +5,8 @@ TODO:
 		- review exploration robot
 		- review genbuf
 		- review DeltaE'/ DeltaC lift 8 (error)
-		- define cutting criteria and re run 
-		- review konighoefer thesis see removal prct. compare to our removing percentage
+		X define cutting criteria and re run (> 30 min as timeout)
+		X review konighoefer thesis see removal prct. compare to our removing percentage (The size of the specification is reduced by 90% on average)
 	- corrections
 		- change missing assumption for missing liveness
 		- remove reference to 7 runs and whiskers
