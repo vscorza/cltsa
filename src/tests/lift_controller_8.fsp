@@ -42,5 +42,5 @@ ltl fluent Goal_Serve_Request_8			= ((b8->f8)).
 |gr1| <{Ass_True}><{Goal_Serve_Request_1,Goal_Serve_Request_2,Goal_Serve_Request_3,Goal_Serve_Request_4,Goal_Serve_Request_5
 	,Goal_Serve_Request_6,Goal_Serve_Request_7,Goal_Serve_Request_8,Goal_Back_To_Ground}> STRAT = ENV.
 
-STRAT >> "/tmp/lift_controller_8.rep".
+//STRAT >> "/tmp/lift_controller_8.rep".
 

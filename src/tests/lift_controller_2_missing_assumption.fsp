@@ -23,5 +23,5 @@ ltl fluent Goal_Last_Floor				= (f2).
 |f| ENV =(GAME_LTL).
 |gr1| <{Ass_True}><{Goal_Serve_Request_1,Goal_Serve_Request_2,Goal_Back_To_Ground,Goal_Last_Floor}> STRAT = ENV.
 
-STRAT >> "/tmp/lift_controller_2_missing_assumption.rep".
+//STRAT >> "/tmp/lift_controller_2_missing_assumption.rep".
 

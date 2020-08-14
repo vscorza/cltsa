@@ -75,4 +75,4 @@ ltl fluent G_7				= (empty || deq).
 |gr1| <{A_rcvr_0, A_rcvr_0_b}><{G_1_2_sndr_0, G_12,G_7}> STRAT = ENV.
 
 
-STRAT >> "/tmp/genbuf_1_strat_removed_env_safety.rep".
+//STRAT >> "/tmp/genbuf_1_strat_removed_env_safety.rep".

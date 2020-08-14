@@ -9,7 +9,7 @@ INSTANCES=""
 
 for ((i=1; i<=$MAX_INSTANCE;i++)) 
 	do 
-		i2=$((i*10))
+		i2=$((i*100))
 		for((j=1; j<=$ITERATIONS;j++))do INSTANCES="${INSTANCES} ${DST_DIR}exploration-robot-v1_${i2}.fsp Exploration.Robot.${i2}"; done
 	done
 

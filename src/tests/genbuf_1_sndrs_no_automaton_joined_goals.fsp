@@ -71,4 +71,4 @@ ltl fluent G_Strongest	= (a).
 |f| ENV =(GENBUF).
 |gr1| <{A_rcvr_0, A_rcvr_0_b}><{G_Strongest}> STRAT = ENV.
 
-STRAT >> "/tmp/genbuf_1_strat_joined_goals.rep".
+//STRAT >> "/tmp/genbuf_1_strat_joined_goals.rep".
