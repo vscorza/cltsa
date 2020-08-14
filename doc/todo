@@ -1,5 +1,9 @@
 TODO:
 =====
+- extend tests
+	- exploration robot 700
+	- try genbuf.3.removed.safety again
+	- extrapolate collecto and lift controller to reach the 2593 s mark
 - review paper format
 - review validation
 	- running tests
