@@ -2744,15 +2744,15 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2_c_i_complem
 		if(automaton_is_gr1_realizable(minimization, assumptions, assumptions_count,
 				guarantees, guarantees_count) || minimization->out_degree[minimization->initial_states[0]] == 0){
 			automaton_automaton_destroy(minimization);
-#if DEBUG_UNREAL
+#if DEBUG_UNREAL || DEBUG_DD
 			printf("(compl. to part. %d realizable)\n", dd);
 #endif
 		}else{//update bit vector to keep only current partition complement and set n to max(n-1, 2)
-#if DEBUG_UNREAL
+#if DEBUG_UNREAL || DEBUG_DD
 			printf("(compl. to part. %d unrealizable)\n", dd);
 #endif
 			if(removed == 0){
-#if DEBUG_UNREAL
+#if DEBUG_UNREAL || DEBUG_DD
 				printf("(minimal)\n");
 #endif
 				automaton_automaton_destroy(minimization);
@@ -2792,10 +2792,10 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2_c_i_complem
 				}
 			}
 #if DEBUG_DD
-		if(t_count < 256)
-			printf("]/n");
-		else
-			printf("Partition (%d) complement kept \t %d trans. from \t %d\n", dd, transitions_kept_size, t_count);
+			if(t_count < 256)
+				printf("]/n");
+			else
+				printf("Partition (%d) complement kept \t %d trans. from \t %d\n", dd, transitions_kept_size, t_count);
 #endif
 			uint32_t next_partitions_count = max(partitions_count - 1, 2);
 			//compute where to start the next step, project current ith position in the next partition size
