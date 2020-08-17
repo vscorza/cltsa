@@ -1,8 +1,8 @@
 \renewcommand{\ttdefault}{pcr}
-\begin{lstlisting}[escapeinside={[*}{*]},basicstyle=\scriptsize\ttfamily,columns=flexible,frame=lines,mathescape=true,xleftmargin=3.0ex,keywordstyle=\textbf,morekeywords={if,while,do,else,fork,int,null, algorithm, is, input, output, return},numbers=left,numberstyle=\scriptsize]
+\begin{lstlisting}[escapeinside={[*}{*]},basicstyle=\scriptsize\ttfamily,columns=flexible,frame=lines,mathescape=true,keywordstyle=\textbf,morekeywords={if,while,do,else,fork,int,null, algorithm, is, input, output, return},numbers=left,numberstyle=\scriptsize,numbers=none]
 algorithm dfs_min is
-	input: $E$ the LTS representing the original plant
-	output: $E'$ the LTS that satisfies the problem statement
+	input: $E$ an LTS representing the original plant
+	output: $E'$ an LTS that satisfies the problem statement
 	$E$ = $E$.prune_mixed_states()[*\listRef{A}*]
 	$E_{new}$ = $E'$ = $E$ 
 	$\mathcal{T}_u$ = $E$.non_controllable_transitions() [*\listRef{B}*]

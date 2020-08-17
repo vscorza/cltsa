@@ -1,4 +1,6 @@
-\documentclass[sigconf,review, anonymous]{acmart}
+%\documentclass[sigconf,review, anonymous]{acmart}
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
 \usepackage{etex}
 \usepackage{booktabs} % For formal tables
 \usepackage[utf8]{inputenc}
@@ -17,7 +19,7 @@
 \usepackage{placeins}
 \usepackage{graphicx} % Required for including images
 \usepackage{lipsum} % Used for inserting dummy 'Lorem ipsum' text into the template
-%\usepackage{amssymb}
+\usepackage{amssymb}
 \usepackage{rotating}
 \usepackage{tikz}
 \usetikzlibrary{automata,positioning}
@@ -27,11 +29,16 @@
 \usepackage{amsmath,amsthm,mathtools,bussproofs,turnstile}
 \usepackage{listings}
 \usepackage{calc}
+\usepackage{makecell}
 %\usepackage{changes}
 
 \newlength\mylength
 \setlength\mylength{(\widthof{long long long long long}-\widthof{short})/2}
 \setlength\arraycolsep{2pt}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+\newtheorem{lemma}{Lemma}[section]
 % Copyright
 %\setcopyright{none}
 %\setcopyright{acmcopyright}
@@ -67,8 +74,8 @@
 %\copyrightyear{2017}
 
 %\acmPrice{15.00}
-\acmYear{2018}
-\acmConference[ESEC/FSE 2018]{The 26th ACM Joint European Software Engineering Conference and Symposium on the Foundations of Software Engineering}{4–9 November, 2018}{Lake Buena Vista, Florida, United States}
+%\acmYear{2018}
+%\acmConference[ESEC/FSE 2018]{The 26th ACM Joint European Software Engineering Conference and Symposium on the Foundations of Software Engineering}{4–9 November, 2018}{Lake Buena Vista, Florida, United States}
 
 
 
@@ -81,15 +88,26 @@
 \title{Behavior Minimization Feedback for Unrealizable Specifications }
 
 
-\author{
-%M. Cerrutti$^+$, V. Braberman$^+$, N. D'Ippolito$^+$, S. Uchitel$^+$$^\dagger$\\
+\author{\IEEEauthorblockN{1\textsuperscript{st} Given Name Surname}
+	\IEEEauthorblockA{\textit{dept. name of organization (of Aff.)} \\
+		\textit{name of organization (of Aff.)}\\
+		City, Country \\
+		email address or ORCID}
+	\and
+	\IEEEauthorblockN{2\textsuperscript{nd} Given Name Surname}
+	\IEEEauthorblockA{\textit{dept. name of organization (of Aff.)} \\
+		\textit{name of organization (of Aff.)}\\
+		City, Country \\
+		email address or ORCID}
+}
+%\author{M. Cerrutti$^+$, V. Braberman$^+$, N. D'Ippolito$^+$, S. Uchitel$^+$$^\dagger$\\
 %
 %\IEEEauthorblockA{$^+$Departamento de Computaci\'{o}n, FCEN, Universidad de Buenos Aires, Argentina\\
-%$^\dagger$Departament of Computing, Imperial College, London}
-}
+%$^\dagger$Departament of Computing, Imperial College, London}}
 %\renewcommand{\shortauthors}{M. Cerrutti et. al.}
 
 \input{macros}
+\maketitle
 
 \begin{abstract}
 At their early stages system specifications are usually unrealizable, in
@@ -111,7 +129,7 @@ and returns a model that preserves the cause for unrealizability in the sense th
 %The technique has also the potential to complement existing techniques that assume a specification only in LTL form and that work by syntactic, rather than semantic, minimization.
 \end{abstract}
 
-\maketitle
+
 %\IEEEpeerreviewmaketitle
 % We no longer use \terms command
 %\terms{Theory}
@@ -130,10 +148,10 @@ and returns a model that preserves the cause for unrealizability in the sense th
 \input{validation}
 \input{discussion}
 \input{conclusion}
-\bibliographystyle{ACM-Reference-Format}
+%\bibliographystyle{ACM-Reference-Format}
 %\bibliographystyle{ACM-Reference-Format}
 %\bibliography{sigproc} 
-%\bibliographystyle{IEEEtran}
+\bibliographystyle{IEEEtran}
 %\newpage
 \bibliography{bibliography}
 \input{Appendix}

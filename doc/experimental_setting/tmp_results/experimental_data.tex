@@ -1,28 +1,29 @@
 % latex table generated in R 3.6.3 by xtable 1.8-4 package
-% Fri Aug 14 15:39:41 2020
+% Mon Aug 17 02:05:09 2020
 \begin{tabular}{|l|rr|rr|rr|rr|}
   \hline & \multicolumn{2}{c|}{Diagnosis}&\multicolumn{2}{c|}{Plant ($E$)} & \multicolumn{2}{c|}{Minimization ($v_{\mathcal{U}}$)} & \multicolumn{2}{c|}{Controller ($v_{\mathcal{C}}$)}\\ \hline
 Name & Diag. time(s) & Diag. steps & $|\varphi_e + \varphi_s|$ & $|\Delta_E|$ & $|\Delta_{E'}|$ & $|\Delta_{E'}|/|\Delta_{E}|$ & $|\Delta_{C}|$ & $|\Delta_{E'}|/|\Delta_{C}|$ \\ 
   \hline
-Lift Controller 2 (missing assumption) & 0.015 & 3 & 5 & 52 & 4 & 0.0769 & 116 & 0.4483 \\ 
-  Lift Controller 4 (missing assumption) & 0.037 & 8 & 7 & 1088 & 4 & 0.0037 & 3238 & 0.3360 \\ 
-  Lift Controller 6 (missing assumption) & 1.069 & 12 & 9 & 15720 & 4 & 0.0003 & 61400 & 0.2560 \\ 
-  Lift Controller 8 (missing assumption) & 150.302 & 17 & 11 & 195040 & 20 & 0.0001 & 937004 & 0.2082 \\ 
-  Collector 1 (missing assumption) & 0.003 & 4 & 2 & 39 & 4 & 0.1026 & 29 & 0.1379 \\ 
-  Collector 2 (missing assumption) & 0.024 & 15 & 2 & 253 & 8 & 0.0316 & 182 & 0.0440 \\ 
-  Collector 3 (missing assumption) & 0.061 & 21 & 3 & 1815 & 16 & 0.0088 & 1259 & 0.0127 \\ 
-  Collector 4 (missing assumption) & 0.241 & 22 & 4 & 13621 & 18 & 0.0013 & 9305 & 0.0019 \\ 
-  Collector 5 (missing assumption) & 5.158 & 48 & 5 & 104799 & 16 & 0.0002 & 71093 & 0.0002 \\ 
-  Exploration Robot 100 (missing assumption) & 1.238 & 7 & 3 & 79209 & 497 & 0.0063 & 79209 & 0.0063 \\ 
-  Exploration Robot 200 (missing assumption) & 16.231 & 8 & 3 & 318409 & 1089 & 0.0034 & 318409 & 0.0034 \\ 
-  Exploration Robot 300 (missing assumption) & 73.491 & 9 & 3 & 717609 & 1181 & 0.0016 & 717609 & 0.0016 \\ 
-  Exploration Robot 400 (missing assumption) & 240.351 & 9 & 3 & 1276809 & 1845 & 0.0014 & 1276809 & 0.0014 \\ 
-  Exploration Robot 500 (missing assumption) & 950.340 & 10 & 3 & 1996009 & 1812 & 0.0009 & 1996009 & 0.0009 \\ 
-  Exploration Robot 600 (missing assumption) & 1803.151 & 10 & 3 & 2875213 & 2301 & 0.0008 & 2875209 & 0.0008 \\ 
-  Genbuf 1 (missing assumption) & 0.017 & 6 & 4 & 273 & 48 & 0.1758 & 307 & 0.8893 \\ 
-  Genbuf 2 (missing assumption) & 2.941 & 23 & 5 & 28706 & 610 & 0.0212 & 78008 & 0.3680 \\ 
-  Genbuf 3 (missing assumption) & 2593.529 & 126 & 6 & 528650 & 2539 & 0.0048 & 1918013 & 0.2756 \\ 
-  Genbuf 1 (removed safety) & 0.039 & 10 & 5 & 1388 & 8 & 0.0058 & 307 & 0.0261 \\ 
-  Genbuf 2 (removed safety) & 833.414 & 194 & 8 & 142850 & 834 & 0.0058 & 78008 & 0.0107 \\ 
+Lift Controller 2 (missing liveness) & 0.020 & 3 & 5 & 52 & 4 & 0.0769 & 116 & 0.4483 \\ 
+  Lift Controller 4 (missing liveness) & 0.036 & 8 & 7 & 1088 & 4 & 0.0037 & 3238 & 0.3360 \\ 
+  Lift Controller 6 (missing liveness) & 1.035 & 12 & 9 & 15720 & 4 & 0.0003 & 61400 & 0.2560 \\ 
+  Lift Controller 8 (missing liveness) & 148.990 & 17 & 11 & 195040 & 20 & 0.0001 & 937004 & 0.2082 \\ 
+  Collector 1 (missing liveness) & 0.002 & 4 & 2 & 39 & 4 & 0.1026 & 29 & 0.1379 \\
+  Collector 2 (missing liveness) & 0.023 & 15 & 2 & 253 & 8 & 0.0316 & 182 & 0.0440 \\ 
+  Collector 3 (missing liveness) & 0.059 & 21 & 3 & 1815 & 16 & 0.0088 & 1259 & 0.0127 \\ 
+  Collector 4 (missing liveness) & 0.224 & 22 & 4 & 13621 & 18 & 0.0013 & 9305 & 0.0019 \\ 
+  Collector 5 (missing liveness) & 4.785 & 48 & 5 & 104799 & 16 & 0.0002 & 71093 & 0.0002 \\ 
+  Exploration Robot 100 (missing liveness) & 1.173 & 7 & 3 & 79209 & 497 & 0.0063 & 79209 & 0.0063 \\ 
+  Exploration Robot 200 (missing liveness) & 15.138 & 8 & 3 & 318409 & 1089 & 0.0034 & 318409 & 0.0034 \\ 
+  Exploration Robot 300 (missing liveness) & 69.442 & 9 & 3 & 717609 & 1181 & 0.0016 & 717609 & 0.0016 \\ 
+  Exploration Robot 400 (missing liveness) & 226.143 & 9 & 3 & 1276809 & 1845 & 0.0014 & 1276809 & 0.0014 \\ 
+  Exploration Robot 500 (missing liveness) & 888.071 & 10 & 3 & 1996009 & 1812 & 0.0009 & 1996009 & 0.0009 \\ 
+  Exploration Robot 600 (missing liveness) & 1683.510 & 10 & 3 & 2875213 & 2301 & 0.0008 & 2875209 & 0.0008 \\ 
+  Exploration Robot 700 (missing liveness) & 4041.122 & 10 & 3 & 3914413 & 3197 & 0.0008 & 3914409 & 0.0008 \\ 
+  Genbuf 1 (missing liveness) & 0.020 & 6 & 4 & 273 & 48 & 0.1758 & 307 & 0.8893 \\ 
+  Genbuf 2 (missing liveness) & 8.065 & 42 & 5 & 28706 & 284 & 0.0099 & 78008 & 0.3680 \\ 
+  Genbuf 3 (missing liveness) & 2390.699 & 126 & 6 & 528650 & 2539 & 0.0048 & 1918013 & 0.2756 \\ 
+  Genbuf 1 (removed safety) & 0.052 & 10 & 5 & 1388 & 8 & 0.0058 & 307 & 0.0261 \\ 
+  Genbuf 2 (removed safety) & 661.155 & 236 & 8 & 142850 & 542 & 0.0038 & 78008 & 0.0069 \\ 
    \hline
 \end{tabular}

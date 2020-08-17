@@ -1,22 +1,41 @@
 \section{Validation}
-The extent to which the technique serves it purpose is defined by its soundness, efficiency and, more importantly, information, understood as the ability to guide the engineer while writing a non trivial formal specification. The presented diagnosis should help by pointing out the causes of non realizability (expressed in a behavioral implicit language) that may appear while progressively gathering knowledge and building a complete and precise model.
+The extent to which the technique serves it purpose is defined by its soundness, efficiency and, more importantly, information, the latter understood as the ability to guide the engineer while writing a non trivial formal specification. The presented diagnosis should help by pointing out the causes of non realizability, expressed in a language where the behavior of the plant, or as in this case a part of it, is explicit. The diagnosis tool set should be a part of the specification process and must be present while progressively gathering knowledge and refining the model towards its intended form.
 
-The measure of information our technique may provide should ultimately be related to the impact it can have on the overall specification process, in particular how clear it is for the engineer  to interpret the diagnosis in terms of amount of data presented and its relevance in relation to the non realizability cause. The unavailability of skilled professionals and the amount of time and effort required to prepare a considerable set of external subjects to the point where they would be able to write non trivial formal specifications renders the perspective of a controlled experiment with external engineers writing specifications from scratch unfeasible. On the other hand, it is also impossible to propose a direct comparison with similar techniques, since, for instance, in ~\cite{DBLP:conf/hvc/KonighoferHB10} the minimization is applied on the set of environmental safety formulas, which in fact increments the volume of the plant when presented as an automaton, and in ~\cite{DBLP:conf/sigsoft/KuventMR17} a simplification of the symbolic counter strategy is presented as a LTS composed of attractors and trap states. We think that our technique adds a complimentary view to the non realizability diagnosis problem.
+The measure of information our technique provides must be related to the impact it can have on the overall specification process, in particular in how clear it is for the engineer  to interpret the diagnosis. The aim is to minimize the amount of data presented while keeping it relevant to the non realizability cause. The unavailability of skilled professionals and the amount of time and effort required to prepare a considerable set of external subjects up to the point where they would be able to write non trivial formal specifications, renders the perspective of a controlled experiment with external engineers writing specifications from scratch unfeasible. On the other hand, it is also impossible to propose a direct comparison with similar techniques, since, for instance, in ~\cite{DBLP:conf/hvc/KonighoferHB10} the minimization is applied on the set of environmental safety formulas, which in fact increments the volume of the plant when presented as an automaton, and in ~\cite{DBLP:conf/sigsoft/KuventMR17} a simplification of the symbolic counter strategy is presented as a LTS composed of attractors and trap states. We think that our technique adds a complimentary view to the non realizability diagnosis problem.
 
 We now explain two of the metrics used to quantitatively evaluate our technique. The first metric is relative minimization volume ($v_{\mathcal{U}}$), defined as the size of the minimized plant against the original instance ($|\Delta_{E'}|/|\Delta_{E}|$). 
-The number of transitions is used as the representation of absolute volume for two reasons, first, because it is a measure of how many options the user has when exploring the minimized plant the  and second, because it is the defining parameter in the complexity of the synthesis algorithms. 
-The other metric we compute is minimization volume relative to the controller volume ($v_{\mathcal{C}}=|\Delta_{E'}|/|\Delta_{C}|$). The controller $C$ is the automaton representation of the strategy for the realizable version of each specification. The rationale behind this is that the size of the controller is a good proxy for the volume of the engineer's design intent in terms of concrete behavior. The motivation for taking the controller as a proxy of volume is that sometimes an ongoing specification is under defined, with weaker conditions than it will eventually have when reaching realizability. We expect for our minimization to be at least comparable to the controller in terms of volume.
-
+The number of transitions is used as the representation of absolute volume for two reasons, first, because it is a measure of how many options the user has when exploring the minimized plant, and the  and second, because it is the defining parameter in the complexity of the synthesis algorithms. 
+The other metric we compute is minimization volume relative to the controller volume ($v_{\mathcal{C}}=|\Delta_{E'}|/|\Delta_{C}|$). The controller $C$ is the automaton representation of the strategy for the realizable version of each specification. The rationale behind this is that the size of the controller is a good proxy for the volume of the engineer's design intent in terms of concrete behavior. The motivation for taking the controller as a proxy of volume is that sometimes an ongoing specification is under defined, with weaker conditions than it will eventually have when reaching realizability. We expect our minimization to be at least comparable to the controller in terms of volume.
 
 The validation reported in this section is guided by two main concerns.  This first is the degree to which the initial control problem is reduced and the computational cost involved. The second is if the minimization offers insight into non realizability causes.
 In order to avoid bias, we prioritized using non realizable specifications present in the existing benchmarks and literature.
 
 %refs 
-The Generic Buffer case study was taken from~\cite{DBLP:conf/hvc/KonighoferHB10}, the Lift Controller comes from ~\cite{DBLP:conf/fmcad/AlurMT13}, Collector is part of the SYNTCOMP competition ~\cite{SYNTCOMP} benchmark and the exploration robot case was adapted from ~\cite{DBLP:journals/corr/abs-2001-07678}.
+For the test cases we first wrote and synthesized the realizable version for each instance, and then modified it
+to violate at least one of the original guarantees. We will now briefly explain each case and then show how the they were parameterized and modified in order to achieve non realizability.
+
+The Generalized Buffer (GenBuf) case study was taken from~\cite{DBLP:conf/hvc/KonighoferHB10}, the Lift Controller comes from ~\cite{DBLP:conf/fmcad/AlurMT13}, Collector is part of the SYNTCOMP competition ~\cite{SYNTCOMP} benchmark and the exploration robot case was adapted from ~\cite{DBLP:journals/corr/abs-2001-07678}.
+%lift controller
+The \textbf{Lift Controller} case specifies the behavior of a system that should eventually serve every request to take the elevator to a required floor when the corresponding button was pressed, and also to take it back to the ground floor if no request is pending. The parameter on these instances indicates how many floors are present in the specification. The \texttt{missing liveness} modification changes one of the liveness guarantees from $\square \Diamond (b_i \rightarrow f_i)$ to $\square \Diamond (f_i)$. The original form asks the system to serve a floor only when requested, the modification makes it serve a floor even when it was not requested. Due to other safety restrictions this renders the specification unrealizable.
+
+%collector
+The \textbf{Collector} case outputs a barrier signal once all inputs $in_1\ldots in_n$ have occurred at least once. The parameter indicates how many inputs the specification could receive. The \texttt{missing liveness} modification removes one of the assumptions that forces the environment to always eventually produce input $i$ ($\square\Diamond(in_i)$).
+
+%exploration robot
+The \textbf{Exploration Robot} case models the behavior of a robot that can move through a sqare grid of size $n$, which also serves as the parameter for this specification. The robot must load cargo at the initial position and then unload it at the opposite corner of the grid. At the loading site the operation can either be successful or fail. The \texttt{missing liveness} modification removes the assumption that a load will always eventually occur.
+
+%genbuf
+The \textbf{Generalized Buffer (GenBuf)} case has a FIFO for storing data incoming from senders, and a
+controller to communicate with the senders, receivers, and the
+FIFO. On the sender side, GenBuf receives a request input from each sender, and replies
+with an acknowledge output. On the receiver side, GenBuf outputs a request and inputs an
+acknowledge for each receiver. The GenBuf controller gets the \texttt{FULL} and \texttt{EMPTY} signals from the FIFO and
+provides the \texttt{ENQ,DEQ}, and \texttt{SLC} signals for writing (reading) appropriate data to (from) the FIFO.
+The parameter on each instance indicates how many senders the specification has. The \texttt{missing liveness} modification removes the assumption that the first receiver will eventually acknowledge a request, and in \texttt{removed safety} we removed original assumption \texttt{A5}, relaxing the behavior of the \texttt{FULL} and \texttt{EMPTY} signals.
 
 %tool support - tool/translation/diagnosis
-The diagnosis technique was implemented in a new tool that accepts specifications expressed as both LTL formulas or FSP constructs and operates internally on CLTS structures. Each case study was written in its original syntax, for signal based specifications we used LTL formulas (as presented in ~\cite{Bloem:2012}), and for those initially described using process-like syntax we used CFSP. This tool was written from scratch with the intention to model, verify and synthesize reactive systems over enumerative models in an effective fashion. Bear in mind that for each specification the diagnosis runs a number of synthesis checks (each one having its particular time complexity) linear in time in relation to the number of transitions of the original plant.
-Prior to this work the only feedback given to the user  when specifying an non realizable problem over an enumerative model was binary, either the problem was realizable or it was not.
+The diagnosis technique was implemented in a new tool that accepts specifications expressed as both LTL formulas or FSP constructs and operates internally on CLTS structures. Each case study was written in its original syntax, for signal based specifications we used LTL formulas (as presented in ~\cite{Bloem:2012}), and for those initially described using process-like syntax we used CFSP. This tool was written from scratch with the intention to model, verify and synthesize reactive systems over explicit models in an effective fashion. Bear in mind that for each specification the diagnosis runs a number of synthesis checks (each one having its particular time complexity) linear in time in relation to the number of transitions of the original plant.
+Prior to this work the only feedback given to the user  when specifying an non realizable problem over an explicit model was binary, either the problem was realizable or it was not.
 he extension builds a minimized non realizable version of the environment that can then be exported to different formats and inspected through various methods including animations and visualization of the state space.
 
 In the following we report quantitatively on all case studies to show the degree to which the initial control problem is reduced and the computational cost involved. We also briefly explain the case studies and provide an interpretation of what we think are the hints extracted from the diagnosis. 
@@ -31,7 +50,7 @@ Total time taken by the diagnosis algorithm is measured in seconds and
 labeled as \emph{Diag. time(s)}, \emph{Diag. steps} shows the number of steps the diagnosis algorithm had to take to yield a minimal plant, this can be thought as de maximum depth of recursion reached while exploring the semi-lattice of alternating Sub-LTS structures.  The values in column $|\varphi_e + \varphi_s|$ are the sum of environmental and system liveness formulae, $|\Delta_{E}|$ the number of transitions in the original plant, $|\Delta_{E'}|$ the number of transitions in the minimization,
 , $|\Delta_{E'}|/|\Delta_{E}|$ is the relation of the minimization volume against the original plant, , $|\Delta_{C}|$ the number of transitions in the controller for the realizable specification,
 , $|\Delta_{E'}|/|\Delta_{C}|$ is the relation of the minimization volume against the controller.
-
+We defined a timeout for each case study of 45 minutes and reported all instances below that limit.
 \begin{table*}
 	\resizebox{\textwidth}{!} {
 \input{../experimental_setting/tmp_results/experimental_data.tex}
@@ -49,26 +68,26 @@ labeled as \emph{Diag. time(s)}, \emph{Diag. steps} shows the number of steps th
 	\vspace*{-4mm}
 	\MediumPicture
 \end{figure}
-\begin{figure}[bt]
-	\centering
-	\SmallPicture
-	\includegraphics[width=0.3\textwidth, angle=-90]{../experimental_setting/tmp_results/genbuf_2_time_plot.ps}
-	\vspace*{-2mm}
-	\caption{Generic buffer (2 senders) time progression.}
-	\label{fig:genbuf_2_time_plot}
-	\vspace*{-4mm}
-	\MediumPicture
-\end{figure}
-\begin{figure}[bt]
-	\centering
-	\SmallPicture
-	\includegraphics[width=0.3\textwidth, angle=-90]{../experimental_setting/tmp_results/genbuf_2_size_plot.ps}
-	\vspace*{-2mm}
-	\caption{Generic buffer (2 senders) size progression.}
-	\label{fig:genbuf_2_size_plot}
-	\vspace*{-4mm}
-	\MediumPicture
-\end{figure}
+%\begin{figure}[bt]
+%	\centering
+%	\SmallPicture
+%	\includegraphics[width=0.3\textwidth, angle=-90]{../experimental_setting/tmp_results/genbuf_2_time_plot.ps}
+%	\vspace*{-2mm}
+%	\caption{Generic buffer (2 senders) time progression.}
+%	\label{fig:genbuf_2_time_plot}
+%	\vspace*{-4mm}
+%	\MediumPicture
+%\end{figure}
+%\begin{figure}[bt]
+%	\centering
+%	\SmallPicture
+%	\includegraphics[width=0.3\textwidth, angle=-90]{../experimental_setting/tmp_results/genbuf_2_size_plot.ps}
+%	\vspace*{-2mm}
+%	\caption{Generic buffer (2 senders) size progression.}
+%	\label{fig:genbuf_2_size_plot}
+%	\vspace*{-4mm}
+%	\MediumPicture
+%\end{figure}
 \begin{figure}[bt]
 	\centering
 	\SmallPicture
@@ -85,18 +104,19 @@ labeled as \emph{Diag. time(s)}, \emph{Diag. steps} shows the number of steps th
 
 %replace this paragraph with something related to the time it takes to finish the diagnosis w.r.t. the time of synthesis in the realizable case
 The results we observe after applying the technique on this initial set of case studies show the proposed approach is feasible even for a significant number of signal based specifications. 
-As expected with any algorithm working with enumerative models, the minimization technique still under performs against symbolic approaches on both size and time. 
+As expected with any algorithm working with explicit models, the minimization technique still under performs against symbolic approaches on both size and time. 
 
 %time
-In figure ~\ref{fig:size_vs_diag_time} we expose the relation between diagnosis time and plant size (measured in number of initial transitions). We argue that the performance of the algorithm is linearly consistent (the lineal fit having a p-value of $< 3.387e^{-11}$) across the range of sizes present in the test set (going from tens to hundred thousands of transitions).
-We show the behavior of the technique while diagnosing the first non realizable version of the generic buffer for two senders, figure ~\ref{fig:genbuf_2_time_plot} shows the time taken at each step of the minimization and fig. ~\ref{fig:genbuf_2_size_plot} shows the incremental reduction of the plant as the minimization progresses. 
+In figure ~\ref{fig:size_vs_diag_time} we expose the relation between diagnosis time and plant size (measured in number of initial transitions). We argue that the performance of the algorithm is linearly consistent (the lineal fit having a p-value of $< 3.387e^{-11}$) across the range of sizes present in the test set (going from tens to hundred thousands of transitions). This is relevant because the synthesis procedure has a polynomial cost in terms of its input, so a polynomial increase in the cost of diagnosis in relation to its input size could be expected. 
 %controllability and post processing
-We also found that the amount of minimization achievable seems to be related to how controllable the result expressed in figure  ~\ref{fig:min_ctr_vs_min_pct} as the number of controllable transitions in the minimization over the number of total transitions. The relation seems to fit a lineal model (p-value $< 2.2e^{-11}$).
+We also found that the amount of minimization achievable seems to be related to how controllable the result is, as expressed in figure  ~\ref{fig:min_ctr_vs_min_pct} in the number of controllable transitions in the minimization over the number of total transitions. The relation seems to fit a lineal model (p-value $< 2.2e^{-11}$).
 %final remarks
 From the results it is possible to argue that the minimization technique can be applied to control problems of similar size to those reported in the literature. 
 %In addition, it is possible to observe, as expected, that the  that spatial and temporal limitation behave linearly with respect to the realizability query. 
-In addition, it can be seen that the technique can achieve a significant reduction in terms of states and transitions. Even when the reduction is significant in the bigger examples, as the 0.4\% reduction for 528650 transitions in the biggest generic buffer case, the resulting 2539 transitions are still enough to make manual inspection difficult. We assume that in this cases the technique can be used as the initial step of the diagnosis, allowing for other techniques to be applied afterwards, such as existential quantification or collapsing $\sigma$-traps.
+In addition, it can be seen that the technique can achieve a significant reduction in terms of states and transitions. Even when the reduction is significant in the bigger examples, as the 0.48\% reduction for 528650 transitions in the biggest generic buffer case, the resulting 2539 transitions are still enough to make manual inspection difficult. We assume that in this cases the technique can be used as the initial step of the diagnosis, allowing for other techniques to be applied afterwards, such as existential quantification or collapsing $\sigma$-traps.
+Going back to the problem of comparing our technique to the symbolic approaches, ~\cite{DBLP:conf/hvc/KonighoferHB10} reports an average reduction of the presented formulae of a 90\% and our approach has a marginal better value of 97,8\%.
 
+In terms of the retained behavior the initial size of the specification determines whether the minimization can be manually inspected or not, except for the Lift Controller and Collector cases. These are minimized to the point where it is easy to see that the plant never produces a particular set of signals. In the exploration robot case it is necessary to execute a short trace before reaching a loop that violates the assumption that a loads always eventually occurs. For the Genbuf case the non realizability cause is easily spotted in the initial parameter, but requires some exploration for the other numbers. We suppose that a novice user can directly benefit from the diagnosis in the most of the cases but will require an additional step involving label hiding or signal quantification for some of them to be able to promptly identify the problem.
 %
 %
 %\subsection{Modified Lift Controller}

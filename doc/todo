@@ -1,32 +1,20 @@
 TODO:
 =====
-- extend tests
-	- exploration robot 700
-	- try genbuf.3.removed.safety again
-	- extrapolate collecto and lift controller to reach the 2593 s mark
-- review paper format
 - review validation
-	- running tests
-		- review exploration robot
-		- review genbuf
-		- review DeltaE'/ DeltaC lift 8 (error)
-		X define cutting criteria and re run (> 30 min as timeout)
-		X review konighoefer thesis see removal prct. compare to our removing percentage (The size of the specification is reduced by 90% on average)
-	- corrections
-		- change missing assumption for missing liveness
-		- remove reference to 7 runs and whiskers
-		- fig 11. explain that since gr1 is non lineal w.r.t. to input, is of relevance that diagnosis is
-		- fig 13. would be better to check time instead of steps (comment 13, 12)
-	- explain tests
-		- explain cases and parameters (sizes and complexities)
-		- explain difference between industrial and toy cases
-		- explain non realizability modifications
-		- explain cutting criteria (take timeout from previous publication)
-		- explain how phi sizes affect diagnosis time
+	X explain tests
+		X explain cases and parameters (sizes and complexities)
+		X explain difference between industrial and toy cases
+		X explain non realizability modifications
+		X explain cutting criteria on params (> 2500 s as timeout)
+
+	X corrections
+		X fig 11. explain that since gr1 is non lineal w.r.t. to input, is of relevance that diagnosis is
+		X review konighoefer thesis see removal prct. compare to our removing percentage (The size of the specification is reduced by 90% on average, we are reducing by 97,8% on average)
+		X explain how phi sizes affect diagnosis time
 	- anecdotical 
-		- explain why exploration robot minimization is linear w.r.t. to the environment
-		- explain why exploration robot DeltaE' / DeltaC > 1
-		- explain difference between lift controller 6-8, genbuf 2-3 (review profiler)
+		X explain difference between lift controller 6-8, genbuf 2-3 (review profiler)
+
+
 - note to discuss
 	- fluent should be treated carefully since the range |P_i - Q_j| is of the essence in determining the 
 		effective cost of the synthesis, check exploration robot case time diff between:
@@ -46,6 +34,7 @@ TODO:
 - phd meeting	
 	- plan paper for clts, tool and general thesis layout
 - after paper
+	- review master thesis subjects for p d crisfoforis
 	- examples
 		- add syntax support (state fluent XX = (s_i, ..., s_j) in name.
 		- use mm512 operations for ordered list in aut_push_string_to_list

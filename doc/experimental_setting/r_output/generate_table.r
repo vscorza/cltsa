@@ -116,9 +116,8 @@ ggplot(time_summ, aes(x=plant_transitions, y=ymean)) +
   scale_x_log10(labels=comma) +	
   geom_point(color='red') +	
   geom_smooth(method='lm') +
-  scale_colour_Publication()+ theme_Publication()+
-  geom_errorbar(aes(ymin = ymin, ymax = ymax), width=.05,
-                position=position_dodge(0.05))
+  scale_colour_Publication()+ theme_Publication()
+#+geom_errorbar(aes(ymin = ymin, ymax = ymax), width=.05,position=position_dodge(0.05))
 dev.off()
 model <- lm(time_summ$plant_transitions ~ time_summ$ymean)
 summary(model)

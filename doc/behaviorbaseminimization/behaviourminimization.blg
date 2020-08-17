@@ -1,93 +1,56 @@
 This is BibTeX, Version 0.99d (TeX Live 2019/Debian)
 Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
 The top-level auxiliary file: behaviourminimization.aux
-The style file: ACM-Reference-Format.bst
+The style file: IEEEtran.bst
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
 Reallocated singl_function (elt_size=4) to 100 items from 50.
 Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
-Database file #1: bibliography.bib
-Warning--I didn't find a database entry for "shahar"
-Warning--no key, author in SYNTCOMP
-Warning--no author, editor, organization, or key in SYNTCOMP
-Warning--to sort, need author or key in SYNTCOMP
-Warning--no key, author in DBLP:conf/hvc/2010
-Warning--no key, author in DBLP:conf/hvc/2010
-Warning--no key, author in SYNTCOMP
-Warning--no key, author in SYNTCOMP
 Reallocated singl_function (elt_size=4) to 100 items from 50.
-Warning--no key, author in SYNTCOMP
-Warning--no author, editor, organization, or key in SYNTCOMP
-Warning--empty address in DBLP:conf/fmcad/AlurMT13
-Warning--empty address in DBLP:conf/cav/BloemCGHKRSS10
-Warning--empty publisher in DBLP:conf/tacas/CavezzaA17
-Warning--empty address in DBLP:conf/tacas/CavezzaA17
-Warning--empty address in DBLP:conf/emsoft/CernyGHRT12
-Warning--empty publisher in chockler2001practical
-Warning--empty address in chockler2001practical
-Warning--empty publisher in chockler2001coverage
-Warning--empty address in chockler2001coverage
-Warning--no number and no volume in daniele:2000
-Warning--page numbers missing in both pages and numpages fields in daniele:2000
-Warning--empty address in DBLP:conf/sigsoft/AlfaroH01
-Warning--empty address in DBLP:conf/kbse/DegiovanniRACA16
-Warning--empty address in DBLP:conf/sigsoft/GiannakopoulouM03
-Warning--empty address in DBLP:conf/kbse/HagiharaESY14
-Warning--require articleno with numpages field in Hoare:1983
-Warning--require articleno with numpages field in Jackson:1995
-Warning--require articleno with numpages field in Keller:1976
-Warning--empty address in DBLP:conf/icra/KimF13
-Warning--empty address in DBLP:conf/icra/KimFS12
-Warning--empty address in DBLP:conf/fmcad/KonighoferHB09
-Warning--empty address in DBLP:conf/sigsoft/KuventMR17
-Warning--empty address in Letier:2013:RMS
-Warning--page numbers missing in both pages and numpages fields in Letier:2013:RMS
-Warning--require articleno with numpages field in Letier:2002
-Warning--empty address in DBLP:conf/memocode/LiDS11
-Warning--empty address in DBLP:conf/sigsoft/MaozR16
-Warning--empty address in Maoz:2014
-Warning--empty address in DBLP:conf/vmcai/PitermanPS06
-Warning--empty address in DBLP:conf/popl/PnueliR89
-Warning--require articleno with numpages field in Torlak:2008
-Warning--require articleno with numpages field in vanLamsweerde:2000
-Warning--page numbers missing in both pages and numpages fields in DBLP:journals/corr/abs-2001-07678
-You've used 44 entries,
-            5551 wiz_defined-function locations,
-            1735 strings with 29753 characters,
-and the built_in function-call counts, 51012 in all, are:
-= -- 6342
-> -- 1896
-< -- 0
-+ -- 576
-- -- 897
-* -- 3904
-:= -- 5484
-add.period$ -- 219
-call.type$ -- 44
-change.case$ -- 296
-chr.to.int$ -- 42
-cite$ -- 92
-duplicate$ -- 3997
-empty$ -- 2846
-format.name$ -- 784
-if$ -- 11856
-int.to.chr$ -- 3
-int.to.str$ -- 0
-missing$ -- 186
-newline$ -- 466
-num.names$ -- 367
-pop$ -- 1452
+Database file #1: bibliography.bib
+-- IEEEtran.bst version 1.14 (2015/08/26) by Michael Shell.
+-- http://www.michaelshell.org/tex/ieeetran/bibtex/
+-- See the "IEEEtran_bst_HOWTO.pdf" manual for usage information.
+
+Done.
+You've used 42 entries,
+            4087 wiz_defined-function locations,
+            1191 strings with 19824 characters,
+and the built_in function-call counts, 38439 in all, are:
+= -- 3148
+> -- 910
+< -- 334
++ -- 482
+- -- 148
+* -- 1975
+:= -- 5809
+add.period$ -- 106
+call.type$ -- 42
+change.case$ -- 68
+chr.to.int$ -- 810
+cite$ -- 42
+duplicate$ -- 2596
+empty$ -- 3065
+format.name$ -- 194
+if$ -- 8934
+int.to.chr$ -- 0
+int.to.str$ -- 42
+missing$ -- 463
+newline$ -- 215
+num.names$ -- 68
+pop$ -- 1034
 preamble$ -- 1
-purify$ -- 513
-quote$ -- 0
-skip$ -- 1169
+purify$ -- 0
+quote$ -- 2
+skip$ -- 2923
 stack$ -- 0
-substring$ -- 4690
-swap$ -- 440
-text.length$ -- 503
+substring$ -- 1927
+swap$ -- 2211
+text.length$ -- 64
 text.prefix$ -- 0
-top$ -- 0
-type$ -- 607
-warning$ -- 42
-while$ -- 388
-width$ -- 0
-write$ -- 910
-(There were 43 warnings)
+top$ -- 5
+type$ -- 42
+warning$ -- 0
+while$ -- 194
+width$ -- 44
+write$ -- 541
