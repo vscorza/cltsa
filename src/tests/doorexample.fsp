@@ -23,11 +23,9 @@ order = {}
 //assumptions
 
  ltl env rho Sillyassumption in DOOR = [](doorhit -> bellrings).
- ltl env rho Sillyassumption_X in DOOR = [](X(doorhit -> bellrings)).
 
 ltl env rho Otherassumption in DOOR = []((bellpressed -> bellrings)).
- ltl env rho Otherassumption_X in DOOR = [](X(bellpressed -> bellrings)).
- ltl env rho Contradiction in DOOR = []((bellpressed -> !bellpressed)).
+ ltl env rho Contradiction in DOOR = [](X(bellpressed && !bellpressed)).
 
 //guarantees
 
@@ -35,7 +33,6 @@ ltl sys rho Goal1 in DOOR = []((bellrings -> dooranswered)).
 ltl sys rho Goal1_X in DOOR = [](X(bellrings -> dooranswered)).
 
  ltl sys rho Goal2 in DOOR = [](knocksound -> dooranswered).
- ltl sys rho Goal2_x in DOOR = [](X(knocksound -> dooranswered)).
 
 /***********
 **** FAIRNESS

@@ -1,11 +1,6 @@
 TODO:
 =====
-- check synthesis with deadlocks 
-	- on fsp
-	- on ltl automata
-- check restrictions on current states (should be applied again after getting the next valuations?)
-	- for each new state if env apply again restriction against rho_env keep x
-	- for each new state if sys apply again restriction against rho_sys keep y
+- minimization should only remove new deadlocks
 - add safety test tests and add to the functional tests
 - discussion
 	- move references to symbolic to discussion

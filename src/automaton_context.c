@@ -2979,7 +2979,14 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 		env_sys_rho_composed				= obdd_apply_and(env_rho_composed, sys_rho_composed);
 	}
 
-
+	// apply restriction over V when needed, this should restrict current vars according to V restrictions on rho
+	obdd *exists_env_sys_rho_composed	= obdd_exists_vector(env_sys_rho_composed, parser_primed_variables, parser_primed_variables_count);
+	obdd *exists_swapped_env_sys_rho_composed	= obdd_swap_vars(exists_env_sys_rho_composed, parser_primed_original_variables, parser_primed_variables, parser_primed_variables_count);
+	obdd_destroy(exists_env_sys_rho_composed);
+	obdd *exists_swapped_env_sys_rho_composed_and	= obdd_apply_and(env_sys_rho_composed, exists_swapped_env_sys_rho_composed);
+	obdd_destroy(env_sys_rho_composed);
+	obdd_destroy(exists_swapped_env_sys_rho_composed);
+	env_sys_rho_composed	= exists_swapped_env_sys_rho_composed_and;
 
 #if DEBUG_LTL_AUTOMATON
 	printf("\n");

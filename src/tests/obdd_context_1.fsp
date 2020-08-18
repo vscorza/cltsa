@@ -22,16 +22,13 @@ ltl env rho A_env_1 in TEST			= [](!x1 <-> (X(x1))).
 ltl env rho A_5_2 in TEST			= [](x1 <-> x2).
 ltl env rho A_5_3 in TEST			= [](X(x1 <-> x3)).
 
-
 TEST_p = S_0,
 S_0 = (<>-> S_1),
 S_1 = (<>-> S_2),
-S_2 = (<x1.on,x3.on>-> S_3|<x1.on,x2.on,x3.on>-> S_4),
-S_3 = (<>-> S_6),
-S_4 = (<>-> S_5),
-S_5 = (<x1.off,x2.off,x3.off>-> S_7|<x1.off,x3.off>-> S_8),
-S_7 = (<>-> S_2),
-S_8 = (<>-> S_9).
+S_2 = (<x1.on,x2.on,x3.on>-> S_3),
+S_3 = (<>-> S_4),
+S_4 = (<x1.off,x2.off,x3.off>-> S_5),
+S_5 = (<>-> S_2).
 
 // tests
 equals FATAL_NEXT_IFF_OBDD_TEST(TEST, TEST_p).
