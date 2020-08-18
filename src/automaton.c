@@ -2660,7 +2660,8 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd(automaton_au
 			}
 		}
 	}
-	automaton_automaton_remove_deadlocks(master);
+	//automaton_automaton_remove_deadlocks(master);
+	automaton_automaton_remove_unreachable_states(master);
 	automaton_automaton_update_valuations(master);
 
 	int32_t vector_size			= (int32_t)ceil(non_controllable_size / sizeof(uint8_t));
@@ -2740,7 +2741,8 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2_c_i_complem
 			}
 		}
 		//if non-realizable:update structs, perform recursive call and return
-		automaton_automaton_remove_deadlocks(minimization);
+		//automaton_automaton_remove_deadlocks(minimization);
+		automaton_automaton_remove_unreachable_states(minimization);
 		automaton_automaton_update_valuations(minimization);
 		if(automaton_is_gr1_realizable(minimization, assumptions, assumptions_count,
 				guarantees, guarantees_count) || minimization->out_degree[minimization->initial_states[0]] == 0){
@@ -2876,7 +2878,8 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2_c_i(automat
 			printf("Partition (%d) Kept \t %d trans. from \t %d\n", dd, transitions_kept_size, t_count);
 #endif
 		//if non-realizable:update structs, perform recursive call and return
-		automaton_automaton_remove_deadlocks(minimization);
+		//automaton_automaton_remove_deadlocks(minimization);
+		automaton_automaton_remove_unreachable_states(minimization);
 		automaton_automaton_update_valuations(minimization);
 		if(automaton_is_gr1_realizable(minimization, assumptions, assumptions_count,
 				guarantees, guarantees_count) || minimization->out_degree[minimization->initial_states[0]] == 0){
@@ -3116,7 +3119,8 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_autom
 			}
 		}
 	}
-	automaton_automaton_remove_deadlocks(master);
+	//automaton_automaton_remove_deadlocks(master);
+	automaton_automaton_remove_unreachable_states(master);
 	automaton_automaton_update_valuations(master);
 	automaton_automaton *minimization	= automaton_automaton_clone(master);
 
@@ -3159,7 +3163,8 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_autom
 		r_states[r_count]	= t_states[t_count];	r_indexes[r_count++]	= t_indexes[t_count];
 
 		automaton_automaton_remove_transition(minimization, current_transition);
-		automaton_automaton_remove_deadlocks(minimization);
+		//automaton_automaton_remove_deadlocks(minimization);
+		automaton_automaton_remove_unreachable_states(minimization);
 		automaton_automaton_update_valuations(minimization);
 
 		if(automaton_is_gr1_realizable(minimization, assumptions, assumptions_count,
@@ -3172,7 +3177,8 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_autom
 				current_transition	= &(master->transitions[r_states[i]][r_indexes[i]]);
 				automaton_automaton_remove_transition(minimization, current_transition);
 			}
-			automaton_automaton_remove_deadlocks(minimization);
+			//automaton_automaton_remove_deadlocks(minimization);
+			automaton_automaton_remove_unreachable_states(minimization);
 			automaton_automaton_update_valuations(minimization);
 #if DEBUG_UNREAL
 			printf("Minimizing [%d,%d,R,%d]\n", t_count, r_count,steps);
@@ -3182,7 +3188,8 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_autom
 			automaton_automaton_destroy(last_unrealizable);
 			last_unrealizable = automaton_automaton_clone(minimization);
 			*/
-			automaton_automaton_remove_deadlocks(minimization);
+			//automaton_automaton_remove_deadlocks(minimization);
+			automaton_automaton_remove_unreachable_states(minimization);
 			automaton_automaton_update_valuations(minimization);
 			from_step = steps;
 #if DEBUG_UNREAL
@@ -3205,7 +3212,8 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_autom
 			current_transition	= &(master->transitions[r_states[i]][r_indexes[i]]);
 			automaton_automaton_remove_transition(minimization, current_transition);
 		}
-		automaton_automaton_remove_deadlocks(minimization);
+		//automaton_automaton_remove_deadlocks(minimization);
+		automaton_automaton_remove_unreachable_states(minimization);
 		automaton_automaton_update_valuations(minimization);
 		printf("[%d,%d,R,%d]\n", t_count, r_count,steps);
 		printf("[%d,%d]Returning restored from %d\n", t_count, r_count, from_step);
