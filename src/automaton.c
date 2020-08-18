@@ -2734,7 +2734,8 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2_c_i_complem
 				current_linear_index++;
 			}
 			current_transition	= &(master->transitions[t_states[i]][t_indexes[i]]);
-			if((!(TEST_BITVECTOR_BIT(partition_bit_vector, i)) || (current_linear_index >= first_linear_index && current_linear_index <= last_linear_index))
+			if(((current_linear_index >= first_linear_index && current_linear_index <= last_linear_index))
+					&& (TEST_BITVECTOR_BIT(partition_bit_vector, i))
 					 && (minimization->out_degree[current_transition->state_from] > 1)){
 				automaton_automaton_remove_transition(minimization, current_transition);
 				removed++;
@@ -2754,14 +2755,6 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2_c_i_complem
 #if DEBUG_UNREAL || DEBUG_DD
 			printf("(compl. to part. %d unrealizable)\n", dd);
 #endif
-			if(removed == 0){
-#if DEBUG_UNREAL || DEBUG_DD
-				printf("(minimal)\n");
-#endif
-				automaton_automaton_destroy(minimization);
-				return inner_automaton;
-
-			}
 			gettimeofday(&tval_before, NULL);
 			removed = 0;
 			current_linear_index = -1; transitions_kept_size = 0;
@@ -2793,6 +2786,14 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2_c_i_complem
 					}
 #endif
 				}
+			}
+			if(partitions_count > transitions_kept_size){
+			//if(removed == 0){
+#if DEBUG_UNREAL
+				printf("(minimal)\n");
+#endif
+				automaton_automaton_destroy(inner_automaton);
+				return minimization;
 			}
 #if DEBUG_DD
 			if(t_count < 256)
@@ -2856,7 +2857,8 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2_c_i(automat
 			}
 			current_transition	= &(master->transitions[t_states[i]][t_indexes[i]]);
 			if((current_linear_index < first_linear_index || current_linear_index > last_linear_index)
-					&& TEST_BITVECTOR_BIT(partition_bit_vector, i)  && (minimization->out_degree[current_transition->state_from] > 1)){
+					&& TEST_BITVECTOR_BIT(partition_bit_vector, i)
+					&& (minimization->out_degree[current_transition->state_from] > 1)){
 				automaton_automaton_remove_transition(minimization, current_transition);
 				removed++;
 #if DEBUG_DD
@@ -2891,14 +2893,6 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2_c_i(automat
 #if DEBUG_UNREAL
 			printf("(part. %d unrealizable)\n", dd);
 #endif
-			if(removed == 0){
-#if DEBUG_UNREAL
-				printf("(minimal)\n");
-#endif
-				automaton_automaton_destroy(inner_automaton);
-				return minimization;
-
-			}
 			removed = 0;
 			current_linear_index = -1; transitions_kept_size = 0;
 			//bit vector sets to false anything outside the range
@@ -2913,6 +2907,15 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2_c_i(automat
 					transitions_kept_size++;
 				}
 			}
+			if(partitions_count > transitions_kept_size){
+			//if(removed == 0){
+#if DEBUG_UNREAL
+				printf("(minimal)\n");
+#endif
+				automaton_automaton_destroy(inner_automaton);
+				return minimization;
+			}
+
 			partitions_count = 2;
 			gettimeofday(&tval_after, NULL);
 			timersub(&tval_after, &tval_before, &((*steps_times)[*steps]));
@@ -2992,14 +2995,22 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2(automaton_a
 #endif
 			}
 #if DEBUG_DD
-			else if(t_count < 256)
-				printf("◦");
+			else if(t_count < 256){
+				if(inner_automaton->out_degree[current_transition->state_from] == 1)
+					printf("ˆ");
+				else
+					printf("◦");
+			}
 #endif
 		}else{
 			transitions_kept_size++;
 #if DEBUG_DD
 			if(t_count < 256)
-				printf("▪");
+				if(inner_automaton->out_degree[current_transition->state_from] > 1){
+					printf("▪");
+				}else{
+					printf("x");
+				}
 #endif
 		}
 	}

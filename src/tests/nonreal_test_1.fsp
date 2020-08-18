@@ -35,18 +35,17 @@ ltl fluent A_2		= (x2).
 STRAT >> "/tmp/nonreal_test_1.rep".
 
 
-DIAG = S_0,
+DIAG =S_0,
 S_0 = (<>-> S_1),
 S_1 = (<>-> S_2),
 S_2 = (x2.on-> S_3),
 S_3 = (<>-> S_11),
-S_11 = (x2.off-> S_12|<x1.on,x2.off>-> S_13),
-S_12 = (<>-> S_2),
+S_11 = (<x1.on,x2.off>-> S_13),
 S_13 = (<>-> S_14),
 S_14 = (<x1.off,x2.on>-> S_15),
 S_15 = (<>-> S_11).
 
-STRAT >> "/tmp/non_real_strat_diag.rep".
+DIAG >> "/tmp/non_real_strat_diag.rep".
 
 // tests
 equals FATAL_Non_Real_Test_1_Diag(STRAT,DIAG).

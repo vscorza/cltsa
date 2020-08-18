@@ -1,14 +1,13 @@
 TODO:
 =====
-- Sacar los puntos decimales de segundos en la tabla y para los que son menores a uno poner "<1"
-- Explicar por qué los cambios no son arbitrarios.
-	- Parece arbitrario la elección de cambios para hacer las especificaciones no realizables. Hay un criterio? Explicar en el paper.
-	- Por que solo para un caso de estudio se hace con safety?
-	- agregar mutación de safety a los que no tienen
--Cual fue el criterio para no-elegir otros casos de estudio. Por ejemplo, los demás de syntcomp?
-	- explicar que no había otros ejemplos de liveness
-- write adjustment semantics
-- write adjustment operator
+- add safety mutations
+	- lift controller
+	- collector
+	- exploration robot
+- remove decimal points in table for seconds and for all those less than 1 write "<1"
+- explain the nature of the changes
+- explain that there why there are no other liveness specs from syntcomp
+- write monitored adjustment operator
 	- syntax
 	- operation
 - discussion
