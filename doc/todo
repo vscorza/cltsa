@@ -1,27 +1,11 @@
 TODO:
 =====
-- review validation
-	X explain tests
-		X explain cases and parameters (sizes and complexities)
-		X explain difference between industrial and toy cases
-		X explain non realizability modifications
-		X explain cutting criteria on params (> 2500 s as timeout)
-
-	X corrections
-		X fig 11. explain that since gr1 is non lineal w.r.t. to input, is of relevance that diagnosis is
-		X review konighoefer thesis see removal prct. compare to our removing percentage (The size of the specification is reduced by 90% on average, we are reducing by 97,8% on average)
-		X explain how phi sizes affect diagnosis time
-	- anecdotical 
-		X explain difference between lift controller 6-8, genbuf 2-3 (review profiler)
-
-
-- note to discuss
-	- fluent should be treated carefully since the range |P_i - Q_j| is of the essence in determining the 
-		effective cost of the synthesis, check exploration robot case time diff between:
-		fluent F_Dont_Drop = <load, drop>
-		fluent F_Dont_Drop = <load, drop> initially 1
-		fluent F_Dont_Drop = <load, {unload,drop}>
-		fluent F_Dont_Drop = <load, {unload,drop}> initially 1
+- check synthesis with deadlocks 
+	- on fsp
+	- on ltl automata
+- check restrictions on current states (should be applied again after getting the next valuations?)
+	- maybe project rho obdd on current state and apply after getting relevant next states (can reduce state space)
+- add safety test tests and add to the functional tests
 - discussion
 	- move references to symbolic to discussion
 - meeting

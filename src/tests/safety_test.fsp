@@ -1,0 +1,33 @@
+set Global_Alphabet = {}
+set Controllable_Alphabet = {}
+/*
+set Global_Signals = {x,y,z}
+set Output_Signals = {y}
+order = {}
+
+ ltl env theta E_init in SAFETY_TEST = (!x).
+ ltl env theta S_init in SAFETY_TEST = (!y).
+ ltl sys rho Sys_1 in SAFETY_TEST = [](x -> X(z)).
+ ltl sys rho Sys_2 in SAFETY_TEST = [](y -> !y).
+ltl fluent Dummy_A	= (x || !x).
+ltl fluent Dummy_G	= (y || !y).
+|f| ENV =  (SAFETY_TEST).
+|gr1| <{Dummy_A}><{Dummy_G}> STRAT = ENV.
+
+SAFETY_TEST >> "/tmp/safety_test.rep".
+STRAT >> "/tmp/safety_test_diag.rep".
+*/
+set Global_Signals = {x,y}
+set Output_Signals = {y}
+
+ ltl env theta E_init in SAFETY_TEST_2 = (!x || x).
+ ltl env theta S_init in SAFETY_TEST_2 = (y).
+ ltl env rho Env_1 in SAFETY_TEST_2 = [](x <-> X(x)).
+ ltl env rho Sys_1 in SAFETY_TEST_2 = [](y -> !(y)).
+ ltl fluent Dummy_A	= (x || !x).
+|f| ENV_2 =  (SAFETY_TEST_2).
+|gr1| <{Dummy_A}><{Dummy_A}> STRAT_2 = ENV_2.
+
+SAFETY_TEST_2 >> "/tmp/safety_test_2.rep".
+STRAT_2 >> "/tmp/safety_test_2_diag.rep".
+

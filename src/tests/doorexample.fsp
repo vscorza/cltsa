@@ -1,0 +1,54 @@
+set Global_Alphabet = {}
+set Controllable_Alphabet = {}
+
+set Global_Signals = {dooranswered,doorhit,bellpressed,knocksound,bellrings}
+set Output_Signals = {dooranswered}
+order = {}
+
+
+/***********
+**** THETA
+***********/
+//assumptions
+
+ ltl env theta E_init in DOOR = (!bellrings && !doorhit && !bellpressed && !knocksound).
+
+//guarantees
+
+ ltl env theta S_init in DOOR = ((!dooranswered)).
+
+/***********
+**** RHO
+***********/
+//assumptions
+
+ ltl env rho Sillyassumption in DOOR = [](doorhit -> bellrings).
+ ltl env rho Sillyassumption_X in DOOR = [](X(doorhit -> bellrings)).
+
+ltl env rho Otherassumption in DOOR = []((bellpressed -> bellrings)).
+ ltl env rho Otherassumption_X in DOOR = [](X(bellpressed -> bellrings)).
+ ltl env rho Contradiction in DOOR = []((bellpressed -> !bellpressed)).
+
+//guarantees
+
+ltl sys rho Goal1 in DOOR = []((bellrings -> dooranswered)).
+ltl sys rho Goal1_X in DOOR = [](X(bellrings -> dooranswered)).
+
+ ltl sys rho Goal2 in DOOR = [](knocksound -> dooranswered).
+ ltl sys rho Goal2_x in DOOR = [](X(knocksound -> dooranswered)).
+
+/***********
+**** FAIRNESS
+***********/
+//assumptions
+ltl fluent Dummy_A	= (doorhit  || !doorhit).
+//guarantees
+ltl fluent Dummy_G	= (dooranswered  || !dooranswered).
+/***********
+**** SYNTHESIS
+***********/
+|f| ENV =  (DOOR).
+|gr1| <{Dummy_A}><{Dummy_G}> STRAT = ENV.
+
+DOOR >> "/tmp/doorexample.rep".
+STRAT >> "/tmp/doorexample_diag.rep".
