@@ -104,6 +104,27 @@ In the scope of this work asynchronous composition will only be applied over CLT
 	\end{center}
 \end{definition}
 
+\begin{definition} 
+	\label{def:monitored_adjustment}(\emph{Monitored Adjustment}) Let \automaton{M},\automaton{N}, with $\Delta_M : S_M \times \mathcal{P}(\Sigma_M) \times S_M$, be two CLTS instances, then CLTS monitored adjustment w.r.t.$\mathcal{U} \subseteq \Sigma_M \cup \Sigma_N$ is defined as \ltsAdjustment{M}{N} where $\Delta$ is the smallest relation s.t:
+	\begin{center}
+		\begin{equation}
+		\AxiomC{$(s, l_M, s') \in \Delta_M,(t, l_N, t') \in \Delta_N  $}\RightLabel{$l_M \cap \Sigma_N = l_N \cap \Sigma_M \wedge ((l_M \cup l_N)\cap \mathcal{U}) = \emptyset$}
+		\UnaryInfC{$((s,t),l_M \cup l_N,(s',t')) \in \Delta$}
+		\DisplayProof	
+		\end{equation}	
+		\begin{equation}
+		\AxiomC{$(t, l, t') \in \Delta_N  $}\RightLabel{$l \cap \mathcal{U}) \neq \emptyset \wedge \exists s:(s,t)\in S \wedge \nexists t':(s,l,s')\in \Delta_M$}
+		\UnaryInfC{$((s,t),l,(s,t')) \in \Delta$}
+		\DisplayProof	
+		\end{equation}		
+		\begin{equation}
+		\AxiomC{$(s, l, s') \in \Delta_M,(t, l, t') \in \Delta_N  $}\RightLabel{$l \cap \mathcal{U} \neq \emptyset$}
+		\UnaryInfC{$((s,t),l,(s',t')) \in \Delta$}
+		\DisplayProof	
+		\end{equation}			
+	\end{center}
+\end{definition}
+
 %\begin{definition} 
 %	Let $M_1 \ldots M_N$ be CLTS instances s.t. $M_i= (S_{i}, \Sigma_{i}, \Delta_{i}, s_{0}^{i})$ with $\Delta_i : S_i \times l \subseteq \Sigma_i \times S_i$, the concurrent parallel composition \ltsComposition{}{M_i}{} where $\Delta_i$ is the smallest relation s.t:
 %	\begin{center}
