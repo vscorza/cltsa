@@ -1,7 +1,9 @@
 TODO:
 =====
-- minimization should only remove new deadlocks
-- add safety test tests and add to the functional tests
+- write adjustment semantics
+- write adjustment operator
+	- syntax
+	- operation
 - discussion
 	- move references to symbolic to discussion
 - meeting
