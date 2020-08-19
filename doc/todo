@@ -4,10 +4,11 @@ TODO:
 	X lift controller
 	X collector
 	X exploration robot
-	- modify scripts
+	X modify scripts
 - remove decimal points in table for seconds and for all those less than 1 write "<1"
-- explain the nature of the changes
+x explain the nature of the changes
 - explain that there why there are no other liveness specs from syntcomp
+- do a general review on validation and related work
 - write monitored adjustment operator
 	- syntax
 	- operation
