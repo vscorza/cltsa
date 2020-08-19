@@ -1,5 +1,6 @@
 TODO:
 =====
+- exploration_robot_100_remove_safety never reaches base
 - add safety mutations
 	X lift controller
 	X collector

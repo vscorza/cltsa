@@ -2666,11 +2666,47 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd(automaton_au
 
 	int32_t vector_size			= (int32_t)ceil(non_controllable_size / sizeof(uint8_t));
 	uint8_t *partition_bit_vector	= calloc(vector_size, sizeof(uint8_t));
-	for(i = 0; i < vector_size;i++)partition_bit_vector[i]	= 0xFF;
+	for(i = 0; i < vector_size;i++)partition_bit_vector[i]	= 0xFFFF;
 	uint32_t transitions_kept_size  = non_controllable_size;
 	uint32_t partitions_count		= 2;
 #if DEBUG_UNREAL
 			printf("Minimizing %s through delta debugging\n", master->name);
+#endif
+
+#if DEBUG_DD
+	if(t_count < 256){
+		printf("Character meaning: \n▪\tkept\nx\tkept single trans.\n▫\tcurr.removed\nˆ\tcouldnt't remove single trans.\n◦\tprev.removed\n");
+		/*
+		 * 					if(t_count < 256){
+						printf("▫");//curr.removed
+				if(automaton_automaton_has_transition(inner_automaton, current_transition)){
+					if(t_count < 256)
+						if(inner_automaton->out_degree[current_transition->state_from] > 1){
+							printf("▪");//kept
+						}else{
+							printf("x");//kept single trans.
+						}
+				}else{
+					if(t_count < 256){
+						if(inner_automaton->out_degree[current_transition->state_from] == 1)
+							printf("ˆ");//single trans.
+						else
+							printf("◦");//prev.removed
+					}
+		 * */
+		//remove transitions that are in the current partition
+		printf("[");
+		for(i = 0; i < vector_size;i++)printf("%02x",partition_bit_vector[i]);
+		printf("]raw partition vector\n");
+		printf("[");
+		for(i = 0; i < t_count; i++){
+			if(TEST_BITVECTOR_BIT(partition_bit_vector, i))printf("▪");
+			else printf("▫");
+		}
+		printf("]Kept transitions\n");
+
+
+	}
 #endif
 	automaton_automaton *minimized	= automaton_automaton_clone(master);
 	automaton_automaton *result 	= automaton_get_gr1_unrealizable_minimization_dd2(master, minimized, assumptions, assumptions_count, guarantees, guarantees_count
@@ -2729,18 +2765,73 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2_c_i_complem
 		removed = 0;
 		current_linear_index = -1;
 		//remove transitions as the range is evaluated traversing the transitions' list
+#if DEBUG_DD
+		if(t_count < 256){
+			for(i = 0; i < t_count; i++)printf("%s",automaton_automaton_has_transition(minimization, &(master->transitions[t_states[i]][t_indexes[i]]))? "▪" : "▫");
+			printf("]Effective partition (previous)\n");
+			for(i = 0; i < t_count; i++)printf("%s",TEST_BITVECTOR_BIT(partition_bit_vector, i)? "▪" : "▫");
+			printf("]Bit vector (previous)\n");
+		}
+		bool index_changed = false;
+#endif
 		for(i = 0; i < t_count; i++){
+#if DEBUG_DD
+			index_changed = false;
+#endif
 			if(TEST_BITVECTOR_BIT(partition_bit_vector, i)){
+#if DEBUG_DD
+				index_changed = true;
+#endif
 				current_linear_index++;
 			}
+#if DEBUG_DD
+			if(t_count < 256 && index_changed)
+				if(current_linear_index == first_linear_index)printf(">");
+#endif
 			current_transition	= &(master->transitions[t_states[i]][t_indexes[i]]);
 			if(((current_linear_index >= first_linear_index && current_linear_index <= last_linear_index))
 					&& (TEST_BITVECTOR_BIT(partition_bit_vector, i))
 					 && (minimization->out_degree[current_transition->state_from] > 1)){
 				automaton_automaton_remove_transition(minimization, current_transition);
 				removed++;
+#if DEBUG_DD
+				if(t_count < 256)
+					printf("▫");//curr.removed
+			}	else if(automaton_automaton_has_transition(minimization, current_transition)){
+				if(t_count < 256){
+					if(inner_automaton->out_degree[current_transition->state_from] > 1){
+						printf("▪");//kept
+					}else{
+						printf("x");//kept single trans.
+					}
+				}
+			}else{
+				if(t_count < 256){
+					if(inner_automaton->out_degree[current_transition->state_from] == 1){
+						printf("ˆ");//single trans.
+					}else{
+						printf("◦");//prev.removed
+					}
+				}
+#endif
 			}
+#if DEBUG_DD
+			if(t_count < 256 && index_changed)
+				if(current_linear_index == last_linear_index)printf("<");
+#endif
 		}
+#if DEBUG_DD
+		if(t_count < 256){
+			printf("]Partition (%d) vector\n",dd);
+			printf("[");
+			for(i = 0; i < t_count; i++)printf("%s",automaton_automaton_has_transition(minimization, &(master->transitions[t_states[i]][t_indexes[i]]))? "▪" : "▫");
+			printf("]Effective partition(removed:%d)\n",removed);
+			for(i = 0; i < t_count; i++)printf("%s",TEST_BITVECTOR_BIT(partition_bit_vector, i)? "▪" : "▫");
+			printf("]Bit vector (new)\n");
+		}
+		else
+			printf("Partition (%d) Kept \t %d trans. from \t %d\n", dd, transitions_kept_size, t_count);
+#endif
 		//if non-realizable:update structs, perform recursive call and return
 		//automaton_automaton_remove_deadlocks(minimization);
 		automaton_automaton_remove_unreachable_states(minimization);
@@ -2760,7 +2851,7 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2_c_i_complem
 			current_linear_index = -1; transitions_kept_size = 0;
 #if DEBUG_DD
 			if(t_count < 256)
-				printf("Partition (%d) complement vector: [", dd);
+				printf("[");
 #endif
 			//bit vector sets to false anything outside the range
 			for(i = 0; i < t_count; i++){
@@ -2769,38 +2860,22 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2_c_i_complem
 				}
 				if((current_linear_index >= first_linear_index && current_linear_index <= last_linear_index)){
 					CLEAR_BITVECTOR_BIT(partition_bit_vector, i);
+					current_transition	= &(master->transitions[t_states[i]][t_indexes[i]]);
+					if(minimization->out_degree[current_transition->state_from] > 1)
+						automaton_automaton_remove_transition(minimization, current_transition);
 					removed++;
-#if DEBUG_DD
-					if(t_count < 256)
-						printf("▫");
-#endif
 				}else{
 					transitions_kept_size++;
-#if DEBUG_DD
-					if(t_count < 256){
-						if(automaton_automaton_has_transition(inner_automaton, current_transition)){
-							printf("▪");
-						}else{
-							printf("◦");
-						}
-					}
-#endif
 				}
 			}
-			if(partitions_count > transitions_kept_size){
-			//if(removed == 0){
+
+			if(partitions_count > transitions_kept_size || removed == 0){
 #if DEBUG_UNREAL
 				printf("(minimal)\n");
 #endif
 				automaton_automaton_destroy(inner_automaton);
 				return minimization;
 			}
-#if DEBUG_DD
-			if(t_count < 256)
-				printf("]/n");
-			else
-				printf("Partition (%d) complement kept \t %d trans. from \t %d\n", dd, transitions_kept_size, t_count);
-#endif
 			uint32_t next_partitions_count = max(partitions_count - 1, 2);
 			//compute where to start the next step, project current ith position in the next partition size
 			uint32_t next_partition = floor((uint32_t)(dd * ((next_partitions_count*1.0f) / partitions_count)));
@@ -2848,13 +2923,32 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2_c_i(automat
 		removed = 0;
 #if DEBUG_DD
 		if(t_count < 256)
-			printf("Partition (%d) vector: [", dd);
+			printf("[");
 #endif
 		//remove transitions as the range is evaluated traversing the transitions' list
+#if DEBUG_DD
+		if(t_count < 256){
+			for(i = 0; i < t_count; i++)printf("%s",automaton_automaton_has_transition(minimization, &(master->transitions[t_states[i]][t_indexes[i]]))? "▪" : "▫");
+			printf("]Effective partition (previous)\n");
+			for(i = 0; i < t_count; i++)printf("%s",TEST_BITVECTOR_BIT(partition_bit_vector, i)? "▪" : "▫");
+			printf("]Bit vector (previous)\n");
+		}
+		bool index_changed = false;
+#endif
 		for(i = 0; i < t_count; i++){
+#if DEBUG_DD
+			index_changed = false;
+#endif
 			if(TEST_BITVECTOR_BIT(partition_bit_vector, i)){
+#if DEBUG_DD
+				index_changed = true;
+#endif
 				current_linear_index++;
 			}
+#if DEBUG_DD
+			if(t_count < 256 && index_changed)
+				if(current_linear_index == first_linear_index)printf("<");
+#endif
 			current_transition	= &(master->transitions[t_states[i]][t_indexes[i]]);
 			if((current_linear_index < first_linear_index || current_linear_index > last_linear_index)
 					&& TEST_BITVECTOR_BIT(partition_bit_vector, i)
@@ -2863,19 +2957,39 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2_c_i(automat
 				removed++;
 #if DEBUG_DD
 				if(t_count < 256)
-					printf("▫");
-			}	else if(automaton_automaton_has_transition(inner_automaton, current_transition)){
-				if(t_count < 256)
-					printf("▪");
+					printf("▫");//curr.removed
+			}	else if(automaton_automaton_has_transition(minimization, current_transition)){
+				if(t_count < 256){
+					if(inner_automaton->out_degree[current_transition->state_from] > 1){
+						printf("▪");//kept
+					}else{
+						printf("x");//kept single trans.
+					}
+				}
 			}else{
-				if(t_count < 256)
-					printf("◦");
+				if(t_count < 256){
+					if(inner_automaton->out_degree[current_transition->state_from] == 1){
+						printf("ˆ");//single trans.
+					}else{
+						printf("◦");//prev.removed
+					}
+				}
 #endif
 			}
+#if DEBUG_DD
+			if(t_count < 256 && index_changed)
+				if(current_linear_index == last_linear_index)printf(">");
+#endif
 		}
 #if DEBUG_DD
-		if(t_count < 256)
-			printf("]\n");
+		if(t_count < 256){
+			printf("]Partition (%d) vector\n",dd);
+			printf("[");
+			for(i = 0; i < t_count; i++)printf("%s",automaton_automaton_has_transition(minimization, &(master->transitions[t_states[i]][t_indexes[i]]))? "▪" : "▫");
+			printf("]Effective partition(removed:%d)\n",removed);
+			for(i = 0; i < t_count; i++)printf("%s",TEST_BITVECTOR_BIT(partition_bit_vector, i)? "▪" : "▫");
+			printf("]Bit vector (new)\n");
+		}
 		else
 			printf("Partition (%d) Kept \t %d trans. from \t %d\n", dd, transitions_kept_size, t_count);
 #endif
@@ -2902,13 +3016,15 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2_c_i(automat
 				}
 				if((current_linear_index < first_linear_index || current_linear_index > last_linear_index)&& TEST_BITVECTOR_BIT(partition_bit_vector, i)){
 					CLEAR_BITVECTOR_BIT(partition_bit_vector, i);
+					current_transition	= &(master->transitions[t_states[i]][t_indexes[i]]);
+					if(minimization->out_degree[current_transition->state_from] > 1)
+						automaton_automaton_remove_transition(minimization, current_transition);
 					removed++;
 				}else if(TEST_BITVECTOR_BIT(partition_bit_vector, i)){
 					transitions_kept_size++;
 				}
 			}
-			if(partitions_count > transitions_kept_size){
-			//if(removed == 0){
+			if(partitions_count > transitions_kept_size || removed == 0){
 #if DEBUG_UNREAL
 				printf("(minimal)\n");
 #endif
@@ -2971,14 +3087,14 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2(automaton_a
 
 #if DEBUG_DD
 	if(t_count < 256){
-		printf("Partition vector: [");
+		printf("[");
 		//remove transitions that are in the current partition
 		for(i = 0; i < t_count; i++){
 			if(TEST_BITVECTOR_BIT(partition_bit_vector, i))printf("▪");
 			else printf("▫");
 		}
-		printf("]\n");
-		printf("Kept transitions: [");
+		printf("]Partition vector\n");
+		printf("[");
 	}
 #endif
 	//remove transitions that are in the current partition
@@ -2991,32 +3107,33 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2(automaton_a
 				automaton_automaton_remove_transition(inner_automaton, current_transition);
 #if DEBUG_DD
 				if(t_count < 256)
-					printf("▫");
+					printf("▫");//curr.removed
 #endif
 			}
 #if DEBUG_DD
 			else if(t_count < 256){
 				if(inner_automaton->out_degree[current_transition->state_from] == 1)
-					printf("ˆ");
+					printf("ˆ");//single trans.
 				else
-					printf("◦");
+					printf("◦");//prev.removed
 			}
 #endif
 		}else{
 			transitions_kept_size++;
 #if DEBUG_DD
-			if(t_count < 256)
+			if(t_count < 256){
 				if(inner_automaton->out_degree[current_transition->state_from] > 1){
-					printf("▪");
+					printf("▪");//kept
 				}else{
-					printf("x");
+					printf("x");//kept single trans.
 				}
+			}
 #endif
 		}
 	}
 #if DEBUG_DD
 	if(t_count < 256)
-		printf("]\n");
+		printf("]Kept transitions\n");
 	else
 		printf("Kept \t %d trans. from \t %d\n", transitions_kept_size, t_count);
 				//automaton_automaton_print(inner_automaton, false, false, false, NULL, NULL);

@@ -14,7 +14,7 @@
 #include "automaton_composite_hash_table.h"
 #include "y.tab.h"
 
-#define VERBOSE 0
+#define VERBOSE 1
 
 #define COMPOSE_SYNCH	1
 #define PARTIAL_SHARE	2
@@ -53,7 +53,7 @@
 #define TEST_FLUENT_BIT(arr,index)    ( arr[(index/FLUENT_ENTRY_SIZE)] & (1 << (index%FLUENT_ENTRY_SIZE)) )
 //#define GET_TRANSITION_SIGNAL(t, i)  (((i) < FIXED_SIGNALS_COUNT ? (t)->signals[(i)] : (t)->other_signals[(i)-FIXED_SIGNALS_COUNT]))
 
-#define BITVECTOR_ENTRY_SIZE 12
+#define BITVECTOR_ENTRY_SIZE 8
 #define TEST_BITVECTOR_BIT(arr,index)    ( arr[(index/BITVECTOR_ENTRY_SIZE)] & (1 << (index%BITVECTOR_ENTRY_SIZE)) )
 #define SET_BITVECTOR_BIT(arr,index)     ( arr[(index/BITVECTOR_ENTRY_SIZE)] |= (1 << (index%BITVECTOR_ENTRY_SIZE)) )
 #define CLEAR_BITVECTOR_BIT(arr,index)   ( arr[(index/BITVECTOR_ENTRY_SIZE)] &= ~(1 << (index%BITVECTOR_ENTRY_SIZE)) )
