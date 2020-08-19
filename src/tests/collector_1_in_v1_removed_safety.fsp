@@ -1,0 +1,45 @@
+//  Parameterized Collector, Signals whether all input clients have delivered a token
+//  INPUTS {finished[n];} 
+//  OUTPUTS { allFinished;}
+//  ASSERT { &&[0 <= i < n](allFinished -> X (!allFinished W finished[i]));}
+//  GUARANTEES {G F allFinished <-> &&[0 <= i < n] G F finished[i];}
+
+set Global_Alphabet = {}
+set Controllable_Alphabet = {}
+
+set Global_Signals	= {in_0, allFinished, latch_0}
+set Output_Signals	= {allFinished}
+order			= {}
+
+/***********
+**** THETA
+***********/
+ltl env theta Init_Collector_e in COLLECTOR	= (!in_0 && !latch_0).
+ltl sys theta Init_Collector_s in COLLECTOR	= (!allFinished).
+//update latches, up with input, down with allFinished
+//ltl env rho Latch_0_up in COLLECTOR		= [](in_0 -> X(latch_0)).
+ltl env rho Latch_0_keep in COLLECTOR		= [](!(allFinished || in_0) -> (latch_0 <-> X(latch_0))).
+ltl env rho Latch_0_down in COLLECTOR		= [](in_0 && allFinished && X(!in_0) -> X(!latch_0)).
+/***********
+**** SYS RHO
+***********/
+
+//only set allFinished if every latch is up
+ltl sys rho Restrict_AllFinished in COLLECTOR	= [](allFinished -> (latch_0)).
+
+/***********
+**** ENV RHO
+***********/
+ltl env rho Dummy_e in COLLECTOR		= [](in_0 || !in_0).
+/***********
+**** FLUENTS
+***********/
+ltl fluent A_in_0		= (in_0).
+ltl fluent G			= (allFinished).
+/***********
+**** SYNTHESIS
+***********/
+|f| ENV =(COLLECTOR).
+|gr1| <{A_in_0}><{G}> STRAT = ENV.
+
+STRAT >> "/tmp/collector_1_strat.rep".
