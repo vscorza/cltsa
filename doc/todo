@@ -1,9 +1,10 @@
 TODO:
 =====
 - add safety mutations
-	- lift controller
-	- collector
-	- exploration robot
+	X lift controller
+	X collector
+	X exploration robot
+	- modify scripts
 - remove decimal points in table for seconds and for all those less than 1 write "<1"
 - explain the nature of the changes
 - explain that there why there are no other liveness specs from syntcomp

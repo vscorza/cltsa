@@ -11,14 +11,14 @@ MAX_INSTANCE=$4
 ITERATIONS=$5
 INSTANCES=""
 
-echo "::[Running missing assumption collector instances from size 1 to ${MAX_INSTANCE}]::"
+echo "::[Running removed safety collector instances from size 1 to ${MAX_INSTANCE}]::"
 cd ${CLTSA_DIR}
 
 for ((i=1; i<=$MAX_INSTANCE;i++)) 
 	do 
 		for((j=1; j<=$ITERATIONS;j++))
 			do 
-				INSTANCES="${INSTANCES} ${DST_DIR}collector_${i}_in_v1_missing_assumption.fsp Collector.${i}.(missing.liveness)"; 
+				INSTANCES="${INSTANCES} ${DST_DIR}collector_${i}_in_v1_removed_safety.fsp Collector.${i}.(removed.safety)"; 
 				nice -20 ./cltsa -r -o $OUTPUT_DIR $INSTANCES
 			done
 	done

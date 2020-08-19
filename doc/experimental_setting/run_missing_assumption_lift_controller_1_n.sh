@@ -15,7 +15,7 @@ for ((i=1; i<=$MAX_INSTANCE;i++))
 		for((j=1;j<=$ITERATIONS;j++))
 			do 
 				i2=$((i*2))
-				INSTANCES="${INSTANCES} ${DST_DIR}lift_controller_${i2}_missing_assumption.fsp Lift.Controller.${i2}.(missing.assumption)"; 
+				INSTANCES="${INSTANCES} ${DST_DIR}lift_controller_${i2}_missing_assumption.fsp Lift.Controller.${i2}.(missing.liveness)"; 
 				nice -20 ./cltsa -r -o $OUTPUT_DIR $INSTANCES
 			done
 	done
