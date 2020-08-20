@@ -1,15 +1,9 @@
 TODO:
 =====
-- exploration_robot_100_remove_safety never reaches base
-- add safety mutations
-	X lift controller
-	X collector
-	X exploration robot
-	X modify scripts
-- remove decimal points in table for seconds and for all those less than 1 write "<1"
-x explain the nature of the changes
-- explain that there why there are no other liveness specs from syntcomp
+- remove 0 values from fig. 12
 - do a general review on validation and related work
+- review victor notes
+- explain that there why there are no other liveness specs from syntcomp (if ahb is not added)
 - write monitored adjustment operator
 	- syntax
 	- operation

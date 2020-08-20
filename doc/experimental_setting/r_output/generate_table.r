@@ -67,10 +67,13 @@ summ_real <- realizable_composite %>%
   summarize(plant_trans = max(plant_transitions),  min_trans = max(minimization_transitions))
 
 lift <- subset(summ_unreal, grepl("Lift\\.Controller\\.\\d\\.\\(missing", name))
+lift_removed <- subset(summ_unreal, grepl("Lift\\.Controller\\.\\d\\.\\(removed", name))
 genbuf_missing <- subset(summ_unreal, grepl("Genbuf\\.\\d\\.\\(missing", name))
 genbuf_removed <- subset(summ_unreal, grepl("Genbuf\\.\\d\\.\\(removed", name))
 collector_missing <- subset(summ_unreal, grepl("Collector\\.\\d\\.\\(missing", name))
+collector_removed <- subset(summ_unreal, grepl("Collector\\.\\d\\.\\(removed", name))
 robot_samples <- subset(summ_unreal, grepl("Robot\\.\\d*\\.\\(missing", name))
+robot_removed <- subset(summ_unreal, grepl("Robot\\.\\d*\\.\\(removed", name))
 
 lift_real <- subset(summ_real, grepl("Lift", name))
 genbuf_real <- subset(summ_real, grepl("Genbuf", name))
@@ -79,20 +82,32 @@ robot_real <- subset(summ_real, grepl("Robot", name))
 
 lift$ctrl_transitions <- lift_real$min_trans
 lift$reduction_ctrl <- lift$plant_trans / lift_real$min_trans
+lift_removed$ctrl_transitions <- lift_real$min_trans
+lift_removed$reduction_ctrl <- lift_removed$plant_trans / lift_real$min_trans
 genbuf_missing$ctrl_transitions <- genbuf_real$min_trans
 genbuf_missing$reduction_ctrl <- genbuf_missing$plant_trans / genbuf_real$min_trans
 #removed env is missing the last value
 genbuf_real_b <- genbuf_real[1:(nrow(genbuf_real)-1),]
 genbuf_removed$ctrl_transitions <- genbuf_real_b$min_trans
 genbuf_removed$reduction_ctrl <- genbuf_removed$min_trans / genbuf_real_b$min_trans
+#genbuf_removed$ctrl_transitions <- genbuf_real$min_trans
+#genbuf_removed$reduction_ctrl <- genbuf_removed$min_trans / genbuf_real$min_trans
 collector_missing$ctrl_transitions <- collector_real$min_trans
 collector_missing$reduction_ctrl <- collector_missing$min_trans / collector_real$min_trans
+collector_removed$ctrl_transitions <- collector_real$min_trans
+collector_removed$reduction_ctrl <- collector_removed$min_trans / collector_real$min_trans
 robot_samples$ctrl_transitions <- robot_real$min_trans
 robot_samples$reduction_ctrl <- robot_samples$min_trans / robot_real$min_trans
-composite_table <- rbind(lift,collector_missing, robot_samples, genbuf_missing, genbuf_removed)
+robot_removed$ctrl_transitions <- robot_real$min_trans
+robot_removed$reduction_ctrl <- robot_removed$min_trans / robot_real$min_trans
+
+composite_table <- rbind(lift,lift_removed,collector_missing, collector_removed,robot_samples, robot_removed,genbuf_missing, genbuf_removed)
 composite_table$name <- gsub("\\.", " ", composite_table$name)
 table_contents <- xtable(composite_table, type = "latex", align = "r|l|rr|rr|rr|rr|",caption="Quantitative results for minimization plants"
                          ,digits=c(0,0,3,0,0,0,0,4,0,4))
+table_contents$diag <- with(table_contents, ifelse(diag < 1, '$<$1', round(diag)))
+table_contents$red <- ifelse(table_contents$red < 0.00001, "$<1e^{-5}$ \\%",paste(format(round((table_contents$red * 100), 4), nsmall = 2), "\\%"))
+table_contents$reduction_ctrl <- ifelse(table_contents$reduction_ctrl < 0.00001, "$<1e^{-5}$ \\%",paste(format(round((table_contents$reduction_ctrl * 100), 4), nsmall = 2), "\\%"))
 names(table_contents) <- c('Name', 'Diag. time(s)', "Diag. steps", '$|\\varphi_e + \\varphi_s|$', '$|\\Delta_E|$', "$|\\Delta_{E'}|$", "$|\\Delta_{E'}|/|\\Delta_{E}|$", "$|\\Delta_{C}|$", "$|\\Delta_{E'}|/|\\Delta_{C}|$")
 addtorow <- list()
 addtorow$pos <- list(-1)
@@ -100,6 +115,9 @@ addtorow$command <- paste0(paste0('\\hline & \\multicolumn{2}{c|}{Diagnosis}&\\m
 
 print(table_contents, file = "/home/mariano/code/henos-automata/doc/experimental_setting/tmp_results/experimental_data.tex", 
       add.to.row = addtorow, floating= FALSE, include.rownames=FALSE, sanitize.text.function=function(x){x})
+
+median(composite_table$red)
+length(composite_table$red)
 
 #sive vs diagnosis time
 time_summ <- experimental_composite %>% group_by(plant_transitions) %>%
@@ -122,12 +140,15 @@ dev.off()
 model <- lm(time_summ$plant_transitions ~ time_summ$ymean)
 summary(model)
 boxplot(model[['residuals']],main='Boxplot: Residuals',ylab='residual value')
+cor.test(time_summ$plant_transitions, time_summ$ymean,  method="kendall")
+
 #plant controllability vs minimization amount
-c_coeff = experimental_composite$minimization_controllable_transitions / experimental_composite$plant_transitions	
-m_coeff = experimental_composite$minimization_transitions / experimental_composite$plant_transitions	
+no_robot_safety_composite <- subset(experimental_composite, !(grepl("Robot\\.\\d*\\.", name)))
+c_coeff = no_robot_safety_composite$minimization_controllable_transitions / no_robot_safety_composite$plant_transitions	
+m_coeff = no_robot_safety_composite$minimization_transitions / no_robot_safety_composite$plant_transitions	
 
 postscript(file="/home/mariano/code/henos-automata/doc/experimental_setting/tmp_results/min_ctrl_vs_min_pct.ps")
-ggplot(experimental_composite, aes(x=c_coeff, y=m_coeff)) +
+ggplot(no_robot_safety_composite, aes(x=c_coeff, y=m_coeff)) +
   labs(title="Minimization controllability vs minimization amount") +
   xlab("Minimization controllability") +
   ylab("Reduction") +
@@ -137,6 +158,7 @@ ggplot(experimental_composite, aes(x=c_coeff, y=m_coeff)) +
   geom_smooth(method='lm') +
   scale_colour_Publication()+ theme_Publication() 
 dev.off()
+cor.test(c_coeff, m_coeff,  method="kendall")
 
 df <- read.csv(file="/home/mariano/code/henos-automata/doc/experimental_setting/tmp_results/steps/genbuf_3_sndrs_no_automaton_missing_assumption.csv")
 postscript(file="/home/mariano/code/henos-automata/doc/experimental_setting/tmp_results/genbuf_3_time_plot.ps")
