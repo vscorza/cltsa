@@ -70,6 +70,8 @@ lift <- subset(summ_unreal, grepl("Lift\\.Controller\\.\\d\\.\\(missing", name))
 lift_removed <- subset(summ_unreal, grepl("Lift\\.Controller\\.\\d\\.\\(removed", name))
 genbuf_missing <- subset(summ_unreal, grepl("Genbuf\\.\\d\\.\\(missing", name))
 genbuf_removed <- subset(summ_unreal, grepl("Genbuf\\.\\d\\.\\(removed", name))
+ahb_missing <- subset(summ_unreal, grepl("AHB\\.\\d\\.\\(missing", name))
+ahb_removed <- subset(summ_unreal, grepl("AHB\\.\\d\\.\\(removed", name))
 collector_missing <- subset(summ_unreal, grepl("Collector\\.\\d\\.\\(missing", name))
 collector_removed <- subset(summ_unreal, grepl("Collector\\.\\d\\.\\(removed", name))
 robot_samples <- subset(summ_unreal, grepl("Robot\\.\\d*\\.\\(missing", name))
@@ -77,6 +79,7 @@ robot_removed <- subset(summ_unreal, grepl("Robot\\.\\d*\\.\\(removed", name))
 
 lift_real <- subset(summ_real, grepl("Lift", name))
 genbuf_real <- subset(summ_real, grepl("Genbuf", name))
+ahb_real <- subset(summ_real, grepl("AHB", name))
 collector_real <- subset(summ_real, grepl("Collector", name))
 robot_real <- subset(summ_real, grepl("Robot", name))
 
@@ -92,6 +95,12 @@ genbuf_removed$ctrl_transitions <- genbuf_real_b$min_trans
 genbuf_removed$reduction_ctrl <- genbuf_removed$min_trans / genbuf_real_b$min_trans
 #genbuf_removed$ctrl_transitions <- genbuf_real$min_trans
 #genbuf_removed$reduction_ctrl <- genbuf_removed$min_trans / genbuf_real$min_trans
+
+ahb_missing$ctrl_transitions <- ahb_real$min_trans
+ahb_missing$reduction_ctrl <- ahb_missing$min_trans / ahb_real$min_trans
+ahb_removed$ctrl_transitions <- ahb_real$min_trans
+ahb_removed$reduction_ctrl <- ahb_removed$min_trans / ahb_real$min_trans
+
 collector_missing$ctrl_transitions <- collector_real$min_trans
 collector_missing$reduction_ctrl <- collector_missing$min_trans / collector_real$min_trans
 collector_removed$ctrl_transitions <- collector_real$min_trans
@@ -101,7 +110,7 @@ robot_samples$reduction_ctrl <- robot_samples$min_trans / robot_real$min_trans
 robot_removed$ctrl_transitions <- robot_real$min_trans
 robot_removed$reduction_ctrl <- robot_removed$min_trans / robot_real$min_trans
 
-composite_table <- rbind(lift,lift_removed,collector_missing, collector_removed,robot_samples, robot_removed,genbuf_missing, genbuf_removed)
+composite_table <- rbind(lift,lift_removed,collector_missing, collector_removed,robot_samples, robot_removed,genbuf_missing, genbuf_removed,ahb_missing, ahb_removed)
 composite_table$name <- gsub("\\.", " ", composite_table$name)
 table_contents <- xtable(composite_table, type = "latex", align = "r|l|rr|rr|rr|rr|",caption="Quantitative results for minimization plants"
                          ,digits=c(0,0,3,0,0,0,0,4,0,4))

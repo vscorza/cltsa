@@ -9,5 +9,6 @@ echo "[[Running realizable examples]]"
 ./run_realizable_exploration_robot_1_n.sh $1 $2 $3 6 $4
 # max it. 3
 ./run_realizable_genbuf_1_n.sh $1 $2 $3 3 $4
-
+# max it. 3
+./run_realizable_ahb_1_n.sh $1 $2 $3 3 $4
 
