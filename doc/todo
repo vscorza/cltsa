@@ -1,24 +1,35 @@
 TODO:
 =====
-- remove 0 values from fig. 12
+- add ahb spec
+	- missing assumption
+	- removed safety
+	- version 3,4
+	- adapt scripts
+	- rerun examples
+	- write paragraph
+- write examples from symbolic repair paper
+- vic changes
+	- Intro, cite Cimatti (Diagnostic information for realizability) and symbolic repair (Maoz)
+	- review clts section
+    	- Cross-paper keep consistent terminology according to what is kept in the background section
+	- Motivation review example, doesn't like the safety keep condition, "idle controller"
 - do a general review on validation and related work
-- review victor notes
 - explain that there why there are no other liveness specs from syntcomp (if ahb is not added)
-- write monitored adjustment operator
-	- syntax
-	- operation
 - discussion
 	- move references to symbolic to discussion
 - meeting
-- examples
-	- write amba version from Synthesis of AMBA AHB from Formal Specification:A Case Study
-		- specify master
-		- specify slave	
-	- write examples from symbolic repair paper
-	- prove correct decomposition of ahb arbiter into modules
-- phd meeting	
-	- plan paper for clts, tool and general thesis layout
+
 - after paper
+	- Dalal, write monitored adjustment operator
+		- syntax
+		- operation
+	- examples
+		- write amba version from Synthesis of AMBA AHB from Formal Specification:A Case Study
+			- specify master
+			- specify slave	
+		- prove correct decomposition of ahb arbiter into modules
+	- phd meeting	
+		- plan paper for clts, tool and general thesis layout
 	- review master thesis subjects for p d crisfoforis
 	- examples
 		- add syntax support (state fluent XX = (s_i, ..., s_j) in name.

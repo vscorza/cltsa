@@ -41,13 +41,14 @@ ltl sys rho G10_3_1_e in AHB	= []((!g10_error && g10_3_0 && (sel0 && sel1) && !h
 
 ltl sys rho G10_grant0 in AHB	= []((decide && !hReq0 && !hReq1 && !hReq2 && !hReq3) -> X(!sel0 && !sel1)).
 
+
 /***********
 **** ENV RHO
 ***********/
 /***********
 **** FLUENTS
 ***********/
-ltl fluent A10			= (decide).
+ltl fluent A10			= (!decide).
 //G11 (i)
 ltl fluent G10			= (!g10_error).
 ltl fluent G11_0		= (!hReq0 || (!sel0 && !sel1)).

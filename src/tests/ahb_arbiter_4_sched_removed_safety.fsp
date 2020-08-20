@@ -41,6 +41,8 @@ ltl sys rho G10_3_1_e in AHB	= []((!g10_error && g10_3_0 && (sel0 && sel1) && !h
 
 ltl sys rho G10_grant0 in AHB	= []((decide && !hReq0 && !hReq1 && !hReq2 && !hReq3) -> X(!sel0 && !sel1)).
 
+ltl env rho Fix_hReq1 in AHB	= [](sel0 -> !hReq1).
+
 /***********
 **** ENV RHO
 ***********/
