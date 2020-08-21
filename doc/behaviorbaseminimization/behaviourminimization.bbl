@@ -207,6 +207,17 @@ A.~Kuvent, S.~Maoz, and J.~O. Ringert, ``A symbolic justice violations
   \url{http://doi.acm.org/10.1145/3106237.3106240}
 \BIBentrySTDinterwordspacing
 
+\bibitem{DBLP:conf/vmcai/CimattiRST08}
+\BIBentryALTinterwordspacing
+A.~Cimatti, M.~Roveri, V.~Schuppan, and A.~Tchaltsev, ``Diagnostic information
+  for realizability,'' in \emph{Verification, Model Checking, and Abstract
+  Interpretation, 9th International Conference, {VMCAI} 2008, San Francisco,
+  USA, January 7-9, 2008, Proceedings}, ser. Lecture Notes in Computer Science,
+  F.~Logozzo, D.~A. Peled, and L.~D. Zuck, Eds., vol. 4905.\hskip 1em plus
+  0.5em minus 0.4em\relax Springer, 2008, pp. 52--67. [Online]. Available:
+  \url{http://dx.doi.org/10.1007/978-3-540-78163-9\_9}
+\BIBentrySTDinterwordspacing
+
 \bibitem{SYNTCOMP}
 \BIBentryALTinterwordspacing
 (2020) The reactive synthesis competition. [Online]. Available:
