@@ -1,5 +1,30 @@
 TODO:
 =====
+- picking criteria
+	- overall review last paper to the best of our knowledge, list of papers, try all, one of each, but clear
+		- collect list of papers and examples
+			- ??* Debugging Formal Specifications
+			- 8* Debugging formal specifications using simple counterstrategies
+			- 9* Towards a notion of unsatisfiable and unrealizable cores for LTL
+			- 10* Counter-strategy guided refinement of GR(1) temporal logic specifications
+			- 11* Finding minimal unsatisfiable cores of declarative specifications
+			- 19* Debugging unrealizable specifications with model-based diagnosis
+			- 24* A symbolic justice violations transition system for unrealizable GR(1) specifications
+			- 25* Diagnostic information for realizability
+			- 28* Synthesis from incompatible specifications
+			- 29* On the revision problem of specification automata
+			- 30* Minimal specification revision for weighted transition systems
+			- 31* Vacuity detection in temporal model checking
+			- 34* On well-separation of GR(1) specifications
+			- 39* Goal-conflict detection based on temporal satisfiability checking
+			- 40* Minimal strongly unsatisfiable subsets of reactive system specifications
+			- 42* Interpolation-based GR(1) assumptions refinement
+			- ??* Symbolic Repairs for GR(1) Specifications
+		- define criteria
+		- explain that everything with liveness from syntcomp (define proper criteria)
+		- check ratsy unrealizable cases
+		- explain how per case which mutations were evaluated
+- rephrase scalability add it as a point to validation
 - write examples from symbolic repair paper
 - vic changes
 	- Intro, cite Cimatti (Diagnostic information for realizability) and symbolic repair (Maoz)
