@@ -45,7 +45,8 @@
         - students examples (SYNTECH15)
 - 11! Finding minimal unsatisfiable cores of declarative specifications
         - not applicable (sat. not real.)
-
+- ??! performance heuristics for gr(1) synthesis and related algorithms
+	- add ref to Spectra: A Specification Language for Reactive Systems
 
 	
 

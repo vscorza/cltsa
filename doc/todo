@@ -2,36 +2,54 @@ TODO:
 =====
 - ratsy examples
 	- translate and check
-		- genbuf
+		X genbuf
+		X variants
+		X amba
 		- variants
-		- amba
-		- variants
-		
-- add syntech15 try 1
-	- something referred to in maoz's paper
-
-- criteria
+			X run variants for amba_1
+			- check variants on ratsy version to adjust scheduler
+				- woef_a
+					! $env_fairness .= "#Taken out to make the specification unrealizable:\n";
+					! $env_fairness .= "#G(F(hready=1));\n";
+				- wsf_a
+					+ print "#A fiarness guarantee to make the spec unrealizable\n";
+					+ print "G(F(stateG2_0=1));\n";
+				- wsf_b
+					! print "#A fiarness guarantee to make the spec unrealizable\n";
+					! print "G(F(hmaster0=1 + hbusreq0=1));\n";
+				- wst_a
+					+ $sys_transitions .= "#An additional transition guarantee to make the spec unrealizable:\n";
+					+ $sys_transitions .= "G((hburst0=0 <-> X(hburst0=1)) -> X(start=0));\n";
+				- wst_b
+					+ $sys_transitions .= "#An additional transition guarantee to make the spec unrealizable:\n";
+					+ $sys_transitions .= "G((hready=1) -> X(start=0));\n";
+		- create new test set
+		- test new amba set
+		- translate and report other 2 spectra examples
+		- update scripts
+			- update new genbuf and amba from ratsy
+			- update new amba scheduler
+			- update spectra specs
+		- re run tests and generate output
+- picking criteria
+	- overall review last paper to the best of our knowledge, list of papers, try all, one of each, but clear
+		- define criteria
+		- add and expand list from validation
+		- explain that everything with liveness from syntcomp (define proper criteria)
+			- has simplified arbiter (not included bc it was covered by ahb genbuf)
+			- then we found collector and AHB - Genbuf
+		- explain how per case which mutations were evaluated
+		- rephrase scalability add it as a point to validation
+		- explain that there why there are no other liveness specs from syntcomp (if ahb is not added)
 - change presentation 
 	- why is not counterstrategy
 	- early reference to maoz
-- picking criteria
-	- overall review last paper to the best of our knowledge, list of papers, try all, one of each, but clear
-		X collect list of papers and examples
-		- define criteria
-		X explain that everything with liveness from syntcomp (define proper criteria)
-			- has simplified arbiter (not included bc it was covered by ahb genbuf)
-			- then we found collector and AHB - Genbuf
-		- check ratsy unrealizable cases
-		- explain how per case which mutations were evaluated
-- rephrase scalability add it as a point to validation
-- write examples from symbolic repair paper
 - vic changes
 	- Intro, cite Cimatti (Diagnostic information for realizability) and symbolic repair (Maoz)
 	- review clts section
     	- Cross-paper keep consistent terminology according to what is kept in the background section
 	- Motivation review example, doesn't like the safety keep condition, "idle controller"
 - do a general review on validation and related work
-- explain that there why there are no other liveness specs from syntcomp (if ahb is not added)
 - discussion
 	- move references to symbolic to discussion
 - meeting

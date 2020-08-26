@@ -1,0 +1,122 @@
+set Global_Alphabet = {}
+set Controllable_Alphabet = {}
+set Global_Signals	= {hready, hbusreq0, hlock0, hburst0, hburst1,hmaster0, hmastlock, start, decide, hlocked, hgrant0, stateG2_0, stateG3_0, stateG3_1, stateG3_2}
+set Output_Signals	= {hmaster0, hmastlock, start, decide, hlocked, hgrant0, stateG2_0, stateG3_0, stateG3_1, stateG3_2}
+order	= {}
+ltl env theta Init_Buffer_e in AHB	= (!hready &&!hbusreq0 && !hlock0 && !hburst0 &&!hburst1).
+ltl sys theta Init_Buffer_s in AHB	= (!hmaster0 && !hmastlock && start && decide &&!hlocked &&hgrant0 && !stateG2_0 &&!stateG3_0 && !stateG3_1 && !stateG3_2).
+//##############################################
+// Environment specification
+//##############################################
+//##############################################
+// Input variable definition
+//##############################################
+//[ENV_TRANSITIONS]
+//Assumption 3:
+ltl env rho A3_0 in AHB = []( hlock0 -> hbusreq0 ).//A3
+
+//##############################################
+// System specification
+//##############################################
+//##############################################
+// Output variable definition
+//##############################################
+//[SYS_TRANSITIONS]
+//Assumption 1:
+
+//Guarantee 1:
+ltl sys rho G1 in AHB = []((!hready) -> X(!start)).
+
+//Guarantee 2:
+//  Master 0:
+ltl sys rho G2_0_a in AHB = [](((!stateG2_0)&&(!hmastlock))->X(!stateG2_0)).
+ltl sys rho G2_0_b in AHB = [](((!stateG2_0)&&(!start))    ->X(!stateG2_0)).
+ltl sys rho G2_0_c in AHB = [](((!stateG2_0)&&(hburst0))  ->X(!stateG2_0)).
+ltl sys rho G2_0_d in AHB = [](((!stateG2_0)&&(hburst1))  ->X(!stateG2_0)).
+ltl sys rho G2_0_e in AHB = [](((!stateG2_0)&&(!(!hmaster0)))->X(!stateG2_0)).
+ltl sys rho G2_0_f in AHB = [] (((!stateG2_0)&&(hmastlock)&&(start)&&(!hburst0)&&(!hburst1)&&(!hmaster0))->X(stateG2_0)).
+ltl sys rho G2_0_g in AHB = [](((stateG2_0)&&(!start)&&(hbusreq0))->X(stateG2_0)).
+ltl sys rho G2_0_h in AHB = [](((stateG2_0)&&(start))->(start && !start)).
+ltl sys rho G2_0_i in AHB = [](((stateG2_0)&&(!start)&&(!hbusreq0))  ->X(!stateG2_0)).
+
+//Guarantee 3:
+ltl sys rho G3_a in AHB = [](((!stateG3_0)&&(!stateG3_1)&&(!stateG3_2)&&((!hmastlock)||(!start)||((hburst0)||(!hburst1)))) -> X((!stateG3_0)&&(!stateG3_1)&&(!stateG3_2))). 
+ltl sys rho G3_b in AHB = [](((!stateG3_0)&&(!stateG3_1)&&(!stateG3_2)&&((hmastlock)&&(start)&&((!hburst0)&&(hburst1))&&(!hready))) ->  X((stateG3_0)&&(!stateG3_1)&&(!stateG3_2))). 
+ltl sys rho G3_c in AHB = [](((!stateG3_0)&&(!stateG3_1)&&(!stateG3_2)&& ((hmastlock)&&(start)&&((!hburst0)&&(hburst1))&&(hready))) -> X((!stateG3_0)&&(stateG3_1)&&(!stateG3_2))). 
+ 
+ltl sys rho G3_d in AHB = [](((stateG3_0)&&(!stateG3_1)&&(!stateG3_2)&&((!start)&&(!hready))) ->  X((stateG3_0)&&(!stateG3_1)&&(!stateG3_2))). 
+ltl sys rho G3_e in AHB = [](((stateG3_0)&&(!stateG3_1)&&(!stateG3_2)&&((!start)&&(hready))) ->  X((!stateG3_0)&&(stateG3_1)&&(!stateG3_2))). 
+
+ltl sys rho G3_f in AHB = [](((stateG3_0)&&(!stateG3_1)&&(!stateG3_2)&&((start))) -> (start && !start)). 
+
+ 
+ltl sys rho G3_e in AHB = [](((!stateG3_0)&&(stateG3_1)&&(!stateG3_2)&&((!start)&&(!hready))) -> 
+ X((!stateG3_0)&&(stateG3_1)&&(!stateG3_2))). 
+ltl sys rho G3_f in AHB = [](((!stateG3_0)&&(stateG3_1)&&(!stateG3_2)&&((!start)&&(hready))) -> 
+ X((stateG3_0)&&(stateG3_1)&&(!stateG3_2))). 
+ltl sys rho G3_g in AHB = [](((!stateG3_0)&&(stateG3_1)&&(!stateG3_2)&&((start))) -> (start && !start)). 
+ 
+ltl sys rho G3_h in AHB = [](((stateG3_0)&&(stateG3_1)&&(!stateG3_2)&&((!start)&&(!hready))) -> 
+ X((stateG3_0)&&(stateG3_1)&&(!stateG3_2))). 
+ltl sys rho G3_i in AHB = [](((stateG3_0)&&(stateG3_1)&&(!stateG3_2)&&((!start)&&(hready))) -> 
+ X((!stateG3_0)&&(!stateG3_1)&&(stateG3_2))). 
+ltl sys rho G3_j in AHB = [](((stateG3_0)&&(stateG3_1)&&(!stateG3_2)&&((start))) -> (start && !start)). 
+ 
+ltl sys rho G3_k in AHB = [](((!stateG3_0)&&(!stateG3_1)&&(stateG3_2)&&((!start)&&(!hready))) -> 
+ X((!stateG3_0)&&(!stateG3_1)&&(stateG3_2))). 
+ltl sys rho G3_l in AHB = [](((!stateG3_0)&&(!stateG3_1)&&(stateG3_2)&&((!start)&&(hready))) -> 
+ X((!stateG3_0)&&(!stateG3_1)&&(!stateG3_2))).
+
+ltl sys rho G3_m in AHB = [](((!stateG3_0)&&(!stateG3_1)&&(stateG3_2)&&((start))) -> (start && !start)). 
+
+//Guarantee 4 and 5:
+//  Master 0:
+ltl sys rho G4_0 in AHB = []((hready) -> ((hgrant0) <-> X(!hmaster0))).
+//  HMASTLOCK:
+ltl sys rho G5 in AHB = []((hready) -> (!hlocked <-> X(!hmastlock))).
+
+//Guarantee 6.1:
+//  Master 0:
+ltl sys rho G6_0 in AHB = [](X(!start) -> ((!hmaster0) <-> (X(!hmaster0)))).
+
+//Guarantee 6.2:
+ltl sys rho G6_b in AHB = [](((X(!start))) -> ((hmastlock) <-> X(hmastlock))).
+
+//Guarantee 7:
+ltl sys rho G7_0_a in AHB = []((decide && hlock0 && X(hgrant0))->X(hlocked)).
+ltl sys rho G7_0_b in AHB = []((decide && !hlock0 && X(hgrant0))->X(!hlocked)).
+//default master
+ltl sys rho G7 in AHB = []((decide && !hbusreq0) -> X(hgrant0)).
+
+//Guarantee 8:
+ltl sys rho G8_0 in AHB = []((!decide)->(((!hgrant0)<->X(!hgrant0)))).
+ltl sys rho G8 in AHB = []((!decide)->(!hlocked <-> X(!hlocked))).
+
+//add unrealizability
+ltl sys rho UNREAL in AHB = []((hready) -> X(!start)).
+
+//Guarantee 10:
+
+//##############################################
+// PROPERTY
+//##############################################
+//[ENV_FAIRNESS]
+
+
+//Assumption 2:
+ltl fluent A2 = ((hready)).
+//[SYS_FAIRNESS]
+
+//Guarantee 2:
+ltl fluent G2_0 = ((!stateG2_0)).
+
+//Guarantee 3:
+ltl fluent G3 = (((!stateG3_0) && (!stateG3_1) && (!stateG3_2))).
+
+//Guarantee 9:
+ltl fluent G9_i = (((!hmaster0) || !hbusreq0)).
+/*###############################################
+# Synthesis
+###############################################*/
+|f| ENV =(AHB).
+|gr1| <{A2}><{G2_0, G3, G9_0}> STRAT = ENV.

@@ -1,0 +1,44 @@
+set Global_Alphabet = {}
+set Controllable_Alphabet = {}
+/*
+blncr2	blncr1	blncr0	value
+0	0	0	stp
+0	0	1	fwd
+0	1	0	bwd
+0	1	1	left
+1	0	0	right
+*/
+set Global_Signals	= {frontDistSense, backDistSense, isReady, blncr0, blncr1, blncr2, respondedA, respondedB, respondedC}
+set Output_Signals	= {blncr0, blncr1, blncr2, respondedA, respondedB, respondedC}
+order	= {}
+ltl sys theta Init_Buffer_s in GYRO =(!blncr0 && !blncr1 && !blncr2 && respondedA && respondedB && respondedC).
+// Stop while the robot is not ready to move.
+ltl sys rho G1 in GYRO = [](!isReady -> (!blncr0 && !blncr1 && !blncr2)).
+// Move forward only when there are no obstacles ahead.
+ltl sys rho G2 in GYRO = [](((blncr0 && !blncr1 && !blncr2)) -> (!frontDistSense)).
+// Move backward only when there are no obstacles behind.
+ltl sys rho G3 in GYRO = [](((!blncr0 && blncr1 && !blncr2)) -> (!backDistSense)).
+// When in auto mode, eventually move forward.
+ltl fluent SYS_GF_1 = ((blncr0 && !blncr1 && !blncr2)).
+ltl fluent SYS_GF_2 = ((!blncr0 && !blncr1 && blncr2)||(blncr0 && blncr1 && !blncr2)).
+ltl sys rho G4 in GYRO = []((isReady && !frontDistSense) -> (blncr0 && !blncr1 && !blncr2)).
+// The robot needs to be stabilized at first and it is not ready to move.
+ltl env theta Init_Buffer_e in GYRO = (!isReady && !frontDistSense && !backDistSense).
+// Eventually the robot will be ready to move.
+ltl fluent ENV_GF_1 = (isReady).
+// When the robot is ready, it will stay that way.
+ltl env rho A1 in GYRO = [](isReady -> X(isReady)).
+// Back surface becomes clear responds to continuously moving away from obstacle.
+ltl env rho A2 in GYRO = [](X(respondedA) <-> ((!((!blncr0 && blncr1 && !blncr2) || (!blncr0 && !blncr1 && !blncr2))) || (respondedA && !((((!blncr0 && blncr1 && !blncr2) || (!blncr0 && !blncr1 && !blncr2))||!backDistSense))))).
+ltl fluent SYS_GF_3 = (respondedA).
+// Front surface becomes blocked responds to continuously moving forward.
+ltl env rho A3 in GYRO =   [](X(respondedB) <-> (((!((blncr0 && !blncr1 && !blncr2))||frontDistSense)) || (respondedB && !((blncr0 && !blncr1 && !blncr2))))).
+ltl fluent SYS_GF_4 = (respondedB).
+// Back surface becomes blocked responds to continuously moving backward
+ltl env rho A4 in GYRO =   [](X(respondedC) <-> (((!((!blncr0 && blncr1 && !blncr2))||backDistSense)) || (respondedC && !((!blncr0 && blncr1 && !blncr2))))).
+ltl fluent SYS_GF_5 = (respondedC).
+
+|f| ENV =(GYRO).
+|gr1| <{ENV_GF_1}><{SYS_GF_1,SYS_GF_2,SYS_GF_3,SYS_GF_4,SYS_GF_5}> STRAT = ENV.
+ENV >> "/tmp/gyro1.rep".
+STRAT >> "/tmp/gyro1_diag.rep".
