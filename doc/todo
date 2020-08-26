@@ -2,8 +2,10 @@ TODO:
 =====
 - counterstrategy
 	- ours is smaller
-	- not symbolic
 	- run in spectra our running example
+- motivation
+	- no tool available for explicit models
+	- generate traces valid for tests
 - ratsy examples
 	- translate and check
 		X genbuf
