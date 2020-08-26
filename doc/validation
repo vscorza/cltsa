@@ -1,46 +1,51 @@
 - ??! Debugging Formal Specifications | Minimization + (counterstrategies -> countertrace)
-	- dining philosophers (has liveness, too simple)
-	- amba (used elsewhere)
+        - dining philosophers (has liveness, too simple) Motivating example.
+        - amba (used elsewhere)
 - 8! Debugging formal specifications using simple counterstrategies | Minimization + (counterstrategies -> countertrace)
-	- AMBA and Genbuf modifications from RATSY
+        - AMBA modifications from RATSY
+        - Genbuf modifications from RATSY
 - 9! Towards a notion of unsatisfiable and unrealizable cores for LTL
-	- Lift controller
+        - Lift controller
 - 10! Counter-strategy guided refinement of GR(1) temporal logic specifications
-	- Lift controller
-	- AMBA
+        - Lift controller
+        - AMBA
 - 19! Debugging unrealizable specifications with model-based diagnosis
-	- refers to 1
+        - refers to 1
 - 24! A symbolic justice violations transition system for unrealizable GR(1) specifications
-	- students specs + AMBA
+        - students specs + AMBA
 - 25! Diagnostic information for realizability
-	- AMBA (they remove from env. safety, env. liveness, add sys. liveness)
+        - AMBA (they remove from env. safety, env. liveness, add sys. liveness)
 - 28! Synthesis from incompatible specifications
-	- Forward error correcting codes (not applicable)
-	- Optimal Scheduling for Overloads
+        - Forward error correcting codes (not applicable) Sólo safety
+        - Optimal Scheduling for Overloads  Solo safety
 - 29! On the revision problem of specification automata
-	- Reachability in a map-like spec.
+        - Reachability in a map-like spec. 
 - 30! Minimal specification revision for weighted transition systems
-	- not applicable
+        - not applicable
 - 31! Vacuity detection in temporal model checking
-	- not applicable
+        - not applicable
 - 34! On well-separation of GR(1) specifications
-	- fork controller (too simple but could add)
-- 39! Goal-conflict detection based on temporal satisfiability checking
-	- elevator controller (too simple)
-	- the rail road crossing system (too simple)
-	- tcp (too simple)
-	- atm (missing ref)
-	- telephone (missing ref)
-	- london ambulance service (missing ref)
+        - fork controller (too simple but could add)  MOTIVATING EXAMPLE.
+- 39! Goal-conflict detection based on temporal satisfiability checking. Unavailable.
+        - elevator controller (too simple)
+        - the rail road crossing system (too simple)
+        - tcp (too simple)
+        - atm (missing ref)
+        - telephone (missing ref)
+        - london ambulance service (missing ref)
 - 40! Minimal strongly unsatisfiable subsets of reactive system specifications
-	- elevator like example
+        - elevator like example
 - 42! Interpolation-based GR(1) assumptions refinement
-	- AMBA
-	- Lift controller
+        - AMBA
+        - Lift controller
 - ??! Symbolic Repairs for GR(1) Specifications
-	- request grant example
-	- AMBA
-	- Lift controller
-	- students examples (SYNTECH15)
+        - request grant example   Motivating example
+        - AMBA
+        - Lift controller
+        - students examples (SYNTECH15)
 - 11! Finding minimal unsatisfiable cores of declarative specifications
-	- not applicable (sat. not real.)
+        - not applicable (sat. not real.)
+
+
+	
+
