@@ -1,8 +1,11 @@
 TODO:
 =====
+- clts
+	- translation to kripke
+	- review interface automata for legality
 - counterstrategy
-	- ours is smaller
 	- run in spectra our running example
+	- ours is smaller
 - motivation
 	- no tool available for explicit models
 	- generate traces valid for tests
@@ -29,9 +32,6 @@ TODO:
 				- wst_b
 					+ $sys_transitions .= "#An additional transition guarantee to make the spec unrealizable:\n";
 					+ $sys_transitions .= "G((hready=1) -> X(start=0));\n";
-		- a,b clts: a ||_c b bisim trad(a) ||_c' trad(b)
-			- trad(a ||_c b) <-> trad(a) || trad(b)
-		- define legality
 		- create new test set
 		- test new amba set
 		- translate and report other 2 spectra examples

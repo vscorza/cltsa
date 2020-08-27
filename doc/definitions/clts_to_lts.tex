@@ -1,0 +1,33 @@
+La idea es que no podemos traducir CLTS a LTS sin meter deadlocks.
+Supongamos la existencia de una traducción $lts:CLTS \rightarrow LTS$ que debería cumplir con lo siguiente, si $A=\langle S, \Sigma, \Delta, s_0 \rangle$ es un CLTS y $A'=lts(A)=\langle S', \Sigma', \Delta', s'_0 \rangle$ es su traducción, querríamos que se cumpla que se pueden proyectar los estados del CLTS, que al menos contiene el alfbeto original y que hay caminos consistentes entre los estados proyectados:
+
+\[S \subseteq S', \Sigma \subseteq \Sigma', s_0 = s'_0\]
+Para los estados proyectados pedimos que la relación de transición permita reconstruir un camino donde aparezcan los elementos de la etiqueta orginal preservando cardinalidad:
+\[ \forall (s,l,s') \in \Delta, \exists s \xRightarrow[]{l} s' \in \Delta': |l'\downarrow_{\Sigma}| = |l| \]
+Queremos ver si se cumple la siguiente propiedad:
+\[\exists lts: CLTS \rightarrow LTS | \forall A,B:CLTS, lts(A) \parallel lts(B) = lts(A \parallel_s B)\]
+Para esto vamos a usar tres CLTSs de referencia:
+\[M_1 = \langle \lbrace 1,2 \rbrace, \lbrace a,b,c \rbrace, \lbrace\langle 1, \lbrace a,b \rbrace, 2 \rangle\rbrace, 1 \rangle\]
+\[M_2 = \langle \lbrace 1,2 \rbrace, \lbrace b,c \rbrace, \lbrace \langle 1, \lbrace b,c \rbrace, 2 \rangle\rbrace, 1 \rangle\]
+\[M_3 = \langle \lbrace 1,2 \rbrace, \lbrace a,b \rbrace, \lbrace \langle 1, \lbrace a,b \rbrace, 2 \rangle\rbrace, 1 \rangle\]
+
+Aplicando la traducción sobre $M_1$ podemos decir que:
+\[M'_1 = lts(M_1) \implies ( 1 \xRightarrow[]{l'} 2 \in \Delta_{M'_1} \wedge |l'\downarrow_{\lbrace a,b,c\rbrace}|= |\lbrace a, b \rbrace | )\]
+Si este es el caso vale alguna de las dos opciones siguientes:
+\[1 \xRightarrow[]{l'} 2: 1 \xRightarrow[]{p}\xrightarrow{a}\xRightarrow[]{p'}\xrightarrow{b}\xRightarrow[]{p''}2\]
+\[1 \xRightarrow[]{l'} 2: 1 \xRightarrow[]{r}\xrightarrow{b}\xRightarrow[]{r'}\xrightarrow{a}\xRightarrow[]{r''}2\]
+Y para $M_2$:
+\[M'_2 = lts(M_2) \implies ( 1 \xRightarrow[]{l''} 2 \in \Delta_{M'_2} \wedge |l''\downarrow_{\lbrace b,c\rbrace}|= |\lbrace b,c \rbrace | )\]
+Si este es el caso vale alguna de las dos opciones siguientes:
+\[1 \xRightarrow[]{l''} 2: 1 \xRightarrow[]{u}\xrightarrow{b}\xRightarrow[]{u'}\xrightarrow{c}\xRightarrow[]{u''}2\]
+\[1 \xRightarrow[]{l''} 2: 1 \xRightarrow[]{v}\xrightarrow{c}\xRightarrow[]{v'}\xrightarrow{b}\xRightarrow[]{v''}2\]
+Pero recordando que $M_{\parallel}=M_1 \parallel_s M_2=\langle \lbrace 1 \rbrace, \lbrace a,b,c \rbrace, \emptyset, 1 \rangle$ bloquea, los pares de prefijos entre $p,r$ y $u,v$ debería bloquear, con lo cual, por ej. debería valer $p_1 \in \Sigma_{M'_2}$, $u_1 \in \Sigma_{M'_1}$ y $p_1 \neq u_1$.
+
+\textbf{Suponiendo que la extensión del alfabeto se consigue por combinación de elementos de $\Sigma$} (por ej. concatenación, que si así no fuese no hay cota de finitud para la extensión, porque cualquier autómata que tenga el mismo alfabeto más un elemento $x$ y está compuesto por una única transición $1 \xrightarrow{x} 2$ tendría que bloquear siempre, entonces un elemento particular debería ser agregado para $x$), tendríamos la siguiente situación:
+
+\[lts(M_2 \parallel_s M_3) \neq lts(M_2)\parallel lts(M_3)\]
+
+Porque $lts(M_2)\parallel lts(M_3)$ no puede producir prefijo $abc$ por haber extendido su alfabeto a poteriori ($\Sigma = \lbrace a,b,c \rbrace$)
+pero la composición no bloquearía con:
+
+\[M_1 = \langle \lbrace 1,2 \rbrace, \lbrace a,b,c \rbrace, \lbrace\langle 1, \lbrace c \rbrace, 2 \rangle\rbrace, 1 \rangle\]
