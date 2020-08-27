@@ -1,6 +1,7 @@
 TODO:
 =====
 - clts
+	- el setting es lts con composicion, cómo el related work viene de signal based extendemos clts a lts
 	- translation to kripke
 	- review interface automata for legality
 - counterstrategy
