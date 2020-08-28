@@ -1,67 +1,60 @@
 //HumanoidLTL_458_Humanoid_fixed_unrealizable
-module Humanoid
-		env {CLEAR, BLOCKED} Obstacle ;
-		env {FWD, BWD, TURN_LEFT_1, TURN_LEFT_2} InputMoveMode ;
-		sys {FWD, BWD, STOP, TURN_FWD, TURN_BWD, CALIB_TURN, CALIB_FWD} LeftMotor ;
-		sys {FWD, BWD, STOP, TURN_FWD, TURN_BWD, CALIB_TURN, CALIB_FWD} RightMotor ;
-		sys {FWD, BWD, STOP} HeadMotor ;
-		sys {FWD, BWD, TURN_LEFT_1, TURN_LEFT_2} OutputMoveMode ;
+/*
+obstacle 0 clear 1 blocked
+xmove1	xmove0	value
+0	0	fwd
+0	1	bwd
+1	0	left
+1	1	right
+motor2	motor1	motor0	value
+0	0	0	fwd
+0	0	1	bwd
+0	1	0	turn_fwd
+0	1	1	turn_bwd
+1	0	0	calib_turn
+1	0	1	calib_fwd
+head1	head0	value
+0	0	fwd
+0	1	bwd
+1	0	stop
+*/
 
-guarantee 
-	G((InputMoveMode = FWD & Obstacle = BLOCKED) -> (OutputMoveMode = TURN_LEFT_1 & LeftMotor = CALIB_TURN & RightMotor = CALIB_TURN));
+set Global_Alphabet = {}
+set Controllable_Alphabet = {}
+set Global_Signals	= {obstacle, inputMove1, inputMove0, outputMove1, outputMove0, leftMotor2, leftMotor1, leftMotor0, rightMotor2, rightMotor1, rightMotor0, head}
+set Output_Signals	= {outputMove1, outputMove0, leftMotor2, leftMotor1, leftMotor0, rightMotor2, rightMotor1, rightMotor0, head}
+order	= {}
+ltl sys theta Init_Buffer_s in HUMAN =(!outputMove1 && !outputMove0 && !leftMotor2 && !leftMotor1 && !leftMotor0 && !rightMotor2 && !rightMotor1 && !rightMotor0 && !head).
+ltl sys theta Init_Buffer_e in HUMAN =(!obstacle && !inputMove1 && !inputMove0).
 
-guarantee 
-	G((InputMoveMode = BWD & Obstacle = CLEAR) -> ((OutputMoveMode = FWD & LeftMotor = FWD & RightMotor = BWD)));
+ltl sys rho G_X in HUMAN = [](((!inputMove0 && !inputMove1) && obstacle) -> ((!outputMove0 && outputMove1) && (!leftMotor0 && !leftMotor1 && leftMotor2) && (!rightMotor0 && !rightMotor1 && rightMotor2))).
 
-guarantee
-	G  ((InputMoveMode = FWD & Obstacle = CLEAR ) -> (LeftMotor = FWD & RightMotor = FWD));
+ltl sys rho G_X in HUMAN = [](((inputMove0 && !inputMove1) && !obstacle) -> (((!outputMove0 && !outputMove1) && (!leftMotor0 && !leftMotor1 && !leftMotor2) && (rightMotor0 && !rightMotor1 && !rightMotor2)))).
 
-guarantee
-	G ((Obstacle = BLOCKED) -> !(OutputMoveMode = FWD));
+ltl sys rho G_X in HUMAN = [] (((!inputMove0 && !inputMove1) && !obstacle ) -> ((!leftMotor0 && !leftMotor1 && !leftMotor2) && (!rightMotor0 && !rightMotor1 && !rightMotor2))).
+
+ltl sys rho G_X in HUMAN = []((obstacle) -> !((!outputMove0 && !outputMove1))).
 ////////////////////////////	
 
-guarantee//for turning sequence (step 1 and then 2
-	G ((InputMoveMode = TURN_LEFT_1) <-> (OutputMoveMode = TURN_LEFT_2));
+ltl sys rho G_X in HUMAN = [](((!inputMove0 && inputMove1)) <-> ((outputMove0 && outputMove1))).
 
-guarantee
-	G ((InputMoveMode = TURN_LEFT_1) -> (LeftMotor = FWD & RightMotor = TURN_FWD));
+ltl sys rho G_X in HUMAN = [](((!inputMove0 && inputMove1)) -> ((!leftMotor0 && !leftMotor1 && !leftMotor2) && (!rightMotor0 && rightMotor1 && !rightMotor2))).
 	
-guarantee
-	G ((InputMoveMode = TURN_LEFT_2) -> (LeftMotor = BWD & RightMotor = TURN_BWD));
+ltl sys rho G_X in HUMAN = [](((inputMove0 && inputMove1)) -> ((leftMotor0 && !leftMotor1 && !leftMotor2) && (rightMotor0 && rightMotor1 && !rightMotor2))).
 	
-guarantee
-	G (!(InputMoveMode = TURN_LEFT_1 | InputMoveMode = TURN_LEFT_2) -> !(LeftMotor = TURN_BWD | RightMotor = TURN_BWD |LeftMotor = TURN_FWD & RightMotor = TURN_FWD));
+ltl sys rho G_X in HUMAN = [](!((!inputMove0 && inputMove1) || (inputMove0 && inputMove1)) -> !((leftMotor0 && leftMotor1 && !leftMotor2) || (rightMotor0 && rightMotor1 && !rightMotor2) ||(!leftMotor0 && leftMotor1 && !leftMotor2) && (!rightMotor0 && rightMotor1 && !rightMotor2))).
 	
-guarantee
-	G ((InputMoveMode = TURN_LEFT_1 | InputMoveMode = TURN_LEFT_2) -> (HeadMotor = STOP));
+ltl sys rho G_X in HUMAN = [](((!inputMove0 && inputMove1) || (inputMove0 && inputMove1)) -> (!head)).
 	
-guarantee
-	G ((InputMoveMode = TURN_LEFT_2 & OutputMoveMode != TURN_LEFT_1) -> (LeftMotor = CALIB_FWD & RightMotor = CALIB_FWD));
+ltl sys rho G_X in HUMAN = [](((inputMove0 && inputMove1) && !(!outputMove0 && outputMove1)) -> ((leftMotor0 && !leftMotor1 && leftMotor2) && (rightMotor0 
+&& !rightMotor1 && rightMotor2))).
 
-guarantee
-	G  ((InputMoveMode = TURN_LEFT_2 & Obstacle = CLEAR) -> (OutputMoveMode = FWD));
+ltl sys rho G_X in HUMAN = [] (((inputMove0 && inputMove1) && !obstacle) -> ((!outputMove0 && !outputMove1))).
 
---LTLSPEC//for turning sequence (step 1 and then 2
-	--G (!(InputMoveMode = TURN_LEFT_1) -> !(OutputMoveMode = TURN_LEFT_2));
-	
---LTLSPEC//for turning sequence (step 1 and then 2
-	--G ((InputMoveMode = TURN_LEFT_1) -> (OutputMoveMode = TURN_LEFT_2 & LeftMotor = TURN_FWD & RightMotor = TURN_FWD));
-	
---LTLSPEC
-	--G ((InputMoveMode = TURN_LEFT_2) -> !(OutputMoveMode = TURN_LEFT_2));
+ltl fluent DUMMY = (obstacle || !obstacle).
 
---LTLSPEC
-	--G ((InputMoveMode = TURN_LEFT_2 & Obstacle = BLOCKED) -> OutputMoveMode = TURN_LEFT_1);
-	
---LTLSPEC
-	--G ((Obstacle = CLEAR) -> !(OutputMoveMode = TURN_LEFT_1));
-	
---LTLSPEC
-	--G ((OutputMoveMode = TURN_LEFT_1 & (InputMoveMode = TURN_LEFT_2)) -> (LeftMotor = TURN_BWD & RightMotor = TURN_BWD));
-	
---LTLSPECENV
-	--G ((OutputMoveMode = TURN_LEFT_1 | OutputMoveMode = TURN_LEFT_2) -> F(Obstacle = CLEAR));
+|f| ENV =(HUMAN).
+|gr1| <{DUMMY}><{DUMMY}> STRAT = ENV.
+ENV >> "/tmp/human.rep".
+STRAT >> "/tmp/human_strat.rep".
 
---LTLSPECENV
-	--G F(InputMoveMode = FWD);
-	
