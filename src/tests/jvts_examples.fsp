@@ -1,0 +1,68 @@
+set Global_Alphabet = {}
+set Controllable_Alphabet = {}
+
+set Global_Signals	= {dockRequest, ready, docking, aux_Once, aux_Must_Respond}
+set Output_Signals	= {ready, docking, aux_Once, aux_Must_Respond}
+order			= {}
+
+/*
+pattern pRespondsToS(p, s) {
+  var { S0, S1} state;
+
+  -- initial assignments: initial state
+  state=S0;
+
+  -- safety this and next state
+  G ((state=S0 & ((!p) | (p & s)) & next(state=S0)) |
+  (state=S0 & (p & !s) & next(state=S1)) |
+  (state=S1 & (s) & next(state=S0)) |
+  (state=S1 & (!s) & next(state=S1)));
+
+  -- equivalence of satisfaction
+  GF (state=S0);
+}
+
+env boolean dockRequest ;
+sys boolean ready ;
+sys boolean docking ;
+// don ' t dock before ready
+asm G dockRequest -> ONCE ( ready );
+
+// respond to dock requests
+gar DockingResponse :
+pRespondsToS ( dockRequest , docking );
+gar G docking -> dockRequest ;
+gar G docking -> ! next ( docking );
+*/
+
+ltl env theta Init_E in JVTS	= (!dockRequest).
+ltl sys theta Init_S in JVTS	= (!aux_Once && !aux_Must_Respond && !docking).
+
+ltl env rho A_1 in JVTS	= [](dockRequest -> (ready || aux_Once)).
+
+ltl sys rho Response1 in JVTS	= []((!aux_Must_Respond && (!dockRequest || (dockRequest && docking)))->X(!aux_Must_Respond)).
+ltl sys rho Response2 in JVTS	= []((!aux_Must_Respond && (dockRequest && !docking))->X(aux_Must_Respond)).
+ltl sys rho Response3 in JVTS	= []((aux_Must_Respond && docking)->X(!aux_Must_Respond)).
+ltl sys rho Response4 in JVTS	= []((aux_Must_Respond && !docking)->X(aux_Must_Respond)).
+
+ltl sys rho Once1 in JVTS	= [](!aux_Once && !ready -> X(!aux_Once)).
+ltl sys rho Once2 in JVTS	= [](!aux_Once && ready -> X(aux_Once)).
+ltl sys rho Once2 in JVTS	= [](aux_Once && ready -> X(aux_Once)).
+
+ltl sys rho S_1 in JVTS	= [](docking -> dockRequest).
+ltl sys rho S_2 in JVTS	= [](docking -> X(!docking)).
+
+
+ltl fluent A_2		= (ready || !ready).
+ltl fluent G_2 		= (!aux_Must_Respond).
+ltl fluent G_1		= (ready).
+
+/***********
+**** SYNTHESIS
+***********/
+|f| ENV =(JVTS).
+|gr1| <{A_2}><{G_1,G_2}> STRAT = ENV.
+
+
+JVTS >> "/tmp/jvts.rep".
+STRAT >> "/tmp/jvts_diag.rep".
