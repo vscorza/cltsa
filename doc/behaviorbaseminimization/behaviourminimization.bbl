@@ -106,6 +106,23 @@ E.~Torlak, F.~S.-H. Chang, and D.~Jackson, ``Finding minimal unsatisfiable
   International Symposium on Formal Methods}, ser. FM '08.\hskip 1em plus 0.5em
   minus 0.4em\relax Berlin, Heidelberg: Springer-Verlag, 2008, pp. 326--341.
 
+\bibitem{DBLP:conf/sigsoft/KuventMR17}
+\BIBentryALTinterwordspacing
+A.~Kuvent, S.~Maoz, and J.~O. Ringert, ``A symbolic justice violations
+  transition system for unrealizable {GR(1)} specifications,'' in
+  \emph{Proceedings of the 2017 11th Joint Meeting on Foundations of Software
+  Engineering, {ESEC/FSE} 2017, Paderborn, Germany, September 4-8, 2017},
+  E.~Bodden, W.~Sch{\"{a}}fer, A.~van Deursen, and A.~Zisman, Eds.\hskip 1em
+  plus 0.5em minus 0.4em\relax {ACM}, 2017, pp. 362--372. [Online]. Available:
+  \url{http://doi.acm.org/10.1145/3106237.3106240}
+\BIBentrySTDinterwordspacing
+
+\bibitem{maoz2019symbolic}
+S.~Maoz, J.~O. Ringert, and R.~Shalom, ``Symbolic repairs for gr (1)
+  specifications,'' in \emph{2019 IEEE/ACM 41st International Conference on
+  Software Engineering (ICSE)}.\hskip 1em plus 0.5em minus 0.4em\relax IEEE,
+  2019, pp. 1016--1026.
+
 \bibitem{Keller:1976}
 \BIBentryALTinterwordspacing
 R.~M. Keller, ``Formal verification of parallel programs,''
@@ -194,17 +211,6 @@ C.~A.~R. Hoare, ``Communicating sequential processes,'' \emph{Commun. {ACM}},
 A.~Zeller and R.~Hildebrandt, ``Simplifying and isolating failure-inducing
   input,'' \emph{{IEEE} Trans. Software Eng.}, vol.~28, no.~2, pp. 183--200,
   2002. [Online]. Available: \url{http://dx.doi.org/10.1109/32.988498}
-\BIBentrySTDinterwordspacing
-
-\bibitem{DBLP:conf/sigsoft/KuventMR17}
-\BIBentryALTinterwordspacing
-A.~Kuvent, S.~Maoz, and J.~O. Ringert, ``A symbolic justice violations
-  transition system for unrealizable {GR(1)} specifications,'' in
-  \emph{Proceedings of the 2017 11th Joint Meeting on Foundations of Software
-  Engineering, {ESEC/FSE} 2017, Paderborn, Germany, September 4-8, 2017},
-  E.~Bodden, W.~Sch{\"{a}}fer, A.~van Deursen, and A.~Zisman, Eds.\hskip 1em
-  plus 0.5em minus 0.4em\relax {ACM}, 2017, pp. 362--372. [Online]. Available:
-  \url{http://doi.acm.org/10.1145/3106237.3106240}
 \BIBentrySTDinterwordspacing
 
 \bibitem{DBLP:conf/vmcai/CimattiRST08}

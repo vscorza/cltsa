@@ -1,7 +1,7 @@
-\section{Preliminaries}
+\section{Preliminaries}\label{sec:background}
 %In this section we present background on realisability, which is linked to the problem of controller synthesis~\cite{DBLP:conf/popl/PnueliR89,DBLP:journals/jcss/BloemJPPS12} which, in turn, requires a formal specification that, in this paper, is assumed to be, as in~\cite{DBLP:conf/sigsoft/DIppolitoBPU10} provided as a labeled transition system and a subset of linear temporal logic formula called Generalised Reactivity 1~\cite{DBLP:journals/jcss/BloemJPPS12}.
 
-We model safety assumptions on the environment and goals for the system as composition of Concurrent Labeled Transition Systems (CLTS). 
+We model safety assumptions on the environment and goals for the system as composition of Concurrent Labeled Transition Systems (CLTS). These structures are presented as an extension of LTS, which is our initial target formalism, that allow us to model both signal-based and event-based specifications. When labels are atomic both models are similar. We now present the definitions and properties required to express the realizability problem over a plant expressed as a CLTS.
 
 \begin{definition}
 	\label{def:CLTS} \emph{(Concurrent Labeled Transition Systems)} 

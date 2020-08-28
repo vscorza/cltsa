@@ -1,15 +1,20 @@
 TODO:
 =====
 - clts
-	- el setting es lts con composicion, cómo el related work viene de signal based extendemos clts a lts
-	- translation to kripke
-	- review interface automata for legality
+	X el setting es lts con composicion, cómo el related work viene de signal based extendemos clts a lts
+	- había x tipos de specs de syntech y tomamos 1 al azar de cada
 - counterstrategy
 	- run in spectra our running example
 	- ours is smaller
 - motivation
-	- no tool available for explicit models
-	- generate traces valid for tests
+	X no tool available for explicit models
+	X generate traces valid for tests	
+- syntech15
+	- translate and report other 2 spectra examples	
+- check with sebas
+	- translation to kripke
+	- review interface automata for legality
+
 - ratsy examples
 	- translate and check
 		X genbuf
@@ -35,7 +40,6 @@ TODO:
 					+ $sys_transitions .= "G((hready=1) -> X(start=0));\n";
 		- create new test set
 		- test new amba set
-		- translate and report other 2 spectra examples
 		- update scripts
 			- update new genbuf and amba from ratsy
 			- update new amba scheduler
@@ -51,12 +55,7 @@ TODO:
 		- explain how per case which mutations were evaluated
 		- rephrase scalability add it as a point to validation
 		- explain that there why there are no other liveness specs from syntcomp (if ahb is not added)
-- change presentation 
-	- why is not counterstrategy
-	- early reference to maoz
 - vic changes
-	- Intro, cite Cimatti (Diagnostic information for realizability) and symbolic repair (Maoz)
-	- review clts section
     	- Cross-paper keep consistent terminology according to what is kept in the background section
 	- Motivation review example, doesn't like the safety keep condition, "idle controller"
 - do a general review on validation and related work
