@@ -1,113 +1,82 @@
 //ColorSortLTLUnrealizable1_790_ColorSort_unrealizable
 /*
-pattern respondsTo(trigger, response) {
-  var boolean responded;
-  responded;
-  G (next(responded) iff (response or responded and !trigger));
-  GF (responded);
-}
-module ColorSort
-		env {GREEN, BLACK, RED, BLUE,  YELLOW , WHITE} color ;
-		env {GREEN, BLACK, RED, BLUE,  YELLOW , WHITE} detect ;
-		env {MOVE, SLEEP} ack_ver ;
-		env {MOVE, SLEEP} ack_hor ;
-		env {MOVE, SLEEP} ack_bot ;
-		env {YES, NO} starting_pos ;
-		env {PRESS, RELEASE} speedButton;
-		sys {MOVE, SLEEP} verMot ;
-		sys {MOVE, SLEEP} horMot ;
-		sys {SEEK, STOP, RETURN} botMot ;
-		sys {LEVEL1, LEVEL2, LEVEL3} motSpeed;
-		sys {GREEN, BLACK, RED, BLUE,  YELLOW , WHITE} spec_currentColor;
-		sys boolean spec_dropping ;
-		sys boolean spec_speedButtonValidPressed ;
-	define
-		allsleep := verMot = SLEEP & horMot = SLEEP & botMot = STOP;
-	define
-		nonemove := ack_ver = SLEEP & ack_hor = SLEEP & ack_bot = SLEEP;
-	define
-		verhor_dontmove := ack_ver = SLEEP & ack_hor = SLEEP;
-	define
-		onlybotmoves := verhor_dontmove & ack_bot = MOVE;
-guarantee -- only one motors moves at a time
-	G (verMot = MOVE -> (botMot = STOP & horMot = SLEEP));
-guarantee 
-	G (horMot = MOVE -> (botMot = STOP & verMot = SLEEP));
-guarantee 
-	G (botMot != STOP -> (verMot = SLEEP & horMot = SLEEP));
-guarantee -- if a motor is in the middle of moving, all the other motors stop
-	G (ack_ver = MOVE | ack_hor = MOVE -> allsleep);
--- currentColor keeps its value unless a new cube is kicked
-guarantee 
-	G (verMot = SLEEP <-> spec_currentColor = next(spec_currentColor));
-guarantee
-	G (spec_dropping = next(spec_dropping) <-> verMot = SLEEP & horMot = SLEEP);
--- attempt at creating a working robot
-guarantee
-	!spec_dropping & motSpeed = LEVEL1;
-guarantee
-	G (!spec_dropping & starting_pos = NO & verhor_dontmove <-> botMot = RETURN);
-guarantee
-	G (!spec_dropping & starting_pos = YES & color = BLACK -> allsleep);
-guarantee
-	G (color = BLACK | spec_dropping -> verMot = SLEEP);
-guarantee
-	G (!spec_dropping & starting_pos = YES & nonemove & color != BLACK <-> verMot = MOVE & color = next(spec_currentColor));
-guarantee
-	G (spec_dropping & detect != spec_currentColor & verhor_dontmove <-> botMot = SEEK);
-guarantee
-	G (spec_dropping & detect = spec_currentColor & verhor_dontmove <-> horMot = MOVE);
--- the speed button
-guarantee
-	motSpeed = LEVEL1 & !spec_dropping;
-guarantee
-	G (speedButton = PRESS & PREV(speedButton = RELEASE) <-> spec_speedButtonValidPressed);
-guarantee -- if the speed button is pressed, increase the speed by one level
-	G (spec_speedButtonValidPressed & motSpeed = LEVEL1 -> next(motSpeed = LEVEL2));
-guarantee -- if the speed button is pressed, increase the speed by one level
-	G (spec_speedButtonValidPressed & motSpeed = LEVEL2 -> next(motSpeed = LEVEL3));
-guarantee -- if the speed button is pressed, increase the speed by one level
-	G (spec_speedButtonValidPressed & motSpeed = LEVEL3 -> next(motSpeed = LEVEL1));
-guarantee -- if the speed button is released, the speed remains the same
-	G (!spec_speedButtonValidPressed -> motSpeed = next(motSpeed));
--- environment specifications
-  sys boolean spec_waiting_ack_ver_mot;
-  sys boolean spec_waiting_ack_hor_mot;
-guarantee -- initial state
-  !spec_waiting_ack_ver_mot; -- not waiting for acknowledgement (only sleeping is allowed)
-guarantee -- transitions
-  G(!spec_waiting_ack_ver_mot & verMot!=MOVE -> next(!spec_waiting_ack_ver_mot));
-guarantee
-  G (!spec_waiting_ack_ver_mot & verMot=MOVE -> next(spec_waiting_ack_ver_mot));
-guarantee
-  G (spec_waiting_ack_ver_mot & ack_ver=SLEEP -> next(!spec_waiting_ack_ver_mot));
-guarantee
-  G (spec_waiting_ack_ver_mot & ack_ver!=SLEEP -> next(spec_waiting_ack_ver_mot));
-assumption -- while we are not waiting motor can only acknowledge sleeping
-  G(!spec_waiting_ack_ver_mot -> ack_ver=SLEEP);
-assumption -- if we are waiting motor has to eventually acknowledge finishing
-  respondsTo(spec_waiting_ack_ver_mot,(ack_ver=SLEEP));
-guarantee -- initial state
-  !spec_waiting_ack_hor_mot; -- not waiting for acknowledgement (only sleeping is allowed)
-guarantee -- transitions
-  G(!spec_waiting_ack_hor_mot & horMot!=MOVE -> next(!spec_waiting_ack_hor_mot));
-guarantee
-  G (!spec_waiting_ack_hor_mot & horMot=MOVE -> next(spec_waiting_ack_hor_mot));
-guarantee
-  G (spec_waiting_ack_hor_mot & ack_hor=SLEEP -> next(!spec_waiting_ack_hor_mot));
-guarantee
-  G (spec_waiting_ack_hor_mot & ack_hor!=SLEEP -> next(spec_waiting_ack_hor_mot));
-assumption -- while we are not waiting motor can only acknowledge sleeping
-  G(!spec_waiting_ack_hor_mot -> ack_hor=SLEEP);
-assumption -- if we are waiting motor has to eventually acknowledge finishing
-  respondsTo(spec_waiting_ack_hor_mot,(ack_hor=SLEEP));
-assumption -- there will always be a cube
-  GF (color!=BLACK);
-assumption
-  GF (ack_hor=MOVE);
--- some interesting guarantees
-guarantee
-  respondsTo(color!=BLACK,(horMot=MOVE&detect=spec_currentColor));
-guarantee
-  GF (horMot=MOVE);
+color2	color1	color0	value
+0	0	0	green
+0	0	1	black
+0	1	0	red
+0	1	1	blue
+1	0	0	yellow
+1	0	1	white
+ack 0 sleep	1 move
+botmot1	botmot0	value
+0	0	stop
+0	1	seek
+1	0	return
+motspeed1	motspeed0	value
+0	0	level1
+0	1	level2
+1	0	level3
 */
+
+set Global_Alphabet = {}
+set Controllable_Alphabet = {}
+set Global_Signals	= {color2, color1, color0, detect2, detect1, detect0, ack_ver, ack_hor, ack_bot, starting_pos, speedButton, verMot, horMot, botMot1, botMot0, motSpeed1, motSpeed0, spec_color2, spec_color1, spec_color0, spec_dropping, spec_valid,spec_waiting_ack_ver_mot,spec_waiting_ack_hor_mot, respondedA, respondedB, respondedC}
+set Output_Signals	= {verMot, horMot, botMot1, botMot0, motSpeed1, motSpeed0, spec_color2, spec_color1, spec_color0, spec_dropping, spec_valid,spec_waiting_ack_ver_mot,spec_waiting_ack_hor_mot, respondedA, respondedB, respondedC}
+order	= {}
+ltl sys theta Init_Buffer_s in COLOR =(!color2 && !color1 && !color0 && !detect2 && !detect1 && !detect0 && !ack_ver && !ack_hor && !ack_bot && !starting_pos && !speedButton && !respondedA && !respondedB && !respondedC).
+ltl sys theta Init_Buffer_e in COLOR =(!verMot && !horMot && !botMot1 && !botMot0 && !motSpeed1 && !motSpeed0 && !spec_color2 && !spec_color1 && !spec_color0 && !spec_dropping && !spec_valid && !spec_waiting_ack_ver_mot && !spec_waiting_ack_hor_mot).
+
+/*
+pattern respondsTo(trigger, response) {
+  var boolean responded.
+  responded.
+  G (X(responded) iff (response or responded and !trigger)).
+  GF (responded).
+}
+*/
+ltl sys rho G_XX in COLOR = [](verMot -> ((!botMot0 && !botMot1) && !horMot)).
+ltl sys rho G_XX in COLOR = [](horMot -> ((!botMot0 && !botMot1) && !verMot)).
+ltl sys rho G_XX in COLOR = [](!(!botMot0 && !botMot1) -> (!verMot && !horMot)).
+ltl sys rho G_XX in COLOR = [](ack_ver || ack_hor ->  (!verMot && !horMot && !botMot1 && !botMot0)).
+ltl sys rho G_XX in COLOR = [](!verMot <-> ((spec_color0 <-> X(spec_color0)) && (spec_color1 <-> X(spec_color1)) && (spec_color2 <-> X(spec_color2)))).
+ltl sys rho G_XX in COLOR = []((spec_dropping <-> X(spec_dropping)) <-> !verMot && !horMot).
+ltl sys rho G_XX in COLOR = [](!spec_dropping && !starting_pos && (!ack_ver && !ack_hor) <-> (!botMot0 && botMot1)).
+ltl sys rho G_XX in COLOR = [](!spec_dropping && starting_pos && (color0 && !color1 && !color2) ->  (!verMot && !horMot && !botMot1 && !botMot0)).
+ltl sys rho G_XX in COLOR = []((color0 && !color1 && !color2) || spec_dropping -> !verMot).
+ltl sys rho G_XX in COLOR = [](!spec_dropping && starting_pos && (!ack_ver && !ack_hor && !ack_bot) && !(color0 && !color1 && !color2) <-> verMot && ((color0 <-> X(spec_color0)) && (color1 <-> X(spec_color1)) && (color2 <-> X(spec_color2)))).
+ltl sys rho G_XX in COLOR = [](spec_dropping && !((detect0 <-> spec_color0) &&(detect1 <-> spec_color1) &&(detect2 <-> spec_color2)) && (!ack_ver && !ack_hor) <-> (botMot0 && !botMot1)).
+ltl sys rho G_XX in COLOR = [](spec_dropping && ((detect0 <-> spec_color0) &&(detect1 <-> spec_color1) &&(detect2 <-> spec_color2)) && (!ack_ver && !ack_hor) <-> horMot).
+ltl sys rho G_XX in COLOR = [](!X(speedButton) && speedButton <-> X(spec_valid)).
+ltl sys rho G_XX in COLOR = [](spec_valid && (!motSpeed0 && !motSpeed1) -> X((motSpeed0 && !motSpeed1))).
+ltl sys rho G_XX in COLOR = [](spec_valid && (motSpeed0 && !motSpeed1) -> X((!motSpeed0 && motSpeed1))).
+ltl sys rho G_XX in COLOR = [](spec_valid && (!motSpeed0 && motSpeed1) -> X((!motSpeed0 && !motSpeed1))).
+ltl sys rho G_XX in COLOR = [](!spec_valid -> ((motSpeed0 <-> X(motSpeed0)) && (motSpeed1 <-> X(motSpeed1)))).
+ltl sys rho A_XX in COLOR = [](!spec_waiting_ack_ver_mot && !verMot -> X(!spec_waiting_ack_ver_mot)).
+ltl sys rho G_XX in COLOR = [](!spec_waiting_ack_ver_mot && verMot -> X(spec_waiting_ack_ver_mot)).
+ltl sys rho G_XX in COLOR = [](spec_waiting_ack_ver_mot && !ack_ver -> X(!spec_waiting_ack_ver_mot)).
+ltl sys rho G_XX in COLOR = [](spec_waiting_ack_ver_mot && ack_ver -> X(spec_waiting_ack_ver_mot)).
+ltl env rho A_XX in COLOR = [](!spec_waiting_ack_ver_mot -> !ack_ver).
+
+ltl sys rho A_XX in COLOR = [](!spec_waiting_ack_hor_mot && !horMot -> X(!spec_waiting_ack_hor_mot)).
+ltl sys rho G_XX in COLOR = [](!spec_waiting_ack_hor_mot && horMot -> X(spec_waiting_ack_hor_mot)).
+ltl sys rho G_XX in COLOR = [](spec_waiting_ack_hor_mot && !ack_hor -> X(!spec_waiting_ack_hor_mot)).
+ltl sys rho G_XX in COLOR = [](spec_waiting_ack_hor_mot && ack_hor -> X(spec_waiting_ack_hor_mot)).
+ltl env rho A_XX in COLOR = [](!spec_waiting_ack_hor_mot -> !ack_hor).
+
+ltl env rho A_XX in COLOR = [] (X(respondedA) <-> (!ack_ver || (respondedA && !spec_waiting_ack_ver_mot))).
+ltl env rho A_XX in COLOR = [] (X(respondedB) <-> (!ack_hor || (respondedB && !spec_waiting_ack_hor_mot))).
+ltl sys rho A_XX in COLOR = [] (X(respondedC) <-> ((horMot && ((detect0 <-> spec_color0) &&(detect1 <-> spec_color1) &&(detect2 <-> spec_color2))) || (respondedC && !(color0 && !color1 && !color2)))). 
+
+ltl fluent A1 = (!(color0 && !color1 && !color2)).
+ltl fluent A2 = (ack_hor).
+ltl fluent G1 = (horMot).
+
+ltl fluent GA = (!respondedA).
+ltl fluent GB = (!respondedB).
+ltl fluent GC = (!respondedC).
+
+|f| ENV =(COLOR).
+|gr1| <{A1, A2}><{G1,GA,GB,GC}> STRAT = ENV.
+ENV >> "/tmp/color.rep".
+STRAT >> "/tmp/color_strat.rep".
+
