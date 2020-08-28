@@ -1,25 +1,15 @@
 TODO:
 =====
+- claim: tengo un clts que hace de planta, lo traduzco para conseguir theta y rho, tengo sintesis clts donde voy a encontrar otro clts que junto con la composicion sincronica clts, que si es legal en mis términos, que si me satisface la fórmula, si esto lo traduzco, es un fds que satisface realizabilidad de trad. de planta
 - clts
 	X el setting es lts con composicion, cómo el related work viene de signal based extendemos clts a lts
 	- había x tipos de specs de syntech y tomamos 1 al azar de cada
 - counterstrategy
-	- run in spectra our running example
+	X run in spectra our running example
 	- ours is smaller
-- motivation
-	X no tool available for explicit models
-	X generate traces valid for tests	
-- syntech15
-	- translate and report other 2 spectra examples	
-- check with sebas
-	- translation to kripke
-	- review interface automata for legality
 
 - ratsy examples
 	- translate and check
-		X genbuf
-		X variants
-		X amba
 		- variants
 			X run variants for amba_1
 			- check variants on ratsy version to adjust scheduler
