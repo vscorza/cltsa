@@ -157,3 +157,111 @@ We can now introduce algorithm ~\ref{fig:gs_to_clts_algorithm}, that takes a gam
 $\gsTheE$, $\gsTheS$, $\gsRhoE$, $\gsRhoS$, $\varphi$ of OBDDs, one for each formula, and produces the CLTS automaton $A$ that preserves its behavior. Since the state space is finite ($2^{|\gsV|}$ at most) and the number of states reached by applying $\gsRhoS(\gsRhoE(v))$ increases monotonically (when starting from $\gsTheS(\gsTheE)$), a least fixed point exists, the algorithm computes such fixed point while progressively creating the transition relation $\Delta$. \texttt{valuations}($\psi$) gives the set of valuations over $\gsV$ for a formula $\psi$ represented with an OBDD. Each valuation induces a unique state in $A$. \texttt{restrict}($\psi$, $s$) fixes a subset of variables in $\psi$ according to $s$ a valuation. If $\varphi$ is the set of propositional formulas involved in the winning condition, \texttt{evaluate\_condition}($A$, $\varphi$, $s$) evaluates the satisfaction of each such formulas according to valuation $s$ and maps the result to $s$ as a state in $A$.
 \newpage
 \input{gs_to_clts_code}
+
+\newpage
+%%%%% CLTS 2 GS
+
+
+We introduce now a translation from CLTS to game structures.
+The first thing that will be addressed is the relation between fluent valuations and states in any given CLTS model. Assume $E = \langle S_E, \Sigma_E, \Delta_E, s^E_0 \rangle$ is the automaton that represents the plant, and $\mathcal{F}=\{fl_1,\ldots,fl_k\}$ with $fl_i = \langle I_i, T_i, init_i \rangle$ the set of fluents associated with a control problem. We will construct a new plant that is compatible with the valuation of the fluents at each step of the execution. To do this we construct an equivalent automaton for each fluent, compose them with each other and with the original plant $E$. This way we have a consistent mechanism to define the set of states satisfying any given fluent.  The for $fl_i$ the candidate fluent automaton is constructed as follows:
+\[ FL_i = \langle S_{fl_i}, \Sigma_{fl_i}, \Delta_{fl_i}, s_{0_i}\rangle \]
+Where:
+\[S_{fl_i}= \{s^{\bot}_i, s^{\top}_i\} \]
+\[\Delta_{fl_i} \text{is the minimal relation s.t.}\]
+\[ \forall \alpha \in I_i: \{(s^{\bot}_i,\alpha,s^{\top}_i), (s^{\top}_i,\alpha,s^{\top}_i)\} \in \Delta_{fl_i} \]
+\[ \forall \beta \in T_i: \{(s^{\top}_i,\beta,s^{\bot}_i), (s^{\bot}_i,\beta,s^{\bot}_i)\} \in \Delta_{fl_i} \]
+\[
+s_{0_i} = \begin{cases}
+s^{\top}_i & init_i = \top \\
+s^{\bot}_i & otherwise
+\end{cases}
+\]
+
+The fluent compatible plant $E_G$ is the result of the synchronous parallel composition of the fluent automata with the original plant:
+\[E_G = (E \parallel_s FL_1 ||_s \ldots ||_s FL_k) \]
+And the function that determines which states satisfy which fluent is defined as:
+\[ fl(i) = \{s \in S_{E_G} : s_{(i + 1)} = s^{\top}_i \} \]
+Atomic satisfaction of LTL formula $fl_i$ at step $j$ of trace $\pi$ can be redefined as:
+\[ \pi_j \models fl_i \]
+Now we introduce the CLTS to Game Structure translation.
+\begin{definition}
+	\label{def:val_ltl} \emph{(LTL over $\mathcal{F}$ to LTL over $\mathcal{V}$ translation)} 
+	Let $\varphi$ be a LTL formula over fluents $\mathcal{F}$, and if $\mathcal{V}$ is the minimal set of boolean variables containing $v_{fl_i}$ for each $f \in \mathcal{F}$, $val(\varphi)$ is an equivalent LTL formula over boolean variables according to the following inductive definition:\\
+	
+	\begin{tabular}{ l c l }
+		$val(fl_i)$ & $\triangleq$ & $v_{fl_i}$\\	
+		$val(\neg \varphi)$ & $\triangleq$ & $\neg val(\varphi)$\\
+		$val(\varphi \vee \psi$ & $\triangleq$ & $val(\varphi) \vee val(\psi)$\\
+		$val(\bigcirc \varphi)$ & $\triangleq$ & $\bigcirc val(\varphi)$\\
+		$val(\varphi \U \psi)$ & $\triangleq$ & $val(\varphi) \U val(\psi)$\\
+	\end{tabular}	
+\end{definition}
+
+\begin{definition}
+	\label{def:clts_to_gs_translation} \emph{(CLTS to Game Structure translation)} 
+	Let $A = \langle S_A, \Sigma_A, \Delta_A, s_{0_A} \rangle$ be a clts, and $\mathcal{C}\subseteq \Sigma_A$ its controllable alphabet, $gs(A,\mathcal{C})=B$ is a game structure such that $A \models \varphi$ $\iff$ $B \models val(\varphi)$.
+\end{definition}
+
+Let $A$ be the CLTS to be translated and $B =  \langle \gsX, \gsY, \gsTheE, \gsTheS, \gsRhoE, \gsRhoS, \varphi \rangle$ the game structure resulting after applying $gs(A)$. 
+
+Let $G$ be the game structure to be translated and $M=\langle S, \Sigma, \Delta, s_0 \rangle$ the target CLTS, i.e. the candidate for $clts(G)$.  We now define the alphabet of the Game Structure as the two sets:
+\[\gsX = \{x_i : a_i \in \Sigma_A \setminus \mathcal{C} \}\]
+\[\gsY = \{y_i : a_i \in \mathcal{C} \} \cup \{s_i : i \in 1..\lfloor log_2(|S_A|)\rfloor \} \cup \{v_{fl_i} : fl_i \in \mathcal{F}\}\]
+From now on we will write $s(j)$ to represent the valuation of the system variables representing a given state $j$, i.e.: 
+\[s(j) = \bigwedge\limits^{\lfloor log_2(|S_A|)\rfloor - 1}_{i=0}  s_{bit}(i,j)\]
+\[
+s_{bit}(i,j) = \begin{cases}
+s_i & j / 2^i \\
+\neg s_i & otherwise
+\end{cases}
+\]
+To represent the value of fluent $f$ at state $i$ we will use $f_{val}(f,i)$:
+\[
+f_{val}(f,i) = \begin{cases}
+v_{fl_i} & s_i \in fl(f) \\
+\neg v_{fl_i} & otherwise
+\end{cases}
+\]
+The initial condition will be set as:
+\[\gsTheE = \bigwedge_{i = 1}^{|\Sigma_A \setminus \mathcal{C}|}\neg x_i\]
+\[\gsTheS = (\bigwedge_{i = 1}^{|\mathcal{C}|}\neg y_i) \wedge s(0) \wedge (\bigwedge_{f = 1}^{|\mathcal{F}|}f_{val}(f,0))\]
+Transition relations are constructed as a conjunction of safety formulae that are added for each state. These can be split into two types, enabling and state updating formulae. The first type restrict the set of variables that can be set to $true$ in a mutually exclusive fashion at each state. The second type defines the state reached for each combination of current state and enabled variables. 
+We will use the following two functions to build the conjunction of system or environment variables related to the label in any given automaton transition:
+\[\delta_e(l) = \{\bigwedge_{\sigma_i \in \Sigma \setminus \mathcal{C}}var(l, \sigma_i)\}\]
+\[\delta_s(l) = \{\bigwedge_{\sigma_i \in \Sigma}var(l, \sigma_i)\}\]
+\[
+var(l, \sigma_i) = \begin{cases}
+\sigma_i & \sigma_i \in l \\
+\neg \sigma_i & otherwise
+\end{cases}
+\]
+And the mutually exclusive condition needed for any given state $s_i$ will be described as:
+\[mux_e(s_i,L) = s(i) \wedge \bigvee_{l \in L}(\delta_e(l) \wedge \bigwedge_{l' \in L \setminus \{l\}}(\neg \delta_e(l')) ) \]
+\[mux_s(s_i,L) = s(i) \wedge \bigvee_{l \in L}(\delta_s(l) \wedge \bigwedge_{l' \in L \setminus \{l\}}(\neg \delta_s(l')) ) \]
+Then we can build the transition relations $\gsRhoE$ and $\gsRhoS$ from $\Delta_A$ as follows:
+
+\[ \gsRhoE = \bigwedge_{s_i \in S_A} \bigcirc(mux_e(s_i,\cup_{(s_i,l,s_j)}l))\]
+\[ \gsRhoS = (\bigwedge_{s_i \in S_A} \bigcirc(mux_s(s_i,\cup_{(s_i,l,s_j)}l)) \wedge (\bigwedge_{(s_k,l',s_l) \in \Delta_A} (s(k) \wedge \delta_s(l') \implies \bigcirc(s(l))\]
+
+Now we have the following, mapping:
+
+\[\xymatrix@C+1pc{
+	\langle E = \langle S, \Sigma, \Delta, s_0 \rangle, \mathcal{C} \rangle \ar@{<->}[d]^{clts}_{gs}
+	& \varphi_{CLTS}\ar@{<->}[d]^{fl}_{val}
+	& C\ar@{<->}[d]^{clts}_{gs}
+	& \exists C: E\parallel C \models  \varphi_{CLTS}\ar@{<=>}[d]\\
+	G = \langle \mathcal{X},\mathcal{Y},\theta_e,\theta_s,\rho_e,\rho_s, \emptyset \rangle
+	& \varphi_{FDS}
+	& D
+	&\exists D: D \models \varphi_G\\
+}\]
+
+Where the strict realizability formula is:
+
+\[\varphi_G = (\theta_e \implies \theta_s) \wedge (\theta_e \implies \square((\boxdot \rho_e) \implies \rho_s)) \wedge (\theta_e \wedge \rho_e \implies \varphi_{FDS}) \]
+
+And we can prove:
+
+\[E\parallel C \models  \varphi \iff gs(C) \models (\theta_e \implies \theta_s) \wedge (\theta_e \implies \square((\boxdot \rho_e) \implies \rho_s)) \wedge (\theta_e \wedge \rho_e \implies val(\varphi))
+ \]
+\[clts(G) \parallel clts(D) \models  fl(\varphi) \iff D \models \varphi \]
