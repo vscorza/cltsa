@@ -1,0 +1,22 @@
+In the scope of this work asynchronous composition will mainly be applied over CLTS instances whose transitions contain only one action per label. Asynchronous semantics follow the same rules as in the LTS case.
+
+
+\begin{definition} 
+	\label{def:asynchronous_composition}(\emph{Asynchronous Composition}) Let \automaton{M},\automaton{N}, with $\Delta_M : S_M \times \mathcal{P}(\Sigma_M) \times S_M$, be two CLTS instances, then CLTS asynchronous parallel composition is defined as \ltsComposition{M}{N}{a} where $\Delta$ is the smallest relation s.t:
+	\begin{center}
+		\begin{equation}
+		\AxiomC{$(s, l_M, s') \in \Sigma_M,(t, l_N, t') \in \Sigma_N  $}\RightLabel{$l_M \cap \Sigma_N = l_N \cap \Sigma_M \neq \emptyset$}
+		\UnaryInfC{$((s,t),l_M \cup l_N,(s',t')) \in \Delta$}
+		\DisplayProof
+		\end{equation}	
+		\begin{equation}
+		\AxiomC{$(s, l_M, s') \in \Sigma_M $}\RightLabel{$l_M \cap \Sigma_N = \emptyset$}
+		\UnaryInfC{$((s,t),l_M,(s',t))$}
+		\DisplayProof
+		\quad\quad
+		\AxiomC{$(t, l_N, t') \in \Sigma_N $}\RightLabel{$l_N \cap \Sigma_M = \emptyset$}
+		\UnaryInfC{$((s,t),l_N,(s,t'))$}
+		\DisplayProof
+		\end{equation}
+	\end{center}
+\end{definition}

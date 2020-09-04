@@ -1,7 +1,7 @@
 In this section we present the background to define the notion of control problem in the CLTS domain.  In the context of this work specifications come from the digital design domain, where the environmental signals are set first and the system signals are set afterwards, making states either controllable or non controllable, and because of this every transition's elements are all within $\mathcal{C}$ or all within $\mathcal{U}$. 
 
 \begin{definition}\label{def:bi-partite_clts} \emph{(Bi-partite w.r.t. $\mathcal{C}$)} 
-A CLTS instance $E=\langle S_e, \Sigma_e, \Delta_e, s_{e_0} \rangle$ is considered to be bi-partite with respect to a set of controllable actions $\mathcal{C} \subseteq \Sigma$ if and only if each transition is fully (non) controllable:
+A CLTS instance $E=\langle S_e, \Sigma_e, \Delta_e, s_{e_0} \rangle$ is considered to be bi-partite with respect to a set of controllable actions $\mathcal{C} \subseteq \Sigma$ if and only if each transition is either fully controllable or fully non controllable:
 \[ l_{\mathcal{C}}((s,l,s')): ( \forall l_i \in l:(l_i \in \mathcal{C}))\]
 \[ l_{\mathcal{U}}((s,l,s')): ( \forall l_i \in l:(l_i \not\in \mathcal{C}))\]
 \[ \forall (s,l,s') \in \Delta_e: l_{\mathcal{C}}((s,l,s')) \vee l_{\mathcal{U}}((s,l,s')) \]

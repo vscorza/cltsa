@@ -22,27 +22,75 @@ Para los estados proyectados pedimos que la relación de transición permita rec
 Queremos ver si se cumple la siguiente propiedad:
 \[\exists lts: CLTS \rightarrow LTS | \forall A,B:CLTS, lts(A) \parallel lts(B) = lts(A \parallel_s B)\]
 Para esto vamos a usar tres CLTSs de referencia:
-\[M_1 = \langle \lbrace 1,2 \rbrace, \lbrace a,b,c \rbrace, \lbrace\langle 1, \lbrace a,b \rbrace, 2 \rangle\rbrace, 1 \rangle\]
+\[M_x = \langle \lbrace 1,2 \rbrace, \lbrace a,b,c,x \rbrace, \lbrace\langle 1, \lbrace b,x \rbrace, 2 \rangle\rbrace, 1 \rangle\]
 \[M_2 = \langle \lbrace 1,2 \rbrace, \lbrace b,c \rbrace, \lbrace \langle 1, \lbrace b,c \rbrace, 2 \rangle\rbrace, 1 \rangle\]
 \[M_3 = \langle \lbrace 1,2 \rbrace, \lbrace a,b \rbrace, \lbrace \langle 1, \lbrace a,b \rbrace, 2 \rangle\rbrace, 1 \rangle\]
+\begin{figure}[bt]
+	\centering
+\minipage{0.32\textwidth}%
+\centering
+\begin{VCPicture}{(-1.5,-1)(1.5,1)}
+	\SetStateLabelScale{.8}
+	\SetEdgeLabelScale{1}
+	\State[1]{(-1,-0.3)}{1}
+	\State[2]{(1,-0.3)}{2}
+	\Initial[w]{1}
+	\ArcL{1}{2}{<b,x>}        
+\end{VCPicture}
+\caption{$M_x$}
+\label{fig:m_x}
+\endminipage\hfill
+\minipage{0.32\textwidth}%
+\centering
+\begin{VCPicture}{(-1.5,-1)(1.5,1)}
+	\SetStateLabelScale{.8}
+	\SetEdgeLabelScale{1}
+	\State[1]{(-1,-0.3)}{1}
+	\State[2]{(1,-0.3)}{2}
+	\Initial[w]{1}
+	\ArcL{1}{2}{<b,c>}        
+\end{VCPicture}
+\caption{$M_2$}
+\label{fig:m_x}
+\endminipage\hfill
+\minipage{0.32\textwidth}%
+\centering
+\begin{VCPicture}{(-1.5,-1)(1.5,1)}
+	\SetStateLabelScale{.8}
+	\SetEdgeLabelScale{1}
+	\State[1]{(-1,-0.3)}{1}
+	\State[2]{(1,-0.3)}{2}
+	\Initial[w]{1}
+	\ArcL{1}{2}{<a,b>}        
+\end{VCPicture}
+\caption{$M_3$}
+\label{fig:m_x}
+\endminipage\hfill
+\end{figure}
 
 Aplicando la traducción sobre $M_1$ podemos decir que:
-\[M'_1 = lts(M_1) \implies ( 1 \xRightarrow[]{l'} 2 \in \Delta_{M'_1} \wedge |l'\downarrow_{\lbrace a,b,c\rbrace}|= |\lbrace a, b \rbrace | )\]
+\[M'_x = lts(M_x) \implies ( 1 \xRightarrow[]{l'} 2 \in \Delta_{M'_x} \wedge |l'\downarrow_{\lbrace a,b,x\rbrace}|= |\lbrace b,x \rbrace | )\]
 Si este es el caso vale alguna de las dos opciones siguientes:
-\[1 \xRightarrow[]{l'} 2: 1 \xRightarrow[]{p}\xrightarrow{a}\xRightarrow[]{p'}\xrightarrow{b}\xRightarrow[]{p''}2\]
-\[1 \xRightarrow[]{l'} 2: 1 \xRightarrow[]{r}\xrightarrow{b}\xRightarrow[]{r'}\xrightarrow{a}\xRightarrow[]{r''}2\]
+\[1 \xRightarrow[]{l'} 2: 1 \xRightarrow[]{p}\xrightarrow{b}\xRightarrow[]{p'}\xrightarrow{x}\xRightarrow[]{p''}2\]
+\[1 \xRightarrow[]{l'} 2: 1 \xRightarrow[]{r}\xrightarrow{x}\xRightarrow[]{r'}\xrightarrow{b}\xRightarrow[]{r''}2\]
 Y para $M_2$:
 \[M'_2 = lts(M_2) \implies ( 1 \xRightarrow[]{l''} 2 \in \Delta_{M'_2} \wedge |l''\downarrow_{\lbrace b,c\rbrace}|= |\lbrace b,c \rbrace | )\]
 Si este es el caso vale alguna de las dos opciones siguientes:
 \[1 \xRightarrow[]{l''} 2: 1 \xRightarrow[]{u}\xrightarrow{b}\xRightarrow[]{u'}\xrightarrow{c}\xRightarrow[]{u''}2\]
 \[1 \xRightarrow[]{l''} 2: 1 \xRightarrow[]{v}\xrightarrow{c}\xRightarrow[]{v'}\xrightarrow{b}\xRightarrow[]{v''}2\]
-Pero recordando que $M_{\parallel}=M_1 \parallel_s M_2=\langle \lbrace 1 \rbrace, \lbrace a,b,c \rbrace, \emptyset, 1 \rangle$ bloquea, los pares de prefijos entre $p,r$ y $u,v$ debería bloquear, con lo cual, por ej. debería valer $p_1 \in \Sigma_{M'_2}$, $u_1 \in \Sigma_{M'_1}$ y $p_1 \neq u_1$.
+Pero recordando que $M_{\parallel}=M_x \parallel_s M_2=\langle \lbrace 1 \rbrace, \lbrace a,b,x \rbrace, \emptyset, 1 \rangle$ bloquea, los pares de prefijos entre $p,r$ y $u,v$ debería bloquear, con lo cual, por ej. debería valer $p_1 \in \Sigma_{M'_2}$, $u_1 \in \Sigma_{M'_x}$ y $p_1 \neq u_1$. Ahora, para un:
+\[M_y = \langle \lbrace 1,2 \rbrace, \lbrace a,b,c,y \rbrace, \lbrace\langle 1, \lbrace b,y \rbrace, 2 \rangle\rbrace, 1 \rangle\]
+En el que reemplazamos $x$ por $y$ valiendo $x \neq y$, podemos reproducir el razonamiento sobre:
+\[1 \xRightarrow[]{l'''} 2: 1 \xRightarrow[]{w}\xrightarrow{b}\xRightarrow[]{w'}\xrightarrow{y}\xRightarrow[]{w''}2\]
+Y notar que no puede valer $p_1 = w_1$, porque si así fuera la composición $lts(M_x) || lts(M_y)$ introduciría deadlock al permitir $1 \xrightarrow{p_1} 2$. De aquí se desprende que no hay forma de producir un alfabeto finito que permita evitar deadlocks frente a la composición con un autómata de alfabeto arbitrario.
 
-\textbf{Suponiendo que la extensión del alfabeto se consigue por combinación de elementos de $\Sigma$} (por ej. concatenación, que si así no fuese no hay cota de finitud para la extensión, porque cualquier autómata que tenga el mismo alfabeto más un elemento $x$ y está compuesto por una única transición $1 \xrightarrow{x} 2$ tendría que bloquear siempre, entonces un elemento particular debería ser agregado para $x$), tendríamos la siguiente situación:
+Y si queremos preservar alfabeto finito tendríamos también la siguiente situación:
 
 \[lts(M_2 \parallel_s M_3) \neq lts(M_2)\parallel lts(M_3)\]
 
-Porque $lts(M_2)\parallel lts(M_3)$ no puede producir prefijo $abc$ por haber extendido su alfabeto a poteriori ($\Sigma = \lbrace a,b,c \rbrace$)
-pero la composición no bloquearía con:
+$lts(M_2)\parallel lts(M_3)$ no puede producir prefijo que bloquee el elemento $a,b,c$ por haber extendido su alfabeto a posteriori ($\Sigma = \lbrace a,b,c \rbrace$)
+y la composición no bloquearía con:
 
-\[M_1 = \langle \lbrace 1,2 \rbrace, \lbrace a,b,c \rbrace, \lbrace\langle 1, \lbrace c \rbrace, 2 \rangle\rbrace, 1 \rangle\]
+\[M_c = \langle \lbrace 1,2 \rbrace, \lbrace a,b,c \rbrace, \lbrace\langle 1, \lbrace c \rbrace, 2 \rangle\rbrace, 1 \rangle\]
+
+Un ejemplo que muestra que no la composición asíncrona no preserva las propiedades de la conjunción se puede construir con dos autómatas que representen las fórmulas $a \iff b$ y $a \neq x$ el primero sobre el alfabeto $\{a,b\}$ y el segundo sobre $\{a,x\}$. Esto indicaría que la composición asíncrona no es congruente con la conjunción si se preserva el alcance finito de los alfabetos.

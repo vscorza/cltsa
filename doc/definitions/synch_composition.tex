@@ -1,0 +1,11 @@
+
+\begin{definition} 
+	\label{def:synchronous_composition}(\emph{Synchronous Composition}) Let \automaton{M},\automaton{N}, with $\Delta_M : S_M \times \mathcal{P}(\Sigma_M) \times S_M$, be two CLTS instances, then CLTS synchronous parallel composition is defined as \ltsComposition{M}{N}{s} where $\Delta$ is the smallest relation s.t:
+	\begin{center}
+		\begin{equation}
+		\AxiomC{$(s, l_M, s') \in \Delta_M,(t, l_N, t') \in \Delta_N  $}\RightLabel{$l_M \cap \Sigma_N = l_N \cap \Sigma_M$}
+		\UnaryInfC{$((s,t),l_M \cup l_N,(s',t')) \in \Delta$}
+		\DisplayProof	
+		\end{equation}	
+	\end{center}
+\end{definition}
