@@ -1,7 +1,8 @@
-This is BibTeX, Version 0.99d (TeX Live 2019/Debian)
-Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+This is BibTeX, Version 0.99d (TeX Live 2017/Debian)
+Capacity: max_strings=100000, hash_size=100000, hash_prime=85009
 The top-level auxiliary file: behaviourminimization.aux
 The style file: IEEEtran.bst
+I found no \citation commands---while reading file behaviourminimization.aux
 Reallocated singl_function (elt_size=4) to 100 items from 50.
 Reallocated singl_function (elt_size=4) to 100 items from 50.
 Reallocated singl_function (elt_size=4) to 100 items from 50.
@@ -13,44 +14,45 @@ Database file #1: bibliography.bib
 -- See the "IEEEtran_bst_HOWTO.pdf" manual for usage information.
 
 Done.
-You've used 44 entries,
+You've used 0 entries,
             4087 wiz_defined-function locations,
-            1209 strings with 20503 characters,
-and the built_in function-call counts, 40594 in all, are:
-= -- 3317
-> -- 969
-< -- 353
-+ -- 513
-- -- 158
-* -- 2087
-:= -- 6113
-add.period$ -- 112
-call.type$ -- 44
-change.case$ -- 72
-chr.to.int$ -- 858
-cite$ -- 44
-duplicate$ -- 2739
-empty$ -- 3243
-format.name$ -- 207
-if$ -- 9443
+            821 strings with 7323 characters,
+and the built_in function-call counts, 104 in all, are:
+= -- 0
+> -- 0
+< -- 0
++ -- 0
+- -- 0
+* -- 19
+:= -- 27
+add.period$ -- 0
+call.type$ -- 0
+change.case$ -- 0
+chr.to.int$ -- 0
+cite$ -- 0
+duplicate$ -- 0
+empty$ -- 1
+format.name$ -- 0
+if$ -- 3
 int.to.chr$ -- 0
-int.to.str$ -- 44
-missing$ -- 490
-newline$ -- 223
-num.names$ -- 72
-pop$ -- 1097
+int.to.str$ -- 0
+missing$ -- 0
+newline$ -- 23
+num.names$ -- 0
+pop$ -- 0
 preamble$ -- 1
 purify$ -- 0
 quote$ -- 2
-skip$ -- 3085
+skip$ -- 1
 stack$ -- 0
-substring$ -- 2041
-swap$ -- 2335
-text.length$ -- 67
+substring$ -- 0
+swap$ -- 0
+text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 5
-type$ -- 44
+type$ -- 0
 warning$ -- 0
-while$ -- 205
-width$ -- 46
-write$ -- 565
+while$ -- 0
+width$ -- 0
+write$ -- 22
+(There was 1 error message)
