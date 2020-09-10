@@ -1,13 +1,31 @@
 TODO:
 =====
-- claim: tengo un clts que hace de planta, lo traduzco para conseguir theta y rho, tengo sintesis clts donde voy a encontrar otro clts que junto con la composicion sincronica clts, que si es legal en mis términos, que si me satisface la fórmula, si esto lo traduzco, es un fds que satisface realizabilidad de trad. de planta
 - clts
-	X el setting es lts con composicion, cómo el related work viene de signal based extendemos clts a lts
-	- había x tipos de specs de syntech y tomamos 1 al azar de cada
+	- fluent consistency over traces instead of games structures
+	- clts(G): S es 1+2**(|V|+1)
+	- s va de partes de V,x,V+X a S
+	- cambiar nombres a s
+	- s(x,y) para a s(x \wedge y)
+	- en lugar de bottom emptyset para proposiciones
+	- quitar los existe de las transiciones de los autómatas
+	- *(v, v U x) es *(v, v (x<-x'))
+	- prove translation clts <-> GS preserves satisfaction
+		- prove clts -> gs
+		- prove existence of controller -> existence of strategy		
+		- add existence of path form claim existence in gs -> clts
+		- prove existence of strategy -> existence of controller
+	- prove clts -> lts cannot preserve consistency with parallel composition
+	- review 
+		-event structures
+		-pom sets
 - counterstrategy
 	X run in spectra our running example
 	- ours is smaller
-
+- validation
+	- corrimos todo lo de konighoefer y escalamos hasta donde pudimos
+	- corrimos uno de cada tipo de maoz, traducido a mano
+		- comparar con jvts y decir que diagnosticamos
+		- escribir a maoz
 - ratsy examples
 	- translate and check
 		- variants
