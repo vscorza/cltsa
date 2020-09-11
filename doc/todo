@@ -1,14 +1,14 @@
 TODO:
 =====
 - clts
-	- fluent consistency over traces instead of games structures
-	- clts(G): S es 1+2**(|V|+1)
-	- s va de partes de V,x,V+X a S
-	- cambiar nombres a s
-	- s(x,y) para a s(x \wedge y)
-	- en lugar de bottom emptyset para proposiciones
-	- quitar los existe de las transiciones de los autómatas
-	- *(v, v U x) es *(v, v (x<-x'))
+	X fluent consistency over traces instead of games structures
+	X clts(G): S es 1+2**(|V|+1)
+	X s va de partes de V,x,V+X a S
+	X cambiar nombres a s
+	X s(x,y) para a s(x \wedge y)
+	X en lugar de bottom emptyset para proposiciones
+	X quitar los existe de las transiciones de los autómatas
+	X *(v, v U x) es *(v, v (x<-x'))
 	- prove translation clts <-> GS preserves satisfaction
 		- prove clts -> gs
 		- prove existence of controller -> existence of strategy		
