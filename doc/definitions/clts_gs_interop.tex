@@ -97,11 +97,7 @@ Given a reactive system problem expressed as a game structure:
 We want to show that an equi-realizable CLTS control problem $\mathcal{I}$  exists, starting with the strict realizability formula:
 \[\varphi_G = (\theta_e \implies \theta_s) \wedge (\theta_e \implies \square((\boxdot \rho_e) \implies \rho_s)) \wedge (\theta_e \wedge \rho_e \implies \varphi_{FDS}) \]
 and since the system wins $G$ iff there is a fairness-free FDS $\mathcal{D}$ (complete w.r.t. $\mathcal{X}$) s.t. $\mathcal{D} \models \varphi_G$ we can introduce the following translations:
-\[E = clts(\varphi_G)\]
-\[\mathcal{F} = fluents(\varphi_G)\]
-\[\mathcal{C} = \sigma(\mathcal{Y})\]
-\[C= ctrl(\mathcal{D},\varphi_G)\] 
-\[\varphi_{CLTS} = fl(\varphi)\]
+\[E = clts(\varphi_G),\mathcal{F} = fluents(\varphi_G),\mathcal{C} = \sigma(\mathcal{Y}),C= ctrl(\mathcal{D},\varphi_G),\varphi_{CLTS} = fl(\varphi)\]
 in order to prove that $\mathcal{I} = \langle E, \mathcal{C}, \mathcal{F}, \varphi_{CLTS} \rangle$ is an equi-realizable control problem w.r.t. $G$, i.e.: 
 \[\mathcal{D}\models \varphi_G \iff E \parallel C \models \varphi_{CLTS}\]
 Where $C$ is a legal CLTS w.r.t. $E$ and $\mathcal{C}$.
