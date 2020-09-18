@@ -1,6 +1,11 @@
 TODO:
 =====
-- clts
+- meeting today
+	- write proper problem formulation
+	- we want a translation from:
+		- phi_g to E and phi_clts
+		- D to C
+- clts <-> gs
 	X fluent consistency over traces instead of games structures
 	X clts(G): S es 1+2**(|V|+1)
 	X s va de partes de V,x,V+X a S
@@ -11,9 +16,11 @@ TODO:
 	X *(v, v U x) es *(v, v (x<-x'))
 	- prove translation clts <-> GS preserves satisfaction
 		- prove clts -> gs
-		- prove existence of controller -> existence of strategy		
-		- add existence of path form claim existence in gs -> clts
-		- prove existence of strategy -> existence of controller
+	- write dfs <-> clts translation
+	- prove existence of controller -> existence of strategy		
+	- add existence of path form claim existence in gs -> clts
+	- prove existence of strategy -> existence of controller
+- clts w.r.t. ||*
 	- prove clts -> lts cannot preserve consistency with parallel composition
 	- review 
 		-event structures

@@ -1,0 +1,5 @@
+
+We can now introduce algorithm ~\ref{fig:gs_to_clts_algorithm}, that takes a game structure, represented as a set 
+$\gsTheE$, $\gsTheS$, $\gsRhoE$, $\gsRhoS$, $\varphi$ of OBDDs, one for each formula, and produces the CLTS automaton $A$ that preserves its behavior. Since the state space is finite ($2^{|\gsV|}$ at most) and the number of states reached by applying $\gsRhoS(\gsRhoE(v))$ increases monotonically (when starting from $\gsTheS(\gsTheE)$), a least fixed point exists, the algorithm computes such fixed point while progressively creating the transition relation $\Delta$. \texttt{valuations}($\psi$) gives the set of valuations over $\gsV$ for a formula $\psi$ represented with an OBDD. Each valuation induces a unique state in $A$. \texttt{restrict}($\psi$, $s$) fixes a subset of variables in $\psi$ according to $s$ a valuation. If $\varphi$ is the set of propositional formulas involved in the winning condition, \texttt{evaluate\_condition}($A$, $\varphi$, $s$) evaluates the satisfaction of each such formulas according to valuation $s$ and maps the result to $s$ as a state in $A$.
+\newpage
+\input{gs_to_clts_code}

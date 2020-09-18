@@ -1,0 +1,20 @@
+
+\begin{definition}
+	\label{def:mixed_env} \emph{(Mixed Environment Definition)} 
+	A mixed environment $D = \langle E, G \rangle$ is defined over both CTLS instances and game structures as follows,
+	let $E_1,\ldots,E_n$ be a set of CLTS automata and $G_1,\ldots,G_m$ a set of game structures,
+	then each component is defined as $G=\langle \mathcal{V}, \mathcal{X}, \cap_{i \in 1..m}\theta_{e_i}, \cap_{i \in 1..m}\theta_{s_i},$ $\cap_{i \in 1..m}\rho_{e_i},$ $\cap_{i \in 1..m}\rho_{s_i}\rangle$ and $E = \parallel_{*,i \in 1..n} E_i$, where $\parallel_*$ stands for either the asynchronous or synchronous composition semantic.
+	The composed behavior of $D$ is defined by the automaton $E \parallel_* clts(G)$, thus $\langle E, G \rangle \models \varphi$ means $(E \parallel_* clts(G)) \models \varphi$.
+\end{definition}
+
+
+\begin{definition}
+	\label{def:mixed_control_problem} \emph{(Mixed Control Problem)} 
+	Let $D= \langle E, G \rangle$ be a mixed environment, if $\mathcal{F}$ is a set of fluents over $\Sigma$ and $\varphi$ an LTL formula over $\mathcal{F}$, then $I = \langle E, G, \mathcal{F}, \varphi \rangle$ conforms a mixed control problem. If $I$ is consistent and a solution to $I$ exists, such a solution will be a CLTS $M$, legal w.r.t. $D$, such that, $D \parallel M \models \varphi$.
+\end{definition}
+
+\begin{definition}
+	\label{def:consistent_mixed_control_problem} \emph{(Consistent Mixed Control Problem)} 
+	Let $I = \langle E, G, \mathcal{F}, \varphi \rangle$ be a mixed control problem, $I$ is consistent if $\forall v \in \mathcal{V}: v\uparrow, v\downarrow \in \Sigma$, let
+	$\mathcal{Y} = \mathcal{V}\setminus \mathcal{X}$, $v \in \mathcal{Y}$ implies $v\uparrow, v\downarrow \in \mathcal{C}$, $\dot{v} = \lbrace v\uparrow, v\downarrow \rbrace \in \mathcal{F}$ and both $E$ and $clts(G)$ are consistent w.r.t. $\mathcal{F}$.
+\end{definition}
