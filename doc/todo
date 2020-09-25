@@ -1,10 +1,17 @@
 TODO:
 =====
-- meeting today
+- review
+	- Folk Theorems on the Correspondence betweenState-Based and Event-Based Systems
+	- Correspondence between Kripke Structures and Labeled TransitionSystems for Model Minimization
+- clts
 	- write proper problem formulation
 	- we want a translation from:
 		- phi_g to E and phi_clts
 		- D to C
+- add cites
+	- DFS cited from "Verification by Augmented Finitary Abstraction"
+	- Presented in "Algorithmic verification of linear temporal logic specifications"
+	- Taken from DTS "Temporal Verification of Reactive Systems: Safety"
 - clts <-> gs
 	X fluent consistency over traces instead of games structures
 	X clts(G): S es 1+2**(|V|+1)
