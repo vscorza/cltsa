@@ -11,7 +11,7 @@
 Donde $C$ es legal respecto a $\langle E,\mathcal{C} \rangle$ y $D$ predica sobre $\mathcal{V}$, valiendo $\mathcal{X} \cup \mathcal{Y} \subseteq \mathcal{V}$,$D$ es completo respecto de $X$ y
 \[\varphi_G = (\theta_e \implies \theta_s) \wedge (\theta_e \implies \square((\boxdot \rho_e) \implies \rho_s)) \wedge (\theta_e \wedge \rho_e \implies \varphi_{FDS}) \]
 De aquí que habría que encontrar $t$, $t^{-1}$,$f$,$f^{-1}$ y con eso mostrar la doble implicación de los problemas de síntesis.
-\newpage
+%\newpage
 
 La idea es que no podemos traducir CLTS a LTS sin meter deadlocks.
 Supongamos la existencia de una traducción $lts:CLTS \rightarrow LTS$ que debería cumplir con lo siguiente, si $A=\langle S, \Sigma, \Delta, s_0 \rangle$ es un CLTS y $A'=lts(A)=\langle S', \Sigma', \Delta', s'_0 \rangle$ es su traducción, querríamos que se cumpla que se pueden proyectar los estados del CLTS, que al menos contiene el alfbeto original y que hay caminos consistentes entre los estados proyectados:

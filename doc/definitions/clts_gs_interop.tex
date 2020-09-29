@@ -90,7 +90,7 @@ a\downarrow & \text{if } a \in L(s)
 Now if $\cdot(\varphi)$ is the translation from atomic propositions into fluents, and a set of fluents $\mathcal{F}$ exists containing, for each proposition $a$ a fluent $\langle a\uparrow, a\downarrow \rangle$, we say that, again observing only the atomic case where the formula consists of a single variable, $\varphi$ is satisfied in a path $\rho=s_0 s_1\ldots s_i$ over $K$ if $v_i$ appears in $L(s_i)$. In our case this also implies that $\cdot(\varphi)$ is satisfied in the path $\pi=\cdot(s_0)\cdot(s_1)\ldots \cdot(s_i)$ over $M$ since, from $v_i \in L(s_i)$ follows that at some point the proposition started appearing in states leading to $s_i$, suppose that $s_j$ was the first state were $v_i$ appeared and was kept until reaching $s_i$ ($\forall j \leq k \leq i: v_i \in L(s_k)$), then transition $(s_{j-1},s_j) \in R$ was translated as $(s_{j-1}, \delta(s_{j-1},s_j),s_j)$ and $v_i\uparrow \in \delta(s_{j-1},s_j)$ since its value changed from one state to the other. It follows from this observation, that if $M$ is the CLTS structure constructed from $K$ following the previous translation, then LTL satisfaction is preserved between structures.
 
 
-\newpage
+%\newpage
 \subsubsection{CLTS preserves realizability w.r.t. game structures}
 Given a reactive system problem expressed as a game structure:
 \[G = \langle \gsV, \gsX, \gsY, \gsTheE, \gsTheS, \gsRhoE, \gsRhoS, \varphi \rangle\]
@@ -101,7 +101,7 @@ and since the system wins $G$ iff there is a fairness-free FDS $\mathcal{D}$ (co
 in order to prove that $\mathcal{I} = \langle E, \mathcal{C}, \mathcal{F}, \varphi_{CLTS} \rangle$ is an equi-realizable control problem w.r.t. $G$, i.e.: 
 \[\mathcal{D}\models \varphi_G \iff E \parallel C \models \varphi_{CLTS}\]
 Where $C$ is a legal CLTS w.r.t. $E$ and $\mathcal{C}$.
-\newpage
+%\newpage
 \subsubsection{GS $\rightarrow$ CLTS}
 \input{gs_to_clts}
 
@@ -109,13 +109,13 @@ Where $C$ is a legal CLTS w.r.t. $E$ and $\mathcal{C}$.
 %\subsubsection{Mixed Environments}
 %\input{mixed_environ}
 
-\newpage
+%\newpage
 \subsubsection{CLTS $\rightarrow$ GS}
 \input{clts_to_gs}
 
 %\newpage
 %\subsubsection{GS $\rightarrow$ CLTS algorithm}
 %\input{gs_to_clts_algorithm}
-\newpage
+%\newpage
 %%%%% CLTS 2 GS
 
