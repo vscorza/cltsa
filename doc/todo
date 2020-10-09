@@ -1,14 +1,6 @@
 TODO:
 =====
-- review
-	- Action versus state based logics for transition systems
-	- Folk Theorems on the Correspondence betweenState-Based and Event-Based Systems
-	- Correspondence between Kripke Structures and Labeled TransitionSystems for Model Minimization
-- clts
-	- write proper problem formulation
-	- we want a translation from:
-		- phi_g to E and phi_clts
-		- D to C
+- meter una variable por estado del sistema, sacar la codificación 
 - add cites
 	- DFS cited from "Verification by Augmented Finitary Abstraction"
 	- Presented in "Algorithmic verification of linear temporal logic specifications"

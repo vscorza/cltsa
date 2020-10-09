@@ -104,7 +104,60 @@ Where $C$ is a legal CLTS w.r.t. $E$ and $\mathcal{C}$.
 %\newpage
 \subsubsection{GS $\rightarrow$ CLTS}
 \input{gs_to_clts}
+\newpage
+%\begin{theorem}(\emph{$clts$, $\sigma(\mathcal{Y})$ and $fl$ preserve realizability})\label{theorem:clts_preserves_realizability}\\
+%	Let $G =  \langle \gsV, \gsX, \gsY, \gsTheE, \gsTheS, \gsRhoE, \gsRhoS, \varphi \rangle$ be a game structure and $\varphi_{G}$ its strict realizability formula, then:
+%	\small
+%	\[(\exists D \text{ fairness-free, complete w.r.t. } \mathcal{X} \text{: } D \models \varphi_{G})\iff(\exists C \text{ legal w.r.t. } clts(G),\sigma(\mathcal{Y}) \text{: } C \parallel clts(G) \models fl(\varphi))  \]
+%	\normalsize
+%\end{theorem}
+%
+%\begin{theorem}(\emph{$gs$ preserves realizability})\label{theorem:gs_preserves_realizability}\\
+%	Let $I = \langle E, \mathcal{C}, \mathcal{F}, \varphi \rangle$ be a CLTS control problem with $E = \langle S_e,\Sigma,$ $\Delta_e,$ $s_{e_0}\rangle$ then:
+%	\small
+%	\[(\exists D \text{ fairness-free, complete w.r.t. } \mathcal{X} \text{: } D \models \varphi_{gs(\mathcal{I})}) \iff
+%	(\exists C \text{ legal w.r.t. } E,\mathcal{C} \text{: } C \parallel E \models \varphi)  \]
+%	\normalsize
+%\end{theorem}
 
+%With ad hoc translations
+%\begin{tcolorbox}
+%\begin{theorem}(\emph{$clts$, $\sigma(\mathcal{Y})$ and $fl$ preserve realizability})\label{theorem:clts_preserves_realizability}\\
+%	Let $\varphi$ be a LTL formula over variables $\mathcal{V} = \mathcal{X} \uplus \mathcal{Y}$ then:
+%	\footnotesize
+%	\[(\exists D \text{ fairness-free, complete w.r.t. } \mathcal{X} \text{: } D \models \varphi)\iff(\exists C \text{ legal w.r.t. } clts(\varphi),\sigma(\mathcal{Y}) \text{: } C \parallel clts(\varphi) \models fl(\varphi))  \]
+%	\normalsize
+%\end{theorem}
+%
+%\begin{theorem}(\emph{$ltl$,$\mathcal{x}$ preserves realizability})\label{theorem:gs_preserves_realizability}\\
+%	Let $I = \langle E, \mathcal{C}, \mathcal{F}, \varphi \rangle$ be a CLTS control problem with $E = \langle S_e,\Sigma,$ $\Delta_e,$ $s_{e_0}\rangle$, $\Sigma = \mathcal{C}\uplus \mathcal{U}$ then:
+%	\small
+%	\[(\exists D \text{ fairness-free, complete w.r.t. } \mathcal{x}(\mathcal{U}) \text{: } D \models ltl(\mathcal{I})) \iff
+%	(\exists C \text{ legal w.r.t. } E,\mathcal{C} \text{: } C \parallel E \models \varphi)  \]
+%	\normalsize
+%\end{theorem}
+%\end{tcolorbox}
+%
+%With existing translations
+%\begin{tcolorbox}
+%\begin{theorem}(\emph{$clts$, $\sigma(\mathcal{Y})$ and $fl$ preserve realizability})\label{theorem:clts_preserves_realizability}\\
+%	Let $\varphi$ be a LTL formula over variables $\mathcal{V} = \mathcal{X} \uplus \mathcal{Y}$ then:
+%	\footnotesize
+%	\[(\exists D \text{ fairness-free, complete w.r.t. } \mathcal{X} \text{: } D \models \varphi)\iff(\exists C \text{ legal w.r.t. } clts(\varphi),\sigma(\mathcal{Y}) \text{: } C \parallel clts(G_{\varphi}) \models fl(\varphi))  \]
+%	\normalsize
+%\end{theorem}
+%
+%\begin{theorem}(\emph{$gs$, $\mathcal{x}$ preserves realizability})\label{theorem:gs_preserves_realizability}\\
+%	Let $I = \langle E, \mathcal{C}, \mathcal{F}, \varphi \rangle$ be a CLTS control problem with $E = \langle S_e,\Sigma,$ $\Delta_e,$ $s_{e_0}\rangle$, $\Sigma = \mathcal{C}\uplus \mathcal{U}$ then:
+%	\small
+%	\[(\exists D \text{ fairness-free, complete w.r.t. } \mathcal{x}(\mathcal{U}) \text{: } D \models \varphi_{gs(\mathcal{I})} \iff
+%	(\exists C \text{ legal w.r.t. } E,\mathcal{C} \text{: } C \parallel E \models \varphi)  \]
+%	\normalsize
+%\end{theorem}
+%\end{tcolorbox}
+\input{clts_gs_realizability}
+
+\newpage
 %\newpage
 %\subsubsection{Mixed Environments}
 %\input{mixed_environ}
