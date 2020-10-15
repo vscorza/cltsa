@@ -1,25 +1,41 @@
 TODO:
 =====
-- meter una variable por estado del sistema, sacar la codificación 
+- prove iff realizables
+	- exists c then exists d
+		- we build D from C with fds(C) then for all plays p satisfying phi_g, either it does not satisfies the precedent or trace(p) satisfies phi, then p satisfies val(phi) proved by cases and the fact that trace(p) belongs to C
+			- define fds: CLTS -> FDS (complete w.r.t. x and fairness-free by construction)
+			- introduce val if needed
+			- define trace: play -> trace
+			- prove that if precedent is satisfied then trace(p) exists in C
+			- prove implication by ltl cases
+	- exists d then exists c
+		- we build C from D with clts(D) then for all traces it exists a play, the satisfcation in val(phi) implies satisfaction of phi by trace
+			- define clts: FDS -> CLTS
+				- removes vacuous traces
+					- prove if D exists then should have traces satisfying precedent, otherwise the env would win by violating pred.
+				- prove it is legal
+					- if it violates precedent then it will jump anywhere, if it does not and a value is picked for env. (free) rho_sys should hold, updating the next state
+				- pŕove it is deadlock-free
+					- by definition it will follow phi_g, which does not allow deadlocks
+			- define play: trace -> play
+			- prove implication by ltl cases			
 - add cites
 	- DFS cited from "Verification by Augmented Finitary Abstraction"
 	- Presented in "Algorithmic verification of linear temporal logic specifications"
 	- Taken from DTS "Temporal Verification of Reactive Systems: Safety"
 - clts <-> gs
-	X fluent consistency over traces instead of games structures
-	X clts(G): S es 1+2**(|V|+1)
-	X s va de partes de V,x,V+X a S
-	X cambiar nombres a s
-	X s(x,y) para a s(x \wedge y)
-	X en lugar de bottom emptyset para proposiciones
-	X quitar los existe de las transiciones de los autómatas
-	X *(v, v U x) es *(v, v (x<-x'))
 	- prove translation clts <-> GS preserves satisfaction
 		- prove clts -> gs
 	- write dfs <-> clts translation
 	- prove existence of controller -> existence of strategy		
 	- add existence of path form claim existence in gs -> clts
 	- prove existence of strategy -> existence of controller
+- pvs
+	- read and run http://www.fit.vutbr.cz/~matousp/doc/2001/mosis01.html
+	- write clts props
+	- read and run https://www.irif.fr/~haberm/ADVANCE/Year3/Papers/PA.ps
+	- write ltl props
+	- write simplest embedding
 - clts w.r.t. ||*
 	- prove clts -> lts cannot preserve consistency with parallel composition
 	- review 
@@ -33,33 +49,6 @@ TODO:
 	- corrimos uno de cada tipo de maoz, traducido a mano
 		- comparar con jvts y decir que diagnosticamos
 		- escribir a maoz
-- ratsy examples
-	- translate and check
-		- variants
-			X run variants for amba_1
-			- check variants on ratsy version to adjust scheduler
-				- woef_a
-					! $env_fairness .= "#Taken out to make the specification unrealizable:\n";
-					! $env_fairness .= "#G(F(hready=1));\n";
-				- wsf_a
-					+ print "#A fiarness guarantee to make the spec unrealizable\n";
-					+ print "G(F(stateG2_0=1));\n";
-				- wsf_b
-					! print "#A fiarness guarantee to make the spec unrealizable\n";
-					! print "G(F(hmaster0=1 + hbusreq0=1));\n";
-				- wst_a
-					+ $sys_transitions .= "#An additional transition guarantee to make the spec unrealizable:\n";
-					+ $sys_transitions .= "G((hburst0=0 <-> X(hburst0=1)) -> X(start=0));\n";
-				- wst_b
-					+ $sys_transitions .= "#An additional transition guarantee to make the spec unrealizable:\n";
-					+ $sys_transitions .= "G((hready=1) -> X(start=0));\n";
-		- create new test set
-		- test new amba set
-		- update scripts
-			- update new genbuf and amba from ratsy
-			- update new amba scheduler
-			- update spectra specs
-		- re run tests and generate output
 - picking criteria
 	- overall review last paper to the best of our knowledge, list of papers, try all, one of each, but clear
 		- define criteria
