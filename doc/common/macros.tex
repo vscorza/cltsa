@@ -5,11 +5,44 @@
 \newtheorem{definition}{Definition}[section]
 \newtheorem{corollary}[theorem]{Corollary}
 
+
+%acceptors
+\newcommand{\acceptors}{\mathbb{A}}
+\newcommand{\acceptingSet}{\mathbb{B}}
+\newcommand{\acceptingState}{acc}
+\newcommand{\acceptingSymbol}{x}
+\newcommand{\acceptingSymbols}{\mathcal{X}}
+\newcommand{\executionDef}{$\varepsilon=s_0, \act_0, s_1, \ldots$}
+\newcommand{\execution}{\varepsilon}
+
+%clts
+\newcommand{\cltsDefIdx}[1]{$#1 = (S_{#1},$$ \Sigma_{#1},$$ \Delta_{#1},$$ s_{0}^{#1},$$ \acceptors_{#1})$}
+\newcommand{\cltsDefShareSigmaIdx}[1]{$#1 = (S_{#1},$$ \Sigma,$$ \Delta_{#1},$$ s_{0}^{#1},$$ \acceptors_{#1})$}
+\newcommand{\cltsDef}[1]{$E = (S, \Sigma, \Delta, s_{0}, \acceptors)$}
 \newcommand{\automaton}[1]{$#1 = (S_{#1}, \Sigma_{#1}, \Delta_{#1}, s_{0}^{#1})$}
-\newcommand{\ltsComposition}[3]{$#1 \parallel_{#3} #2 = (S_{#1}\times S_{#2}, \Sigma_{#1} \cup \Sigma_{#2}, \Delta, (s_{0}^{#1},s_{0}^{#2}))$}
-\newcommand{\ltsAdjustment}[2]{$#1 \pm #2 = (S_{#1}\times S_{#2}, \Sigma_{#1} \cup \Sigma_{#2}, \Delta, (s_{0}^{#1},s_{0}^{#2}))$}
 \newcommand{\act}{A}
 \newcommand{\traces}{\emph{Tr} }
+
+%composition
+\newcommand{\cltsComposition}[3]{$#1 \parallel_{#3} #2 = (S_{#1}\times S_{#2}, \Sigma_{#1} \cup \Sigma_{#2}, \Delta, (s_{0}^{#1},s_{0}^{#2}),\acceptors)$}
+\newcommand{\ltsAdjustment}[2]{$#1 \pm #2 = (S_{#1}\times S_{#2}, \Sigma_{#1} \cup \Sigma_{#2}, \Delta, (s_{0}^{#1},s_{0}^{#2}))$}
+
+%control problem
+\newcommand{\controlSet}{\mathcal{C}}
+\newcommand{\nonControlSet}{\mathcal{U}}
+\newcommand{\controlProblemDef}{$\mathcal{I} = \langle E, \controlSet, \varphi \rangle$}
+\newcommand{\controlProblem}{\mathcal{I}}
+
+%GS
+\newcommand{\gsV}{{\mathcal{V}}}
+\newcommand{\gsX}{{\mathcal{X}}}
+\newcommand{\gsY}{{\mathcal{Y}}}
+\newcommand{\gsTheE}{{\theta_e}}
+\newcommand{\gsTheS}{{\theta_s}}
+\newcommand{\gsRhoE}{{\rho_e}}
+\newcommand{\gsRhoS}{{\rho_s}}
+
+%formulae
 \newcommand{\true}{\emph{true} }
 \newcommand{\false}{\emph{false} }
 \newcommand{\assume}{\phi}
@@ -24,22 +57,3 @@
 \newcommand{\F}{{\bf F}}
 \newcommand{\X}{{\bf X}}
 \newcommand{\U}{{\bf U}}
-
-\newcommand{\gsV}{{\mathcal{V}}}
-\newcommand{\gsX}{{\mathcal{X}}}
-\newcommand{\gsY}{{\mathcal{Y}}}
-\newcommand{\gsTheE}{{\theta_e}}
-\newcommand{\gsTheS}{{\theta_s}}
-\newcommand{\gsRhoE}{{\rho_e}}
-\newcommand{\gsRhoS}{{\rho_s}}
-
-\newcommand{\exception}{\epsilon}
-\newcommand{\extension}{\uparrow}
-\newcommand{\simulates}[2]{#1 \geq #2}
-\newcommand{\notsimulates}[2]{#1 \not\geq #2}
-\newcommand{\deterministic}[2]{\emph{det}( #1 , #2 )}
-\newcommand{\simState}[3]{\emph{simState}( #1 , #2 , #3 )}
-\newcommand{\initialState}[1]{\emph{init}( #1 )}
-\newcommand{\states}[1]{\emph{states}( #1 )}
-\newcommand{\executes}[1]{\triangleright #1 }
-

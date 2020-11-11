@@ -15,6 +15,8 @@ TODO:
 					- by definition it will follow phi_g, which does not allow deadlocks
 			- define play: trace -> play
 			- prove implication by ltl cases			
+	- prove translations between FLTL and AccLTL (E x F -> E' with new states and accepting sets)
+	- redefine composition with accepting states, disjoint accepting symbols are mapped to composed related states, overlapping accepting symbol x is mapped only to those states where all composed states satisfy x
 - add cites
 	- DFS cited from "Verification by Augmented Finitary Abstraction"
 	- Presented in "Algorithmic verification of linear temporal logic specifications"

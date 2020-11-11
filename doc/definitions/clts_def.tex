@@ -1,8 +1,8 @@
 \begin{definition}
 	\label{def:CLTS} \emph{(Concurrent Labelled Transition Systems)} 
-	A \emph{Concurrent Labelled Transition System} (CLTS) is $E =  (S, \Sigma, \Delta, s_0)$, where $S$ is a finite set of states, $\Sigma \subseteq Act$ is its {\em communicating alphabet}, $\Delta \subseteq (S \times \mathcal{P}(\Sigma) \times S)$ is a transition relation, and $s_0 \in S$ is the initial state.  We denote $\Delta(s)=\{\act~|~(s,\act,s') \in \Delta\}$. 
+	A \emph{Concurrent Labelled Transition System} (CLTS) is \cltsDef, where $S$ is a finite set of states, $\Sigma \subseteq Act$ is its {\em communicating alphabet}, $\Delta \subseteq (S \times 2^{|S|} \times S)$ is a transition relation, $s_0 \in S$ is the initial state, and $\acceptors \in \acceptingSymbols\mapsto 2^{|S|}$ is the set of sets of accepting states identified by a unique symbol in $\acceptingSymbols$.  We denote $\Delta(s)=\{\act~|~(s,\act,s') \in \Delta\}$ and $\acceptors(\acceptingSymbol)=\{\acceptingSet \in 2^{|S|}~|~\acceptingSymbol\mapsto\acceptingSet \in \acceptors\}$. 
 	An CLTS is deterministic if $(s,\act,s')$ and $(s,\act,s'')$ are in $\Delta$ implies $s'=s''$.
-	An execution of $E$ is a word $\varepsilon=s_0, \act_0, s_1, \ldots$ where $(s_i, \act_i, s_{i+1}) \in \Delta$. 
+	An execution of $E$ is a word \executionDef where $(s_i, \act_i, s_{i+1}) \in \Delta$. 
 	A word $\pi$ is a trace (induced by $\varepsilon$) of $E$ if its the result of removing every $s_i$ from an execution $\varepsilon$ of $E$. 
 	We denote the set of infinite traces of $E$ by $\traces(E)$. 
 \end{definition}
