@@ -1,43 +1,16 @@
 
-We introduce now a translation from CLTS to LTL based reactive systems specifications.
-The first thing that will be addressed for a control problem $\mathcal{I} = \langle E, \mathcal{C}, \mathcal{F}, \varphi \rangle$ is the relation between fluent valuations and states in any given CLTS model. Assume $E = \langle S_E, \Sigma_E, \Delta_E, s^E_0 \rangle$ is the automaton that represents the plant, and $\mathcal{F}=\{fl_1,\ldots,fl_k\}$ with $fl_i = \langle I_i, T_i, init_i \rangle$ the set of fluents associated with a control problem. We will construct a new plant that is compatible with the valuation of the fluents at each step of the execution. To do this we construct an equivalent automaton for each fluent, compose them with each other and with the original plant $E$. If the plant was already compatible with the set of fluents, then its structure will remain unchanged. By constructing this fluent compatible plant in this way we have a simple mechanism to define the set of states satisfying any given fluent.  For each fluent $fl_i$ the related automaton is constructed as follows:
-\[ FL_i = \langle S_{fl_i}, \Sigma_{fl_i}, \Delta_{fl_i}, s_{0_i}\rangle \]
-Where:
-\[S_{fl_i}= \{s^{\bot}_i, s^{\top}_i\} \]
-\[\Delta_{fl_i} \text{is the minimal relation s.t.}\]
-\[ \forall \alpha \in I_i: \{(s^{\bot}_i,\alpha,s^{\top}_i), (s^{\top}_i,\alpha,s^{\top}_i)\} \in \Delta_{fl_i} \]
-\[ \forall \beta \in T_i: \{(s^{\top}_i,\beta,s^{\bot}_i), (s^{\bot}_i,\beta,s^{\bot}_i)\} \in \Delta_{fl_i} \]
-\[
-s_{0_i} = \begin{cases}
-s^{\top}_i & init_i = \top \\
-s^{\bot}_i & otherwise
-\end{cases}
-\]
+We introduce now a translation from CLTS to LTL based reactive systems specifications. We will note $\Sigma \setminus \controlSet$ as $\nonControlSet$-
 
-The fluent compatible plant $E_G$ is the result of the synchronous parallel composition of the fluent automata with the original plant:
-\[E_G = (E \parallel_s FL_1 ||_s \ldots ||_s FL_k) \]
-And the function that determines which states satisfy which fluent is defined as:
-\[ fl(i) = \{s \in S_{E_G} : s_{(i + 1)} = s^{\top}_i \} \]
-Here $s_{(i+1)}$ stands for the state of the component $i+1$ of the parallel composition, with the original plant being the first one.
-Atomic satisfaction of LTL formula $fl_i$ at step $j$ of trace $\pi$ can be redefined as:
-\[ \pi_j \models fl_i \triangleq \pi_j \in fl(i) \]
-
-We can prove that, for the trace $\pi=\ell_0,\ell_1,\ldots$, previous definition of satisfaction of fluent $fl_j$ at position $i$ is equivalent to $\ell_i \in fl(j)$.
-From the definition:
-\begin{itemize}%{\leftmargin=3em}
-	\item $\emph{Init}_{\emph{Fl}} \wedge (\forall j \in \mathbb{N} \cdot 0 \leq j \leq i \rightarrow \nexists t \in T_{\fluent}: t \subseteq \ell_j)$
-	\item $\exists j \in \mathbb{N} \cdot (j \leq i \wedge \exists i \in I_{\fluent}: i \subseteq \ell_j) \wedge (\forall k \in \mathbb{N} \cdot j < k \leq i \ \rightarrow \nexists t \in T_{\fluent}: t \subseteq \ell_k)$
-\end{itemize} 
 
 In order to show the relation between a LTL based reactive system specification and a CLTS control problem we introduce a set of translations first and then present and prove a realizability preserving theorem.
 
 The liveness part of the CLTS control problem translation is performed by the $val$ function as follows.
 \begin{definition}
-	\label{def:val_ltl} \emph{(LTL over $\mathcal{F}$ to LTL over $\mathcal{V}$ translation)} 
-	Let $\varphi$ be a LTL formula over fluents $\mathcal{F}$, and $\mathcal{V}$ the minimal set of boolean variables containing $v_{fl_i}$ for each $f \in \mathcal{F}$, then $val(\varphi)$ is an equivalent LTL formula over boolean variables and is defined as follows:\\
+	\label{def:val_ltl} \emph{(LTL over set of accepting states to LTL over $\mathcal{V}$ translation)} 
+	Let $\varphi$ be a LTL formula over set of accepting states $\acceptors$, and $\mathcal{V}$ the minimal set of boolean variables containing a variable $v_{\acceptingSymbol}$ for each $\acceptingSymbol \in \acceptingSymbols(\acceptors)$ , then $val(\varphi)$ is an equivalent LTL formula over boolean variables and is defined as follows:\\
 	
 	\begin{tabular}{ l c l }
-		$val(fl_i)$ & $\triangleq$ & $v_{fl_i}$\\	
+		$val(\acceptingSymbol)$ & $\triangleq$ & $v_{\acceptingSymbol}$\\	
 		$val(\neg \varphi)$ & $\triangleq$ & $\neg val(\varphi)$\\
 		$val(\varphi \vee \psi$ & $\triangleq$ & $val(\varphi) \vee val(\psi)$\\
 		$val(\bigcirc \varphi)$ & $\triangleq$ & $\bigcirc val(\varphi)$\\
@@ -51,11 +24,11 @@ The liveness part of the CLTS control problem translation is performed by the $v
 %\end{definition}
 %
 %Let $A$ be the CLTS to be translated and $B =  \langle \gsX, \gsY, \gsTheE, \gsTheS, \gsRhoE, \gsRhoS, \varphi \rangle$ the game structure resulting after applying $gs(A)$. 
-In order to build the LTL formula equivalent of a given control problem, we present the decomposition of the plant $E_G$ as a set of initial and transition formulae.
+In order to build the LTL formula equivalent of a given control problem \controlProblemDef, we present the decomposition of the plant $E$ as a set of initial and transition formulae.
 The alphabet of the translation will be comprised of two sets:
-\[\gsX = \{x_i : a_i \in \Sigma_A \setminus \mathcal{C} \}\]
-\[\gsY = \{y_i : a_i \in \mathcal{C} \} \cup \{s_j : j \in 1..|S_A| \} \cup \{v_{fl_k} : fl_k \in \mathcal{F}\}\]
-In the previous sets, $x_i$ is a boolean variable representing the occurrence of an environmental action, $y_i$ is a boolean variable representing the occurrence of a system action, $s_j$ represents the fact that the plant is currently on state $j$ and $v_{fl_k}$ indicates that fluent $k$ holds on state $j$.
+\[\gsX = \{x_i : a_i \in \nonControlSet \}\]
+\[\gsY = \{y_i : a_i \in \controlSet \} \cup \{\varState{j} : s_j \in S_A \} \cup \{v_{\acceptingSymbol} : \acceptingSymbol \in \acceptingSymbols(\acceptors)\}\]
+In the previous sets, $x_i$ is a boolean variable representing the occurrence of an environmental action, $y_i$ is a boolean variable representing the occurrence of a system action, $\varState{j}$ represents the fact that the plant is currently on state $j$ and $v_{\acceptingSymbol}$ indicates that state $j$ satisfies condition $\acceptingSymbol$, these will be called acceptance variables.
 %From now on we will write $s(j)$ to represent the valuation of the system variables representing a given state $j$, i.e.: 
 %\[s(j) = \bigwedge\limits^{\lfloor log_2(|S_A|)\rfloor - 1}_{i=0}  s_{bit}(i,j)\]
 %\[
@@ -64,37 +37,44 @@ In the previous sets, $x_i$ is a boolean variable representing the occurrence of
 %\neg s_i & otherwise
 %\end{cases}
 %\]
-To represent the value of fluent $f$ at state $i$ we will use $f_{val}(f,i)$:
+To represent acceptance of $\acceptingSymbol$ at state $i$ we will use $v(\acceptingSymbol,i)$:
 \[
-f_{val}(f,i) = \begin{cases}
-v_{fl_i} & s_i \in fl(f) \\
-\neg v_{fl_i} & otherwise
+v(\acceptingSymbol,i) = \begin{cases}
+v_{\acceptingSymbol} & s_i \in \acceptors(\acceptingSymbol) \\
+\neg v_{\acceptingSymbol} & otherwise
 \end{cases}
 \]
-Remember that $fl(f)$ is the set of states in $S_G$ related to the true state $s^{\top}_i$ from fluent $fl_i$.
 
 The initial condition formula will be defined as:
-\[\gsTheE = \bigwedge_{i = 1}^{|\Sigma_A \setminus \mathcal{C}|}\neg x_i\]
-\[\gsTheS = (\bigwedge_{i = 1}^{|\mathcal{C}|}\neg y_i) \wedge s_0 \wedge (\bigwedge_{f = 1}^{|\mathcal{F}|}f_{val}(f,0))\]
+\[\gsTheE = \bigwedge_{i = 1}^{|\nonControlSet|}\neg x_i\]
+\[\gsTheS = (\bigwedge_{i = 1}^{|\mathcal{C}|}\neg y_i) \wedge \varState{0} \wedge (\bigwedge_{\acceptingSymbol \in \acceptingSymbols(\acceptors)}v(\acceptingSymbol,0))\]
 Transition relations are constructed as a conjunction of safety formulae that are added for each state. These can be split into two types, enabling and state updating formulae. The first type restrict the set of variables that can be set to $true$ in a mutually exclusive fashion at each state, representing the label of the transition picked from a given state. The second type defines the state reached for each combination of current state and enabled variables. 
 We will use the following two functions to build the conjunction of system or environment variables related to the label in any given automaton transition:
-\[\delta_e(l) = \{\bigwedge_{\sigma_i \in \Sigma \setminus \mathcal{C}}var(l, \sigma_i)\}\]
-\[\delta_s(l) = \{\bigwedge_{\sigma_i \in \Sigma}var(l, \sigma_i)\}\]
 \[
 var(l, \sigma_i) = \begin{cases}
 \sigma_i & \sigma_i \in l \\
 \neg \sigma_i & otherwise
 \end{cases}
 \]
+\[label_e(l) = \{\bigwedge_{\sigma_i \in \nonControlSet}var(l, \sigma_i)\}\]
+\[label_s(l) = \{\bigwedge_{\sigma_i \in \Sigma}var(l, \sigma_i)\}\]
 And the enabling formula, which is a mutually exclusive condition over label variables for any given state $s_i$ is described as:
-\[mux_e(s_i,L) = s_i \wedge \bigvee_{l \in L}(\delta_e(l) \wedge \bigwedge_{l' \in L \setminus \{l\}}(\neg \delta_e(l')) ) \]
-\[mux_s(s_i,L) = s_i \wedge \bigvee_{l \in L}(\delta_s(l) \wedge \bigwedge_{l' \in L \setminus \{l\}}(\neg \delta_s(l')) ) \]
+\[labels_e(L) = \bigvee_{l \in L}(label_e(l) \wedge \bigwedge_{l' \in L \setminus \{l\}}(\neg label_e(l')) ) \]
+\[labels_s(L) = \bigvee_{l \in L}(label_s(l) \wedge \bigwedge_{l' \in L \setminus \{l\}}(\neg label_s(l')) ) \]
+\[enable_e(\varState{i},L) = \varState{i} \implies labels_e(L) \]
+\[enable_s(\varState{i},L) = \varState{i} \implies labels_s(L) \]
 Then we can build the transition relations $\gsRhoE$ and $\gsRhoS$ from $\Delta_A$ as a conjunction of the enabling and transition formulae:
 
-\[ \gsRhoE = \bigwedge_{s_i \in S_A} \bigvee_{l \in (s_i,l,s_j)}\bigcirc(mux_e(s_i,l))\]
-\[ \gsRhoS = (\bigwedge_{s_i \in S_A} \bigvee_{l \in (s_i,l,s_j)}\bigcirc(mux_s(s_i,l)) \wedge (\bigwedge_{(s_k,l',s_l) \in \Delta_A} s(k) \wedge \delta_s(l') \implies \bigcirc(s(l) \wedge \bigwedge_{f = 1}^{|\mathcal{F}|}f_{val}(f,l) ) ) ) \]
 
-The first formula, $\gsRhoE$ restricts the set of environment label variables that can be enabled for any given state, $\gsRhoS$ does the same for system label variables but also defines next state valuation for both the state and fluent variables, the next state variables match the target state reached after selecting a particular set of system label variables, fluent variables are set according to the active fluents at that particular state. 
+\begin{tabular}{ l c l }
+	$\gsRhoE$ &$=$& $\bigwedge_{s_i \in S_A} \bigvee_{l \in (s_i,l,s_j)}\bigcirc(enable_e(\varState{i},l))$\\
+	$\rho_{enabling}$ &$=$&$(\bigwedge_{s_i \in S_A} \bigvee_{l \in (s_i,l,s_j)}\bigcirc(enable_s(\varState{i},l))$\\
+	$\rho_{\bigcirc S}$&$=$&$(\bigwedge_{(s_o,l',s_p) \in \Delta_A} \varState{o} \wedge \delta_s(l') \implies \bigcirc(\varState{p} \wedge\bigwedge_{s_q \neq s_p, s_q \in S}\neg \varState{q}) ) )$\\
+	$\rho_{\bigcirc \acceptingSymbol}$&$=$&$(\bigwedge_{(s_o,l',s_p) \in \Delta_A} \varState{o} \wedge \delta_s(l') \implies \bigcirc(\bigwedge_{\acceptingSymbol \in \acceptingSymbols(\acceptors)}v(\acceptingSymbol,l) ) ) )$\\	
+	$\gsRhoS$&$=$&$\rho_{enabling} \wedge  \rho_{\bigcirc S} \wedge  \rho_{\bigcirc \acceptingSymbol}$\\	
+\end{tabular}
+
+The first formula, $\gsRhoE$ restricts the set of environment label variables that can be enabled for any given state, $\rho_{enabling}$ does the same for system label variables, $\rho_{\bigcirc S}$ defines the next state according to the current one and the selected label, and $\rho_{\bigcirc \acceptingSymbol}$ updates the accepting conditions according to the next state, $\gsRhoS$ is the system transition formula, defined as a conjunction of the previous ones.
 %
 %Now we have the following mapping:
 %
@@ -109,18 +89,17 @@ The first formula, $\gsRhoE$ restricts the set of environment label variables th
 %	&\exists D: D \models \varphi_G\\
 %}\]
 
-The following conjunctions will be used from now on:
+%The following will be used to later define an FDS:
+%\[\theta = \theta_e \wedge \theta_s, \rho = \rho_e \wedge \rho_s \]
 
-\[\theta = \theta_e \wedge \theta_s, \rho = \rho_e \wedge \rho_s \]
+The LTL equivalent formula to control problem \controlProblemDef can be defined as:
 
-And the LTL equivalent formula to control problem $\mathcal{I} = \langle E, \mathcal{C}, \mathcal{F}, \varphi \rangle$ is:
+\[ \varphiLtl \]
 
-\[ \varphi_{LTL} = (\theta_e \implies \theta_s) \wedge (\theta_e \implies \square((\boxdot \rho_e) \implies \rho_s)) \wedge (\theta_e \wedge \rho_e \implies val(\varphi)) \]
-
-We can now introduce the realizability preserving theorem.
+Now we can show that realizability is preserved between CLTS control problem $\controlProblem$ and embedding $ltl(\controlProblem)$.
 
 \begin{theorem}(\emph{$ltl$ preserves realizability})\label{theorem:gs_preserves_realizability}\\
-	Let $I = \langle E, \mathcal{C}, \mathcal{F}, \varphi \rangle$ be a CLTS control problem with $E = \langle S_e,\Sigma,$ $\Delta_e,$ $s_{e_0}\rangle$, $\Sigma = \mathcal{C}\uplus \mathcal{U}$ then if $ltl(\mathcal{I}) = \langle \varphi_{ltl}, \gsX, \gsY\rangle$:
+	Let \controlProblemDef be a CLTS control problem with \cltsDef{E} and $\Sigma = \mathcal{C}\uplus \mathcal{U}$ then if $ltl(\controlProblem) = \langle \varphi_{ltl}, \gsX, \gsY\rangle$:
 	\small
 	\[(\exists D= \langle \mathcal{V}_d, \theta_d, \rho_d, \mathcal{J}_d, \mathcal{C}_d\rangle    \gsX, \gsY \in \mathcal{V}_d, \mathcal{D} \text{ is fairness-free, complete w.r.t. } \gsX \text{: } D \models \varphi_{ltl}\]
 	% \wedge \exists \sigma \in D: \sigma \models \theta_e \wedge \square \rho_e) \]
@@ -128,13 +107,12 @@ We can now introduce the realizability preserving theorem.
 	\normalsize
 \end{theorem}
 
-This theorem relates the realizability notion on both domains.
 %, with an additional condition for LTL based reactive systems ($\sigma \models \theta_d \wedge \square \rho_d$) ruling out the cases where $val(\varphi)$ is never satisfied, since $\varphi_{LTL}$ could be realized by achieving $\neg\theta \vee \diamond \neg \rho$. In such a case no controller can be built for $\mathcal{I}$ s.t. $\varphi$ is satisfied since it will violate the safety restrictions related to the behavior of the plant $E_G$.
 
-We prove this theorem in two steps, first we prove the right to left implication, i.e. if a controller exists for $\mathcal{I}$, a DFS exists for $\varphi_{LTL}$. Then we prove the other direction. For the ($\mathcal{I} \rightarrow \varphi_{LTL}$) step we construct a FDS from the controller $C$ through a specific embedding $fds(C)$ and then prove that each property hold. For the ($\varphi_{LTL} \rightarrow \mathcal{I}$) we construct a controller from the FDS $D$ through a specific embedding $ctrl(D)$ and then prove that each property hold. The outline of the proof is as follows:
+The proof is split in two parts, first we prove that if a controller exists for $\controlProblem$, a DFS exists for $\varphi_{LTL}$. Then we prove the opposite direction. For the ($\controlProblem \rightarrow \varphi_{LTL}$) step we construct a FDS from controller $C$ through a specific embedding $fds(C)$ and then prove that each property holds. For the ($\varphi_{LTL} \rightarrow \mathcal{I}$) we construct a controller from FDS $D$ through a specific embedding $ctrl(D)$ and then prove each property for this controller. The outline of the proof is as follows:
 
 \begin{description}
-	\item[($\mathcal{I} \rightarrow \varphi_{LTL}$)] Given $\mathcal{I} = \langle E, \mathcal{C}, \mathcal{F}, \varphi \rangle$ and $ltl(\mathcal{I}) = \langle \varphi_{ltl}, \gsX, \gsY\rangle$
+	\item[($\controlProblem \rightarrow \varphi_{LTL}$)] Given \controlProblemDef and $ltl(\controlProblem) = \langle \varphi_{ltl}, \gsX, \gsY\rangle$
 		\begin{itemize}
 			\item $fds(C)$ is a fairness-free FDS			
 			\item $fds(C)$ is complete w.r.t. $\mathcal{X}$
@@ -149,7 +127,7 @@ We prove this theorem in two steps, first we prove the right to left implication
 		\end{itemize}	
 \end{description}
 
-First,  for the $\mathcal{I} \rightarrow \varphi_{LTL}$ step, $fds$ constructs FDS $\langle \mathcal V_d, \theta_d, \rho_d, \mathcal{J}_d, \mathcal{C}_d \rangle$ from a control problem $\mathcal{I}$ and controller $C$ using the formulas defined for $\varphi_{LTL}$, but instead of using $E_G$ when building $\theta_e,\theta_s,\rho_e,\rho_s$ we will use $C$ and the elements of the FDS are as follows:
+First,  for the $\mathcal{I} \rightarrow \varphi_{LTL}$ step, $fds$ constructs FDS $\langle \mathcal V_d, \theta_d, \rho_d, \mathcal{J}_d, \mathcal{C}_d \rangle$ from a control problem $\controlProblem$ and controller $C$ using the formulas defined for $\varphi_{LTL}$, but instead of using $E$ when building $\theta_e,\theta_s,\rho_e,\rho_s$ we will use $C$ and the elements of the FDS are as follows:
 
 	\begin{tabular}{ l c l }
 	$V_d$ & $=$ & $\mathcal{X} \cup \mathcal{Y}$\\	
@@ -163,15 +141,16 @@ It is easy to see that $fds(C)$ is fairness-free by construction. This also hold
 
 \[\forall \sigma \in D: \sigma \models \varphi_{LTL} \]
 
-We split the proof in two, first we assume $\sigma \not\models \theta_e \wedge \square \rho_e$, i.e.: $\sigma \models \neg\theta_e \vee \Diamond \neg\rho_e$, in this case $\varphi_{LTL}$ is trivially satisfied. Now if $\sigma \models \theta_e \wedge \square \rho_e$ it should also satisfy $\theta_s$, $\square\rho_s$ and $val(\varphi)$. Since $\sigma$ is a play in $fds(C)$ then $\theta_d=(\theta_e \implies \theta_s)$ and $\rho_d=(\rho_e \implies \rho_s)$ hold, and since it also satisfies $\theta_e \wedge \square \rho_e$ we observe the following:
+We split the proof in two again, first assuming $\sigma \not\models \theta_e \wedge \square \rho_e$, i.e.: $\sigma \models \neg\theta_e \vee \Diamond \neg\rho_e$, in this case $\varphi_{LTL}$ is trivially satisfied. Now if $\sigma \models \theta_e \wedge \square \rho_e$ holds it should also satisfy $\theta_s$, $\square\rho_s$ and $val(\varphi)$. Since $\sigma$ is a play in $fds(C)$ then $\theta_d=(\theta_e \implies \theta_s)$ and $\rho_d=(\rho_e \implies \rho_s)$ hold, and since it also satisfies $\theta_e \wedge \square \rho_e$ we observe the following:
 \[((\theta_e \implies \theta_s) \wedge \theta_e))\implies \theta_s\]
 \[((\rho_e \implies \rho_s) \wedge \rho_e))\implies \rho_s\]
-To show that $\sigma$ also satisfies $val(\varphi)$ we first prove that there is a trace $\pi$ in $C$ that follows $\sigma$ by a sketch of the induction proof over $\sigma$. For a play $\sigma \in 2^{|\mathcal{V}|}$ we define $tr(\sigma) \in S^{\omega}$ as follows, suppose that $\sigma = \sigma_1 \sigma_2 \ldots \sigma_i \ldots$ and
-$tr(\sigma)= \pi_1 \pi_2 \ldots \pi_i \ldots$, then $\pi_i = j \iff \sigma_i \models s_j$. For each pair ($\sigma_i$,$\sigma_{i+1}$), since $\sigma \models \rho_e \wedge \rho_s$, remember that: 
-\[ \gsRhoE = \bigwedge_{s_i \in S_A} \bigvee_{l \in (s_i,l,s_j)}\bigcirc(mux_e(s_i,l))\]
-\[ \gsRhoS = (\bigwedge_{s_i \in S_A} \bigvee_{l \in (s_i,l,s_j)}\bigcirc(mux_s(s_i,l)) \wedge (\bigwedge_{(s_k,l',s_l) \in \Delta_A} s(k) \wedge \delta_s(l') \implies \bigcirc(s(l) \wedge \bigwedge_{f = 1}^{|\mathcal{F}|}f_{val}(f,l) ) ) ) \]
-Then $\sigma_i \models s_j$ implies that there exists a transition $(j, l, k)$ s.t.$\sigma_{i+1} \models s_k$ and $\sigma_{i+i} \models \delta_s(l) \wedge \bigwedge_{l' \in L \setminus \{l\}}(\neg \delta_s(l'))$, and in particular $\sigma_0 \models s_0$, from which follows that $\pi \in C$.
+To show that $\sigma$ also satisfies $val(\varphi)$ we prove that there is an execution $\execution$ in $C$ that follows $\sigma$.
+For a play $\sigma \in 2^{|\mathcal{V}|^{\omega}}$ we define $exec(\sigma) \in S^{\omega}$ as follows, suppose that $\sigma = \sigma_1 \sigma_2 \ldots \sigma_i \ldots$ and
+$exec(\sigma)= \execution_1 \execution_2 \ldots \execution_i \ldots$, then $\execution_i = s_j \iff \sigma_i \models \varState{j}$. For each pair ($\sigma_i$,$\sigma_{i+1}$), since $\sigma \models \rho_e \wedge \rho_s$, by restriction $\rho_s$
+We observe that $\sigma_i \models s_j$ implies that there exists a transition $(j, l, k)$ s.t.$\sigma_{i+1} \models s_k$ and $\sigma_{i+i} \models \delta_s(l) \wedge \bigwedge_{l' \in L \setminus \{l\}}(\neg \delta_s(l'))$, and in particular $\sigma_0 \models s_0$, from which follows that $\pi \in C$.
 Since for each play $\sigma$ that satisfies $\theta_e \wedge \square \rho_e$ we have a trace $\pi$ in controller $C$, and since $C \models \varphi$ we can show that $\sigma \models val(\varphi)$.
+
+
 This is proved over the syntactic construction of $\varphi$, we will only show the base case of atomic satisfaction, i.e.
 $\pi \models val(fl_i) \implies \sigma \models v_{fl_i}$. Again, looking at $\gsRhoS$, $\bigwedge_{f = 1}^{|\mathcal{F}|}f_{val}(f,l)$ after the next state operator updates valuation of fluent variables according to $val(fl_i)$ at state $i+1$, proving that $\pi \models val(fl_i) \implies \sigma \models v_{fl_i}$.
 

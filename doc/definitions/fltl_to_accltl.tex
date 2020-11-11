@@ -1,0 +1,28 @@
+The first thing that will be addressed for a control problem $\mathcal{I} = \langle E, \mathcal{C}, \mathcal{F}, \varphi \rangle$ is the relation between fluent valuations and states in any given CLTS model. Assume $E = \langle S_E, \Sigma_E, \Delta_E, s^E_0 \rangle$ is the automaton that represents the plant, and $\mathcal{F}=\{fl_1,\ldots,fl_k\}$ with $fl_i = \langle I_i, T_i, init_i \rangle$ the set of fluents associated with a control problem. We will construct a new plant that is compatible with the valuation of the fluents at each step of the execution. To do this we construct an equivalent automaton for each fluent, compose them with each other and with the original plant $E$. If the plant was already compatible with the set of fluents, then its structure will remain unchanged. By constructing this fluent compatible plant in this way we have a simple mechanism to define the set of states satisfying any given fluent.  For each fluent $fl_i$ the related automaton is constructed as follows:
+\[ FL_i = \langle S_{fl_i}, \Sigma_{fl_i}, \Delta_{fl_i}, s_{0_i}\rangle \]
+Where:
+\[S_{fl_i}= \{s^{\bot}_i, s^{\top}_i\} \]
+\[\Delta_{fl_i} \text{is the minimal relation s.t.}\]
+\[ \forall \alpha \in I_i: \{(s^{\bot}_i,\alpha,s^{\top}_i), (s^{\top}_i,\alpha,s^{\top}_i)\} \in \Delta_{fl_i} \]
+\[ \forall \beta \in T_i: \{(s^{\top}_i,\beta,s^{\bot}_i), (s^{\bot}_i,\beta,s^{\bot}_i)\} \in \Delta_{fl_i} \]
+\[
+s_{0_i} = \begin{cases}
+s^{\top}_i & init_i = \top \\
+s^{\bot}_i & otherwise
+\end{cases}
+\]
+
+The fluent compatible plant $E_G$ is the result of the synchronous parallel composition of the fluent automata with the original plant:
+\[E_G = (E \parallel_s FL_1 ||_s \ldots ||_s FL_k) \]
+And the function that determines which states satisfy which fluent is defined as:
+\[ fl(i) = \{s \in S_{E_G} : s_{(i + 1)} = s^{\top}_i \} \]
+Here $s_{(i+1)}$ stands for the state of the component $i+1$ of the parallel composition, with the original plant being the first one.
+Atomic satisfaction of LTL formula $fl_i$ at step $j$ of trace $\pi$ can be redefined as:
+\[ \pi_j \models fl_i \triangleq \pi_j \in fl(i) \]
+
+We can prove that, for the trace $\pi=\ell_0,\ell_1,\ldots$, previous definition of satisfaction of fluent $fl_j$ at position $i$ is equivalent to $\ell_i \in fl(j)$.
+From the definition:
+\begin{itemize}%{\leftmargin=3em}
+	\item $\emph{Init}_{\emph{Fl}} \wedge (\forall j \in \mathbb{N} \cdot 0 \leq j \leq i \rightarrow \nexists t \in T_{\fluent}: t \subseteq \ell_j)$
+	\item $\exists j \in \mathbb{N} \cdot (j \leq i \wedge \exists i \in I_{\fluent}: i \subseteq \ell_j) \wedge (\forall k \in \mathbb{N} \cdot j < k \leq i \ \rightarrow \nexists t \in T_{\fluent}: t \subseteq \ell_k)$
+\end{itemize} 

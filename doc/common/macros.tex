@@ -10,27 +10,27 @@
 \newcommand{\acceptors}{\mathbb{A}}
 \newcommand{\acceptingSet}{\mathbb{B}}
 \newcommand{\acceptingState}{acc}
-\newcommand{\acceptingSymbol}{x}
-\newcommand{\acceptingSymbols}{\mathcal{X}}
-\newcommand{\executionDef}{$\varepsilon=s_0, \act_0, s_1, \ldots$}
+\newcommand{\acceptingSymbol}{\alpha}
+\newcommand{\acceptingSymbols}{\beta}
+\newcommand{\executionDef}{$\varepsilon=s_0,$ $\act_0,$ $s_1,$ $\ldots$}
 \newcommand{\execution}{\varepsilon}
 
 %clts
-\newcommand{\cltsDefIdx}[1]{$#1 = (S_{#1},$$ \Sigma_{#1},$$ \Delta_{#1},$$ s_{0}^{#1},$$ \acceptors_{#1})$}
-\newcommand{\cltsDefShareSigmaIdx}[1]{$#1 = (S_{#1},$$ \Sigma,$$ \Delta_{#1},$$ s_{0}^{#1},$$ \acceptors_{#1})$}
-\newcommand{\cltsDef}[1]{$E = (S, \Sigma, \Delta, s_{0}, \acceptors)$}
+\newcommand{\cltsDefIdx}[1]{$#1 = (S_{#1},$$ \Sigma_{#1},$ $\Delta_{#1},$ $s_{0}^{#1},$ $\acceptors_{#1})$}
+\newcommand{\cltsDefShareSigmaIdx}[1]{$#1 = (S_{#1},$ $\Sigma,$ $\Delta_{#1},$ $s_{0}^{#1},$ $\acceptors_{#1})$}
+\newcommand{\cltsDef}[1]{$E = (S,$ $\Sigma,$ $\Delta,$ $s_{0},$ $\acceptors)$}
 \newcommand{\automaton}[1]{$#1 = (S_{#1}, \Sigma_{#1}, \Delta_{#1}, s_{0}^{#1})$}
 \newcommand{\act}{A}
 \newcommand{\traces}{\emph{Tr} }
 
 %composition
-\newcommand{\cltsComposition}[3]{$#1 \parallel_{#3} #2 = (S_{#1}\times S_{#2}, \Sigma_{#1} \cup \Sigma_{#2}, \Delta, (s_{0}^{#1},s_{0}^{#2}),\acceptors)$}
-\newcommand{\ltsAdjustment}[2]{$#1 \pm #2 = (S_{#1}\times S_{#2}, \Sigma_{#1} \cup \Sigma_{#2}, \Delta, (s_{0}^{#1},s_{0}^{#2}))$}
+\newcommand{\cltsComposition}[3]{$#1 \parallel_{#3} #2 = (S_{#1}\times S_{#2},$ $\Sigma_{#1} \cup \Sigma_{#2},$ $\Delta,$ $(s_{0}^{#1},s_{0}^{#2}),$ $\acceptors)$}
+\newcommand{\ltsAdjustment}[2]{$#1 \pm #2 = (S_{#1}\times S_{#2},$ $\Sigma_{#1} \cup \Sigma_{#2},$ $\Delta,$ $(s_{0}^{#1},$ $s_{0}^{#2}))$}
 
 %control problem
 \newcommand{\controlSet}{\mathcal{C}}
 \newcommand{\nonControlSet}{\mathcal{U}}
-\newcommand{\controlProblemDef}{$\mathcal{I} = \langle E, \controlSet, \varphi \rangle$}
+\newcommand{\controlProblemDef}{$\mathcal{I} =\langle E,$ $\controlSet,$ $\varphi \rangle$}
 \newcommand{\controlProblem}{\mathcal{I}}
 
 %GS
@@ -41,6 +41,13 @@
 \newcommand{\gsTheS}{{\theta_s}}
 \newcommand{\gsRhoE}{{\rho_e}}
 \newcommand{\gsRhoS}{{\rho_s}}
+
+%FDS
+\newcommand{\fdsDefIdx}[1]{$#1= \langle \mathcal{V}_{#1},$ $\theta_{#1},$ $\rho_{#1},$ $\mathcal{J}_{#1},$ $\mathcal{C}_{#1}\rangle$}
+%realizability theorems
+\newcommand{\varState}[1]{\hat{s}_{#1}}
+\newcommand{\varphiLtl}{\varphi_{LTL} = (\theta_e \implies \theta_s) \wedge (\theta_e \implies \square((\boxdot \rho_e) \implies \rho_s)) \wedge (\theta_e \wedge \rho_e \implies val(\varphi))}
+
 
 %formulae
 \newcommand{\true}{\emph{true} }

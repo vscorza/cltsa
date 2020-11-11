@@ -1,66 +1,26 @@
-\textcolor{blue}{In the present work} controller synthesis is applied to specifications where the environment behavior is defined by a set of CLTS instances and games structures. The properties to be satisfied by the specification fall into the GR(1) category and are expressed as LTL formulas.
+In the present work controller synthesis is applied to specifications where the environment behavior is defined by a set of CLTS instances and games structures. The properties to be satisfied by the specification fall into the GR(1) category and are expressed as LTL formulas.
 
 Since the goal $\varphi$ is restricted to GR(1) formulas we will follow what has been done with LTS based specifications in \cite{DBLP:phd/ethos/DIppolito13}. A translation between CLTS control problems and GR(1) games, and one from strategies into CLTS controller are presented, yielding a framework for CLTS GR(1) control problem synthesis. The GR(1) games used here and in in \cite{DBLP:phd/ethos/DIppolito13} are the same.
 
 \begin{definition}\label{def:gr1_clts_control_problem} \emph{(GR(1) CLTS control problem)} 
-	Let $I = \langle E, \mathcal{C}, \mathcal{F}, \varphi \rangle$ be a CLTS control problem, $I$ is a GR(1) CLTS control problem if $\varphi$ satisfies: 
+	Let \controlProblemDef be a CLTS control problem, $\controlProblem$ is a GR(1) CLTS control problem if $\varphi$ satisfies: 
 	\[\varphi = (\bigwedge_{i=1}^k\square \Diamond \gamma_i \implies \bigwedge_{j=1}^l\square \Diamond \psi_j)\]
-	In the previous definition $\gamma_1, \ldots , \gamma_k$, $\psi_1, \ldots , \psi_l$ are propositional LTL formulas over fluents that represent a set of assumptions over the environment and a set of guarantees the system should satisfy.
+	In the previous definition $\gamma_1, \ldots , \gamma_k$, $\psi_1, \ldots , \psi_l$ are propositional LTL formulas over accepting symbols that represent a set of assumptions over the environment and a set of guarantees the system should satisfy.
 \end{definition}
 
-\begin{definition}\label{def:clts_to_gr1_translation} \emph{(GR(1) CLTS control problem to GR(1) game translation)} 
-For $I = \langle E, \mathcal{C}, \mathcal{F}=\lbrace fl_1, \ldots, fl_{k+l} \rbrace, \varphi \rangle$ a GR(1) CLTS control problem $gr1(I)=G$ is a GR(1) game $G = \langle S_g,$ $\Gamma^-,$ $\Gamma^+,s_{g_0}\varphi \rangle$ where $S_g = S_e \times \mathbb{B}^{k+l}$ is the set of states and for a state $s_g=(s_e,\alpha_1,\ldots,\alpha_{k+l}) \in S_g$ a fluent
-$fl_i$ is said to be satisfied at $s_g$ if and only if $\alpha_i$ is true.
-$s_{g_0}=(s_0,Init_1,\ldots,Init_{k+l})$ is the initial state and for every $(s,l,s')\in \Delta_e$, $(s_g,(s'_e,\alpha'_1,\ldots,\alpha'_{k+l}))$ is added to $\Gamma^-$ if $l \in \mathcal{P}(\mathcal{U})$ or $\Gamma^+$ if $l \in \mathcal{P}(\mathcal{C})$, $\alpha'_i$ is set as follows:
-\[
-\alpha'_i = \begin{cases}
-\alpha_i & \text{if } l \notin I_{fl_i} \cup T_{fl_i} \\
-\top & \text{if } l \in I_{fl_i}\\
-\bot & \text{if } l \in T_{fl_i}
-\end{cases}
-\]
-\end{definition}
+%\begin{definition}\label{def:clts_to_gr1_translation} \emph{(GR(1) CLTS control problem to GR(1) game translation)} 
+%For $I = \langle E, \mathcal{C}, \mathcal{F}=\lbrace fl_1, \ldots, fl_{k+l} \rbrace, \varphi \rangle$ a GR(1) CLTS control problem $gr1(I)=G$ is a GR(1) game $G = \langle S_g,$ $\Gamma^-,$ $\Gamma^+,s_{g_0}\varphi \rangle$ where $S_g = S_e \times \mathbb{B}^{k+l}$ is the set of states and for a state $s_g=(s_e,\alpha_1,\ldots,\alpha_{k+l}) \in S_g$ a fluent
+%$fl_i$ is said to be satisfied at $s_g$ if and only if $\alpha_i$ is true.
+%$s_{g_0}=(s_0,Init_1,\ldots,Init_{k+l})$ is the initial state and for every $(s,l,s')\in \Delta_e$, $(s_g,(s'_e,\alpha'_1,\ldots,\alpha'_{k+l}))$ is added to $\Gamma^-$ if $l \in \mathcal{P}(\mathcal{U})$ or $\Gamma^+$ if $l \in \mathcal{P}(\mathcal{C})$, $\alpha'_i$ is set as follows:
+%\[
+%\alpha'_i = \begin{cases}
+%\alpha_i & \text{if } l \notin I_{fl_i} \cup T_{fl_i} \\
+%\top & \text{if } l \in I_{fl_i}\\
+%\bot & \text{if } l \in T_{fl_i}
+%\end{cases}
+%\]
+%\end{definition}
+%
+%If the game $G$ constructed when applying $gr1$ on $I$ is realizable, i.e. if there exists a winning strategy for the system that satisfies $\varphi$ over $G$, then such a strategy can be encoded as a pair of functions $\sigma
+%$ and $u$. Since $G$ is memory dependent the strategy is split into the function $\sigma$ that picks a successor for any given controllable and reachable state  and $u$ that updates the memory in order to keep track of the guarantee that needs to be satisfied next. 
 
-If the game $G$ constructed when applying $gr1$ on $I$ is realizable, i.e. if there exists a winning strategy for the system that satisfies $\varphi$ over $G$, then such a strategy can be encoded as a pair of functions $\sigma
-$ and $u$. Since $G$ is memory dependent the strategy is split into the function $\sigma$ that picks a successor for any given controllable and reachable state  and $u$ that updates the memory in order to keep track of the guarantee that needs to be satisfied next. 
-
-For a pair $(\sigma,u)$, a controller $M$ is constructed, in order to describe how $M$ is built we define when a transition that follows a winning strategy while preserving legality with respect to a an automaton $E$ is possible.
-
-\begin{definition}\label{def:strat_possible_transition} \emph{(Possible transition)} 
-	Let $I = \langle E, \mathcal{C}, \mathcal{F}, \varphi \rangle$ be a CLTS control problem and $G = \langle S_g, \Gamma^-,\Gamma^+,s_{g_0}\varphi \rangle$ be the result of $gr1(I)$, for $s_g=(s_e,\alpha_1,\ldots,\alpha_{k+l}) \in S_g$ and $s'_g=(s'_e,\alpha'_1,\ldots,\alpha'_{k+l}) \in S_g$, action $l \in \mathcal{P}(\Sigma_e)$ is said to be possible if the following condition si satisfied:
-	\[possible(s_g,l,s'_g):\forall (s_g,s'_g) \in \Gamma^- \cup \Gamma^+: \exists (s_e,l,s'_e) \in \Delta_e \implies \]
-	\[ \forall fl_i \in \mathcal{F}: ((l \cap (I_{fl_i} \cup T_{fl_i} = \emptyset)) \vee (I_{fl_i} \subseteq l \wedge \alpha'_i = \top)\vee (T_{fl_i} \subseteq l \wedge \alpha'_i = \bot))\]
-\end{definition}
-
-\begin{definition}\label{def:strat_to_clts_translation} \emph{(Winning strategy to CLTS controller translation)} 
-	Let $f=(\sigma,u)$ with $\sigma:\Omega \times S_g \rightarrow 2^{|S_g|}$ and
-	$u:\Omega \rightarrow \Omega$ be a winning strategy for $G = \langle S_g, \Gamma^-,\Gamma^+,s_{g_0}\varphi \rangle$, $clts(f)=M$ is a CLTS instance $M=\langle S_m, \Sigma_m, \Delta_m, s_{0_m}\rangle$ where $S_m \subseteq \Omega \times S_g$ is the set of states
-	and $\Delta_m \subseteq S_m \times \mathcal{P}(\Sigma_m) \times S_m$ is the minimal transition relation satisfying the following condition:
-	\[\forall s_g \in S_g: (\exists \omega \in \Omega, (s_g,\sigma(\omega,s_g)) \in (\Gamma^- \cup \Gamma^+), l \in \mathcal{P}(\Sigma_e) \wedge possible(s_g,l,\sigma(\omega,s_g)) \implies \] \[(((\omega,s_g),l,(u(\omega),\sigma(\omega,s_g)))\in \Delta_m) \]
-\end{definition}
-
-\begin{definition}\label{def:strat_completeness} \emph{(Strategy to controller translation completeness)} 
-	Let $I = \langle E, \mathcal{C}, \mathcal{F}, \varphi \rangle$ be a CLTS control problem and $G = \langle S_g, \Gamma^-,\Gamma^+,s_{g_0}\varphi \rangle$ the result of $gr1(I)$, if $M$ is a solution to $I$, then there exists a strategy $f=(\sigma, u)$ such that it is winning for $G$ and it also holds that $clts(f) = M$.
-\end{definition}
-
-\begin{proof}\label{def:strat_completeness_proof}
-	The existence of a winning strategy for $gr1(I)=G$ is proven by construction, the pair
-	$f=(\sigma, u)$ is built out of the solution $M$. Since the winning strategy is defined only on the
-	states of the first player, whose moves are captured by $\Gamma^{+}$, the candidate memory
-	function $u:\Omega \rightarrow \Omega$ will be $u_{\Delta_m}:S_m \rightarrow S_m$, defined 
-	as $u_{\Delta_m}(s)=\{ s'|(s,l,s')\in \Delta_m\}$. W.l.o.g. we can assume $u_{\Delta_m}(s)$ to be singleton since the controller $M$ will keep a single transition enabled in the controllable states. 
-	$M$ is also legal w.r.t. $E$ and $\mathcal{C}$, because of this
-	for every trace $\pi$ in $M$ there is an equivalent $play(\pi)$ over $G$ following the translation presented in definition \ref{def:strat_to_clts_translation}.	
-	If $\varphi$ is a GR(1) LTL formula over fluents and $M \parallel E \models \varphi$ then $\forall \pi \in S_m^{\omega}:(\pi \models \varphi)$. Assume that $play(\varphi)$ is the translation of a LTL formula over fluents into game states, in order to show that $play(\pi) \models play(\varphi)$ it suffices to show that atomic satisfaction is preserved, i.e.: 
-	\[\pi,i \models Fl_k \iff play(\pi),i \models \alpha_k \]
-	But this again is satisfied by the way $G$ is constructed, for every trace that leads to $\pi_i$ in $E \parallel M$, the play leads to $play(\pi)_i$ in $G$ and $\pi_i$ satifies $Fl_k$ if and only if $\alpha_k$ is set at $play(\pi)_i$.	
-\end{proof}
-
-\begin{definition}\label{def:strat_soundness} \emph{(Strategy to controller translation soundness)} 
-	Let $I = \langle E, \mathcal{C}, \mathcal{F}, \varphi \rangle$ be a CLTS control problem and $G = \langle S_g, \Gamma^-,\Gamma^+,s_{g_0}\varphi \rangle$ the result of $gr1(I)$, $\sigma$ and $u$ a transition and update functions respectively, if $f=(\sigma, u)$ defines a winning strategy for $G$ and $M$ is obtained by applying the translation from definition \ref{def:strat_to_clts_translation} over $f$, then $M$ is a solution for $I$.
-\end{definition}
-
-\begin{proof}\label{def:strat_soundness_proof}
-	Let $p=(s_{e_0},s_{m_0}),l_0,(s_{e_1},s_{m_1},\ldots)$ be a path on $E \parallel M$, the states in
-	$p$ are of the form $(s_{e_i},s_{m_i})$ with $s_{m_i}=(m_i,s_{e_j},\alpha_{1_i},\ldots,\alpha_{|k+l|_i})$ where $\alpha_{j_i}$ is the valuation of fluent $Fl_j$ at position $i$ in the path, thus $p_i \models Fl_j \iff \alpha_{j_i} = \top$, since $M$ was built following $f=(\sigma,u)$ a winning strategy for $G$, satisfaction of $\varphi$ in $G$ implies satisfaction of $fluent(\varphi)$ in $E \parallel M$.
-\end{proof}
