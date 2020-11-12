@@ -7,31 +7,32 @@
 
 
 %acceptors
-\newcommand{\acceptors}{\mathbb{A}}
-\newcommand{\acceptingSet}{\mathbb{B}}
-\newcommand{\acceptingState}{acc}
-\newcommand{\acceptingSymbol}{\alpha}
-\newcommand{\acceptingSymbols}{\beta}
-\newcommand{\executionDef}{$\varepsilon=s_0,$ $\act_0,$ $s_1,$ $\ldots$}
-\newcommand{\execution}{\varepsilon}
+\newcommand{\valuations}{{\mathbb{V}}}
+\newcommand{\propositions}{{\mathbb{P}}}
+\newcommand{\proposition}{{p}}
+%\newcommand{\acceptingState}{acc}
+%\newcommand{\acceptingSymbol}{\alpha}
+%\newcommand{\acceptingSymbols}{\beta}
+\newcommand{\executionDef}{{$\varepsilon=s_0,$ $\act_0,$ $s_1,$ $\ldots$}}
+\newcommand{\execution}{{\varepsilon}}
 
 %clts
-\newcommand{\cltsDefIdx}[1]{$#1 = (S_{#1},$$ \Sigma_{#1},$ $\Delta_{#1},$ $s_{0}^{#1},$ $\acceptors_{#1})$}
-\newcommand{\cltsDefShareSigmaIdx}[1]{$#1 = (S_{#1},$ $\Sigma,$ $\Delta_{#1},$ $s_{0}^{#1},$ $\acceptors_{#1})$}
-\newcommand{\cltsDef}[1]{$E = (S,$ $\Sigma,$ $\Delta,$ $s_{0},$ $\acceptors)$}
-\newcommand{\automaton}[1]{$#1 = (S_{#1}, \Sigma_{#1}, \Delta_{#1}, s_{0}^{#1})$}
+\newcommand{\cltsDefIdx}[1]{{$#1 = (S_{#1},$$ \Sigma_{#1},$ $\Delta_{#1},$ $s_{0}^{#1},$ $\valuations_{#1})$}}
+\newcommand{\cltsDefShareSigmaIdx}[1]{{$#1 = (S_{#1},$ $\Sigma,$ $\Delta_{#1},$ $s_{0}^{#1},$ $\valuations_{#1})$}}
+\newcommand{\cltsDef}[1]{{$E = (S,$ $\Sigma,$ $\Delta,$ $s_{0},$ $\valuations)$}}
+\newcommand{\automaton}[1]{{$#1 = (S_{#1}, \Sigma_{#1}, \Delta_{#1}, s_{0}^{#1})$}}
 \newcommand{\act}{A}
 \newcommand{\traces}{\emph{Tr} }
 
 %composition
-\newcommand{\cltsComposition}[3]{$#1 \parallel_{#3} #2 = (S_{#1}\times S_{#2},$ $\Sigma_{#1} \cup \Sigma_{#2},$ $\Delta,$ $(s_{0}^{#1},s_{0}^{#2}),$ $\acceptors)$}
-\newcommand{\ltsAdjustment}[2]{$#1 \pm #2 = (S_{#1}\times S_{#2},$ $\Sigma_{#1} \cup \Sigma_{#2},$ $\Delta,$ $(s_{0}^{#1},$ $s_{0}^{#2}))$}
+\newcommand{\cltsComposition}[3]{{$#1 \parallel_{#3} #2 = (S,$ $\Sigma_{#1} \cup \Sigma_{#2},$ $\Delta,$ $(s_{0}^{#1},s_{0}^{#2}),$ $\valuations)$}}
+\newcommand{\ltsAdjustment}[2]{{$#1 \pm #2 = (S_{#1}\times S_{#2},$ $\Sigma_{#1} \cup \Sigma_{#2},$ $\Delta,$ $(s_{0}^{#1},$ $s_{0}^{#2}))$}}
 
 %control problem
-\newcommand{\controlSet}{\mathcal{C}}
-\newcommand{\nonControlSet}{\mathcal{U}}
-\newcommand{\controlProblemDef}{$\mathcal{I} =\langle E,$ $\controlSet,$ $\varphi \rangle$}
-\newcommand{\controlProblem}{\mathcal{I}}
+\newcommand{\controlSet}{{\mathcal{C}}}
+\newcommand{\nonControlSet}{{\mathcal{U}}}
+\newcommand{\controlProblemDef}{{$\mathcal{I} =\langle E,$ $\controlSet,$ $\varphi \rangle$}}
+\newcommand{\controlProblem}{{\mathcal{I}}}
 
 %GS
 \newcommand{\gsV}{{\mathcal{V}}}

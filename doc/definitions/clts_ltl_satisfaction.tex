@@ -1,0 +1,23 @@
+
+%~\cite{DBLP:conf/sigsoft/GiannakopoulouM03}. 
+
+A LTL formula is defined inductively using the standard Boolean connectives and temporal operators $X$~(next), $U$ (strong until) as follows: 
+$\varphi ::= \proposition \mid \neg \varphi \mid \varphi \vee \psi \mid \X \varphi \mid \varphi U \psi,$
+where $\proposition$ is an atomic proposition from $\propositions$. 
+As usual we introduce $\wedge$, $\F$ (eventually), and $\G$ (always) as syntactic sugar. 
+Let $\epsilon$ be the set of infinite executions over $\Delta$.
+The execution \executionDef satisfies $\proposition$ at position $i$ (we are only considering states, not labels, when defining the position), denoted $\execution,i \models \proposition$, if and only if the state $s_j$ at position $i$ in $\execution$ (i.e. $\execution_i = s_j$)  satisfies $\proposition \in \valuations(s_i)$.
+
+
+Given an infinite execution $\execution$, the satisfaction of a formula $\varphi$ at position $i$, denoted $\execution,i\models\varphi$, is defined as follows:
+
+\begin{tabular}{ l c l }
+$\execution, i \models_d \proposition$ & $\triangleq$ & $\proposition \in \valuations(\execution_i)$\\
+$\execution, i \models_d \neg \varphi$ & $\triangleq$ & $\execution, i \not\models_d \varphi$\\
+$\execution, i \models_d \varphi \vee \psi$ & $\triangleq$ & $(\execution, i \models_d \varphi) \vee (\execution, i \models_d \psi)$\\
+$\execution, i \models_d \X \varphi$ & $\triangleq$ & $\execution, i +1 \models_d \varphi$\\
+$\execution, i \models_d \varphi \U \psi$ & $\triangleq$ & $\exists j \geq i . \execution,j \models_d \psi \wedge \forall i \leq k \le k. \execution, k \models_d \varphi$\\
+\end{tabular}
+  
+We say that $\varphi$ holds in $\execution$, denoted $\execution\models\varphi$, if $\execution,0\models\varphi$. 
+A formula $\varphi \in \mbox{LTL}$ holds in an CLTS $E$ (denoted $E \models \varphi$) if it holds on every infinite execution produced by $E$.

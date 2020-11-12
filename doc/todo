@@ -1,9 +1,7 @@
 TODO:
 =====
 - prove iff realizables
-	- cambiar A por estado a conj de proposiciones (cambiar a P)
 	- cambiar delta por labels en definición de rho
-	- contradicciones proposicionales en la composición no deben participar el estado
 	- exists c then exists d
 		- change satisfaction from fluents over traces to sets over paths
 		- review demo
