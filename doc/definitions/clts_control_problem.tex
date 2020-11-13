@@ -6,16 +6,16 @@ A CLTS instance \cltsDef, is considered to be bi-partite with respect to a set o
 \[ l_{\nonControlSet}((s,l,s')): ( \forall l_i \in l:(l_i \not\in \controlSet))\]
 \[ \forall (s,l,s') \in \Delta_e: l_{\mathcal{C}}((s,l,s')) \vee l_{\controlSet}((s,l,s')) \]
 And that the same criteria is satisfied by every state:
-\[ \forall s \in S_e : (\forall l, s' \text{ s.t. } (s,l,s') \in \Delta_e:l_{\controlSet}((s,l,s')))\vee (\forall l, s' \text{ s.t. } (s,l,s') \in \Delta_e:l_{\nonControlSet}((s,l,s')))\]
+\[ \forall s \in S : (\forall l, s' \text{ s.t. } (s,l,s') \in \Delta:l_{\controlSet}((s,l,s')))\vee (\forall l, s' \text{ s.t. } (s,l,s') \in \Delta:l_{\nonControlSet}((s,l,s')))\]
 \end{definition}
 
 \begin{definition}
 	\label{def:legal_clts} \emph{(Legality w.r.t. $E$ and $\controlSet$)} 
-	Given CLTS \cltsDefShareSigmaIdx{C} and \cltsDefShareSigmaIdx{E}, where $\Sigma$ is partitioned into actions controlled and monitored (non controllable) by $C$ ($\Sigma=\controlSet \; \uplus \;\nonControlSet$), we say that $C$ is a legal CLTS for $E$ if for all $(s_e,s_c) \in E \parallel_* C$ it holds that:
+	Given two bi-partite CLTS instances \cltsDefShareSigmaIdx{C} and \cltsDefShareSigmaIdx{E}, where $\Sigma$ is partitioned into actions controlled and monitored (non controllable) by $C$ ($\Sigma=\controlSet \; \uplus \;\nonControlSet$), we say that $C$ is a legal CLTS for $E$ if for all $(s_e,s_c) \in E \parallel_* C$ it holds that:
 	$\Delta_{E}(s_E)\cap 2^{|\controlSet|} \supseteq \Delta_{C}(s_C)\cap 2^{|\controlSet|}$ and also that  $\Delta_{E}(s_E)\cap 2^{|\nonControlSet|} \subseteq \Delta_{C}(s_C)\cap 2^{|\nonControlSet|}$.
 \end{definition}
 
 \begin{definition}
 	\label{def:clts_control_problem} \emph{(CLTS Control Problem)} 
-	Let \cltsDefShareSigmaIdx{E} be bi-partite w.r.t. $\controlSet \subseteq \Sigma$, then \controlProblemDef constitutes a CLTS control problem. If a solution to $\controlProblem$ exists, such a solution will be a CLTS $M$, legal w.r.t. $E$ and $\controlSet$, such that, $E \parallel_* M \models \varphi$.
+	Let \cltsDefShareSigmaIdx{E} be bi-partite w.r.t. $\controlSet \subseteq \Sigma$, then \controlProblemDef constitutes a CLTS control problem. If a solution to $\controlProblem$ exists, such a solution will be a CLTS $M$, deadlock-free, legal w.r.t. $E$ and $\controlSet$, such that, $E \parallel_* M \models \varphi$.
 \end{definition}

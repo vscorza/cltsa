@@ -2,19 +2,19 @@
 We introduce now a translation from CLTS to LTL based reactive systems specifications. We will note $\Sigma \setminus \controlSet$ as $\nonControlSet$. In order to show the relation between a LTL based reactive system specification and a CLTS control problem we first introduce a set of embeddings, then present and prove a realizability preserving theorem between the original control problem and its embedding into a reactive system specification.
 
 
-In order to embed the CLTS control problem $\controlProblem$ into a LTL reactive system specification, the LTL formula over atomic propositions is translated as follows.
-\begin{definition}
-	\label{def:val_ltl} \emph{(LTL over $\propositions$ to LTL over $\mathcal{V}$ translation)} 
-	Let $\varphi$ be a LTL formula over set of atomic propositions $\propositions$, and $\mathcal{V}$ the minimal set of boolean variables containing a variable $v_{\proposition}$ for each $\proposition \in \propositions$, then $val(\varphi)$ is an equivalent LTL formula over boolean variables and is defined as follows:\\
-	
-	\begin{tabular}{ l c l }
-		$val(\proposition)$ & $\triangleq$ & $v_{\proposition}$\\	
-		$val(\neg \varphi)$ & $\triangleq$ & $\neg val(\varphi)$\\
-		$val(\varphi \vee \psi$ & $\triangleq$ & $val(\varphi) \vee val(\psi)$\\
-		$val(\bigcirc \varphi)$ & $\triangleq$ & $\bigcirc val(\varphi)$\\
-		$val(\varphi \U \psi)$ & $\triangleq$ & $val(\varphi) \U val(\psi)$\\
-	\end{tabular}	
-\end{definition}
+In order to embed the CLTS control problem $\controlProblem$ into a LTL reactive system specification, the LTL formula over atomic propositions is translated simply by replacing each occurrence of an atomic proposition $\proposition \in \propositions$ with the boolean variable variable $v_{\proposition}$.
+%\begin{definition}
+%	\label{def:val_ltl} \emph{(LTL over $\propositions$ to LTL over $\mathcal{V}$ translation)} 
+%	Let $\varphi$ be a LTL formula over set of atomic propositions $\propositions$, and $\mathcal{V}$ the minimal set of boolean variables containing a variable $v_{\proposition}$ for each $\proposition \in \propositions$, then $val(\varphi)$ is an equivalent LTL formula over boolean variables and is defined as follows:\\
+%	
+%	\begin{tabular}{ l c l }
+%		$val(\proposition)$ & $\triangleq$ & $v_{\proposition}$\\	
+%		$val(\neg \varphi)$ & $\triangleq$ & $\neg val(\varphi)$\\
+%		$val(\varphi \vee \psi$ & $\triangleq$ & $val(\varphi) \vee val(\psi)$\\
+%		$val(\bigcirc \varphi)$ & $\triangleq$ & $\bigcirc val(\varphi)$\\
+%		$val(\varphi \U \psi)$ & $\triangleq$ & $val(\varphi) \U val(\psi)$\\
+%	\end{tabular}	
+%\end{definition}
 
 %\begin{definition}
 %	\label{def:clts_to_gs_translation} \emph{(CLTS to Game Structure translation)} 
@@ -45,7 +45,7 @@ v_{\proposition} & \proposition \in \valuations(s_i) \\
 
 The initial condition formula will be defined as:
 \[\gsTheE = \bigwedge_{i = 1}^{|\nonControlSet|}\neg x_i\]
-\[\gsTheS = (\bigwedge_{i = 1}^{|\mathcal{C}|}\neg y_i) \wedge \varState{0} \wedge (\bigwedge_{\proposition \in \propositions}v(\proposition,0))\]
+\[\gsTheS = (\bigwedge_{i = 1}^{|\mathcal{C}|}\neg y_i) \wedge (\varState{0} \wedge\bigwedge_{s_j \neq s_0, s_q \in S}\neg \varState{j}) \wedge (\bigwedge_{\proposition \in \propositions}v(\proposition,0))\]
 \[\theta = \gsTheE \wedge \gsTheS\]
 Transition relations are constructed as a conjunction of safety formulae that are defined for each state. These can be split into two types, enabling and updating formulae. The first type restrict the set of variables that can be set to $true$ in a mutually exclusive fashion at each state, representing the label of the transition picked from any given state. The second type defines the state reached for each combination of current state and enabled natural variables. 
 We will use the following two functions to build the conjunction of system or environment variables related to the label in any given automaton transition (note that here $l$ is a label composed of several actions or events):
@@ -64,10 +64,10 @@ Then we can build the transition relations $\gsRhoE$ and $\gsRhoS$ from $\Delta_
 
 \vspace{1em}
 \begin{tabular}{ l c l }
-	$\rho_{env.enabling}$ &$=$& $\bigwedge_{s_i \in S_A} \bigcirc(\varState{i} \implies \bigvee_{(s_i,l,s_j) \in \Delta_A}labels_e(l))$\\
-	$\rho_{sys.enabling}$ &$=$& $\bigwedge_{s_i \in S_A} \bigcirc(\varState{i} \implies \bigvee_{(s_i,l,s_j) \in \Delta_A}labels_s(l))$\\
+	$\rho_{env.enabling}$ &$=$& $\bigwedge_{s_i \in S_A} \varState{i} \implies \bigvee_{(s_i,l,s_j) \in \Delta_A}labels_e(l)$\\
+	$\rho_{sys.enabling}$ &$=$& $\bigwedge_{s_i \in S_A} \varState{i} \implies \bigvee_{(s_i,l,s_j) \in \Delta_A}labels_s(l)$\\
 	&&\\
-	$\rho_{update.states}$&$=$&$\bigwedge_{(s_i,l,s_j) \in \Delta_A} (\varState{i} \wedge label_s(l) \implies \bigcirc(\varState{p} \wedge\bigwedge_{s_q \neq s_j, s_q \in S}\neg \varState{q}) ) $\\
+	$\rho_{update.states}$&$=$&$\bigwedge_{(s_i,l,s_j) \in \Delta_A} (\varState{i} \wedge label_s(l) \implies \bigcirc(\varState{j} \wedge\bigwedge_{s_q \neq s_j, s_q \in S}\neg \varState{q}) ) $\\
 	$\rho_{update.propositions}$&$=$&$\bigwedge_{(s_i,l,s_j) \in \Delta_A} (\varState{i} \wedge label_s(l) \implies \bigcirc(\bigwedge_{\proposition \in \propositions}v(\proposition,j) ) )$\\
 	&&\\
 	$\gsRhoS$&$=$&$\rho_{sys.enabling} \wedge  \rho_{update.states} \wedge  \rho_{update.propositions}$\\	
@@ -101,7 +101,7 @@ Now we can show that realizability is preserved between CLTS control problem $\c
 \begin{theorem}(\emph{$ltl$ preserves realizability})\label{theorem:gs_preserves_realizability}\\
 	Let \controlProblemDef be a CLTS control problem with \cltsDef{E} and $\Sigma = \mathcal{C}\uplus \mathcal{U}$ then if $ltl(\controlProblem) = \langle \varphi_{ltl}, \gsX, \gsY\rangle$:
 	\small
-	\[(\exists D= \langle \mathcal{V}_d, \theta_d, \rho_d, \mathcal{J}_d, \mathcal{C}_d\rangle    \gsX, \gsY \in \mathcal{V}_d, \mathcal{D} \text{ is fairness-free, complete w.r.t. } \gsX \text{: } D \models \varphi_{ltl}\]
+	\[(\exists D:FDS|D= \langle \mathcal{V}_d, \theta_d, \rho_d, \mathcal{J}_d, \mathcal{C}_d\rangle, \text{s.t. }    \gsX, \gsY \in \mathcal{V}_d, D \text{ is fairness-free, complete w.r.t. } \gsX \text{: } D \models \varphi_{ltl}\]
 	% \wedge \exists \sigma \in D: \sigma \models \theta_e \wedge \square \rho_e) \]
 	 \[ \iff (\exists C \text{ legal w.r.t. } E,\mathcal{C} \text{: } C \parallel E \text{ is deadlock-free and } C \parallel E \models \varphi)  \]
 	\normalsize
