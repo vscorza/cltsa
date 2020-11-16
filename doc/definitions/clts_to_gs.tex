@@ -103,11 +103,9 @@ Now we can show that realizability is preserved between CLTS control problem $\c
 	\small
 	\[(\exists D:FDS|D= \langle \mathcal{V}_d, \theta_d, \rho_d, \mathcal{J}_d, \mathcal{C}_d\rangle, \text{s.t. }    \gsX, \gsY \in \mathcal{V}_d, D \text{ is fairness-free, complete w.r.t. } \gsX \text{: } D \models \varphi_{ltl}\]
 	% \wedge \exists \sigma \in D: \sigma \models \theta_e \wedge \square \rho_e) \]
-	 \[ \iff (\exists C \text{ legal w.r.t. } E,\mathcal{C} \text{: } C \parallel E \text{ is deadlock-free and } C \parallel E \models \varphi)  \]
+	 \[ \iff (\exists C:CLTS| C \text{ legal w.r.t. } E,\mathcal{C} \text{: } C \parallel E \text{ is deadlock-free and } C \parallel E \models \varphi)  \]
 	\normalsize
 \end{theorem}
-
-\newpage
 
 %, with an additional condition for LTL based reactive systems ($\sigma \models \theta_d \wedge \square \rho_d$) ruling out the cases where $val(\varphi)$ is never satisfied, since $\varphi_{LTL}$ could be realized by achieving $\neg\theta \vee \diamond \neg \rho$. In such a case no controller can be built for $\mathcal{I}$ s.t. $\varphi$ is satisfied since it will violate the safety restrictions related to the behavior of the plant $E_G$.
 
@@ -129,7 +127,7 @@ The proof is split in two parts, first we prove that if a controller exists for 
 		\end{itemize}	
 \end{description}
 
-First,  for the $\mathcal{I} \rightarrow \varphi_{LTL}$ step, $fds$ constructs FDS $\langle \mathcal V_d, \theta_d, \rho_d, \mathcal{J}_d, \mathcal{C}_d \rangle$ from a control problem $\controlProblem$ and controller $C$ using the formulas defined for $\varphi_{LTL}$, but instead of using $E$ when building $\theta_e,\theta_s,\rho_e,\rho_s$ we will use $C$ and the elements of the FDS are as follows:
+First,  for the $\mathcal{I} \rightarrow \varphi_{LTL}$ step, $fds$ constructs FDS $D=\langle \mathcal V_d, \theta_d, \rho_d, \mathcal{J}_d, \mathcal{C}_d \rangle$ from a control problem $\controlProblem$ and controller $C$ using the formulas defined for $\varphi_{LTL}$, with the consideration that instead of using $E$ when building $\theta_e,\theta_s,\rho_e,\rho_s$ we will use $C$ and the elements of the FDS are defined as follows:
 
 	\begin{tabular}{ l c l }
 	$V_d$ & $=$ & $\mathcal{X} \cup \mathcal{Y}$\\	
@@ -139,16 +137,16 @@ First,  for the $\mathcal{I} \rightarrow \varphi_{LTL}$ step, $fds$ constructs F
 	$\mathcal{C}_d$ & $=$ & $\emptyset$\\
 \end{tabular}
 
-It is easy to see that $fds(C)$ is fairness-free by construction. This also holds for the complete w.r.t. $\mathcal{X}$ property, since no restriction is placed upon environment variables. Now, to prove that $fds(C)$ satisfies $\varphi_{LTL}$ we state the following:
+We can easily see that $fds(C)$ is fairness-free and complete w.r.t. $\mathcal{X}$ by construction, the first property is obvious, the second holds since no restriction is placed upon environment variables. Now, to prove that $fds(C)$ satisfies $\varphi_{LTL}$ we observe all paths in $D$, i.e.:
 
 \[\forall \sigma \in D: \sigma \models \varphi_{LTL} \]
 
-We split the proof in two again, first assuming $\sigma \not\models \theta_e \wedge \square \rho_e$, i.e.: $\sigma \models \neg\theta_e \vee \Diamond \neg\rho_e$, in this case $\varphi_{LTL}$ is trivially satisfied. Now if $\sigma \models \theta_e \wedge \square \rho_e$ holds it should also satisfy $\theta_s$, $\square\rho_s$ and $val(\varphi)$. Since $\sigma$ is a play in $fds(C)$ then $\theta_d=(\theta_e \implies \theta_s)$ and $\rho_d=(\rho_e \implies \rho_s)$ hold, and since it also satisfies $\theta_e \wedge \square \rho_e$ we observe the following:
+We split the proof in two again, first assuming $\sigma \not\models \theta_e \wedge \square \rho_e$, i.e.: $\sigma \models \neg\theta_e \vee \Diamond \neg\rho_e$, in this case $\varphi_{LTL}$ is trivially satisfied since all the precedents in the general conjunction terms are falsified. Now if $\sigma \models \theta_e \wedge \square \rho_e$ holds it should also satisfy $\theta_s$, $\square\rho_s$ and $val(\varphi)$. Since $\sigma$ is a play in $fds(C)$ then $\theta_d=(\theta_e \implies \theta_s)$ and $\rho_d=(\rho_e \implies \rho_s)$ hold, and since it also satisfies $\theta_e \wedge \square \rho_e$ we observe the following:
 \[((\theta_e \implies \theta_s) \wedge \theta_e))\implies \theta_s\]
 \[((\rho_e \implies \rho_s) \wedge \rho_e))\implies \rho_s\]
 To show that $\sigma$ also satisfies $val(\varphi)$ we prove that there is an execution $\execution$ in $C$ that follows $\sigma$.
 For a play $\sigma \in 2^{|\mathcal{V}|^{\omega}}$ we define $exec(\sigma) \in S^{\omega}$ as follows, suppose that $\sigma = \sigma_1 \sigma_2 \ldots \sigma_i \ldots$ and
-$exec(\sigma)= \execution_1 \execution_2 \ldots \execution_i \ldots$, then $\execution_i = s_j \iff \sigma_i \models \varState{j}$. For each pair ($\sigma_i$,$\sigma_{i+1}$), since $\sigma \models \rho_e \wedge \rho_s$, by restriction $\rho_s$
+$exec(\sigma)= \execution_1 \execution_2 \ldots \execution_i \ldots$, then $\execution_i = s_j \iff \sigma_i \models \varState{j}$, this basically means that $exec(\sigma)$ will ......   . For each pair ($\sigma_i$,$\sigma_{i+1}$), since $\sigma \models \rho_e \wedge \rho_s$, by restriction $\rho_s$
 We observe that $\sigma_i \models s_j$ implies that there exists a transition $(j, l, k)$ s.t.$\sigma_{i+1} \models s_k$ and $\sigma_{i+i} \models \delta_s(l) \wedge \bigwedge_{l' \in L \setminus \{l\}}(\neg \delta_s(l'))$, and in particular $\sigma_0 \models s_0$, from which follows that $\pi \in C$.
 Since for each play $\sigma$ that satisfies $\theta_e \wedge \square \rho_e$ we have a trace $\pi$ in controller $C$, and since $C \models \varphi$ we can show that $\sigma \models val(\varphi)$.
 

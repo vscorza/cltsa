@@ -1,7 +1,7 @@
 TODO:
 =====
 - prove iff realizables
-	- cambiar delta por labels en definición de rho
+	- correct exec to exclude other states and fix label vars and natural vars
 	- exists c then exists d
 		- change satisfaction from fluents over traces to sets over paths
 		- review demo
