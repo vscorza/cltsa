@@ -1,13 +1,10 @@
 TODO:
 =====
 - prove iff realizables
-	- correct exec to exclude other states and fix label vars and natural vars
-	- exists c then exists d
-		- change satisfaction from fluents over traces to sets over paths
-		- review demo
+	- change formula to add theta_e && []rho_e to varphi_LTL
 	- exists d then exists c
 		- we build C from D with clts(D) then for all traces it exists a play, the satisfcation in val(phi) implies satisfaction of phi by path
-			- define clts: FDS -> CLTS
+			- define ctrl: FDS -> CLTS
 				- removes vacuous traces
 					- prove if D exists then should have traces satisfying precedent, otherwise the env would win by violating pred.
 				- prove it is legal

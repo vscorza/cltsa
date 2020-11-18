@@ -127,7 +127,7 @@ The proof is split in two parts, first we prove that if a controller exists for 
 		\end{itemize}	
 \end{description}
 
-First,  for the $\mathcal{I} \rightarrow \varphi_{LTL}$ step, $fds$ constructs FDS $D=\langle \mathcal V_d, \theta_d, \rho_d, \mathcal{J}_d, \mathcal{C}_d \rangle$ from a control problem $\controlProblem$ and controller $C$ using the formulas defined for $\varphi_{LTL}$, with the consideration that instead of using $E$ when building $\theta_e,\theta_s,\rho_e,\rho_s$ we will use $C$ and the elements of the FDS are defined as follows:
+First,  for the $\mathcal{I} \rightarrow \varphi_{LTL}$ step, $fds$ constructs FDS $D=\langle \mathcal V_d, \theta_d, \rho_d, \mathcal{J}_d, \mathcal{C}_d \rangle$ from a control problem $\controlProblem$ and controller $C$ using the formulas defined for $\varphi_{LTL}$, i.e. $\gsTheE, \gsTheS, \gsRhoE, \gsRhoS$, with the consideration that instead of using $E$ when building them we will use $C$ and the elements of the FDS are going to be defined as follows:
 
 	\begin{tabular}{ l c l }
 	$V_d$ & $=$ & $\mathcal{X} \cup \mathcal{Y}$\\	
@@ -137,21 +137,21 @@ First,  for the $\mathcal{I} \rightarrow \varphi_{LTL}$ step, $fds$ constructs F
 	$\mathcal{C}_d$ & $=$ & $\emptyset$\\
 \end{tabular}
 
-We can easily see that $fds(C)$ is fairness-free and complete w.r.t. $\mathcal{X}$ by construction, the first property is obvious, the second holds since no restriction is placed upon environment variables. Now, to prove that $fds(C)$ satisfies $\varphi_{LTL}$ we observe all paths in $D$, i.e.:
+We can easily see that $fds(C)$ is fairness-free and complete w.r.t. $\mathcal{X}$ by construction, the first property is obvious, the second holds since no restriction is placed upon environment variables. Now, to prove that $fds(C)$ satisfies $\varphi_{LTL}$ we observe all paths in $D$ do, i.e.:
 
 \[\forall \sigma \in D: \sigma \models \varphi_{LTL} \]
 
 We split the proof in two again, first assuming $\sigma \not\models \theta_e \wedge \square \rho_e$, i.e.: $\sigma \models \neg\theta_e \vee \Diamond \neg\rho_e$, in this case $\varphi_{LTL}$ is trivially satisfied since all the precedents in the general conjunction terms are falsified. Now if $\sigma \models \theta_e \wedge \square \rho_e$ holds it should also satisfy $\theta_s$, $\square\rho_s$ and $val(\varphi)$. Since $\sigma$ is a play in $fds(C)$ then $\theta_d=(\theta_e \implies \theta_s)$ and $\rho_d=(\rho_e \implies \rho_s)$ hold, and since it also satisfies $\theta_e \wedge \square \rho_e$ we observe the following:
 \[((\theta_e \implies \theta_s) \wedge \theta_e))\implies \theta_s\]
 \[((\rho_e \implies \rho_s) \wedge \rho_e))\implies \rho_s\]
-To show that $\sigma$ also satisfies $val(\varphi)$ we prove that there is an execution $\execution$ in $C$ that follows $\sigma$.
+To show that $\sigma$ also satisfies $val(\varphi)$ we prove that for every play $\sigma$ in $fds(C)$ there is an execution $\execution$ in $C$ that conform to it.
 For a play $\sigma \in 2^{|\mathcal{V}|^{\omega}}$ we define $exec(\sigma) \in S^{\omega}$ as follows, suppose that $\sigma = \sigma_1 \sigma_2 \ldots \sigma_i \ldots$ and
-$exec(\sigma)= \execution_1 \execution_2 \ldots \execution_i \ldots$, then $\execution_i = s_j \iff \sigma_i \models \varState{j}$, this basically means that $exec(\sigma)$ will ......   . For each pair ($\sigma_i$,$\sigma_{i+1}$), since $\sigma \models \rho_e \wedge \rho_s$, by restriction $\rho_s$
-We observe that $\sigma_i \models s_j$ implies that there exists a transition $(j, l, k)$ s.t.$\sigma_{i+1} \models s_k$ and $\sigma_{i+i} \models \delta_s(l) \wedge \bigwedge_{l' \in L \setminus \{l\}}(\neg \delta_s(l'))$, and in particular $\sigma_0 \models s_0$, from which follows that $\pi \in C$.
+$exec(\sigma)= \execution_1 \execution_2 \ldots \execution_i \ldots$, then $\execution_i = s_j \iff \sigma_i \models \varState{j}$, to prove that such execution is possible in $C$ we observe that for each pair ($\sigma_i$,$\sigma_{i+1}$), since $\sigma \models \rho_e \wedge \rho_s$, and $\rho_s$ forces
+plays to assign states according to transitions in $\Delta_C$, if $\sigma_i \models s_j$ then there exists a transition $(j, l, k)$ s.t.$\sigma_{i+1} \models s_k$ and $\sigma_{i+i} \models \delta_s(l) \wedge \bigwedge_{l' \in L \setminus \{l\}}(\neg \delta_s(l'))$. Then, for the base case we know that $\sigma_0 \models s_0$ by construction, therefore we proved that $exec(\sigma) \in C$.
 Since for each play $\sigma$ that satisfies $\theta_e \wedge \square \rho_e$ we have a trace $\pi$ in controller $C$, and since $C \models \varphi$ we can show that $\sigma \models val(\varphi)$.
 
 
-This is proved over the syntactic construction of $\varphi$, we will only show the base case of atomic satisfaction, i.e.
-$\pi \models val(fl_i) \implies \sigma \models v_{fl_i}$. Again, looking at $\gsRhoS$, $\bigwedge_{f = 1}^{|\mathcal{F}|}f_{val}(f,l)$ after the next state operator updates valuation of fluent variables according to $val(fl_i)$ at state $i+1$, proving that $\pi \models val(fl_i) \implies \sigma \models v_{fl_i}$.
+This is proved over the algebraic construction of $\varphi$, and we will only show the base case of atomic satisfaction, where
+$exec(\sigma) \models \proposition$ implies $\sigma \models v_{\proposition}$. Again, for any given state $s_i \in exec(\sigma)$, satisfaction of the natural variable $v_{\proposition}$ will be preserved by  $\rho_{update.propositions}$ through $\bigwedge_{\proposition \in \propositions}v(\proposition,j)$.
 
 
