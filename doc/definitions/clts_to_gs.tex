@@ -42,24 +42,24 @@ v_{\proposition} & \proposition \in \valuations(s_i) \\
 \neg v_{\proposition} & otherwise
 \end{cases}
 \]
-
-The initial condition formula will be defined as:
-\[\gsTheE = \bigwedge_{i = 1}^{|\nonControlSet|}\neg x_i\]
-\[\gsTheS = (\bigwedge_{i = 1}^{|\mathcal{C}|}\neg y_i) \wedge (\varState{0} \wedge\bigwedge_{s_j \neq s_0, s_q \in S}\neg \varState{j}) \wedge (\bigwedge_{\proposition \in \propositions}v(\proposition,0))\]
-\[\theta = \gsTheE \wedge \gsTheS\]
-Transition relations are constructed as a conjunction of safety formulae that are defined for each state. These can be split into two types, enabling and updating formulae. The first type restrict the set of variables that can be set to $true$ in a mutually exclusive fashion at each state, representing the label of the transition picked from any given state. The second type defines the state reached for each combination of current state and enabled natural variables. 
 We will use the following two functions to build the conjunction of system or environment variables related to the label in any given automaton transition (note that here $l$ is a label composed of several actions or events):
 \[
-var(l, \sigma_i) = \begin{cases}
-\sigma_i & \sigma_i \in l \\
-\neg \sigma_i & otherwise
+var(l, l_i) = \begin{cases}
+\varLabel{i} & l_i \in l \\
+\neg \varLabel{i} & otherwise
 \end{cases}
 \]
-\[label_e(l) = \{\bigwedge_{\sigma_i \in \nonControlSet}var(l, \sigma_i)\]
-\[label_s(l) = \{\bigwedge_{\sigma_i \in \Sigma}var(l, \sigma_i)\}\]
+\[label_e(l) = \{\bigwedge_{l_i \in \nonControlSet}var(l, l_i)\]
+\[label_s(l) = \{\bigwedge_{l_i \in \Sigma}var(l, l_i)\}\]
 And the enabling formula, which is a mutually exclusive condition over label variables for any given state $s_i$ is described as (note again that $L$ is a set of labels enabled for a particular state, each one consisting of several actions or events):
 \[labels_e(L) = \bigvee_{l \in L}(label_e(l) \wedge \bigwedge_{l' \in L \setminus \{l\}}(\neg label_e(l')) ) \]
 \[labels_s(L) = \bigvee_{l \in L}(label_s(l) \wedge \bigwedge_{l' \in L \setminus \{l\}}(\neg label_s(l')) ) \]
+The initial condition formula will be defined as:
+\[\gsTheE = \bigvee_{(s_0,l,s_j) \in \Delta_A}labels_e(l)\]
+\[\gsTheS = (\varState{0} \wedge\bigwedge_{s_j \neq s_0, s_q \in S}\neg \varState{j})  \wedge \bigvee_{(s_0,l,s_j) \in \Delta_A}labels_s(l) \wedge \bigwedge_{\proposition \in \propositions}v(\proposition,0)\]
+\[\theta = \gsTheE \wedge \gsTheS\]
+Transition relations are constructed as a conjunction of safety formulae that are defined for each state. These can be split into two types, enabling and updating formulae. The first type restrict the set of variables that can be set to $true$ in a mutually exclusive fashion at each state, representing the label of the transition picked from any given state. The second type defines the state reached for each combination of current state and enabled natural variables. 
+
 Then we can build the transition relations $\gsRhoE$ and $\gsRhoS$ from $\Delta_A$ as a conjunction of the enabling and transition formulae:
 
 \vspace{1em}
@@ -152,6 +152,18 @@ Since for each play $\sigma$ that satisfies $\theta_e \wedge \square \rho_e$ we 
 
 
 This is proved over the algebraic construction of $\varphi$, and we will only show the base case of atomic satisfaction, where
-$exec(\sigma) \models \proposition$ implies $\sigma \models v_{\proposition}$. Again, for any given state $s_i \in exec(\sigma)$, satisfaction of the natural variable $v_{\proposition}$ will be preserved by  $\rho_{update.propositions}$ through $\bigwedge_{\proposition \in \propositions}v(\proposition,j)$.
+$exec(\sigma) \models \proposition$ implies $\sigma \models v_{\proposition}$. Again, for any given state $s_i \in exec(\sigma)$, satisfaction of the natural variable $v_{\proposition}$ will be preserved by  $\rho_{update.propositions}$ through $\bigwedge_{\proposition \in \propositions}v(\proposition,j)$.\\
+\\
 
+Now,  for the $\varphi_{LTL} \rightarrow \mathcal{I}$ direction, we propose an embedding $clts$ from an FDS into a CLTS that will preserve only the behavior that satisfies $\theta_e \wedge \square \rho_e$, since otherwise we will be keeping traces in $clts(D)$ that are not feasible in $clts(D)\parallel E$. We can show that even after removing the set of plays that satisfy $\neg \theta_e \vee \Diamond \rho_e$, a non empty controller exists, since this would contradict the existance of a complete w.r.t. $\gsX$ FDS $D$ that satifsfies $\varphi_{LTL}$, because the environment would be able to win by satisfying $\theta_e \wedge \square \rho_e$ while the system can not achieve $val(\varphi)$. After observing this and considering that  $D= \langle \mathcal{V}_d, \theta_d, \rho_d, \mathcal{J}_d, \mathcal{C}_d\rangle$ is a solution to $\varphi_{LTL}$, which in turn was built from \controlProblemDef,  we can present the embedding $clts$ from FDS into CLTS as \cltsEmbeddingDef{D} as follows :
 
+\vspace{1em}
+\begin{tabular}{ l c l }
+	$S$ &$=$& $S_E$\\
+	$\Sigma$ &$=$&$\Sigma_E$\\	
+	$s_0$&$=$&$s_0^{E}$\\
+	$\valuations$&$=$&$\valuations_E$\\
+	&&\\
+	$\Delta$&$=$&$\{(s_i,l,s_j)| \rho_d \models \varState{i} \wedge \bigcirc \varState{j} \wedge labels_e(l) \wedge labels_s(l) \}$\\
+\end{tabular}
+\vspace{1em}

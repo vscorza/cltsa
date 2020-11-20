@@ -19,7 +19,8 @@
 %clts
 \newcommand{\cltsDefIdx}[1]{{$#1 = (S_{#1},$$ \Sigma_{#1},$ $\Delta_{#1},$ $s_{0}^{#1},$ $\valuations_{#1})$}}
 \newcommand{\cltsDefShareSigmaIdx}[1]{{$#1 = (S_{#1},$ $\Sigma,$ $\Delta_{#1},$ $s_{0}^{#1},$ $\valuations_{#1})$}}
-\newcommand{\cltsDef}[1]{{$E = (S,$ $\Sigma,$ $\Delta,$ $s_{0},$ $\valuations)$}}
+\newcommand{\cltsDef}{$E = (S,$ $\Sigma,$ $\Delta,$ $s_{0},$ $\valuations)$}
+\newcommand{\cltsEmbeddingDef}[1]{{$clts(#1) = (S,$ $\Sigma,$ $\Delta,$ $s_{0},$ $\valuations)$}}
 \newcommand{\automaton}[1]{{$#1 = (S_{#1}, \Sigma_{#1}, \Delta_{#1}, s_{0}^{#1})$}}
 \newcommand{\act}{A}
 \newcommand{\traces}{\emph{Tr} }
@@ -47,7 +48,9 @@
 \newcommand{\fdsDefIdx}[1]{$#1= \langle \mathcal{V}_{#1},$ $\theta_{#1},$ $\rho_{#1},$ $\mathcal{J}_{#1},$ $\mathcal{C}_{#1}\rangle$}
 %realizability theorems
 \newcommand{\varState}[1]{\hat{s}_{#1}}
+\newcommand{\varLabel}[1]{\hat{l}_{#1}}
 \newcommand{\varphiLtl}{\varphi_{LTL} = (\theta_e \implies \theta_s) \wedge (\theta_e \implies \square((\boxdot \rho_e) \implies \rho_s)) \wedge (\theta_e \wedge \rho_e \implies val(\varphi))}
+\newcommand{\varphiLtlFormula}{(\theta_e \implies \theta_s) \wedge (\theta_e \implies \square((\boxdot \rho_e) \implies \rho_s)) \wedge (\theta_e \wedge \rho_e \implies val(\varphi))}
 
 
 %formulae

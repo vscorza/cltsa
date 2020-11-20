@@ -1,12 +1,15 @@
 TODO:
 =====
 - prove iff realizables
-	- change formula to add theta_e && []rho_e to varphi_LTL
+	- ver que pasa con los estados y la memoria (no puede ser que el estado de D,C quede igual que en la planta original)
+	- given a c ... exists C implies exists D (cambiar como se presentan las direcciones de la demostracion)
+	- V_d está mal fonteado en la lista de ctrl(D)
+	- lo de completo respecto a x para decir que hay controlador (en la demostracion de D -> C)
 	- exists d then exists c
 		- we build C from D with clts(D) then for all traces it exists a play, the satisfcation in val(phi) implies satisfaction of phi by path
 			- define ctrl: FDS -> CLTS
-				- removes vacuous traces
-					- prove if D exists then should have traces satisfying precedent, otherwise the env would win by violating pred.
+				X removes vacuous traces
+					X prove if D exists then should have traces satisfying precedent, otherwise the env would win by violating pred.
 				- prove it is legal
 					- if it violates precedent then it will jump anywhere, if it does not and a value is picked for env. (free) rho_sys should hold, updating the next state
 				- pŕove it is deadlock-free
