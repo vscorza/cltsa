@@ -1,7 +1,7 @@
 TODO:
 =====
 - prove iff realizables
-	- ver que pasa con los estados y la memoria (no puede ser que el estado de D,C quede igual que en la planta original)
+	- ver que pasa con los estados y la memoria (no puede ser que el estado de D,C quede igual que en la planta original) definicion de D dice V contiene(!) X e Y
 	- given a c ... exists C implies exists D (cambiar como se presentan las direcciones de la demostracion)
 	- V_d está mal fonteado en la lista de ctrl(D)
 	- lo de completo respecto a x para decir que hay controlador (en la demostracion de D -> C)
