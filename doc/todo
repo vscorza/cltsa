@@ -1,10 +1,18 @@
 TODO:
 =====
+- notas vic
+	- en composición, se usa que sigma_n y sigma_m pueden ser distintos?
+	- definicion de legalidad, pasar subindices E a e
+	- gr1 spcs over clts
+		- explicar ventajas de clts sobre lts
+		- explicar evaluación de ltl sobre trazas (traducción de fluents)
+	- clts -> LTL	
+		- donde dice ctls to ltl debería decir clts control problem
+		X falta definición de reactive systems
+		- aparece el término plant, boolean variable
+		- qué significa alphabet of the transition
+	- the ltl equivalent formula to control problem... (cómo una formula es equivalente a un problema?
 - prove iff realizables
-	- ver que pasa con los estados y la memoria (no puede ser que el estado de D,C quede igual que en la planta original) definicion de D dice V contiene(!) X e Y
-	- given a c ... exists C implies exists D (cambiar como se presentan las direcciones de la demostracion)
-	- V_d está mal fonteado en la lista de ctrl(D)
-	- lo de completo respecto a x para decir que hay controlador (en la demostracion de D -> C)
 	- exists d then exists c
 		- we build C from D with clts(D) then for all traces it exists a play, the satisfcation in val(phi) implies satisfaction of phi by path
 			- define ctrl: FDS -> CLTS
