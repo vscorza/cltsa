@@ -1,18 +1,21 @@
-In this section we present the background required to define a CLTS control problem.  In the context of this work we will use transition systems that are bi-partite with respect to a set of controllable actions, making states either controllable or non controllable, and because of this every label is composed of actions that are all within $\mathcal{C}$ or all within $\mathcal{U}$. 
+In this section we present the background required to define a CLTS control problem.  In the context of this work we will use open transition systems, where the alphabet is split between controllable and monitored actions, i.e.: $\Sigma=\controlSet \; \uplus \;\nonControlSet$, and in particular with instances that are bi-partite with respect to a \controlSet, making states either controllable or non controllable, and because of this every label is composed of actions that are all within $\mathcal{C}$ or all within $\mathcal{U}$. 
 
 \begin{definition}\label{def:bi-partite_clts} \emph{(Bi-partite w.r.t. $\controlSet$)} 
 A CLTS instance \cltsDef, is considered to be bi-partite with respect to a set of controllable actions $\controlSet \subseteq \Sigma$ if and only if each transition is either fully controllable or fully non controllable:
-\[ \actionLabel_{\controlSet}((s,\actionLabel,s')): ( \forall \action \in \actionLabel:(\action \in \controlSet))\]
-\[ \actionLabel_{\nonControlSet}((s,\actionLabel,s')): ( \forall \action \in \actionLabel:(\action \not\in \controlSet))\]
-\[ \forall (s,\actionLabel,s') \in \Delta_e: \actionLabel_{\mathcal{C}}((s,\actionLabel,s')) \vee \actionLabel_{\controlSet}((s,l,s')) \]
+\[ \actionLabel_{\controlSet}((s,\actionLabel,s'))= ( \forall \action \in \actionLabel:(\action \in \controlSet))\]
+\[ \actionLabel_{\nonControlSet}((s,\actionLabel,s'))= ( \forall \action \in \actionLabel:(\action \not\in \controlSet))\]
+\[ (\forall (s,\actionLabel,s') \in \Delta_e| \actionLabel_{\mathcal{C}}((s,\actionLabel,s')) \vee \actionLabel_{\controlSet}((s,l,s'))) \]
 And that the same criteria is satisfied by every state:
-\[ \forall s \in S : (\forall \actionLabel, s' \text{ s.t. } (s,\actionLabel,s') \in \Delta:\actionLabel_{\controlSet}((s,\actionLabel,s')))\vee (\forall \actionLabel, s' \text{ s.t. } (s,\actionLabel,s') \in \Delta:\actionLabel_{\nonControlSet}((s,\actionLabel,s')))\]
+\[ (\forall s \in S | (\forall (\actionLabel, s'): (s,\actionLabel,s') \in \Delta|\actionLabel_{\controlSet}((s,\actionLabel,s')))\vee (\forall (\actionLabel, s'): (s,\actionLabel,s') \in \Delta|\actionLabel_{\nonControlSet}((s,\actionLabel,s'))))\]
 \end{definition}
 
 \begin{definition}
 	\label{def:legal_clts} \emph{(Legality w.r.t. $E$ and $\controlSet$)} 
-	Given two bi-partite CLTS instances \cltsDefShareSigmaIdx{C} and \cltsDefShareSigmaIdx{E}, where $\Sigma$ is partitioned into actions controlled and monitored (non controllable) by $C$ ($\Sigma=\controlSet \; \uplus \;\nonControlSet$), we say that $C$ is a legal CLTS for $E$ if for all $(s_e,s_c) \in E \parallel_* C$ it holds that:
-	$\Delta_{E}(s_E)\cap 2^{|\controlSet|} \supseteq \Delta_{C}(s_C)\cap 2^{|\controlSet|}$ and also that  $\Delta_{E}(s_E)\cap 2^{|\nonControlSet|} \subseteq \Delta_{C}(s_C)\cap 2^{|\nonControlSet|}$.
+	Given two bi-partite CLTS instances \cltsDefShareSigmaIdx{C} and \cltsDefShareSigmaIdx{E}, where $\Sigma$ is partitioned into actions controlled and monitored, i.e.: $\Sigma=\controlSet \; \uplus \;\nonControlSet$, we say that $C$ is a legal CLTS for $E$ if the following holds for all $(s_e,s_c) \in E \parallel_* C$:
+	
+	\[ \Delta_{E}(s_E)\cap 2^{|\controlSet|} \supseteq \Delta_{C}(s_C)\cap 2^{|\controlSet|}\] 
+	\[\wedge\]
+	\[\Delta_{E}(s_E)\cap 2^{|\nonControlSet|} \subseteq \Delta_{C}(s_C)\cap 2^{|\nonControlSet|} \]
 \end{definition}
 
 \begin{definition}

@@ -1,5 +1,5 @@
 
-We present a translation between CLTS and FDS control problems. We will note $\Sigma \setminus \controlSet$ as $\nonControlSet$. In order to show the relation between a CLTS and an FDS control problem we first introduce a set of embeddings, then present and prove a realizability preserving theorem between the CLTS version and its embedding into an FDS  control problem.
+We present a translation between CLTS and FDS control problems. Remember that we denote $\Sigma \setminus \controlSet$ as $\nonControlSet$. In order to show the relation between a CLTS and an FDS control problem we first introduce a set of embeddings, then present and prove a realizability preserving theorem between the CLTS control problem and its embedding.
 
 
 In order to embed the CLTS control problem \controlProblemDef into \fdsEmbedding, the LTL formula over atomic propositions $\varphi$ is translated as $val(\varphi)$ by simply  replacing each occurrence of an atomic proposition $\proposition \in \propositions$ with the boolean variable variable $v_{\proposition}$.
@@ -22,11 +22,11 @@ In order to embed the CLTS control problem \controlProblemDef into \fdsEmbedding
 %\end{definition}
 %
 %Let $A$ be the CLTS to be translated and $B =  \langle \gsX, \gsY, \gsTheE, \gsTheS, \gsRhoE, \gsRhoS, \varphi \rangle$ the game structure resulting after applying $gs(A)$. 
-Next we present the decomposition of $E$ as a set of initial and transition formulae.
-The alphabet of the translation will be comprised of two sets:
+The variables of the embedding will be comprised of two sets:
 \[\gsX = \{x_i : c_i \in \nonControlSet \}\]
 \[\gsY = \{y_i : u_i \in \controlSet \} \cup \{\varState{j} : s_j \in S_A \} \cup \{v_{\proposition} : \proposition \in \propositions\}\]
 Here $x_i$ is a Boolean variable representing the occurrence of an monitored action, $y_i$ is a Boolean variable representing the occurrence of a controllable action, $\varState{j}$ represents the fact that $E$ is currently on state $j$ and $v_{\proposition}$ indicates that state $j$ satisfies proposition $\proposition$,  in the context of the embedding $x_i$ and $y_i$ will be called \emph{label variables}, $\varState{j}$ will be called a \emph{state variable} and $v_{\proposition}$ will be called a \emph{natural variable}.
+The behavior of $E$ is decomposed into a pair of initial and transition formulae, the latter being expressed as a conjunction of smaller terms in order to clarify its construction.
 %From now on we will write $s(j)$ to represent the valuation of the system variables representing a given state $j$, i.e.: 
 %\[s(j) = \bigwedge\limits^{\lfloor log_2(|S_A|)\rfloor - 1}_{i=0}  s_{bit}(i,j)\]
 %\[
@@ -52,8 +52,8 @@ var(\actionLabel, \action) = \begin{cases}
 \[label_e(\actionLabel) = \{\bigwedge_{\action \in \nonControlSet}var(\actionLabel, \action)\]
 \[label_s(\actionLabel) = \{\bigwedge_{\action \in \Sigma}var(\actionLabel, \action)\}\]
 The enabling formula, which is a mutually exclusive condition over label variables for any given state $s_i$ that restricts the set of choices as the transition relation $\Delta$ does in $E$, is constructed through $labels_e:2^{2^{|\Sigma|}}\mapsto 2^{\Sigma_{\gsX}}$ and $labels_s:2^{2^{|\Sigma|}}\mapsto 2^{\Sigma_{\gsV}}$ as (note again that \labelSet is a set of labels \actionLabel enabled for a particular state, each one consisting of several actions \action):
-\[labels_e(\labelSet) = \bigvee_{\actionLabel \in \labelSet}(label_e(\actionLabel) \wedge \bigwedge_{\actionLabel' \in \labelSet \setminus \{\actionLabel\}}(\neg label_e(\actionLabel')) ) \]
-\[labels_s(\labelSet) = \bigvee_{\actionLabel \in \labelSet}(label_s(\actionLabel) \wedge \bigwedge_{\actionLabel' \in \labelSet \setminus \{\actionLabel\}}(\neg label_s(\actionLabel')) ) \]
+\[labels_e(\labelSet) = \bigvee_{\actionLabel \in \labelSet}(label_e(\actionLabel) \wedge \bigwedge_{\action' \in  \nonControlSet \setminus \actionLabel}\neg \varLabel{}') \]
+\[labels_s(\labelSet) = \bigvee_{\actionLabel \in \labelSet}(label_s(\actionLabel) \wedge \bigwedge_{\action' \in  \Sigma \setminus \actionLabel}\neg \varLabel{}') \]
 The initial condition formula will be defined as:
 \[\gsTheE = \bigvee_{(s_0,\actionLabel,s_j) \in \Delta_A}labels_e(\actionLabel)\]
 \[\gsTheS = (\varState{0} \wedge\bigwedge_{s_j \neq s_0, s_q \in S}\neg \varState{j})  \wedge \bigvee_{(s_0,\actionLabel,s_j) \in \Delta_A}labels_s(\actionLabel) \wedge \bigwedge_{\proposition \in \propositions}v(\proposition,0)\]
@@ -99,7 +99,7 @@ The LTL formula that captures the behavior of $E$ w.r.t. the separation of $\Sig
 Now we can show that realizability is preserved between CLTS control problem $\controlProblem$ and the embedding \fdsEmbedding.
 
 \begin{theorem}(\emph{$ltl$ preserves realizability})\label{theorem:gs_preserves_realizability}\\
-	Let \controlProblemDef be a CLTS control problem with \cltsDef{E} and $\Sigma = \mathcal{C}\uplus \mathcal{U}$ then if \fdsEmbedding:
+	Let \controlProblemDef be a CLTS control problem with \cltsDef{E} and $\Sigma = \mathcal{C}\uplus \mathcal{U}$ then if \fdsEmbeddingDef:
 	\small
 	\[(\exists D:FDS|\fdsD= \langle \mathcal{V}_d, \theta_d, \rho_d, \mathcal{J}_d, \mathcal{C}_d\rangle, \text{s.t. }    \gsX, \gsY \in \mathcal{V}_d, D \text{ is fairness-free, complete w.r.t. } \gsX \text{: } \fdsD \models \varphiLTL\]
 	% \wedge \exists \sigma \in D: \sigma \models \theta_e \wedge \square \rho_e) \]
@@ -109,17 +109,17 @@ Now we can show that realizability is preserved between CLTS control problem $\c
 
 %, with an additional condition for LTL based reactive systems ($\sigma \models \theta_d \wedge \square \rho_d$) ruling out the cases where $val(\varphi)$ is never satisfied, since $\varphi_{LTL}$ could be realized by achieving $\neg\theta \vee \diamond \neg \rho$. In such a case no controller can be built for $\mathcal{I}$ s.t. $\varphi$ is satisfied since it will violate the safety restrictions related to the behavior of the plant $E_G$.
 
-The proof is split in two parts, first we prove that if a controller exists for $\controlProblem$, a DFS exists for $\fdsControlProblem'$. Then we prove the opposite direction. For the ($\exists C \rightarrow \exists \fdsD$) step we construct a FDS from controller $C$ through a specific embedding $fds(C)$ and then prove that each property holds. For the ($\exists \fdsD \rightarrow \exists C$) we construct a controller from FDS \fdsD through a specific embedding $ctrl(\fdsD)$ and then prove each property for this controller. The outline of the proof is as follows:
+The proof is split in two parts, first we prove that if a controller exists for $\controlProblem$, an FDS exists for $\fdsEmbedding$. Then we prove the opposite direction. For the ($\exists C \rightarrow \exists \fdsD$) step we construct an FDS from controller $C$ through a specific embedding $fds(C)$ and then prove that each property holds. For the ($\exists \fdsD \rightarrow \exists C$) we construct a controller from FDS \fdsD through a specific embedding $ctrl(\fdsD)$ and then prove each property for this controller. The outline of the proof is as follows:
 
 \begin{description}
-	\item[($\exists C \rightarrow \exists \fdsD$)] Given \controlProblemDef and $\fdsEmbedding$
+	\item[($\exists C \rightarrow \exists \fdsD$)] Given \controlProblemDef and $C$
 		\begin{itemize}
 			\item $fds(C)$ is a fairness-free FDS			
 			\item $fds(C)$ is complete w.r.t. $\mathcal{X}$
 			\item $fds(C) \models \varphiLTL$
 		%	\item $\exists \sigma \in D: \sigma \models \theta_e \wedge \square \rho_e$			
 		\end{itemize}
-	\item[($\exists \fdsD \rightarrow \exists E$)] Given $\fdsEmbedding$ and FDS $\fdsD$
+	\item[($\exists \fdsD \rightarrow \exists E$)] Given $\fdsEmbeddingDef$ and FDS $\fdsD$
 		\begin{itemize}
 			\item $ctrl(\fdsD)$ is legal w.r.t. $E$ and $\mathcal{C}$
 			\item $ctrl(\fdsD)$ is a deadlock-free CLTS			
@@ -127,35 +127,32 @@ The proof is split in two parts, first we prove that if a controller exists for 
 		\end{itemize}	
 \end{description}
 
-First,  for the $\exists C \rightarrow \exists \fdsD$ step, $fds$ constructs an FDS $\fdsD=\langle \mathcal V_d, \theta_d, \rho_d, \mathcal{J}_d, \mathcal{C}_d \rangle$ from a control problem $\controlProblem$ and a controller $C$ using the formulas defined for $\varphiLTL$, i.e. $\gsTheE, \gsTheS, \gsRhoE, \gsRhoS$, but with the consideration that instead of using $E$ as the CLTS we will use $C$.
+First,  for the $\exists C \rightarrow \exists \fdsD$ step, $fds$ constructs an FDS $\fdsD=\langle \mathcal V, \theta_d, \rho_d, \mathcal{J}_d, \mathcal{C}_d \rangle$ from a control problem $\controlProblem$ and a controller $C$ using the variables and formulas defined for $\varphiLTL$, i.e. $\gsX, \gsY, \gsTheE, \gsTheS, \gsRhoE, \gsRhoS$, but with the consideration that instead of using $E$ as the CLTS we will use $C$.
 
 \begin{tabular}{ l c l }
-	$V_d$ & $=$ & $\mathcal{X} \cup \mathcal{Y}$\\	
+	$V$ & $=$ & $\gsX \cup \gsY$\\	
 	$\theta_d$ & $=$ & $(\theta_e \implies \theta_s)$\\
 	$\rho_d$ & $=$ & $(\rho_e \implies \rho_s)$\\	
 	$\mathcal{J}_d$ & $=$ & $\emptyset$\\
 	$\mathcal{C}_d$ & $=$ & $\emptyset$\\
 \end{tabular}
 
-We can easily see that $fds(C)$ is fairness-free and complete w.r.t. $\mathcal{X}$ by construction, the first property is obvious, the second holds since no restriction is placed upon environment variables. Now, to prove that $fds(C)$ satisfies $\varphiLTL$ we observe all runs in $\fdsD$ do, i.e.:
+We can easily see that $fds(C)$ is fairness-free and complete w.r.t. $\mathcal{X}$ by construction, the first property is obvious, the second holds since no restriction is placed upon environment variables. Now, to prove that $fds(C)$ satisfies $\varphiLTL$ we observe all runs in $\fdsD$ do, i.e.: 
 
 \[\forall \sigma \in \fdsD: \sigma \models \varphiLTL \]
 
-We split the proof in two again, first assuming $\sigma \not\models \theta_e \wedge \square \rho_e$, i.e.: $\sigma \models \neg\theta_e \vee \Diamond \neg\rho_e$, in this case $\varphiLTL$ is trivially satisfied since all the precedents in the general conjunction terms are falsified. Now if $\sigma \models \theta_e \wedge \square \rho_e$ holds it should also satisfy $\theta_s$, $\square\rho_s$ and $val(\varphi)$. Since $\sigma$ is a play in $fds(C)$ then $\theta_d=(\theta_e \implies \theta_s)$ and $\rho_d=(\rho_e \implies \rho_s)$ hold, and since it also satisfies $\theta_e \wedge \square \rho_e$ we observe the following:
+We split the proof in two again, first assuming that the run violates the restrictions that follow the behavior of $E$, i.e.: $\sigma \not\models \theta_e \wedge \square \rho_e$, i.e.: $\sigma \models \neg\theta_e \vee \Diamond \neg\rho_e$, in which case $\varphiLTL$ is trivially satisfied since all the precedents in the general conjunction terms are falsified, then if the behavior restrictions are held, i.e.: $\sigma \models \theta_e \wedge \square \rho_e$, we must prove that $\theta_s$, $\square\rho_s$ and $val(\varphi)$ are also satisfied. Since $\sigma$ is a play in $fds(C)$ then $\theta_d=(\theta_e \implies \theta_s)$ and $\rho_d=(\rho_e \implies \rho_s)$ hold, and since it also satisfies $\theta_e \wedge \square \rho_e$ we observe the following:
 \[((\theta_e \implies \theta_s) \wedge \theta_e))\implies \theta_s\]
 \[((\rho_e \implies \rho_s) \wedge \rho_e))\implies \rho_s\]
 To show that $\sigma$ also satisfies $val(\varphi)$ we prove that for every run $\sigma$ in $fds(C)$ there is an execution $\execution$ in $C$ that conform to it.
 For a run $\sigma \in 2^{|\mathcal{V}|^{\omega}}$ we define $exec(\sigma) \in S^{\omega}$ as follows, suppose that $\sigma = \sigma_1 \sigma_2 \ldots \sigma_i \ldots$ and
-$exec(\sigma)= \execution_1 \execution_2 \ldots \execution_i \ldots$, then $\execution_i = s_j \iff \sigma_i \models \varState{j}$, to prove that such execution is possible in $C$ we observe that for each pair ($\sigma_i$,$\sigma_{i+1}$), since $\sigma \models \rho_e \wedge \rho_s$, and $\rho_s$ forces
-runs to assign states according to transitions in $\Delta_C$, if $\sigma_i \models s_j$ then there exists a transition $(j, l, k)$ s.t.$\sigma_{i+1} \models s_k$ and $\sigma_{i+i} \models \delta_s(l) \wedge \bigwedge_{l' \in L \setminus \{l\}}(\neg \delta_s(l'))$. Then, for the base case we know that $\sigma_0 \models s_0$ by construction, therefore we proved that $exec(\sigma) \in C$.
-Since for each run $\sigma$ that satisfies $\theta_e \wedge \square \rho_e$ we have a trace $\pi$ in controller $C$, and since $C \models \varphi$ we can show that $\sigma \models val(\varphi)$.
-
-
-This is proved over the algebraic construction of $\varphi$, and we will only show the base case of atomic satisfaction, where
+$exec(\sigma)= \execution_1 \execution_2 \ldots \execution_i \ldots$, then $\execution_i = s_j \iff \sigma_i \models \varState{j}$, to prove that such execution is possible in $C$ we observe that for each pair ($\sigma_i$,$\sigma_{i+1}$), since $\sigma$ satisfies $\rho_e \wedge \rho_s$ and $\rho_s$ forces
+runs to set the value of its label variables according to exactly one enabled transition's label ($\rho_{env.enabling}$,$\rho_{sys.enabling}$) and to assign states according to transitions in $\Delta_C$ ($\rho_{update.states}$), if $\sigma_i$ satisfies $s_j$ and $\sigma_{i+1}$ satisfies $s_k$ there exists a transition $(j, l, k) \in \Delta$. For the initial state in $\sigma$ we know that $\sigma_0$ satisfies $\varState{0}$ by construction, therefore showing that $exec(\sigma)$ is possible $C$.
+Since, for each run $\sigma$ that satisfies $\theta_e \wedge \square \rho_e$, we have a trace $\pi$ in controller $C$, and since $C \models \varphi$ we can show that $\sigma \models val(\varphi)$. This is proved over the algebraic construction of $\varphi$, and we will only show the base case of atomic satisfaction, where
 $exec(\sigma) \models \proposition$ implies $\sigma \models v_{\proposition}$. Again, for any given state $s_i \in exec(\sigma)$, satisfaction of the natural variable $v_{\proposition}$ will be preserved by  $\rho_{update.propositions}$ through $\bigwedge_{\proposition \in \propositions}v(\proposition,j)$.\\
 \\
 
-Now,  for the $\exists \fdsD \rightarrow \exists C$ direction, we propose an embedding $clts$ from an FDS into a CLTS that will preserve only the behavior that satisfies $\theta_e \wedge \square \rho_e$, since otherwise we will be keeping traces in $clts(\fdsD)$ that are not feasible in $clts(\fdsD)\parallel E$. We can show that even after removing the set of plays that satisfy $\neg \theta_e \vee \Diamond \rho_e$, a non empty controller exists, since otherwise it would contradict the existence of a FDS $\fdsD$ that is also complete w.r.t. $\gsX$ . In the following definitions, let $\mathcal{W}= \mathcal{V}_{d}\setminus (\mathcal{X} \cup \mathcal{Y})$ be called the \emph{memory variables} of $D$. We will use an arbitrary bijective function \enumSetDef to define the second component in the set of states of the controller. After observing this and considering that  $\fdsD= \langle \mathcal{V}_d, \theta_d, \rho_d, \mathcal{J}_d, \mathcal{C}_d\rangle$ is a solution to $\varphiLTL$, which in turn was built from \controlProblemDef,  we can describe the embedding \cltsEmbeddingDef{\fdsD} from FDS into CLTS as follows:
+Now,  for the $\exists \fdsD \rightarrow \exists C$ direction, we propose an embedding $clts$ from an FDS into a CLTS that will preserve only the behavior that satisfies $\theta_e \wedge \square \rho_e$, since otherwise we will be keeping traces in $clts(\fdsD)$ that are not feasible in $clts(\fdsD)\parallel E$. We can show that even after removing the set of plays that satisfy $\neg \theta_e \vee \Diamond \rho_e$, a non empty controller exists, since otherwise it would contradict the existence of a FDS $\fdsD$ that is also complete w.r.t. $\gsX$ . In the following definitions, let $\mathcal{W}= \mathcal{V}_d\setminus (\mathcal{X} \cup \mathcal{Y})$ be called the \emph{memory variables} of $\fdsD$. We will use an arbitrary bijective function \enumSetDef to define the second component in the set of states of the controller. Considering that  $\fdsD= \langle \mathcal{V}_d, \theta_d, \rho_d, \mathcal{J}_d, \mathcal{C}_d\rangle$ is a solution to $\varphiLTL$ that was built from \controlProblemDef,  we can define the embedding from an FDS controller \fdsD into a CLTS controller \cltsEmbeddingDef{\fdsD}  as:
 
 \vspace{1em}
 \begin{tabular}{ l c l }
@@ -168,11 +165,11 @@ Now,  for the $\exists \fdsD \rightarrow \exists C$ direction, we propose an emb
 \end{tabular}
 \vspace{1em}
 \\
-Where $S$ is the set that results from the cross product between $S_E$ and those induced by the memory valuations of $D$, the sets of actions and atomic propositions remain unchanged, $\valuations=\pi_1 \circ \valuations_E$ describes the application of $\valuations_E$ over the first component of $(s,m)$ and the transitions are defined by relating states and labels following the satisfaction of their FDS counterpart in $\fdsD$.
+Where $S$ is the cross product between $S_E$ and the states induced by the memory valuations of $\fdsD$ through $\#$, the sets of actions and atomic propositions remain unchanged, $\valuations=\pi_1 \circ \valuations_E$ describes the application of $\valuations_E$ over the first component of $S$ in order to get the set of propositions that are satisfied iby the projected state in $E$. The transition relation is defined by adding those states and labels whose state and label variables are satisfied according to $\rho_d$ in $\fdsD$.
 
 We can now show that $clts(\fdsD)$ satisfies the properties that make it a solution to $\controlProblem$. The first property we need to prove is legality w.r.t $E$ and $\mathcal{C}$, which means that for all $(s_e,s_c) \in E \parallel_* C$ it holds that:
-$\Delta_{E}(s_E)\cap 2^{|\controlSet|} \supseteq \Delta_{C}(s_C)\cap 2^{|\controlSet|}$ and also that  $\Delta_{E}(s_E)\cap 2^{|\nonControlSet|} \subseteq \Delta_{C}(s_C)\cap 2^{|\nonControlSet|}$. Since $\fdsD$ satisfies $\varphiLTL$, which implies that it also satisfies $\rho_e \implies \rho_s$, and we are only considering plays where $\theta_e \wedge \square \rho_e$ holds, for any transition $((s_i, \enumSet{m_1}),\actionLabel,(s_j,\enumSet{m_j})$ in $clts(D)$ a transition $(s_i, l, s_j)$ should exist in $\Delta_E$. This proves the first restriction ($\Delta_{E}(s_E)\cap 2^{|\controlSet|} \supseteq \Delta_{C}(s_C)\cap 2^{|\controlSet|}$), now for the other part, since $\fdsD$ is complete w.r.t. $\mathcal{X}$ and we are only restricting environmental variables by forcing $\theta_e \wedge \square\rho_e$, all transitions enabled by $\rho_e$ are held in $\fdsD$, which are then included in $\Delta$, and since the plant is bi-partite, i.e. either all label variables are environmental or either all of them are system variables, and since the next state variables are completely defined by the selection of label variables in $\rho_{update.states}$, we can prove that all non controllable transitions from $E$ are kept in $ctrl(\fdsD)$. Now is easy to show that such controller needs to be deadlock free, because otherwise there would be at least one reachable state $s_b$ that would not have a successor, thus implying that there is a contradiction when at a point of the run $\sigma$ in $\fdsD$ the variable $\varState{s_b}$ holds, which will prevent $\fdsD$ from satisfying the $\rho$ part of $\varphiLTL$ ($\theta_e \implies \square((\boxdot \rho_e) \implies \rho_s)$).  
+$\Delta_{E}(s_E)\cap 2^{|\controlSet|} \supseteq \Delta_{C}(s_C)\cap 2^{|\controlSet|}$(no controllable transitions are added) and also $\Delta_{E}(s_E)\cap 2^{|\nonControlSet|} \subseteq \Delta_{C}(s_C)\cap 2^{|\nonControlSet|}$ (all monitored transitions are kept). Since $\fdsD$ satisfies $\varphiLTL$, which implies that it also satisfies $\rho_e \implies \rho_s$, and we are only considering plays where $\theta_e \wedge \square \rho_e$ holds, for any transition $((s_i, \enumSet{m_1}),\actionLabel,(s_j,\enumSet{m_j})$ in $clts(D)$ a transition $(s_i, \actionLabel, s_j)$ should exist in $\Delta_E$. This proves the first restriction (no controllable transitions are added), now for the other part, since $\fdsD$ is complete w.r.t. $\mathcal{X}$ and we are only restricting environmental variables by forcing $\theta_e \wedge \square\rho_e$, all transitions enabled by $\rho_e$ are held in $\fdsD$, which are then included in $\Delta$, and since $E$ is bi-partite implying that either all label variables relted to a label are environmental or either all of them are system variables, and since the next state variables are completely defined by the selection of label variables in $\rho_{update.states}$, we can prove that all non controllable transitions from $E$ are kept in $ctrl(\fdsD)$ (all monitored transitions are kept). Now is easy to show that such a controller needs to be deadlock free, because otherwise there would be at least one reachable state $s_b$ that would not have a \fdsD-successor, thus implying that there is a contradiction when at a point of the run $\sigma$ in $\fdsD$ the variable $\varState{s_b}$ holds, which will prevent $\fdsD$ from satisfying the $\rho$ part of $\varphiLTL$ ($\theta_e \implies \square((\boxdot \rho_e) \implies \rho_s)$).  
 Now for the LTL formula $\varphi$ in \controlProblem, we prove that for every execution $\execution$ in $clts(\fdsD)$ there is a run $\sigma$ in $\fdsD$ that conforms to it.
 For an execution $\execution \in S^{\omega}$ we define the run $\sigma(\execution) \in 2^{|\mathcal{V}|^{\omega}}$ as follows, suppose that $\execution= \execution_1 \execution_2 \ldots \execution_i \ldots$ and $\sigma(\execution) = \sigma_1 \sigma_2 \ldots \sigma_i \ldots$ 
  then $\execution_i = s_j \iff \sigma_i \models \varState{j}$, the proof that such run is possible in $D$ is similar to the one for $exec(\sigma)$.
-Now, since for each execution $\sigma(\execution)$ in $clts(D)$ we have a run $\sigma$ in $\fdsD$, and since given that we evaluate only runs that follow $\theta$ and $\rho$, then $\fdsD \models val(\varphi)$ and we can show that $\sigma(\execution) \models \varphi$ since the satisfaction of the atomic propositions is defined completely by the embedding of states $\varState{i} \in \sigma$ and $s_i \in \execution(\sigma)$.
+Now, since for each execution $\sigma(\execution)$ in $clts(\fdsD)$ we have a run $\sigma$ in $\fdsD$, and since given that we evaluate only runs that follow $\theta$ and $\rho$, then $\fdsD$ satisfies $val(\varphi)$ and we can show that $\sigma(\execution)$ satisfies $\varphi$ since the satisfaction of the atomic propositions is defined completely by the embedding of states $\varState{i} \in \sigma$ and $s_i \in \execution(\sigma)$.

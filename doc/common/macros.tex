@@ -8,8 +8,8 @@
 
 %valuations
 \newcommand{\valuations}{\ensuremath{\mathbb{V}}}
-\newcommand{\propositions}{\ensuremath{\mathbb{P}}}
-\newcommand{\proposition}{\ensuremath{p}}
+\newcommand{\propositions}{\ensuremath{\mathbb{P}}\xspace}
+\newcommand{\proposition}{\ensuremath{p}\xspace}
 %\newcommand{\acceptingState}{acc}
 %\newcommand{\acceptingSymbol}{\alpha}
 %\newcommand{\acceptingSymbols}{\beta}
@@ -51,7 +51,7 @@
 \newcommand{\enumSetDef}{$\#:\mathcal{P}(\mathcal{W})\mapsto [0\ldots2^{|\mathcal{W}|}-1]$\xspace}
 \newcommand{\fdsDefIdx}[1]{$#1= \langle \gsV_{#1},$ $\theta_{#1},$ $\rho_{#1},$ $\mathcal{J}_{#1},$ $\mathcal{C}_{#1}\rangle$\xspace}
 \newcommand{\fdsD}{\ensuremath{\mathcal{D}}\xspace}
-\newcommand{\fdsDef}{$\fdsD = \langle \gsV,$ $\theta,$ $\rho,$ $\mathcal{J},$ $\mathcal{C}\rangle$\xspace}
+\newcommand{\fdsDef}{$\fdsD = \langle \gsV_d,$ $\theta_d,$ $\rho_d,$ $\mathcal{J}_d,$ $\mathcal{C}_d\rangle$\xspace}
 \newcommand{\fdsControlProblemDef}{{$\fdsControlProblem =\langle \gsX,$ $\gsY,$ $\varphi \rangle$}\xspace}
 \newcommand{\fdsControlProblem}{{\mathcal{K}}\xspace}
 %realizability theorems
@@ -60,7 +60,8 @@
 \newcommand{\varphiLTL}{\ensuremath{\varphi_{FDS}}}
 \newcommand{\varphiLTLDef}{\ensuremath{\varphiLTL = (\theta_e \implies \theta_s) \wedge (\theta_e \implies \square((\boxdot \rho_e) \implies \rho_s)) \wedge (\theta_e \wedge \rho_e \implies val(\varphi))}\xspace}
 \newcommand{\varphiLtlFormula}{\ensuremath{(\theta_e \implies \theta_s) \wedge (\theta_e \implies \square((\boxdot \rho_e) \implies \rho_s)) \wedge (\theta_e \wedge \rho_e \implies val(\varphi))}}
-\newcommand{\fdsEmbedding}{\ensuremath{ltl(\controlProblem) = \fdsControlProblem' =\langle \gsX,$ $\gsY,$ $\varphiLTL \rangle}\xspace}
+\newcommand{\fdsEmbeddingDef}{\ensuremath{ltl(\controlProblem) = \langle \gsX,$ $\gsY,$ $\varphiLTL \rangle}\xspace}
+\newcommand{\fdsEmbedding}{\ensuremath{ltl(\controlProblem)}\xspace}
 
 %formulae
 \newcommand{\true}{\emph{true} }

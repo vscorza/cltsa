@@ -1,7 +1,8 @@
 % Cite GS, realizability 
 % Cite FDS 
 
-In this section we introduce the models and definitions from the reactive systems domain. Fair Discrete Systems ~\cite{kesten2000verification} are used as a symbolic representation of a finite state transition system over Boolean variables. Game structures were introduced ~\cite{bloem2012synthesis} to model open systems where properties are split between assumptions and guarantees.
+In this section we introduce the models and definitions for Fair Discrete Systems (FDS). Fair Discrete Systems ~\cite{kesten2000verification},~\cite{bloem2012synthesis} are used as a symbolic representation of a finite state transition system over Boolean variables. 
+%Game structures were introduced  to model open systems where properties are split between assumptions and guarantees.
 
 In the following definitions we will denote $2^{\gsV}$ as $\Sigma_{\gsV}$, and $s|_{\gsY}$ as the projection of $s$ to $\gsY$, i.e., $s_{\gsY} = \{y \in \gsY | y \in s \}$.
 
@@ -38,10 +39,9 @@ In the following definitions we will denote $2^{\gsV}$ as $\Sigma_{\gsV}$, and $
 	\end{itemize}
 \end{definition}
 
-
 \begin{definition}
 	\label{def:fds_realizability} (\emph{Realizability of $\varphi$ by an FDS})
-	Given an LTL formula $\varphi$ over sets of input and output variables $\gsX$ and $\gsY$, we say that an FDS \fdsDef \emph{realizes} $\varphi$ if:
+	Given an LTL formula $\varphi$ over sets of input and output variables $\gsX$ and $\gsY$ respectively, we say that an FDS \fdsDef \emph{realizes} $\varphi$ if:
 	\begin{itemize}
 		\item $\gsV$ contains $\gsX$ and $\gsY$ 
 		\item $\fdsD$ is complete with respect to $\gsX$
