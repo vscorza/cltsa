@@ -1,13 +1,14 @@
 
 \begin{definition} 
-	\label{def:synchronous_composition}(\emph{Synchronous Composition}) Let \cltsDefIdx{M},\cltsDefIdx{N}, with $\Delta_M : S_M \times 2^{|\Sigma_M|} \times S_M$, be two CLTS instances, then CLTS synchronous parallel composition is defined as \cltsComposition{M}{N}{s} where:\\
+	\label{def:synchronous_composition}(\emph{Synchronous Composition}) 
+	Let \cltsDefIdx{M}, \cltsDefIdx{N}, with $\Delta_M : S_M \times 2^{|\Sigma_M|} \times S_M$, be two CLTS instances, then CLTS synchronous parallel composition is defined as \cltsComposition{M}{N}{s} where:\\
 	 \[S = \{(s_M,s_N) \in S_M \times S_N~|~ \valuations_M(s_M) \cap \propositions_N = \valuations_N(s_N) \cap \propositions_M  \}\]
 	 \[ \valuations(s) = \valuations_M(s) \cup \valuations_N(s)\] 
 	 And $\Delta$ is the smallest relation s.t:
 	\begin{center}
 		\begin{equation}
-		\AxiomC{$(s, l_M, s') \in \Delta_M,(t, l_N, t') \in \Delta_N  $}\RightLabel{$l_M \cap \Sigma_N = l_N \cap \Sigma_M$}
-		\UnaryInfC{$((s,t),l_M \cup l_N,(s',t')) \in \Delta$}
+		\AxiomC{$(s, \actionLabel_M, s') \in \Delta_M,(t, \actionLabel_N, t') \in \Delta_N  $}\RightLabel{$\actionLabel_M \cap \Sigma_N = \actionLabel_N \cap \Sigma_M$}
+		\UnaryInfC{$((s,t),\actionLabel_M \cup \actionLabel_N,(s',t')) \in \Delta$}
 		\DisplayProof	
 		\end{equation}	
 	\end{center}

@@ -3,49 +3,55 @@
 
 In this section we introduce the models and definitions from the reactive systems domain. Fair Discrete Systems ~\cite{kesten2000verification} are used as a symbolic representation of a finite state transition system over Boolean variables. Game structures were introduced ~\cite{bloem2012synthesis} to model open systems where properties are split between assumptions and guarantees.
 
-In the following definitions we will denote $2^{\mathcal{V}}$ as $\Sigma_{\mathcal{V}}$, and $s|_{\mathcal{Y}}$ as the projection of $s$ to $\mathcal{Y}$, i.e., $s_{\mathcal{Y}} = \{y \in \mathcal{Y} | y \in s \}$.
+In the following definitions we will denote $2^{\gsV}$ as $\Sigma_{\gsV}$, and $s|_{\gsY}$ as the projection of $s$ to $\gsY$, i.e., $s_{\gsY} = \{y \in \gsY | y \in s \}$.
 
 \begin{definition}
 	\label{def:FDS} \emph{(Fair Discrete System)} 
 	A \emph{Fair Discrete System} (FDS) \fdsDef, where:
 	\begin{itemize}
-		\item $\mathcal{V} = \{v_1,\ldots,v_n \}$: A finite set of Boolean variables. We define a \emph{state} $s$ to be an interpretation of $\mathcal{V}$, i.e., $s \in \Sigma_{\mathcal{V}}$.
-		\item $\theta$: The \emph{initial condition}. This is an assertion over $\mathcal{V}$ characterizing all the initial states of the FDS. A state is called \emph{initial} if it satisfies $\theta$.
-		\item $\rho$: A \emph{transition relation}. This is an assertion $\rho(\mathcal{V} \cup \mathcal{V}')$, relating a state $s \in \Sigma_{\mathcal{V}}$ to its $\mathcal{D}$-successors $s' \in \Sigma_{\mathcal{V}}$, i.e. $(s,s') \models \rho$.
-		\item $\mathcal{J} = \{J_1, \ldots, J_m \}$: A set of \emph{justice requirements} (weak fairness). Each requirement $J \in \mathcal{J}$ is an assertion over $\mathcal{V}$ that is intended to hold infinitely many times in every computation.
+		\item $\gsV = \{v_1,\ldots,v_n \}$: A finite set of Boolean variables. We define a \emph{state} $s$ to be an interpretation of $\gsV$, i.e., $s \in \Sigma_{\gsV}$.
+		\item $\theta$: The \emph{initial condition}. This is an assertion over $\gsV$ characterizing all the initial states of the FDS. A state is called \emph{initial} if it satisfies $\theta$.
+		\item $\rho$: A \emph{transition relation}. This is an assertion $\rho(\gsV \cup \gsV')$, relating a state $s \in \Sigma_{\gsV}$ to its $\fdsD$-successors $s' \in \Sigma_{\gsV}$, i.e. $(s,s') \models \rho$.
+		\item $\mathcal{J} = \{J_1, \ldots, J_m \}$: A set of \emph{justice requirements} (weak fairness). Each requirement $J \in \mathcal{J}$ is an assertion over $\gsV$ that is intended to hold infinitely many times in every computation.
 		\item $\mathcal{C} = \{(P_1,Q_1), \ldots, (P_n,Q_n) \}$: A set of \emph{compassion requirements} (strong fairness). Each requirement $(P,Q) \in \mathcal{C}$ consists of a pair of assertions, such that if a computation contains infinitely many $P$-states, it should also hold infinitely many $Q$-states.
 	\end{itemize}
 \end{definition}
 
 \begin{definition}
-	\label{def:runFDS} \emph{(Run of a FDS)} 
-	A \emph{run} of the FDS $\mathcal{D}$ is a maximal sequence of states $\sigma = s_0,s_1,\ldots$
+	\label{def:fds_run} \emph{(Run of a FDS)} 
+	A \emph{run} of the FDS $\fdsD$ is a maximal sequence of states $\sigma = s_0,s_1,\ldots$
 	satisfying:
 	\begin{itemize}
 		\item \emph{initiality}, i.e., $s_0\models \theta$ and
 		\item \emph{consecution}, i.e., for every $j\geq 0, (s_j, s_{j+1})\models \rho$.
 	\end{itemize}
-	A sequence $\sigma$ is maximal if either $\sigma$ is infinite or $\sigma=s_0,\ldots,s_k$ and $s_k$ has no $\mathcal{D}$-successor, i.e., for all $s_{k+1} \in \Sigma_{\mathcal{V}}, (s_k,s_{k+1}) \not\models \rho$
+	A sequence $\sigma$ is maximal if either $\sigma$ is infinite or $\sigma=s_0,\ldots,s_k$ and $s_k$ has no $\fdsD$-successor, i.e., for all $s_{k+1} \in \Sigma_{\gsV}, (s_k,s_{k+1}) \not\models \rho$
 \end{definition}
 
 
 \begin{definition}
-	\label{def:completeFDS} (\emph{Complete w.r.t.} $\mathcal{X}$)
-	We say that an FDS $\mathcal{D}$ \emph{is complete with respect to} $\mathcal{X} \subseteq \mathcal{V}$, if:
+	\label{def:complete_fds} (\emph{Complete w.r.t.} $\gsX$)
+	We say that an FDS $\fdsD$ \emph{is complete with respect to} $\gsX \subseteq \gsV$, if:
 	\begin{itemize}
-		\item for every assignment $s_{\mathcal{X}} \in \Sigma_{\mathcal{X}}$, there exists a state $s \in \Sigma_{\mathcal{V}}$ such that $s|_{\mathcal{X}} = s_{\mathcal{X}}$ and $s \models \theta$
-		\item for all states $s \in \Sigma_{\mathcal{V}}$ and assignments $s'_{\mathcal{X}} \in \Sigma_{\mathcal{X}}$, there exists a state $s' \in \Sigma_{\mathcal{V}}$ such that $s'|_{\mathcal{X}}=s'_{\mathcal{X}}$ and $(s,s') \models \rho$
+		\item for every assignment $s_{\gsX} \in \Sigma_{\gsX}$, there exists a state $s \in \Sigma_{\gsV}$ such that $s|_{\gsX} = s_{\gsX}$ and $s \models \theta$
+		\item for all states $s \in \Sigma_{\gsV}$ and assignments $s'_{\gsX} \in \Sigma_{\gsX}$, there exists a state $s' \in \Sigma_{\gsV}$ such that $s'|_{\gsX}=s'_{\gsX}$ and $(s,s') \models \rho$
 	\end{itemize}
 \end{definition}
 
 
 \begin{definition}
-	\label{def:realizabilityFDS} (\emph{Realizability of $\varphi$ by an FDS})
-	Given an LTL formula $\varphi$ over sets of input and output variables $\mathcal{X}$ and $\mathcal{Y}$, we say that an FDS \fdsDef \emph{realizes} $\varphi$ if:
+	\label{def:fds_realizability} (\emph{Realizability of $\varphi$ by an FDS})
+	Given an LTL formula $\varphi$ over sets of input and output variables $\gsX$ and $\gsY$, we say that an FDS \fdsDef \emph{realizes} $\varphi$ if:
 	\begin{itemize}
-		\item $\mathcal{V}$ contains $\mathcal{X}$ and $\mathcal{Y}$ 
-		\item $\mathcal{D}$ is complete with respect to $\mathcal{X}$
-		\item $\mathcal{D} \models \varphi$
+		\item $\gsV$ contains $\gsX$ and $\gsY$ 
+		\item $\fdsD$ is complete with respect to $\gsX$
+		\item $\fdsD \models \varphi$
 	\end{itemize}
-	Such an FDS is called a \emph{controller} for $\varphi$. We say that the specification is realizable ~\cite{pnueli1989synthesis}, if there exists a fairness-free FDS $\mathcal{D}$, i.e., an FDS where $\mathcal{J} =\mathcal{C} = \emptyset$, that realizes it, otherwise we say that the specification is \emph{unrealizable}.
+	Such an FDS is called a \emph{controller} for $\varphi$. We say that the specification is realizable ~\cite{pnueli1989synthesis}, if there exists a fairness-free FDS $\fdsD$, i.e., an FDS where $\mathcal{J} =\mathcal{C} = \emptyset$, that realizes it, otherwise we say that the specification is \emph{unrealizable}.
 \end{definition}
+
+\begin{definition}
+	\label{def:fds_control_problem} \emph{(FDS Control Problem)} 
+	Let $\varphi$ be a LTL formula over sets of input and output variables $\gsX$ and $\gsY$, then \fdsControlProblemDef constitutes an FDS control problem. If a solution to $\fdsControlProblem$ exists, such a solution will be the FDS \fdsDef that realizes $\varphi$.
+\end{definition}
+In the context of an FDS control problem, $x \in \gsX$ will be called an \emph{environmental variable} and $y \in \gsY$ will be called a \emph{system variable}.

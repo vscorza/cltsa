@@ -6,34 +6,36 @@
 \newtheorem{corollary}[theorem]{Corollary}
 
 
-%acceptors
-\newcommand{\valuations}{{\mathbb{V}}}
-\newcommand{\propositions}{{\mathbb{P}}}
-\newcommand{\proposition}{{p}}
+%valuations
+\newcommand{\valuations}{\ensuremath{\mathbb{V}}}
+\newcommand{\propositions}{\ensuremath{\mathbb{P}}}
+\newcommand{\proposition}{\ensuremath{p}}
 %\newcommand{\acceptingState}{acc}
 %\newcommand{\acceptingSymbol}{\alpha}
 %\newcommand{\acceptingSymbols}{\beta}
-\newcommand{\executionDef}{{$\varepsilon=s_0,$ $\act_0,$ $s_1,$ $\ldots$}}
-\newcommand{\execution}{{\varepsilon}}
+\newcommand{\executionDef}{\ensuremath{\varepsilon=s_0, \actionLabel_0, s_1, \ldots}\xspace}
+\newcommand{\execution}{\ensuremath{\varepsilon}}
 
 %clts
-\newcommand{\cltsDefIdx}[1]{{$#1 = (S_{#1},$$ \Sigma_{#1},$ $\Delta_{#1},$ $s_{0}^{#1},$ $\valuations_{#1})$}}
-\newcommand{\cltsDefShareSigmaIdx}[1]{{$#1 = (S_{#1},$ $\Sigma,$ $\Delta_{#1},$ $s_{0}^{#1},$ $\valuations_{#1})$}}
-\newcommand{\cltsDef}{$E = (S,$ $\Sigma,$ $\Delta,$ $s_{0},$ $\valuations)$}
-\newcommand{\cltsEmbeddingDef}[1]{{$clts(#1) = (S,$ $\Sigma,$ $\Delta,$ $s_{0},$ $\valuations)$}}
-\newcommand{\automaton}[1]{{$#1 = (S_{#1}, \Sigma_{#1}, \Delta_{#1}, s_{0}^{#1})$}}
-\newcommand{\act}{A}
-\newcommand{\traces}{\emph{Tr} }
+\newcommand{\cltsDefIdx}[1]{\ensuremath{#1 = \lparen S_{#1},} \ensuremath{\Sigma_{#1}, \Delta_{#1},} \ensuremath{s_{0}^{#1}, \valuations_{#1}\rparen}\xspace}
+\newcommand{\cltsDefShareSigmaIdx}[1]{\ensuremath{#1 = \lparen S_{#1},} \ensuremath{\Sigma, \Delta_{#1},} \ensuremath{s_{0}^{#1},} \ensuremath{\valuations_{#1}\rparen}\xspace}
+\newcommand{\cltsDef}{\ensuremath{E = (S, \Sigma, \Delta, s_{0}, \valuations)}\xspace}
+\newcommand{\cltsEmbeddingDef}[1]{\ensuremath{clts(#1) = (S, \Sigma, \Delta, s_{0}, \valuations)}\xspace}
+\newcommand{\automaton}[1]{\ensuremath{#1 = (S_{#1}, \Sigma_{#1}, \Delta_{#1}, s_{0}^{#1})}\xspace}
+\newcommand{\labelSet}{\ensuremath{\mathcal{L}}\xspace}
+\newcommand{\actionLabel}{\ensuremath{L}\xspace}
+\newcommand{\action}{\ensuremath{l}\xspace}
+\newcommand{\traces}{\ensuremath{\emph{Tr}}}
 
 %composition
-\newcommand{\cltsComposition}[3]{{$#1 \parallel_{#3} #2 = (S,$ $\Sigma_{#1} \cup \Sigma_{#2},$ $\Delta,$ $(s_{0}^{#1},s_{0}^{#2}),$ $\valuations)$}}
-\newcommand{\ltsAdjustment}[2]{{$#1 \pm #2 = (S_{#1}\times S_{#2},$ $\Sigma_{#1} \cup \Sigma_{#2},$ $\Delta,$ $(s_{0}^{#1},$ $s_{0}^{#2}))$}}
+\newcommand{\cltsComposition}[3]{{\ensuremath{#1 \parallel_{#3} #2 = \lparen S,$ $\Sigma_{#1} \cup \Sigma_{#2},$ $\Delta,$ $(s_{0}^{#1},s_{0}^{#2}),$ $\valuations\rparen}}\xspace}
+\newcommand{\ltsAdjustment}[2]{{\ensuremath{#1 \pm #2 = \lparen S_{#1}\times S_{#2},$ $\Sigma_{#1} \cup \Sigma_{#2},$ $\Delta,$ $(s_{0}^{#1},$ $s_{0}^{#2})\rparen}}\xspace}
 
 %control problem
-\newcommand{\controlSet}{{\mathcal{C}}}
-\newcommand{\nonControlSet}{{\mathcal{U}}}
-\newcommand{\controlProblemDef}{{$\mathcal{I} =\langle E,$ $\controlSet,$ $\varphi \rangle$}}
-\newcommand{\controlProblem}{{\mathcal{I}}}
+\newcommand{\controlSet}{\ensuremath{\mathcal{C}}}
+\newcommand{\nonControlSet}{\ensuremath{\mathcal{U}}}
+\newcommand{\controlProblemDef}{\ensuremath{\controlProblem =\langle E,$ $\controlSet,$ $\varphi \rangle}\xspace}
+\newcommand{\controlProblem}{\ensuremath{\mathcal{I}}}
 
 %GS
 \newcommand{\gsV}{{\mathcal{V}}}
@@ -47,14 +49,18 @@
 %FDS
 \newcommand{\enumSet}[1]{\#(#1)}
 \newcommand{\enumSetDef}{$\#:\mathcal{P}(\mathcal{W})\mapsto [0\ldots2^{|\mathcal{W}|}-1]$\xspace}
-\newcommand{\fdsDefIdx}[1]{$#1= \langle \mathcal{V}_{#1},$ $\theta_{#1},$ $\rho_{#1},$ $\mathcal{J}_{#1},$ $\mathcal{C}_{#1}\rangle$}
-\newcommand{\fdsDef}{$\mathcal{D} = \langle \mathcal{V},$ $\theta,$ $\rho,$ $\mathcal{J},$ $\mathcal{C}\rangle$}
+\newcommand{\fdsDefIdx}[1]{$#1= \langle \gsV_{#1},$ $\theta_{#1},$ $\rho_{#1},$ $\mathcal{J}_{#1},$ $\mathcal{C}_{#1}\rangle$\xspace}
+\newcommand{\fdsD}{\ensuremath{\mathcal{D}}\xspace}
+\newcommand{\fdsDef}{$\fdsD = \langle \gsV,$ $\theta,$ $\rho,$ $\mathcal{J},$ $\mathcal{C}\rangle$\xspace}
+\newcommand{\fdsControlProblemDef}{{$\fdsControlProblem =\langle \gsX,$ $\gsY,$ $\varphi \rangle$}\xspace}
+\newcommand{\fdsControlProblem}{{\mathcal{K}}\xspace}
 %realizability theorems
 \newcommand{\varState}[1]{\hat{s}_{#1}}
 \newcommand{\varLabel}[1]{\hat{l}_{#1}}
-\newcommand{\varphiLtl}{\varphi_{LTL} = (\theta_e \implies \theta_s) \wedge (\theta_e \implies \square((\boxdot \rho_e) \implies \rho_s)) \wedge (\theta_e \wedge \rho_e \implies val(\varphi))}
-\newcommand{\varphiLtlFormula}{(\theta_e \implies \theta_s) \wedge (\theta_e \implies \square((\boxdot \rho_e) \implies \rho_s)) \wedge (\theta_e \wedge \rho_e \implies val(\varphi))}
-
+\newcommand{\varphiLTL}{\ensuremath{\varphi_{FDS}}}
+\newcommand{\varphiLTLDef}{\ensuremath{\varphiLTL = (\theta_e \implies \theta_s) \wedge (\theta_e \implies \square((\boxdot \rho_e) \implies \rho_s)) \wedge (\theta_e \wedge \rho_e \implies val(\varphi))}\xspace}
+\newcommand{\varphiLtlFormula}{\ensuremath{(\theta_e \implies \theta_s) \wedge (\theta_e \implies \square((\boxdot \rho_e) \implies \rho_s)) \wedge (\theta_e \wedge \rho_e \implies val(\varphi))}}
+\newcommand{\fdsEmbedding}{\ensuremath{ltl(\controlProblem) = \fdsControlProblem' =\langle \gsX,$ $\gsY,$ $\varphiLTL \rangle}\xspace}
 
 %formulae
 \newcommand{\true}{\emph{true} }

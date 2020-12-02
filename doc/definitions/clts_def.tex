@@ -1,8 +1,8 @@
 \begin{definition}
-	\label{def:CLTS} \emph{(Concurrent Labelled Transition Systems)} 
-	A \emph{Concurrent Labelled Transition System} (CLTS) is \cltsDef, where $S$ is a finite set of states, $\Sigma$ is its {\em communicating alphabet}, $\Delta \subseteq (S \times 2^{|\Sigma|} \times S)$ is a transition relation, $s_0 \in S$ is the initial state, and $\valuations : S \mapsto  2^{|\propositions|}$ is the function that defines the set of valuations over $\propositions$ for any given state.  We denote $\Delta(s)=\{\act~|~(s,\act,s') \in \Delta\}$. 
-	A CLTS is deterministic if $(s,\act,s')$ and $(s,\act,s'')$ are in $\Delta$ implies $s'=s''$.
-	An execution of $E$ is a word \executionDef where $(s_i, \act_i, s_{i+1}) \in \Delta$. 
+	\actionLabel{def:CLTS} \emph{(Concurrent Labelled Transition Systems)} 
+	A \emph{Concurrent Labelled Transition System} (CLTS) is \cltsDef, where $S$ is a finite set of states, $\Sigma$ is its {\em set of actions}, $\Delta \subseteq (S \times 2^{|\Sigma|} \times S)$ is a transition relation, $s_0 \in S$ is the initial state, and $\valuations : S \mapsto  2^{|\propositions|}$ is the function that defines the set of valuations over $\propositions$ for any given state.  We denote $\Delta(s)=\{\actionLabel~|~(s,\actionLabel,s') \in \Delta\}$. 
+	A CLTS is deterministic if $(s,\actionLabel,s')$ and $(s,\actionLabel,s'')$ are in $\Delta$ implies $s'=s''$.
+	An execution of $E$ is a word \executionDef where $(s_i, \actionLabel_i, s_{i+1}) \in \Delta$. 
 	A word $\pi$ is a trace (induced by $\varepsilon$) of $E$ if its the result of removing every $s_i$ from an execution $\varepsilon$ of $E$. 
-	We denote the set of infinite traces of $E$ by $\traces(E)$. 
+	We denote the set of infinite traces of $E$ by $\traces(E)$. Given a transition $(s_i, \actionLabel_i, s_j) \in \Delta$, we will call $\actionLabel_i$ its label, and each element $\action_k \in \actionLabel_i$ an action.
 \end{definition}
