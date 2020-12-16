@@ -1,6 +1,10 @@
 \begin{definition}
 	\actionLabel{def:CLTS} \emph{(Concurrent Labelled Transition Systems)} 
-	A \emph{Concurrent Labelled Transition System} (CLTS) is defined as \cltsDef, where $S$ is a finite set of states, $\Sigma$ is its {\em set of actions}, $\Delta \subseteq (S \times 2^{|\Sigma|} \times S)$ is a transition relation, $s_0 \in S$ is the initial state, $\propositions : \{\proposition_0,\ldots,\proposition_k\}$ is a finite set of atomic propositions and $\valuations : S \mapsto  2^{|\propositions|}$ is the function that defines the set of propositions ¨that hold at a given state $s \in S$.  
+	A \emph{Concurrent Labelled Transition System} (CLTS) is defined as 
+	\cltsDef, 
+	where $S$ is a finite set of states, $\Sigma$ is its {\em set of actions}, $\Delta \subseteq (S \times 2^{|\Sigma|} \times S)$ is a transition relation, $s_0 \in S$ is the initial state,
+	 $\propositions : \{\proposition_0,\ldots,\proposition_k\}$ is a finite set of atomic 
+	 propositions and $\valuations : S \mapsto  2^{|\propositions|}$ is the function that defines the set of propositions that hold at a given state $s \in S$.  
 	%We denote $\Delta(s)=\{\actionLabel~|~(s,\actionLabel,s') \in \Delta\}$. 
 	A CLTS is deterministic if $(s,\actionLabel,s')$ and $(s,\actionLabel,s'')$ are in $\Delta$ then $s'=s''$ should hold.
 	An execution of $E$ is a word \executionDef where $(s_i, \actionLabel_i, s_{i+1}) \in \Delta$. 

@@ -1,29 +1,14 @@
 TODO:
 =====
 - notas vic
-	- en composición, se usa que sigma_n y sigma_m pueden ser distintos?
-	- definicion de legalidad, pasar subindices E a e
-	- gr1 spcs over clts
-		- explicar ventajas de clts sobre lts
-		- explicar evaluación de ltl sobre trazas (traducción de fluents)
-	- clts -> LTL	
-		- donde dice ctls to ltl debería decir clts control problem
-		X falta definición de reactive systems
-		- aparece el término plant, boolean variable
-		- qué significa alphabet of the transition
-	- the ltl equivalent formula to control problem... (cómo una formula es equivalente a un problema?
-- prove iff realizables
-	- exists d then exists c
-		- we build C from D with clts(D) then for all traces it exists a play, the satisfcation in val(phi) implies satisfaction of phi by path
-			- define ctrl: FDS -> CLTS
-				X removes vacuous traces
-					X prove if D exists then should have traces satisfying precedent, otherwise the env would win by violating pred.
-				- prove it is legal
-					- if it violates precedent then it will jump anywhere, if it does not and a value is picked for env. (free) rho_sys should hold, updating the next state
-				- pŕove it is deadlock-free
-					- by definition it will follow phi_g, which does not allow deadlocks
-			- define play: trace -> play
-			- prove implication by ltl cases			
+	- review deterministic dependencies on proof
+	- propose nondeterministic compatible translation
+		- sketch
+	- fds -> clts
+		- translation
+		- theorem
+		- proof
+	- plan clts <-> lts 
 	- prove translations between FLTL and AccLTL (E x F -> E' with new states and accepting sets)
 	- update clts strategy
 - add cites
