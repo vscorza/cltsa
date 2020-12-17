@@ -1,10 +1,10 @@
 TODO:
 =====
 - notas vic
-	- review deterministic dependencies on proof
-	- propose nondeterministic compatible translation
-		- sketch
 	- fds -> clts
+		- propose ranking approach, for mixed transitions the ranking si defined as:
+			project monitored alphabet and take the one representative for each and set the
+			ranking of the candidate as the min within the group
 		- translation
 		- theorem
 		- proof

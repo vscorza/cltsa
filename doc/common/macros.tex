@@ -52,16 +52,21 @@
 \newcommand{\fdsDefIdx}[1]{$#1= \langle \gsV_{#1},$ $\theta_{#1},$ $\rho_{#1},$ $\mathcal{J}_{#1},$ $\mathcal{C}_{#1}\rangle$\xspace}
 \newcommand{\fdsD}{\ensuremath{\mathcal{D}}\xspace}
 \newcommand{\fdsDef}{$\fdsD = \langle \gsV_d,$ $\theta_d,$ $\rho_d,$ $\mathcal{J}_d,$ $\mathcal{C}_d\rangle$\xspace}
-\newcommand{\fdsControlProblemDef}{{$\fdsControlProblem =\langle \gsX,$ $\gsY,$ $\varphi \rangle$}\xspace}
-\newcommand{\fdsControlProblem}{{\mathcal{K}}\xspace}
+\newcommand{\fdsControlProblemDef}{\ensuremath{\fdsControlProblem =\langle \gsX,} \ensuremath{\gsY,$ $\varphi \rangle}\xspace}
+\newcommand{\fdsControlProblem}{\ensuremath{\mathcal{K}}\xspace}
 %realizability theorems
 \newcommand{\varState}[1]{\hat{s}_{#1}}
 \newcommand{\varLabel}[1]{\hat{l}_{#1}}
 \newcommand{\varphiLTL}{\ensuremath{\varphi_{FDS}}}
 \newcommand{\varphiLTLDef}{\ensuremath{\varphiLTL = (\theta_e \implies \theta_s) \wedge (\theta_e \implies \square((\boxdot \rho_e) \implies \rho_s)) \wedge (\theta_e \wedge \rho_e \implies val(\varphi))}\xspace}
+\newcommand{\varphiCLTS}{\ensuremath{\varphi_{CLTS}}}
+\newcommand{\varphiCLTSDef}{\ensuremath{\varphiCLTS = ()}\xspace}
 \newcommand{\varphiLtlFormula}{\ensuremath{(\theta_e \implies \theta_s) \wedge (\theta_e \implies \square((\boxdot \rho_e) \implies \rho_s)) \wedge (\theta_e \wedge \rho_e \implies val(\varphi))}}
 \newcommand{\fdsEmbeddingDef}{\ensuremath{ltl(\controlProblem) = \langle \gsX,$ $\gsY,$ $\varphiLTL \rangle}\xspace}
 \newcommand{\fdsEmbedding}{\ensuremath{ltl(\controlProblem)}\xspace}
+\newcommand{\cltsCPEmbeddingDef}{\ensuremath{clts(\fdsControlProblem) =\langle E,$ $\controlSet,$ $\varphiCLTS \rangle}\xspace}
+\newcommand{\cltsCPEmbedding}{\ensuremath{clts(\fdsControlProblem)}\xspace}
+
 
 %formulae
 \newcommand{\true}{\emph{true} }
