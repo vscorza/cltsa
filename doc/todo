@@ -1,27 +1,26 @@
 TODO:
 =====
 - notas vic
-	- fds -> clts
-		- propose ranking approach, for mixed transitions the ranking si defined as:
-			project monitored alphabet and take the one representative for each and set the
-			ranking of the candidate as the min within the group
-		- translation
-		- theorem
-		- proof
-	- plan clts <-> lts 
-	- prove translations between FLTL and AccLTL (E x F -> E' with new states and accepting sets)
-	- update clts strategy
+	   Ok, la aridad está en los párrafos donde dice e.g. theta_e \in 2^{\Sigma^X}, para que me quede claro, eso te parece que está mal o que hay que poner el tipo antes de la definición para que quede más claro?
+
+
+	Sí, digo poner las variables explícitamente como hacen en 2.3 del paper de Nir pero con tus propios nombres de variables antes de la definición.
+	 
+
 - add cites
 	- DFS cited from "Verification by Augmented Finitary Abstraction"
 	- Presented in "Algorithmic verification of linear temporal logic specifications"
 	- Taken from DTS "Temporal Verification of Reactive Systems: Safety"
-- clts <-> gs
-	- prove translation clts <-> GS preserves satisfaction
-		- prove clts -> gs
-	- write dfs <-> clts translation
-	- prove existence of controller -> existence of strategy		
-	- add existence of path form claim existence in gs -> clts
-	- prove existence of strategy -> existence of controller
+- fds -> clts
+	- propose ranking approach, for mixed transitions the ranking si defined as:
+		project monitored alphabet and take the one representative for each and set the
+		ranking of the candidate as the min within the group
+	- translation
+	- theorem
+	- proof
+- plan clts <-> lts 
+- prove translations between FLTL and AccLTL (E x F -> E' with new states and accepting sets)
+- update clts strategy
 - pvs
 	- review 
 		- https://www.mat.unb.br/~ayala/pvsclass17/
