@@ -11,7 +11,7 @@ And that the same criteria is satisfied by every state:
 
 \begin{definition}
 	\label{def:legal_clts} \emph{(Legality w.r.t. $E$ and $\controlSet$)} 
-	Given two bi-partite CLTS instances \cltsDefShareSigmaIdx{C} and \cltsDefShareSigmaIdx{E}, where $\Sigma$ is partitioned into actions controlled and monitored, i.e.: $\Sigma=\controlSet \; \uplus \;\nonControlSet$, we say that $C$ is a legal CLTS for $E$ if the following holds for all $(s_e,s_c) \in E \parallel_* C$:
+	Given two bi-partite CLTS instances \cltsDefShareSigmaIdx{C} and \cltsDefShareSigmaIdx{E}, where $\Sigma$ is partitioned into actions controlled and monitored, i.e.: $\Sigma=\controlSet \; \uplus \;\nonControlSet$, we say that $C$ is a legal CLTS for $E$ if the following holds for all $(s_e,s_c) \in E \parallel C$:
 	
 	\[ \Delta_{E}(s_E)\cap 2^{|\controlSet|} \supseteq \Delta_{C}(s_C)\cap 2^{|\controlSet|}\] 
 	\[\wedge\]
@@ -20,5 +20,5 @@ And that the same criteria is satisfied by every state:
 
 \begin{definition}
 	\label{def:clts_control_problem} \emph{(CLTS Control Problem)} 
-	Let \cltsDefShareSigmaIdx{E} be bi-partite w.r.t. $\controlSet \subseteq \Sigma$, then \controlProblemDef constitutes a CLTS control problem. If a solution to $\controlProblem$ exists, such a solution will be a CLTS $M$, deadlock-free, legal w.r.t. $E$ and $\controlSet$, such that, $E \parallel_* M \models \varphi$.
+	Let \cltsDefShareSigmaIdx{E} be deterministic and bi-partite w.r.t. $\controlSet \subseteq \Sigma$, then \controlProblemDef constitutes a CLTS control problem. If a solution to $\controlProblem$ exists, such a solution will be a CLTS $M$, deadlock-free, legal w.r.t. $E$ and $\controlSet$, such that, $E \parallel M \models \varphi$.
 \end{definition}

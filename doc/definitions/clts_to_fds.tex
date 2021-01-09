@@ -1,8 +1,8 @@
 
-We present a translation between CLTS and FDS control problems. Remember that we denote $\Sigma \setminus \controlSet$ as $\nonControlSet$. In order to show the relation between a CLTS and an FDS control problem we first introduce a set of embeddings, then present and prove a realizability preserving theorem between the CLTS control problem and its embedding.
+To show that CLTS and FDS control problems are equivalent we  present a translation that preserves realizability, starting with the direction from the CLTS into the FDS domain first. We will start by introducing a set of embeddings that constitute the translation and then state and prove a realizability preserving theorem.
 
 
-In order to embed the CLTS control problem \controlProblemDef into the FDS control problem \fdsEmbeddingDef, the first thing that we need to address is that the LTL formula over atomic propositions $\varphi$ is translated as $val(\varphi)$ by simply  replacing each occurrence of an atomic proposition $\proposition \in \propositions$ with the boolean variable variable $v_{\proposition}$.
+In order to embed the CLTS control problem \controlProblemDef into the FDS control problem \fdsEmbeddingDef, the first thing to note is that the LTL formula over atomic propositions $\varphi$ is translated as $val(\varphi)$ by replacing each occurrence of an atomic proposition $\proposition \in \propositions$ with the boolean variable $v_{\proposition}$. Remember that we denote $\Sigma \setminus \controlSet$ as $\nonControlSet$. 
 %\begin{definition}
 %	\label{def:val_ltl} \emph{(LTL over $\propositions$ to LTL over $\mathcal{V}$ translation)} 
 %	Let $\varphi$ be a LTL formula over set of atomic propositions $\propositions$, and $\mathcal{V}$ the minimal set of boolean variables containing a variable $v_{\proposition}$ for each $\proposition \in \propositions$, then $val(\varphi)$ is an equivalent LTL formula over boolean variables and is defined as follows:\\
@@ -23,12 +23,12 @@ In order to embed the CLTS control problem \controlProblemDef into the FDS contr
 %
 %Let $A$ be the CLTS to be translated and $B =  \langle \gsX, \gsY, \gsTheE, \gsTheS, \gsRhoE, \gsRhoS, \varphi \rangle$ the game structure resulting after applying $gs(A)$. 
 Let \cltsDef, the variables of the embedding will be comprised of two sets:
-\[\gsX = \{x_i : c_i \in \nonControlSet \} \cup \{\varState{j} : s_j \in S \}\]
-\[\gsY = \{y_i : u_i \in \controlSet \} \cup \{v_{\proposition} : \proposition \in \propositions\}\]
-Here $x_i$ is a Boolean variable representing the occurrence of an monitored action, $y_i$ is a Boolean variable representing the occurrence of a controllable action, $\varState{j}$ represents the fact that $E$ is currently at state $j$ and $v_{\proposition}$ indicates that state $j$ satisfies proposition $\proposition$,  in the context of the embedding $x_i$ and $y_i$ will be called \emph{label variables} and should be interpreted as follows, if at any point in the run $\sigma$ such label variable, say $x_i$ is set to $true$, the action $u_i$ related to that variable is taking part of the label that is being chosen at the current state to transition into the next one, $\varState{j}$ will be called a \emph{state variable} and $v_{\proposition}$ will be called a \emph{natural variable}. The information modeled at each state $v$ in the embedding \fdsEmbedding will be comprised of the \emph{state variable} $\varState{i}$ defining to which explicit state $s_i$ in the automaton $E$ $v$ is related, the \emph{natural variables} defining which propositions hold at $s_i$ and the \emph{label variables} ($x_i^1\ldots x_i^n y_i^1\ldots y_i^m$) defining the set of actions ($u_i^1\ldots u_i^n c_i^1\ldots c_i^m$) that constitute the label for the transition chosen at state $s_i$.
+\[\gsX = \{x_i : c_i \in \nonControlSet \}\]
+\[\gsY = \{y_i : u_i \in \controlSet \} \cup \{v_{\proposition} : \proposition \in \propositions\} \cup \{\varState{j} : s_j \in S \}\]
+Here $\varState{j}$ represents the fact that any given step of a run $\sigma$ in the translation relates to the state $j$ in the execution \execution over $E$, $x_i$ is a Boolean variable representing the occurrence of an monitored action at the current state, $y_i$ is a Boolean variable representing the occurrence of a controllable action. Finally, $v_{\proposition}$ indicates that state $j$ satisfies proposition $\proposition$. In the context of the embedding $x_i$ and $y_i$ will be called \emph{label variables} and should be interpreted as follows, if at any point in the run $\sigma$ such label variable, say $x_i$ is set to $true$, the action $u_i$ related to that variable is taking part of the label that is being chosen at the current state to transition into the next one, $\varState{j}$ will be called a \emph{state variable} and $v_{\proposition}$ will be called a \emph{natural variable}. The information modeled at each state $v$ in the embedding \fdsEmbedding will be comprised of the \emph{state variable} $\varState{i}$ defining to which explicit state $s_i$ in the automaton $E$ $v$ is related, the \emph{natural variables} defining which propositions hold at $s_i$ and the \emph{label variables} ($x_i^1\ldots x_i^n y_i^1\ldots y_i^m$) defining the set of actions ($u_i^1\ldots u_i^n c_i^1\ldots c_i^m$) that constitute the label for the transition chosen at state $s_i$.
 
 The possible behavior of $E$ is restricted by the pair of initial ($\theta$) and transition ($\rho$) formulae, the latter being expressed as a conjunction of smaller terms in order to clarify its construction.  
-A somewhat similar translation is presented in ~\cite{bloem2012synthesis} where, while introducing the AMBA AHB case study, the authors replace the automaton that captures the assumption that an unspecified length locked burst, leaving \emph{HBUSREQ[i]} high locks the bus, with a set of LTL formulae. Auxiliar system variables are added to specification to represent the states of the automaton. These are also used as Büchi acceptance condition, which are easily included in the GR(1) formula by adding the conjunction of accepting states to the right side of the implication.
+A somewhat similar translation is presented, for instance, in ~\cite{bloem2012synthesis} where, while introducing the AMBA AHB case study, the authors replace the automaton that captures the assumption that an unspecified length locked burst, leaving \emph{HBUSREQ[i]} high locks the bus, with a set of LTL formulae. Auxiliar system variables are added to specification to represent the states of the automaton. These are also used as Büchi acceptance condition, which are easily included in the GR(1) formula by adding the conjunction of accepting states to the right side of the implication.
 The two main differences between their translation and ours is that, first, we restrict the occurrence of certain combination of label variables to enable only those that are conforming to an existing label in the original automaton and second, that we add additional system variables to add explicit valuations in our states following the definition of \valuations.
 %From now on we will write $s(j)$ to represent the valuation of the system variables representing a given state $j$, i.e.: 
 %\[s(j) = \bigwedge\limits^{\lfloor log_2(|S_A|)\rfloor - 1}_{i=0}  s_{bit}(i,j)\]
@@ -38,7 +38,8 @@ The two main differences between their translation and ours is that, first, we r
 %\neg s_i & otherwise
 %\end{cases}
 %\]
-To embed satisfaction of $\proposition$ at state $i$ we use:
+
+The translation is now presented in a bottom-up fashion, introducing first the translation of each element in order to compose them afterwads into a LTL formulae that captures both the behavior of $E$ and the property $\varphi$ that we want to evalute. To embed satisfaction of $\proposition$ at state $i$ we use:
 \begin{center}
 	\begin{tabular}{r r r l}
 $v:$ & $\propositions \times S \mapsto \gsY',$
@@ -50,7 +51,7 @@ v_{\proposition}' & \proposition \in \valuations(s_i) \\
 $
 \end{tabular}
 \end{center}
-We will use the following three functions $var$, $label_e$ and $label_s$ to build the conjunction of system or environment variables related to the label in any given transition (note that here \actionLabel is a label composed of several actions \action):
+We will use the following three functions ($var$, $label_e$ and $label_s$) to build the conjunction of system or environment variables to represent the occurrence of a set of actions as captured by the label in any given transition taken in $E$ (note that here \actionLabel is a label composed of several actions \action):
 \begin{center}
 	\begin{tabular}{r r r l}
 $var:$ & $2^{|\Sigma|}\times \Sigma \mapsto 2,$ &
@@ -87,16 +88,16 @@ The initial condition formula will be defined as:
 \begin{center}
 	\begin{tabular}{r l}
 		$\gsTheE:2^{\Sigma_{\gsX}},$ &
-		$\gsTheE = (\varState{0} \wedge\bigwedge_{s_j \neq s_0, s_q \in S}\neg \varState{j})  \wedge \bigvee_{(s_0,\actionLabel,s_j) \in \Delta_A}labels_e(\actionLabel)$\\
+		$\gsTheE = \bigvee_{(s_0,\actionLabel,s_j) \in \Delta_A}labels_e(\actionLabel)$\\
 		$\gsTheS:2^{\Sigma_{\gsV}},$ &
-		$\gsTheS = \bigvee_{(s_0,\actionLabel,s_j) \in \Delta_A}labels_s(\actionLabel) \wedge \bigwedge_{\proposition \in \propositions}v(\proposition,0)$\\
+		$\gsTheS = (\varState{0} \wedge\bigwedge_{s_j \neq s_0, s_q \in S}\neg \varState{j}) \wedge \bigvee_{(s_0,\actionLabel,s_j) \in \Delta_A}labels_s(\actionLabel) \wedge \bigwedge_{\proposition \in \propositions}v(\proposition,0)$\\
 		$\theta:2^{\Sigma_{\gsV}},$ &
 		$\theta = \gsTheE \wedge \gsTheS$\\		
 	\end{tabular}
 \end{center}
 
-Where $\gsTheE$ defines that only the state variable related to initial state $s_0$ holds and allows the environment to pick any conjunction of label variables that are conforming to monitored actions in the transitions $(s_0, \actionLabel, s_j)$ coming out of $s_0$ in $E$, $\gsTheS$ does the same for the controllable actions and sets the natural variables related to propositions enabled at the start of the execution to $true$.
-The transition relation is constructed as a conjunction of safety formulae. These can be split into two types, \emph{enabling} and \emph{updating} formulae. The first type restricts the set of label variables that can be set to $true$ at state $s_i$, one mutually exclusive option for each label \actionLabel if the transitions $(s_i,\actionLabel,s_j) \in \Delta$. The second type defines the state $s_j$ reached for each combination of current state and enabled label variables. 
+Where $\gsTheE$ defines that allows the environment to pick any conjunction of label variables that are conforming to monitored actions in the transitions $(s_0, \actionLabel, s_j)$ coming out of $s_0$ in $E$, $\gsTheS$ does the same for the controllable actions, ensures that only the state variable related to initial state $s_0$ holds and sets the natural variables related to propositions enabled at the start of the execution to $true$.
+The transition relation is constructed as a conjunction of safety formulae. These can be split into two types, \emph{enabling} and \emph{updating} formulae. The first type restricts the set of label variables that can be set to $true$ at state $s_i$, one mutually exclusive option for each label \actionLabel in the transition relation ($(s_i,\actionLabel,s_j) \in \Delta$). The second type defines the state $s_j$ reached for each combination of current state and enabled label variables. 
 We will use the following formula to set mutually exclusive values over state variables:
 
 \begin{center}
@@ -111,22 +112,22 @@ Transition formulae $\gsRhoE$ and $\gsRhoS$ are written conforming to $\Delta$ a
 \begin{tabular}{ l c l }
 	$\rho_{env.enabling}$&$:$&$2^{\Sigma_{\gsV}} \times 2^{\Sigma_{\gsX'}}$\\
 	$\rho_{env.enabling}$ &$=$& $\bigwedge_{s_i \in S} \varState{i} \implies \bigvee_{(s_i,\actionLabel,s_j) \in \Delta}labels_e(\actionLabel)$\\
-	$\rho_{update.states}$&$:$&$\gsRhoE  \in 2^{\Sigma_{\gsV}} \times 2^{\Sigma_{\gsX'}}$\\
-	$\rho_{update.states}$&$=$&$\bigwedge_{\exists s_j:(s_i,\actionLabel,s_j) \in \Delta} (\varState{i} \wedge label_s(\actionLabel) \implies \bigvee_{(s_i,\actionLabel,s_k) \in \Delta}mux(\varState{k}') ) $\\	
 	$\rho_{sys.enabling}$&$:$&$2^{\Sigma_{\gsV}} \times 2^{\Sigma_{\gsV'}}$\\
 	$\rho_{sys.enabling}$ &$=$& $\bigwedge_{s_i \in S} \varState{i} \implies \bigvee_{(s_i,\actionLabel,s_j) \in \Delta}labels_s(\actionLabel)$\\
 	&&\\
+	$\rho_{update.states}$&$:$&$\gsRhoE  \in 2^{\Sigma_{\gsV}} \times 2^{\Sigma_{\gsY'}}$\\
+$\rho_{update.states}$&$=$&$\bigwedge_{\exists s_j:(s_i,\actionLabel,s_j) \in \Delta} (\varState{i} \wedge label_s(\actionLabel) \implies mux(\varState{j}') ) $\\	
 	$\rho_{update.propositions}$&$:$&$2^{\Sigma_{\gsV}} \times 2^{\Sigma_{\gsV'}}$\\
 	$\rho_{update.propositions}$&$=$&$\bigwedge_{(s_i,\actionLabel,s_j) \in \Delta} (\varState{i} \wedge label_s(\actionLabel) \wedge \varState{j} \implies \bigwedge_{\proposition \in \propositions}v(\proposition,j) )$\\
 	&&\\
 	$\gsRhoE$&$:$&$2^{\Sigma_{\gsV}} \times 2^{\Sigma_{\gsX'}}$\\
-	$\gsRhoE$&$=$&$\rho_{env.enabling} \wedge  \rho_{update.states}$\\		
+	$\gsRhoE$&$=$&$\rho_{env.enabling}$\\		
 	$\gsRhoS$&$:$&$2^{\Sigma_{\gsV}} \times 2^{\Sigma_{\gsV'}}$\\	
-	$\gsRhoS$&$=$&$\rho_{sys.enabling} \wedge  \rho_{update.propositions}$\\	
+	$\gsRhoS$&$=$&$\rho_{sys.enabling} \wedge  \rho_{update.states} \wedge  \rho_{update.propositions}$\\	
 \end{tabular}
 \vspace{1em}
 
-The first formula, $\rho_{env.enabling}$ restricts the set of environmental label variables that can be enabled for any given state, $\rho_{sys.enabling}$ does the same for system label variables, $\rho_{update.states}$ defines the next state variables according to the satisfaction of the state and label variables at the moment, $\rho_{update.propositions}$ updates the natural variables according to the selected next state, $\gsRhoS$ is the system transition formula, defined as a conjunction of $\rho_{sys.enabling}$, $\rho_{update.states}$ and $\rho_{update.propositions}$.
+The first formula, $\rho_{env.enabling}$ restricts the set of environmental label variables that can be enabled in mutually exclusive fashion at any given state $\sigma_j$ in the reactive system, when \varState{i} holds, capturing the fixed set of options of actions the environment can execute at any given point in the run $\sigma$ that conforms with the enabled transitions going out of $s_i$, $\rho_{sys.enabling}$ does the same for system label variables that relate to controllable actions, $\rho_{update.states}$ defines the next state variables according to the satisfaction of the state and label variables at the moment, this will conform to the state reached in $E$ after fixing the variables related to the current state and the label component of the selected outgoing transition, $\rho_{update.propositions}$ updates the natural variables according to the selected next state to ensure that these are evaluated according to the valuations defined in \valuations. Then $\gsRhoS$ is the system transition formula, defined as a conjunction of $\rho_{sys.enabling}$, $\rho_{update.states}$ and $\rho_{update.propositions}$.
 %
 %Now we have the following mapping:
 %
@@ -144,24 +145,21 @@ The first formula, $\rho_{env.enabling}$ restricts the set of environmental labe
 %The following will be used to later define an FDS:
 %\[\theta = \theta_e \wedge \theta_s, \rho = \rho_e \wedge \rho_s \]
 
-The LTL formula that captures the behavior of $E$ w.r.t. the separation of $\Sigma$ between $\controlSet$ and $\nonControlSet$ can be defined as:
+The LTL formula that contains the behavior of $E$ w.r.t. the separation of $\Sigma$ between $\controlSet$ and $\nonControlSet$ while being complete w.r.t. \gsX can be defined as:
 
 \[ \varphiLTLDef \]
 
-Now we can show that realizability is preserved between CLTS control problem $\controlProblem$ and the embedding \fdsEmbedding.
+Now we can prove that realizability is preserved between CLTS control problem $\controlProblem$ and the embedding \fdsEmbedding.
 
 \begin{theorem}(\emph{$ltl$ preserves realizability})\label{theorem:gs_preserves_realizability}\\
-	Let \controlProblemDef be a CLTS control problem with \cltsDef{E} and $\Sigma = \mathcal{C}\uplus \mathcal{U}$ then if \fdsEmbeddingDef:
-	\small
-	\[(\exists D:FDS|\fdsD= \langle \mathcal{V}_d, \theta_d, \rho_d, \mathcal{J}_d, \mathcal{C}_d\rangle, \text{s.t. }    \gsX, \gsY \in \mathcal{V}_d, D \text{ is fairness-free, complete w.r.t. } \gsX \text{: } \fdsD \models \varphiLTL\]
-	% \wedge \exists \sigma \in D: \sigma \models \theta_e \wedge \square \rho_e) \]
-	 \[ \iff (\exists C:CLTS| C \text{ legal w.r.t. } E,\mathcal{C} \text{: } C \parallel E \text{ is deadlock-free and } C \parallel E \models \varphi)  \]
+	Let \controlProblemDef be a CLTS control problem with \cltsDef and $\Sigma = \mathcal{C}\uplus \mathcal{U}$ then if \fdsEmbeddingDef, there is an FDS $\fdsD= \langle \mathcal{V}_d, \theta_d,$ $\rho_d,$ $\mathcal{J}_d,$ $\mathcal{C}_d\rangle$, s.t. $\gsX \cup \gsY \subseteq \mathcal{V}_d$, $D$ is fairness-free, complete w.r.t. \gsX that satisfies $\fdsD \models \varphiLTL$
+	if and only if there is a CLTS $C$ legal w.r.t. ($E,\mathcal{C}$) s.t. $C \parallel E$ is deadlock-free and $C \parallel E \models \varphi$.
 	\normalsize
 \end{theorem}
 
 %, with an additional condition for LTL based reactive systems ($\sigma \models \theta_d \wedge \square \rho_d$) ruling out the cases where $val(\varphi)$ is never satisfied, since $\varphi_{LTL}$ could be realized by achieving $\neg\theta \vee \diamond \neg \rho$. In such a case no controller can be built for $\mathcal{I}$ s.t. $\varphi$ is satisfied since it will violate the safety restrictions related to the behavior of the plant $E_G$.
 
-The proof is split in two parts, first we prove that if a controller exists for $\controlProblem$, an FDS exists for $\fdsEmbedding$. Then we prove the opposite direction. For the ($\exists C \rightarrow \exists \fdsD$) step we construct an FDS from controller $C$ through a specific embedding $fds(C)$ and then prove that each property holds. For the ($\exists \fdsD \rightarrow \exists C$) we construct a controller from FDS \fdsD through a specific embedding $ctrl(\fdsD)$ and then prove each property for this controller. The outline of the proof is as follows:
+The proof is split in two parts, first we prove that if a controller exists for $\controlProblem$, an FDS exists for $\fdsEmbedding$($\exists C \rightarrow \exists \fdsD$) by constructing an FDS from controller $C$ through a specific embedding $fds(C)$ and then proving that each property holds. For the case where if an FDS \fdsD exists for the embedding \fdsEmbedding there must exist a CLTS controller for \controlProblem ($\exists \fdsD \rightarrow \exists C$) we construct an FDS controller from \fdsD through a specific embedding $ctrl(\fdsD)$ and then prove each property for it. The outline of the proof is as follows:
 
 \begin{description}
 	\item[($\exists C \rightarrow \exists \fdsD$)] Given \controlProblemDef and $C$
@@ -179,7 +177,7 @@ The proof is split in two parts, first we prove that if a controller exists for 
 		\end{itemize}	
 \end{description}
 
-First,  for the $\exists C \rightarrow \exists \fdsD$ step, $fds$ constructs an FDS $\fdsD=\langle \mathcal V, \theta_d, \rho_d, \mathcal{J}_d, \mathcal{C}_d \rangle$ from a control problem $\controlProblem$ and a controller $C$ using the variables and formulas defined for $\varphiLTL$, i.e. $\gsX, \gsY, \gsTheE, \gsTheS, \gsRhoE, \gsRhoS$, but with the consideration that instead of using $E$ as the CLTS we will use $C$.
+First,  for the $\exists C \rightarrow \exists \fdsD$ step, $fds$ constructs an FDS $\fdsD=\langle \mathcal V, \theta_d, \rho_d, \mathcal{J}_d, \mathcal{C}_d \rangle$ from a control problem $\controlProblem$ and a controller $C$ using the variables and formulas defined for $\varphiLTL$, i.e. $\gsX, \gsY, \gsTheE, \gsTheS, \gsRhoE, \gsRhoS$, but with the consideration that instead of using $E$ as the base CLTS we will use $C$.
 
 \begin{tabular}{ l c l }
 	$\gsV$ & $=$ & $\gsX \cup \gsY$\\	
@@ -189,7 +187,7 @@ First,  for the $\exists C \rightarrow \exists \fdsD$ step, $fds$ constructs an 
 	$\mathcal{C}_d$ & $=$ & $\emptyset$\\
 \end{tabular}
 
-We can easily see that $fds(C)$ is fairness-free and complete w.r.t. $\mathcal{X}$ by construction, the first property is obvious ($\mathcal{J}_d=\emptyset$,$\mathcal{C}_d=\emptyset$), the second holds because no restriction is placed upon environment variables. Note that the environmental propositions appear on the left side of the implication in both $\theta_d$ and $\rho_d$. Take for instance the first condition of the complete w.r.t. $\gsX$ property, for any assignment $s_{\gsX}$ exists $s \in \Sigma_{\gsV}$ s.t. $s|_{\gsX}=s_{\gsX}$ and $s \models \theta_d$. Now, to prove that $fds(C)$ satisfies $\varphiLTL$ we observe all runs in $\fdsD$ do, i.e.: 
+We can easily see that $fds(C)$ is fairness-free and complete w.r.t. $\mathcal{X}$ by construction, the first property is obvious ($\mathcal{J}_d=\emptyset$,$\mathcal{C}_d=\emptyset$), the second holds because no restriction is placed upon environment variables. Note that the environmental propositions appear on the left side of the implication in both $\theta_d$ and $\rho_d$. Take for instance the first condition of the complete w.r.t. $\gsX$ property, for any assignment $s_{\gsX}$ exists $s \in \Sigma_{\gsV}$ s.t. $s|_{\gsX}=s_{\gsX}$ and $s \models \theta_d$. Now, to prove that $fds(C)$ satisfies $\varphiLTL$ we will show that the condition holds for all runs in $\fdsD$: 
 
 \[\forall \sigma \in \fdsD: \sigma \models \varphiLTL \]
 
@@ -206,12 +204,12 @@ $exec(\sigma) \models \proposition$ implies $\sigma \models v_{\proposition}$. A
 
 Now,  for the $\exists \fdsD \rightarrow \exists C$ direction, we propose an embedding $clts$ from an FDS into a CLTS that will preserve only the behavior that satisfies $\theta_e \wedge \square \rho_e$, since otherwise we will be keeping traces in $clts(\fdsD)$ that are not feasible in $clts(\fdsD)\parallel E$. We can show that even after removing the set of plays that satisfy $\neg \theta_e \vee \Diamond \rho_e$, a non empty controller exists, since otherwise it would contradict the existence of a FDS $\fdsD$ that is also complete w.r.t. $\gsX$ . In the following definitions, let $\mathcal{M}= \mathcal{V}_d\setminus (\mathcal{X} \cup \mathcal{Y})$ be called the \emph{memory variables} of $\fdsD$, these are the variables added by the controller to be enable to enact a memoryful strategy. We will use an arbitrary bijective function \enumSetDef that maps the valuation of memory variables with a single integer thus defining the second component in the set of states of the CLTS controller. 
 Following ~\cite{bloem2012synthesis} we will suppose that \fdsD is constructed from a strategy $f: M \times \Sigma$ $\times$ $\Sigma_{\gsX} \mapsto M \times \Sigma_{\gsY}$
-that wins the game $G_{\varphiLTL}=\langle \gsX, \gsY, true,$ $true, true,$ $true,$ $\varphiLTL \rangle$. We know  that \varphiLTL is realizable iff there is a winning strategy $f$ for $G_{\varphiLTL}$, that finite memory $M$ suffices and that at each state a single value $m_i \in M$ holds.
-Considering that $\fdsD= \langle \mathcal{V}_d, \theta_d, \rho_d, \mathcal{J}_d, \mathcal{C}_d\rangle$ is a solution to $\varphiLTL$ that was in turn built from \controlProblemDef,  we can define the embedding from an FDS controller \fdsD into a CLTS controller \cltsEmbeddingDef{\fdsD}  as:
+that wins the game $G_{\varphiLTL}=\langle \gsX, \gsY, true,$ $true, true,$ $true,$ $\varphiLTL \rangle$. We know from ~\cite{bloem2012synthesis} that \varphiLTL is realizable if and only if there is a winning strategy $f$ for $G_{\varphiLTL}$. In this case finite memory $M$ suffices and, in particular, at each state a single value $m_i \in M$ is assigned. 
+Considering that $\fdsD= \langle \mathcal{V}_d, \theta_d, \rho_d, \mathcal{J}_d, \mathcal{C}_d\rangle$ is a solution to $\varphiLTL$ that was in turn built from \controlProblemDef, we can define the embedding from an FDS controller \fdsD into a CLTS controller \cltsEmbeddingDef{\fdsD}  as:
 
 \vspace{1em}
 \begin{tabular}{ l c l }
-	$S$ &$=$& $\{(s,\enumSet{m}) | s \in S_E \times m \in \mathcal{P}(\mathcal{M}) \}$\\
+	$S$ &$=$& $\{(s,\enumSet{m}) | s \in S_E, m \in \mathcal{P}(\mathcal{M}) \}$\\
 	$\Sigma$ &$=$&$\Sigma_E$\\	
 	$s_0$&$=$&$(s_0^{E}, \enumSet{m_0})$ where $\theta_d \models m_0$ \\
 	$\valuations$&$=$&$\pi_1 \circ \valuations_E$\\
@@ -220,9 +218,9 @@ Considering that $\fdsD= \langle \mathcal{V}_d, \theta_d, \rho_d, \mathcal{J}_d,
 \end{tabular}
 \vspace{1em}
 \\
-Where $S$ is the cross product between $S_E$ and the states induced by the memory valuations of $\fdsD$ through $\#$, the sets of actions and atomic propositions remain unchanged, $\valuations=\pi_1 \circ \valuations_E$ describes the application of $\valuations_E$ over the first component of $S$ in order to get the set of propositions that are satisfied iby the projected state in $E$. The transition relation is defined by adding those states and labels whose state and label variables are satisfied according to $\rho_d$ in $\fdsD$.
+Where $S$ is the cross product between $S_E$ and the states induced by the memory valuations of $\fdsD$ through $\#$, the sets of actions and atomic propositions remain unchanged, $\valuations=\pi_1 \circ \valuations_E$ describes the application of $\valuations_E$ over the first component of $S$ in order to get the set of propositions that are satisfied by the projected state in $E$. The transition relation is defined by adding those states and labels whose state and label variables are satisfied according to $\rho_d$ in $\fdsD$.
 
-We can now show that $clts(\fdsD)$ satisfies the properties that make it a solution to $\controlProblem$. The first property we need to prove is legality w.r.t $E$ and $\mathcal{C}$, which means that for all $(s_e,s_c) \in E \parallel_* C$ it holds that:
+We can now show that $clts(\fdsD)$ satisfies the properties that make it a solution to $\controlProblem$. The first property we need to prove is legality w.r.t $E$ and $\mathcal{C}$, which means that for all $(s_e,s_c) \in E \parallel C$ it holds that:
 $\Delta_{E}(s_E)\cap 2^{|\controlSet|} \supseteq \Delta_{C}(s_C)\cap 2^{|\controlSet|}$(no controllable transitions are added) and also $\Delta_{E}(s_E)\cap 2^{|\nonControlSet|} \subseteq \Delta_{C}(s_C)\cap 2^{|\nonControlSet|}$ (all monitored transitions are kept). Since $\fdsD$ satisfies $\varphiLTL$, which implies that it also satisfies $\rho_e \implies \rho_s$, and we are only considering plays where $\theta_e \wedge \square \rho_e$ holds, for any transition $((s_i, \enumSet{m_1}),\actionLabel,(s_j,\enumSet{m_j})$ in $clts(D)$ a transition $(s_i, \actionLabel, s_j)$ should exist in $\Delta_E$. This proves the first restriction (no controllable transitions are added), now for the other part, since $\fdsD$ is complete w.r.t. $\mathcal{X}$ and we are only restricting environmental variables by forcing $\theta_e \wedge \square\rho_e$, all transitions enabled by $\rho_e$ are held in $\fdsD$, which are then included in $\Delta$, and since $E$ is bi-partite implying that either all label variables related to a label are environmental or either all of them are system variables, and since the next state variables are completely defined by the selection of label variables in $\rho_{update.states}$, we can prove that all non controllable transitions from $E$ are kept in $ctrl(\fdsD)$ (all monitored transitions are kept). Now is easy to show that such a controller needs to be deadlock free, because otherwise there would be at least one reachable state $s_b$ that would not have a \fdsD-successor, thus implying that there is a contradiction when at a point of the run $\sigma$ in $\fdsD$ the variable $\varState{s_b}$ holds, which will prevent $\fdsD$ from satisfying the $\rho$ part of $\varphiLTL$ ($\theta_e \implies \square((\boxdot \rho_e) \implies \rho_s)$).  
 Now for the LTL formula $\varphi$ in \controlProblem, we prove that for every execution $\execution$ in $clts(\fdsD)$ there is a run $\sigma$ in $\fdsD$ that conforms to it.
 For an execution $\execution \in S^{\omega}$ we define the run $\sigma(\execution) \in 2^{|\mathcal{V}|^{\omega}}$ as follows, suppose that $\execution= \execution_1 \execution_2 \ldots \execution_i \ldots$ and $\sigma(\execution) = \sigma_1 \sigma_2 \ldots \sigma_i \ldots$ 

@@ -14,7 +14,7 @@
 %\newcommand{\acceptingSymbol}{\alpha}
 %\newcommand{\acceptingSymbols}{\beta}
 \newcommand{\executionDef}{\ensuremath{\varepsilon=s_0, \actionLabel_0, s_1, \ldots}\xspace}
-\newcommand{\execution}{\ensuremath{\varepsilon}}
+\newcommand{\execution}{\ensuremath{\varepsilon}\xspace}
 
 %clts
 \newcommand{\cltsDefIdx}[1]{\ensuremath{#1 = \lparen S_{#1},} \ensuremath{\Sigma_{#1}, \Delta_{#1},} \ensuremath{s_{0}^{#1}, \propositions_{#1}, \valuations_{#1}\rparen}\xspace}
@@ -38,26 +38,26 @@
 \newcommand{\controlProblem}{\ensuremath{\mathcal{I}}}
 
 %GS
-\newcommand{\gsV}{{\mathcal{V}}}
-\newcommand{\gsX}{{\mathcal{X}}}
-\newcommand{\gsY}{{\mathcal{Y}}}
-\newcommand{\gsTheE}{{\theta_e}}
-\newcommand{\gsTheS}{{\theta_s}}
-\newcommand{\gsRhoE}{{\rho_e}}
-\newcommand{\gsRhoS}{{\rho_s}}
+\newcommand{\gsV}{{\ensuremath{\mathcal{V}}}\xspace}
+\newcommand{\gsX}{{\ensuremath{\mathcal{X}}}\xspace}
+\newcommand{\gsY}{{\ensuremath{\mathcal{Y}}}\xspace}
+\newcommand{\gsTheE}{\ensuremath{{\theta_e}}\xspace}
+\newcommand{\gsTheS}{\ensuremath{{\theta_s}}\xspace}
+\newcommand{\gsRhoE}{\ensuremath{{\rho_e}}\xspace}
+\newcommand{\gsRhoS}{\ensuremath{{\rho_s}}\xspace}
 
 %FDS
 \newcommand{\enumSet}[1]{\#(#1)}
-\newcommand{\enumSetDef}{$\#:\mathcal{P}(\mathcal{W})\mapsto [0\ldots2^{|\mathcal{W}|}-1]$\xspace}
+\newcommand{\enumSetDef}{$\#:\mathcal{P}(\mathcal{M})\mapsto [0\ldots2^{|\mathcal{M}|}-1]$\xspace}
 \newcommand{\fdsDefIdx}[1]{$#1= \langle \gsV_{#1},$ $\theta_{#1},$ $\rho_{#1},$ $\mathcal{J}_{#1},$ $\mathcal{C}_{#1}\rangle$\xspace}
 \newcommand{\fdsD}{\ensuremath{\mathcal{D}}\xspace}
 \newcommand{\fdsDef}{$\fdsD = \langle \gsV_d,$ $\theta_d,$ $\rho_d,$ $\mathcal{J}_d,$ $\mathcal{C}_d\rangle$\xspace}
 \newcommand{\fdsControlProblemDef}{\ensuremath{\fdsControlProblem =\langle \gsX,} \ensuremath{\gsY,$ $\varphi \rangle}\xspace}
 \newcommand{\fdsControlProblem}{\ensuremath{\mathcal{K}}\xspace}
 %realizability theorems
-\newcommand{\varState}[1]{\hat{s}_{#1}}
-\newcommand{\varLabel}[1]{\hat{l}_{#1}}
-\newcommand{\varphiLTL}{\ensuremath{\varphi_{FDS}}}
+\newcommand{\varState}[1]{\ensuremath{\hat{s}_{#1}}\xspace}
+\newcommand{\varLabel}[1]{\ensuremath{\hat{l}_{#1}}\xspace}
+\newcommand{\varphiLTL}{\ensuremath{\varphi_{FDS}}\xspace}
 \newcommand{\varphiLTLDef}{\ensuremath{\varphiLTL = (\theta_e \implies \theta_s) \wedge (\theta_e \implies \square((\boxdot \rho_e) \implies \rho_s)) \wedge (\theta_e \wedge \rho_e \implies val(\varphi))}\xspace}
 \newcommand{\varphiCLTS}{\ensuremath{\varphi_{CLTS}}}
 \newcommand{\varphiCLTSDef}{\ensuremath{\varphiCLTS = ()}\xspace}
