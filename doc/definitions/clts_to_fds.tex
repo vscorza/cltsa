@@ -205,16 +205,26 @@ $exec(\sigma) \models \proposition$ implies $\sigma \models v_{\proposition}$. A
 Now,  for the $\exists \fdsD \rightarrow \exists C$ direction, we propose an embedding $clts$ from an FDS into a CLTS that will preserve only the behavior that satisfies $\theta_e \wedge \square \rho_e$, since otherwise we will be keeping traces in $clts(\fdsD)$ that are not feasible in $clts(\fdsD)\parallel E$. We can show that even after removing the set of plays that satisfy $\neg \theta_e \vee \Diamond \rho_e$, a non empty controller exists, since otherwise it would contradict the existence of a FDS $\fdsD$ that is also complete w.r.t. $\gsX$ . In the following definitions, let $\mathcal{M}= \mathcal{V}_d\setminus (\mathcal{X} \cup \mathcal{Y})$ be called the \emph{memory variables} of $\fdsD$, these are the variables added by the controller to be enable to enact a memoryful strategy. We will use an arbitrary bijective function \enumSetDef that maps the valuation of memory variables with a single integer thus defining the second component in the set of states of the CLTS controller. 
 Following ~\cite{bloem2012synthesis} we will suppose that \fdsD is constructed from a strategy $f: M \times \Sigma$ $\times$ $\Sigma_{\gsX} \mapsto M \times \Sigma_{\gsY}$
 that wins the game $G_{\varphiLTL}=\langle \gsX, \gsY, true,$ $true, true,$ $true,$ $\varphiLTL \rangle$. We know from ~\cite{bloem2012synthesis} that \varphiLTL is realizable if and only if there is a winning strategy $f$ for $G_{\varphiLTL}$. In this case finite memory $M$ suffices and, in particular, at each state a single value $m_i \in M$ is assigned. 
+We will use the following to map a set of variables into a propositional formula:
+
+
+\begin{center}
+	\begin{tabular}{r l}
+		$\omega:2^{|\mathcal{M}|}\mapsto \Sigma_{\mathcal{M}},$ &
+		$\omega(m) = \bigwedge_{m_i \in m}var(m, m_i)$\\
+	\end{tabular}
+\end{center}
+
 Considering that $\fdsD= \langle \mathcal{V}_d, \theta_d, \rho_d, \mathcal{J}_d, \mathcal{C}_d\rangle$ is a solution to $\varphiLTL$ that was in turn built from \controlProblemDef, we can define the embedding from an FDS controller \fdsD into a CLTS controller \cltsEmbeddingDef{\fdsD}  as:
 
 \vspace{1em}
 \begin{tabular}{ l c l }
-	$S$ &$=$& $\{(s,\enumSet{m}) | s \in S_E, m \in \mathcal{P}(\mathcal{M}) \}$\\
+	$S$ &$=$& $\{(s,\enumSet{m}) | s \in S_E, m \in \Sigma_{\mathcal{M}} \}$\\
 	$\Sigma$ &$=$&$\Sigma_E$\\	
-	$s_0$&$=$&$(s_0^{E}, \enumSet{m_0})$ where $\theta_d \models m_0$ \\
+	$s_0$&$=$&$(s_0^{E}, \enumSet{m_0})$ where $\theta_d \vdash m_0$ \\
 	$\valuations$&$=$&$\pi_1 \circ \valuations_E$\\
 	&&\\
-	$\Delta$&$=$&$\{((s_i,\enumSet{m_i}),\actionLabel,(s_j,\enumSet{m_j})| \rho_d \models \varState{i} \wedge \varState{j}' \wedge m_i \wedge m_j' \wedge labels_e(\actionLabel) \wedge labels_s(\actionLabel) \}$\\
+	$\Delta$&$=$&$\{((s_i,\enumSet{m_i}),\actionLabel,(s_j,\enumSet{m_j})| \rho_d \vdash \varState{i} \wedge \varState{j}' \wedge m_i \wedge m_j' \wedge labels_e(\actionLabel) \wedge labels_s(\actionLabel) \}$\\
 \end{tabular}
 \vspace{1em}
 \\
