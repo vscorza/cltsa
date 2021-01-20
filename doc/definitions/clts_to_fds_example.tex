@@ -1,7 +1,7 @@
 The following is an example of an embedding from a CLTS control problem into an FDS control problem, for which a strategy is built, converted into an FDS controller and then translated into a CLTS controller. 
 
-The CLTS control problem tries to process two items before resetting the system. The initial state requires that the environment signals that the conditions are met through the action $r$ (ready) otherwise it will keep informing that the status is pending through action $p$.  The system can then process an item through action $P$ or issue a reset $R$. Proposition $e$ indicates that an enabled state has been reached after which the processing can start, propositions $a$ and $b$ denote that the first and second items respectively have been processed. 
-The property to be satisfied is captured by $\varphi: \square \Diamond e$ $\implies$ $(\square \Diamond a$ $\wedge$ $\square \Diamond b)$. The CLTS control problem will be $\mathcal{I}=\langle E, \{P,R\}, \varphi \rangle$ with $E$ being the automaton depicted in Figure ~\ref{fig:clts_to_fds_E}. The labels next to the state numbers indicate which propositions hold at any given point.
+The CLTS control problem tries to process two items before resetting the system. The initial state requires that the environment signals that the conditions are met through the action $r$ (ready) otherwise it will keep informing that the status is pending through action $p$.  The system can then process an item through action $P$ or issue a reset $R$. Proposition $e$ indicates that an enabled state has been reached after which the processing can start, propositions $a$ and $b$ denote that the first and second items, respectively, have been processed. 
+The property to be satisfied is captured by $\varphi: \square \Diamond e$ $\implies$ $(\square \Diamond a$ $\wedge$ $\square \Diamond b)$. The CLTS control problem is noted as $\mathcal{I}=\langle E, \{P,R\}, \varphi \rangle$ with $E$ being the automaton depicted in figure ~\ref{fig:clts_to_fds_E}. The labels next to the state numbers indicate which propositions hold at any given point.
 
 \begin{figure}[bt]
 	\centering
@@ -30,7 +30,7 @@ The property to be satisfied is captured by $\varphi: \square \Diamond e$ $\impl
 	%\endminipage\hfill
 \end{figure}
 
-The FDS equivalent formula to $E$ is built using the translation proposed before, with $\gsX$ being the set $\{\hat{p},\hat{r}\}$ and $\gsY$ being $\{s_0,s_1,\hat{P},\hat{R},\hat{e},\hat{a},\hat{b}\}$. Then we have:
+The FDS equivalent formula to $E$ is built using the translation proposed before, with $\gsX$ being the set $\{\hat{p},\hat{r}\}$ and $\gsY$ being $\{s_0,s_1,\hat{P},\hat{R},\hat{e},\hat{a},\hat{b}\}$.
 
 \footnotesize
 \vspace{1em}
@@ -58,7 +58,7 @@ The FDS equivalent formula to $E$ is built using the translation proposed before
 \vspace{1em}
 \normalsize
 
-If we keep only the behavior that conforms to $\theta_e, \theta_s, \rho_e$ and $\rho_s$ this translation induces the Kripke automaton depicted in Figure ~\ref{fig:clts_to_fds_K}.
+If we keep only the behavior that conforms to $\theta_e, \theta_s, \rho_e$ and $\rho_s$ this translation induces the Kripke automaton depicted in figure ~\ref{fig:clts_to_fds_K}.
 
 \begin{figure}[bt]
 	\centering
@@ -70,11 +70,11 @@ If we keep only the behavior that conforms to $\theta_e, \theta_s, \rho_e$ and $
 			\SetEdgeLabelScale{1.2}
 			\StateVar[0:\overline{s_0 s_1 e a b}p\overline{r P R}]{(-6,-0.3)}{0}
 			\StateVar[1:\overline{s_0 s_1 e a b p}r\overline{P R}]{(-6,2.3)}{1}
-			\StateVar[2:s_0\overline{s_1 e a b p r P} R]{(-2,-0.3)}{2}
-			\StateVar[3:s_0\overline{s_1 e a b p r} P \overline{R}]{(-2,2.3)}{3}
-			\StateVar[4:\overline{s_0}s_1 \overline{e a b p r P} R]{(2,-0.3)}{4}
-			\StateVar[5:\overline{s_0}s_1 \overline{e a b p r} P \overline{R}]{(2,2.3)}{5}			
-			\StateVar[6:s_0 s_1\overline{e a b p r P} R]{(6,1)}{6}						
+			\StateVar[2:s_0\overline{s_1} e \overline{a b p r P} R]{(-2,-0.3)}{2}
+			\StateVar[3:s_0\overline{s_1} e  \overline{a b p r} P \overline{R}]{(-2,2.3)}{3}
+			\StateVar[4:\overline{s_0}s_1 \overline{e} a  \overline{b p r P} R]{(2,-0.3)}{4}
+			\StateVar[5:\overline{s_0}s_1 \overline{e} a  \overline{b p r} P \overline{R}]{(2,2.3)}{5}			
+			\StateVar[6:s_0 s_1\overline{e a} b  \overline{p r P} R]{(6,1)}{6}						
 			\Initial[w]{0}
 			\Initial[w]{1}
 			\LoopS{0}{}			
@@ -95,11 +95,40 @@ If we keep only the behavior that conforms to $\theta_e, \theta_s, \rho_e$ and $
 	%\endminipage\hfill
 \end{figure}
 
-Explain winning states, strat, restriction, explain out of $\rho_e$ is arbitrary.
+We then use $\theta_e$, $\theta_s$, $\rho_e$ and $\rho_s$ to write \varphiLTL and solve \fdsEmbeddingDef. Following the construction of the FDS controller from a given strategy as in ~\cite{bloem2012synthesis}, we describe the transformation of $f$ into $\hat{f}$ as:
+\[\hat{f} = \bigwedge_{m \in M}\bigwedge_{s \in W_s}\bigwedge_{s'_{\gsX} \in \Sigma_{\gsX}} ((m \wedge s \wedge s'_{\gsX})\implies f(m,s,s'_{\gsX})')\]
+Where $M$ is the memory domain and $W_s$ is the set of winning states. We can see that this transformation maps the function:
+\[f: M \times \Sigma \times \Sigma_{\gsX} \mapsto M \times \Sigma_{\gsY}\ \]
+To:
+\[\hat{f}: M \times \Sigma \times \Sigma_{\gsX'} \mapsto M' \times \Sigma_{\gsY'}\ \]
+While restricting only those states within the winning region.
+The FDS controller is built as $\mathcal{D} = \langle \hat{\gsV}, \hat{\theta}, \hat{\rho} \rangle$ where:
 
-Strategy as mapping.
+\vspace{1em}
+\begin{tabular}{ l c l }
+	$\hat{\gsV}$ & $=$ & $\gsX \cup \gsY \cup \mathcal{M}$\\	
+	$\hat{\theta}$ & $=$ & $(\theta_e \implies (\theta_s \wedge m_0 \wedge W_s))$\\
+	$\hat{\rho_d}$ & $=$ & $((W_s \wedge \rho_e) \implies \hat{f})$\\	
+\end{tabular}
+\vspace{1em}
 
-Restriction as Kripke.
+We describe $\hat{f}$ extensively only for the part of its domain that satisfies $\theta_e$, $\rho_e$ and $W_s$ since any other values are assigned arbitrarily. The rightmost term indicates the transition from the automaton in figure ~\ref{fig:clts_to_fds_K} being kept for each row.
+
+\vspace{1em}
+\begin{tabular}{ r r r l l r r l l r}
+	$\hat{f}($ & $\overline{m_0},$ & $\overline{s_0 s_1 e a b}p\overline{rPR},$ &$p'\overline{r'}$ & $) =$ & $($ & $\overline{s_0's_1'e'a'b'P'R'},$ & $\overline{m_o'}$ & $)$ & $(0 \rightarrow 0)$\\
+	$\hat{f}($ & $\overline{m_0},$ & $\overline{s_0 s_1 e a b}p\overline{rPR},$ &$\overline{p'}r'$ & $) =$ & $($ & $\overline{s_0's_1'e'a'b'P'R'},$ & $\overline{m_o'}$ & $)$ & $(0 \rightarrow 1)$\\
+	$\hat{f}($ & $\overline{m_0},$ & $\overline{s_0 s_1 e a b p}r\overline{PR},$ &$\overline{p'r'}$ & $) =$ & $($ & $s_0'\overline{s_1'}e'\overline{a'b'}P'\overline{R'},$ & $\overline{m_o'}$ & $)$ & $(1 \rightarrow 3)$\\		
+	$\hat{f}($ & $\overline{m_0},$ & $s_0\overline{ s_1} e \overline{a b p r}P\overline{R},$ &$\overline{p'r'}$ & $) =$ & $($ & $\overline{s_0'}s_1'\overline{e'}a'\overline{b'}P'\overline{R'},$ & $m_o'$ & $)$ & $(3 \rightarrow 5)$\\		
+	$\hat{f}($ & $m_0,$ & $\overline{ s_0}s_1\overline{e} a \overline{b p r}P\overline{R},$ &$\overline{p'r'}$ & $) =$ & $($ & $s_0's_1'\overline{e'a'}b'\overline{P'}R',$ & $\overline{m_o'}$ & $)$ & $(5 \rightarrow 6)$\\			
+	$\hat{f}($ & $\overline{m_0},$ & $s_0 s_1\overline{e a} b \overline{p r P}R,$ &$p'\overline{r'}$ & $) =$ & $($ & $\overline{s_0's_1'e'a'b'P'R'},$ & $\overline{m_o'}$ & $)$ & $(6 \rightarrow 0)$\\				
+	$\hat{f}($ & $\overline{m_0},$ & $s_0 s_1\overline{e a b p r P}R,$ &$\overline{p'}r'$ & $) =$ & $($ & $s_0'\overline{s_1'}e'\overline{a'b'}P'\overline{R'},$ & $\overline{m_o'}$ & $)$ & $(6 \rightarrow 1)$\\					
+\end{tabular}
+\vspace{1em}
+
+
+
+If we restrict the behavior of the model that was shown in figure ~\ref{fig:clts_to_fds_K} after applying $\hat{f}$ we get the Kripke automaton from figure  ~\ref{fig:clts_to_fds_F}.
 
 \begin{figure}[bt]
 	\centering
@@ -111,9 +140,9 @@ Restriction as Kripke.
 			\SetEdgeLabelScale{1.2}
 			\StateVar[0:\overline{s_0 s_1 e a b}p\overline{r P R}]{(-6,-0.3)}{0}
 			\StateVar[1:\overline{s_0 s_1 e a b p}r\overline{P R}]{(-6,2.3)}{1}
-			\StateVar[3:s_0\overline{s_1 e a b p r} P \overline{R}]{(-2,2.3)}{3}
-			\StateVar[5:\overline{s_0}s_1 \overline{e a b p r} P \overline{R}]{(2,2.3)}{5}			
-			\StateVar[6:s_0 s_1\overline{e a b p r P} R]{(6,1)}{6}						
+			\StateVar[3:s_0\overline{s_1} e \overline{a b p r} P \overline{R}]{(-2,2.3)}{3}
+			\StateVar[5:\overline{s_0}s_1 \overline{e} a \overline{b p r} P \overline{R}]{(2,2.3)}{5}			
+			\StateVar[6:s_0 s_1\overline{e a} b \overline{p r P} R]{(6,1)}{6}						
 			\Initial[w]{0}
 			\Initial[w]{1}
 			\LoopS{0}{}			
@@ -130,7 +159,7 @@ Restriction as Kripke.
 	%\endminipage\hfill
 \end{figure}
 
-Explain translation back to CLTS controller.
+We can get our CLTS controller from \fdsD by applying $clts(\fdsD)$ to get the CLTS depicted in figure ~\ref{fig:clts_to_fds_C} which is a solution to \controlProblem.
 
 \begin{figure}[H]
 	\centering
