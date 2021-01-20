@@ -4,7 +4,7 @@
 In this section we introduce the models and definitions for Fair Discrete Systems (FDS). Fair Discrete Systems ~\cite{kesten2000verification},~\cite{bloem2012synthesis} are used as a symbolic representation of a finite state transition system over Boolean variables. 
 %Game structures were introduced  to model open systems where properties are split between assumptions and guarantees.
 
-In the following definitions we will denote $2^{|\gsV|}$ as $\Sigma_{\gsV}$, and $s|_{\gsY}$ as the projection of $s$ to $\gsY$, i.e., $s_{\gsY} = \{y \in \gsY | y \in s \}$.
+In the following definitions we will denote $2^{|\gsV|}$ as $\Sigma_{\gsV}$, and $s|_{\gsY}$ as the projection of $s$ to $\gsY$, i.e., $s_{\gsY} = \{y \in \gsY | y \in s \}$, propositional formulas over a set of variables $P$ will be noted as $WFF(P)$.
 
 \begin{definition}
 	\label{def:FDS} \emph{(Fair Discrete System)} 
@@ -12,7 +12,7 @@ In the following definitions we will denote $2^{|\gsV|}$ as $\Sigma_{\gsV}$, and
 	\begin{itemize}
 		\item $\gsV = \{v_1,\ldots,v_n \}$: A finite set of Boolean variables. We define a \emph{state} $s$ to be an interpretation of $\gsV$, i.e., $s \in \Sigma_{\gsV}$.
 		\item $\theta$: The \emph{initial condition}. This is an assertion over $\gsV$ characterizing all the initial states of the FDS. A state is called \emph{initial} if it satisfies $\theta$.
-		\item $\rho$: A \emph{transition relation}. This is an assertion $\rho(\gsV \cup \gsV')$, relating a state $s \in \Sigma_{\gsV}$ to its $\fdsD$-successors $s' \in \Sigma_{\gsV}$, i.e. $(s,s') \models \rho$.
+		\item $\rho$: A \emph{transition relation}. This is an assertion over $\gsV \cup \gsV'$, relating a state $s \in \Sigma_{\gsV}$ to its $\fdsD$-successors $s' \in \Sigma_{\gsV}$, i.e. $(s,s') \models \rho$.
 		\item $\mathcal{J} = \{J_1, \ldots, J_m \}$: A set of \emph{justice requirements} (weak fairness). Each requirement $J \in \mathcal{J}$ is an assertion over $\gsV$ that is intended to hold infinitely many times in every computation.
 		\item $\mathcal{C} = \{(P_1,Q_1), \ldots, (P_n,Q_n) \}$: A set of \emph{compassion requirements} (strong fairness). Each requirement $(P,Q) \in \mathcal{C}$ consists of a pair of assertions, such that if a computation contains infinitely many $P$-states, it should also hold infinitely many $Q$-states.
 	\end{itemize}

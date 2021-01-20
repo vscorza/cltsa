@@ -1,0 +1,158 @@
+The following is an example of an embedding from a CLTS control problem into an FDS control problem, for which a strategy is built, converted into an FDS controller and then translated into a CLTS controller. 
+
+The CLTS control problem tries to process two items before resetting the system. The initial state requires that the environment signals that the conditions are met through the action $r$ (ready) otherwise it will keep informing that the status is pending through action $p$.  The system can then process an item through action $P$ or issue a reset $R$. Proposition $e$ indicates that an enabled state has been reached after which the processing can start, propositions $a$ and $b$ denote that the first and second items respectively have been processed. 
+The property to be satisfied is captured by $\varphi: \square \Diamond e$ $\implies$ $(\square \Diamond a$ $\wedge$ $\square \Diamond b)$. The CLTS control problem will be $\mathcal{I}=\langle E, \{P,R\}, \varphi \rangle$ with $E$ being the automaton depicted in Figure ~\ref{fig:clts_to_fds_E}. The labels next to the state numbers indicate which propositions hold at any given point.
+
+\begin{figure}[bt]
+	\centering
+	%\minipage{0.32\textwidth}%
+	%\centering
+	\VCDraw{
+	\begin{VCPicture}{(-2.5,-1)(2.5,3.5)}
+		\SetStateLabelScale{1}
+		\SetEdgeLabelScale{1.2}
+		\State[0:-]{(-2,2.3)}{0}
+		\State[1:e]{(2,2.3)}{1}
+		\State[2:a]{(2,-0.3)}{2}
+		\State[3:b]{(-2,-0.3)}{3}
+		\Initial[w]{0}
+		\ArcL{0}{1}{<r>}        
+		\ArcL{1}{0}{<R>}        
+		\LoopN{0}{<p>}		
+		\ArcL{1}{2}{<P>}        
+		\ArcL{2}{0}{<R>}        				
+		\ArcL{2}{3}{<P>}        
+		\ArcL{3}{0}{<R>}        						
+	\end{VCPicture}
+	}
+	\caption{Automaton $E$ from $\mathcal{I}=\langle E, \{P,R\}, \varphi \rangle$}
+	\label{fig:clts_to_fds_E}
+	%\endminipage\hfill
+\end{figure}
+
+The FDS equivalent formula to $E$ is built using the translation proposed before, with $\gsX$ being the set $\{\hat{p},\hat{r}\}$ and $\gsY$ being $\{s_0,s_1,\hat{P},\hat{R},\hat{e},\hat{a},\hat{b}\}$. Then we have:
+
+\footnotesize
+\vspace{1em}
+\begin{tabular}{ r c l }
+	$\theta_{e}$ &$=$& $\bar{\hat{p}} \wedge \bar{\hat{r}}$\\
+	$\theta_{s}$ &$=$& $\bar{s_0} \wedge \bar{s_1} \wedge \bar{\hat{P}} \wedge \bar{\hat{R}} \wedge \bar{\hat{e}} \wedge \bar{\hat{a}} \wedge \bar{\hat{b}}$\\	
+	$\rho_{env.enabling}$ &$=$& $((\bar{s_0} \wedge \bar{s_1} ) \implies ((\hat{p} \wedge \bar{\hat{r}}) \vee (\bar{\hat{p}} \wedge \hat{r}))) \wedge$\\
+	&& $((s_0 \vee s_1 ) \implies (\bar{\hat{p}} \wedge \bar{\hat{r}}))$\\	
+	$\rho_{sys.enabling}$ &$=$& $((\bar{s_0} \wedge \bar{s_1} ) \implies (\bar{\hat{P}} \wedge \bar{\hat{R}})) \wedge$\\
+	&& $((s_0 \vee s_1 ) \implies ((\hat{P} \wedge \bar{\hat{R}}) \vee (\bar{\hat{P}} \wedge  \hat{R})))$\\		
+	$\rho_{update.states}$ &$=$& $((\bar{s_0} \wedge \bar{s_1} \wedge \hat{p} \wedge \bar{\hat{r}} \wedge \bar{\hat{P}} \wedge \bar{\hat{R}}) \implies (\bar{s_0}' \wedge \bar{s_1}')) \wedge$\\
+	&&$((\bar{s_0} \wedge \bar{s_1} \wedge \bar{\hat{p}} \wedge \hat{r} \wedge \bar{\hat{P}} \wedge \bar{\hat{R}}) \implies (s_0' \wedge \bar{s_1}')) \wedge$\\	
+	&&$((s_0 \wedge \bar{s_1} \wedge \bar{\hat{p}} \wedge \bar{\hat{r}} \wedge \bar{\hat{P}} \wedge \hat{R}) \implies (\bar{s_0}' \wedge \bar{s_1}')) \wedge$\\	
+	&&$((s_0 \wedge \bar{s_1} \wedge \bar{\hat{p}} \wedge \bar{\hat{r}} \wedge \hat{P} \wedge \bar{\hat{R}}) \implies (\bar{s_0}' \wedge s_1')) \wedge$\\	
+	&&$((\bar{s_0} \wedge s_1 \wedge \bar{\hat{p}} \wedge \bar{\hat{r}} \wedge \bar{\hat{P}} \wedge \hat{R}) \implies (\bar{s_0}' \wedge \bar{s_1}')) \wedge$\\		
+	&&$((\bar{s_0} \wedge s_1 \wedge \bar{\hat{p}} \wedge \bar{\hat{r}} \wedge \hat{P} \wedge \bar{\hat{R}}) \implies (s_0' \wedge s_1')) \wedge$\\		
+	&&$((s_0 \wedge s_1 \wedge \bar{\hat{p}} \wedge \bar{\hat{r}} \wedge \bar{\hat{P}} \wedge \hat{R}) \implies (\bar{s_0}' \wedge \bar{s_1}'))$\\	
+	$\rho_{update.propositions}$ &$=$& $((\bar{s_0} \wedge \bar{s_1}) \implies (\bar{\hat{e}}' \wedge \bar{\hat{a}}' \wedge \bar{\hat{b}}')) \wedge$\\
+	&& $((s_0 \wedge \bar{s_1}) \implies (\hat{e}' \wedge \bar{\hat{a}}' \wedge \bar{\hat{b}}')) \wedge$\\
+	&& $((\bar{s_0} \wedge s_1) \implies (\bar{\hat{e}}' \wedge \hat{a}' \wedge \bar{\hat{b}}')) \wedge$\\
+	&& $((s_0 \wedge s_1) \implies (\bar{\hat{e}}' \wedge \bar{\hat{a}}' \wedge \hat{b}'))$\\	
+	$\gsRhoE$&$=$&$\rho_{env.enabling}$\\		
+	$\gsRhoS$&$=$&$\rho_{sys.enabling} \wedge  \rho_{update.states} \wedge  \rho_{update.propositions}$\\	
+\end{tabular}
+\vspace{1em}
+\normalsize
+
+If we keep only the behavior that conforms to $\theta_e, \theta_s, \rho_e$ and $\rho_s$ this translation induces the Kripke automaton depicted in Figure ~\ref{fig:clts_to_fds_K}.
+
+\begin{figure}[bt]
+	\centering
+	%\minipage{0.32\textwidth}%
+	%\centering
+	\VCDraw{
+		\begin{VCPicture}{(-6.5,-2.5)(6.5,3.5)}
+			\SetStateLabelScale{1}
+			\SetEdgeLabelScale{1.2}
+			\StateVar[0:\overline{s_0 s_1 e a b}p\overline{r P R}]{(-6,-0.3)}{0}
+			\StateVar[1:\overline{s_0 s_1 e a b p}r\overline{P R}]{(-6,2.3)}{1}
+			\StateVar[2:s_0\overline{s_1 e a b p r P} R]{(-2,-0.3)}{2}
+			\StateVar[3:s_0\overline{s_1 e a b p r} P \overline{R}]{(-2,2.3)}{3}
+			\StateVar[4:\overline{s_0}s_1 \overline{e a b p r P} R]{(2,-0.3)}{4}
+			\StateVar[5:\overline{s_0}s_1 \overline{e a b p r} P \overline{R}]{(2,2.3)}{5}			
+			\StateVar[6:s_0 s_1\overline{e a b p r P} R]{(6,1)}{6}						
+			\Initial[w]{0}
+			\Initial[w]{1}
+			\LoopS{0}{}			
+			\EdgeL{0}{1}{}        
+			\EdgeL{1}{3}{}        
+			\EdgeL{2}{1}{}        			
+			\EdgeL{2}{0}{}        						
+			\EdgeL{3}{5}{}        
+			\EdgeL{4}{1}{}        			
+			\ArcL{4}{0}{}        						
+			\EdgeL{5}{6}{}        			
+			\VArcR[.5]{arcangle=45,ncurv=.6}{6}{0}{}        						
+			\VArcL[.5]{arcangle=-45,ncurv=.6}{6}{1}{}        									
+		\end{VCPicture}
+	}
+	\caption{Kripke structure induced from $\theta$ and $\rho$}
+	\label{fig:clts_to_fds_K}
+	%\endminipage\hfill
+\end{figure}
+
+Explain winning states, strat, restriction, explain out of $\rho_e$ is arbitrary.
+
+Strategy as mapping.
+
+Restriction as Kripke.
+
+\begin{figure}[bt]
+	\centering
+	%\minipage{0.32\textwidth}%
+	%\centering
+	\VCDraw{
+		\begin{VCPicture}{(-6.5,-2.5)(6.5,3.5)}
+			\SetStateLabelScale{1}
+			\SetEdgeLabelScale{1.2}
+			\StateVar[0:\overline{s_0 s_1 e a b}p\overline{r P R}]{(-6,-0.3)}{0}
+			\StateVar[1:\overline{s_0 s_1 e a b p}r\overline{P R}]{(-6,2.3)}{1}
+			\StateVar[3:s_0\overline{s_1 e a b p r} P \overline{R}]{(-2,2.3)}{3}
+			\StateVar[5:\overline{s_0}s_1 \overline{e a b p r} P \overline{R}]{(2,2.3)}{5}			
+			\StateVar[6:s_0 s_1\overline{e a b p r P} R]{(6,1)}{6}						
+			\Initial[w]{0}
+			\Initial[w]{1}
+			\LoopS{0}{}			
+			\EdgeL{0}{1}{}        
+			\EdgeL{1}{3}{}        
+			\EdgeL{3}{5}{}        
+			\EdgeL{5}{6}{}        			
+			\VArcR[.5]{arcangle=45,ncurv=.6}{6}{0}{}        						
+			\VArcL[.5]{arcangle=-45,ncurv=.6}{6}{1}{}        									
+		\end{VCPicture}
+	}
+	\caption{Kripke structure induced from $\theta$ and $\rho$ after strengthening with $\hat{f}$}
+	\label{fig:clts_to_fds_F}
+	%\endminipage\hfill
+\end{figure}
+
+Explain translation back to CLTS controller.
+
+\begin{figure}[H]
+	\centering
+	%\minipage{0.32\textwidth}%
+	%\centering
+	\VCDraw{
+		\begin{VCPicture}{(-2.5,-1)(2.5,3.5)}
+			\SetStateLabelScale{1}
+			\SetEdgeLabelScale{1.2}
+			\State[0]{(-2,2.3)}{0}
+			\State[1]{(2,2.3)}{1}
+			\State[2]{(2,-0.3)}{2}
+			\State[3]{(-2,-0.3)}{3}
+			\Initial[w]{0}
+			\ArcL{0}{1}{<r>}        
+			\LoopN{0}{<p>}		
+			\ArcL{1}{2}{<P>}        
+			\ArcL{2}{3}{<P>}        
+			\ArcL{3}{0}{<R>}        						
+		\end{VCPicture}
+	}
+	\caption{Controller $C$ translated from $\fdsD$}
+	\label{fig:clts_to_fds_C}
+	%\endminipage\hfill
+\end{figure}
