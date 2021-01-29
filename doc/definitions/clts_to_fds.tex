@@ -1,5 +1,5 @@
 
-To show that CLTS and FDS control problems are equivalent we  present a translation that preserves realizability, starting with the direction from the CLTS into the FDS domain first. We will start by introducing a set of embeddings that constitute the translation and then state and prove a realizability preserving theorem.
+To show that the CLTS and FDS control problems are equivalent we  present a translation that preserves realizability, starting with the direction from the CLTS into the FDS domain first. We will start by introducing a set of embeddings that constitute the translation and then state and prove a realizability preserving theorem.
 
 
 In order to embed the CLTS control problem \controlProblemDef into the FDS control problem \fdsEmbeddingDef, the first thing to note is that the LTL formula over atomic propositions $\varphi$ is translated as $val(\varphi)$ by replacing each occurrence of an atomic proposition $\proposition \in \propositions$ with the boolean variable $v_{\proposition}$. Remember that we denote $\Sigma \setminus \controlSet$ as $\nonControlSet$. 
@@ -22,15 +22,15 @@ In order to embed the CLTS control problem \controlProblemDef into the FDS contr
 %\end{definition}
 %
 %Let $A$ be the CLTS to be translated and $B =  \langle \gsX, \gsY, \gsTheE, \gsTheS, \gsRhoE, \gsRhoS, \varphi \rangle$ the game structure resulting after applying $gs(A)$. 
-Let \cltsDef, the variables of the embedding will be comprised of two sets:
+Let \cltsDef, the variables of the embedding will be comprised of two sets, \gsX and \gsY, declared as follows:
 \[\gsX = \{\hat{x}_i : x_i \in \nonControlSet \}\]
 \[\gsY_c = \{\hat{y}_i : y_i \in \controlSet \}, \gsY_p = \{v_{\proposition} : \proposition \in \propositions\}, \gsY_s = \{\varState{j} : s_j \in S \}\]
 \[\gsY = \gsY_c \cup \gsY_p \cup \gsY_s \]
-Here $\varState{j}$ represents the fact that any given step of a run $\sigma$ in the translation relates to the state $j$ in the execution \execution over $E$, $\hat{x}_i$ is a Boolean variable representing the occurrence of an monitored action at the current state, $\hat{y}_i$ is a Boolean variable representing the occurrence of a controllable action. Finally, $v_{\proposition}$ indicates that state $j$ satisfies proposition $\proposition$. In the context of the embedding $\hat{x}_i$ and $\hat{y}_i$ will be called \emph{label variables} and should be interpreted as follows, if at any point in the run $\sigma$ such label variable, say $\hat{x}_i$ is set to $true$, the action $x_i$ related to that variable is taking part of the label that is being chosen at the current state to transition into the next one, $\varState{j}$ will be called a \emph{state variable} and $v_{\proposition}$ will be called a \emph{natural variable}. The information modeled at each state $v$ in the embedding \fdsEmbedding will be comprised of the \emph{state variable} $\varState{i}$ defining to which explicit state $s_i$ in the automaton $E$ $v$ is related, the \emph{natural variables} defining which propositions hold at $s_i$ and the \emph{label variables} ($\hat{x}_i^1\ldots \hat{x}_i^n \hat{y}_i^1\ldots \hat{y}_i^m$) defining the set of actions ($x_i^1\ldots x_i^n y_i^1\ldots y_i^m$) that constitute the label for the transition chosen at state $s_i$.
+Here $\varState{j}$ being set to $true$ at state $\sigma_i$ of a run $\sigma$ in the translation relates it to the execution \execution over $E$ where $\execution_i$ is at state $j$, $\hat{x}_i$ is a Boolean variable representing the occurrence of a monitored action leading to the current state, i.e. if $\varState{q}$ and $\hat{x}_i$ are up at state $\sigma_i$ and $\varState{p}$ is up at $\sigma_{i-1}$, then it can be read as \emph{$x_i$ was part of the label of the transition taken when moving from $s_p$ to $s_q$ at $E$}, in a similar way, $\hat{y}_i$ is a Boolean variable representing the occurrence of a controllable action leading to the current state. Finally, $v_{\proposition}$ indicates that state $j$ satisfies proposition $\proposition$. In the context of this embedding, $\hat{x}_i$ and $\hat{y}_i$ will be called \emph{label variables}, $\varState{j}$ will be called a \emph{state variable} and $v_{\proposition}$ will be called a \emph{natural variable}. The information modeled at each state $v$ in the embedding \fdsEmbedding will be comprised of the \emph{state variable} $\varState{i}$ defining to which explicit state $s_i$ in the automaton $E$ $v$ is related, the \emph{natural variables} defining which propositions hold at $s_i$ and the \emph{label variables} ($\hat{x}_i^1\ldots \hat{x}_i^n \hat{y}_i^1\ldots \hat{y}_i^m$) defining the set of actions ($x_i^1\ldots x_i^n y_i^1\ldots y_i^m$) that constitute the label of the transition taken when moving from $s_{i-1}$ to $s_i$.
 
-The possible behavior of $E$ is restricted by the pair of initial ($\theta$) and transition ($\rho$) formulae, the latter being expressed as a conjunction of smaller terms in order to clarify its construction.  
-A somewhat similar translation is presented, for instance, in ~\cite{bloem2012synthesis} where, while introducing the AMBA AHB case study, the authors replace the automaton that captures the assumption that an unspecified length locked burst, leaving \emph{HBUSREQ[i]} high locks the bus, with a set of LTL formulae. Auxiliar system variables are added to specification to represent the states of the automaton. These are also used as Büchi acceptance condition, which are easily included in the GR(1) formula by adding the conjunction of accepting states to the right side of the implication.
-The two main differences between their translation and ours is that, first, we restrict the occurrence of certain combination of label variables to enable only those that are conforming to an existing label in the original automaton and second, that we add additional system variables to add explicit valuations in our states following the definition of \valuations.
+The possible behavior of $E$ is emulated by the pair of initial ($\theta$) and transition ($\rho$) formulae, the latter being expressed as a conjunction of smaller terms in order to clarify its construction. For $\theta$ and $\rho$ we write the restriction for environment first ($\theta_e$,$\theta_s$), and then the one for the system ($\rho_e$,$\rho_s$).  This is needed in order to allow the solution to be complete w.r.t \gsX, which is the way to account for the non controllability or openness of the problem.  The way in which this is achieved will become clear soon.  
+As a brief side note, a somewhat similar translation is presented in ~\cite{bloem2012synthesis} where, while introducing the AMBA AHB case study, the authors replace the automaton that captures the assumption that an unspecified length locked burst, leaving \emph{HBUSREQ[i]} high locks the bus, with a set of LTL formulae. Auxiliary system variables are added to specification to represent the states of the automaton. These are also used as Büchi acceptance condition, which are easily included in the GR(1) formula by adding the conjunction of accepting states to the right side of the implication.
+Two main differences between their translation and ours are, first,  that we restrict the occurrence of certain combination of label variables to enable only those that are conforming to an existing label in the original automaton and second, that we add additional system variables to add explicit valuations in our states following the definition of \valuations.
 %From now on we will write $s(j)$ to represent the valuation of the system variables representing a given state $j$, i.e.: 
 %\[s(j) = \bigwedge\limits^{\lfloor log_2(|S_A|)\rfloor - 1}_{i=0}  s_{bit}(i,j)\]
 %\[
@@ -40,7 +40,7 @@ The two main differences between their translation and ours is that, first, we r
 %\end{cases}
 %\]
 
-The translation is now presented in a bottom-up fashion, introducing first the translation of each element in order to compose them afterwads into a LTL formulae that captures both the behavior of $E$ and the property $\varphi$ that we want to evalute. To embed satisfaction of $\proposition$ at state $i$ we use:
+The translation is now presented in a bottom-up fashion, introducing first the translation of each element, to then compose the smaller formulae into a single one that captures both the behavior of $E$ and the property $\varphi$ that we want to evaluate. In order to embed satisfaction of proposition $\proposition$ at state $i$ we use $v$:
 \begin{center}
 	\begin{tabular}{r r r l}
 $v:$ & $\propositions \times S \mapsto \gsY,$
@@ -52,43 +52,49 @@ v_{\proposition} & \proposition \in \valuations(s_i) \\
 $
 \end{tabular}
 \end{center}
-We will use the following three functions ($var$, $labels_e$ and $labels_s$) to build the conjunction of system or environment variables to represent the occurrence of a set of actions as captured by the label in any given transition taken in $E$.
+We will use the following three functions ($var$, $labels_e$ and $labels_s$) to build the conjunction of system or environment variables that will represent the occurrence of a set of actions as described by the labels of the transitions in $E$.
 The enabling formula, which is a mutually exclusive condition over label variables for any given state $s_i$ that restricts the set of choices as the transition relation $\Delta$ does in $E$, is constructed through $labels_e$ and $labels_s$ as (note that here that \labelSet is a set of labels \actionLabel enabled for a particular state and \actionLabel is a label composed of several actions \action ):
 %\[labels_e(\labelSet) = \bigvee_{\actionLabel \in \labelSet}(label_e(\actionLabel) \wedge \bigwedge_{\action' \in  \nonControlSet \setminus \actionLabel}\neg \varLabel{}') \]
 %\[labels_s(\labelSet) = \bigvee_{\actionLabel \in \labelSet}(label_s(\actionLabel) \wedge \bigwedge_{\action' \in  \Sigma \setminus \actionLabel}\neg \varLabel{}') \]
-
-\begin{center}
-	\begin{tabular}{r l r l}
-		$var:$&$2^{|\Sigma|}\times \Sigma \mapsto WFF(\gsV),$ &
+\vspace{1em}
+\footnotesize
+%\begin{center}
+	\begin{tabular}{l l r l}
+		$var$&$:2^{|\Sigma|}\times \Sigma \mapsto WFF(\gsV),$ &
 		$
 		var(\actionLabel, \action)$&$= \begin{cases}
 		\varLabel{} & \action \in \actionLabel \\
 		\neg \varLabel{} & otherwise
 		\end{cases}
 		$\\
-		$labels_e:$&$2^{2^{|\Sigma|}}\mapsto WFF(\gsX),$ &
+		$labels_e$&$:2^{2^{|\Sigma|}}\mapsto WFF(\gsX),$ &
 		$labels_e(\labelSet)$&$= \bigvee_{\actionLabel \in \labelSet}\bigwedge_{\action \in \nonControlSet}var(\actionLabel, \action)$\\
-		$labels_s:$&$2^{2^{|\Sigma|}}\mapsto  WFF(\gsV),$ &
+		$labels_s$&$:2^{2^{|\Sigma|}}\mapsto  WFF(\gsV),$ &
 		$labels_s(\labelSet)$&$= \bigvee_{\actionLabel \in \labelSet}\bigwedge_{\action \in \Sigma}var(\actionLabel, \action)$\\
 	\end{tabular}
-\end{center}
+%\end{center}
+\normalsize
 
+The initial condition formula is defined as:
 
-The initial condition formula will be defined as:
-\begin{center}
-	\begin{tabular}{r l r l}
-		$\gsTheE:$&$WFF(\gsX),$ &
-		$\gsTheE$&$= \bigvee_{(s_0,\actionLabel,s_j) \in \Delta_A}labels_e(\actionLabel)$\\
-		$\gsTheS:$&$WFF(\gsV),$ &
-		$\gsTheS$&$= (\varState{0} \wedge\bigwedge_{s_j \neq s_0, s_q \in S}\neg \varState{j}) \wedge \bigvee_{(s_0,\actionLabel,s_j) \in \Delta_A}labels_s(\actionLabel) \wedge \bigwedge_{\proposition \in \propositions}v(\proposition,0)$\\
-		$\theta:$&$WFF(\gsV),$ &
+\vspace{1em}
+\footnotesize
+%\begin{center}
+	\begin{tabular}{l l r l}
+		$\gsTheE$&$:WFF(\gsX),$ &
+		$\gsTheE$&$= \bigwedge_{x_i \in \nonControlSet}\neg \hat{x}_i$\\
+		$\gsTheS$&$:WFF(\gsV),$ &
+		$\gsTheS$&$= (\varState{0} \wedge\bigwedge_{s_j \neq s_0, s_q \in S}\neg \varState{j}) \wedge \bigwedge_{a_i \in \Sigma}\neg \hat{a}_i \wedge \bigwedge_{\proposition \in \propositions}v(\proposition,0)$\\
+		$\theta$&$:WFF(\gsV),$ &
 		$\theta$&$= \gsTheE \wedge \gsTheS$\\		
 	\end{tabular}
-\end{center}
+%\end{center}
+\normalsize
+\vspace{1em}
 
-Where $\gsTheE$ defines that allows the environment to pick any conjunction of label variables that are conforming to monitored actions in the transitions $(s_0, \actionLabel, s_j)$ coming out of $s_0$ in $E$, $\gsTheS$ does the same for the controllable actions, ensures that only the state variable related to initial state $s_0$ holds and sets the natural variables related to propositions enabled at the start of the execution to $true$.
-The transition relation is constructed as a conjunction of safety formulae. These can be split into two types, \emph{enabling} and \emph{updating} formulae. The first type restricts the set of label variables that can be set to $true$ at state $s_i$, one mutually exclusive option for each label \actionLabel in the transition relation ($(s_i,\actionLabel,s_j) \in \Delta$). The second type defines the state $s_j$ reached for each combination of current state and enabled label variables. 
-We will use the following formula to set mutually exclusive values over state variables:
+Where $\gsTheE$ assigns all environment label variables to $false$ since no transition has been taken yet at the start of execution, $\gsTheS$ does the same for the controllable actions, also ensures that only the state variable related to initial state $s_0$ holds and sets the natural variables related to propositions enabled at the start of the execution to $true$.
+The transition relation is constructed as a conjunction of safety formulae. These can be split into two types, \emph{enabling} and \emph{updating} formulae. The first type restricts the set of primed label variables that can be set to $true$ at state $s_i$, one mutually exclusive option for each label \actionLabel in the transition relation ($(s_i,\actionLabel,s_j) \in \Delta$), indicating the actions that ocurred when going from $s_i$ to $s_j$. The second type defines the state $s_j$ reached for each combination of current state and enabled label variables. Notice that we rely on $E$ being deterministic in order to build emulate the transition relation in this way.
+We will use the following formula to set mutually exclusive values over state variables (exactly one state variable is set to $true$ at any given time):
 
 \begin{center}
 	\begin{tabular}{r r r l}
@@ -101,9 +107,9 @@ Transition formulae $\gsRhoE$ and $\gsRhoS$ are written conforming to $\Delta$ a
 \vspace{1em}
 \begin{tabular}{ r c l }
 	$\rho_{env.enabling}$&$:$&$WFF(\gsV \cup \gsX')$\\
-	$\rho_{env.enabling}$ &$=$& $\bigwedge_{s_i \in S} \varState{i} \implies \bigvee_{(s_i,\actionLabel,s_j) \in \Delta}labels_e(\actionLabel)$\\
+	$\rho_{env.enabling}$ &$=$& $\bigwedge_{s_i \in S} \varState{i} \implies \bigvee_{(s_i,\actionLabel,s_j) \in \Delta}labels_e(\actionLabel)'$\\
 	$\rho_{sys.enabling}$&$:$&$WFF(\gsV \cup \gsV')$\\
-	$\rho_{sys.enabling}$ &$=$& $\bigwedge_{s_i \in S} \varState{i} \implies \bigvee_{(s_i,\actionLabel,s_j) \in \Delta}labels_s(\actionLabel)$\\
+	$\rho_{sys.enabling}$ &$=$& $\bigwedge_{s_i \in S} \varState{i} \implies \bigvee_{(s_i,\actionLabel,s_j) \in \Delta}labels_s(\actionLabel)'$\\
 	&&\\
 	$\rho_{update.states}$&$:$&$WFF(\gsV \cup \gsV')$\\
 $\rho_{update.states}$&$=$&$\bigwedge_{\exists s_j:(s_i,\actionLabel,s_j) \in \Delta} (\varState{i} \wedge label_s(\actionLabel) \implies mux(\varState{j}') ) $\\	
@@ -117,7 +123,7 @@ $\rho_{update.states}$&$=$&$\bigwedge_{\exists s_j:(s_i,\actionLabel,s_j) \in \D
 \end{tabular}
 \vspace{1em}
 
-The first formula, $\rho_{env.enabling}$ restricts the set of environmental label variables that can be enabled in mutually exclusive fashion at any given state $\sigma_j$ in the reactive system, when \varState{i} holds, capturing the fixed set of options of actions the environment can execute at any given point in the run $\sigma$ that conforms with the enabled transitions going out of $s_i$, $\rho_{sys.enabling}$ does the same for system label variables that relate to controllable actions, $\rho_{update.states}$ defines the next state variables according to the satisfaction of the state and label variables at the moment, this will conform to the state reached in $E$ after fixing the variables related to the current state and the label component of the selected outgoing transition, $\rho_{update.propositions}$ updates the natural variables according to the selected next state to ensure that these are evaluated according to the valuations defined in \valuations. Then $\gsRhoS$ is the system transition formula, defined as a conjunction of $\rho_{sys.enabling}$, $\rho_{update.states}$ and $\rho_{update.propositions}$.
+The first formula, $\rho_{env.enabling}$ restricts the set of environmental label variables that can be enabled in mutually exclusive fashion at any given state $\sigma_j$ in the reactive system, when \varState{i} holds, capturing the fixed set of options of actions the environment can execute at any given point in the run $\sigma$ that conforms with the enabled transitions going out of $s_i$, note that the application of both $labels_e$ and $labels_s$ are primed to ensure that the restriction is placed on next-state variables, according to our interpretation of the problem. $\rho_{sys.enabling}$ does the same for system label variables that relate to controllable actions, $\rho_{update.states}$ defines the next state variables according to the satisfaction of the state and label variables at the moment that will conform to the state reached in $E$, remember again the deterministic assumption, after taking the transition whose label conforms to the variables chosen for the state of the run. $\rho_{update.propositions}$ sets the natural variables according to the selected state to ensure that these are set according to \valuations. Then $\gsRhoS$ is the system transition formula, defined as a conjunction of $\rho_{sys.enabling}$, $\rho_{update.states}$ and $\rho_{update.propositions}$.
 %
 %Now we have the following mapping:
 %
@@ -184,6 +190,7 @@ We can easily see that $fds(C)$ is fairness-free and complete w.r.t. $\mathcal{X
 We split the proof in two again, first assuming that the run violates the restrictions that follow the behavior of $E$, i.e.: $\sigma \not\models \theta_e \wedge \square \rho_e$, i.e.: $\sigma \models \neg\theta_e \vee \Diamond \neg\rho_e$, in which case $\varphiLTL$ is trivially satisfied since all the precedents in the general conjunction terms are falsified, then if the behavior restrictions are held, i.e.: $\sigma \models \theta_e \wedge \square \rho_e$, we must prove that $\theta_s$, $\square\rho_s$ and $val(\varphi)$ are also satisfied. Since $\sigma$ is a play in $fds(C)$ then $\theta_d=(\theta_e \implies \theta_s)$ and $\rho_d=(\rho_e \implies \rho_s)$ hold, and since it also satisfies $\theta_e \wedge \square \rho_e$ we observe the following:
 \[((\theta_e \implies \theta_s) \wedge \theta_e))\implies \theta_s\]
 \[((\rho_e \implies \rho_s) \wedge \rho_e))\implies \rho_s\]
+
 To show that $\sigma$ also satisfies $val(\varphi)$ we prove that for every run $\sigma$ in $fds(C)$ there is an execution $\execution$ in $C$ that conforms to it.
 For a run $\sigma \in 2^{|\mathcal{V}|^{\omega}}$ we define $exec(\sigma) \in S^{\omega}$ as follows, suppose that $\sigma = \sigma_1 \sigma_2 \ldots \sigma_i \ldots$ and
 $exec(\sigma)= \execution_1 \execution_2 \ldots \execution_i \ldots$, then $\execution_i = s_j \iff \sigma_i \models \varState{j}$, to prove that such execution is possible in $C$ we observe that since $\sigma$ satisfies $\rho_e \wedge \rho_s$, for each pair ($\sigma_i$,$\sigma_{i+1}$),  $\rho_e \wedge \rho_s$ forces
@@ -204,8 +211,8 @@ Considering that $\fdsD= \langle \mathcal{V}_d, \theta_d, \rho_d, \mathcal{J}_d,
 	$s_0$&$=$&$(s_0^{E}, \enumSet{s_0|_{\mathcal{M}}})$ where $s_0 \models \theta_d$ \\
 	$\valuations$&$=$&$\pi_1 \circ \valuations_E$\\
 	&&\\
-	$\Delta$&$=$&$\{((s_i,\enumSet{s|_{\mathcal{M}}}),\actionLabel,(s_j,\enumSet{s'|_{\mathcal{M}'}}): (s, s') \models \rho_d \wedge \xspace s|_{\gsY_s} = \varState{i}  \wedge s'|_{\gsY_s} = \varState{j}$ \\
-	&&$\wedge (\forall y_i \in \controlSet : y_i \in \actionLabel \iff \hat{y}_i \in s|_{\gsY_c})  \wedge (\forall x_i \in \nonControlSet : x_i \in \actionLabel \iff \hat{x}_i \in s|_{\gsX})  \}$\\
+	$\Delta$&$=$&$\{((s_i,\enumSet{s|_{\mathcal{M}}}),\actionLabel,(s_j,\enumSet{s'|_{\mathcal{M}'}}): (s, s') \models \rho_d \wedge \xspace s|_{\gsY_s} = \varState{i}  \wedge s'|_{\gsY'_s} = \varState{j}'$ \\
+	&&$\wedge (\forall y_i \in \controlSet : y_i \in \actionLabel \iff \hat{y'}_i \in s'|_{\gsY'_c})  \wedge (\forall x_i \in \nonControlSet : x_i \in \actionLabel \iff \hat{x'}_i \in s'|_{\gsX'})  \}$\\
 \end{tabular}
 \vspace{1em}
 \\

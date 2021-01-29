@@ -35,19 +35,19 @@ The FDS equivalent formula to $E$ is built using the translation proposed before
 \footnotesize
 \vspace{1em}
 \begin{tabular}{ r c l }
-	$\theta_{e}$ &$=$& $\bar{\hat{p}} \wedge \bar{\hat{r}}$\\
-	$\theta_{s}$ &$=$& $\bar{s_0} \wedge \bar{s_1} \wedge \bar{\hat{P}} \wedge \bar{\hat{R}} \wedge \bar{\hat{e}} \wedge \bar{\hat{a}} \wedge \bar{\hat{b}}$\\	
-	$\rho_{env.enabling}$ &$=$& $((\bar{s_0} \wedge \bar{s_1} ) \implies ((\hat{p} \wedge \bar{\hat{r}}) \vee (\bar{\hat{p}} \wedge \hat{r}))) \wedge$\\
-	&& $((s_0 \vee s_1 ) \implies (\bar{\hat{p}} \wedge \bar{\hat{r}}))$\\	
-	$\rho_{sys.enabling}$ &$=$& $((\bar{s_0} \wedge \bar{s_1} ) \implies (\bar{\hat{P}} \wedge \bar{\hat{R}})) \wedge$\\
-	&& $((s_0 \vee s_1 ) \implies ((\hat{P} \wedge \bar{\hat{R}}) \vee (\bar{\hat{P}} \wedge  \hat{R})))$\\		
-	$\rho_{update.states}$ &$=$& $((\bar{s_0} \wedge \bar{s_1} \wedge \hat{p} \wedge \bar{\hat{r}} \wedge \bar{\hat{P}} \wedge \bar{\hat{R}}) \implies (\bar{s_0}' \wedge \bar{s_1}')) \wedge$\\
-	&&$((\bar{s_0} \wedge \bar{s_1} \wedge \bar{\hat{p}} \wedge \hat{r} \wedge \bar{\hat{P}} \wedge \bar{\hat{R}}) \implies (s_0' \wedge \bar{s_1}')) \wedge$\\	
-	&&$((s_0 \wedge \bar{s_1} \wedge \bar{\hat{p}} \wedge \bar{\hat{r}} \wedge \bar{\hat{P}} \wedge \hat{R}) \implies (\bar{s_0}' \wedge \bar{s_1}')) \wedge$\\	
-	&&$((s_0 \wedge \bar{s_1} \wedge \bar{\hat{p}} \wedge \bar{\hat{r}} \wedge \hat{P} \wedge \bar{\hat{R}}) \implies (\bar{s_0}' \wedge s_1')) \wedge$\\	
-	&&$((\bar{s_0} \wedge s_1 \wedge \bar{\hat{p}} \wedge \bar{\hat{r}} \wedge \bar{\hat{P}} \wedge \hat{R}) \implies (\bar{s_0}' \wedge \bar{s_1}')) \wedge$\\		
-	&&$((\bar{s_0} \wedge s_1 \wedge \bar{\hat{p}} \wedge \bar{\hat{r}} \wedge \hat{P} \wedge \bar{\hat{R}}) \implies (s_0' \wedge s_1')) \wedge$\\		
-	&&$((s_0 \wedge s_1 \wedge \bar{\hat{p}} \wedge \bar{\hat{r}} \wedge \bar{\hat{P}} \wedge \hat{R}) \implies (\bar{s_0}' \wedge \bar{s_1}'))$\\	
+	$\theta_{e}$ &$=$& $(\bar{\hat{p}} \wedge \bar{\hat{r}})$\\
+	$\theta_{s}$ &$=$& $\bar{s_0} \wedge \bar{s_1} \wedge ((\bar{\hat{P}} \wedge \bar{\hat{R}})) \wedge \bar{\hat{e}} \wedge \bar{\hat{a}} \wedge \bar{\hat{b}}$\\	
+	$\rho_{env.enabling}$ &$=$& $((\bar{s_0} \wedge \bar{s_1} ) \implies ((\hat{p}'\wedge \bar{\hat{r}}') \vee (\bar{\hat{p}}' \wedge \hat{r}'))) \wedge$\\
+	&& $((s_0 \vee s_1 ) \implies (\bar{\hat{p}}' \wedge \bar{\hat{r}}'))$\\	
+	$\rho_{sys.enabling}$ &$=$& $((\bar{s_0} \wedge \bar{s_1} ) \implies (\bar{\hat{P}}' \wedge \bar{\hat{R}}')) \wedge$\\
+	&& $((s_0 \vee s_1 ) \implies ((\hat{P}'\wedge \bar{\hat{R}}') \vee (\bar{\hat{P}}' \wedge  \hat{R})))$\\		
+	$\rho_{update.states}$ &$=$& $((\bar{s_0} \wedge \bar{s_1} \wedge \hat{p}'\wedge \bar{\hat{r}}' \wedge \bar{\hat{P}}' \wedge \bar{\hat{R}}') \implies (\bar{s_0}' \wedge \bar{s_1}')) \wedge$\\
+	&&$((\bar{s_0} \wedge \bar{s_1} \wedge \bar{\hat{p}}' \wedge \hat{r}'\wedge \bar{\hat{P}}' \wedge \bar{\hat{R}}') \implies (s_0' \wedge \bar{s_1}')) \wedge$\\	
+	&&$((s_0 \wedge \bar{s_1} \wedge \bar{\hat{p}}' \wedge \bar{\hat{r}}' \wedge \bar{\hat{P}}' \wedge \hat{R}')\implies (\bar{s_0}' \wedge \bar{s_1}')) \wedge$\\	
+	&&$((s_0 \wedge \bar{s_1} \wedge \bar{\hat{p}}' \wedge \bar{\hat{r}}' \wedge \hat{P}'\wedge \bar{\hat{R}}') \implies (\bar{s_0}' \wedge s_1')) \wedge$\\	
+	&&$((\bar{s_0} \wedge s_1 \wedge \bar{\hat{p}}' \wedge \bar{\hat{r}}' \wedge \bar{\hat{P}}' \wedge \hat{R}')\implies (\bar{s_0}' \wedge \bar{s_1}')) \wedge$\\		
+	&&$((\bar{s_0} \wedge s_1 \wedge \bar{\hat{p}}' \wedge \bar{\hat{r}}' \wedge \hat{P}'\wedge \bar{\hat{R}}') \implies (s_0' \wedge s_1')) \wedge$\\		
+	&&$((s_0 \wedge s_1 \wedge \bar{\hat{p}}' \wedge \bar{\hat{r}}' \wedge \bar{\hat{P}}' \wedge \hat{R}')\implies (\bar{s_0}' \wedge \bar{s_1}'))$\\	
 	$\rho_{update.propositions}$ &$=$& $((\bar{s_0} \wedge \bar{s_1}) \implies (\bar{\hat{e}}' \wedge \bar{\hat{a}}' \wedge \bar{\hat{b}}')) \wedge$\\
 	&& $((s_0 \wedge \bar{s_1}) \implies (\hat{e}' \wedge \bar{\hat{a}}' \wedge \bar{\hat{b}}')) \wedge$\\
 	&& $((\bar{s_0} \wedge s_1) \implies (\bar{\hat{e}}' \wedge \hat{a}' \wedge \bar{\hat{b}}')) \wedge$\\
@@ -68,28 +68,28 @@ If we keep only the behavior that conforms to $\theta_e, \theta_s, \rho_e$ and $
 		\begin{VCPicture}{(-6.5,-2.5)(6.5,3.5)}
 			\SetStateLabelScale{1}
 			\SetEdgeLabelScale{1.2}
-			\StateVar[0:\overline{s_0 s_1 e a b}p\overline{r P R}]{(-6,-0.3)}{0}
-			\StateVar[1:\overline{s_0 s_1 e a b p}r\overline{P R}]{(-6,2.3)}{1}
-			\StateVar[2:s_0\overline{s_1} e \overline{a b p r P} R]{(-2,-0.3)}{2}
-			\StateVar[3:s_0\overline{s_1} e  \overline{a b p r} P \overline{R}]{(-2,2.3)}{3}
-			\StateVar[4:\overline{s_0}s_1 \overline{e} a  \overline{b p r P} R]{(2,-0.3)}{4}
-			\StateVar[5:\overline{s_0}s_1 \overline{e} a  \overline{b p r} P \overline{R}]{(2,2.3)}{5}			
-			\StateVar[6:s_0 s_1\overline{e a} b  \overline{p r P} R]{(6,1)}{6}						
+			\StateVar[0:\overline{s_0 s_1 e a b p r P R}]{(-6,2.3)}{0}
+			\StateVar[1:\overline{s_0 s_1 e a b}p \overline{r P R}]{(-2,2.3)}{1}
+			\StateVar[2:\overline{s_0 s_1 e a b p r P} R]{(-2,-0.3)}{2}
+			\StateVar[3:s_0\overline{s_1} e  \overline{a b p} r \overline{P R}]{(2,2.3)}{3}
+			\StateVar[4:\overline{s_0}s_1 \overline{e} a  \overline{b p r } P \overline{R}]{(6,1.3)}{4}
+			\StateVar[5:s_0 s_1 \overline{e a} b  \overline{ p r} P \overline{R}]{(2,-0.3)}{5}			
 			\Initial[w]{0}
-			\Initial[w]{1}
-			\LoopS{0}{}			
+			\CLoopSW{1}{}			
 			\EdgeL{0}{1}{}        
-			\EdgeL{1}{3}{}        
-			\EdgeL{2}{1}{}        			
-			\EdgeL{2}{0}{}        						
-			\EdgeL{3}{5}{}        
-			\EdgeL{4}{1}{}        			
-			\ArcL{4}{0}{}        						
-			\EdgeL{5}{6}{}        			
-			\VArcR[.5]{arcangle=45,ncurv=.6}{6}{0}{}        						
-			\VArcL[.5]{arcangle=-45,ncurv=.6}{6}{1}{}        									
+			\ArcL{0}{3}{}  			
+			\EdgeL{2}{1}{}        		
+			\EdgeL{1}{3}{}        		
+			\EdgeR{3}{2}{}        		
+			\EdgeR{2}{3}{}        					
+			\ArcL{3}{4}{}        		
+			\ArcR{4}{2}{}        		
+			\ArcL{4}{5}{}        		
+			\EdgeL{5}{2}{}        		
+		%	\VArcR[.5]{arcangle=45,ncurv=.6}{6}{0}{}        						
+		%	\VArcL[.5]{arcangle=-45,ncurv=.6}{6}{1}{}        									
 		\end{VCPicture}
-	}
+	}	
 	\caption{Kripke structure induced from $\theta$ and $\rho$}
 	\label{fig:clts_to_fds_K}
 	%\endminipage\hfill
@@ -108,7 +108,7 @@ The FDS controller is built as $\mathcal{D} = \langle \hat{\gsV}, \hat{\theta}, 
 \begin{tabular}{ l c l }
 	$\hat{\gsV}$ & $=$ & $\gsX \cup \gsY \cup \mathcal{M}$\\	
 	$\hat{\theta}$ & $=$ & $(\theta_e \implies (\theta_s \wedge m_0 \wedge W_s))$\\
-	$\hat{\rho_d}$ & $=$ & $((W_s \wedge \rho_e) \implies \hat{f})$\\	
+	$\hat{\rho}$ & $=$ & $((W_s \wedge \rho_e) \implies \hat{f})$\\	
 \end{tabular}
 \vspace{1em}
 
@@ -116,13 +116,11 @@ We describe $\hat{f}$ extensively only for the part of its domain that satisfies
 
 \vspace{1em}
 \begin{tabular}{ r r r l l r r l l r}
-	$\hat{f}($ & $\overline{m_0},$ & $\overline{s_0 s_1 e a b}p\overline{rPR},$ &$p'\overline{r'}$ & $) =$ & $($ & $\overline{s_0's_1'e'a'b'P'R'},$ & $\overline{m_o'}$ & $)$ & $(0 \rightarrow 0)$\\
-	$\hat{f}($ & $\overline{m_0},$ & $\overline{s_0 s_1 e a b}p\overline{rPR},$ &$\overline{p'}r'$ & $) =$ & $($ & $\overline{s_0's_1'e'a'b'P'R'},$ & $\overline{m_o'}$ & $)$ & $(0 \rightarrow 1)$\\
-	$\hat{f}($ & $\overline{m_0},$ & $\overline{s_0 s_1 e a b p}r\overline{PR},$ &$\overline{p'r'}$ & $) =$ & $($ & $s_0'\overline{s_1'}e'\overline{a'b'}P'\overline{R'},$ & $\overline{m_o'}$ & $)$ & $(1 \rightarrow 3)$\\		
-	$\hat{f}($ & $\overline{m_0},$ & $s_0\overline{ s_1} e \overline{a b p r}P\overline{R},$ &$\overline{p'r'}$ & $) =$ & $($ & $\overline{s_0'}s_1'\overline{e'}a'\overline{b'}P'\overline{R'},$ & $m_o'$ & $)$ & $(3 \rightarrow 5)$\\		
-	$\hat{f}($ & $m_0,$ & $\overline{ s_0}s_1\overline{e} a \overline{b p r}P\overline{R},$ &$\overline{p'r'}$ & $) =$ & $($ & $s_0's_1'\overline{e'a'}b'\overline{P'}R',$ & $\overline{m_o'}$ & $)$ & $(5 \rightarrow 6)$\\			
-	$\hat{f}($ & $\overline{m_0},$ & $s_0 s_1\overline{e a} b \overline{p r P}R,$ &$p'\overline{r'}$ & $) =$ & $($ & $\overline{s_0's_1'e'a'b'P'R'},$ & $\overline{m_o'}$ & $)$ & $(6 \rightarrow 0)$\\				
-	$\hat{f}($ & $\overline{m_0},$ & $s_0 s_1\overline{e a b p r P}R,$ &$\overline{p'}r'$ & $) =$ & $($ & $s_0'\overline{s_1'}e'\overline{a'b'}P'\overline{R'},$ & $\overline{m_o'}$ & $)$ & $(6 \rightarrow 1)$\\					
+	$\hat{f}($ & $\overline{m_0},$ & $\overline{s_0 s_1},$ &$\overline{r'}$ & $) =$ & $($ & $\overline{P'R'},$ & $\overline{m_o'}$ & $)$ & $(0 \rightarrow 0)$\\
+	$\hat{f}($ & $\overline{m_0},$ & $\overline{s_0 s_1},$ &$r'$ & $) =$ & $($ & $P'\overline{R'},$ & $\overline{m_o'}$ & $)$ & $(0 \rightarrow 1)$\\	
+	$\hat{f}($ & $\overline{m_0},$ & $s_0\overline{s_1},$ &$\top$ & $) =$ & $($ & $P'\overline{R'},$ & $m_o'$ & $)$ & $(1 \rightarrow 2)$\\	
+	$\hat{f}($ & $m_0,$ & $\overline{s_0} s_1,$ &$\top$ & $) =$ & $($ & $P'\overline{R'},$ & $\overline{m_o'}$ & $)$ & $(2 \rightarrow 3)$\\	
+	$\hat{f}($ & $\overline{m_0},$ & $s_0 s_1,$ &$\top$ & $) =$ & $($ & $\overline{P'}R',$ & $\overline{m_o'}$ & $)$ & $(3 \rightarrow 0)$\\	
 \end{tabular}
 \vspace{1em}
 
@@ -138,23 +136,27 @@ If we restrict the behavior of the model that was shown in figure ~\ref{fig:clts
 		\begin{VCPicture}{(-6.5,-2.5)(6.5,3.5)}
 			\SetStateLabelScale{1}
 			\SetEdgeLabelScale{1.2}
-			\StateVar[0:\overline{s_0 s_1 e a b}p\overline{r P R}]{(-6,-0.3)}{0}
-			\StateVar[1:\overline{s_0 s_1 e a b p}r\overline{P R}]{(-6,2.3)}{1}
-			\StateVar[3:s_0\overline{s_1} e \overline{a b p r} P \overline{R}]{(-2,2.3)}{3}
-			\StateVar[5:\overline{s_0}s_1 \overline{e} a \overline{b p r} P \overline{R}]{(2,2.3)}{5}			
-			\StateVar[6:s_0 s_1\overline{e a} b \overline{p r P} R]{(6,1)}{6}						
+			\StateVar[0:\overline{s_0 s_1 e a b p r P R}]{(-6,2.3)}{0}
+			\StateVar[1:\overline{s_0 s_1 e a b}p \overline{r P R}]{(-2,2.3)}{1}
+			\StateVar[2:\overline{s_0 s_1 e a b p r P} R]{(-2,-0.3)}{2}
+			\StateVar[3:s_0\overline{s_1} e  \overline{a b p} r \overline{P R}]{(2,2.3)}{3}
+			\StateVar[4:\overline{s_0}s_1 \overline{e} a  \overline{b p r } P \overline{R}]{(6,1.3)}{4}
+			\StateVar[5:s_0 s_1 \overline{e a} b  \overline{ p r} P \overline{R}]{(2,-0.3)}{5}			
 			\Initial[w]{0}
-			\Initial[w]{1}
-			\LoopS{0}{}			
+			\CLoopSW{1}{}			
 			\EdgeL{0}{1}{}        
-			\EdgeL{1}{3}{}        
-			\EdgeL{3}{5}{}        
-			\EdgeL{5}{6}{}        			
-			\VArcR[.5]{arcangle=45,ncurv=.6}{6}{0}{}        						
-			\VArcL[.5]{arcangle=-45,ncurv=.6}{6}{1}{}        									
+			\ArcL{0}{3}{}  			
+			\EdgeL{2}{1}{}        		
+			\EdgeL{1}{3}{}        		
+			\EdgeR{2}{3}{}        					
+			\ArcL{3}{4}{}        		
+			\ArcL{4}{5}{}        		
+			\EdgeL{5}{2}{}        		
+			%	\VArcR[.5]{arcangle=45,ncurv=.6}{6}{0}{}        						
+			%	\VArcL[.5]{arcangle=-45,ncurv=.6}{6}{1}{}        									
 		\end{VCPicture}
-	}
-	\caption{Kripke structure induced from $\theta$ and $\rho$ after strengthening with $\hat{f}$}
+	}	
+	\caption{Kripke structure induced from $\theta$ and $\rho$ after strengthening through $\hat{f}$}
 	\label{fig:clts_to_fds_F}
 	%\endminipage\hfill
 \end{figure}

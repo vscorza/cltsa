@@ -1,13 +1,20 @@
 TODO:
 =====
+- re-escribir ejemplo
+- revisar todo
 - notas vic
-	- buscar motivación encoding labels en literatura
-	- revisar traducción a clts y memoria en estado inicial
-	   Ok, la aridad está en los párrafos donde dice e.g. theta_e \in 2^{\Sigma^X}, para que me quede claro, eso te parece que está mal o que hay que poner el tipo antes de la definición para que quede más claro?
 
+El último asunto para pensar es el siguiente:
+en la definición de Delta =
+{((s_i, Memoria(s)), L, (s_k, Memoria(s´)) / s transiciona a s' en D  &&  EstadoEnv(s)= s_i && EstadoEnv(s')= s_k && L es lo que s dice sobre las etiquetas}
 
-	Sí, digo poner las variables explícitamente como hacen en 2.3 del paper de Nir pero con tus propios nombres de variables antes de la definición.
-	 
+Lo que me preocupa: potencialmente tenés no-determinismo aún con una planta determinística. O sea, ir con un mismo L ir al mismo estado del ambiente/planta pero con memoria distinta. 
+ Esto en el ejemplo no pasa: del 6: vas al 0: y al 1: por R pero estos estados coinciden tanto en su estado de ambiente subyacente y memoria (la inicial). A uno se llegó asumiendo que la señal de input es x´=neg(p),r y el otro x´=p,neg(r) (*).
+Ahora, nunca puede darse el no determinismo que digo? Por qué? y sino, porqué no es un problema?
+
+Saludos!    
+
+(*): Notar que si bien s transiciona a s' y f define la memoria de s´ de manera unívoca esa definición depende de X´ y no sólo del L de la definición del Delta. Dicho de otro modo, s podría tener a L prendido y transicionar a s' y a s'' con dos señales de input distintas (que representan la acción que viene, no?). Esos s' y s'' podrían ser distintos en estado de la  memoria, potencialmente.    	 
 
 - add cites
 	- DFS cited from "Verification by Augmented Finitary Abstraction"
