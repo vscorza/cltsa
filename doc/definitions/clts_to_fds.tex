@@ -98,7 +98,7 @@ We will use the following formula to set mutually exclusive values over state va
 
 \begin{center}
 	\begin{tabular}{r r r l}
-$mux:$&$\gsV' \mapsto WFF(\gsV'),$&$mux(\varState{i}') = $&$(\varState{i}' \wedge\bigwedge_{s_j \neq s_i, s_j \in S}\neg \varState{j}')$
+$mux:$&$\gsV \mapsto WFF(\gsV),$&$mux(\varState{i}) = $&$(\varState{i} \wedge\bigwedge_{s_j \neq s_i, s_j \in S}\neg \varState{j})$
 	\end{tabular}
 \end{center}
 
@@ -112,7 +112,7 @@ Transition formulae $\gsRhoE$ and $\gsRhoS$ are written conforming to $\Delta$ a
 	$\rho_{sys.enabling}$ &$=$& $\bigwedge_{s_i \in S} \varState{i} \implies \bigvee_{(s_i,\actionLabel,s_j) \in \Delta}labels_s(\actionLabel)'$\\
 	&&\\
 	$\rho_{update.states}$&$:$&$WFF(\gsV \cup \gsV')$\\
-$\rho_{update.states}$&$=$&$\bigwedge_{\exists s_j:(s_i,\actionLabel,s_j) \in \Delta} (\varState{i} \wedge label_s(\actionLabel) \implies mux(\varState{j}') ) $\\	
+$\rho_{update.states}$&$=$&$\bigwedge_{\exists s_j:(s_i,\actionLabel,s_j) \in \Delta} (\varState{i} \wedge label_s(\actionLabel) \implies mux(\varState{j})' ) $\\	
 	$\rho_{update.propositions}$&$:$&$WFF(\gsV \cup \gsV')$\\
 	$\rho_{update.propositions}$&$=$&$\bigwedge_{s_i \in S} (\varState{i} \implies \bigwedge_{\proposition \in \propositions}v(\proposition,i) )$\\
 	&&\\
@@ -211,7 +211,7 @@ Considering that $\fdsD= \langle \mathcal{V}_d, \theta_d, \rho_d, \mathcal{J}_d,
 	$s_0$&$=$&$(s_0^{E}, \enumSet{s_0|_{\mathcal{M}}})$ where $s_0 \models \theta_d$ \\
 	$\valuations$&$=$&$\pi_1 \circ \valuations_E$\\
 	&&\\
-	$\Delta$&$=$&$\{((s_i,\enumSet{s|_{\mathcal{M}}}),\actionLabel,(s_j,\enumSet{s'|_{\mathcal{M}'}}): (s, s') \models \rho_d \wedge \xspace s|_{\gsY_s} = \varState{i}  \wedge s'|_{\gsY'_s} = \varState{j}'$ \\
+	$\Delta$&$=$&$\{((s_i,\enumSet{s|_{\mathcal{M}}}),\actionLabel,(s_j,\enumSet{s'|_{\mathcal{M}'}}): (s, s') \models \rho_d \wedge \xspace s|_{\gsY_s} = mux(\varState{i})  \wedge s'|_{\gsY'_s} = mux(\varState{j})'$ \\
 	&&$\wedge (\forall y_i \in \controlSet : y_i \in \actionLabel \iff \hat{y'}_i \in s'|_{\gsY'_c})  \wedge (\forall x_i \in \nonControlSet : x_i \in \actionLabel \iff \hat{x'}_i \in s'|_{\gsX'})  \}$\\
 \end{tabular}
 \vspace{1em}
