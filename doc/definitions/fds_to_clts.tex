@@ -1,83 +1,122 @@
-We can now introduce the embedding of a FDS control problem \fdsControlProblemDef into a CLTS control problem \cltsCPEmbeddingDef.
-Again we need to translate the LTL formula over boolean formulae $\varphi$ as $prop(\varphi)$ by simply  replacing each occurrence of a boolean variable variable $v$ with an atomic proposition $p_v$.
 
+To show that the CLTS and FDS control problems are equivalent we  still need to show that an FDS control problem can be translated into an equivalent CLTS control problem. We will again introduce a set of embeddings that constitute the translation and then state and prove a realizability preserving theorem.
 
+In order to embed the FDS control problem \fdsControlProblemDef into the CLTS control problem \cltsCPEmbeddingDef, the first thing to note is that the LTL formula over Boolean variables $\varphi$ is translated as $\varphiCLTS$ by replacing each occurrence of an Boolean variables $v \in \gsV$ with the proposition $\dot{v} \in \propositions$. 
+%\begin{definition}
+%	\label{def:val_ltl} \emph{(LTL over $\propositions$ to LTL over $\mathcal{V}$ translation)} 
+%	Let $\varphi$ be a LTL formula over set of atomic propositions $\propositions$, and $\mathcal{V}$ the minimal set of boolean variables containing a variable $v_{\proposition}$ for each $\proposition \in \propositions$, then $val(\varphi)$ is an equivalent LTL formula over boolean variables and is defined as follows:\\
+%	
+%	\begin{tabular}{ l c l }
+%		$val(\proposition)$ & $\triangleq$ & $v_{\proposition}$\\	
+%		$val(\neg \varphi)$ & $\triangleq$ & $\neg val(\varphi)$\\
+%		$val(\varphi \vee \psi$ & $\triangleq$ & $val(\varphi) \vee val(\psi)$\\
+%		$val(\bigcirc \varphi)$ & $\triangleq$ & $\bigcirc val(\varphi)$\\
+%		$val(\varphi \U \psi)$ & $\triangleq$ & $val(\varphi) \U val(\psi)$\\
+%	\end{tabular}	
+%\end{definition}
 
+%\begin{definition}
+%	\label{def:clts_to_gs_translation} \emph{(CLTS to Game Structure translation)} 
+%	Let $A = \langle S_A, \Sigma_A, \Delta_A, s_{0_A} \rangle$ be a clts, and $\mathcal{C}\subseteq \Sigma_A$ its controllable alphabet, $gs(A,\mathcal{C})=B$ is a game structure such that $A \models \varphi$ $\iff$ $B \models val(\varphi)$.
+%\end{definition}
+%
+%Let $A$ be the CLTS to be translated and $B =  \langle \gsX, \gsY, \gsTheE, \gsTheS, \gsRhoE, \gsRhoS, \varphi \rangle$ the game structure resulting after applying $gs(A)$. 
+Let \fdsControlProblemDef, the alphabet of the embedding will be comprised of two sets, \controlSet and \nonControlSet, declared as follows:
+\[\controlSet = \{y\uparrow | y \in \gsY \} \cup \{y\downarrow | y \in \gsY \}\]
+\[\nonControlSet = \{x\uparrow | x \in \gsX \} \cup \{x\downarrow | x \in \gsX \}\]
+\[\Sigma = \controlSet \cup \nonControlSet \]
+For each variable $v$ in \fdsControlProblem we are adding two actions, $v\uparrow$ that indicates that the variable was set to $true$ when going to current state to the next and $v\downarrow$ added to the transitions from a state where $v$ held into one where it does not.
+We will use \enumStateSetDef to relate a state in the FDS domain to one in the CLTS control problem, it assigns a unique integer to each possible valuation over \gsV.
+Let \cltsDef be the CLTS describing the behavior of our problem, we can build it as follows:
 
-
-Now we can introduce a direct translation between game structures and CLTS instances.
-
-\begin{definition}
-	\label{def:fl_ltl} \emph{(LTL over $\mathcal{V}$ to LTL over $\mathcal{F}$ translation)} 
-	Let $\varphi$ be a LTL formula over countable boolean variables $\mathcal{V}$, and if $\mathcal{F}$ is the minimal fluent set containing $v_f = \langle v\uparrow, v\downarrow \rangle$ for each $v \in \mathcal{V}$, $fl(\varphi)$ is an equivalent LTL formula over fluents according to the following inductive definition:\\
-	
+\vspace{1em}
 \begin{tabular}{ l c l }
-	$fl(v)$ & $\triangleq$ & $v_f$\\	
-	$fl(\neg \varphi)$ & $\triangleq$ & $\neg fl(\varphi)$\\
-	$fl(\varphi \vee \psi$ & $\triangleq$ & $fl(\varphi) \vee fl(\psi)$\\
-	$fl(\bigcirc \varphi)$ & $\triangleq$ & $\bigcirc\bigcirc fl(\varphi)$\\
-	$fl(\varphi \U \psi)$ & $\triangleq$ & $fl(\varphi) \U fl(\psi)$\\
-\end{tabular}	
-\end{definition}
+	$S$ &$=$& $\{s_{i+1} : i \in [0\ldots2^{|\gsV|-1}] \}\cup \{s_0\}$\\
+	$\Sigma$ &$=$&$\controlSet \cup \nonControlSet$\\	
+	$\Delta$&$=$&$\{(s_i,\actionLabel,s_j) | s_i = \enumStateSet{\hat{s}_i} \wedge  s_j = \enumStateSet{\hat{s}_j} \wedge (\forall v \in \gsV: (v\uparrow \in \actionLabel \iff v \in \hat{s}_j \wedge v \not\in \hat{s}_i)$\\
+	&&$\wedge (\forall v \in \gsV: (v\downarrow \in \actionLabel \iff v \not\in \hat{s}_j \wedge v \in \hat{s}_i))\}$\\
+	&&$\cup \{ (s_0,\actionLabel,s_i)| s_i = \enumStateSet{\hat{s}_i} \wedge (\forall v \in \gsV: (v\uparrow \in \actionLabel \iff v \in \hat{s}_i)\}$\\
+	$\propositions$&$=$&$\{\dot{v} | v \in \gsV\}$\\
+	$\valuations(s)$&$=$&$\{\dot{v}| v \in \hat{s} \wedge s = \enumStateSet{\hat{s}}\}$\\
+\end{tabular}
+\vspace{1em}
+\\
+With $E$ we are allowing the whole domain of $\gsV \times \gsV'$ to be executed, expecting the CLTS controller that is a solution to \cltsCPEmbedding to to leave only the traces that are conforming to runs on \fdsD the FDS controller that is a solution to \fdsControlProblem. $S$ is the set of states to be related through \enumStateSetDef to valuations over \gsV while adding a distinguished initial state $s_0$ that allows $E$ to emulate the existence of multiple initial states by adding transitions from $s_0$ to those states that relate to valuations satisfying $\theta$. A proposition $\dot{v}$ is added for each variable $v$ so that the valuations over states in $S$ conform to those in $\Sigma_{\gsV}$. The transition relation imposes no restriction containing all possible pairs of states other than the ones going back to $s_0$.
 
-When relating a game structure to a control problem over CLTS we will use $M \models_{\mathcal{E,C}}\varphi$ when $M$ is a solution to $\langle E, \mathcal{C}, \mathcal{F}, \varphi \rangle$ and $\mathcal{F}$ is the minimal set as described in the translation between boolean variables and fluents.
+Now we can prove that realizability is preserved between FDS control problem $\fdsControlProblem$ and the embedding \cltsCPEmbedding.
 
-\begin{definition}
-	\label{def:gs_to_clts_translation} \emph{(Game Structure to CLTS translation)} 
-Let $G =  \langle \gsV, \gsX, \gsY, \gsTheE, \gsTheS, \gsRhoE, \gsRhoS, \varphi \rangle$ be a game structure, $clts(G)=M$ is a CLTS instance such that $G \models \varphi$ $\iff$ $M \models fl(\varphi)$.
-\end{definition}
+\begin{theorem}(\emph{$clts$ preserves realizability})\label{theorem:clts_preserves_realizability}\\
+	Let \fdsControlProblemDef be an FDS control problem  then if \cltsCPEmbeddingDef, there is a CLTS $\fdsD= \langle \mathcal{V}_d, \theta_d,$ $\rho_d,$ $\mathcal{J}_d,$ $\mathcal{C}_d\rangle$, s.t. $\gsX \cup \gsY \subseteq \mathcal{V}_d$, $D$ is fairness-free, complete w.r.t. \gsX that satisfies $\fdsD \models \varphi$
+	if and only if there is a CLTS $C$ legal w.r.t. ($E,\mathcal{C}$) s.t. $C \parallel E$ is deadlock-free and $C \parallel E \models \varphiCLTS$.
+	\normalsize
+\end{theorem}
 
-Let $G$ be the game structure to be translated and $M=\langle S, \Sigma, \Delta, s_0 \rangle$ the target CLTS, i.e. the candidate for $clts(G)$. 
-$S$ is $2^{|\mathcal{X}|}+2^{|\mathcal{V}|+|\mathcal{X}|}+2^{|\mathcal{V}|}+1$.
-The alphabet is defined as the minimal set satisfying 
-$\forall v \in \mathcal{V}: v\uparrow \in \Sigma, v\downarrow \in \Sigma$. 
-In order to construct $\Delta$ variables will be mapped as following:
+%, with an additional condition for LTL based reactive systems ($\sigma \models \theta_d \wedge \square \rho_d$) ruling out the cases where $val(\varphi)$ is never satisfied, since $\varphi_{LTL}$ could be realized by achieving $\neg\theta \vee \diamond \neg \rho$. In such a case no controller can be built for $\mathcal{I}$ s.t. $\varphi$ is satisfied since it will violate the safety restrictions related to the behavior of the plant $E_G$.
 
-\[
-\delta(v_i,v) = \begin{cases}
-v_i\uparrow & \text{if } v \in v \\
-v_i\downarrow & \text{if } v \not\in v
-\end{cases}
-\]
-\[\hat{\delta}(v,v') = \lbrace \delta(v_i,v') | v_i \in v \neq v_i \in v' \rbrace \]
-We will use the following set of mappings relating a valuation over those set of variables with a distinct state in the CLTS automaton:
-\[s_{\theta_e}:2^{|\mathcal{X}|}\rightarrow S\]
-\[s_{\rho_e}:2^{|\mathcal{V}| + |\mathcal{X}|}\rightarrow S\]
-\[s_{\rho_s}:2^{|\mathcal{V}|} \rightarrow S\]
-Since in the CLTS model we can define only one initial state, the set of initial valuations have to be explicitly reached from the distinguished element $s_0$ through $s_{\theta_e}$ and $s_{\rho_s}$. States reached via $\rho_e$ and $\rho_s$, which updated the environmental variables first and then the system part are mapped through $s_{\rho_e}$ and $s_{\rho_s}$.  The images of these functions do not overlap. 
-$\Delta$ is the minimal relation satisfying:
-	\[
-	\forall x, y: \theta_e(x) \wedge \theta_s(x,y) \implies s_{\theta_e}(x),s_{\rho_s}(x \wedge y) : (s_0, \hat{\delta} (\emptyset, x), s_{\theta_e}(x)), (s_{\theta_e}(x), \hat{\delta} (x,(x \wedge y)), s_{\rho_s}(x \wedge y)) \in \Delta 
-	\] 
-	\[
-	\forall v, x', y': \rho_e(v,x') \wedge \rho_s(v,x',y') \implies\]
-	\[(s_{\rho_s}(v), \hat{\delta} (v, v [v \cap \mathcal{X} \mapsto x']),s_{\rho_e}(v \wedge x')), (s_{\rho_e}(v \wedge x'), \hat{\delta} (v[v \cap \mathcal{X}  \mapsto x'],x' \wedge y'), s_{\rho_s}(x' \wedge y')) \in \Delta 
-	\] 
+The proof is split in two parts, first we prove that if an FDS \fdsD controller exists for $\fdsControlProblem$, a CLTS controller $C$ exists for $\cltsCPEmbedding$($\exists \fdsD \rightarrow \exists C$) by constructing an CLTS from controller \fdsD through a specific embedding $ctrl(\fdsD)$ and then proving that each property holds. For the case where if a CLTS controller $C$ exists for the embedding \cltsCPEmbedding there must exist an FDS controller for \fdsControlProblem ($\exists C \rightarrow \exists \fdsD$) we construct an FDS controller from $C$ through a specific embedding, similar to the one used in the previous section, and then prove each property for it. The outline of the proof is as follows:
 
-As in the previous cases, and showing only the atomic case where the formula consists of a single variable $v$, $\varphi$ is satisfied in move $\sigma_i$ within play $\sigma=\sigma_1,\sigma_2\ldots ,\sigma_i$ on $G$ if $v$ belongs to $\sigma_i$. In our case this also implies that $fl(\varphi)$ is satisfied in state $s_i$ within the path $\pi=s_{\theta_e}(x),s_{\rho_s}(x,y),\ldots,s_i=s_{\rho_*}(\sigma_i)$ over $M$ since, from $v \in \sigma_i$ follows that at some point the proposition started appearing in states leading to $s_i$, (we can assume w.l.o.g. $*$ is either $e$ or $s$ and $\overline{*}$ is its complement, $s$ if $*$ is $e$, and $e$ otherwise), suppose that $s_j$ was the first state were $v$ appeared and was kept until reaching $s_i$ ($\forall j \leq k \leq i: v \in \sigma_k$), then step $(\sigma_{j-1},\sigma_j) \in G$ was translated as $(s_{\rho_*}(\sigma_{j-1}), \hat{\delta}(\sigma_{j-1},s_{\rho_{\overline{*}}}(\sigma_j)),\sigma_{j})$ and $v\uparrow \in \hat{\delta}(\sigma_{j-1},\sigma_j)$ since its value changed from one state to the other, and since it still holds at $\sigma_i$, then no $v\downarrow$ was introduced between $s_j$ and $s_i$, thus satisfying the definition of $fl(\varphi)$ by construction of the fluent $v_f$. It follows from this observation, that if $M$ is the CLTS structure constructed from $G$ following the previous translation, then LTL satisfaction is preserved between structures.
 
-In order to prove realizability preservation we need to introduce a translation between fair discrete systems and CLTS structures. 
+\begin{description}
+	\item[($\exists \fdsD \rightarrow \exists C$)] Given $\fdsControlProblemDef$ and FDS $\fdsD$
+		\begin{itemize}
+			\item $ctrl'(\fdsD)$ is legal w.r.t. $E$ and $\mathcal{C}$
+			\item $ctrl'(\fdsD)$ is a deadlock-free CLTS			
+			\item $ctrl'(\fdsD) \models \varphiCLTS$
+		\end{itemize}	
+	\item[($\exists C \rightarrow \exists \fdsD$)] Given \cltsCPEmbeddingDef and $C$
+\begin{itemize}
+	\item $fds(C)$ is a fairness-free FDS			
+	\item $fds(C)$ is complete w.r.t. $\mathcal{X}$
+	\item $fds(C) \models \varphi$
+	%	\item $\exists \sigma \in D: \sigma \models \theta_e \wedge \square \rho_e$			
+\end{itemize}	
+\end{description}
 
-\begin{definition}
-	\label{def:dfs_to_clts_translation} \emph{(Discrete Fair System to CLTS translation w.r.t. a Game Structure)} 
-	Let $G =  \langle \gsV, \gsX, \gsY, \gsTheE, \gsTheS, \gsRhoE, \gsRhoS, \varphi \rangle$ be a game structure, $\mathcal{D}=\langle \gsV, \theta, \rho, \emptyset, \emptyset \rangle$ a fairness-free fair discrete system, $clts(\mathcal{D},G)=M$ is a CLTS instance such that $\mathcal{D}$ realizes $\varphi \iff M \models v_{vacuous} \vee fl(\varphi)$.
-\end{definition}
+First,  for the $\exists \fdsD \rightarrow \exists C$ step, $ctrl'$ constructs an embedding from an FDS into a CLTS. In the following definitions, let $\mathcal{M}= \mathcal{V}_d\setminus (\mathcal{X} \cup \mathcal{Y})$ be called the \emph{memory variables} of $\fdsD$ as before.
+Again and following ~\cite{bloem2012synthesis} we will suppose that \fdsD is constructed from a strategy $f: M \times \Sigma$ $\times$ $\Sigma_{\gsX} \mapsto M \times \Sigma_{\gsY}$
+that wins the game $G_{\varphi}=\langle \gsX, \gsY, true,$ $true, true,$ $true,$ $\varphi \rangle$. Considering that $\fdsD= \langle \mathcal{V}_d, \theta_d, \rho_d, \mathcal{J}_d, \mathcal{C}_d\rangle$ is a solution to $\varphi$, we can define the embedding from an FDS controller \fdsD into a CLTS controller ctrl'(\fdsD)  as:
 
-The translation will be as in the case of the game structure but for each environmental move that violates $\theta_e$ or $\rho_e$ in $\mathcal{D}$ the automaton $M$ will move to a free state $s_{vacuous}$ where the fluent $v_{vacuous}$ holds indefinitely. We extend $\Sigma_M$ by adding the element $vacuous\uparrow$, $S_M$ by adding $s_vacuous$, the set of fluents $\mathcal{F}$ with $v_{vacuous}= \langle \{ vacuous\uparrow \}, \emptyset \rangle$ and $\Delta$ as the minimal relation satisfying:
-\[
-\forall x, y: \theta_e(x) \wedge \theta_s(x,y)  \wedge \theta(x,y) \implies s_{\theta_e}(x),s_{\rho_s}(x \wedge y) : (s_0, \hat{\delta} (\emptyset, x), s_{\theta_e}(x)), (s_{\theta_e}(x), \hat{\delta} (x,(x \wedge y)), s_{\rho_s}(x \wedge y)) \in \Delta 
-\] 
-\[
-\forall v, x', y': \rho_e(v,x') \wedge \rho_s(v,x',y') \wedge \rho(v,x',y') \implies\]
-\[(s_{\rho_s}(v), \hat{\delta} (v, v [v \cap \mathcal{X} \mapsto x']),s_{\rho_e}(v \wedge x')), (s_{\rho_e}(v \wedge x'), \hat{\delta} (v[v \cap \mathcal{X}  \mapsto x'],x' \wedge y'), s_{\rho_s}(x' \wedge y')) \in \Delta 
-\] 
-And now for the steps leading to the vacuous solution of $\varphi$ by way of violating safety environmental constraints:
-\[
-\forall x: \neg\theta_e(x) \wedge \theta(x) \implies (s_0, \hat{\delta} (\emptyset, x) \cup \{vacuous\uparrow\}, s_{vacuous}) \in \Delta 
-\] 
-\[
-\forall v, x': \neg\rho_e(v,x') \wedge \rho(v,x') \implies\]
-\[(s_{\rho_s}(v), \hat{\delta} (v, v [v \cap \mathcal{X} \mapsto x']) \cup \{vacuous\uparrow\},s_{vacuous}) \in \Delta 
-\] 
+\vspace{1em}
+\begin{tabular}{ l c l }
+	$S$ &$=$& $\{(s_{i+1},\hat{m}) : i \in [0\ldots2^{|\gsV|}-1] \in [0\ldots2^{|\mathcal{M}|}-1], \hat{m} \in [0\ldots2^{|\mathcal{M}|}-1] \}\cup\{s_0\}$\\
+	$\Sigma$ &$=$&$\controlSet \cup \nonControlSet$\\	
+	$\Delta$&$=$&$\{((s_i,\enumSet{\hat{s}_i|_{\mathcal{M}}}),\actionLabel,(s_j,\enumSet{\hat{s}_j|_{\mathcal{M}}})) | s_i = \enumStateSet{\hat{s}_i|_{\gsV}}$\\
+	&&$\wedge  s_j = \enumStateSet{\hat{s}_j|_{\gsV}} \wedge (\hat{s}_i, \hat{s}_j) \models \rho_d$\\
+	&&$\wedge (\forall v \in \gsV: (v\uparrow \in \actionLabel \iff v \in \hat{s}_j \wedge v \not\in \hat{s}_i)$\\
+	&&$\wedge (\forall v \in \gsV: (v\downarrow \in \actionLabel \iff v \not\in \hat{s}_j \wedge v \in \hat{s}_i))\}$\\
+	&&$\cup \{ (s_0,\actionLabel,(s_i,\enumSet{\hat{s}_i|_{\mathcal{M}}}))| s_i = \enumStateSet{\hat{s}_i|_{\gsV}} \wedge \hat{s}_i \models \theta_d$\\
+	&&$\wedge (\forall v \in \gsV: (v\uparrow \in \actionLabel \iff v \in \hat{s}_i)\}$\\
+	$\propositions$&$=$&$\{\dot{v} | v \in \gsV\}$\\
+	$\valuations((s,\hat{m}))$&$=$&$\{\dot{v}| v \in \hat{s} \wedge s = \enumStateSet{\hat{s}}\}$\\
+\end{tabular}
+\vspace{1em}
+\\
+Where $S$ is the cross product between the range of values related to the set of valuations over \gsV and those induced by the memory of $\fdsD$ through $\#$, the sets of actions and atomic propositions remain unchanged from $E$, \valuations are evaluated over the first component of $S$ in order to get the set of propositions that are satisfied by the values of \gsV. The transition relation is defined by adding those CLTS states and labels whose FDS state and label variables are satisfied according to $\rho_d$ in $\fdsD$, setting also the second element of each state, i.e. its memory, according to the projection of the valuation over the memory domain $\mathcal{M}$. 
 
-Again we focus only on the atomic case where the formula consists of a single variable $v$. , $\varphi$ is satisfied in move $\sigma_i$ within play $\sigma=\sigma_1,\sigma_2\ldots ,\sigma_i$ on $G$ if $v$ belongs to $\sigma_i$. In our case this also implies that $fl(\varphi)$ is satisfied in state $s_i$ within the path $\pi=s_{\theta_e}(x),s_{\rho_s}(x,y),\ldots,s_i=s_{\rho_*}(\sigma_i)$ over $M$ since, from $v \in \sigma_i$ follows that at some point the proposition started appearing in states leading to $s_i$, (we can assume w.l.o.g. $*$ is either $e$ or $s$ and $\overline{*}$ is its complement, $s$ if $*$ is $e$, and $e$ otherwise), suppose that $s_j$ was the first state were $v$ appeared and was kept until reaching $s_i$ ($\forall j \leq k \leq i: v \in \sigma_k$), then step $(\sigma_{j-1},\sigma_j) \in G$ was translated as $(s_{\rho_*}(\sigma_{j-1}), \hat{\delta}(\sigma_{j-1},s_{\rho_{\overline{*}}}(\sigma_j)),\sigma_{j})$ and $v\uparrow \in \hat{\delta}(\sigma_{j-1},\sigma_j)$ since its value changed from one state to the other, and since it still holds at $\sigma_i$, then no $v\downarrow$ was introduced between $s_j$ and $s_i$, thus satisfying the definition of $fl(\varphi)$ by construction of the fluent $v_f$. It follows from this observation, that if $M$ is the CLTS structure constructed from $G$ following the previous translation, then LTL satisfaction is preserved between structures.
+We can now show that $ctrl'(\fdsD)$ satisfies the properties that make it a solution to $\cltsCPEmbedding$. The first property we need to prove is legality w.r.t $E$ and $\mathcal{C}$, which means that for all $(s_e,s_c) \in E \parallel C$ it holds that:\\
+
+\begin{center}
+	\begin{tabular}{r l}
+		
+		$\forall L_{\nonControlSet}\text{ s.t. }(s_E, L, s'_E) \in \Delta_E \wedge L|_{\nonControlSet} = L_{\nonControlSet}:( \exists (s_C, L', s'_C) \in \Delta_C \wedge L'|_{\nonControlSet} = L_{\nonControlSet})$ &(legality openness)\\
+		$\forall (s_C, L, s'_C) \in \Delta_C: ( \exists (s_E, L, s'_E) \in \Delta_E)$& (legality inclusion)\\
+	\end{tabular}
+\end{center}
+
+Since $\fdsD$ is complete w.r.t. $\mathcal{X}$ and only accepts infinite runs there must exist a choice in $\rho$ to reach the next state, we can prove that all non controllable options from $E$ at each state are kept in $ctrl'(\fdsD)$, proving legality openness. Remember that $\Delta$ in $E$ had all the possible transitions between states related to valuations of \gsV, thus trivilly proving legality inclusion.
+Now for the LTL formula $\varphiCLTS$, we prove that for every execution $\execution$ in $clts(\fdsD)$ there is a run $\sigma$ in $\fdsD$ that conforms to it. We use $\sigma(\execution) \in 2^{|\mathcal{V}|^{\omega}}$ as defined in the previous section.
+Now, since for each execution $\sigma(\execution)$ in $clts(\fdsD)$ we have a run $\sigma$ in $\fdsD$, and since given that we evaluate only runs that follow $\theta$ and $\rho$, then $\fdsD$ satisfies $\varphi$ and we can show that $\sigma(\execution)$ satisfies $\varphiCLTS$ since the satisfaction of the atomic propositions is defined completely by the embedding of states $\varState{i} \in \sigma$ and $s_i \in \execution(\sigma)$.
+
+%%
+Now given \cltsCPEmbeddingDef and $C$ we build an FDS $\fdsD=\langle \mathcal V, \theta_d, \rho_d, \mathcal{J}_d, \mathcal{C}_d \rangle$ using the variables and formulas as defined in the previous section, i.e. $\gsX, \gsY, \gsTheE, \gsTheS, \gsRhoE, \gsRhoS$.
+
+\begin{tabular}{ l c l }
+	$\gsV$ & $=$ & $\gsX \cup \gsY$\\	
+	$\theta_d$ & $=$ & $(\theta_e \implies \theta_s)$\\
+	$\rho_d$ & $=$ & $(\rho_e \implies \rho_s)$\\	
+	$\mathcal{J}_d$ & $=$ & $\emptyset$\\
+	$\mathcal{C}_d$ & $=$ & $\emptyset$\\
+\end{tabular}
+
+The first two properties of the FDS controller are trivially proven as in the previous case. To show that $fds(C)$ satisfies $\varphi$  we prove that for every run $\sigma$ in $fds(C)$ there is an execution $\execution$ in $C$ that conforms to it using $exec(\sigma) \in S^{\omega}$ once again. Such execution is possible in $C$ because \fdsD emulates its behavior and since $C$ is legal w.r.t. $E$ it will retain all the non controllable options that satisfy the open w.r.t. \gsX property in \fdsD.
+A trace $\pi$ in controller $C$ exists for each run $\sigma$ that satisfies $\theta_d \wedge \square \rho_d$, and since $C \models \varphiCLTS$ we can show that $\sigma \models \varphi$. This is proved over the algebraic construction of $\varphi$ as before.

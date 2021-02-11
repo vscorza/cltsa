@@ -1,0 +1,15 @@
+\vspace{1em}
+\begin{tabular}{ l c l }
+	$\valuateSetE{v}$ &$=$& $\{s \in S | v \in \valuations(s)\}$\\
+	$\valuateSetE{\neg v}$ &$=$& $\{s \in S | v \not \in \valuations(s)\}$\\	
+	$\valuateSetE{X}$ &$=$& $\varepsilon(X)$\\	
+	$\valuateSetE{\varphi \vee \psi}$ &$=$& $\valuateSetE{\varphi} \vee \valuateSetE{\psi}$\\		
+	$\valuateSetE{\odiamond \varphi}$ &$=$& $\{s \in S | \forall L_{\nonControlSet}\text{ s.t. }  (s, L, s') \in \Delta \wedge L|_{\nonControlSet} = L_{\nonControlSet}:( \exists L_{\controlSet} \in 2^{|\controlSet|}: ((s, L_{\nonControlSet} \cup L_{\controlSet}, s') \in \Delta \wedge$\\
+	&&$s' \in \valuateSetE{\varphi}))  \}$\\		
+	$\valuateSetE{\osquare \varphi}$ &$=$& $\{s \in S | \exists L_{\nonControlSet}\text{ s.t. }  (s, L, s') \in \Delta \wedge L|_{\nonControlSet} = L_{\nonControlSet}:( \forall L_{\controlSet} \in 2^{|\controlSet|}: ((s, L_{\nonControlSet} \cup L_{\controlSet}, s') \in \Delta \wedge$\\
+	&&$s' \in \valuateSetE{\varphi}))  \}$\\				
+	$\valuateSetE{\mu X \varphi}$ &$=$& $\cup_i S_i, S_0 = \emptyset, S_{i+1} = \valuateSet{\varepsilon[X \leftarrow S_i]}{E}{\varphi}$\\		
+	$\valuateSetE{\nu X \varphi}$ &$=$& $\cap_i S_i, S_0 = S, S_{i+1} = \valuateSet{\varepsilon[X \leftarrow S_i]}{E}{\varphi}$\\					
+\end{tabular}
+\vspace{1em}
+\\

@@ -17,10 +17,13 @@
 \newcommand{\execution}{\ensuremath{\varepsilon}\xspace}
 
 %clts
+\newcommand{\enumStateSet}[1]{\#_s(#1)}
+\newcommand{\enumStateSetDef}{$\#_s:\Sigma_{\gsV}\mapsto [0\ldots2^{|\gsV|}-1]$\xspace}
 \newcommand{\cltsDefIdx}[1]{\ensuremath{#1 = \lparen S_{#1},} \ensuremath{\Sigma_{#1}, \Delta_{#1},} \ensuremath{s_{0}^{#1}, \propositions_{#1}, \valuations_{#1}\rparen}\xspace}
 \newcommand{\cltsDefShareSigmaIdx}[1]{\ensuremath{#1 = \lparen S_{#1},} \ensuremath{\Sigma, \Delta_{#1},} \ensuremath{s_{0}^{#1}, \propositions_{#1},} \ensuremath{\valuations_{#1}\rparen}\xspace}
 \newcommand{\cltsDef}{\ensuremath{E = (S, \Sigma, \Delta, s_{0}, \propositions, \valuations)}\xspace}
-\newcommand{\cltsEmbeddingDef}[1]{\ensuremath{clts(#1) = (S, \Sigma, \Delta, s_{0}, \valuations)}\xspace}
+\newcommand{\cltsEmbeddingDef}[1]{\ensuremath{clts(#1) = (S, \Sigma, \Delta, s_{0}, \propositions, \valuations)}\xspace}
+\newcommand{\ctrlEmbeddingDef}[1]{\ensuremath{ctrl(#1) = (S, \Sigma, \Delta, s_{0}, \propositions, \valuations)}\xspace}
 \newcommand{\automaton}[1]{\ensuremath{#1 = (S_{#1}, \Sigma_{#1}, \Delta_{#1}, s_{0}^{#1})}\xspace}
 \newcommand{\labelSet}{\ensuremath{\mathcal{L}}\xspace}
 \newcommand{\actionLabel}{\ensuremath{L}\xspace}
@@ -32,10 +35,10 @@
 \newcommand{\ltsAdjustment}[2]{{\ensuremath{#1 \pm #2 = \lparen S_{#1}\times S_{#2},$ $\Sigma_{#1} \cup \Sigma_{#2},$ $\Delta,$ $(s_{0}^{#1},$ $s_{0}^{#2})\rparen}}\xspace}
 
 %control problem
-\newcommand{\controlSet}{\ensuremath{\mathcal{C}}}
-\newcommand{\nonControlSet}{\ensuremath{\mathcal{U}}}
+\newcommand{\controlSet}{\ensuremath{\mathcal{C}}\xspace}
+\newcommand{\nonControlSet}{\ensuremath{\mathcal{U}}\xspace}
 \newcommand{\controlProblemDef}{\ensuremath{\controlProblem =\langle E,$ $\controlSet,$ $\varphi \rangle}\xspace}
-\newcommand{\controlProblem}{\ensuremath{\mathcal{I}}}
+\newcommand{\controlProblem}{\ensuremath{\mathcal{I}}\xspace}
 
 %GS
 \newcommand{\gsV}{{\ensuremath{\mathcal{V}}}\xspace}
@@ -67,7 +70,11 @@
 \newcommand{\cltsCPEmbeddingDef}{\ensuremath{clts(\fdsControlProblem) =\langle E,$ $\controlSet,$ $\varphiCLTS \rangle}\xspace}
 \newcommand{\cltsCPEmbedding}{\ensuremath{clts(\fdsControlProblem)}\xspace}
 
-
+%mu calculus for clts
+\newcommand{\valuateSet}[3]{\ensuremath{\llbracket #3 \rrbracket^{#1}_{#2}}\xspace}
+\newcommand{\valuateSetE}[1]{\ensuremath{\llbracket #1 \rrbracket^{\varepsilon}_{E}}\xspace}
+\newcommand\osquare{\stackMath\mathbin{\stackinset{c}{0ex}{c}{0ex}{\Box}{\bigcirc}}}
+\newcommand\odiamond{\stackMath\mathbin{\stackinset{c}{0ex}{c}{0ex}{\diamond}{\bigcirc}}}
 %formulae
 \newcommand{\true}{\emph{true} }
 \newcommand{\false}{\emph{false} }

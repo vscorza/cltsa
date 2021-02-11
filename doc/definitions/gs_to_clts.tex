@@ -1,3 +1,86 @@
+We can now introduce the embedding of a FDS control problem \fdsControlProblemDef into a CLTS control problem \cltsCPEmbeddingDef.
+Again we need to translate the LTL formula over boolean formulae $\varphi$ as $prop(\varphi)$ by simply  replacing each occurrence of a boolean variable variable $v$ with an atomic proposition $p_v$.
+
+
+
+
+
+Now we can introduce a direct translation between game structures and CLTS instances.
+
+\begin{definition}
+	\label{def:fl_ltl} \emph{(LTL over $\mathcal{V}$ to LTL over $\mathcal{F}$ translation)} 
+	Let $\varphi$ be a LTL formula over countable boolean variables $\mathcal{V}$, and if $\mathcal{F}$ is the minimal fluent set containing $v_f = \langle v\uparrow, v\downarrow \rangle$ for each $v \in \mathcal{V}$, $fl(\varphi)$ is an equivalent LTL formula over fluents according to the following inductive definition:\\
+	
+	\begin{tabular}{ l c l }
+		$fl(v)$ & $\triangleq$ & $v_f$\\	
+		$fl(\neg \varphi)$ & $\triangleq$ & $\neg fl(\varphi)$\\
+		$fl(\varphi \vee \psi$ & $\triangleq$ & $fl(\varphi) \vee fl(\psi)$\\
+		$fl(\bigcirc \varphi)$ & $\triangleq$ & $\bigcirc\bigcirc fl(\varphi)$\\
+		$fl(\varphi \U \psi)$ & $\triangleq$ & $fl(\varphi) \U fl(\psi)$\\
+	\end{tabular}	
+\end{definition}
+
+When relating a game structure to a control problem over CLTS we will use $M \models_{\mathcal{E,C}}\varphi$ when $M$ is a solution to $\langle E, \mathcal{C}, \mathcal{F}, \varphi \rangle$ and $\mathcal{F}$ is the minimal set as described in the translation between boolean variables and fluents.
+
+\begin{definition}
+	\label{def:gs_to_clts_translation} \emph{(Game Structure to CLTS translation)} 
+	Let $G =  \langle \gsV, \gsX, \gsY, \gsTheE, \gsTheS, \gsRhoE, \gsRhoS, \varphi \rangle$ be a game structure, $clts(G)=M$ is a CLTS instance such that $G \models \varphi$ $\iff$ $M \models fl(\varphi)$.
+\end{definition}
+
+Let $G$ be the game structure to be translated and $M=\langle S, \Sigma, \Delta, s_0 \rangle$ the target CLTS, i.e. the candidate for $clts(G)$. 
+$S$ is $2^{|\mathcal{X}|}+2^{|\mathcal{V}|+|\mathcal{X}|}+2^{|\mathcal{V}|}+1$.
+The alphabet is defined as the minimal set satisfying 
+$\forall v \in \mathcal{V}: v\uparrow \in \Sigma, v\downarrow \in \Sigma$. 
+In order to construct $\Delta$ variables will be mapped as following:
+
+\[
+\delta(v_i,v) = \begin{cases}
+v_i\uparrow & \text{if } v \in v \\
+v_i\downarrow & \text{if } v \not\in v
+\end{cases}
+\]
+\[\hat{\delta}(v,v') = \lbrace \delta(v_i,v') | v_i \in v \neq v_i \in v' \rbrace \]
+We will use the following set of mappings relating a valuation over those set of variables with a distinct state in the CLTS automaton:
+\[s_{\theta_e}:2^{|\mathcal{X}|}\rightarrow S\]
+\[s_{\rho_e}:2^{|\mathcal{V}| + |\mathcal{X}|}\rightarrow S\]
+\[s_{\rho_s}:2^{|\mathcal{V}|} \rightarrow S\]
+Since in the CLTS model we can define only one initial state, the set of initial valuations have to be explicitly reached from the distinguished element $s_0$ through $s_{\theta_e}$ and $s_{\rho_s}$. States reached via $\rho_e$ and $\rho_s$, which updated the environmental variables first and then the system part are mapped through $s_{\rho_e}$ and $s_{\rho_s}$.  The images of these functions do not overlap. 
+$\Delta$ is the minimal relation satisfying:
+\[
+\forall x, y: \theta_e(x) \wedge \theta_s(x,y) \implies s_{\theta_e}(x),s_{\rho_s}(x \wedge y) : (s_0, \hat{\delta} (\emptyset, x), s_{\theta_e}(x)), (s_{\theta_e}(x), \hat{\delta} (x,(x \wedge y)), s_{\rho_s}(x \wedge y)) \in \Delta 
+\] 
+\[
+\forall v, x', y': \rho_e(v,x') \wedge \rho_s(v,x',y') \implies\]
+\[(s_{\rho_s}(v), \hat{\delta} (v, v [v \cap \mathcal{X} \mapsto x']),s_{\rho_e}(v \wedge x')), (s_{\rho_e}(v \wedge x'), \hat{\delta} (v[v \cap \mathcal{X}  \mapsto x'],x' \wedge y'), s_{\rho_s}(x' \wedge y')) \in \Delta 
+\] 
+
+As in the previous cases, and showing only the atomic case where the formula consists of a single variable $v$, $\varphi$ is satisfied in move $\sigma_i$ within play $\sigma=\sigma_1,\sigma_2\ldots ,\sigma_i$ on $G$ if $v$ belongs to $\sigma_i$. In our case this also implies that $fl(\varphi)$ is satisfied in state $s_i$ within the path $\pi=s_{\theta_e}(x),s_{\rho_s}(x,y),\ldots,s_i=s_{\rho_*}(\sigma_i)$ over $M$ since, from $v \in \sigma_i$ follows that at some point the proposition started appearing in states leading to $s_i$, (we can assume w.l.o.g. $*$ is either $e$ or $s$ and $\overline{*}$ is its complement, $s$ if $*$ is $e$, and $e$ otherwise), suppose that $s_j$ was the first state were $v$ appeared and was kept until reaching $s_i$ ($\forall j \leq k \leq i: v \in \sigma_k$), then step $(\sigma_{j-1},\sigma_j) \in G$ was translated as $(s_{\rho_*}(\sigma_{j-1}), \hat{\delta}(\sigma_{j-1},s_{\rho_{\overline{*}}}(\sigma_j)),\sigma_{j})$ and $v\uparrow \in \hat{\delta}(\sigma_{j-1},\sigma_j)$ since its value changed from one state to the other, and since it still holds at $\sigma_i$, then no $v\downarrow$ was introduced between $s_j$ and $s_i$, thus satisfying the definition of $fl(\varphi)$ by construction of the fluent $v_f$. It follows from this observation, that if $M$ is the CLTS structure constructed from $G$ following the previous translation, then LTL satisfaction is preserved between structures.
+
+In order to prove realizability preservation we need to introduce a translation between fair discrete systems and CLTS structures. 
+
+\begin{definition}
+	\label{def:dfs_to_clts_translation} \emph{(Discrete Fair System to CLTS translation w.r.t. a Game Structure)} 
+	Let $G =  \langle \gsV, \gsX, \gsY, \gsTheE, \gsTheS, \gsRhoE, \gsRhoS, \varphi \rangle$ be a game structure, $\mathcal{D}=\langle \gsV, \theta, \rho, \emptyset, \emptyset \rangle$ a fairness-free fair discrete system, $clts(\mathcal{D},G)=M$ is a CLTS instance such that $\mathcal{D}$ realizes $\varphi \iff M \models v_{vacuous} \vee fl(\varphi)$.
+\end{definition}
+
+The translation will be as in the case of the game structure but for each environmental move that violates $\theta_e$ or $\rho_e$ in $\mathcal{D}$ the automaton $M$ will move to a free state $s_{vacuous}$ where the fluent $v_{vacuous}$ holds indefinitely. We extend $\Sigma_M$ by adding the element $vacuous\uparrow$, $S_M$ by adding $s_vacuous$, the set of fluents $\mathcal{F}$ with $v_{vacuous}= \langle \{ vacuous\uparrow \}, \emptyset \rangle$ and $\Delta$ as the minimal relation satisfying:
+\[
+\forall x, y: \theta_e(x) \wedge \theta_s(x,y)  \wedge \theta(x,y) \implies s_{\theta_e}(x),s_{\rho_s}(x \wedge y) : (s_0, \hat{\delta} (\emptyset, x), s_{\theta_e}(x)), (s_{\theta_e}(x), \hat{\delta} (x,(x \wedge y)), s_{\rho_s}(x \wedge y)) \in \Delta 
+\] 
+\[
+\forall v, x', y': \rho_e(v,x') \wedge \rho_s(v,x',y') \wedge \rho(v,x',y') \implies\]
+\[(s_{\rho_s}(v), \hat{\delta} (v, v [v \cap \mathcal{X} \mapsto x']),s_{\rho_e}(v \wedge x')), (s_{\rho_e}(v \wedge x'), \hat{\delta} (v[v \cap \mathcal{X}  \mapsto x'],x' \wedge y'), s_{\rho_s}(x' \wedge y')) \in \Delta 
+\] 
+And now for the steps leading to the vacuous solution of $\varphi$ by way of violating safety environmental constraints:
+\[
+\forall x: \neg\theta_e(x) \wedge \theta(x) \implies (s_0, \hat{\delta} (\emptyset, x) \cup \{vacuous\uparrow\}, s_{vacuous}) \in \Delta 
+\] 
+\[
+\forall v, x': \neg\rho_e(v,x') \wedge \rho(v,x') \implies\]
+\[(s_{\rho_s}(v), \hat{\delta} (v, v [v \cap \mathcal{X} \mapsto x']) \cup \{vacuous\uparrow\},s_{vacuous}) \in \Delta 
+\] 
+
+Again we focus only on the atomic case where the formula consists of a single variable $v$. , $\varphi$ is satisfied in move $\sigma_i$ within play $\sigma=\sigma_1,\sigma_2\ldots ,\sigma_i$ on $G$ if $v$ belongs to $\sigma_i$. In our case this also implies that $fl(\varphi)$ is satisfied in state $s_i$ within the path $\pi=s_{\theta_e}(x),s_{\rho_s}(x,y),\ldots,s_i=s_{\rho_*}(\sigma_i)$ over $M$ since, from $v \in \sigma_i$ follows that at some point the proposition started appearing in states leading to $s_i$, (we can assume w.l.o.g. $*$ is either $e$ or $s$ and $\overline{*}$ is its complement, $s$ if $*$ is $e$, and $e$ otherwise), suppose that $s_j$ was the first state were $v$ appeared and was kept until reaching $s_i$ ($\forall j \leq k \leq i: v \in \sigma_k$), then step $(\sigma_{j-1},\sigma_j) \in G$ was translated as $(s_{\rho_*}(\sigma_{j-1}), \hat{\delta}(\sigma_{j-1},s_{\rho_{\overline{*}}}(\sigma_j)),\sigma_{j})$ and $v\uparrow \in \hat{\delta}(\sigma_{j-1},\sigma_j)$ since its value changed from one state to the other, and since it still holds at $\sigma_i$, then no $v\downarrow$ was introduced between $s_j$ and $s_i$, thus satisfying the definition of $fl(\varphi)$ by construction of the fluent $v_f$. It follows from this observation, that if $M$ is the CLTS structure constructed from $G$ following the previous translation, then LTL satisfaction is preserved between structures.
 
 Now we can introduce a direct translation between game structures and CLTS instances.
 
