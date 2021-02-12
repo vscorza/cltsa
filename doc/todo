@@ -1,9 +1,14 @@
 TODO:
 =====
 - fds -> clts
-	- write fds'
-	- write demos
-	- write example
+	- add s_0 proposition to clts and clts' translation, convert varphiCLTS to !s_0 -> varphiCLTS
+	- write example of: (!x && !y && z) && [](y <-> !z) && []<>(x -> y) && []<>(x -> z)
+		- kripke representation
+		- fds controller
+		- clts output (E)
+		- clts controller
+		- fds(C)
+	- review everything
 - add cites
 	- DFS cited from "Verification by Augmented Finitary Abstraction"
 	- Presented in "Algorithmic verification of linear temporal logic specifications"
@@ -12,9 +17,6 @@ TODO:
 	- propose ranking approach, for mixed transitions the ranking si defined as:
 		project monitored alphabet and take the one representative for each and set the
 		ranking of the candidate as the min within the group
-	- translation
-	- theorem
-	- proof
 - plan clts <-> lts 
 - prove translations between FLTL and AccLTL (E x F -> E' with new states and accepting sets)
 - update clts strategy

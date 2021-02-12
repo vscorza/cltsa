@@ -1,7 +1,8 @@
 
 To show that the CLTS and FDS control problems are equivalent we  still need to show that an FDS control problem can be translated into an equivalent CLTS control problem. We will again introduce a set of embeddings that constitute the translation and then state and prove a realizability preserving theorem.
 
-In order to embed the FDS control problem \fdsControlProblemDef into the CLTS control problem \cltsCPEmbeddingDef, the first thing to note is that the LTL formula over Boolean variables $\varphi$ is translated as $\varphiCLTS$ by replacing each occurrence of an Boolean variables $v \in \gsV$ with the proposition $\dot{v} \in \propositions$. 
+In order to embed the FDS control problem \fdsControlProblemDef into the CLTS control problem \cltsCPEmbeddingDef, the first thing to note is that the LTL formula over Boolean variables $\varphi$ is translated as $\varphiCLTS$ by replacing each occurrence of an Boolean variables $v \in \gsV$ with the proposition $\dot{v} \in \propositions$, then a next operator is added enclosing the translated formula in order to account for the initial transition that goes from the distinguished state $s_0$ to all the initial states that conform to the original specification ($\varphiCLTS = \bigcirc \dot{\varphi}$).
+
 %\begin{definition}
 %	\label{def:val_ltl} \emph{(LTL over $\propositions$ to LTL over $\mathcal{V}$ translation)} 
 %	Let $\varphi$ be a LTL formula over set of atomic propositions $\propositions$, and $\mathcal{V}$ the minimal set of boolean variables containing a variable $v_{\proposition}$ for each $\proposition \in \propositions$, then $val(\varphi)$ is an equivalent LTL formula over boolean variables and is defined as follows:\\
