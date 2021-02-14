@@ -54,7 +54,7 @@ Now we can prove that realizability is preserved between FDS control problem $\f
 
 %, with an additional condition for LTL based reactive systems ($\sigma \models \theta_d \wedge \square \rho_d$) ruling out the cases where $val(\varphi)$ is never satisfied, since $\varphi_{LTL}$ could be realized by achieving $\neg\theta \vee \diamond \neg \rho$. In such a case no controller can be built for $\mathcal{I}$ s.t. $\varphi$ is satisfied since it will violate the safety restrictions related to the behavior of the plant $E_G$.
 
-The proof is split in two parts, first we prove that if an FDS \fdsD controller exists for $\fdsControlProblem$, a CLTS controller $C$ exists for $\cltsCPEmbedding$($\exists \fdsD \rightarrow \exists C$) by constructing an CLTS from controller \fdsD through a specific embedding $ctrl(\fdsD)$ and then proving that each property holds. For the case where if a CLTS controller $C$ exists for the embedding \cltsCPEmbedding there must exist an FDS controller for \fdsControlProblem ($\exists C \rightarrow \exists \fdsD$) we construct an FDS controller from $C$ through a specific embedding, similar to the one used in the previous section, and then prove each property for it. The outline of the proof is as follows:
+The proof is split in two parts, first we prove that if an FDS \fdsD controller exists for $\fdsControlProblem$, a CLTS controller $C$ exists for $\cltsCPEmbedding$($\exists \fdsD \rightarrow \exists C$) by constructing an CLTS from controller \fdsD through a specific embedding $ctrl'(\fdsD)$ and then proving that each property holds. For the case where if a CLTS controller $C$ exists for the embedding \cltsCPEmbedding there must exist an FDS controller for \fdsControlProblem ($\exists C \rightarrow \exists \fdsD$) we construct an FDS controller from $C$ through a specific embedding, similar to the one used in the previous section, and then prove each property for it. The outline of the proof is as follows:
 
 
 \begin{description}
@@ -66,9 +66,9 @@ The proof is split in two parts, first we prove that if an FDS \fdsD controller 
 		\end{itemize}	
 	\item[($\exists C \rightarrow \exists \fdsD$)] Given \cltsCPEmbeddingDef and $C$
 \begin{itemize}
-	\item $fds(C)$ is a fairness-free FDS			
-	\item $fds(C)$ is complete w.r.t. $\mathcal{X}$
-	\item $fds(C) \models \varphi$
+	\item $fds'(C)$ is a fairness-free FDS			
+	\item $fds'(C)$ is complete w.r.t. $\mathcal{X}$
+	\item $fds'(C) \models \varphi$
 	%	\item $\exists \sigma \in D: \sigma \models \theta_e \wedge \square \rho_e$			
 \end{itemize}	
 \end{description}
@@ -109,15 +109,28 @@ Now for the LTL formula $\varphiCLTS$, we prove that for every execution $\execu
 Now, since for each execution $\sigma(\execution)$ in $clts(\fdsD)$ we have a run $\sigma$ in $\fdsD$, and since given that we evaluate only runs that follow $\theta$ and $\rho$, then $\fdsD$ satisfies $\varphi$ and we can show that $\sigma(\execution)$ satisfies $\varphiCLTS$ since the satisfaction of the atomic propositions is defined completely by the embedding of states $\varState{i} \in \sigma$ and $s_i \in \execution(\sigma)$.
 
 %%
-Now given \cltsCPEmbeddingDef and $C$ we build an FDS $\fdsD=\langle \mathcal V, \theta_d, \rho_d, \mathcal{J}_d, \mathcal{C}_d \rangle$ using the variables and formulas as defined in the previous section, i.e. $\gsX, \gsY, \gsTheE, \gsTheS, \gsRhoE, \gsRhoS$.
+Now given \cltsCPEmbeddingDef and $C$ we build an FDS $\fdsD=\langle \mathcal V_d, \theta_d, \rho_d, \mathcal{J}_d, \mathcal{C}_d \rangle$ through $fds'(C)$, where $C=\langle S_C,$ $\Sigma_C,$ $\Delta_C,$ $s_0^C,$ $\propositions_C,$ $\valuations_C\rangle$ as:
 
 \begin{tabular}{ l c l }
-	$\gsV$ & $=$ & $\gsX \cup \gsY$\\	
-	$\theta_d$ & $=$ & $(\theta_e \implies \theta_s)$\\
-	$\rho_d$ & $=$ & $(\rho_e \implies \rho_s)$\\	
+	$\gsV_d$ & $=$ & $\gsX \cup \gsY \cup \{\dot{s}| s \in S_C\}$\\	
+	$\theta_d$ & $=$ & $\bigvee_{s,\exists \actionLabel:(s_0^C,\actionLabel,s)\in\Delta_C}(\bigwedge\{ v | \dot{v}\in \valuations_C(s)\}\wedge mux'(\dot{s}) )$\\
+	$\rho_d$ & $=$ &$\bigwedge_{s,\exists \actionLabel,s':(s,\actionLabel,s')\in \Delta_C, s\neq s_0^C}\dot{s}\implies\bigvee_{s':\exists \actionLabel':(s,\actionLabel',s')\in \Delta_C}(\bigwedge\{v | \dot{v}\in \valuations_C(s') \}\wedge mux'(\dot{s}'))$\\	
 	$\mathcal{J}_d$ & $=$ & $\emptyset$\\
 	$\mathcal{C}_d$ & $=$ & $\emptyset$\\
 \end{tabular}
 
-The first two properties of the FDS controller are trivially proven as in the previous case. To show that $fds(C)$ satisfies $\varphi$  we prove that for every run $\sigma$ in $fds(C)$ there is an execution $\execution$ in $C$ that conforms to it using $exec(\sigma) \in S^{\omega}$ once again. Such execution is possible in $C$ because \fdsD emulates its behavior and since $C$ is legal w.r.t. $E$ it will retain all the non controllable options that satisfy the open w.r.t. \gsX property in \fdsD.
+We are using a slightly different version of the mutual exclusion formula for the state variables in $fds'$:
+
+\begin{center}
+	\begin{tabular}{r r r l}
+		$mux':$&$\gsV_d \mapsto WFF(\gsV_d),$&$mux'(\dot{s}_i) = $&$(\dot{s}_i \wedge\bigwedge_{s_j \neq s_i, s_j \in S_C}\neg \dot{s}_j)$
+	\end{tabular}
+\end{center}
+
+Where $\gsV_d$ is the extension of the original variables with the a set of variables $\dot{s}$ for each state in the CLTS controller. Both the initial and transition formulae are built in an extensive fashion, restricting the set of states in $\Sigma_{\gsV_d}$ or pair of states respectively that are to take part in the FDS controller. The initial formula $\theta_d$ is built as the disjunctive extension of conjunctions of original valuations (as kept in $\valuations_C$) plus the mutual exclusion over the state variables that keep up only that related to the current state in the CLTS controller. The transition formula $\rho_d$ is a conjunction of implications, where the precedent is the occurrence of a state variables and what it is implied is the set of variables that can hold in the next state, as a disjunctive conjunction that includes the original variables (as kept in $\valuations_C$) and the ones conforming to states in $C$.
+
+%fairness free is trivial
+%complete w.r.t. X comes from the fact that E kept all possible valuations over X and C must be legal, thus not restricting X choices
+The fairness-free property holds by construction. The resulting FDS is complete w.r.t \gsX first because $C$ is legal w.r.t. $E$ and \controlSet, which means that it wont restrict environment options, and second by $E$ being non restrictive with respect to valuations over \gsV. This implies that any restriction imposed by $C$ has to be over \gsY in a completely open environment.
+To show that $fds(C)$ satisfies $\varphi$  we prove that for every run $\sigma$ in $fds(C)$ there is an execution $\execution$ in $C$ that conforms to it using $exec(\sigma) \in S^{\omega}$ once again. Such execution is possible in $C$ because \fdsD fully emulates its behavior, for each transition $(s,\actionLabel, s')\in \Delta_C$ there is pair of states $(\dot{s}_i,\dot{s}_j) \in \rho_d$ s.t. $\dot{v} \in \valuations_C(s) \iff v \in \dot{s}_i|_{\gsV}$ and $\dot{v}' \in \valuations_C(s') \iff v' \in \dot{s}_j|_{\gsV}$ .
 A trace $\pi$ in controller $C$ exists for each run $\sigma$ that satisfies $\theta_d \wedge \square \rho_d$, and since $C \models \varphiCLTS$ we can show that $\sigma \models \varphi$. This is proved over the algebraic construction of $\varphi$ as before.

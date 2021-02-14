@@ -144,184 +144,59 @@ The CLTS automaton $E$ in \cltsCPEmbedding that captures all possible interactio
 \end{figure}
 
 
+A candidate CLTS controller $C$ that is a solution to \cltsCPEmbedding is depicted in figure ~\ref{fig:fds_to_clts_C} (label information omitted to improve readability).
 
+
+Applying the translation $fds'$ over $C$ we get:
 
 \footnotesize
 \vspace{1em}
 \begin{tabular}{ r c l }
-	$\theta_{e}$ &$=$& $(\bar{\hat{p}} \wedge \bar{\hat{r}})$\\
-	$\theta_{s}$ &$=$& $\bar{s_0} \wedge \bar{s_1} \wedge ((\bar{\hat{P1}} \wedge \bar{\hat{P2}} \wedge \bar{\hat{R}})) \wedge \bar{\hat{e}} \wedge \bar{\hat{a}} \wedge \bar{\hat{b}}$\\	
-	$\rho_{env.enabling}$ &$=$& $((\bar{s_0} \wedge \bar{s_1} ) \implies ((\hat{p}'\wedge \bar{\hat{r}}') \vee (\bar{\hat{p}}' \wedge \hat{r}'))) \wedge$\\
-	&& $((s_0 \wedge \bar{s_1}) \implies (\bar{\hat{p}}' \wedge \bar{\hat{r}}')) \wedge$\\	
-	&& $((\bar{s_0} \wedge s_1) \implies (\bar{\hat{p}}' \wedge \bar{\hat{r}}')) \wedge$\\	
-	&& $((s_0 \wedge s_1) \implies (\bar{\hat{p}}' \wedge \bar{\hat{r}}'))$\\			
-	$\rho_{sys.enabling}$ &$=$& $((\bar{s_0} \wedge \bar{s_1} ) \implies (\bar{\hat{P1}}' \wedge\bar{\hat{P2}}' \wedge \bar{\hat{R}}')) \wedge$\\
-	&& $((s_0 \wedge \bar{s_1} ) \implies ((\hat{P1}'\wedge \bar{\hat{P2}}' \wedge \bar{\hat{R}}') \vee (\bar{\hat{P1}}'\wedge \hat{P2}' \wedge \bar{\hat{R}}'))) \wedge$\\		
-	&& $((\bar{s_0} \wedge s_1 ) \implies ((\bar{\hat{P1}}'\wedge \bar{\hat{P2}}' \wedge \hat{R}')))\wedge$\\	
-	&& $((s_0 \wedge \bar{s_1} ) \implies ((\bar{\hat{P1}}'\wedge \bar{\hat{P2}}' \wedge \hat{R}')))$\\
-	$\rho_{update.states}$ &$=$& $((\bar{s_0} \wedge \bar{s_1} \wedge \hat{p}'\wedge \bar{\hat{r}}' \wedge \bar{\hat{P1}}' \wedge \bar{\hat{P2}}' \wedge \bar{\hat{R}}') \implies (\bar{s_0}' \wedge \bar{s_1}')) \wedge$\\
-	&&$((\bar{s_0} \wedge \bar{s_1} \wedge \bar{\hat{p}}' \wedge \hat{r}'\wedge \bar{\hat{P1}}' \wedge \bar{\hat{P2}}' \wedge \bar{\hat{R}}') \implies (s_0' \wedge \bar{s_1}')) \wedge$\\	
-	&&$((s_0 \wedge \bar{s_1} \wedge \bar{\hat{p}}' \wedge \bar{\hat{r}}' \wedge \bar{\hat{P1}}' \wedge \bar{\hat{P2}}' \wedge \hat{R}')\implies (\bar{s_0}' \wedge \bar{s_1}')) \wedge$\\	
-	&&$((s_0 \wedge \bar{s_1} \wedge \bar{\hat{p}}' \wedge \bar{\hat{r}}' \wedge \hat{P1}'\wedge \bar{\hat{P2}}' \wedge \bar{\hat{R}}') \implies (\bar{s_0}' \wedge s_1')) \wedge$\\	
-	&&$((s_0 \wedge \bar{s_1} \wedge \bar{\hat{p}}' \wedge \bar{\hat{r}}' \wedge \bar{\hat{P1}}'\wedge \hat{P2}' \wedge \bar{\hat{R}}') \implies (s_0' \wedge s_1')) \wedge$\\		
-	&&$((\bar{s_0} \wedge s_1 \wedge \bar{\hat{p}}' \wedge \bar{\hat{r}}' \wedge \bar{\hat{P1}}' \wedge \bar{\hat{P2}}' \wedge \hat{R}')\implies (\bar{s_0}' \wedge \bar{s_1}')) \wedge$\\		
-	&&$((s_0 \wedge s_1 \wedge \bar{\hat{p}}' \wedge \bar{\hat{r}}' \wedge \bar{\hat{P1}}' \wedge \bar{\hat{P2}}' \wedge \hat{R}')\implies (\bar{s_0}' \wedge \bar{s_1}'))$\\			
-	$\rho_{update.propositions}$ &$=$& $((\bar{s_0} \wedge \bar{s_1}) \implies (\bar{\hat{e}}' \wedge \bar{\hat{a}}' \wedge \bar{\hat{b}}')) \wedge$\\
-	&& $((s_0 \wedge \bar{s_1}) \implies (\hat{e}' \wedge \bar{\hat{a}}' \wedge \bar{\hat{b}}')) \wedge$\\
-	&& $((\bar{s_0} \wedge s_1) \implies (\bar{\hat{e}}' \wedge \hat{a}' \wedge \bar{\hat{b}}')) \wedge$\\
-	&& $((s_0 \wedge s_1) \implies (\bar{\hat{e}}' \wedge \bar{\hat{a}}' \wedge \hat{b}'))$\\	
-	$\gsRhoE$&$=$&$\rho_{env.enabling}$\\		
-	$\gsRhoS$&$=$&$\rho_{sys.enabling} \wedge  \rho_{update.states} \wedge  \rho_{update.propositions}$\\	
+	$\gsV_{d}$ &$=$& $\gsX \cup \gsY \cup \{s_{(2,0)},s_{(6,1)},s_{(5,0)},s_{(2,1)},s_{(1,0)}\}$\\	
+	$\theta_{d}$ &$=$& $\bar{r} \wedge \bar{g}_1 \wedge g_2 \wedge s_{(2,0)}  \wedge \bar{s}_{(6,1)}  \wedge \bar{s}_{(5,0)}  \wedge \bar{s}_{(2,1)}  \wedge \bar{s}_{(1,0)}$\\						
+	$\rho_{d}$ &$=$& $\square((s_{(2,0)}\implies (\bar{r}' \wedge \bar{g}'_1 \wedge g_2 \wedge s'_{(2,0)}  \wedge \bar{s}'_{(6,1)}  \wedge \bar{s}'_{(5,0)}  \wedge \bar{s}'_{(2,1)}  \wedge \bar{s}'_{(1,0)}) \vee$\\
+	&&$\qquad(r' \wedge g'_1 \wedge \bar{g}_2 \wedge \bar{s}'_{(2,0)}  \wedge s'_{(6,1)}  \wedge \bar{s}'_{(5,0)}  \wedge \bar{s}'_{(2,1)}  \wedge \bar{s}'_{(1,0)})) \wedge$\\
+	&& $(s_{(6,1)}\implies (r' \wedge \bar{g}'_1 \wedge g_2 \wedge \bar{s}'_{(2,0)}  \wedge \bar{s}'_{(6,1)}  \wedge s'_{(5,0)}  \wedge \bar{s}'_{(2,1)}  \wedge \bar{s}'_{(1,0)}) \vee$\\
+	&&$\qquad(\bar{r}' \wedge \bar{g}'_1 \wedge g_2 \wedge \bar{s}'_{(2,0)}  \wedge \bar{s}'_{(6,1)}  \wedge \bar{s}'_{(5,0)}  \wedge s'_{(2,1)}  \wedge \bar{s}'_{(1,0)})) \wedge$\\		
+	&& $(s_{(5,0)}\implies (\bar{r}' \wedge \bar{g}'_1 \wedge g_2 \wedge \bar{s}'_{(2,0)}  \wedge \bar{s}'_{(6,1)}  \wedge \bar{s}'_{(5,0)}  \wedge \bar{s}'_{(2,1)}  \wedge s'_{(1,0)}) \vee$\\
+	&&$\qquad(r' \wedge g'_1 \wedge \bar{g}_2 \wedge \bar{s}'_{(2,0)}  \wedge s'_{(6,1)}  \wedge \bar{s}'_{(5,0)}  \wedge \bar{s}'_{(2,1)}  \wedge \bar{s}'_{(1,0)})) \wedge$\\			
+	&& $(s_{(1,0)}\implies (r' \wedge g'_1 \wedge \bar{g}_2 \wedge \bar{s}'_{(2,0)}  \wedge s'_{(6,1)}  \wedge \bar{s}'_{(5,0)}  \wedge \bar{s}'_{(2,1)}  \wedge \bar{s}'_{(1,0)})) \wedge$\\				
+	&& $(s_{(2,0)}\implies (r' \wedge \bar{g}'_1 \wedge \bar{g}_2 \wedge \bar{s}'_{(2,0)}  \wedge \bar{s}'_{(6,1)}  \wedge s'_{(5,0)}  \wedge \bar{s}'_{(2,1)}  \wedge \bar{s}'_{(1,0)})))$\\	
+	$\mathcal{J}_d$ & $=$ & $\emptyset$\\
+$\mathcal{C}_d$ & $=$ & $\emptyset$\\					
 \end{tabular}
 \vspace{1em}
 \normalsize
 
-If we keep only the behavior that conforms to $\theta_e, \theta_s, \rho_e$ and $\rho_s$ this translation induces the Kripke automaton depicted in figure ~\ref{fig:clts_to_fds_K}.
+Then, \fdsD can be represented as the automaton in figure ~\ref{fig:fds_to_clts_D}, where we use $mux'(s_i)$ to abbreviate the conjunction of state variables used as memory.
 
 \begin{figure}[bt]
 	\centering
 	%\minipage{0.32\textwidth}%
 	%\centering
 	\VCDraw{
-		\begin{VCPicture}{(-6.5,-2.5)(6.5,3.5)}
+		\begin{VCPicture}{(-2.5,-1.5)(6.5,3.5)}
 			\SetStateLabelScale{1}
 			\SetEdgeLabelScale{1.2}
-			\StateVar[0:\overline{s_0 s_1 e a b p r P1 P2 R}]{(-6,1.3)}{0}
-			\StateVar[1:\overline{s_0 s_1 e a b}p \overline{r P1 P2 R}]{(-2,1.3)}{1}
-			\StateVar[2:\overline{s_0 s_1 e a b p r P1 P2} R]{(2,-0.3)}{2}
-			\StateVar[3:s_0\overline{s_1} e  \overline{a b p} r \overline{P1 P2 R}]{(2,2.9)}{3}
-			\StateVar[4:\overline{s_0}s_1 \overline{e} a  \overline{b p r } P1 \overline{ P2 R}]{(6,2.9)}{4}
-			\StateVar[5:s_0 s_1 \overline{e a} b  \overline{ p r P1} P2 \overline{R}]{(6,-0.3)}{5}			
-			\Initial[w]{0}
-			\CLoopSW{1}{}			
-			\EdgeL{0}{1}{}        
-			\LArcL{0}{3}{}  			
-			\EdgeL{2}{1}{}        		
-			\EdgeL{1}{3}{}        		
-			\ArcR{3}{2}{}        		
-			\ArcR{2}{3}{}        					
-			\ArcL{3}{4}{}        		
-			\EdgeR{3}{5}{}        					
-			\EdgeL{4}{2}{}        		
-			\ArcL{5}{2}{}        		
-		%	\VArcR[.5]{arcangle=45,ncurv=.6}{6}{0}{}        						
-		%	\VArcL[.5]{arcangle=-45,ncurv=.6}{6}{1}{}        									
-		\end{VCPicture}
-	}	
-	\caption{Kripke structure induced from $\theta$ and $\rho$}
-	\label{fig:clts_to_fds_K}
-	%\endminipage\hfill
-\end{figure}
-
-We then use $\theta_e$, $\theta_s$, $\rho_e$ and $\rho_s$ to write \varphiLTL and solve \fdsEmbeddingDef. Following the construction of the FDS controller from a given strategy as in ~\cite{bloem2012synthesis}, we describe the transformation of $f$ into $\hat{f}$ as:
-\[\hat{f} = \bigwedge_{m \in M}\bigwedge_{s \in W_s}\bigwedge_{s'_{\gsX} \in \Sigma_{\gsX}} ((m \wedge s \wedge s'_{\gsX})\implies f(m,s,s'_{\gsX})')\]
-Where $M$ is the memory domain and $W_s$ is the set of winning states. We can see that this transformation maps the function:
-\[f: M \times \Sigma \times \Sigma_{\gsX} \mapsto M \times \Sigma_{\gsY}\ \]
-To:
-\[\hat{f}: M \times \Sigma \times \Sigma_{\gsX'} \mapsto M' \times \Sigma_{\gsY'}\ \]
-While restricting only those states within the winning region.
-The FDS controller is built as $\mathcal{D} = \langle \hat{\gsV}, \hat{\theta}, \hat{\rho} \rangle$ where:
-
-\vspace{1em}
-\begin{tabular}{ l c l }
-	$\hat{\gsV}$ & $=$ & $\gsX \cup \gsY \cup \mathcal{M}$\\	
-	$\hat{\theta}$ & $=$ & $(\theta_e \implies (\theta_s \wedge m_0 \wedge W_s))$\\
-	$\hat{\rho}$ & $=$ & $((W_s \wedge \rho_e) \implies \hat{f})$\\	
-\end{tabular}
-\vspace{1em}
-
-We describe $\hat{f}$ extensively only for the part of its domain that satisfies $\theta_e$, $\rho_e$ and $W_s$ since any other values are assigned arbitrarily. The rightmost term indicates the transition from the automaton in figure ~\ref{fig:clts_to_fds_K} being kept for each row. 
-
-\vspace{1em}
-\begin{tabular}{ r r r l l r r l l l}
-	$\hat{f}($ & $\overline{m},$ & $\overline{s_0 s_1eabprP1P2R},$ &$p'\overline{r'}$ & $) =$ & $($ & $\overline{s_0' s_1'e'a'b'P1'P2'R'},$ & $\overline{m'}$ & $)$ & $((0,0) \rightarrow (0,0))$\\
-	$\hat{f}($ & $\overline{m},$ & $\overline{s_0 s_1eab}p\overline{rP1P2R},$ &$p'\overline{r'}$ & $) =$ & $($ & $\overline{s_0' s_1'e'a'b'P1'P2'R'},$ & $\overline{m'}$ & $)$ & $((0,0) \rightarrow (0,0))$\\	
-	$\hat{f}($ & $\overline{m},$ & $\overline{s_0 s_1 eabp rP1P2R},$ &$\overline{p'}r'$ & $) =$ & $($ & $s_0'\overline{s_1'}e'\overline{a'b'P1'P2'R'},$ & $\overline{m'}$ & $)$ & $((0,0) \rightarrow (1,0))$\\
-	$\hat{f}($ & $\overline{m},$ & $\overline{s_0 s_1eab} p \overline{rP1P2R},$ &$\overline{p'}r'$ & $) =$ & $($ & $s_0'\overline{s_1'}e'\overline{a'b'P1'P2'R'},$ & $\overline{m'}$ & $)$ & $((0,0) \rightarrow (1,0))$\\
-	$\hat{f}($ & $\overline{m},$ & $s_0\overline{s_1}e\overline{abp} r \overline{P1P2R},$ &$\overline{p'r'}$ & $) =$ & $($ & $\overline{s_0'}s_1'\overline{e'}a'\overline{b'}P1'\overline{P2'R'},$ & $m'$ & $)$ & $((1,0) \rightarrow (2,1))$\\	
-	$\hat{f}($ & $m,$ & $\overline{s_0}s_1\overline{e}a\overline{b p r}P1\overline{P2R},$ &$\overline{p'r'}$ & $) =$ & $($ & $\overline{s_0's_1'e'a'b'P1'P2'}R',$ & $m'$ & $)$ & $((2,1) \rightarrow (0,1))$\\	
-	$\hat{f}($ & $m,$ & $\overline{s_0s_1eab p rP1P2}R,$ &$p'\overline{r'}$ & $) =$ & $($ & $\overline{s_0's_1'e'a'b'P1'P2'R'},$ & $m'$ & $)$ & $((0,1) \rightarrow (0,1))$\\			
-	$\hat{f}($ & $m,$ & $\overline{s_0s_1eab p rP1P2}R,$ &$\overline{p'}r'$ & $) =$ & $($ & $s_0'\overline{s_1'}e'\overline{a'b'P1'P2'R'},$ & $m'$ & $)$ & $((0,1) \rightarrow (1,1))$\\				
-	$\hat{f}($ & $m,$ & $s_0\overline{s_1}e\overline{ab p} r\overline{P1P2R},$ &$\overline{p'r'}$ & $) =$ & $($ & $s_0's_1'\overline{e'a'}b'\overline{P1'}P2'\overline{R'},$ & $\overline{m'}$ & $)$ & $((1,1) \rightarrow (3,0))$\\					
-	$\hat{f}($ & $\overline{m},$ & $s_0s_1\overline{ea}b\overline{prP1}P2\overline{R},$ &$\overline{p'r'}$ & $) =$ & $($ & $\overline{s_0's_1'e'a'b'P1'P2'}R',$ & $\overline{m'}$ & $)$ & $((3,0) \rightarrow (0,0))$\\						
-	$\hat{f}($ & $\overline{m},$ & $\overline{s_0s_1eabprP1P2}R,$ &$p'\overline{r'}$ & $) =$ & $($ & $\overline{s_0's_1'e'a'b'P1'P2'R'},$ & $\overline{m'}$ & $)$ & $((0,0) \rightarrow (0,0))$\\	
-	$\hat{f}($ & $\overline{m},$ & $\overline{s_0s_1eabprP1P2}R,$ &$\overline{p'}r'$ & $) =$ & $($ & $s_0'\overline{s_1'}e'\overline{a'b'P1'P2'R'},$ & $\overline{m'}$ & $)$ & $((0,0) \rightarrow (1,0))$\\		
-\end{tabular}
-\vspace{1em}
-
-
-
-If we restrict the behavior of the model that was shown in figure ~\ref{fig:clts_to_fds_K} after applying $\hat{f}$ we get the Kripke automaton from figure  ~\ref{fig:clts_to_fds_F}.
-
-\begin{figure}[bt]
-	\centering
-	%\minipage{0.32\textwidth}%
-	%\centering
-	\VCDraw{
-		\begin{VCPicture}{(-8.5,-2.5)(8.5,3.5)}
-			\SetStateLabelScale{1}
-			\SetEdgeLabelScale{1.2}
-			\StateVar[0:\overline{s_0 s_1 e a b p r P1 P2 R m}]{(-10,-0.3)}{0}
-			\StateVar[1:\overline{s_0 s_1 e a b}p \overline{r P1 P2 R m}]{(-5,-0.3)}{1}
-			\StateVar[2:\overline{s_0 s_1 e a b p r P1 P2} R \overline{m}]{(-5,2.9)}{2}
-			\StateVar[3:s_0\overline{s_1} e  \overline{a b p} r \overline{P1 P2 R m}]{(0,-0.3)}{3}
-			\StateVar[4:\overline{s_0}s_1 \overline{e} a  \overline{b p r } P1 \overline{ P2 R}m]{(5,-0.3)}{4}
-			\StateVar[5:\overline{s_0 s_1 e a b}p \overline{r P1 P2 R}m]{(10,2.9)}{1b}
-			\StateVar[6:\overline{s_0 s_1 e a b p r P1 P2} R m]{(10,-0.3)}{2b}
-			\StateVar[7:s_0\overline{s_1} e  \overline{a b p} r \overline{P1 P2 R}m]{(5,2.9)}{3b}
-			\StateVar[8:s_0 s_1 \overline{e a} b  \overline{ p r P1} P2		\overline{R m}]{(0,2.9)}{5b}					
-			\Initial[w]{0}
-			\CLoopS{1}{}			
-			\CLoopN{1b}{}					
-			\EdgeL{0}{1}{}        
-			\LArcR{0}{3}{}  							
-			\EdgeL{1}{3}{}        			
-			\ArcR{2}{1}{}        			
+			\StateVar[0:\overline{r g_1} g_2 mux(s_{2,0})]{(-2,2.9)}{1}
+			\StateVar[1:r g_1\overline{g_2} mux(s_{6,1})]{(2,2.9)}{2}
+			\StateVar[2:r \overline{g_1}g_2 mux(s_{5,0})]{(6,2.9)}{3}
+			\StateVar[3:\overline{r g_1}g_2 mux(s_{1,0})]{(6,-0.3)}{4}
+			\StateVar[4:\overline{r g_1} g_2 mux(s_{2,1})]{(2,-0.3)}{5}				
+			\Initial[w]{1}
+			\LoopS{1}{}
+			\EdgeL{1}{2}{}        						
 			\EdgeL{2}{3}{}        			
-			\EdgeL{3}{4}{}        			
-			\EdgeL{4}{2b}{}        			
-			\EdgeL{2b}{3b}{}        			
-			\ArcR{2b}{1b}{}        						
-			\EdgeL{1b}{3b}{}        									
-			\EdgeL{3b}{5b}{}        						
-			\EdgeL{5b}{2}{}        						
+			\EdgeL{3}{2}{}      			
+			\EdgeL{2}{5}{}        			
+			\EdgeL{3}{4}{}        						
+			\EdgeL{4}{2}{}        			
+			\EdgeL{5}{3}{}        						
 			%	\VArcR[.5]{arcangle=45,ncurv=.6}{6}{0}{}        						
 			%	\VArcL[.5]{arcangle=-45,ncurv=.6}{6}{1}{}        									
 		\end{VCPicture}
-	}	
-	\caption{Kripke structure induced from $\theta$ and $\rho$ after strengthening through $\hat{f}$}
-	\label{fig:clts_to_fds_F}
-	%\endminipage\hfill
-\end{figure}
-
-We can get our CLTS controller from \fdsD by applying $clts(\fdsD)$ to get the CLTS depicted in figure ~\ref{fig:clts_to_fds_C} which is a solution to \controlProblem.
-
-\begin{figure}[H]
-	\centering
-	%\minipage{0.32\textwidth}%
-	%\centering
-	\VCDraw{
-		\begin{VCPicture}{(-3.5,-2.5)(3.5,3.5)}
-			\SetStateLabelScale{1}
-			\SetEdgeLabelScale{1.2}
-			\State[0,0]{(-3,2.3)}{0}
-			\State[1,0]{(0,2.3)}{1}
-			\State[2,0]{(3,2.3)}{2}
-			\State[0,1]{(3,-0.3)}{0b}
-			\State[1,1]{(0,-0.3)}{1b}			
-			\State[3,0]{(-3,-0.3)}{3}			
-			\Initial[w]{0}
-			\EdgeL{0}{1}{<r>}        
-			\LoopN{0}{<p>}		
-			\EdgeL{1}{2}{<P1>}        
-			\EdgeL{2}{0b}{<R>}        
-			\EdgeL{0b}{1b}{<r>}    
-			\LoopS{0b}{<p>}					    						
-			\EdgeL{1b}{3}{<P2>}    			
-			\EdgeL{3}{0}{<R>}    						
-		\end{VCPicture}
 	}
-	\caption{Controller $C$ translated from $\fdsD$}
-	\label{fig:clts_to_fds_C}
+	\caption{Automaton representation of \fdsD}
+	\label{fig:fds_to_clts_D}
 	%\endminipage\hfill
 \end{figure}
