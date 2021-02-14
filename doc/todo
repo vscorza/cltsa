@@ -1,14 +1,5 @@
 TODO:
 =====
-- fds -> clts
-	- add s_0 proposition to clts and clts' translation, convert varphiCLTS to !s_0 -> varphiCLTS
-	- write example of: (!x && !y && z) && [](y <-> !z) && []<>(x -> y) && []<>(x -> z)
-		- kripke representation
-		- fds controller
-		- clts output (E)
-		- clts controller
-		- fds(C)
-	- review everything
 - add cites
 	- DFS cited from "Verification by Augmented Finitary Abstraction"
 	- Presented in "Algorithmic verification of linear temporal logic specifications"

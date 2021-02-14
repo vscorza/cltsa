@@ -26,28 +26,28 @@ Let \fdsControlProblemDef, the alphabet of the embedding will be comprised of tw
 \[\controlSet = \{y\uparrow | y \in \gsY \} \cup \{y\downarrow | y \in \gsY \}\]
 \[\nonControlSet = \{x\uparrow | x \in \gsX \} \cup \{x\downarrow | x \in \gsX \}\]
 \[\Sigma = \controlSet \cup \nonControlSet \]
-For each variable $v$ in \fdsControlProblem we are adding two actions, $v\uparrow$ that indicates that the variable was set to $true$ when going to current state to the next and $v\downarrow$ added to the transitions from a state where $v$ held into one where it does not.
+For each variable $v$ in \fdsControlProblem we are adding two actions, $v\uparrow$ that indicates that the variable was set to $true$ when going from the current state to the next and $v\downarrow$ added to the transitions from a state where $v$ held into one where it does not.
 We will use \enumStateSetDef to relate a state in the FDS domain to one in the CLTS control problem, it assigns a unique integer to each possible valuation over \gsV.
-Let \cltsDef be the CLTS describing the behavior of our problem, we can build it as follows:
+Let \cltsDef be the CLTS describing the behavior of our problem built as follows:
 
 \vspace{1em}
 \begin{tabular}{ l c l }
 	$S$ &$=$& $\{s_{i+1} : i \in [0\ldots2^{|\gsV|-1}] \}\cup \{s_0\}$\\
 	$\Sigma$ &$=$&$\controlSet \cup \nonControlSet$\\	
-	$\Delta$&$=$&$\{(s_i,\actionLabel,s_j) | s_i = \enumStateSet{\hat{s}_i} \wedge  s_j = \enumStateSet{\hat{s}_j} \wedge (\forall v \in \gsV: (v\uparrow \in \actionLabel \iff v \in \hat{s}_j \wedge v \not\in \hat{s}_i)$\\
-	&&$\wedge (\forall v \in \gsV: (v\downarrow \in \actionLabel \iff v \not\in \hat{s}_j \wedge v \in \hat{s}_i))\}$\\
-	&&$\cup \{ (s_0,\actionLabel,s_i)| s_i = \enumStateSet{\hat{s}_i} \wedge (\forall v \in \gsV: (v\uparrow \in \actionLabel \iff v \in \hat{s}_i)\}$\\
+	$\Delta$&$=$&$\{(s,\actionLabel,s') | s = \enumStateSet{\hat{s}} \wedge  s' = \enumStateSet{\hat{s}'} \wedge (\forall v \in \gsV: (v\uparrow \in \actionLabel \iff v \in \hat{s}' \wedge v \not\in \hat{s})$\\
+	&&$\wedge (\forall v \in \gsV: (v\downarrow \in \actionLabel \iff v \not\in \hat{s}' \wedge v \in \hat{s}))\}$\\
+	&&$\cup \{ (s_0,\actionLabel,s)| s = \enumStateSet{\hat{s}} \wedge (\forall v \in \gsV: (v\uparrow \in \actionLabel \iff v \in \hat{s})\}$\\
 	$\propositions$&$=$&$\{\dot{v} | v \in \gsV\}$\\
 	$\valuations(s)$&$=$&$\{\dot{v}| v \in \hat{s} \wedge s = \enumStateSet{\hat{s}}\}$\\
 \end{tabular}
 \vspace{1em}
 \\
-With $E$ we are allowing the whole domain of $\gsV \times \gsV'$ to be executed, expecting the CLTS controller that is a solution to \cltsCPEmbedding to to leave only the traces that are conforming to runs on \fdsD the FDS controller that is a solution to \fdsControlProblem. $S$ is the set of states to be related through \enumStateSetDef to valuations over \gsV while adding a distinguished initial state $s_0$ that allows $E$ to emulate the existence of multiple initial states by adding transitions from $s_0$ to those states that relate to valuations satisfying $\theta$. A proposition $\dot{v}$ is added for each variable $v$ so that the valuations over states in $S$ conform to those in $\Sigma_{\gsV}$. The transition relation imposes no restriction containing all possible pairs of states other than the ones going back to $s_0$.
+With $E$ we are allowing the whole domain of $\gsV \times \gsV'$ to be executed, as the CLTS controller that is a solution to \cltsCPEmbedding will keep only the traces that are conforming to runs on \fdsD, the FDS controller that is a solution to \fdsControlProblem. $S$ is the set of states to be related through \enumStateSetDef to valuations over \gsV while adding a distinguished initial state $s_0$ that allows $E$ to emulate the existence of multiple initial states by adding transitions from $s_0$ to those states, which are the ones that relate to valuations satisfying $\theta$. A proposition $\dot{v}$ is added for each variable $v$ so that the valuations over states in $S$ conform to those in $\Sigma_{\gsV}$. The transition relation imposes no restriction, thus containing all possible pairs of states other than the ones going back to $s_0$.
 
 Now we can prove that realizability is preserved between FDS control problem $\fdsControlProblem$ and the embedding \cltsCPEmbedding.
 
 \begin{theorem}(\emph{$clts$ preserves realizability})\label{theorem:clts_preserves_realizability}\\
-	Let \fdsControlProblemDef be an FDS control problem  then if \cltsCPEmbeddingDef, there is a CLTS $\fdsD= \langle \mathcal{V}_d, \theta_d,$ $\rho_d,$ $\mathcal{J}_d,$ $\mathcal{C}_d\rangle$, s.t. $\gsX \cup \gsY \subseteq \mathcal{V}_d$, $D$ is fairness-free, complete w.r.t. \gsX that satisfies $\fdsD \models \varphi$
+	Let \fdsControlProblemDef be an FDS control problem  then if \cltsCPEmbeddingDef, there is an FDS $\fdsD= \langle \mathcal{V}_d, \theta_d,$ $\rho_d,$ $\mathcal{J}_d,$ $\mathcal{C}_d\rangle$, s.t. $\gsX \cup \gsY \subseteq \mathcal{V}_d$, $D$ is fairness-free, complete w.r.t. \gsX that satisfies $\fdsD \models \varphi$
 	if and only if there is a CLTS $C$ legal w.r.t. ($E,\mathcal{C}$) s.t. $C \parallel E$ is deadlock-free and $C \parallel E \models \varphiCLTS$.
 	\normalsize
 \end{theorem}
@@ -92,7 +92,7 @@ that wins the game $G_{\varphi}=\langle \gsX, \gsY, true,$ $true, true,$ $true,$
 \end{tabular}
 \vspace{1em}
 \\
-Where $S$ is the cross product between the range of values related to the set of valuations over \gsV and those induced by the memory of $\fdsD$ through $\#$, the sets of actions and atomic propositions remain unchanged from $E$, \valuations are evaluated over the first component of $S$ in order to get the set of propositions that are satisfied by the values of \gsV. The transition relation is defined by adding those CLTS states and labels whose FDS state and label variables are satisfied according to $\rho_d$ in $\fdsD$, setting also the second element of each state, i.e. its memory, according to the projection of the valuation over the memory domain $\mathcal{M}$. 
+Where $S$ is the cross product between the range of values related to the set of valuations over \gsV and those induced by the memory of $\fdsD$ through $\#$, the sets of actions and atomic propositions remain unchanged from $E$, elements of \valuations are evaluated over the first component of $S$ in order to get the set of propositions that are satisfied according to states in $\Sigma_{\gsV}$. The transition relation is defined by adding those CLTS states and labels whose FDS state and label variables are satisfied according to $\rho_d$ in $\fdsD$, setting also the second element of each state, i.e. its memory, according to the projection of the valuation over the memory domain $\mathcal{M}$. 
 
 We can now show that $ctrl'(\fdsD)$ satisfies the properties that make it a solution to $\cltsCPEmbedding$. The first property we need to prove is legality w.r.t $E$ and $\mathcal{C}$, which means that for all $(s_e,s_c) \in E \parallel C$ it holds that:\\
 
@@ -127,10 +127,10 @@ We are using a slightly different version of the mutual exclusion formula for th
 	\end{tabular}
 \end{center}
 
-Where $\gsV_d$ is the extension of the original variables with the a set of variables $\dot{s}$ for each state in the CLTS controller. Both the initial and transition formulae are built in an extensive fashion, restricting the set of states in $\Sigma_{\gsV_d}$ or pair of states respectively that are to take part in the FDS controller. The initial formula $\theta_d$ is built as the disjunctive extension of conjunctions of original valuations (as kept in $\valuations_C$) plus the mutual exclusion over the state variables that keep up only that related to the current state in the CLTS controller. The transition formula $\rho_d$ is a conjunction of implications, where the precedent is the occurrence of a state variables and what it is implied is the set of variables that can hold in the next state, as a disjunctive conjunction that includes the original variables (as kept in $\valuations_C$) and the ones conforming to states in $C$.
+Where $\gsV_d$ is the extension of the original variables with the a set of variables $\dot{s}$ for each state in the CLTS controller. Both the initial and transition formulae are built in an extensive fashion, restricting the set of states in $\Sigma_{\gsV_d}$ (or pair of states respectively) that are to take part in the FDS controller. The initial formula $\theta_d$ is built as the disjunctive extension of conjunctions of original valuations (as kept in $\valuations_C$) plus the mutual exclusion over the state variables that keep up only that related to the current state in the CLTS controller. The transition formula $\rho_d$ is a conjunction of implications, where the precedent is the occurrence of a state variables and what it is implied is the set of variables that can hold in the next state, as a disjunctive conjunction that includes the original variables (as kept in $\valuations_C$) and the ones conforming to states in $C$.
 
 %fairness free is trivial
 %complete w.r.t. X comes from the fact that E kept all possible valuations over X and C must be legal, thus not restricting X choices
-The fairness-free property holds by construction. The resulting FDS is complete w.r.t \gsX first because $C$ is legal w.r.t. $E$ and \controlSet, which means that it wont restrict environment options, and second by $E$ being non restrictive with respect to valuations over \gsV. This implies that any restriction imposed by $C$ has to be over \gsY in a completely open environment.
+The fairness-free property holds by construction. The resulting FDS is complete w.r.t \gsX first, because $C$ is legal w.r.t. $E$ and \controlSet, which means that it will not restrict environment options, and second, by $E$ being non restrictive with respect to valuations over \gsV. This implies that any restriction imposed by $C$ has to be over \gsY in a completely open environment.
 To show that $fds(C)$ satisfies $\varphi$  we prove that for every run $\sigma$ in $fds(C)$ there is an execution $\execution$ in $C$ that conforms to it using $exec(\sigma) \in S^{\omega}$ once again. Such execution is possible in $C$ because \fdsD fully emulates its behavior, for each transition $(s,\actionLabel, s')\in \Delta_C$ there is pair of states $(\dot{s}_i,\dot{s}_j) \in \rho_d$ s.t. $\dot{v} \in \valuations_C(s) \iff v \in \dot{s}_i|_{\gsV}$ and $\dot{v}' \in \valuations_C(s') \iff v' \in \dot{s}_j|_{\gsV}$ .
 A trace $\pi$ in controller $C$ exists for each run $\sigma$ that satisfies $\theta_d \wedge \square \rho_d$, and since $C \models \varphiCLTS$ we can show that $\sigma \models \varphi$. This is proved over the algebraic construction of $\varphi$ as before.
