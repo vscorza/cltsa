@@ -1,5 +1,18 @@
 TODO:
 =====
+- rankings
+	- decidir si se toma de minimizing generalized buchi automata o small progress measure
+		- leer small progress measure
+		- comprender implementación en minimizing
+		- si es por minimizing
+			- definir best para ranking CLTS
+			- definir good para ranking CLTS
+			- definir tight para ranking CLTS
+			- definir traducción de CLTS a juego (V_0, V_1)
+			- probar que si al estabilizar los rankings de CLTS y su traducción vale lo siguiente:
+				r_1(v_E) \neq \inf \iff r_1(v_{G(E)}) \neg inf
+				o sea gana en CLTS sii gana en el juego
+- revisar como se extrae la estrategia del ranking clts
 - add cites
 	- DFS cited from "Verification by Augmented Finitary Abstraction"
 	- Presented in "Algorithmic verification of linear temporal logic specifications"
