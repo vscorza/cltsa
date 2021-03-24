@@ -3,6 +3,7 @@ TODO:
 - rankings
 	- decidir si se toma de minimizing generalized buchi automata o small progress measure
 		- leer small progress measure
+		- leer fair simultion relations, parity games and state space reduction for buchi automaton
 		- comprender implementación en minimizing
 		- si es por minimizing
 			- definir best para ranking CLTS
