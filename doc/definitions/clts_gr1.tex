@@ -1,6 +1,8 @@
-In the present work controller synthesis is applied to specifications where the environment behavior is defined by a set of CLTS instances and games structures. The properties to be satisfied by the specification fall into the GR(1) category and are expressed as LTL formulas.
+In the present section controller synthesis is applied to specifications where the environment behavior is defined by a CLTS instance and the property to be satisfied as an LTL formula which falls into the GR(1) category.
 
-Since the goal $\varphi$ is restricted to GR(1) formulas we will follow what has been done with LTS based specifications in \cite{DBLP:phd/ethos/DIppolito13}. A translation between CLTS control problems and GR(1) games, and one from strategies into CLTS controller are presented, yielding a framework for CLTS GR(1) control problem synthesis. The GR(1) games used here and in in \cite{DBLP:phd/ethos/DIppolito13} are the same.
+Since the goal $\varphi$ is restricted to GR(1) formulas we will follow what has been done with LTS based specifications in ~\cite{DBLP:phd/ethos/DIppolito13} after the application of small progress measures ~\cite{jurdzinski2000small} to Generalized Streett[1] Games from ~\cite{juvekar2006minimizing}. 
+
+A translation between CLTS control problems and GR(1) games, and one from strategies into CLTS controller are presented, yielding a framework for CLTS GR(1) control problem synthesis. The GR(1) games used here and in in \cite{DBLP:phd/ethos/DIppolito13} are the same.
 
 \begin{definition}\label{def:gr1_clts_control_problem} \emph{(GR(1) CLTS control problem)} 
 	Let \controlProblemDef be a CLTS control problem, $\controlProblem$ is a GR(1) CLTS control problem if $\varphi$ satisfies: 
@@ -8,19 +10,83 @@ Since the goal $\varphi$ is restricted to GR(1) formulas we will follow what has
 	In the previous definition $\gamma_1, \ldots , \gamma_k$, $\psi_1, \ldots , \psi_l$ are propositional LTL formulas over atomic propositions that represent a set of assumptions over the environment and a set of guarantees the system should satisfy.
 \end{definition}
 
-%\begin{definition}\label{def:clts_to_gr1_translation} \emph{(GR(1) CLTS control problem to GR(1) game translation)} 
-%For $I = \langle E, \mathcal{C}, \mathcal{F}=\lbrace fl_1, \ldots, fl_{k+l} \rbrace, \varphi \rangle$ a GR(1) CLTS control problem $gr1(I)=G$ is a GR(1) game $G = \langle S_g,$ $\Gamma^-,$ $\Gamma^+,s_{g_0}\varphi \rangle$ where $S_g = S_e \times \mathbb{B}^{k+l}$ is the set of states and for a state $s_g=(s_e,\alpha_1,\ldots,\alpha_{k+l}) \in S_g$ a fluent
-%$fl_i$ is said to be satisfied at $s_g$ if and only if $\alpha_i$ is true.
-%$s_{g_0}=(s_0,Init_1,\ldots,Init_{k+l})$ is the initial state and for every $(s,l,s')\in \Delta_e$, $(s_g,(s'_e,\alpha'_1,\ldots,\alpha'_{k+l}))$ is added to $\Gamma^-$ if $l \in \mathcal{P}(\mathcal{U})$ or $\Gamma^+$ if $l \in \mathcal{P}(\mathcal{C})$, $\alpha'_i$ is set as follows:
-%\[
-%\alpha'_i = \begin{cases}
-%\alpha_i & \text{if } l \notin I_{fl_i} \cup T_{fl_i} \\
-%\top & \text{if } l \in I_{fl_i}\\
-%\bot & \text{if } l \in T_{fl_i}
-%\end{cases}
-%\]
-%\end{definition}
-%
-%If the game $G$ constructed when applying $gr1$ on $I$ is realizable, i.e. if there exists a winning strategy for the system that satisfies $\varphi$ over $G$, then such a strategy can be encoded as a pair of functions $\sigma
-%$ and $u$. Since $G$ is memory dependent the strategy is split into the function $\sigma$ that picks a successor for any given controllable and reachable state  and $u$ that updates the memory in order to keep track of the guarantee that needs to be satisfied next. 
 
+\begin{definition}\label{def:gr1_range_j} \emph{(Range of $\psi_j$)} 
+Let \controlProblemDef be a GR(1) CLTS control problem, the range of each system liveness proposition $\psi_j$ is defined as:
+\[|j|=max_i\{|\gamma_i - \psi_j|\} = max_i \{ | \{ s | \gamma_i \in \valuations (s) \wedge  \psi_j \not\in \valuations (s) \} | \} \]
+\end{definition}
+
+\begin{definition}\label{def:gr1_rank_increment} \emph{(Rank increment)} 
+	Let $(r,i)$ or $\infty$ be a rank for $\psi_j$ a liveness property, we define its increment $(r,i)+_j 1$ as follows:
+\begin{center}
+	\begin{tabular}{r l}
+		$(r,i)+_j 1 = $ & $\begin{cases}
+		(r,i+1) & i < k\\
+		(r+1,i) & i = k \wedge r < |j|\\
+		´\infty & r = |j|
+		\end{cases}$\\
+		$\infty + 1 = $ & $\infty$\\
+	\end{tabular}
+\end{center}
+\end{definition}
+
+\begin{definition}\label{def:gr1_rank_state_increment} \emph{(Rank increment w.r.t state)} 
+	Let $(r,i)$ or $\infty$ be a rank for $\psi_j$ a liveness property, and \controlProblemDef a GR(1) CLTS control problem, we define the rank increment w.r.t. state $s$ ($s \in S$) as follows:
+	\begin{center}
+		\begin{tabular}{r l}
+			$incr_s^j((r,i)) = $ & $\begin{cases}
+			(0,1) & \psi_j \in \valuations(s)\\
+			(r,i)+_j 1 & \psi_j \not\in \valuations(s) \wedge \gamma_i \in \valuations(s)\\			
+			(r,i) & \text{otherwise}\\
+			\infty & r = |j|
+			\end{cases}$\\
+			$incr_s^j(\infty) = $ & $\infty$\\
+		\end{tabular}
+	\end{center}
+\end{definition}
+
+\begin{definition}\label{def:gr1_rank_best} \emph{(Rank best successor)} 
+	Let \controlProblemDef be a GR(1) CLTS control problem, and $R_j: S \mapsto ((\mathbb{N} \times \{1 \ldots n\}) \cup \{\infty \})$ the function mapping a state to its current $j$ ranking, we define the best successor ranking w.r.t. state $s$ and liveness property $\psi_j$, $best^j(s)$ as:
+	\begin{center}
+		\begin{tabular}{r l}
+			$\nonControlSet(s)=$&$ \{\actionLabel_{\nonControlSet} | \exists \actionLabel \in 2^{|\Sigma|} \wedge s' \in S, \actionLabel_{\nonControlSet} = \actionLabel\downarrow_{\nonControlSet}  \wedge (s,\actionLabel, s') \in \Delta \} $\\
+			$succ_{\actionLabel_{\nonControlSet}}(s)=$ & $ \{s' | \exists \actionLabel \in 2^{|\Sigma|} \wedge \actionLabel_{\nonControlSet} = \actionLabel\downarrow_{\nonControlSet}  \wedge (s,\actionLabel, s') \in \Delta \} $ \\
+			$min_c^j(s)=$ & $ \{s' | \exists \actionLabel_{\nonControlSet} \in \nonControlSet(s) \wedge R_j(s') = min(R_j(succ_{\actionLabel_{\nonControlSet}}(s))) \} $ \\			
+			$max_R^j(s)=$ & $max(R_j(min_c^j(s)))$ \\						
+%			$succ(s,j) =$ & $min(\{ R_j(s')| \forall \actionLabel_{\nonControlSet}:(\exists \actionLabel,s':(\actionLabel \downarrow_{\nonControlSet} = \actionLabel_{\nonControlSet}, (s,\actionLabel,s')\in \Delta))  \})$ \\			
+%			$succ(s,j) =$ & $min(\{ R_j(s')| \forall \actionLabel_{\nonControlSet}:(\exists \actionLabel,s':(\actionLabel \downarrow_{\nonControlSet} = \actionLabel_{\nonControlSet}, (s,\actionLabel,s')\in \Delta))  \})$ \\
+			$best^j(s) = $ & $\begin{cases}
+			\infty & \nexists \actionLabel, s' : (s,\actionLabel,s') \in \Delta\\
+			max_R^{j \oplus 1}(s) & \psi_j \in \valuations(s)\\			
+			max_R^{j}(s) & \psi_j \not\in \valuations(s)\\			
+			\end{cases}$\\
+		\end{tabular}
+	\end{center}
+\end{definition}
+
+\begin{definition}\label{def:gr1_update} \emph{(Rank update)} 
+	Let $(r,i)$ or $\infty$ be a rank for $\psi_j$ a liveness property, and \controlProblemDef a GR(1) CLTS control problem, we define the rank update w.r.t. state $s$ ($s \in S$) as follows:
+	\begin{center}
+		\begin{tabular}{r l}
+			$update^j(R_j,s) =$ & $\{ \hat{r}_s^j(s') | s' \in S\}$\\
+			$\hat{r}_s^j(s') = $ & $\begin{cases}
+			R_j(s') & s \neq s'\\
+			max(\{r^j(s),incr_s^j(best^j(s))\}) & \text{otherwise}\\
+			\end{cases}$\\
+		\end{tabular}
+	\end{center}
+\end{definition}
+
+\begin{definition}\label{def:gr1_lift} \emph{(Rank lifting algorithm)} 
+	Let $(r,i)$ or $\infty$ be a rank for $\psi_j$ a liveness property, and \controlProblemDef a GR(1) CLTS control problem, we define the rank lifting algorithm as :
+	\vspace{1em}
+	\begin{center}
+		\begin{tabular}{l}
+			$\forall s \in S, j \in [1\ldots l]:$\\
+			$\qquad  R_j(s) \leftarrow (0,1);$\\
+			$while(\exists s,j:(R_j(s) \neq update^j(R_j,s))):$\\
+			$\qquad R_j(s) \leftarrow update^j(R_j,s);$
+		\end{tabular}
+	\end{center}
+	
+\end{definition}
