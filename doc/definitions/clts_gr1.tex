@@ -1,8 +1,5 @@
 In the present section controller synthesis is applied to specifications where the environment behavior is defined by a CLTS instance and the property to be satisfied as an LTL formula which falls into the GR(1) category.
 
-Since the goal $\varphi$ is restricted to GR(1) formulas we will follow what has been done with LTS based specifications in ~\cite{DBLP:phd/ethos/DIppolito13} after the application of small progress measures ~\cite{jurdzinski2000small} to Generalized Streett[1] Games from ~\cite{juvekar2006minimizing}. 
-
-A translation between CLTS control problems and GR(1) games, and one from strategies into CLTS controller are presented, yielding a framework for CLTS GR(1) control problem synthesis. The GR(1) games used here and in in \cite{DBLP:phd/ethos/DIppolito13} are the same.
 
 \begin{definition}\label{def:gr1_clts_control_problem} \emph{(GR(1) CLTS control problem)} 
 	Let \controlProblemDef be a CLTS control problem, $\controlProblem$ is a GR(1) CLTS control problem if $\varphi$ satisfies: 
@@ -10,11 +7,29 @@ A translation between CLTS control problems and GR(1) games, and one from strate
 	In the previous definition $\gamma_1, \ldots , \gamma_k$, $\psi_1, \ldots , \psi_l$ are propositional LTL formulas over atomic propositions that represent a set of assumptions over the environment and a set of guarantees the system should satisfy.
 \end{definition}
 
+Once the base for CLTS control problems is given, it is desirable to define a way to systematically answer whether\controlProblem is realizable.  
+For the particular case where the goal $\varphi$ is restricted to GR(1) formulas we will follow what has been done with LTS based specifications in ~\cite{DBLP:phd/ethos/DIppolito13} after the application of small progress measures ~\cite{jurdzinski2000small} to Generalized Streett[1] Games from ~\cite{juvekar2006minimizing}. The general outline of the approach is this: a ranking function is defined w.r.t. each state in $S$ and liveness goal $\psi_j$ in $\varphi$, then a fixed point (lifting) algorithm is applied for each goal $\psi_j$ in a round-robin fashion, once stabilization is achieved the answer to the realizability question is given by observing whether all the rankings for the initial state are not $\infty$.
+Since the GR(1) formula has the following structure:
+
+\[\varphi = (\bigwedge_{i=1}^k\square \Diamond \gamma_i \implies \bigwedge_{j=1}^l\square \Diamond \psi_j)\]
+
+The solution to the GR(1) control problem can be seen as a game where the system tries to satisfy $\varphi$ and the environment tries to satisfy its complement:
+
+\[\neg\varphi = \bigwedge_{i=1}^k\square \Diamond \gamma_i \wedge \bigvee_{j=1}^l\Diamond \square \neg\psi_j\]
+
+Which can be decomposed as a dis-junction $\neg\varphi = \bigvee_{j=1}^l \neg\varphi_j$ where:
+
+\[\neg\varphi_j = \bigwedge_{i=1}^k\square \Diamond \gamma_i \wedge \Diamond \square \neg\psi_j\]
+
+Here $\neg\varphi_j$ can be interpreted as the region where \emph{all assumptions $\gamma_1$ to $\gamma_k$ are satisfied infinitely often while there is a point after which the goal $\psi_j$ is never satisfied}. Because of this, the environment wins if and only if it can find a goal that can be always falsified after a certain point while satisfying all the assumptions infinitely often. This observation is used to define a notion of distance from a given state to the goal $\psi_j$ and an upper bound after which satisfaction is unachievable. The range $|j|$ of ranking $R_j$ is defined as the set of states that satisfy $\gamma_i$ while not satisfying $\psi_j$ w.r.t. to the assumption $\gamma_i$ that maximizes this number. The idea is that if the environment has the option to keep the play within a region where $\gamma_i$ is satisfied more than $|j|$ times while not satisfying $\psi_j$ once, then it wins $\neg\varphi_j$ which means that it also wins $\neg\varphi$.  Since the game is determined, the environment wins if and only if the system loses, thus being able to check this property answers the $\varphi$ realizability question.
+
 
 \begin{definition}\label{def:gr1_range_j} \emph{(Range of $\psi_j$)} 
 Let \controlProblemDef be a GR(1) CLTS control problem, the range of each system liveness proposition $\psi_j$ is defined as:
 \[|j|=max_i\{|\gamma_i - \psi_j|\} = max_i \{ | \{ s | \gamma_i \in \valuations (s) \wedge  \psi_j \not\in \valuations (s) \} | \} \]
 \end{definition}
+
+In order to incrementally compute the distance from a given state $s$ to a goal $\psi_j$ we define the step-increment of the rank, first by giving semantic to $(r,i)+_j 1$ and then by deciding when to apply the increment w.r.t. to the valuations that hold at $s$ and whether or not the distance is within the rank $|j|$ ($incr_s^j((r,i))$).
 
 \begin{definition}\label{def:gr1_rank_increment} \emph{(Rank increment)} 
 	Let $(r,i)$ or $\infty$ be a rank for $\psi_j$ a liveness property, we define its increment $(r,i)+_j 1$ as follows:
@@ -30,6 +45,8 @@ Let \controlProblemDef be a GR(1) CLTS control problem, the range of each system
 \end{center}
 \end{definition}
 
+
+
 \begin{definition}\label{def:gr1_rank_state_increment} \emph{(Rank increment w.r.t state)} 
 	Let $(r,i)$ or $\infty$ be a rank for $\psi_j$ a liveness property, and \controlProblemDef a GR(1) CLTS control problem, we define the rank increment w.r.t. state $s$ ($s \in S$) as follows:
 	\begin{center}
@@ -44,6 +61,8 @@ Let \controlProblemDef be a GR(1) CLTS control problem, the range of each system
 		\end{tabular}
 	\end{center}
 \end{definition}
+
+The evaluation of ranking $R_j$ at state $s$ will be updated by way of backward propagation, picking at each step of the algorithm the successor that maximizes distance to the goal for the environment, while minimizing it for the system. Since the CLTS automaton allows for transitions having both controllable and non controllable actions, the decision can be thought as being split in two, first the environment chooses one candidate the set $\nonControlSet(s)$ ($\actionLabel_{\nonControlSet} \in \nonControlSet(s)$), which represent of possible projections over $\nonControlSet$ for the labels from transitions coming out of $s$, then the system chooses one transition conforming to it ($(s,\actionLabel, s') \in \Delta$ s.t. $\actionLabel_{\nonControlSet} = \actionLabel\downarrow_{\nonControlSet}$). The set $min_c^j(s)$ contains the optimal choices for the system w.r.t. to goal $\psi_j$ and all possible environmental choices $\actionLabel_{\nonControlSet} \in \nonControlSet(s)$. Then $max_R^j(s)$ is the best option for the environment against the choices in $min_c^j(s)$.  The value of $best^j(s)$ is defined by three cases, the first sets it to $\infty$ when the state has no outgoing edges (deadlock), the second case assigns the best successor but according to the next goal in round-robin fashion since the actual goal is satisfied at state $s$, otherwise it assigns the best successor according to $max_R^j(s)$.
 
 \begin{definition}\label{def:gr1_rank_best} \emph{(Rank best successor)} 
 	Let \controlProblemDef be a GR(1) CLTS control problem, and $R_j: S \mapsto ((\mathbb{N} \times \{1 \ldots n\}) \cup \{\infty \})$ the function mapping a state to its current $j$ ranking, we define the best successor ranking w.r.t. state $s$ and liveness property $\psi_j$, $best^j(s)$ as:
@@ -64,6 +83,8 @@ Let \controlProblemDef be a GR(1) CLTS control problem, the range of each system
 	\end{center}
 \end{definition}
 
+The ranking function $R_j$ is updated through $update^j(R_j,s)$ by increasing the value for $s$ only if the immediate increase of the successors ranking is higher than the current value (due to previous updates of the backwards propagation algorithm).
+
 \begin{definition}\label{def:gr1_update} \emph{(Rank update)} 
 	Let $(r,i)$ or $\infty$ be a rank for $\psi_j$ a liveness property, and \controlProblemDef a GR(1) CLTS control problem, we define the rank update w.r.t. state $s$ ($s \in S$) as follows:
 	\begin{center}
@@ -77,8 +98,10 @@ Let \controlProblemDef be a GR(1) CLTS control problem, the range of each system
 	\end{center}
 \end{definition}
 
+The lifting algorithm can now be presented, once it reaches a fixed point the ranking is said to be \emph{stabilized} thus answering the realizability question w.r.t. $\varphi$.
+
 \begin{definition}\label{def:gr1_lift} \emph{(Rank lifting algorithm)} 
-	Let $(r,i)$ or $\infty$ be a rank for $\psi_j$ a liveness property, and \controlProblemDef a GR(1) CLTS control problem, we define the rank lifting algorithm as :
+	Let \controlProblemDef be a GR(1) CLTS control problem and $\mathbf{R}:R_1 \ldots R_l$ its ranking system, we define the rank lifting algorithm as :
 	\vspace{1em}
 	\begin{center}
 		\begin{tabular}{l}
@@ -90,3 +113,26 @@ Let \controlProblemDef be a GR(1) CLTS control problem, the range of each system
 	\end{center}
 	
 \end{definition}
+
+In order to show that the lifting algorithm solves the GR(1) CLTS control problem we define the notion of stability for a ranking and then introduce the theorem that proves the equivalence between stability and realizability.
+
+\begin{definition}\label{def:gr1_stable_ranking} \emph{(Stable ranking)} 
+	Let \controlProblemDef be a GR(1) CLTS control problem and $\mathbf{R}:R_1 \ldots R_l$ its ranking system, we say that ranking $R_j$ is stable w.r.t. state $s$ iff:
+	\vspace{1em}
+	\begin{center}
+		\begin{tabular}{l}
+			If $\psi_j \in \valuations(s)$ and $max_R^{j \oplus 1}(s) = \infty$ then $R_j(s) = \infty$\\
+			If $\psi_j \in \valuations(s)$ and $max_R^{j \oplus 1}(s) \neq \infty$ then $R_j(s) = (0,1)$\\			
+			If $\psi_j \not\in \valuations(s)$, $R_j(s) = (r,i)$ and $\gamma_i \in \valuations(s)$ then  $R_j(s) > best^j(s)$\\						
+			If $\psi_j \not\in \valuations(s)$, $R_j(s) = (r,i)$ and $\gamma_i \not\in \valuations(s)$ then  $R_j(s) \geq best^j(s)$\\
+		\end{tabular}
+	\end{center}
+We will say that a system $\mathbf{R}:R_1 \ldots R_l$ is stable if all of its components $R_1 \ldots R_l$ are stable.
+\end{definition}
+
+\begin{theorem}(\emph{Stability solves realizability})\label{theorem:gr1_stability_realizability}\\
+	Let \controlProblemDef be a GR(1) CLTS control problem and $\mathbf{R}:R_1 \ldots R_l$ its stable ranking system, then $R_1(s) \neq \infty$ if and only if $s$ is a winning state for the system.
+	\normalsize
+\end{theorem}
+
+PROOF.
