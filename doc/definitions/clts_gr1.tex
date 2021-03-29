@@ -92,7 +92,7 @@ The ranking function $R_j$ is updated through $update^j(R_j,s)$ by increasing th
 			$update^j(R_j,s) =$ & $\{ \hat{r}_s^j(s') | s' \in S\}$\\
 			$\hat{r}_s^j(s') = $ & $\begin{cases}
 			R_j(s') & s \neq s'\\
-			max(\{r^j(s),incr_s^j(best^j(s))\}) & \text{otherwise}\\
+			max(\{R_j(s),incr_s^j(best^j(s))\}) & \text{otherwise}\\
 			\end{cases}$\\
 		\end{tabular}
 	\end{center}
@@ -105,10 +105,12 @@ The lifting algorithm can now be presented, once it reaches a fixed point the ra
 	\vspace{1em}
 	\begin{center}
 		\begin{tabular}{l}
-			$\forall s \in S, j \in [1\ldots l]:$\\
-			$\qquad  R_j(s) \leftarrow (0,1);$\\
-			$while(\exists s,j:(R_j(s) \neq update^j(R_j,s))):$\\
-			$\qquad R_j(s) \leftarrow update^j(R_j,s);$
+			$\forall s \in S, j \in [1\ldots l]:R_j(s) \leftarrow (0,1);$\\
+			\textbf{while}$(\exists s,j:(R_j(s) \neq update^j(R_j,s))):$\\
+			$\qquad$ \textbf{if }$update^j(R_j,s) = \infty:$\\			
+			$\qquad \qquad \forall j \in [1\ldots l]:R_j(s) \leftarrow \infty;$\\						
+			$\qquad$ \textbf{else}$:$\\
+			$\qquad \qquad R_j(s) \leftarrow update^j(R_j,s);$
 		\end{tabular}
 	\end{center}
 	
@@ -121,18 +123,29 @@ In order to show that the lifting algorithm solves the GR(1) CLTS control proble
 	\vspace{1em}
 	\begin{center}
 		\begin{tabular}{l}
-			If $\psi_j \in \valuations(s)$ and $max_R^{j \oplus 1}(s) = \infty$ then $R_j(s) = \infty$\\
-			If $\psi_j \in \valuations(s)$ and $max_R^{j \oplus 1}(s) \neq \infty$ then $R_j(s) = (0,1)$\\			
-			If $\psi_j \not\in \valuations(s)$, $R_j(s) = (r,i)$ and $\gamma_i \in \valuations(s)$ then  $R_j(s) > best^j(s)$\\						
-			If $\psi_j \not\in \valuations(s)$, $R_j(s) = (r,i)$ and $\gamma_i \not\in \valuations(s)$ then  $R_j(s) \geq best^j(s)$\\
+			If $\psi_j \in \valuations(s)$ and $max_R^{j \oplus 1}(s) = \infty$ then $R_j(s) = \infty$ (\textbf{lose by single goal violation})\\
+			If $\psi_j \in \valuations(s)$ and $max_R^{j \oplus 1}(s) \neq \infty$ then $R_j(s) = (0,1)$ (\textbf{target $j$ state})\\			
+			If $\psi_j \not\in \valuations(s)$, $R_j(s) = (r,i)$ and $\gamma_i \in \valuations(s)$ then  $R_j(s) > best^j(s)$ (\textbf{necessary increment})\\						
+			If $\psi_j \not\in \valuations(s)$, $R_j(s) = (r,i)$ and $\gamma_i \not\in \valuations(s)$ then  $R_j(s) \geq best^j(s)$ (\textbf{plausible increment})\\
 		\end{tabular}
 	\end{center}
 We will say that a system $\mathbf{R}:R_1 \ldots R_l$ is stable if all of its components $R_1 \ldots R_l$ are stable.
 \end{definition}
 
+The motivation behind the definition of stability can be decompose on a case by case basis, the \textbf{lose by single goal violation} case ensures that if a state is losing for a single liveness goal, then it should be losing for all the rankings, since system liveness conditions should be satisfied in conjunction whenever the liveness assumptions hold in conjunction. The \textbf{target $j$ state} case forces the ranking to stay in its initial value for those non-losing states that satisfy the liveness goal. The \textbf{necessary increment} ensures that whenever the assumption $\gamma_i$ is satisfied while goal $\psi_j$ is not at state $s$, the distance to the next state satisfying $\psi_j$ must be necessary larger than that defined by the best successor ranking, while \textbf{plausible increment} defines that if neither the current assumption nor the goal are satisfied, the distance should be at least equal than that of the best successor ranking.
+
+\begin{lemma}(\emph{Lifting algorithm fixed point achieves stability of}  $\mathbf{R}$)\label{theorem:gr1_lifting_stability}\\
+	Let \controlProblemDef be a GR(1) CLTS control problem and $\mathbf{R}:R_1 \ldots R_l$ its ranking system, after applying the rank lifting algorithm, $\mathbf{R}$ is stable.
+\end{lemma}
+
+We will show that once the lifting algorithm reaches its fixed point the ranking system is stable.
+At any given step within the algorithm either all rankings are set to $\infty$ for the current state $s$, or its value is effectively increased, following the definition of $update^j(s)$ and under the condition it is not equal to that $R_j(s)$, the value will be set to $incr_s^j(best^j(s))$.  Where $best^j(s)$ yields de best successor ranking according to the max-min criteria for both the environment and the player, and $incr_s^j(r)$ updates the ranking according to the conditions we will briefly review. These increments are applied until all $j$ rankings at any given state $s$ can not be increased further. The first stability condition, \textbf{lose by single goal violation}, is enforced by the first two lines of the \textbf{while loop}. The \textbf{target $j$ state} case holds by definition of $incr_s^j(r)$, since for each state $s$ s.t. $\psi_j \in \valuations(s)$ the ranking is fixed at $(0,1)$. The last two conditions (\textbf{necessary increment} and \textbf{plausible increment}) are achieved through the second case of the $update^j(s)$ function, where the assigned value is $max(\{R_j(s),incr_s^j(best^j(s))\})$. This assignment forces the value to be at least as big as the best max-min successor ranking by comparing it against the current value and forces it to be bigger when the conditions for the \textbf{necessary increment} are met, since they correspond to those for the second case of $incr_s^j(r)$, i.e.: $\psi_j \not\in \valuations(s)$ and $\gamma_i \in \valuations(s)$. 
+
 \begin{theorem}(\emph{Stability solves realizability})\label{theorem:gr1_stability_realizability}\\
-	Let \controlProblemDef be a GR(1) CLTS control problem and $\mathbf{R}:R_1 \ldots R_l$ its stable ranking system, then $R_1(s) \neq \infty$ if and only if $s$ is a winning state for the system.
+	Let \controlProblemDef be a GR(1) CLTS control problem and $\mathbf{R}:R_1 \ldots R_l$ its stable ranking system, then $R_1(s) \neq \infty$ if and only if there is a solution to \controlProblem.
 	\normalsize
 \end{theorem}
+
+We will prove the previous theorem in two steps, first by showing that for each stable ranking system $\mathbf{R}$ we can build an CLTS controller $clts(\mathbf{R})$ that is a solution to \controlProblem, and then that for each solution $C$ to \controlProblem we can build a stable ranking system $\mathbf{R}(C)$.
 
 PROOF.
