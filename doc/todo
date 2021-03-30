@@ -1,5 +1,12 @@
 TODO:
 =====
+- rankings
+	- vamos con ASynthesising Non-Anomalous Event-Based Controllersfor Liveness Goals, definir ranking sobre el control problem y probar que si estabiliza hay estrategia ganadora que satisface phi (no pasar por el juego inducido)
+		X definir sr
+		x definir stable
+		x definir algoritmo (tomar de small progress measures)
+		- probar estabilidad sii satisface fórmula (sound, complete)
+		- armar ejemplos, mejorar legibilidad según corresponda
 - armar plan de trabajo para diagnostico
 	- pasar defs de diag. a lts
 	- armar caso para lts
@@ -8,13 +15,6 @@ TODO:
 	- ref. a un arxiv
 - validar plan de trabajo para diagnostico
 - ejecutar plan de trabajo para diagnostico
-- rankings
-	- vamos con ASynthesising Non-Anomalous Event-Based Controllersfor Liveness Goals, definir ranking sobre el control problem y probar que si estabiliza hay estrategia ganadora que satisface phi (no pasar por el juego inducido)
-		X definir sr
-		x definir stable
-		x definir algoritmo (tomar de small progress measures)
-		- probar estabilidad sii satisface fórmula (sound, complete)
-		- armar ejemplos, mejorar legibilidad según corresponda
 - revisar como se extrae la estrategia del ranking clts
 - add cites
 	- DFS cited from "Verification by Augmented Finitary Abstraction"
