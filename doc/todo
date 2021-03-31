@@ -5,8 +5,9 @@ TODO:
 		X definir sr
 		x definir stable
 		x definir algoritmo (tomar de small progress measures)
-		- probar estabilidad sii satisface fórmula (sound, complete)
-		- armar ejemplos, mejorar legibilidad según corresponda
+		- probar estabilidad sii satisface fórmula
+			X R -> C
+			- C -> R
 - armar plan de trabajo para diagnostico
 	- pasar defs de diag. a lts
 	- armar caso para lts
@@ -14,6 +15,9 @@ TODO:
 	- introducir clts como necesidad para ejecutar los casos
 	- ref. a un arxiv
 - validar plan de trabajo para diagnostico
+- rankings
+	- mejorar legibilidad de pruebas
+	- armar ejemplos
 - ejecutar plan de trabajo para diagnostico
 - revisar como se extrae la estrategia del ranking clts
 - add cites

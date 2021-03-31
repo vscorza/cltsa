@@ -146,6 +146,24 @@ At any given step within the algorithm either all rankings are set to $\infty$ f
 	\normalsize
 \end{theorem}
 
-We will prove the previous theorem in two steps, first by showing that for each stable ranking system $\mathbf{R}$ we can build an CLTS controller $clts(\mathbf{R})$ that is a solution to \controlProblem, and then that for each solution $C$ to \controlProblem we can build a stable ranking system $\mathbf{R}(C)$.
+We will prove the previous theorem in two steps, first by showing that for each stable ranking system $\mathbf{R}$ we can build a CLTS controller $ctrl_{\mathbf{R}}(\mathbf{R})$ that is a solution to \controlProblem, and then that for each $C$ that solves \controlProblem, if we run the lifting algorithm over it, the stable ranking system yielded $\mathbf{R}$ satisfies $R_1(s) \neq \infty$.
 
-PROOF.
+For the first half of the proof we propose the following construction for the controller, where $ctrl_{\mathbf{R}}(\mathbf{R})= \langle S, \Sigma, s_0, \propositions, \valuations \rangle$:
+
+\vspace{1em}
+\begin{tabular}{ l c l }
+	$S$ &$=$& $\{(s,\hat{m}) : s \in S_E, \hat{m} \in [0\ldots l-1] \}$\\
+	$\Sigma$ &$=$&$\Sigma_E$\\	
+	$s_0$&$=$&$(s_0^{E}, 0)$\\
+	$\propositions$&$=$&$\propositions_E$\\	
+	$\valuations$&$=$&$\pi_1 \circ \valuations_E$\\
+	&&\\
+	$\Delta$&$=$&$\{((s_i,j),\actionLabel,(s_j,j')): (s_i,\actionLabel,s_j) \in \Delta_E \wedge s_j \in max_{R}^j(s_i) \wedge$\\
+	&&$(j' = j \iff \psi_j \not\in \valuations(s_j) \wedge j' = j \oplus 1 \iff \psi_j \in \valuations(s_j)))\}$\\
+\end{tabular}
+\vspace{1em}
+\\
+
+We can now show that every trace $\pi$ over $ctrl_{\mathbf{R}}(\mathbf{R})$ satisfies $\varphi$. Following the stable ranking system, since the initial state had a value different to $\infty$, each component, starting with $R_1$, that stands for $\psi_1$, forces the trace to be following a path where the distance to a state where the atomic goal is satisfied decrements monotonically, effectively decreasing it each time a state that satisfies $\gamma_i$ is reached. If there was a chance for the environment to pick a successor that forces the trace to falsify the goal $j$ indefinitely, this would have been captured by the definition of $best^j(s)$, first since it holds the worst case, i.e. maximum ranking value, w.r.t. to the minimum successors once the non controllable portion of the label is fixed, and second because if there is a chance to satisfy each assumption beyond $|j|$ the ranking will be set to $\infty$ and propagated back to the initial state. Satisfaction of all the components of $\bigwedge_j=1^l \psi_j$ is achieved by the round-robin concatenation of rankings once a state $s_j$ is reached such that $\psi_j$ is satisfied in $R_j(s_j)$, which is in turn followed by the construction of $\Delta$ since the second component of the target state is updated according to $\psi_j \in \valuations(s_j)$.
+
+Next we proof that if $C$ is a solution to \controlProblem, running the lifting algorithm over it yields a stable ranking system $\mathbf{R}$ such that $R_1(s_0) \neq \infty$. PROVE
