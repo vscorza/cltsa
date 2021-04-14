@@ -1,7 +1,7 @@
 \section{Behavior Minimization Procedures}\label{sect:solution}
 
-The strategy to find a minimal non realizable control problem is to incrementally remove transitions preserving an alternating Sub-CLTS relation until a local minimum is reached.  A minimal non realizable control problem is reached when any further reduction of the current Sub-CLTS renders the problem realizable.
-The first procedure explores the semi-lattice defined by Alternating Sub-CLTS relation starting with the original automaton and moving downwards by performing minimal reductions. 
+The strategy to find a minimal non realizable control problem is to incrementally remove transitions preserving an alternating Sub-LTS relation until a local minimum is reached.  A minimal non realizable control problem is reached when any further reduction of the current Sub-LTS renders the problem realizable.
+The first procedure explores the semi-lattice defined by Alternating Sub-LTS relation starting with the original automaton and moving downwards by performing minimal reductions. 
   
 \begin{figure}[bt]
 \centering
@@ -83,22 +83,22 @@ Consider the example of Figure~\ref{fig:fig.several-conflicts} where the system 
 achieving $g$ infinitely often (expressed
 by the LTL formula $\square \Diamond g$)
 with $\Sigma = \{u_1, u_2, u_3, c_1, c_2, g\}$ and 
-$\mathcal{C} = \{c_1, c_2, g\}$, the original CLTS $E$ will be
+$\mathcal{C} = \{c_1, c_2, g\}$, the original LTS $E$ will be
 at the top of the semi lattice while $E_1$ (depicted in figure \ref{fig:fig.several-conflicts-min1}) and $E_2$ (depicted in 
 figure \ref{fig:fig.several-conflicts-min2}) will be at 
-the bottom.  In between there is, for example, the Alternating Sub-CLTSs
+the bottom.  In between there is, for example, the Alternating Sub-LTSs
 obtained by removing just one non controllable transition.  
 The automaton obtained by removing $\{u_1, u_3\}$ is not shown
 since it is realizable. 
 %
-%\begin{definition}\label{def:minimal-non realizability legal-plant}\emph{(Minimal Counter-Strategy Preserving Sub-CLTS)}
+%\begin{definition}\label{def:minimal-non realizability legal-plant}\emph{(Minimal Counter-Strategy Preserving Sub-LTS)}
 %Given a control problem $\mathcal{I'}=<E', \mathcal{C}, \varphi>$
 %where $E' = (S_{E'}, \Sigma, \Delta_{E'}, s_0)$ we say that 
-%$E'$ is a minimal Alternating Sub-CLTS for $E$
+%$E'$ is a minimal Alternating Sub-LTS for $E$
 %if $I'$ is not realizable then the following holds:
 %\[
 %\begin{matrix}
-%\forall E'' \text{s.t. } E'' \text{ is a closest Alternating Sub-CLTS for } E'\\
+%\forall E'' \text{s.t. } E'' \text{ is a closest Alternating Sub-LTS for } E'\\
 %\implies\\
 %\mathcal{I}''=<E'', \mathcal{C}, \varphi> \text{ is realizable}\\
 %\end{matrix}
@@ -110,10 +110,10 @@ since it is realizable.
 %what we expect from $min(\mathcal{I})$, i.e., if 
 %$min(\mathcal{I})= \mathcal{I}'$, 
 %$\mathcal{I}'=<E', \mathcal{C}, \varphi>$ then
-%$E'$ should be a minimal Alternating Sub-CLTS for $E$.
+%$E'$ should be a minimal Alternating Sub-LTS for $E$.
 
 %The minization algorithm described below yields
-%one minimal $E'$ Alternating Sub-CLTS
+%one minimal $E'$ Alternating Sub-LTS
 %for $E$ and $\mathcal{C}$.
 %First we remove all controllable transitions from mixed states since this
 %is exactly what the realizability check does before computing the winning region
@@ -121,9 +121,9 @@ since it is realizable.
 %then
 %non controllable transitions are progressively removed from the automaton under
 %minimization (this is what we call $\mathcal{T}_u$ or candidate set),
-%the closest Alternating Sub-CLTS is computed from the resulting partial structure 
-%and a one step back track is fired every time a realizable Alternating Sub-CLTS is found.
-% A minimal Alternating Sub-CLTS is found when no further reduction is available.
+%the closest Alternating Sub-LTS is computed from the resulting partial structure 
+%and a one step back track is fired every time a realizable Alternating Sub-LTS is found.
+% A minimal Alternating Sub-LTS is found when no further reduction is available.
 
 \begin{figure}[ht]
   \begin{center}
@@ -147,13 +147,13 @@ since it is realizable.
 %contradiction.
 %\end{proofsketch}
 
-%\input{Proof_CLTS_Preserves_Realizability}
+%\input{Proof_LTS_Preserves_Realizability}
 
 We can now describe the algorithm as
 presented in figure \ref{fig:dfs-code}. The algorithm first removes all controllable transitions from
 mixed states \listRef{A}, this step can be performed since it
 can be interpreted as the successive removals of controllable 
-transitions with each satisfying the Alternating Sub-CLTS definition 
+transitions with each satisfying the Alternating Sub-LTS definition 
 and preserving non realizability because if it was non realizable
 for the mixed state it will remain non realizable when the controllable transitions are removed since int the game built from
 the automaton at each mixed state the environment
@@ -164,7 +164,7 @@ for removal at \listRef{B} and the effective list
 to be removed at each iteration \texttt{to\_remove} at
 \listRef{C}.  The latter keeps track of the transitions
 removed along our search down the space of
-Alternating Sub-CLTSs for $E$.  The exploration
+Alternating Sub-LTSs for $E$.  The exploration
 will continue until the candidate set is empty.
 At each cycle starting at \listRef{D} the set is updated \listRef{E} by 
 removing those transitions that were already removed by the reduction
@@ -173,31 +173,31 @@ at \listRef{F} or because they would induce a deadlock
 outgoing transition in the state from which \textbf{t} originates).
 The
 reduction, at \listRef{F}, looks for the closest
-Alternating Sub-CLTS obtained after removing 
+Alternating Sub-LTS obtained after removing 
 transitions in \texttt{to\_remove} from $E$.
 Then it checks for realizability \listRef{G}.  If the control problem is non
 realizable the candidate set and the last 
-Alternating Sub-CLTS $E'$ are updated (since further minimization is 
+Alternating Sub-LTS $E'$ are updated (since further minimization is 
 possible), otherwise a one step backtrack
 is triggered by removing the transition under test from
 the effective set \texttt{to\_remove} \listRef{H}.
 This is actually the backtracking point where the algorithm
 shifts the search sideways in the semi-lattice instead of downwards.
 Once the candidate set has been completely explored
-the last non realizability preserving CLTS $E'$ is
-returned as a minimal Alternating Sub-CLTS
+the last non realizability preserving LTS $E'$ is
+returned as a minimal Alternating Sub-LTS
 for $E$ and $\mathcal{C}$ \listRef{I}.
 Notice that
 in the step \listRef{H} the transition $t$ was removed
 from the candidate set but was retained in $E'$.  What happens if
-the transition could have been removed further down the semi lattice?  Removing $t$ from $E'$ and reducing the Alternating Sub-CLTS 
+the transition could have been removed further down the semi lattice?  Removing $t$ from $E'$ and reducing the Alternating Sub-LTS 
 $E_{new}$ accordingly would render the control problem realizable.  Suppose that
 the search continued preserving $t$ and removing other candidates
-$t_1, \ldots, t_n$ from $E'$ getting the Alternating Sub-CLTS
+$t_1, \ldots, t_n$ from $E'$ getting the Alternating Sub-LTS
 $E_{1,\ldots,n}$ that still contains $t$ while preserving non realizability.
 If we were to remove $t$ from $E_{1,\ldots,n}$ after reducing it
-to the closest Alternating Sub-CLTS we would get a new CLTS
-$E'_{new}$ that can be Alternating Sub-CLTS for $E_{new}$, and from lemma
+to the closest Alternating Sub-LTS we would get a new LTS
+$E'_{new}$ that can be Alternating Sub-LTS for $E_{new}$, and from lemma
 \ref{def:induction-preserves} it will render the control problem
 realizable.  We showed this way that if we are looking for just one
 conflict we can immediately remove the transition that yielded realizability 
@@ -205,7 +205,7 @@ from the candidate set without jeopardizing minimality.
 %\input{optimizations}
 The procedure is complete w.r.t to the problem statement because
 if a solution for the problem exists (for the sake of simplicity
-suppose that there is only one possible minimal alternating sub-CLTS $E'$
+suppose that there is only one possible minimal alternating sub-LTS $E'$
 satisfying unrealizability), then the algorithm will effectively, and progressively,
 reduce it to $E'$, if the problem has multiple solutions the
 algorithm will yield one of those.
@@ -214,7 +214,7 @@ The procedure is sound w.r.t to the problem statement since
 at every step it holds that $E' \sublts E$ so the alternating condition
 is met.  The realizability check ensures that the output keeps the
 control problem unrealizable, and the minimality is satisfied by
-checking that every closest alternating sub-CLTS is realizable at the
+checking that every closest alternating sub-LTS is realizable at the
 final iteration in conjunction with lemma  ~\ref{def:induction-preserves}.\\
 
 We introduced two modifications to the algorithm
@@ -228,24 +228,24 @@ looks for non controllable strips within the  input automaton
 $E$, that is, sequences of non controllable actions without branches.
 For each of these sequences only one action is
 added to $\mathcal{T}_u$ since, if removed from $E'$
-when looking for a minimal sub CLTS all the others have to be removed
+when looking for a minimal sub LTS all the others have to be removed
 as well to preserve alternation.
 
 Lemma ~\ref{def:induction-preserves} shows that we can keep removing
 elements from a set $\mathcal{T}_u$ of candidate non controllable
-transitions, reducing $E$ to its closest Alternating Sub-CLTS.
+transitions, reducing $E$ to its closest Alternating Sub-LTS.
  Once we can not,
 while preserving non-realizability, remove
-anything else we have reached an Alternating Sub-CLTS that is also minimal.
+anything else we have reached an Alternating Sub-LTS that is also minimal.
 This follows from the fact that
-no closest Alternating Sub-CLTS exists bellow it that preserves non realizability.
-If all the closest Alternating Sub-CLTSs in its neighborhood 
-are realizable the current CLTS is minimal.
+no closest Alternating Sub-LTS exists bellow it that preserves non realizability.
+If all the closest Alternating Sub-LTSs in its neighborhood 
+are realizable the current LTS is minimal.
 
 
-\begin{lemma}\label{def:induction-preserves}(\emph{Alternating Sub-CLTSs preserve realizability})
-Let $E$ be the CLTS for the non realizable control problem
-$\mathcal{I}=<E,\mathcal{C}, \varphi>$, and $E_1$, $E_2$ two CLTSs s.t. 
+\begin{lemma}\label{def:induction-preserves}(\emph{Alternating Sub-LTSs preserve realizability})
+Let $E$ be the LTS for the non realizable control problem
+$\mathcal{I}=<E,\mathcal{C}, \varphi>$, and $E_1$, $E_2$ two LTSs s.t. 
 $E_2 \sublts E_1 \sublts E$ and
 $\mathcal{I}_1=<E_1, \mathcal{C}, \varphi>$, $\mathcal{I}_2=<E_2, \mathcal{C}, \varphi>$, if $\mathcal{I}_1$ is realizable then $\mathcal{I}_2$ is also realizable.
 \end{lemma}

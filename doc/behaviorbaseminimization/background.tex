@@ -1,37 +1,41 @@
-\section{Preliminaries}\label{sec:background}
-%In this section we present background on realisability, which is linked to the problem of controller synthesis~\cite{DBLP:conf/popl/PnueliR89,DBLP:journals/jcss/BloemJPPS12} which, in turn, requires a formal specification that, in this paper, is assumed to be, as in~\cite{DBLP:conf/sigsoft/DIppolitoBPU10} provided as a labeled transition system and a subset of linear temporal logic formula called Generalised Reactivity 1~\cite{DBLP:journals/jcss/BloemJPPS12}.
+\section{Preliminaries}
+%In this section we present background on realisability, which is linked to the problem of controller synthesis~\cite{DBLP:conf/popl/PnueliR89,DBLP:journals/jcss/BloemJPPS12} which, in turn, requires a formal specification that, in this paper, is assumed to be, as in~\cite{DBLP:conf/sigsoft/DIppolitoBPU10} provided as a labelled transition system and a subset of linear temporal logic formula called Generalised Reactivity 1~\cite{DBLP:journals/jcss/BloemJPPS12}.
 
-We model safety assumptions on the environment and goals for the system as composition of Concurrent Labeled Transition Systems (CLTS). These structures are presented as an extension of LTS, which is our initial target formalism, that allow us to model both signal-based and event-based specifications. When labels are atomic both models are similar. We now present the definitions and properties required to express the realizability problem over a plant expressed as a CLTS.
+We model safety assumptions on the environment and goals for the system as composition of Labelled Transition Systems (LTS). 
+
 
 \begin{definition}
-	\label{def:CLTS} \emph{(Concurrent Labeled Transition Systems)} 
-	A \emph{Concurrent Labeled Transition System} (CLTS) is $E =  (S, \Sigma, \Delta, s_0)$, where $S$ is a finite set of states, $\Sigma \subseteq Act$ is its {\em communicating alphabet}, $\Delta \subseteq (S \times \mathcal{P}(\Sigma) \times S)$ is a transition relation, and $s_0 \in S$ is the initial state.  We denote $\Delta(s)=\{\act~|~(s,\act,s') \in \Delta\}$. 
-	An CLTS is deterministic if $(s,\act,s')$ and $(s,\act,s'')$ are in $\Delta$ implies $s'=s''$.
+	\label{def:LTS} \emph{(Labelled Transition Systems)} 
+	A \emph{Labelled Transition System} (LTS) is $E =  (S, \Sigma, \Delta, s_0)$, where $S$ is a finite set of states, $\Sigma \subseteq Act$ is its {\em communicating alphabet}, $\Delta \subseteq (S \times \Sigma \times S)$ is a transition relation, and $s_0 \in S$ is the initial state.  We denote $\Delta(s)=\set{\act~|~(s,\act,s') \in \Delta}$. 
+	An LTS is deterministic if $(s,\act,s')$ and $(s,\act,s'')$ are in $\Delta$ implies $s'=s''$.
 	An execution of $E$ is a word $\varepsilon=s_0, \act_0, s_1, \ldots$ where $(s_i, \act_i, s_{i+1}) \in \Delta$. 
 	A word $\pi$ is a trace (induced by $\varepsilon$) of $E$ if its the result of removing every $s_i$ from an execution $\varepsilon$ of $E$. 
 	We denote the set of infinite traces of $E$ by $\traces(E)$. 
 \end{definition}
 
 
-\begin{definition} 
-	\label{def:synchronous_composition}(\emph{Synchronous Composition}) Let \automaton{M},\automaton{N}, with $\Delta_M : S_M \times \mathcal{P}(\Sigma_M) \times S_M$, be two CLTS instances, then CLTS synchronous parallel composition is defined as \ltsComposition{M}{N}{s} where $\Delta$ is the smallest relation s.t:
-	\begin{center}
-		\begin{equation}
-		\AxiomC{$(s, l_M, s') \in \Delta_M,(t, l_N, t') \in \Delta_N  $}\RightLabel{$l_M \cap \Sigma_N = l_N \cap \Sigma_M$}
-		\UnaryInfC{$((s,t),l_M \cup l_N,(s',t')) \in \Delta$}
-		\DisplayProof	
-		\end{equation}	
-	\end{center}
+
+\begin{definition}\label{def:parallelComposition}\emph{(Parallel Composition)}
+	Let $P=(S_P,\Sigma_P,\Delta_P,s_{0_P})$ y $Q=(S_Q,\Sigma_Q,\Delta_Q,s_{0_Q})$ be two LTSs, then 
+	the parallel composition $P\|Q$ is defined as $P \| Q = (S_P \times S_Q, \Sigma_P \cup \Sigma_Q, \Delta_{P\|Q}, (s_{0_P}, s_{0_Q}))$
+	where $\Delta_{P\|Q}$ is the smallest relation satisfying that for all $s, t \in S_P$, $s',t' \in S_Q$ and $\ell \in \Sigma_P \cup \Sigma_Q$:
+	\small
+	\begin{gather*}
+	(s,\ell,t) \in \Delta_{P} \wedge a \not\in \Sigma_Q \Rightarrow ((s,s'),\ell,(t,s')) \in \Delta_{P\|Q}\\
+	(s',\ell,t') \in \Delta_{Q} \wedge \ell \not\in \Sigma_P \Rightarrow ((s,s'),\ell,(s,t')) \in \Delta_{P\|Q}\\
+	(s,\ell,t) \in \Delta_{P} \wedge (s',\ell,t') \in \Delta_{Q} \Rightarrow ((s,s'),\ell,(t,t')) \in \Delta_{P\|Q} 
+	\end{gather*}
+	\normalsize
 \end{definition}
 
-The distinction between what an CLTS can control and what it can monitor is enforced through the notion of 
+The distinction between what an LTS can control and what it can monitor is enforced through the notion of 
 {\em legal environment} taken from~\cite{DIppolito:2013}, and inspired in that of Interface Automata~\cite{DBLP:conf/sigsoft/AlfaroH01}.
 Intuitively, a controller does not block the actions that it does not control, and dually, the environment does not restrict controllable actions. 
 
-\begin{definition}
-	\label{def:legal_clts} \emph{(Legality w.r.t. $E$ and $\mathcal{C}$)} 
-	Given CLTS $C = \langle S_c, \Sigma$, $\Delta_c$, $s_{c_0}\rangle$ and $E = \langle S_e,\Sigma,$ $\Delta_e,$ $s_{e_0}\rangle$, where $\Sigma$ is partitioned into actions controlled and monitored (non controllable) by $C$ ($\Sigma=\mathcal{C} \; \cup \;\mathcal{U}$), we say that $C$ is a legal CLTS for $E$ if for all $(s_e,s_c) \in E \parallel_* C$ it holds that:
-	$\Delta_{E}(s_E)\cap \mathcal{P}(\mathcal{C}) \supseteq \Delta_{C}(s_C)\cap \mathcal{P}(\mathcal{C})$ and also that  $\Delta_{E}(s_E)\cap \mathcal{P}(\mathcal{U}) \subseteq \Delta_{C}(s_C)\cap \mathcal{P}(\mathcal{U})$.
+\begin{definition} \label{def:IALTS} \emph{(Legal LTS)}
+	Given LTSs $C = (S_C, \Sigma$, $\Delta_C$, $s_{C_0})$ and $E = (S_E,\Sigma,\Delta_E,s_{E_0})$, where $\Sigma$ is partitioned into actions controlled and monitored (non controllable) by $C$ ($\Sigma=\mathcal{C} \; \cup \;\mathcal{U}$), we say that $C$ is a legal LTS for $E$ if for all $(s_E,s_C) \in E\|C$ it holds that
+	$\Delta_{E}(s_E)\cap \mathcal{C} \supseteq \Delta_{C}(s_C)\cap \mathcal{C}$ and also that  $\Delta_{E}(s_E)\cap \mathcal{U} \subseteq \Delta_{C}(s_C)\cap \mathcal{U}$.
+	
 \end{definition}
 
 
@@ -43,7 +47,7 @@ Intuitively, a controller does not block the actions that it does not control, a
 %For deterministic LTKS, we also use $E\executes(a)$ to denote the LTKS $(S, A, P, \Delta, v, s)$ if $(s_0, a, s) \in \Delta$, and $E$ otherwise.
 %\end{definition}
 %\begin{definition}\emph{(Traces)}
-%A trace of $E$ is $\pi\!=\!s_0,\ell_0,s_1,\ell_1,\cdots$, where $s_0$ is an initial state of $E$ and, for every $i\Ggeq 
+%A trace of $E$ is $\pi\!=\!s_0,\ell_0,s_1,\ell_1,\cdots$, where $s_0$ is an initial state of $E$ and, for every $i\geq 
 %0$, we have $(s_i,\ell_i,s_{i+1})\in \Delta$.
 % We denote as $\pi|_{\Sigma}$ the 
 %sequence that is the result of removing from $\pi$ all actions not in
@@ -55,102 +59,50 @@ Intuitively, a controller does not block the actions that it does not control, a
 %\begin{definition}\emph{(Traces)}
 
 
-%We describe liveness goals and assumptions using fluent linear temporal \Ggr formulae. Linear
+%We describe liveness goals and assumptions using fluent linear temporal \gr formulae. Linear
 %temporal logics (LTL) are widely used to describe behaviour requirements~\cite{CITA INCORRECTA: DBLP:conf/sigsoft/GiannakopoulouM03}.
 %The motivation for
-
-
-We use linear temporal logics of fluents (FLTL) over CLTS models. %~\cite{DBLP:conf/sigsoft/GiannakopoulouM03}. 
-A \emph{fluent} \emph{fl} is defined by a pair of sets and a Boolean value: $\emph{\fluent} = \langle I_{\emph{\fluent}}, T_{\emph{\fluent}}, \emph{Init}_{\emph{\fluent}} \rangle$, where $I_{\emph{\fluent}}\subseteq \mathcal{P}(Act)$ is the set of initiating actions, $T_{\emph{\fluent}} \mathcal{P}(Act)$ is the set of terminating actions and $I_{\emph{\fluent}}\cap T_{\emph{\fluent}}=\emptyset$. 
+We use linear temporal logics on fluents (FLTL) since they provide a uniform framework
+for specifying state-based temporal properties in event-based models~\cite{DBLP:conf/sigsoft/GiannakopoulouM03}. 
+A \emph{fluent} \fluent is defined by a pair of sets and a Boolean value: $\emph{\fluent} = \langle I_{\emph{\fluent}}, T_{\emph{\fluent}}, \emph{Init}_{\emph{\fluent}} \rangle$, where $I_{\emph{\fluent}}\subseteq Act$ is the set of initiating actions, $T_{\emph{\fluent}}\subseteq Act$ is the set of terminating actions and $I_{\emph{\fluent}}\cap T_{\emph{\fluent}}=\emptyset$. 
 A fluent may be initially \true or \false as indicated by \emph{Init}$_{\emph{\fluent}}$. 
-Every actions $\ell\in Act$ induces a fluent, namely $\fluentp{\ell}=\langle \{\ell\}, \{Act\setminus \set{\ell}\}, \false\rangle$. 
+Every action $\ell\in Act$ induces a fluent, namely $\fluentp{\ell}=\langle \ell, Act\setminus \set{\ell}, \false\rangle$. 
 Finally, the alphabet of a fluent is the union of its terminating and initiating actions.
 
-Let $\mathcal{F}$ be the set of all possible fluents over $\mathcal{P}(Act)$. 
-An FLTL formula is defined inductively using the standard Boolean connectives and temporal operators $X$~(next), $U$ (strong until) as follows: 
+Let $\mathcal{F}$ be the set of all possible fluents over $Act$. 
+An FLTL formula is defined inductively using the standard Boolean connectives and temporal operators $\bigcirc$~(next), $U$ (strong until) as follows: 
 $\varphi ::= \fluent \mid \neg \varphi \mid \varphi \vee \psi \mid \X \varphi \mid \varphi U \psi,$
 where $\fluent\in\mathcal{F}$. 
-As usual we introduce $\wedge$, $\F$ (eventually), and $\Gg$ (always) as syntactic sugar. 
+As usual we introduce $\wedge$, $\Diamond$ (eventually), and $\square$ (always) as syntactic sugar. 
 Let $\Pi$ be the set of infinite traces over \emph{Act}.
-The trace $\pi=\ell_0,\ell_1,\ldots$ satisfies a fluent $\emph{Fl}$ at position $i$, denoted $\pi,i \models \emph{Fl}$, if and only if one of the following conditions holds:
-\begin{itemize}%{\leftmargin=3em}
-	\item $\emph{Init}_{\emph{Fl}} \wedge (\forall j \in \mathbb{N} \cdot 0 \leq j \leq i \rightarrow \nexists t \in T_{\fluent}: t \subseteq \ell_j)$
-	\item $\exists j \in \mathbb{N} \cdot (j \leq i \wedge \exists i \in I_{\fluent}: i \subseteq \ell_j) \wedge (\forall k \in \mathbb{N} \cdot j < k \leq i \ \rightarrow \nexists t \in T_{\fluent}: t \subseteq \ell_k)$
+The trace $\pi=\ell_0,\ell_1,\ldots$ satisfies a fluent $\emph{Fl}$ at position $i$, denoted $\pi,i \models \emph{Fl}$, if and only if at least one of the following conditions holds:
+%\begin{list}{-} %{\leftmargin=3em}
+\begin{itemize}
+	\item $\emph{Init}_{\emph{Fl}} \wedge (\forall j \in \mathbb{N} \cdot 0 \leq j \leq i \rightarrow \ell_j \notin T_{\fluent})$
+	\item $\exists j \in \mathbb{N} \cdot (j \leq i \wedge \ell_j \in I_{\fluent}) \wedge (\forall k \in \mathbb{N} \cdot j < k \leq i \ \rightarrow \ell_k \notin T_{\fluent})$
+	%\end{list}
 \end{itemize}
-
-%Suppose that $\fluent \in \mathcal{F}$, in order to avoid having a label $l_i$ in our trace $\pi$ where both the initiation and termination of $\fluent$ are triggered, we will require that our model $E$ satisfies a notion of consistency with respect to a set of fluents, we say that a model $E$ is consistent with respect to a set of fluents $\mathcal{F}$, noted $\cong(E,\mathcal{F})$ if the following holds: let $\pi$ be a trace of $E$,
-%$\forall \pi_i \in \pi, fl \in F, \neg(\exists i \in I_{fl}: (i \subseteq \pi_i) \wedge \exists t \in T_{fl}: (t \subseteq \pi_i))$.
-Suppose that $\fluent \in \mathcal{F}$, in order to avoid having a label $l_i$ in our trace $\pi$ where both the initiation and termination of $\fluent$ are triggered, we will require that our model $E$ satisfies a notion of consistency with respect to a set of fluents, we say that a model $E$ is consistent with respect to a set of fluents $\mathcal{F}$, noted $\cong(E,\mathcal{F})$ if the following safety condition holds: 
-\[\forall \fluent \in \mathcal{F}, (s,l,s') \in \Delta_E:\] \[\square(\neg(\exists i \in I_{\fluent}: i \subseteq l) \vee \neg(\exists t \in T_{\fluent}: t \subseteq l))\]
-
-
-
-Given an infinite trace $\pi$, the satisfaction of a formula $\varphi$ at position $i$, denoted $\pi,i\models\varphi$, is defined as follows:
+We will assume that FLTL formulae are equipped with the corresponding
+fluent definition triples.
+Formula satisfaction for FLTL is defined as follows: 
+given an infinite trace $\pi$, the satisfaction of a formula $\varphi$ at position $i$, denoted $\pi,i\models\varphi$, is defined as shown in Figure~\ref{fig:back:satisfactionop}.  
 \begin{figure}[bt]
-\begin{tabular}{ l c l }
-	$\pi, i \models_d \neg \varphi$ & $\triangleq$ & $\pi, i \not\models_d \varphi$\\
-	$\pi, i \models_d \varphi \vee \psi$ & $\triangleq$ & $(\pi, i \models_d \varphi) \vee (\pi, i \models_d \psi)$\\
-	$\pi, i \models_d \X \varphi$ & $\triangleq$ & $\pi, i +1 \models_d \varphi$\\
-	$\pi, i \models_d \varphi \Uu \psi$ & $\triangleq$ & $\exists j \geq i . \pi,j \models_d \psi \wedge \forall i \leq k \le k. \pi,$\\
-	$ $ & $ $ & $k \models_d \varphi$\\	
-\end{tabular}
-\caption{Semantics for the satisfaction operator}
-\label{fig:back:satisfactionop}
+	$$
+	\begin{array}{lcl}
+	\pi,i \models \fluent &\triangleq & \pi,i \models \fluent  \\
+	\pi,i \models \neg \varphi & \triangleq & \neg(\pi,i \models \varphi) \\
+	\pi,i \models \varphi \vee \psi &\triangleq& (\pi,i\models \varphi) \vee (\pi,i models \psi) \\
+	\pi,i \models \bigcirc \varphi &\triangleq & \pi,1 \models \varphi \\
+	\pi,i \models \varphi \bf U \psi &\triangleq&\exists j \geq i \cdot \pi,j \models \psi \wedge \forall \mbox{ }i \leq k < j \cdot \pi,k \models \varphi\\
+	\end{array}
+	$$
+	\caption{Semantics for the satisfaction operator}
+	\label{fig:back:satisfactionop}
 \end{figure}
 
+
 We say that $\varphi$ holds in $\pi$, denoted $\pi\models\varphi$, if $\pi,0\models\varphi$. 
-A formula $\varphi \in \mbox{FLTL}$ holds in an CLTS $E$ (denoted $E \models \varphi$) if it holds on every infinite trace produced by $E$.
-A \emph{fluent} \fluent \space is defined by a set of initiating actions $I_{\fluent}$, a set of terminating actions $T_{\fluent}$, and an initial value \emph{Initially}$_{\fluent}$.
-
-That is,
-%\begin{equation*}
-$ \fluent = \langle I_{\fluent}, T_{\fluent} \rangle_{\emph{initially}_{\fluent}} $, 
-where 
-$I_{\fluent},T_{\fluent} \subseteq \mathcal{P}(\emph{Act})$ 
-and $I_{\fluent} \cap T_{\fluent} = \emptyset.$\\
-
-
-%We use linear temporal logics on fluents (FLTL) since they provide a uniform framework
-%for specifying state-based temporal properties in event-based models~\cite{DBLP:conf/sigsoft/GiannakopoulouM03}. 
-%A \emph{fluent} \fluent is defined by a pair of sets and a Boolean value: $\emph{\fluent} = \langle I_{\emph{\fluent}}, T_{\emph{\fluent}}, \emph{Init}_{\emph{\fluent}} \rangle$, where $I_{\emph{\fluent}}\subseteq Act$ is the set of initiating actions, $T_{\emph{\fluent}}\subseteq Act$ is the set of terminating actions and $I_{\emph{\fluent}}\cap T_{\emph{\fluent}}=\emptyset$. 
-%A fluent may be initially \true or \false as indicated by \emph{Init}$_{\emph{\fluent}}$. 
-%Every action $\ell\in Act$ induces a fluent, namely $\fluentp{\ell}=\langle \ell, Act\setminus \set{\ell}, \false\rangle$. 
-%Finally, the alphabet of a fluent is the union of its terminating and initiating actions.
-%
-%Let $\mathcal{F}$ be the set of all possible fluents over $Act$. 
-%An FLTL formula is defined inductively using the standard Boolean connectives and temporal operators $\bigcirc$~(next), $U$ (strong until) as follows: 
-%$\varphi ::= \fluent \mid \neg \varphi \mid \varphi \vee \psi \mid \X \varphi \mid \varphi U \psi,$
-%where $\fluent\in\mathcal{F}$. 
-%As usual we introduce $\wedge$, $\Diamond$ (eventually), and $\square$ (always) as syntactic sugar. 
-%Let $\Pi$ be the set of infinite traces over \emph{Act}.
-%The trace $\pi=\ell_0,\ell_1,\ldots$ satisfies a fluent $\emph{Fl}$ at position $i$, denoted $\pi,i \models \emph{Fl}$, if and only if at least one of the following conditions holds:
-%%\begin{list}{-} %{\leftmargin=3em}
-%\begin{itemize}
-%\item $\emph{Init}_{\emph{Fl}} \wedge (\forall j \in \mathbb{N} \cdot 0 \leq j \leq i \rightarrow \ell_j \notin T_{\fluent})$
-%\item $\exists j \in \mathbb{N} \cdot (j \leq i \wedge \ell_j \in I_{\fluent}) \wedge (\forall k \in \mathbb{N} \cdot j < k \leq i \ \rightarrow \ell_k \notin T_{\fluent})$
-%%\end{list}
-%\end{itemize}
-%We will assume that FLTL formulae are equipped with the corresponding
-%fluent definition triples.
-%Formula satisfaction for FLTL is defined as follows: 
-%given an infinite trace $\pi$, the satisfaction of a formula $\varphi$ at position $i$, denoted $\pi,i\models\varphi$, is defined as shown in Figure~\ref{fig:back:satisfactionop}.  
-%\begin{figure}[bt]
-%$$
-%\begin{array}{lcl}
-%\pi,i \models \fluent &\triangleq & \pi,i \models \fluent  \\
-%\pi,i \models \neg \varphi & \triangleq & \neg(\pi,i \models \varphi) \\
-%\pi,i \models \varphi \vee \psi &\triangleq& (\pi,i\models \varphi) \vee (\pi,i models \psi) \\
-%\pi,i \models \bigcirc \varphi &\triangleq & \pi,1 \models \varphi \\
-%\pi,i \models \varphi \bf U \psi &\triangleq&\exists j \Ggeq i \cdot \pi,j \models \psi \wedge \forall \mbox{ }i \leq k < j \cdot \pi,k \models \varphi\\
-%\end{array}
-%$$
-%\caption{Semantics for the satisfaction operator}
-%\label{fig:back:satisfactionop}
-%\end{figure}
-%
-%
-%We say that $\varphi$ holds in $\pi$, denoted $\pi\models\varphi$, if $\pi,0\models\varphi$. 
-%A formula $\varphi \in \mbox{FLTL}$ holds in an LTS $E$ (denoted $E \models \varphi$) if it holds on every infinite trace produced by $E$.
+A formula $\varphi \in \mbox{FLTL}$ holds in an LTS $E$ (denoted $E \models \varphi$) if it holds on every infinite trace produced by $E$.
 
 In this paper we restrict attention to \gr~\cite{DBLP:journals/jcss/BloemJPPS12} formulas as there are effective synthesis algorithms for this sub-logic~\cite{DBLP:journals/jcss/BloemJPPS12}. \gr formulae are of the form $\varphi = \bigwedge_{i=1}^n \square\Diamond \assume_i \implies \bigwedge_{j=1}^m \square\Diamond \guarantee_j$, where $\{\assume_1 \ldots \assume_n\}$ and $\{\guarantee_1 \ldots \guarantee_m\}$ are propositional FLTL formulae.
 
@@ -158,13 +110,13 @@ In this paper we restrict attention to \gr~\cite{DBLP:journals/jcss/BloemJPPS12}
 %%%assumptions that should
 %%%always eventually be satisfied in order to 
 %%%always eventually satisfy the set of goals
-%%%$\{\Gguarantee_1 \ldots \Gguarantee_m\}$.
-%%%\Ggr is an expressive subset that has gained increased interest recently due to the development of tractable synthesis algorithms for it~\cite{DBLP:journals/jcss/BloemJPPS12}.
+%%%$\{\guarantee_1 \ldots \guarantee_m\}$.
+%%%\gr is an expressive subset that has gained increased interest recently due to the development of tractable synthesis algorithms for it~\cite{DBLP:journals/jcss/BloemJPPS12}.
 
 %From the FLTL definition it follows that many results for LTL can be
 %easily extended to FLTL.
 
-We now provide a standard definition of parallel composition of CLTSs to support compositional construction of environment models~\cite{DBLP:journals/cacm/Hoare78}.
+We now provide a standard definition of parallel composition of LTSs to support compositional construction of environment models~\cite{DBLP:journals/cacm/Hoare78}.
 % which is defined as an LTS that models the asynchronous execution of composed models, interleaving non-shared actions but forcing synchronisation on shared actions. 
 
 %%%%\begin{definition}\label{def:legalEnvironment}\emph{(Legal Environment)}
@@ -187,69 +139,69 @@ We now provide a standard definition of parallel composition of CLTSs to support
 
 We now formally define the control problem for \gr formulas.
 
-\begin{definition}\label{def:gr1_clts_control_problem} \emph{(GR(1) CLTS control problem)} 
-	Let $I = \langle E, \mathcal{C}, \mathcal{F}, \varphi \rangle$ be a CLTS control problem, $I$ is a GR(1) CLTS control problem if $\varphi$ satisfies: 
-	\[\varphi = (\bigwedge_{i=1}^k\square \Diamond \gamma_i \implies \bigwedge_{j=1}^l\square \Diamond \psi_j)\]
-	In the previous definition $\gamma_1, \ldots , \gamma_k$, $\psi_1, \ldots , \psi_l$ are propositional LTL formulas over fluents that represent a set of assumptions over the environment and a set of guarantees the system should satisfy.
+
+\begin{definition}\label{def:lts-control}\emph{(LTS \gr Control)}
+	Given a specification for a problem domain in the form of an environment LTS $E =  (S, \Sigma, \Delta, s_0)$, a set of controllable actions $\mathcal{C}$, and a \gr formula  $\varphi$, the solution for the LTS control problem $\mathcal{I}=\langle E, \mathcal{C}, \varphi\rangle$ is to find an LTS $M$ such that $M$ is a legal LTS for $E$ ,
+	$E\|M$ is deadlock free, and $M\|E \models \varphi$.
 \end{definition}
 
 \begin{definition}\label{def:state-characterization}\emph{((Non) Controllable and Mixed States)}
-Given an CLTS $E = \langle S_e,\Sigma,$ $\Delta_e,$ $s_{e_0}\rangle$, a set of controllable actions $\mathcal{C} \subseteq \Sigma$ and its complement $\mathcal{U} = \Sigma \setminus \mathcal{C}$,  a state $s \in S$ is called controllable if $\Delta(s) \cap \mathcal{C} = \Delta(s)$, non controllable if $\Delta(s) \cap \mathcal{U} \neq \emptyset$ and mixed otherwise.  We will refer to non mixed states pure states.
+	Given an LTS $E =  (S, \Sigma, \Delta, s_0)$, a set of controllable actions $\mathcal{C} \subseteq \Sigma$ and its complement $\mathcal{U} = \Sigma \setminus \mathcal{C}$,  a state $s \in S$ is called controllable if $\Delta(s) \cap \mathcal{C} = \Delta(s)$, non controllable if $\Delta(s) \cap \mathcal{U} \neq \emptyset$ and mixed otherwise.  We will refer to non mixed states pure states.
 \end{definition}
 
 \begin{definition}\label{def:twoplayer-game}\emph{(Two-player Game)}
-A two player game $G$ is defined as the tuple $G=(S_g,\gamma^{-},\gamma^{+},s_{g0}, \varphi)$ where $S_{g}$ is a finite set of states, $\gamma^{-}$,$\gamma^{+}$ $\subseteq S\times S$ are transition relations defined for the uncontrollable and controllable transtiions respectively, $s_{g0}\in S_{g}$ is the initial condition and $\varphi \subseteq S_{g}^{\omega}$ is the winning condition.  We denote $\gamma^{-}(s) =$ $\{s'|(s,s')$ $\in \gamma^{-}\}$ and in a similar fashion for $\gamma^{+}(s)$. A state $s$ is uncontrollable if $\gamma^{-}(s)\neq \emptyset$ and controllable otherwise.  A play on $G$ is a sequence $p=s_0,s_1,\ldots$ an a play $p$ ending in $s_{g_{n}}$ is extended by the controller choosing a subset $\gamma \subseteq \gamma^{+}(s_{g_{n}})$.  Then the environment chooses a state $s_{g_{n+1}}$ $\in \gamma \cup \gamma^{-}(s_{g_{n}})$ and adds $s_{g_{n+1}}$ to $p$.
+	A two player game $G$ is defined as the tuple $G=(S_g,\Gamma^{-},\Gamma^{+},s_{g0}, \varphi)$ where $S_{g}$ is a finite set of states, $\Gamma^{-}$,$\Gamma^{+}$ $\subseteq S\times S$ are transition relations defined for the uncontrollable and controllable transtiions respectively, $s_{g0}\in S_{g}$ is the initial condition and $\varphi \subseteq S_{g}^{\omega}$ is the winning condition.  We denote $\Gamma^{-}(s) =$ $\{s'|(s,s')$ $\in \Gamma^{-}\}$ and in a similar fashion for $\Gamma^{+}(s)$. A state $s$ is uncontrollable if $\Gamma^{-}(s)\neq \emptyset$ and controllable otherwise.  A play on $G$ is a sequence $p=s_0,s_1,\ldots$ an a play $p$ ending in $s_{g_{n}}$ is extended by the controller choosing a subset $\gamma \subseteq \Gamma^{+}(s_{g_{n}})$.  Then the environment chooses a state $s_{g_{n+1}}$ $\in \gamma \cup \Gamma^{-}(s_{g_{n}})$ and adds $s_{g_{n+1}}$ to $p$.
 \end{definition}
 
 \begin{definition}\label{def:strategy}\emph{((Counter)Strategy with memory)}
-A strategy with memory $\Omega$ for the controller is a pair of functions $(\delta, u)$ where $\Omega$ is some memory domain, $\delta:\Omega\times S \rightarrow 2^{S}$ such that $\delta(\omega, s) \subseteq \gamma^{+}(s)$ and $u:\Omega \times S \rightarrow \Omega$.
-A counter strategy with memory $\nabla$ for the environment is a pair of functions $(\kappa, v)$ where $\nabla$ is some memory domain, $\kappa:\nabla\times S \rightarrow 2^{S}$ such that $\kappa(\nabla, s) \subseteq \gamma^{-}(s)$ and $v:\nabla \times S \rightarrow \nabla$.
+	A strategy with memory $\Omega$ for the controller is a pair of functions $(\delta, u)$ where $\Omega$ is some memory domain, $\delta:\Omega\times S \rightarrow 2^{S}$ such that $\delta(\omega, s) \subseteq \Gamma^{+}(s)$ and $u:\Omega \times S \rightarrow \Omega$.
+	A counter strategy with memory $\nabla$ for the environment is a pair of functions $(\kappa, v)$ where $\nabla$ is some memory domain, $\kappa:\nabla\times S \rightarrow 2^{S}$ such that $\kappa(\nabla, s) \subseteq \Gamma^{-}(s)$ and $v:\nabla \times S \rightarrow \nabla$.
 \end{definition}
 
 
 \begin{definition}\label{def:consistency}\emph{(Consistency under (Non)Controllability and Winning (Counter)Strategy)}
-A finite or infinite play $p= s_0,s_1,\ldots$ is consistent under controllability if for every $n$ we have $s_{n+1} \in \delta(\omega_n,s_n)$, where $\omega_{i+1}=u(\omega_i,s_{i+1})$ for all
-$i \geq 0$. A strategy $(\delta, u)$ for controller from state $s$ is 
-winning if every maximal play starting in $s$ and consistent under controllability with $(\delta, u)$ is infinite and remains within $\varphi$.  We say that the controller wins the game $G$ if it has a winning strategy from the initial state. For the non controllable case,
-a finite or infinite play $p= s_0,s_1,\ldots$ is consistent under non-controllability if for every $n$ we have $s_{n+1} \in \kappa(\nabla_n,s_n)$, where $\nabla_{i+1}=v(\nabla_i,s_{i+1})$ for all
-$i \geq 0$. A strategy $(\kappa, v)$ for environment from state $s$ is 
-winning if every maximal play starting in $s$ and consistent under non-controllability with $(\kappa, v)$ is infinite and exits $\varphi$ at some point.  We say that the environment wins the game $G$ if it has a winning strategy from the initial state.
+	A finite or infinite play $p= s_0,s_1,\ldots$ is consistent under controllability if for every $n$ we have $s_{n+1} \in \delta(\omega_n,s_n)$, where $\omega_{i+1}=u(\omega_i,s_{i+1})$ for all
+	$i \geq 0$. A strategy $(\delta, u)$ for controller from state $s$ is 
+	winning if every maximal play starting in $s$ and consistent under controllability with $(\delta, u)$ is infinite and remains within $\varphi$.  We say that the controller wins the game $G$ if it has a winning strategy from the initial state. For the non controllable case,
+	a finite or infinite play $p= s_0,s_1,\ldots$ is consistent under non-controllability if for every $n$ we have $s_{n+1} \in \kappa(\nabla_n,s_n)$, where $\nabla_{i+1}=v(\nabla_i,s_{i+1})$ for all
+	$i \geq 0$. A strategy $(\kappa, v)$ for environment from state $s$ is 
+	winning if every maximal play starting in $s$ and consistent under non-controllability with $(\kappa, v)$ is infinite and exits $\varphi$ at some point.  We say that the environment wins the game $G$ if it has a winning strategy from the initial state.
 \end{definition}
 
 \begin{definition}\label{def:generalized-reactivity}\emph{(Generalized Reactivity(1))}
-Given an infinite sequence of states $p$, let $inf(p)$ denote the states that occur infinitely often in $p$, let $\phi_1,\ldots,\phi_n$ and $\gamma_1,\ldots,\gamma_m$ be subsets of $S$.  Let $gr((\phi_1,\ldots,\phi_n),(\gamma_1,\ldots,\gamma_m))$ denote the set of infinite sequences $p$ such that either for some $i$ we have $inf(p) \cap \phi_i = \emptyset$ or for all $j$ we have $inf(p)\cap \gamma_j \neq \emptyset$. A GR(1) game is a game where the winning condition $\varphi$ is $gr((\phi_1,\ldots,\phi_n),(\gamma_1,\ldots,\gamma_m))$.
+	Given an infinite sequence of states $p$, let $inf(p)$ denote the states that occur infinitely often in $p$, let $\phi_1,\ldots,\phi_n$ and $\gamma_1,\ldots,\gamma_m$ be subsets of $S$.  Let $gr((\phi_1,\ldots,\phi_n),(\gamma_1,\ldots,\gamma_m))$ denote the set of infinite sequences $p$ such that either for some $i$ we have $inf(p) \cap \phi_i = \emptyset$ or for all $j$ we have $inf(p)\cap \gamma_j \neq \emptyset$. A GR(1) game is a game where the winning condition $\varphi$ is $gr((\phi_1,\ldots,\phi_n),(\gamma_1,\ldots,\gamma_m))$.
 \end{definition}
 
 
 %\begin{definition}\label{def:counter-strategy}\emph{(Counter-strategy with memory)}
-%A counter strategy with memory $\nabla$ for the environment is a pair of functions $(\kappa, v)$ where $\nabla$ is some memory domain with designate start value $\nabla_{0}$, $\kappa:\nabla\times S \rightarrow 2^{S}$ such that $\kappa(\nabla, s) \subseteq \gamma^{-}(s)$ and $v:\nabla \times S \rightarrow \nabla$.
+%A counter strategy with memory $\nabla$ for the environment is a pair of functions $(\kappa, v)$ where $\nabla$ is some memory domain with designate start value $\nabla_{0}$, $\kappa:\nabla\times S \rightarrow 2^{S}$ such that $\kappa(\nabla, s) \subseteq \Gamma^{-}(s)$ and $v:\nabla \times S \rightarrow \nabla$.
 %\end{definition}
 %
 %\begin{definition}\label{def:counter-consistency}\emph{(Consistency under Non-Controllability and Winning Strategy for the Environment)}
 %A finite or infinite play $p= s_0,s_1,\ldots$ is consistent under non-controllability if for every $n$ we have $s_{n+1} \in \kappa(\nabla_n,s_n)$, where $\nabla_{i+1}=v(\nabla_i,s_{i+1})$ for all
-%$i \Ggeq 0$. A strategy $(\kappa, v)$ for environment from state $s$ is 
+%$i \geq 0$. A strategy $(\kappa, v)$ for environment from state $s$ is 
 %winning if every maximal play starting in $s$ and consistent under non-controllability with $(\kappa, v)$ is infinite and remains exits $\varphi$ at least at some point.  We say that the environment wins the game $G$ if it has a winning strategy from the initial state.
 %\end{definition}
 
 \begin{definition}\label{def:lts-2-game}\emph{(($G_{\mathcal{I}}$) Two-Player Game for $\mathcal{I}$ )}
-We convert the GR(1) CLTS control problem $\mathcal{I}=\langle E, \mathcal{C}, \varphi \rangle$ to a two-player GR(1) game $G (\mathcal{I})=(S_{g},\gamma{-},\gamma{+},s_{g0},\varphi)$ as follows: every state in $S_{g}$ encodes a state in $E$ and a valuation of all fluents
-appearing in $\varphi$. We build $S_g$ from $E$ in such a way that states in the game encode a state in $E$ and truth values for all fluents in $\varphi$, let $S_g = S_e \times \Pi_{i=0}^{k}\{true,false\}$.  Consider state $s_g=(s_e,\alpha_1,\ldots,\alpha_k)$, given fluent $fl_i$ we say that $s_g$ satisfies $fl_i$ if and only if $\alpha_i$ is $true$. We generalize satisfaction to boolean combination of fluents in the natural way.  We build the transition relations $\gamma^{-}$,$\gamma^{+}$ through the following rules.  Consider state $s_g=(s_e,\alpha_1,\ldots,\alpha_k)$, for every transition $(s_e,l,s'_e) \in \Delta$ we include $(s_g,(s'_e,\alpha'_1,\ldots,\alpha'_k))$ in $\gamma^{\beta}$ where
-$\beta$ is $+$ if $l \in \mathcal{C}$ and in $\gamma^{-}$ otherwise.
-$\alpha'_i$ is $\alpha_i$ if $l \neg\in I_{fl_i} \cup T_{fl_i}$, $\alpha'_i$ is $true$ if $l \in I_{fl_i}$ and $false$ if $l \in T_{fl_i}$.  
-If $s_e$ is a mixed state (i.e., $\Delta(s_e) \cap \mathcal{C} \neq \emptyset$
-$\wedge$
-$\Delta(s_e) \cap \mathcal{U} \neq \emptyset$) we only include
-$(s_g, (s'_e,\alpha'_1,\ldots,\alpha'_k))$ in $\gamma^{-}$
-if $l \in \mathcal{U}$ since we will consider mixed states as 
-non-controllable (antagonistic) in the game.
-$s_{g0}$ is $(s_0, Init_{fl_1},\ldots, Init_{fl_k})$.
-Let $\varphi_g \subseteq S_g^{\omega}$ be the set of sequences that satisfy $gr((\phi_1,\ldots,\phi_n),(\gamma_1,\ldots,\gamma_m))$.
+	We convert the GR(1) LTS control problem $\mathcal{I}=\langle E, \mathcal{C}, \varphi \rangle$ to a two-player GR(1) game $G (\mathcal{I})=(S_{g},\Gamma{-},\Gamma{+},s_{g0},\varphi)$ as follows: every state in $S_{g}$ encodes a state in $E$ and a valuation of all fluents
+	appearing in $\varphi$. We build $S_g$ from $E$ in such a way that states in the game encode a state in $E$ and truth values for all fluents in $\varphi$, let $S_g = S_e \times \Pi_{i=0}^{k}\{true,false\}$.  Consider state $s_g=(s_e,\alpha_1,\ldots,\alpha_k)$, given fluent $fl_i$ we say that $s_g$ satisfies $fl_i$ if and only if $\alpha_i$ is $true$. We generalize satisfaction to boolean combination of fluents in the natural way.  We build the transition relations $\Gamma^{-}$,$\Gamma^{+}$ through the following rules.  Consider state $s_g=(s_e,\alpha_1,\ldots,\alpha_k)$, for every transition $(s_e,l,s'_e) \in \Delta$ we include $(s_g,(s'_e,\alpha'_1,\ldots,\alpha'_k))$ in $\Gamma^{\beta}$ where
+	$\beta$ is $+$ if $l \in \mathcal{C}$ and in $\Gamma^{-}$ otherwise.
+	$\alpha'_i$ is $\alpha_i$ if $l \neg\in I_{fl_i} \cup T_{fl_i}$, $\alpha'_i$ is $true$ if $l \in I_{fl_i}$ and $false$ if $l \in T_{fl_i}$.  
+	If $s_e$ is a mixed state (i.e., $\Delta(s_e) \cap \mathcal{C} \neq \emptyset$
+	$\wedge$
+	$\Delta(s_e) \cap \mathcal{U} \neq \emptyset$) we only include
+	$(s_g, (s'_e,\alpha'_1,\ldots,\alpha'_k))$ in $\Gamma^{-}$
+	if $l \in \mathcal{U}$ since we will consider mixed states as 
+	non-controllable (antagonistic) in the game.
+	$s_{g0}$ is $(s_0, Init_{fl_1},\ldots, Init_{fl_k})$.
+	Let $\varphi_g \subseteq S_g^{\omega}$ be the set of sequences that satisfy $gr((\phi_1,\ldots,\phi_n),(\gamma_1,\ldots,\gamma_m))$.
 \end{definition}
 
 %Although the synthesis problem for general FLTL goals is 2EXPTIME
 %complete~\cite{DBLP:conf/popl/PnueliR89}. Nevertheless, restrictions on the form of
 %the goal and assumptions specification have been studied and found
-%to be solvable in polynomial time. The formulation above, which is restricted to \Ggr, has a polinomial solution~\cite{DBLP:conf/vmcai/PitermanPS06}. An adaptation of \Ggr in the context
+%to be solvable in polynomial time. The formulation above, which is restricted to \gr, has a polinomial solution~\cite{DBLP:conf/vmcai/PitermanPS06}. An adaptation of \gr in the context
 %of LTS has been presented in~\cite{DBLP:conf/sigsoft/DIppolitoBPU10} 
 
 
@@ -296,32 +248,32 @@ Let $\varphi_g \subseteq S_g^{\omega}$ be the set of sequences that satisfy $gr(
 %\begin{definition}
 %\label{def:game} \emph{(Two-player Game)} A \emph{Two-player}
 %\emph{Ga\-me} (Game) is
-%$G=(S_g,\gamma^{-},\gamma^{+},s_{g_0},\varphi)$, where $S_g$ is a
-%finite set of states, $\gamma^{-},\gamma^{+}\subseteq S_g\times S_g$
+%$G=(S_g,\Gamma^{-},\Gamma^{+},s_{g_0},\varphi)$, where $S_g$ is a
+%finite set of states, $\Gamma^{-},\Gamma^{+}\subseteq S_g\times S_g$
 %are transition relations, $s_{g_0}\in S_g$ is the initial state, and
 %$\varphi\subseteq S_g^\omega$ is a winning condition. We denote
-%$\gamma^{-}(s_g) = \{s_g' ~|~ (s_g,s_g') \in \gamma^{-}\}$ and
-%similarly for $\gamma^{+}$. A state $s_g$ is \emph{uncontrollable}
-%if $\gamma^{-}(s_g)\neq \emptyset$ and \emph{controllable}
+%$\Gamma^{-}(s_g) = \{s_g' ~|~ (s_g,s_g') \in \Gamma^{-}\}$ and
+%similarly for $\Gamma^{+}$. A state $s_g$ is \emph{uncontrollable}
+%if $\Gamma^{-}(s_g)\neq \emptyset$ and \emph{controllable}
 %otherwise. A \emph{play} on $G$ is a sequence
 %$p=s_{g_0},s_{g_1},\ldots$. A play $p$ ending in $s_{g_n}$ is
 %extended by the controller choosing a subset $\gamma \subseteq
-%\gamma^{+}(s_{g_n})$. Then, the environment chooses a state
-%$s_{g_{n+1}} \in \gamma \cup \gamma^{-}(s_{g_{n+1}})$ and adds
+%\Gamma^{+}(s_{g_n})$. Then, the environment chooses a state
+%$s_{g_{n+1}} \in \gamma \cup \Gamma^{-}(s_{g_{n+1}})$ and adds
 %$s_{g_{n+1}}$ to $p$.
 %
 %A \emph{strategy with memory $\Omega$} for the controller is a pair
 %of functions $(\sigma, u)$ where, $\sigma:\Omega\times S_g
 %\rightarrow 2^{S_g}$ such that $\sigma(\varpi,s_g) \subseteq
-%\gamma^{+}(s_g)$ and $u:\Omega\times S_g \rightarrow \Omega$ such
+%\Gamma^{+}(s_g)$ and $u:\Omega\times S_g \rightarrow \Omega$ such
 %that $\Omega$ is some memory domain with a designated start value
 %$\varpi_0$. Intuitively, $\sigma$ tells controller which states to
 %enable as possible successors and $u$ tells controller how to update
 %her memory. If $\Omega$ is finite, we say that the strategy uses
 %finite memory. A finite or infinite play $p=s_{g_0},s_{g_1},\ldots$
 %is \emph{consistent} with $(\sigma, u)$ if for every $n$ we have
-%$s_{g_{n+1}} \in \sigma(\varpi_n,s_{g_n}) \cup \gamma^{-}(s_{g_n})$,
-%where $\varpi_{i+1}=u(\varpi_i,s_{g_{i+1}})$ for all $i\Ggeq 0$. A
+%$s_{g_{n+1}} \in \sigma(\varpi_n,s_{g_n}) \cup \Gamma^{-}(s_{g_n})$,
+%where $\varpi_{i+1}=u(\varpi_i,s_{g_{i+1}})$ for all $i\geq 0$. A
 %strategy $(\sigma, u)$ for controller is \emph{winning} if every
 %maximal play consistent with $(\sigma, u)$ is infinite and in
 %$\varphi$. We say that controller \emph{wins} the game $G$ if it has
@@ -329,11 +281,11 @@ Let $\varphi_g \subseteq S_g^{\omega}$ be the set of sequences that satisfy $gr(
 %\end{definition}
 %
 %\begin{definition}\label{def:strategy}\emph{(Strategy with memory)}
-%Given an LTS control problem $\mathcal{I}=\langle E, \mathcal{C}, \varphi\rangle$, where $E = (S,\Sigma_{c}\Uuplus \Sigma_{u},\Delta,s_{0})$
-%A \emph{strategy $\strategy$ with memory $\Omega$}  for controller is a pair of functions $(\tran, \Uupd)$ where, $\tran:\Omega\times S \rightarrow 2^{\Sigma}$ and $\Uupd:\Omega\times S \rightarrow \Omega$ such that $\Omega$ is some memory domain with a designated start value $\varpi_0$, and for all $s\in S$ it holds that $\tran(\varpi,s) \subseteq (\Sigma_c\cap\Delta(s))$ and $\tran(\varpi,s) = (\Sigma_u\cap\Delta(s))$.
-%Intuitively, $\tran$ tells controller which actions to enable as possible successors from a state $s$ and $\Uupd$ tells controller how to update her memory. 
+%Given an LTS control problem $\mathcal{I}=\langle E, \mathcal{C}, \varphi\rangle$, where $E = (S,\Sigma_{c}\uplus \Sigma_{u},\Delta,s_{0})$
+%A \emph{strategy $\strategy$ with memory $\Omega$}  for controller is a pair of functions $(\tran, \upd)$ where, $\tran:\Omega\times S \rightarrow 2^{\Sigma}$ and $\upd:\Omega\times S \rightarrow \Omega$ such that $\Omega$ is some memory domain with a designated start value $\varpi_0$, and for all $s\in S$ it holds that $\tran(\varpi,s) \subseteq (\Sigma_c\cap\Delta(s))$ and $\tran(\varpi,s) = (\Sigma_u\cap\Delta(s))$.
+%Intuitively, $\tran$ tells controller which actions to enable as possible successors from a state $s$ and $\upd$ tells controller how to update her memory. 
 %If $\Omega$ is finite, we say that the strategy uses finite memory. 
-%An execution $\varepsilon=s_0, \act_0, s_1, \ldots$ is \emph{consistent} with $\strategy$ if for every $n$ we have $\act\in\tran(\varpi_n,s_{n})$, where $\varpi_{i+1}=\Uupd(\varpi_i,\act)$ for all $i\Ggeq 0$. 
+%An execution $\varepsilon=s_0, \act_0, s_1, \ldots$ is \emph{consistent} with $\strategy$ if for every $n$ we have $\act\in\tran(\varpi_n,s_{n})$, where $\varpi_{i+1}=\upd(\varpi_i,\act)$ for all $i\geq 0$. 
 %We say that the trace $\pi$ induced by $\varepsilon$  is also \emph{consistent} with \strategy.
 %A strategy \strategy for controller is \emph{winning} if every maximal trace in $E$ consistent with \strategy is infinite and satisfies $\varphi$. 
 %Finite traces are losing for the controller.

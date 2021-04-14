@@ -18,7 +18,7 @@ An alternative approach to providing unrealizability is to allow inspecting coun
  in order to expose relevant environmental decisions.
 Inspection of counter strategies that build on minimization of LTL specifications~\cite{DBLP:conf/emsoft/CernyGHRT12,DBLP:conf/sigsoft/KuventMR17} the fact that the behavior of the specification being analyzed has increased. Thus, the inspection of the counter strategy may lead an engineer to reasoning about behavior that is not allowed in the original specification.   
 
- Note that our approach also differs from depicting as an CLTS the winning strategy for the environment. The CLTS modeling the counter strategy is not a sub-CLTS of $E$ as the strategy must remember which assumption was the last to be satisfied. In general, the worst case is that the strategy of the environment will have $n$ times more states than the minimal sub-CLTS that can be used to generate it, where $n$ is the number of liveness assumptions that the environment must satisfy. Furthermore, the sub-CLTS we produce can allow for more than one counter strategy and hence provide insight to more than one problem with the original specification. 
+ Note that our approach also differs from depicting as an LTS the winning strategy for the environment. The LTS modeling the counter strategy is not a sub-LTS of $E$ as the strategy must remember which assumption was the last to be satisfied. In general, the worst case is that the strategy of the environment will have $n$ times more states than the minimal sub-LTS that can be used to generate it, where $n$ is the number of liveness assumptions that the environment must satisfy. Furthermore, the sub-LTS we produce can allow for more than one counter strategy and hence provide insight to more than one problem with the original specification. 
  %Our setting (and our search space characterization) allows us
  %to provide conflicts in an enumerative fashion by exhaustively exploring the induced semi-lattice.  This differs considerably to the single conflict diagnosis provided by executing a counter-strategy bounded by its implementation to a particular conflict.
  
@@ -108,7 +108,7 @@ In \cite{DBLP:conf/tacas/CavezzaA17} an assumption computing technique is presen
 %with the aspect justifying its presence or elimination, for unrealizable specifications an interactive game is provided to explain the cause of non realizability.\\
 %Several works have used mobile robotics examples as motivation.  Non realizability diagnosis has been applied to this domain in \cite{DBLP:conf/icra/RamanK12}
 %and \cite{DBLP:conf/cav/RamanK11}.\\
-%In \cite{DBLP:conf/icfem/XingSLD11} an approach to compute differences between CLTSs
+%In \cite{DBLP:conf/icfem/XingSLD11} an approach to compute differences between LTSs
 %is introduced in the context of evolving behaviors.  This is slightly related with our
 %work in the sense that it copes with the potential divergence between the current
 %model and the initial user intent. 

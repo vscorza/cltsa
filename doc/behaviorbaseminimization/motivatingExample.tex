@@ -15,6 +15,7 @@ It is assumed that $x_1$ will hold true infinitely often while $x_1 \wedge x_2 \
 The automaton induced from this set of formulae is depicted in Fig. ~\ref{fig:konig_original_plant_2_clts}. At this point, the specification is not realizable since the environment can set $x_1$ to true only when $x_2$ is down, thus honoring the environmental assumption while avoiding the system to reach the winning valuation $x_1 \wedge x_2 \wedge y$. The minimization presented in ~\cite{DBLP:conf/hvc/KonighoferHB10} removes $\rho_e$ since it is unnecessary for the environment to swap $x_2$ regularly in order to win the (non) realizability game. This approach can be characterized as a syntactic minimization, whose purpose is to help the engineer when viewing the specification, and in particular the safety part describing the behavior of the plant, as a set of LTL formulae. This approach, nonetheless, yields the automaton depicted in Fig. ~\ref{fig:konig_original_plant_k_2} which is, in fact, more complex in terms of its explicit behavior. Our approach is designed to simplify the semantic view of the specification, producing the automaton depicted in Fig. ~\ref{fig:konig_original_plant_c_2}. 
 
 The syntactic minimization should help the engineer to focus on a smaller set of formulae by getting rid of the irrelevant element $\rho_e$ while diagnosing the non realizability cause, in this example being that assumption $\varphi_e$ is too weak. Our approach simplifies the specification semantically instead, reducing the relevant behavior and showing that it is possible for the environment to avoid state 2 by never allowing $x_1$ and $x_2$ to happen simultaneously, while at the same time not restricting the system below its original capabilities. Notice that if we were allowed to add the assumption that both environmental variables occur simultaneously infinitely often ($\rho'_s = \square \Diamond x_1 \wedge x_2$) the specification would be realizable and choosing to raise $y$ at the beginning would be sufficient in order to guarantee our goal, as shown in Fig. ~\ref{fig:konig_strategy_2}. After fixing $y$ to true the environment can move freely as long as it visits state 2 infinitely often. If the engineer has this behavior in mind as her design intent, it should be easy to see that in the semantic minimization the desired state is unreachable, hopefully guiding her to the strengthening of the assumption.  In Fig. ~\ref{fig:konig_composition_2} we show the synchronous composition of the aforementioned strategy with our minimization. Note that after letting the system raise $y$ state 1 is visited only once and then the execution keeps moving between states 2 and 3 in order to keep the value of $x_2$ oscillating.
+
 %\begin{figure}[bt]
 %	\centering
 %	\SmallPicture
@@ -54,11 +55,14 @@ The syntactic minimization should help the engineer to focus on a smaller set of
 %\label{fig:konig_original_plant_2}
 %\MediumPicture
 %\end{figure}
+
 \begin{figure}[bt]
 \centering
 \SmallPicture
 %\ShowFrame
+
 	\VCDraw{
+
 	\begin{VCPicture}{(-4,-2.5)(4,9.5)}
 		\SetEdgeLabelScale{1.4}
 		\State[0]{(-5,3)}{init}
