@@ -2,10 +2,10 @@ TODO:
 =====
 - cltsa
 	- split into different files
-		- automaton.c
-			- run tests
-		- automaton_context.c into different files
-			- run tests
+		x automaton.c
+			x run tests
+		x automaton_context.c into different files
+			x run tests
 		- parser_utils.c
 			- run tests
 		- main.c
