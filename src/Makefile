@@ -24,13 +24,19 @@ YACCFLAGS =
 
 all: cltsa
 
-
-cltsa: main.c parser_utils_c.o y.tab.o lex.yy.o automaton_c.o automaton_utils_c.o \
+cltsa: main.c cltsa_runner_c.o parser_utils_c.o y.tab.o lex.yy.o automaton_c.o automaton_utils_c.o \
 	automaton_context_c.o automaton_importer_c.o bucket_list_c.o ordered_list_c.o \
 	max_heap_c.o obdd_c.o obdd_cache_c.o dictionary_c.o fast_pool_c.o bool_array_hash_table_c.o \
 	automaton_composite_hash_table_c.o automaton_serializer_c.o automaton_composition_c.o \
 	automaton_gr1_c.o automaton_diagnosis_c.o automaton_context_from_obdd_c.o
 	$(CC) $(CPARAMS) $(CFLAGS) $^ -o $@ $(CLIBS) 
+
+cltsa_runner_c.o: cltsa_runner.c parser_utils_c.o y.tab.o lex.yy.o automaton_c.o automaton_utils_c.o \
+	automaton_context_c.o automaton_importer_c.o bucket_list_c.o ordered_list_c.o \
+	max_heap_c.o obdd_c.o obdd_cache_c.o dictionary_c.o fast_pool_c.o bool_array_hash_table_c.o \
+	automaton_composite_hash_table_c.o automaton_serializer_c.o automaton_composition_c.o \
+	automaton_gr1_c.o automaton_diagnosis_c.o automaton_context_from_obdd_c.o
+	$(CC) $(CPARAMS) $(CFLAGS) -c $< -o $@ $(CLIBS) 
 
 automaton_utils_c.o: automaton_utils.c
 	$(CC) $(CPARAMS) $(CFLAGS) -c $< -o $@ $(CLIBS) 
