@@ -1,7 +1,71 @@
 TODO:
 =====
-- armar plan de trabajo para diagnostico
-	x pasar defs de diag. a lts
+- cltsa
+	- split into different files
+		- automaton.c
+			- run tests
+		- automaton_context.c into different files
+			- run tests
+		- parser_utils.c
+			- run tests
+		- main.c
+			- run tests
+	- cambio en el algoritmo de sintesis
+		- revisar tests
+		- re escribir tests
+			- de implementacion
+			- de casos de estudio
+		- implementar cambios
+			- ranking (desarrollar)
+				- cambiar sucesores
+				- cambiar algoritmos de estabilización
+			- estrategias
+				- cambiar creación de estrategia desde rankings
+		- correr tests
+	- traducción a lts
+		- definir casos de estudio
+		- escribir tests
+			- de implementacion
+			- de casos de estudio
+		- escribir traducción
+		- correr tests
+	- cambio en la traducción de obdds
+		- revisar tests
+		- re escribir tests
+			- de implementacion
+			- de casos de estudio
+		- implementar cambios
+			- cambiar theta
+			- cambiar rho
+		- correr tests
+	- definicion de valuaciones por estados
+		- revisar tests
+		- definir casos de estudio
+		- definir sintaxis
+		- re escribir tests
+			- de implementacion
+			- de casos de estudio
+		- implementar cambios
+			- sintaxis
+			- parsing
+			- conversión a modelos
+			- composición		
+		- correr tests
+- redefinir recortes para clts
+	- definiciones
+		- desarrollar
+	- pruebas
+		- desarrollar
+- implementar recortes para clts
+	- revisar tests
+	- definir casos de estudio
+	- re escribir tests
+		- de implementacion
+		- de casos de estudio
+	- implementar cambios
+		- desarrollar
+	- correr tests
+- plan de trabajo para diagnostico
 	- armar caso para lts
 	- tablas comparativas
 	- introducir clts como necesidad para ejecutar los casos (refs de definitions nuevo)
