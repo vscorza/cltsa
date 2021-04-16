@@ -841,3 +841,216 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 
 	return composition;
 }
+
+/** COMPOSITE TREE **/
+void automaton_composite_tree_entry_print(automaton_composite_tree_entry* entry, bool comes_from_next, uint32_t* tabs){
+	uint32_t i;
+	if(comes_from_next){
+		for(i = 0; i < *tabs; i++)
+			printf("\t");
+	}
+	if(entry->next == NULL && entry->succ == NULL){
+		printf("->%d", entry->value);
+	}else{
+		printf("[%d]\t", entry->value);
+	}
+	if(entry->succ != NULL){
+		(*tabs)++;
+		automaton_composite_tree_entry_print(entry->succ, false, tabs);
+		(*tabs)--;
+	}
+	if(entry->next != NULL){
+		printf("\n");
+		automaton_composite_tree_entry_print(entry->next, true, tabs);
+	}
+}
+
+void automaton_composite_tree_print(automaton_composite_tree* tree){
+	printf("Composite Tree.\n");
+	if(tree->first_entry != NULL){
+		uint32_t tabs	= 0;
+		automaton_composite_tree_entry_print(tree->first_entry, false, &tabs);
+	}
+	printf("\n");
+}
+
+automaton_composite_tree* automaton_composite_tree_create(uint32_t key_length){
+	automaton_composite_tree* tree	= malloc(sizeof(automaton_composite_tree));
+	tree->key_length	= key_length;
+	tree->max_value		= 0;
+	tree->first_entry	= NULL;
+	tree->entries_size_count		= 1;
+	tree->entries_composite_count	= 0;
+	tree->entries_size				= malloc(sizeof(uint32_t) * tree->entries_size_count);
+	tree->entries_count				= malloc(sizeof(uint32_t) * tree->entries_size_count);
+	tree->entries_size[0]			= LIST_INITIAL_SIZE * LIST_INITIAL_SIZE * 32;
+	tree->entries_count[0]			= 0;
+	tree->entries_composite_size	= tree->entries_size[0];
+	tree->entries_pool				= malloc(sizeof(automaton_composite_tree_entry*) * tree->entries_size_count);
+	tree->entries_pool[0]			= malloc(sizeof(automaton_composite_tree_entry) * tree->entries_size[0]);
+	return tree;
+}
+
+automaton_composite_tree_entry* automaton_composite_tree_entry_get_from_pool(automaton_composite_tree* tree){
+	uint32_t current_pool					= tree->entries_size_count - 1;
+	uint32_t i;
+	if(tree->entries_composite_count >= tree->entries_composite_size){
+		uint32_t new_size					= tree->entries_size[current_pool] * LIST_INCREASE_FACTOR;
+		tree->entries_composite_size		+= new_size;
+		tree->entries_size_count++;
+		current_pool						= tree->entries_size_count - 1;
+
+		uint32_t* ptr	= realloc(tree->entries_size, sizeof(uint32_t) * tree->entries_size_count);
+		if(ptr == NULL){printf("Could not allocate memory[automaton_composite_tree_entry_get_from_pool:1]\n");exit(-1);	}
+		else tree->entries_size	= ptr;
+		ptr	= realloc(tree->entries_count, sizeof(uint32_t) * tree->entries_size_count);
+		if(ptr == NULL){printf("Could not allocate memory[automaton_composite_tree_entry_get_from_pool:2]\n");exit(-1);	}
+		else tree->entries_count	= ptr;
+		automaton_composite_tree_entry** ptr2	= realloc(tree->entries_pool, sizeof(automaton_composite_tree_entry*) * tree->entries_size_count);
+		if(ptr2 == NULL){printf("Could not allocate memory[automaton_composite_tree_entry_get_from_pool:3]\n");exit(-1);	}
+		else tree->entries_pool	= ptr2;
+		tree->entries_size[current_pool]	= new_size;
+		tree->entries_count[current_pool]	= 0;
+		tree->entries_pool[current_pool]	= malloc(sizeof(automaton_composite_tree_entry) * new_size);
+	}
+
+	automaton_composite_tree_entry* entry	= &(tree->entries_pool[current_pool][tree->entries_count[current_pool]++]);
+	tree->entries_composite_count++;
+	return entry;
+}
+
+uint32_t automaton_composite_tree_get_key(automaton_composite_tree* tree, uint32_t* composite_key){
+	uint32_t i,j;
+	automaton_composite_tree_entry* current_entry 	= NULL;
+	automaton_composite_tree_entry* last_entry		= NULL;
+	automaton_composite_tree_entry* terminal_entry	= NULL;
+	//if first entry then add whole strip and return first value
+#if DEBUG_COMPOSITE_TREE
+	printf("(");
+	for(i = 0; i < tree->key_length; i++){
+		printf("%d%s", composite_key[i], (i == (tree->key_length - 1)) ? "": ",");
+	}
+	printf("):");
+	fflush(stdout);
+#endif
+	if(tree->first_entry == NULL){
+		for(i = 0; i < tree->key_length; i++){
+			current_entry			= automaton_composite_tree_entry_get_from_pool(tree);
+			current_entry->value	= composite_key[i];
+			current_entry->next		= NULL;
+			current_entry->succ 	= NULL;
+			if(i == 0){
+				tree->first_entry	= current_entry;
+			}
+			if(last_entry != NULL){
+				last_entry->succ = current_entry;
+			}
+			last_entry = current_entry;
+			if(i == (tree->key_length -1)){
+				terminal_entry			= automaton_composite_tree_entry_get_from_pool(tree);
+				terminal_entry->value	= tree->max_value++;
+				terminal_entry->succ	= NULL;
+				terminal_entry->next	= NULL;
+				last_entry->succ		= terminal_entry;
+#if DEBUG_COMPOSITE_TREE
+				printf("FIRST\n");
+#endif
+				return terminal_entry->value;
+			}
+		}
+	}else{
+		current_entry	= tree->first_entry;
+		bool found;
+		for(i = 0; i < tree->key_length; i++){
+			found	= false;
+			while(!found && current_entry != NULL){
+				if(current_entry->value == composite_key[i]){
+#if DEBUG_COMPOSITE_TREE
+					printf("[%d]", composite_key[i]);
+#endif
+					if(i == (tree->key_length -1)){
+#if DEBUG_COMPOSITE_TREE
+						printf("<%d>\n",current_entry->succ->value);
+#endif
+						return current_entry->succ->value;
+					}
+					current_entry	= current_entry->succ;
+					found	= true;
+				}else{
+					last_entry		= current_entry;
+					current_entry	= current_entry->next;
+				}
+#if DEBUG_COMPOSITE_TREE
+				fflush(stdout);
+#endif
+			}
+			//if not found add whole strip from this point on
+			if(!found){
+#if DEBUG_COMPOSITE_TREE
+				printf("X.");
+#endif
+				break;
+			}
+		}
+		//last_entry	= NULL;
+		for(j = i; j < tree->key_length; j++){
+			current_entry			= automaton_composite_tree_entry_get_from_pool(tree);
+			current_entry->value	= composite_key[j];
+#if DEBUG_COMPOSITE_TREE
+			printf("%d.", composite_key[j]);
+#endif
+			current_entry->next	= NULL;
+			current_entry->succ = NULL;
+			if(j == i && last_entry != NULL){
+				last_entry->next = current_entry;
+			}else if(last_entry != NULL){
+				last_entry->succ = current_entry;
+			}
+			last_entry = current_entry;
+			if(j == (tree->key_length -1)){
+				terminal_entry			= automaton_composite_tree_entry_get_from_pool(tree);
+				terminal_entry->value	= tree->max_value++;
+				terminal_entry->succ	= NULL;
+				terminal_entry->next	= NULL;
+				last_entry->succ		= terminal_entry;
+#if DEBUG_COMPOSITE_TREE
+				printf("<%d>\n",terminal_entry->value);
+#endif
+				return terminal_entry->value;
+			}
+		}
+	}
+	return 0;
+}
+void automaton_composite_tree_destroy_entry(automaton_composite_tree* tree, automaton_composite_tree_entry* tree_entry){
+	if(tree_entry->succ != NULL){
+		automaton_composite_tree_destroy_entry(tree, tree_entry->succ);
+		tree_entry->succ = NULL;
+	}
+	if(tree_entry->next != NULL){
+		automaton_composite_tree_destroy_entry(tree, tree_entry->next);
+		tree_entry->next = NULL;
+	}
+	tree_entry->value = 0;
+	//free(tree_entry);
+}
+
+void automaton_composite_tree_destroy(automaton_composite_tree* tree){
+	if(tree->first_entry != NULL){
+		automaton_composite_tree_destroy_entry(tree, tree->first_entry);
+		tree->first_entry = NULL;
+	}
+	tree->max_value 	= 0;
+	tree->key_length	= 0;
+	uint32_t i;
+	for(i = 0; i < tree->entries_size_count; i++)free(tree->entries_pool[i]);free(tree->entries_pool);
+	free(tree->entries_size);free(tree->entries_count);
+	tree->entries_size_count		= 0;
+	tree->entries_composite_count	= 0;
+	tree->entries_composite_size	= 0;
+	tree->entries_pool				= NULL;
+	tree->entries_size				= NULL;
+	tree->entries_count				= NULL;
+	free(tree);
+}
+
