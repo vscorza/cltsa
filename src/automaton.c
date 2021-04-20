@@ -758,6 +758,9 @@ signal_t automaton_alphabet_get_signal_index(automaton_alphabet* alphabet, autom
 	return 0;
 }
 /** TRANSITION **/
+void automaton_transition_set_from_to(automaton_transition* transition, uint32_t from_state, uint32_t to_state){
+	transition->state_from	= from_state; transition->state_to	= to_state;
+}
 bool automaton_transition_has_signal_event(automaton_transition* transition, automaton_automata_context* ctx, automaton_signal_event* signal_event){ 
 	uint32_t signal_index	= automaton_alphabet_get_signal_index(ctx->global_alphabet, signal_event);
 	return automaton_transition_has_signal_event_ID(transition, ctx, signal_index);

@@ -348,47 +348,10 @@ void automaton_ranking_update(automaton_automaton* game_automaton, automaton_con
 
 int __ranking_link_id = -1;
 
-automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automaton, char** assumptions, uint32_t assumptions_count
-		, char** guarantees, uint32_t guarantees_count, bool print_ranking){
-	clock_t begin = clock();
-	__ranking_link_id++;
-	_print_ranking	= print_ranking;
-	uint32_t pending_processed	= 0;
-	//TODO: preallocate pending states and rankings
-	automaton_automata_context* ctx				= game_automaton->context;
-	uint32_t i, j ,k, l, m;
-	automaton_concrete_bucket_list** ranking_list	= malloc(sizeof(automaton_concrete_bucket_list*) * guarantees_count);
-	automaton_pending_state_max_heap* pending_list	= automaton_pending_state_max_heap_create();
-	automaton_concrete_bucket_list** key_lists		= calloc(guarantees_count, sizeof(automaton_concrete_bucket_list*));
-	for(i = 0; i < guarantees_count; i++)
-				key_lists[i]					= automaton_concrete_bucket_list_create(RANKING_BUCKET_SIZE, automaton_pending_state_extractor, sizeof(automaton_pending_state));
-	uint32_t current_state;
-	//these are the indexes from the global fluents list, should not be used in ranking_list
-	uint32_t* assumptions_indexes				= malloc(sizeof(uint32_t) * assumptions_count);
-	uint32_t* guarantees_indexes				= malloc(sizeof(uint32_t) * guarantees_count);
-	int32_t first_assumption_index				= 0;
-	uint32_t fluent_count						= ctx->global_fluents_count;
-	uint32_t fluent_index;
-	//get assumptions and guarantees indexes
-	for(i = 0; i < assumptions_count; i++){
-		for(j = 0; j < ctx->global_fluents_count; j++){
-			if(strcmp(assumptions[i], ctx->global_fluents[j].name) == 0){
-				assumptions_indexes[i]	= j;
-				/*if (i == 0)
-					first_assumption_index	= (int32_t)j;*/
-				break;
-			}
-		}
-	}
-	for(i = 0; i < guarantees_count; i++){
-		for(j = 0; j < ctx->global_fluents_count; j++){
-			if(strcmp(guarantees[i], ctx->global_fluents[j].name) == 0){
-				guarantees_indexes[i]	= j;
-				break;
-			}
-		}
-	}
+uint32_t* automaton_compute_infinity(automaton_automaton* game_automaton, uint32_t assumptions_count,
+		uint32_t guarantees_count, uint32_t* assumptions_indexes, uint32_t* guarantees_indexes){
 	//get max_l(|fi_l - gamma_g|)
+	uint32_t i, j, l, k;
 	automaton_bucket_list *bigger_bucket_list, *smaller_bucket_list;
 	uint32_t* max_delta	= malloc(sizeof(uint32_t) * guarantees_count);
 	uint32_t current_delta;
@@ -426,6 +389,84 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 		automaton_automaton_print(game_automaton, false, false, true, "", "\n");
 	}
 #endif
+	return max_delta;
+}
+
+void automaton_get_gr1_liveness_indexes(automaton_automaton* game_automaton, char** assumptions, uint32_t assumptions_count,
+		 char** guarantees, uint32_t guarantees_count, uint32_t* assumptions_indexes, uint32_t* guarantees_indexes){
+	//these are the indexes from the global fluents list, should not be used in ranking_list
+	assumptions_indexes				= malloc(sizeof(uint32_t) * assumptions_count);
+	guarantees_indexes				= malloc(sizeof(uint32_t) * guarantees_count);
+	int32_t first_assumption_index				= 0;
+	uint32_t i,j;
+	automaton_automata_context* ctx	= game_automaton->context;
+	//get assumptions and guarantees indexes
+	for(i = 0; i < assumptions_count; i++){
+		for(j = 0; j < ctx->global_fluents_count; j++){
+			if(strcmp(assumptions[i], ctx->global_fluents[j].name) == 0){
+				assumptions_indexes[i]	= j;
+				/*if (i == 0)
+					first_assumption_index	= (int32_t)j;*/
+				break;
+			}
+		}
+	}
+	for(i = 0; i < guarantees_count; i++){
+		for(j = 0; j < ctx->global_fluents_count; j++){
+			if(strcmp(guarantees[i], ctx->global_fluents[j].name) == 0){
+				guarantees_indexes[i]	= j;
+				break;
+			}
+		}
+	}
+}
+
+automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automaton, char** assumptions, uint32_t assumptions_count
+		, char** guarantees, uint32_t guarantees_count, bool print_ranking){
+	clock_t begin = clock();
+	__ranking_link_id++;
+	_print_ranking	= print_ranking;
+	uint32_t pending_processed	= 0;
+	//TODO: preallocate pending states and rankings
+	automaton_automata_context* ctx				= game_automaton->context;
+	uint32_t i, j ,k, l, m;
+	automaton_concrete_bucket_list** ranking_list	= malloc(sizeof(automaton_concrete_bucket_list*) * guarantees_count);
+	automaton_pending_state_max_heap* pending_list	= automaton_pending_state_max_heap_create();
+	automaton_concrete_bucket_list** key_lists		= calloc(guarantees_count, sizeof(automaton_concrete_bucket_list*));
+	for(i = 0; i < guarantees_count; i++)
+				key_lists[i]					= automaton_concrete_bucket_list_create(RANKING_BUCKET_SIZE, automaton_pending_state_extractor, sizeof(automaton_pending_state));
+	uint32_t current_state;
+	uint32_t fluent_count						= ctx->global_fluents_count;
+	uint32_t fluent_index;
+	//these are the indexes from the global fluents list, should not be used in ranking_list
+	uint32_t* assumptions_indexes				= malloc(sizeof(uint32_t) * assumptions_count);
+	uint32_t* guarantees_indexes				= malloc(sizeof(uint32_t) * guarantees_count);
+	int32_t first_assumption_index				= 0;
+
+	automaton_get_gr1_liveness_indexes(game_automaton, assumptions, assumptions_count,
+			 guarantees, guarantees_count, assumptions_indexes, guarantees_indexes);
+
+	//get assumptions and guarantees indexes
+	for(i = 0; i < assumptions_count; i++){
+		for(j = 0; j < ctx->global_fluents_count; j++){
+			if(strcmp(assumptions[i], ctx->global_fluents[j].name) == 0){
+				assumptions_indexes[i]	= j;
+				/*if (i == 0)
+					first_assumption_index	= (int32_t)j;*/
+				break;
+			}
+		}
+	}
+	for(i = 0; i < guarantees_count; i++){
+		for(j = 0; j < ctx->global_fluents_count; j++){
+			if(strcmp(guarantees[i], ctx->global_fluents[j].name) == 0){
+				guarantees_indexes[i]	= j;
+				break;
+			}
+		}
+	}
+	uint32_t * max_delta = automaton_compute_infinity(game_automaton, assumptions_count,
+			guarantees_count, assumptions_indexes, guarantees_indexes);
 	//initialize transitions ranking
 	automaton_ranking concrete_ranking;
 	automaton_pending_state concrete_pending_state;

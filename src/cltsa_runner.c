@@ -14,7 +14,7 @@ extern FILE* yyin;
 extern automaton_program_syntax* parsed_program;
 
 char* automataFile  =  "automata.txt";
-
+/** TEST UTILITIES **/
 char* test_get_output_content(char *filename){
 	char *buffer = NULL;
 	size_t size = 0;
@@ -29,7 +29,6 @@ char* test_get_output_content(char *filename){
 	/* Print it ! */
 	return buffer;
 }
-
 void test_set_expected_content(char* content, char* filename){
 	FILE *fp = fopen(filename, "w");
 
@@ -39,7 +38,6 @@ void test_set_expected_content(char* content, char* filename){
 	}
 	fclose(fp);
 }
-
 void print_test_result(bool passed, char* name, char* description){
 	if(!passed){
 		printf(ANSI_COLOR_RED);
@@ -53,7 +51,6 @@ void print_test_result(bool passed, char* name, char* description){
 	printf("\t [%s] \t (%s)\n", name, description);
 	fflush(stdout);
 }
-
 void run_parse_test_local(char* test_file, char* test_name, char* result_name, char* steps_name,
 		diagnosis_search_method diagnosis_method, bool append_results){
 	FILE *fd;
@@ -81,36 +78,41 @@ void run_parse_test_local(char* test_file, char* test_name, char* result_name, c
     automaton_program_syntax_destroy(parsed_program);
     fclose(yyin);
 }
-
 void run_parse_test(char* test_file, char* test_name){
 	char buf[255] = {'\0'}, steps_buff[255] = {'\0'};
 	snprintf(buf, sizeof(buf),"results/%s", test_name);
 	snprintf(steps_buff, sizeof(steps_buff),"results/%s_steps", test_name);
 	run_parse_test_local(test_file, test_name, buf, steps_buff, DD_SEARCH, false);
 }
-
 void run_parse_test_linear(char* test_file, char* test_name){
 	char buf[255] = {'\0'}, steps_buff[255] = {'\0'};
 	snprintf(buf, sizeof(buf),"results/%s", test_name);
 	snprintf(steps_buff, sizeof(steps_buff),"results/%s_steps", test_name);
 	run_parse_test_local(test_file, test_name, buf, steps_buff, LINEAR_SEARCH, false);
 }
-
 void run_diagnosis(char* test_file, char* test_name, bool append_results){
 	char buf[255] = {'\0'}, steps_buff[255] = {'\0'};
 	snprintf(buf, sizeof(buf),"results/%s", test_name);
 	snprintf(steps_buff, sizeof(steps_buff),"results/%s_steps", test_name);
 	run_parse_test_local(test_file, test_name, buf, steps_buff, DD_SEARCH, append_results);
 }
-
+void run_fsp_tests(uint32_t test_count){
+	uint32_t i;
+	char buf[255], buf2[255];
+	for(i = 1; i <= test_count; i++){
+		printf("\n\n==============\nRunning fsp test %d\n==============\n", i);
+		sprintf(buf, "tests/test%d.fsp", i);
+		sprintf(buf2, "test%d", i);
+		run_parse_test(buf, buf2);
+	}
+}
 void run_automaton_export_test(){
 	run_parse_test("tests/export_test_1.fsp", "export test");
 }
-
 void run_automaton_import_test(){
 	run_parse_test("tests/import_test_1.fsp", "import test");
 }
-
+/** OBDD TESTS **/
 void run_obdd_exists(){
 	obdd_mgr* new_mgr	= obdd_mgr_create();
 	//compare x1 & !(x2 | x3) == x1 & !x2 & !x3
@@ -217,7 +219,6 @@ void run_obdd_exists(){
 	obdd_destroy(true_obdd);
 	obdd_mgr_destroy(new_mgr);
 }
-
 void run_obdd_valuations(){
 	obdd_mgr* new_mgr	= obdd_mgr_create();
 	//compare x1 & !(x2 | x3) == x1 & !x2 & !x3
@@ -423,7 +424,6 @@ void run_small_obdd_tests(){
 	obdd_destroy(x1_then_x2_obdd);
 	obdd_mgr_destroy(new_mgr);
 }
-
 void run_next_obdd_tests(){
 	obdd_mgr* new_mgr	= obdd_mgr_create();
 	//compare x1 & !(x2 | x3) == x1 & !x2 & !x3
@@ -495,7 +495,6 @@ void run_next_obdd_tests(){
 	obdd_destroy(not_x1_then_next_x2_obdd);
 	obdd_mgr_destroy(new_mgr);
 }
-
 void run_obdd_tests(){
 	obdd_mgr* new_mgr	= obdd_mgr_create();
 	//compare x1 & !(x2 | x3) == x1 & !x2 & !x3
@@ -622,7 +621,122 @@ void run_obdd_tests(){
 	obdd_mgr_destroy(new_mgr);
 
 }
+void run_small_obdd_tree_tests(){
+	obdd_state_tree* tree	= obdd_state_tree_create(5);
+	bool key1[5]				= {true, true, true, true, true};
+	bool key2[5]				= {true, false, true, true, true};
+	bool key3[5]				= {true, true, false, true, true};
+	bool key4[5]				= {false, false, false, true, false};
+	bool key5[5]				= {false, false, false, true, true};
+	printf("new key %d\n", obdd_state_tree_get_key(tree, key1, -1));
+	printf("new key %d\n", obdd_state_tree_get_key(tree, key2, -1));
+	printf("new key %d\n", obdd_state_tree_get_key(tree, key3, -1));
+	printf("new key %d\n", obdd_state_tree_get_key(tree, key4, -1));
+	printf("new key %d\n", obdd_state_tree_get_key(tree, key5, -1));
+	uint32_t buff_size	= 16384;
+	char *buff = calloc(buff_size, sizeof(char));
+	obdd_state_tree_print(tree, buff, buff_size);
+	free(buff);
+	obdd_state_tree_destroy(tree);
+}
+void run_obdd_tree_tests(){
+	obdd_state_tree* tree	= obdd_state_tree_create(7);
+	bool key1[7]				= {false, false, false, false, false, false, false};
+	uint32_t i, j;
+	bool passed = true;
+	for(i = 0; i < 128; i++){
+		for(j = 0; j < 7; j++){
+			key1[j] = ((i >> j) & 0x1) == 0;
+		}
+#if PRINT_TEST_OUTPUT
+		printf("%d:%d %s", i, obdd_state_tree_get_key(tree, key1, -1), i % 5 == 0 ? "\n" : "  ");
+#endif
+		passed = passed & ((i + 1) == obdd_state_tree_get_key(tree, key1, -1));
+	}
+#if PRINT_TEST_OUTPUT
+	printf("\nREPEATING VALUES\n");
+#endif
+	for(i = 0; i < 128; i++){
+		for(j = 0; j < 7; j++){
+			key1[j] = ((i >> j) & 0x1) == 0;
+		}
+#if PRINT_TEST_OUTPUT
+		printf("%d:%d %s", i, obdd_state_tree_get_key(tree, key1, -1), i % 5 == 0 ? "\n" : "  ");
+#endif
+		passed = passed & ((i + 1) == obdd_state_tree_get_key(tree, key1, -1));
+	}
+	print_test_result(passed, "OBDD TREE", "128 values tested");
+	//obdd_state_tree_print(tree);
+	obdd_state_tree_destroy(tree);
+}
+void run_obdd_cache_tests(){
+	obdd_mgr* new_mgr	= obdd_mgr_create();
+	//compare x1 & !(x2 | x3) == x1 & !x2 & !x3
+	obdd* x1_obdd		= obdd_mgr_var(new_mgr, "x1");
+	obdd* x2_obdd		= obdd_mgr_var(new_mgr, "x2");
+	obdd* x1_and_x2_obdd	= obdd_apply_and(x1_obdd, x2_obdd);
+	obdd* x1_and_x2_obdd_bis= obdd_apply_and(x1_obdd, x2_obdd);
 
+#if PRINT_TEST_OUTPUT
+	printf("CHECK NODE EQUALITY X1 && X2 USING CACHE\n");
+#endif
+
+	print_test_result(x1_and_x2_obdd->root_obdd == x1_and_x2_obdd_bis->root_obdd, "OBDD CACHE TEST", "obdd cache test");
+
+	obdd_destroy(x1_obdd);
+	obdd_destroy(x2_obdd);
+	obdd_destroy(x1_and_x2_obdd);
+	obdd_destroy(x1_and_x2_obdd_bis);
+	obdd_mgr_destroy(new_mgr);
+}
+void run_obdd_fast_lists_tests(){
+	obdd_mgr* new_mgr	= obdd_mgr_create();
+	//compare x1 & !(x2 | x3) == x1 & !x2 & !x3
+	char buff[255];
+	obdd** vars	= calloc(FAST_LIST_VAR_COUNT, sizeof(obdd*));
+	uint32_t i;
+	for(i = 0; i < FAST_LIST_VAR_COUNT; i++){
+		sprintf(buff, "x%d", i);
+		vars[i]	= obdd_mgr_var(new_mgr, buff);
+	}
+	bool met_search	= true;
+	obdd_node *result;
+	for(i = 0; i < FAST_LIST_VAR_COUNT; i++){
+		if(!met_search)break;
+		result	= obdd_table_search_node_ID(new_mgr->table, vars[i]->root_obdd->var_ID,
+			vars[i]->root_obdd->high_obdd, vars[i]->root_obdd->low_obdd);
+		met_search	= met_search && (result != NULL);
+	}
+	print_test_result(met_search, "OBDD FAST LIST ADD TEST", "obdd fast list add test");
+	for(i = 0; i < FAST_LIST_VAR_COUNT; i++){
+		if(i % 2 == 0)
+			obdd_table_node_destroy(new_mgr->table, vars[i]->root_obdd);
+	}
+	met_search	= true;
+	for(i = 0; i < FAST_LIST_VAR_COUNT; i++){
+		if(!met_search)break;
+		result	= obdd_table_search_node_ID(new_mgr->table, vars[i]->root_obdd->var_ID,
+			vars[i]->root_obdd->high_obdd, vars[i]->root_obdd->low_obdd);
+		if(i % 2 == 1){
+			met_search	= met_search && (result != NULL);
+		}else{
+			met_search	= met_search && (result == NULL);
+		}
+	}
+	for(i = 0; i < FAST_LIST_VAR_COUNT; i++){
+		if(i % 2 == 1)
+			obdd_table_node_add(new_mgr->table, vars[i]->root_obdd);
+	}
+
+	print_test_result(met_search, "OBDD FAST LIST REMOVAL TEST", "obdd fast list removal test");
+
+	for(i = 0; i < FAST_LIST_VAR_COUNT; i++){
+		obdd_destroy(vars[i]);
+	}
+	free(vars);
+	obdd_mgr_destroy(new_mgr);
+}
+/** SRUCT TESTS **/
 void run_automaton_string_list_test(){
 	char test_list[STRING_LIST_SIZE][10] = {"dan","edward","carl","albert","zoe","dan","aark","zoe"};
 	uint32_t i, pos;
@@ -719,7 +833,6 @@ void run_automaton_string_list_test(){
 	automaton_string_list_destroy(list);
 	print_test_result(passed, "STRING LIST LOAD", "string list insert sorted, allow repeat, load test");
 }
-
 uint32_t test_item_compare(void* left, void* right){
 	test_item_bucket* left_entry	= (test_item_bucket*)left;
 	test_item_bucket* right_entry	= (test_item_bucket*)right;
@@ -825,7 +938,6 @@ void run_max_heap_tests_2(){
 	free(expected);
 	free(buff);
 }
-
 void run_concrete_bucket_list_tests(){
 	automaton_concrete_bucket_list* list	= automaton_concrete_bucket_list_create(RANKING_BUCKET_SIZE, test_item_extractor, sizeof(test_item_bucket));
 	test_item_bucket current_item;
@@ -851,7 +963,6 @@ void run_concrete_bucket_list_tests(){
 	free(expected);
 	free(buff);
 }
-
 void run_ordered_list_tests(){
 	test_item_bucket current_item;
 	uint32_t i;
@@ -891,138 +1002,6 @@ void run_ordered_list_tests(){
 	free(buff);
 
 }
-
-void run_fsp_tests(uint32_t test_count){
-	uint32_t i;
-	char buf[255], buf2[255];
-	for(i = 1; i <= test_count; i++){
-		printf("\n\n==============\nRunning fsp test %d\n==============\n", i);
-		sprintf(buf, "tests/test%d.fsp", i);
-		sprintf(buf2, "test%d", i);
-		run_parse_test(buf, buf2);
-	}
-}
-
-void run_small_obdd_tree_tests(){
-	obdd_state_tree* tree	= obdd_state_tree_create(5);
-	bool key1[5]				= {true, true, true, true, true};
-	bool key2[5]				= {true, false, true, true, true};
-	bool key3[5]				= {true, true, false, true, true};
-	bool key4[5]				= {false, false, false, true, false};
-	bool key5[5]				= {false, false, false, true, true};
-	printf("new key %d\n", obdd_state_tree_get_key(tree, key1, -1));
-	printf("new key %d\n", obdd_state_tree_get_key(tree, key2, -1));
-	printf("new key %d\n", obdd_state_tree_get_key(tree, key3, -1));
-	printf("new key %d\n", obdd_state_tree_get_key(tree, key4, -1));
-	printf("new key %d\n", obdd_state_tree_get_key(tree, key5, -1));
-	uint32_t buff_size	= 16384;
-	char *buff = calloc(buff_size, sizeof(char));
-	obdd_state_tree_print(tree, buff, buff_size);
-	free(buff);
-	obdd_state_tree_destroy(tree);
-}
-void run_obdd_tree_tests(){
-	obdd_state_tree* tree	= obdd_state_tree_create(7);
-	bool key1[7]				= {false, false, false, false, false, false, false};
-	uint32_t i, j;
-	bool passed = true;
-	for(i = 0; i < 128; i++){
-		for(j = 0; j < 7; j++){
-			key1[j] = ((i >> j) & 0x1) == 0;
-		}
-#if PRINT_TEST_OUTPUT
-		printf("%d:%d %s", i, obdd_state_tree_get_key(tree, key1, -1), i % 5 == 0 ? "\n" : "  ");
-#endif
-		passed = passed & ((i + 1) == obdd_state_tree_get_key(tree, key1, -1));
-	}
-#if PRINT_TEST_OUTPUT
-	printf("\nREPEATING VALUES\n");
-#endif
-	for(i = 0; i < 128; i++){
-		for(j = 0; j < 7; j++){
-			key1[j] = ((i >> j) & 0x1) == 0;
-		}
-#if PRINT_TEST_OUTPUT
-		printf("%d:%d %s", i, obdd_state_tree_get_key(tree, key1, -1), i % 5 == 0 ? "\n" : "  ");
-#endif
-		passed = passed & ((i + 1) == obdd_state_tree_get_key(tree, key1, -1));
-	}
-	print_test_result(passed, "OBDD TREE", "128 values tested");
-	//obdd_state_tree_print(tree);
-	obdd_state_tree_destroy(tree);
-}
-
-void run_obdd_cache_tests(){
-	obdd_mgr* new_mgr	= obdd_mgr_create();
-	//compare x1 & !(x2 | x3) == x1 & !x2 & !x3
-	obdd* x1_obdd		= obdd_mgr_var(new_mgr, "x1");
-	obdd* x2_obdd		= obdd_mgr_var(new_mgr, "x2");
-	obdd* x1_and_x2_obdd	= obdd_apply_and(x1_obdd, x2_obdd);
-	obdd* x1_and_x2_obdd_bis= obdd_apply_and(x1_obdd, x2_obdd);
-
-#if PRINT_TEST_OUTPUT
-	printf("CHECK NODE EQUALITY X1 && X2 USING CACHE\n");
-#endif
-
-	print_test_result(x1_and_x2_obdd->root_obdd == x1_and_x2_obdd_bis->root_obdd, "OBDD CACHE TEST", "obdd cache test");
-
-	obdd_destroy(x1_obdd);
-	obdd_destroy(x2_obdd);
-	obdd_destroy(x1_and_x2_obdd);
-	obdd_destroy(x1_and_x2_obdd_bis);
-	obdd_mgr_destroy(new_mgr);
-}
-
-#define FAST_LIST_VAR_COUNT	100//10000
-
-void run_obdd_fast_lists_tests(){
-	obdd_mgr* new_mgr	= obdd_mgr_create();
-	//compare x1 & !(x2 | x3) == x1 & !x2 & !x3
-	char buff[255];
-	obdd** vars	= calloc(FAST_LIST_VAR_COUNT, sizeof(obdd*));
-	uint32_t i;
-	for(i = 0; i < FAST_LIST_VAR_COUNT; i++){
-		sprintf(buff, "x%d", i);
-		vars[i]	= obdd_mgr_var(new_mgr, buff);
-	}
-	bool met_search	= true;
-	obdd_node *result;
-	for(i = 0; i < FAST_LIST_VAR_COUNT; i++){
-		if(!met_search)break;
-		result	= obdd_table_search_node_ID(new_mgr->table, vars[i]->root_obdd->var_ID,
-			vars[i]->root_obdd->high_obdd, vars[i]->root_obdd->low_obdd);
-		met_search	= met_search && (result != NULL);
-	}
-	print_test_result(met_search, "OBDD FAST LIST ADD TEST", "obdd fast list add test");
-	for(i = 0; i < FAST_LIST_VAR_COUNT; i++){
-		if(i % 2 == 0)
-			obdd_table_node_destroy(new_mgr->table, vars[i]->root_obdd);
-	}
-	met_search	= true;
-	for(i = 0; i < FAST_LIST_VAR_COUNT; i++){
-		if(!met_search)break;
-		result	= obdd_table_search_node_ID(new_mgr->table, vars[i]->root_obdd->var_ID,
-			vars[i]->root_obdd->high_obdd, vars[i]->root_obdd->low_obdd);
-		if(i % 2 == 1){
-			met_search	= met_search && (result != NULL);
-		}else{
-			met_search	= met_search && (result == NULL);
-		}
-	}
-	for(i = 0; i < FAST_LIST_VAR_COUNT; i++){
-		if(i % 2 == 1)
-			obdd_table_node_add(new_mgr->table, vars[i]->root_obdd);
-	}
-
-	print_test_result(met_search, "OBDD FAST LIST REMOVAL TEST", "obdd fast list removal test");
-
-	for(i = 0; i < FAST_LIST_VAR_COUNT; i++){
-		obdd_destroy(vars[i]);
-	}
-	free(vars);
-	obdd_mgr_destroy(new_mgr);
-}
-
 void run_tree_tests(){
 	automaton_composite_tree* tree	= automaton_composite_tree_create(3);
 	uint32_t key1[3]				= {1,2,3};
@@ -1066,7 +1045,234 @@ void run_tree_tests(){
 	automaton_composite_tree_destroy(tree2);
 
 }
+void run_fast_pool_tests(){
+	size_t item_size	= sizeof(test_item_pool);
+	test_item_pool** pool_ref1	= malloc(MAX_POOL_COUNT * sizeof(test_item_pool*));
+	test_item_pool** pool_ref2	= malloc(MAX_POOL_COUNT * sizeof(test_item_pool*));
+	test_item_pool** pool_frag1	= malloc(MAX_POOL_COUNT * sizeof(uint32_t));
+	test_item_pool** pool_frag2	= malloc(MAX_POOL_COUNT * sizeof(uint32_t));
 
+
+	char *buff = calloc(MAX_POOL_COUNT * 200, sizeof(char));
+
+	automaton_fast_pool* pool1	= automaton_fast_pool_create(item_size, 100, 100);
+	automaton_fast_pool* pool2	= automaton_fast_pool_create(item_size, 5, 2);
+
+	uint32_t i;
+	for(i = 0; i < MAX_POOL_COUNT/2; i++){
+		test_item_pool* item	= automaton_fast_pool_get_instance(pool1, (uint32_t*)&(pool_frag1[i]));
+		item->a		= i;
+		item->name[0]	= 'h';item->name[1]	= 'i';item->name[2]	= '!';item->name[3]	= '\0';
+		pool_ref1[i]	= item;
+		item	= automaton_fast_pool_get_instance(pool2, (uint32_t*)&(pool_frag2[i]));
+		item->a		= i;
+		item->name[0]	= 'h';item->name[1]	= 'i';item->name[2]	= '!';item->name[3]	= '\0';
+		pool_ref2[i]	= item;
+	}
+	snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "10 100 pool \n");
+	for(i = 0; i < MAX_POOL_COUNT/2; i++){
+		snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "%d%s ", pool_ref1[i]->a, pool_ref1[i]->name);
+	}
+	snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "\n");
+	snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "5 2 pool \n");
+	for(i = 0; i < MAX_POOL_COUNT/2; i++){
+		snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "%d%s ", pool_ref2[i]->a, pool_ref2[i]->name);
+	}
+	snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "\n");
+	for(i = 0; i < MAX_POOL_COUNT/2; i++){
+		automaton_fast_pool_release_instance(pool1, (uintptr_t)pool_frag1[i]);
+		automaton_fast_pool_release_instance(pool2, (uintptr_t)pool_frag2[i]);
+	}
+	for(i = 0; i < MAX_POOL_COUNT/2; i++){
+		test_item_pool* item	= automaton_fast_pool_get_instance(pool1, (uint32_t*)&(pool_frag1[i]));
+		item->a		= i;
+		item->name[0]	= 'h';item->name[1]	= 'i';item->name[2]	= '!';item->name[3]	= '\0';
+		pool_ref1[i]	= item;
+		item	= automaton_fast_pool_get_instance(pool2, (uint32_t*)&(pool_frag2[i]));
+		item->a		= i;
+		item->name[0]	= 'h';item->name[1]	= 'i';item->name[2]	= '!';item->name[3]	= '\0';
+		pool_ref2[i]	= item;
+		snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "%d%s ", item->a, item->name);
+	}
+	snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "\n");
+	automaton_fast_pool_destroy(pool1);
+	automaton_fast_pool_destroy(pool2);
+	free(pool_frag1);free(pool_frag2);
+	free(pool_ref1);free(pool_ref2);
+
+	char * expected = test_get_output_content("tests/expected_output/run_fast_pool_tests.exp");
+	bool txt_cmp = strcmp(buff, expected) == 0;
+	print_test_result(txt_cmp, "FAST POOL", "fast pool test");
+
+	free(expected);
+	free(buff);
+}
+void run_bool_array_hash_table_tests(){
+	int32_t variable_count	= 40;
+	automaton_bool_array_hash_table* table	= automaton_bool_array_hash_table_create(variable_count);
+	int32_t i;
+	bool **values	= malloc(variable_count * sizeof(bool*));
+	bool test_cmp	= true;
+	for(i = 0; i < variable_count; i++){
+		values[i]	= calloc(variable_count, sizeof(bool));
+		values[i][i]	= true;
+		if(i % 4 == 0 && i > 0){
+			values[i - 1][i]	= true;
+			values[i][i - 1]	= true;
+		}
+	}
+	for(i = 0; i < variable_count; i++){
+		if(i % 4 == 0 && i > 0){
+			test_cmp = test_cmp && automaton_bool_array_hash_table_get_entry(table, values[i]) != NULL;
+		}
+		if(automaton_bool_array_hash_table_get_entry(table, values[i]) == NULL){
+			automaton_bool_array_hash_table_add_entry(table, values[i], true);
+		}
+	}
+	automaton_bool_array_hash_table_destroy(table);
+	for(i = 0; i < variable_count; i++){
+		free(values[i]);
+	}
+	free(values);
+	print_test_result(test_cmp, "BOOL_ARRAY_HASH", "bool array hash table");
+}
+void run_automaton_composite_hash_table_small_tests(){
+	uint32_t i,j, *current_composite_state = calloc(2, sizeof(uint32_t));
+		for(i = 0; i < 2; i++)current_composite_state[i]	= 10;
+		automaton_composite_hash_table	*table	= automaton_composite_hash_table_create(2,
+				current_composite_state);
+		for(i = 0; i < 2; i++)current_composite_state[i]	= 0;
+		uint32_t current_index = 2 - 1;
+		uint32_t *witnesses	= calloc(100 * 2, sizeof(uint32_t));
+		bool *initialized	= calloc(100, sizeof(uint32_t));
+		uint32_t current_state	= automaton_composite_hash_table_get_state(table, current_composite_state);
+		bool tests_passed = true;
+		while(true){
+			if(current_composite_state[current_index] < 10 - 1){
+				current_composite_state[current_index]++;
+			}else if(current_index == 0)
+				break;
+			else{
+				bool incremented = false;
+				current_composite_state[current_index] = 0;
+				current_index--;
+				do{
+					if(current_composite_state[current_index] < 10 - 1){
+						current_composite_state[current_index]++;
+						incremented	= true;
+						break;
+					}else{
+						if(current_index == 0){
+							break;
+						}
+						current_composite_state[current_index] = 0;
+						current_index--;
+					}
+				}while(true);
+				current_index = 2 - 1;
+				if(!incremented)break;
+			}
+			current_state	= automaton_composite_hash_table_get_state(table, current_composite_state);
+			if(current_state != automaton_composite_hash_table_get_state(table, current_composite_state)){
+				tests_passed	= false;
+				break;
+			}
+
+			if(initialized[current_state]){
+				tests_passed = false;
+				break;
+			}
+			initialized[current_state]	= true;
+			witnesses[current_state * 2]	= current_composite_state[0];
+			witnesses[current_state * 2 + 1]	= current_composite_state[1];
+		}
+		if(tests_passed){
+			for(i = 1; i < 10; i++){
+				for(j = 0; j < 2; j++){
+					current_composite_state[j] = i;
+				}
+				uint32_t witness_state = automaton_composite_hash_table_get_state(table, current_composite_state);
+				if(witnesses[witness_state * 2] != current_composite_state[0] ||
+						witnesses[witness_state * 2 + 1] != current_composite_state[1]){
+					tests_passed	= false;
+					break;
+				}
+			}
+		}
+		print_test_result(tests_passed, "COMPOSITE_HASH_TABLE_SMALL", "composite states hash table small test");
+		automaton_composite_hash_table_destroy(table);
+
+		free(current_composite_state);
+		free(witnesses);
+		free(initialized);
+}
+void run_automaton_composite_hash_table_tests(){
+	uint32_t i,j, *current_composite_state = calloc(COMPOSITE_TEST_AUTOMATA_COUNT, sizeof(uint32_t));
+	for(i = 0; i < COMPOSITE_TEST_AUTOMATA_COUNT; i++)current_composite_state[i]	= COMPOSITE_TEST_STATE_COUNT;
+	automaton_composite_hash_table	*table	= automaton_composite_hash_table_create(COMPOSITE_TEST_AUTOMATA_COUNT,
+			current_composite_state);
+	for(i = 0; i < COMPOSITE_TEST_AUTOMATA_COUNT; i++)current_composite_state[i]	= 0;
+	uint32_t current_index = COMPOSITE_TEST_AUTOMATA_COUNT - 1;
+	uint32_t *witnesses	= calloc(COMPOSITE_TEST_STATE_COUNT, sizeof(uint32_t));
+	uint32_t current_state	= automaton_composite_hash_table_get_state(table, current_composite_state);
+	bool tests_passed = true;
+	while(true){
+		if(current_composite_state[current_index] < COMPOSITE_TEST_STATE_COUNT - 1){
+			current_composite_state[current_index]++;
+		}else if(current_index == 0)
+			break;
+		else{
+			bool incremented = false;
+			current_composite_state[current_index] = 0;
+			current_index--;
+			do{
+				if(current_composite_state[current_index] < COMPOSITE_TEST_STATE_COUNT - 1){
+					current_composite_state[current_index]++;
+					incremented	= true;
+					break;
+				}else{
+					if(current_index == 0){
+						break;
+					}
+					current_composite_state[current_index] = 0;
+					current_index--;
+				}
+			}while(true);
+			current_index = COMPOSITE_TEST_AUTOMATA_COUNT - 1;
+			if(!incremented)break;
+		}
+		current_state	= automaton_composite_hash_table_get_state(table, current_composite_state);
+		if(current_state != automaton_composite_hash_table_get_state(table, current_composite_state)){
+			tests_passed	= false;
+			break;
+		}
+		bool all_equal = true;
+		for(i = 1; i < COMPOSITE_TEST_AUTOMATA_COUNT; i++){
+			if(current_composite_state[i] != current_composite_state[0]){all_equal = false; break;}
+		}
+		if(all_equal){
+			witnesses[current_composite_state[0]]	= current_state;
+		}
+	}
+	if(tests_passed){
+		for(i = 1; i < COMPOSITE_TEST_STATE_COUNT; i++){
+			for(j = 0; j < COMPOSITE_TEST_AUTOMATA_COUNT; j++){
+				current_composite_state[j] = i;
+			}
+			uint32_t witness_state = automaton_composite_hash_table_get_state(table, current_composite_state);
+			if(witnesses[i] != witness_state){
+				tests_passed	= false;
+				break;
+			}
+		}
+	}
+	print_test_result(tests_passed, "COMPOSITE_HASH_TABLE", "composite states hash table");
+	automaton_composite_hash_table_destroy(table);
+
+	free(current_composite_state);
+	free(witnesses);
+}
+/** AUTOMATON TESTS **/
 void run_automaton_tests(){
 	automaton_signal_event* in		= automaton_signal_event_create("in", INPUT_SIG);
 	automaton_signal_event* out		= automaton_signal_event_create("out", OUTPUT_SIG);
@@ -1207,238 +1413,252 @@ void run_report_tests(){
 	free(expected);
 	free(current);
 }
+/** GR1 TESTS **/
+/**
+- criteria
+	- test
+		- infinity
+		- satisfies assumption
+		- satisfies goal
+		- satisfies both
+		*/
+void build_automaton_and_ranking_for_tests(uint32_t* assumptions_count, uint32_t* goals_count,
+		automaton_automaton** game_automaton, automaton_test_type type){
+	//initialize aux elements
+	*assumptions_count	= GR1_TEST_ASSUMPTION_COUNT;
+	*goals_count		= GR1_TEST_GOALS_COUNT;
+	automaton_signal_event* in		= automaton_signal_event_create("in", INPUT_SIG);
+	automaton_signal_event* in_2		= automaton_signal_event_create("in_2", INPUT_SIG);
+	automaton_signal_event* in_3		= automaton_signal_event_create("in_3", INPUT_SIG);
+	automaton_signal_event* out		= automaton_signal_event_create("out", OUTPUT_SIG);
+	automaton_signal_event* out_2		= automaton_signal_event_create("out_2", OUTPUT_SIG);
+	automaton_signal_event* out_3		= automaton_signal_event_create("out_3", OUTPUT_SIG);
+	automaton_alphabet* alphabet	= automaton_alphabet_create();
+	automaton_alphabet_add_signal_event(alphabet, in);
+	automaton_alphabet_add_signal_event(alphabet, in_2);
+	automaton_alphabet_add_signal_event(alphabet, in_3);
+	automaton_alphabet_add_signal_event(alphabet, out);
+	automaton_alphabet_add_signal_event(alphabet, out_2);
+	automaton_alphabet_add_signal_event(alphabet, out_3);
 
-void run_fast_pool_tests(){
-	size_t item_size	= sizeof(test_item_pool);
-	test_item_pool** pool_ref1	= malloc(MAX_POOL_COUNT * sizeof(test_item_pool*));
-	test_item_pool** pool_ref2	= malloc(MAX_POOL_COUNT * sizeof(test_item_pool*));
-	test_item_pool** pool_frag1	= malloc(MAX_POOL_COUNT * sizeof(uint32_t));
-	test_item_pool** pool_frag2	= malloc(MAX_POOL_COUNT * sizeof(uint32_t));
+	automaton_fluent** fluents		= malloc(sizeof(automaton_fluent*) * 4);
+	fluents[0]	= automaton_fluent_create("ass", false);
+	fluents[1]	= automaton_fluent_create("ass_2", false);
+	fluents[2]	= automaton_fluent_create("goal", false);
+	fluents[3]	= automaton_fluent_create("goal_2", false);
+	automaton_fluent_add_starting_signals(fluents[0], alphabet, 1, &in);
+	automaton_fluent_add_ending_signals(fluents[0], alphabet, 1, &out);
+	automaton_fluent_add_starting_signals(fluents[1], alphabet, 1, &in_2);
+	automaton_fluent_add_ending_signals(fluents[1], alphabet, 1, &out);
+	automaton_fluent_add_starting_signals(fluents[2], alphabet, 1, &out_2);
+	automaton_fluent_add_ending_signals(fluents[2], alphabet, 1, &in_3);
+	automaton_fluent_add_starting_signals(fluents[3], alphabet, 1, &out_3);
+	automaton_fluent_add_ending_signals(fluents[3], alphabet, 1, &in_3);
+	uint32_t fluents_count			= 4;
+	//create context
+	automaton_automata_context* ctx	= automaton_automata_context_create("Context 1", alphabet, fluents_count, fluents, 0, NULL, NULL);
+	automaton_automata_context_print(ctx, "\t", "\n");
+	uint32_t local_alphabet_count	= 6;
+	uint32_t* local_alphabet		= malloc(sizeof(uint32_t) * local_alphabet_count);
+	local_alphabet[0]				= automaton_alphabet_get_signal_index(alphabet, in);
+	local_alphabet[1]				= automaton_alphabet_get_signal_index(alphabet, in_2);
+	local_alphabet[2]				= automaton_alphabet_get_signal_index(alphabet, in_3);
+	local_alphabet[3]				= automaton_alphabet_get_signal_index(alphabet, out);
+	local_alphabet[4]				= automaton_alphabet_get_signal_index(alphabet, out_2);
+	local_alphabet[5]				= automaton_alphabet_get_signal_index(alphabet, out_3);
+	//create automaton
+	*game_automaton		= automaton_automaton_create("Gr1 test automaton", ctx,
+			local_alphabet_count, local_alphabet, true, false);
+	//add transitions
+	automaton_transition* t_in	= automaton_transition_create(0, 1);
+	automaton_transition_add_signal_event(t_in, ctx, in);
+	automaton_transition* t_in_in2	= automaton_transition_create(0, 1);
+	automaton_transition_add_signal_event(t_in_in2, ctx, in);
+	automaton_transition_add_signal_event(t_in_in2, ctx, in_2);
+	automaton_transition* t_in_in2_in3	= automaton_transition_create(0, 1);
+	automaton_transition_add_signal_event(t_in_in2_in3, ctx, in);
+	automaton_transition_add_signal_event(t_in_in2_in3, ctx, in_2);
+	automaton_transition_add_signal_event(t_in_in2_in3, ctx, in_3);
+	automaton_transition* t_in_in2_out2	= automaton_transition_create(0, 1);
+	automaton_transition_add_signal_event(t_in_in2_out2, ctx, in);
+	automaton_transition_add_signal_event(t_in_in2_out2, ctx, in_2);
+	automaton_transition_add_signal_event(t_in_in2_out2, ctx, out_2);
+	automaton_transition* t_in_in2_out3	= automaton_transition_create(0, 1);
+	automaton_transition_add_signal_event(t_in_in2_out3, ctx, in);
+	automaton_transition_add_signal_event(t_in_in2_out3, ctx, in_2);
+	automaton_transition_add_signal_event(t_in_in2_out3, ctx, out_3);
+	automaton_transition* t_in3	= automaton_transition_create(0, 1);
+	automaton_transition_add_signal_event(t_in3, ctx, in_3);
+	automaton_transition* t_out2	= automaton_transition_create(0, 1);
+	automaton_transition_add_signal_event(t_out2, ctx, out_2);
+	automaton_transition* t_out3	= automaton_transition_create(0, 1);
+	automaton_transition_add_signal_event(t_out3, ctx, out_3);
+	automaton_transition* t_empty	= automaton_transition_create(0, 1);
+	switch(type){
+	case TEST_LOSE_DEADLOCK://1
+		automaton_transition_set_from_to(t_in_in2, 0, 1); automaton_automaton_add_transition(*game_automaton, t_in_in2);
+		automaton_transition_set_from_to(t_in_in2, 1, 1); automaton_automaton_add_transition(*game_automaton, t_in_in2);
+		automaton_transition_set_from_to(t_in_in2_out2, 0, 2); automaton_automaton_add_transition(*game_automaton, t_in_in2_out2);
+		automaton_transition_set_from_to(t_in3, 2, 0); automaton_automaton_add_transition(*game_automaton, t_in3);
+		automaton_transition_set_from_to(t_in_in2_out3, 0, 3); automaton_automaton_add_transition(*game_automaton, t_in_in2_out3);
+		automaton_transition_set_from_to(t_in3, 3, 0); automaton_automaton_add_transition(*game_automaton, t_in3);
+		automaton_transition_set_from_to(t_in, 0, 4); automaton_automaton_add_transition(*game_automaton, t_in);
+		break;
+	case TEST_AVOID_SIGMA_TRAP://2
+		automaton_transition_set_from_to(t_in_in2, 0, 1); automaton_automaton_add_transition(*game_automaton, t_in_in2);
+		automaton_transition_set_from_to(t_in_in2, 1, 1); automaton_automaton_add_transition(*game_automaton, t_in_in2);
+		automaton_transition_set_from_to(t_in_in2_out2, 0, 2); automaton_automaton_add_transition(*game_automaton, t_in_in2_out2);
+		automaton_transition_set_from_to(t_in3, 2, 0); automaton_automaton_add_transition(*game_automaton, t_in3);
+		automaton_transition_set_from_to(t_in_in2_out3, 0, 3); automaton_automaton_add_transition(*game_automaton, t_in_in2_out3);
+		automaton_transition_set_from_to(t_in3, 3, 0); automaton_automaton_add_transition(*game_automaton, t_in3);
+		break;
+	case TEST_ALTERNATING_GOALS://3
+		automaton_transition_set_from_to(t_out2, 0, 1); automaton_automaton_add_transition(*game_automaton, t_out2);
+		automaton_transition_set_from_to(t_in, 1, 0); automaton_automaton_add_transition(*game_automaton, t_in);
+		automaton_transition_set_from_to(t_out3, 0, 2); automaton_automaton_add_transition(*game_automaton, t_out3);
+		automaton_transition_set_from_to(t_in, 2, 0); automaton_automaton_add_transition(*game_automaton, t_in);
+		break;
+	case TEST_AVOID_SIGMA_NO_LABEL://4
+		automaton_transition_set_from_to(t_out2, 0, 1); automaton_automaton_add_transition(*game_automaton, t_out2);
+		automaton_transition_set_from_to(t_in_in2, 1, 0); automaton_automaton_add_transition(*game_automaton, t_in_in2);
+		automaton_transition_set_from_to(t_out3, 0, 2); automaton_automaton_add_transition(*game_automaton, t_out3);
+		automaton_transition_set_from_to(t_in_in2, 2, 0); automaton_automaton_add_transition(*game_automaton, t_in_in2);
+		automaton_transition_set_from_to(t_empty, 0, 3); automaton_automaton_add_transition(*game_automaton, t_empty);
+		automaton_transition_set_from_to(t_in_in2_in3, 3, 3); automaton_automaton_add_transition(*game_automaton, t_in_in2_in3);
+		break;
+	default:
+	case TEST_LOSE_SIGMA_TRAP://5
+		automaton_transition_set_from_to(t_in, 0, 1); automaton_automaton_add_transition(*game_automaton, t_in);
+		automaton_transition_set_from_to(t_in_in2, 1, 1); automaton_automaton_add_transition(*game_automaton, t_in_in2);
+		automaton_transition_set_from_to(t_in_in2_out2, 0, 2); automaton_automaton_add_transition(*game_automaton, t_in_in2_out2);
+		automaton_transition_set_from_to(t_in3, 2, 0); automaton_automaton_add_transition(*game_automaton, t_in3);
+		automaton_transition_set_from_to(t_in_in2_out3, 0, 3); automaton_automaton_add_transition(*game_automaton, t_in_in2_out3);
+		automaton_transition_set_from_to(t_in3, 3, 0); automaton_automaton_add_transition(*game_automaton, t_in3);
+		break;
+	}
+	//embed fluents
+	automaton_automaton* return_automaton	= automaton_automata_compose(game_automaton, SYNCHRONOUS, 1, true, "TEST");
+	automaton_automaton_destroy(*game_automaton);
+	*game_automaton	= return_automaton;
+	automaton_transition_destroy(t_in, true);automaton_transition_destroy(t_in_in2, true);
+	automaton_transition_destroy(t_in_in2_out2, true);automaton_transition_destroy(t_in_in2_out3, true);
+	automaton_transition_destroy(t_in3, true);automaton_transition_destroy(t_out2, true);
+	automaton_transition_destroy(t_out3, true);automaton_transition_destroy(t_empty, true);
+	automaton_transition_destroy(t_in_in2_in3, true);
+	//destroy aux elements
+	automaton_fluent_destroy(fluents[0], true);
+	automaton_fluent_destroy(fluents[1], true);
+	automaton_fluent_destroy(fluents[2], true);
+	automaton_fluent_destroy(fluents[3], true);
+	free(fluents);	fluents = NULL;
+	automaton_alphabet_destroy(alphabet); alphabet = NULL;
+	automaton_signal_event_destroy(in, true); in = NULL;
+	automaton_signal_event_destroy(in_2, true); in_2 = NULL;
+	automaton_signal_event_destroy(in_3, true); in_2 = NULL;
+	automaton_signal_event_destroy(out, true); out = NULL;
+	automaton_signal_event_destroy(out_2, true); out_2 = NULL;
+	automaton_signal_event_destroy(out_3, true); out_2 = NULL;
+}
+void set_automaton_ranking_for_tests(automaton_automaton* game_automaton, uint32_t assumptions_count,
+		uint32_t guarantees_count,
+		uint32_t* assumptions_indexes, uint32_t* guarantees_indexes,
+		automaton_concrete_bucket_list*** ranking_system){
+	uint32_t i,j,fluent_index;
+	automaton_ranking concrete_ranking;
+	automaton_concrete_bucket_list** ranking_list	= malloc(sizeof(automaton_concrete_bucket_list*) * guarantees_count);
+	for(i = 0; i < guarantees_count; i++)
+		ranking_list[i]	= automaton_concrete_bucket_list_create(RANKING_BUCKET_SIZE, automaton_ranking_key_extractor, sizeof(automaton_ranking));
+	for(i = 0; i < game_automaton->transitions_count; i++){
+		for(j = 0; j < guarantees_count; j++){
+			if(game_automaton->out_degree[i] == 0){
+				//state is deadlock
+				concrete_ranking.state	= i; concrete_ranking.assumption_to_satisfy	= 0;
+				concrete_ranking.value	= RANKING_INFINITY;
+				automaton_concrete_bucket_add_entry(ranking_list[j], &concrete_ranking);
+			}else{
+				//rank_g(state) = (0, 1)
+				concrete_ranking.state	= i; concrete_ranking.assumption_to_satisfy	= 0;
+				concrete_ranking.value	= 0;
+				automaton_concrete_bucket_add_entry(ranking_list[j], &concrete_ranking);
+			}
+		}
+	}
+	*ranking_system	= ranking_list;
+}
 
+void run_fluent_embedding_tests(){
+	//TODO
+}
 
-	char *buff = calloc(MAX_POOL_COUNT * 200, sizeof(char));
-
-	automaton_fast_pool* pool1	= automaton_fast_pool_create(item_size, 100, 100);
-	automaton_fast_pool* pool2	= automaton_fast_pool_create(item_size, 5, 2);
-
+void run_gr1_initialization_tests(){
+	//initialize aux. elements
 	uint32_t i;
-	for(i = 0; i < MAX_POOL_COUNT/2; i++){
-		test_item_pool* item	= automaton_fast_pool_get_instance(pool1, (uint32_t*)&(pool_frag1[i]));
-		item->a		= i;
-		item->name[0]	= 'h';item->name[1]	= 'i';item->name[2]	= '!';item->name[3]	= '\0';
-		pool_ref1[i]	= item;
-		item	= automaton_fast_pool_get_instance(pool2, (uint32_t*)&(pool_frag2[i]));
-		item->a		= i;
-		item->name[0]	= 'h';item->name[1]	= 'i';item->name[2]	= '!';item->name[3]	= '\0';
-		pool_ref2[i]	= item;
-	}
-	snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "10 100 pool \n");
-	for(i = 0; i < MAX_POOL_COUNT/2; i++){
-		snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "%d%s ", pool_ref1[i]->a, pool_ref1[i]->name);
-	}
-	snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "\n");
-	snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "5 2 pool \n");
-	for(i = 0; i < MAX_POOL_COUNT/2; i++){
-		snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "%d%s ", pool_ref2[i]->a, pool_ref2[i]->name);
-	}
-	snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "\n");
-	for(i = 0; i < MAX_POOL_COUNT/2; i++){
-		automaton_fast_pool_release_instance(pool1, (uintptr_t)pool_frag1[i]);
-		automaton_fast_pool_release_instance(pool2, (uintptr_t)pool_frag2[i]);
-	}
-	for(i = 0; i < MAX_POOL_COUNT/2; i++){
-		test_item_pool* item	= automaton_fast_pool_get_instance(pool1, (uint32_t*)&(pool_frag1[i]));
-		item->a		= i;
-		item->name[0]	= 'h';item->name[1]	= 'i';item->name[2]	= '!';item->name[3]	= '\0';
-		pool_ref1[i]	= item;
-		item	= automaton_fast_pool_get_instance(pool2, (uint32_t*)&(pool_frag2[i]));
-		item->a		= i;
-		item->name[0]	= 'h';item->name[1]	= 'i';item->name[2]	= '!';item->name[3]	= '\0';
-		pool_ref2[i]	= item;
-		snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "%d%s ", item->a, item->name);
-	}
-	snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "\n");
-	automaton_fast_pool_destroy(pool1);
-	automaton_fast_pool_destroy(pool2);
-	free(pool_frag1);free(pool_frag2);
-	free(pool_ref1);free(pool_ref2);
+	uint32_t assumptions_count, goals_count;
+	automaton_automaton* game_automaton	= NULL;
+	automaton_concrete_bucket_list**	ranking_system	= NULL;
+	build_automaton_and_ranking_for_tests(&assumptions_count, &goals_count, &ranking_system, &game_automaton);
+	//get liveness indexes tests
+	//automaton_get_gr1_liveness_indexes(automaton_automaton* game_automaton, char** assumptions, uint32_t assumptions_count,
+	 //char** guarantees, uint32_t guarantees_count, uint32_t* assumptions_indexes, uint32_t* guarantees_indexes)
 
-	char * expected = test_get_output_content("tests/expected_output/run_fast_pool_tests.exp");
-	bool txt_cmp = strcmp(buff, expected) == 0;
-	print_test_result(txt_cmp, "FAST POOL", "fast pool test");
-
-	free(expected);
-	free(buff);
+	//compute infinity tests
+	//uint32_t* automaton_compute_infinity(automaton_automaton* game_automaton, uint32_t assumptions_count,
+	//		uint32_t guarantees_count, uint32_t* assumptions_indexes, uint32_t* guarantees_indexes)
+	for(i = 0; i < goals_count; i++)
+		automaton_concrete_bucket_destroy(ranking_system[i]);
+	free(ranking_system); ranking_system	= NULL;
+	automaton_automata_context_destroy(game_automaton->context);
+	automaton_automaton_destroy(game_automaton);
 }
+void run_ranking_arithmetic_tests(){
+	automaton_ranking *left	= automaton_ranking_create(0, 0);
+	automaton_ranking *right	= automaton_ranking_create(0, 0);
+	//EQ TEST
+	bool rnk_cmp = automaton_ranking_eq(left, right);
+	left->value++;	rnk_cmp &= !automaton_ranking_eq(left, right);
+	left->value--; left->assumption_to_satisfy++;	rnk_cmp &= !automaton_ranking_eq(left, right);
+	left->assumption_to_satisfy--;left->value++;	rnk_cmp &= !automaton_ranking_eq(left, right);
+	left->value = RANKING_INFINITY;	rnk_cmp &= !automaton_ranking_eq(left, right);
+	right->value = RANKING_INFINITY;	rnk_cmp &= automaton_ranking_eq(left, right);
+	print_test_result(rnk_cmp, "RANKING", "automaton ranking eq test");
+	//GT TEST
+	rnk_cmp = !automaton_ranking_gt(left, right);
+	right->value	= 0;	rnk_cmp &= automaton_ranking_gt(left, right);
+	left->value = 0; rnk_cmp &= !automaton_ranking_gt(left, right);
+	left->value++; rnk_cmp &= automaton_ranking_gt(left, right);
+	right->value++; rnk_cmp &= !automaton_ranking_gt(left, right);
+	left->assumption_to_satisfy++; rnk_cmp &= automaton_ranking_gt(left, right);
+	right->assumption_to_satisfy++; rnk_cmp &= !automaton_ranking_gt(left, right);
+	print_test_result(rnk_cmp, "RANKING", "automaton ranking gt test");
+	//INCREMENT TEST
+	//build context
+	uint32_t assumptions_count, goals_count;
+	automaton_concrete_bucket_list** ranking_system;
+	automaton_automaton* test_automaton;
+	uint32_t current_guarantee	= 0;
+	build_automaton_and_ranking_for_tests(&assumptions_count, &goals_count, test_automaton, TEST_LOSE_DEADLOCK);
 
-void run_bool_array_hash_table_tests(){
-	int32_t variable_count	= 40;
-	automaton_bool_array_hash_table* table	= automaton_bool_array_hash_table_create(variable_count);
-	int32_t i;
-	bool **values	= malloc(variable_count * sizeof(bool*));
-	bool test_cmp	= true;
-	for(i = 0; i < variable_count; i++){
-		values[i]	= calloc(variable_count, sizeof(bool));
-		values[i][i]	= true;
-		if(i % 4 == 0 && i > 0){
-			values[i - 1][i]	= true;
-			values[i][i - 1]	= true;
-		}
-	}
-	for(i = 0; i < variable_count; i++){
-		if(i % 4 == 0 && i > 0){
-			test_cmp = test_cmp && automaton_bool_array_hash_table_get_entry(table, values[i]) != NULL;
-		}
-		if(automaton_bool_array_hash_table_get_entry(table, values[i]) == NULL){
-			automaton_bool_array_hash_table_add_entry(table, values[i], true);
-		}
-	}
-	automaton_bool_array_hash_table_destroy(table);
-	for(i = 0; i < variable_count; i++){
-		free(values[i]);
-	}
-	free(values);
-	print_test_result(test_cmp, "BOOL_ARRAY_HASH", "bool array hash table");
+	//automaton_ranking_increment(test_automaton, ranking_system, left, left->state, max_delta, current_guarantee, goals_count,
+	//		assumptions_count, guarantees_indexes, assumptions_indexes, first_assumption_index, target_ranking);
+
+	//UPDATE TEST
+
+	automaton_ranking_destroy(left);
+	automaton_ranking_destroy(right);
 }
+void run_ranking_stabilization_tests(){
+	//BUILD AUTOMATON AND RANKING SYSTEM
 
-void run_automaton_composite_hash_table_small_tests(){
-	uint32_t i,j, *current_composite_state = calloc(2, sizeof(uint32_t));
-		for(i = 0; i < 2; i++)current_composite_state[i]	= 10;
-		automaton_composite_hash_table	*table	= automaton_composite_hash_table_create(2,
-				current_composite_state);
-		for(i = 0; i < 2; i++)current_composite_state[i]	= 0;
-		uint32_t current_index = 2 - 1;
-		uint32_t *witnesses	= calloc(100 * 2, sizeof(uint32_t));
-		bool *initialized	= calloc(100, sizeof(uint32_t));
-		uint32_t current_state	= automaton_composite_hash_table_get_state(table, current_composite_state);
-		bool tests_passed = true;
-		while(true){
-			if(current_composite_state[current_index] < 10 - 1){
-				current_composite_state[current_index]++;
-			}else if(current_index == 0)
-				break;
-			else{
-				bool incremented = false;
-				current_composite_state[current_index] = 0;
-				current_index--;
-				do{
-					if(current_composite_state[current_index] < 10 - 1){
-						current_composite_state[current_index]++;
-						incremented	= true;
-						break;
-					}else{
-						if(current_index == 0){
-							break;
-						}
-						current_composite_state[current_index] = 0;
-						current_index--;
-					}
-				}while(true);
-				current_index = 2 - 1;
-				if(!incremented)break;
-			}
-			current_state	= automaton_composite_hash_table_get_state(table, current_composite_state);
-			if(current_state != automaton_composite_hash_table_get_state(table, current_composite_state)){
-				tests_passed	= false;
-				break;
-			}
+	//ADD UNSTABLE PRED
+	//BEST SUCCESSOR TEST
+	//IS STABLE TEST
 
-			if(initialized[current_state]){
-				tests_passed = false;
-				break;
-			}
-			initialized[current_state]	= true;
-			witnesses[current_state * 2]	= current_composite_state[0];
-			witnesses[current_state * 2 + 1]	= current_composite_state[1];
-		}
-		if(tests_passed){
-			for(i = 1; i < 10; i++){
-				for(j = 0; j < 2; j++){
-					current_composite_state[j] = i;
-				}
-				uint32_t witness_state = automaton_composite_hash_table_get_state(table, current_composite_state);
-				if(witnesses[witness_state * 2] != current_composite_state[0] ||
-						witnesses[witness_state * 2 + 1] != current_composite_state[1]){
-					tests_passed	= false;
-					break;
-				}
-			}
-		}
-		print_test_result(tests_passed, "COMPOSITE_HASH_TABLE_SMALL", "composite states hash table small test");
-		automaton_composite_hash_table_destroy(table);
+	//SOLUTION TEST
 
-		free(current_composite_state);
-		free(witnesses);
-		free(initialized);
+	//CLEAR AUTOMATON AND RANKING SYSTEM
 }
-
-void run_automaton_composite_hash_table_tests(){
-	uint32_t i,j, *current_composite_state = calloc(COMPOSITE_TEST_AUTOMATA_COUNT, sizeof(uint32_t));
-	for(i = 0; i < COMPOSITE_TEST_AUTOMATA_COUNT; i++)current_composite_state[i]	= COMPOSITE_TEST_STATE_COUNT;
-	automaton_composite_hash_table	*table	= automaton_composite_hash_table_create(COMPOSITE_TEST_AUTOMATA_COUNT,
-			current_composite_state);
-	for(i = 0; i < COMPOSITE_TEST_AUTOMATA_COUNT; i++)current_composite_state[i]	= 0;
-	uint32_t current_index = COMPOSITE_TEST_AUTOMATA_COUNT - 1;
-	uint32_t *witnesses	= calloc(COMPOSITE_TEST_STATE_COUNT, sizeof(uint32_t));
-	uint32_t current_state	= automaton_composite_hash_table_get_state(table, current_composite_state);
-	bool tests_passed = true;
-	while(true){
-		if(current_composite_state[current_index] < COMPOSITE_TEST_STATE_COUNT - 1){
-			current_composite_state[current_index]++;
-		}else if(current_index == 0)
-			break;
-		else{
-			bool incremented = false;
-			current_composite_state[current_index] = 0;
-			current_index--;
-			do{
-				if(current_composite_state[current_index] < COMPOSITE_TEST_STATE_COUNT - 1){
-					current_composite_state[current_index]++;
-					incremented	= true;
-					break;
-				}else{
-					if(current_index == 0){
-						break;
-					}
-					current_composite_state[current_index] = 0;
-					current_index--;
-				}
-			}while(true);
-			current_index = COMPOSITE_TEST_AUTOMATA_COUNT - 1;
-			if(!incremented)break;
-		}
-		current_state	= automaton_composite_hash_table_get_state(table, current_composite_state);
-		if(current_state != automaton_composite_hash_table_get_state(table, current_composite_state)){
-			tests_passed	= false;
-			break;
-		}
-		bool all_equal = true;
-		for(i = 1; i < COMPOSITE_TEST_AUTOMATA_COUNT; i++){
-			if(current_composite_state[i] != current_composite_state[0]){all_equal = false; break;}
-		}
-		if(all_equal){
-			witnesses[current_composite_state[0]]	= current_state;
-		}
-	}
-	if(tests_passed){
-		for(i = 1; i < COMPOSITE_TEST_STATE_COUNT; i++){
-			for(j = 0; j < COMPOSITE_TEST_AUTOMATA_COUNT; j++){
-				current_composite_state[j] = i;
-			}
-			uint32_t witness_state = automaton_composite_hash_table_get_state(table, current_composite_state);
-			if(witnesses[i] != witness_state){
-				tests_passed	= false;
-				break;
-			}
-		}
-	}
-	print_test_result(tests_passed, "COMPOSITE_HASH_TABLE", "composite states hash table");
-	automaton_composite_hash_table_destroy(table);
-
-	free(current_composite_state);
-	free(witnesses);
-}
-
+void run_strategy_build_tests(){}
+/** MACRO TESTS **/
 void run_functional_tests(){
 	//MODULE TESTING
 	run_obdd_tree_tests();
@@ -1481,13 +1701,11 @@ void run_functional_tests(){
 	run_parse_test("tests/exploration-robot-realizable_test.fsp", "realizable exploration robot test");
 	run_parse_test("tests/exploration-robot-unrealizable_test.fsp", "unrealizable exploration robot test");
 }
-
 void run_load_tests(){
 	run_parse_test("tests/k_10_100_graph.fsp",  "k 10, 100 graph tests");
 	run_parse_test("tests/seven_floors_lift.fsp", "lift 7 floors");//lift 7 floors
 	run_parse_test("tests/test37.fsp", "lts load test 1");
 }
-
 void run_all_tests(){
 	run_functional_tests();
 	run_load_tests();

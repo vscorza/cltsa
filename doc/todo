@@ -2,10 +2,24 @@ TODO:
 =====
 - cltsa
 	- cambio en el algoritmo de sintesis
-		- revisar tests
-		- re escribir tests
+		- escribir tests
+			- criteria
+				- test 
+					- infinity
+					- satisfies assumption
+					- satisfies goal
+					- satisfies both
 			- de implementacion
-			- de casos de estudio
+				- fluent_embedding
+				- automaton_ranking_tests
+					X eq
+					X gt
+					- increment
+					- update
+				- stabilization					
+					- add_unstable_pred
+					- best_successor
+					- is_stable
 		- implementar cambios
 			- ranking (desarrollar)
 				- cambiar sucesores
@@ -17,14 +31,12 @@ TODO:
 		- definir casos de estudio
 		- escribir tests
 			- de implementacion
-			- de casos de estudio
 		- escribir traducción
 		- correr tests
 	- cambio en la traducción de obdds
 		- revisar tests
 		- re escribir tests
 			- de implementacion
-			- de casos de estudio
 		- implementar cambios
 			- cambiar theta
 			- cambiar rho
@@ -35,13 +47,17 @@ TODO:
 		- definir sintaxis
 		- re escribir tests
 			- de implementacion
-			- de casos de estudio
 		- implementar cambios
 			- sintaxis
 			- parsing
 			- conversión a modelos
 			- composición		
 		- correr tests
+-re-escribir casos de estudio
+	- cambio en el algoritmo de sintesis
+	- traducción a lts
+	- cambio en la traducción de obdds
+	- definicion de valuaciones por estados
 - redefinir recortes para clts
 	- definiciones
 		- desarrollar

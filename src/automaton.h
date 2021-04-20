@@ -213,6 +213,7 @@ bool automaton_alphabet_add_signal_event(automaton_alphabet* alphabet, automaton
 int32_t automaton_alphabet_get_value_index(automaton_alphabet* alphabet, char* signal_name);
 signal_t automaton_alphabet_get_signal_index(automaton_alphabet* alphabet, automaton_signal_event* signal_event);
 /** TRANSITION **/
+void automaton_transition_set_from_to(automaton_transition* transition, uint32_t from_state, uint32_t to_state);
 bool automaton_transition_has_signal_event(automaton_transition* transition, automaton_automata_context* ctx, automaton_signal_event* signal_event);
 bool automaton_transition_has_signal_event_ID(automaton_transition* transition, automaton_automata_context* ctx, uint32_t signal_index);
 bool automaton_transition_add_signal_event(automaton_transition* transition, automaton_automata_context* ctx, automaton_signal_event* signal_event);
@@ -237,6 +238,8 @@ bool automaton_automaton_has_transition(automaton_automaton* current_automaton, 
 bool automaton_automaton_remove_transition(automaton_automaton* current_automaton, automaton_transition* transition);
 bool automaton_automaton_has_state(automaton_automaton* current_automaton, uint32_t state);
 bool automaton_automaton_add_initial_state(automaton_automaton* current_automaton, uint32_t state);
+uint32_t* automaton_compute_infinity(automaton_automaton* game_automaton, uint32_t assumptions_count,
+		uint32_t guarantees_count, uint32_t* assumptions_indexes, uint32_t* guarantees_indexes);
 automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automaton, char** assumptions, uint32_t assumptions_count
 		, char** guarantees, uint32_t guarantees_count, bool print_ranking);
 bool automaton_is_gr1_realizable(automaton_automaton* game_automaton, char** assumptions, uint32_t assumptions_count
