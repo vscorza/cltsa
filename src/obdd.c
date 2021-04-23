@@ -172,7 +172,7 @@ uint32_t get_new_mgr_ID(){
 
 obdd_mgr*	obdd_mgr_create(){
 	//instantiate manager
-	obdd_mgr* new_mgr	= malloc(sizeof(obdd_mgr));
+	obdd_mgr* new_mgr	= calloc(1, sizeof(obdd_mgr));
 	new_mgr->ID			= get_new_mgr_ID();
 	//create pools
 #if OBDD_USE_POOL
@@ -1439,7 +1439,7 @@ void obdd_get_valuations(obdd_mgr* mgr, obdd* root, bool** valuations, uint32_t*
 			}
 			current_node				= last_nodes[current_index];
 			//reset backtracked values
-			for(i = current_index + 1; i <= previous_index; i++){
+			for(i = current_index + 1; (uint32_t)i <= previous_index; i++){
 				dont_care_list[i]		= true;
 				partial_valuation[i]	= false;
 				initialized_values[i]	= false;

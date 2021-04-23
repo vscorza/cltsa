@@ -1423,7 +1423,11 @@ void run_report_tests(){
 		- satisfies both
 		*/
 void build_automaton_and_ranking_for_tests(uint32_t* assumptions_count, uint32_t* goals_count,
+		uint32_t** assumptions_indexes, uint32_t** guarantees_indexes,
+		char*** assumptions, char*** goals,
+		automaton_concrete_bucket_list*** ranking_system, uint32_t** max_delta,
 		automaton_automaton** game_automaton, automaton_test_type type){
+	uint32_t i	= 0;
 	//initialize aux elements
 	*assumptions_count	= GR1_TEST_ASSUMPTION_COUNT;
 	*goals_count		= GR1_TEST_GOALS_COUNT;
@@ -1494,6 +1498,7 @@ void build_automaton_and_ranking_for_tests(uint32_t* assumptions_count, uint32_t
 	automaton_transition* t_out3	= automaton_transition_create(0, 1);
 	automaton_transition_add_signal_event(t_out3, ctx, out_3);
 	automaton_transition* t_empty	= automaton_transition_create(0, 1);
+	automaton_automaton_add_initial_state(*game_automaton, 0);
 	switch(type){
 	case TEST_LOSE_DEADLOCK://1
 		automaton_transition_set_from_to(t_in_in2, 0, 1); automaton_automaton_add_transition(*game_automaton, t_in_in2);
@@ -1540,6 +1545,29 @@ void build_automaton_and_ranking_for_tests(uint32_t* assumptions_count, uint32_t
 	automaton_automaton* return_automaton	= automaton_automata_compose(game_automaton, SYNCHRONOUS, 1, true, "TEST");
 	automaton_automaton_destroy(*game_automaton);
 	*game_automaton	= return_automaton;
+	//get liveness indexes in global fluents list
+	*assumptions_indexes			= NULL;
+	*guarantees_indexes				= NULL;
+	*assumptions				= (void*)calloc(*assumptions_count, sizeof(char*));
+	aut_dupstr(&((*assumptions)[0]), fluents[0]->name);
+	aut_dupstr(&((*assumptions)[1]), fluents[1]->name);
+	*goals						= (void*)calloc(*goals_count, sizeof(char*));
+
+	aut_dupstr(&((*goals)[0]), fluents[2]->name);
+	aut_dupstr(&((*goals)[1]), fluents[3]->name);
+	int32_t first_assumption_index				= 0;
+
+	automaton_get_gr1_liveness_indexes(*game_automaton, *assumptions, *assumptions_count,
+			 *goals, *goals_count, assumptions_indexes, guarantees_indexes);
+
+	//compute infinity tests
+	*max_delta	= automaton_compute_infinity(*game_automaton, *assumptions_count, *goals_count,
+			*assumptions_indexes, *guarantees_indexes);
+
+
+	set_automaton_ranking_for_tests(*game_automaton, *assumptions_count, *goals_count,
+			*assumptions_indexes, *guarantees_indexes, ranking_system);
+
 	automaton_transition_destroy(t_in, true);automaton_transition_destroy(t_in_in2, true);
 	automaton_transition_destroy(t_in_in2_out2, true);automaton_transition_destroy(t_in_in2_out3, true);
 	automaton_transition_destroy(t_in3, true);automaton_transition_destroy(t_out2, true);
@@ -1558,11 +1586,33 @@ void build_automaton_and_ranking_for_tests(uint32_t* assumptions_count, uint32_t
 	automaton_signal_event_destroy(out, true); out = NULL;
 	automaton_signal_event_destroy(out_2, true); out_2 = NULL;
 	automaton_signal_event_destroy(out_3, true); out_2 = NULL;
+	free(local_alphabet);
 }
-void set_automaton_ranking_for_tests(automaton_automaton* game_automaton, uint32_t assumptions_count,
+void destroy_automaton_and_ranking_for_tests(automaton_automaton *game_automaton, uint32_t assumptions_count,
+		uint32_t guarantees_count, uint32_t *assumptions_indexes, uint32_t *guarantees_indexes,
+		char **assumptions, char **goals,
+		automaton_concrete_bucket_list **ranking_system, uint32_t *max_delta){
+	uint32_t i = 0;
+	for(i = 0; i < guarantees_count; i++){
+		automaton_concrete_bucket_destroy(ranking_system[i]);
+	}
+	free(ranking_system); ranking_system	= NULL;
+	automaton_automata_context* ctx	= game_automaton->context;
+	automaton_automaton_destroy(game_automaton);
+	automaton_automata_context_destroy(ctx);
+	free(max_delta);  free(assumptions_indexes);
+	for(i = 0; i < assumptions_count; i++)
+			free(assumptions[i]);
+	for(i = 0; i < guarantees_count; i++)
+		free(goals[i]);
+	free(assumptions);free(goals);
+	free(guarantees_indexes);
+}
+
+void set_automaton_ranking_for_tests(automaton_automaton *game_automaton, uint32_t assumptions_count,
 		uint32_t guarantees_count,
-		uint32_t* assumptions_indexes, uint32_t* guarantees_indexes,
-		automaton_concrete_bucket_list*** ranking_system){
+		uint32_t *assumptions_indexes, uint32_t *guarantees_indexes,
+		automaton_concrete_bucket_list ***ranking_system){
 	uint32_t i,j,fluent_index;
 	automaton_ranking concrete_ranking;
 	automaton_concrete_bucket_list** ranking_list	= malloc(sizeof(automaton_concrete_bucket_list*) * guarantees_count);
@@ -1586,29 +1636,34 @@ void set_automaton_ranking_for_tests(automaton_automaton* game_automaton, uint32
 	*ranking_system	= ranking_list;
 }
 
-void run_fluent_embedding_tests(){
-	//TODO
-}
-
 void run_gr1_initialization_tests(){
 	//initialize aux. elements
-	uint32_t i;
-	uint32_t assumptions_count, goals_count;
+	uint32_t i	= 0;
+	uint32_t assumptions_count = 0, goals_count = 0;
 	automaton_automaton* game_automaton	= NULL;
 	automaton_concrete_bucket_list**	ranking_system	= NULL;
-	build_automaton_and_ranking_for_tests(&assumptions_count, &goals_count, &ranking_system, &game_automaton);
-	//get liveness indexes tests
-	//automaton_get_gr1_liveness_indexes(automaton_automaton* game_automaton, char** assumptions, uint32_t assumptions_count,
-	 //char** guarantees, uint32_t guarantees_count, uint32_t* assumptions_indexes, uint32_t* guarantees_indexes)
+	uint32_t *assumptions_indexes	= NULL, *guarantees_indexes	= NULL;
+	char **assumptions	= NULL, **goals	= NULL;
+	uint32_t *max_delta	= NULL;
+	bool test_result	= false;
+	//CASE: lose by deadlock
+	//build
+	build_automaton_and_ranking_for_tests(&assumptions_count, &goals_count,
+			&assumptions_indexes, &guarantees_indexes, &assumptions, &goals,
+			&ranking_system, &max_delta,
+			&game_automaton, TEST_LOSE_DEADLOCK);
+	//test partial increment
 
-	//compute infinity tests
-	//uint32_t* automaton_compute_infinity(automaton_automaton* game_automaton, uint32_t assumptions_count,
-	//		uint32_t guarantees_count, uint32_t* assumptions_indexes, uint32_t* guarantees_indexes)
-	for(i = 0; i < goals_count; i++)
-		automaton_concrete_bucket_destroy(ranking_system[i]);
-	free(ranking_system); ranking_system	= NULL;
-	automaton_automata_context_destroy(game_automaton->context);
-	automaton_automaton_destroy(game_automaton);
+	//test update
+
+	//test realizability
+	test_result	= automaton_is_gr1_realizable(game_automaton, assumptions, assumptions_count,
+			goals, goals_count);
+	print_test_result(!test_result, "DEADLOCK TEST", "lose by deadlock realizability test");
+	//destroy automaton
+	destroy_automaton_and_ranking_for_tests(game_automaton, assumptions_count, goals_count,
+			assumptions_indexes, guarantees_indexes, assumptions, goals, ranking_system, max_delta);
+
 }
 void run_ranking_arithmetic_tests(){
 	automaton_ranking *left	= automaton_ranking_create(0, 0);
@@ -1630,18 +1685,6 @@ void run_ranking_arithmetic_tests(){
 	left->assumption_to_satisfy++; rnk_cmp &= automaton_ranking_gt(left, right);
 	right->assumption_to_satisfy++; rnk_cmp &= !automaton_ranking_gt(left, right);
 	print_test_result(rnk_cmp, "RANKING", "automaton ranking gt test");
-	//INCREMENT TEST
-	//build context
-	uint32_t assumptions_count, goals_count;
-	automaton_concrete_bucket_list** ranking_system;
-	automaton_automaton* test_automaton;
-	uint32_t current_guarantee	= 0;
-	build_automaton_and_ranking_for_tests(&assumptions_count, &goals_count, test_automaton, TEST_LOSE_DEADLOCK);
-
-	//automaton_ranking_increment(test_automaton, ranking_system, left, left->state, max_delta, current_guarantee, goals_count,
-	//		assumptions_count, guarantees_indexes, assumptions_indexes, first_assumption_index, target_ranking);
-
-	//UPDATE TEST
 
 	automaton_ranking_destroy(left);
 	automaton_ranking_destroy(right);

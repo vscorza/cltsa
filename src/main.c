@@ -158,6 +158,7 @@ int main (int argc, char** argv){
 		//run_all_tests();
 		//run_functional_tests();
 		run_ranking_arithmetic_tests();
+		run_gr1_initialization_tests();
 		//run_parse_test("tests/biscotti.fsp", "biscotti");
 		//run_parse_test("tests/current_sut.fsp", "current_SUT");
 		//run_automaton_composite_hash_table_tests();

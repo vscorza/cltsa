@@ -240,6 +240,8 @@ bool automaton_automaton_has_state(automaton_automaton* current_automaton, uint3
 bool automaton_automaton_add_initial_state(automaton_automaton* current_automaton, uint32_t state);
 uint32_t* automaton_compute_infinity(automaton_automaton* game_automaton, uint32_t assumptions_count,
 		uint32_t guarantees_count, uint32_t* assumptions_indexes, uint32_t* guarantees_indexes);
+void automaton_get_gr1_liveness_indexes(automaton_automaton* game_automaton, char** assumptions, uint32_t assumptions_count,
+		 char** guarantees, uint32_t guarantees_count, uint32_t** assumptions_indexes, uint32_t** guarantees_indexes);
 automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automaton, char** assumptions, uint32_t assumptions_count
 		, char** guarantees, uint32_t guarantees_count, bool print_ranking);
 bool automaton_is_gr1_realizable(automaton_automaton* game_automaton, char** assumptions, uint32_t assumptions_count

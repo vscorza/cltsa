@@ -393,10 +393,10 @@ uint32_t* automaton_compute_infinity(automaton_automaton* game_automaton, uint32
 }
 
 void automaton_get_gr1_liveness_indexes(automaton_automaton* game_automaton, char** assumptions, uint32_t assumptions_count,
-		 char** guarantees, uint32_t guarantees_count, uint32_t* assumptions_indexes, uint32_t* guarantees_indexes){
+		 char** guarantees, uint32_t guarantees_count, uint32_t** assumptions_indexes, uint32_t** guarantees_indexes){
 	//these are the indexes from the global fluents list, should not be used in ranking_list
-	assumptions_indexes				= malloc(sizeof(uint32_t) * assumptions_count);
-	guarantees_indexes				= malloc(sizeof(uint32_t) * guarantees_count);
+	*assumptions_indexes				= malloc(sizeof(uint32_t) * assumptions_count);
+	*guarantees_indexes				= malloc(sizeof(uint32_t) * guarantees_count);
 	int32_t first_assumption_index				= 0;
 	uint32_t i,j;
 	automaton_automata_context* ctx	= game_automaton->context;
@@ -404,7 +404,7 @@ void automaton_get_gr1_liveness_indexes(automaton_automaton* game_automaton, cha
 	for(i = 0; i < assumptions_count; i++){
 		for(j = 0; j < ctx->global_fluents_count; j++){
 			if(strcmp(assumptions[i], ctx->global_fluents[j].name) == 0){
-				assumptions_indexes[i]	= j;
+				(*assumptions_indexes)[i]	= j;
 				/*if (i == 0)
 					first_assumption_index	= (int32_t)j;*/
 				break;
@@ -414,7 +414,7 @@ void automaton_get_gr1_liveness_indexes(automaton_automaton* game_automaton, cha
 	for(i = 0; i < guarantees_count; i++){
 		for(j = 0; j < ctx->global_fluents_count; j++){
 			if(strcmp(guarantees[i], ctx->global_fluents[j].name) == 0){
-				guarantees_indexes[i]	= j;
+				(*guarantees_indexes)[i]	= j;
 				break;
 			}
 		}
@@ -438,13 +438,13 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 	uint32_t current_state;
 	uint32_t fluent_count						= ctx->global_fluents_count;
 	uint32_t fluent_index;
-	//these are the indexes from the global fluents list, should not be used in ranking_list
-	uint32_t* assumptions_indexes				= malloc(sizeof(uint32_t) * assumptions_count);
-	uint32_t* guarantees_indexes				= malloc(sizeof(uint32_t) * guarantees_count);
+	//these are the indexes from the global fluents list, should not be used to access the ranking_list
+	uint32_t* assumptions_indexes				= NULL;
+	uint32_t* guarantees_indexes				= NULL;
 	int32_t first_assumption_index				= 0;
 
 	automaton_get_gr1_liveness_indexes(game_automaton, assumptions, assumptions_count,
-			 guarantees, guarantees_count, assumptions_indexes, guarantees_indexes);
+			 guarantees, guarantees_count, &assumptions_indexes, &guarantees_indexes);
 
 	//get assumptions and guarantees indexes
 	for(i = 0; i < assumptions_count; i++){

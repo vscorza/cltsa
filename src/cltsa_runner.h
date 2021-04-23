@@ -80,12 +80,18 @@ void run_automaton_composite_hash_table_tests();
 void run_functional_tests();
 
 /** GR1 TESTS **/
-void build_automaton_for_tests(uint32_t* assumptions_count, uint32_t* goals_count,
+void build_automaton_and_ranking_for_tests(uint32_t* assumptions_count, uint32_t* goals_count,
+		uint32_t** assumptions_indexes, uint32_t** guarantees_indexes,
+		char*** assumptions, char*** goals,
+		automaton_concrete_bucket_list*** ranking_system, uint32_t** max_delta,
 		automaton_automaton** game_automaton, automaton_test_type type);
+void destroy_automaton_and_ranking_for_tests(automaton_automaton *game_automaton, uint32_t assumptions_count,
+		uint32_t guarantees_count, uint32_t* assumptions_indexes, uint32_t* guarantees_indexes,
+		char** assumptions, char** goals,
+		automaton_concrete_bucket_list** ranking_system, uint32_t* max_delta);
 void set_automaton_ranking_for_tests(automaton_automaton* game_automaton, uint32_t assumptions_count,
 		uint32_t guarantees_count, uint32_t* assumptions_indexes, uint32_t* guarantees_indexes,
 		automaton_concrete_bucket_list*** ranking_system);
-void run_fluent_embedding_tests();
 void run_gr1_initialization_tests();
 void run_ranking_arithmetic_tests();
 void run_ranking_stabilization_tests();
@@ -94,5 +100,6 @@ void run_strategy_build_tests();
 void run_automaton_tests();
 void run_report_tests();
 void run_fast_pool_tests();
-
+void run_all_tests();
+void run_load_tests();
 #endif /* SRC_CLTSA_RUNNER_H_ */
