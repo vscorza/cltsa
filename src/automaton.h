@@ -60,6 +60,7 @@
 
 #define TEST_TRANSITION_BIT(t,index)    ( (t->signals[((index+1)/TRANSITION_ENTRY_SIZE)]) & ((signal_bit_array_t)1 << ((index+1)%TRANSITION_ENTRY_SIZE)) )
 #define SET_TRANSITION_BIT(t,index)     ( (t->signals[((index+1)/TRANSITION_ENTRY_SIZE)]) |= ((signal_bit_array_t)1 << ((index+1)%TRANSITION_ENTRY_SIZE)) )
+#define SET_TRANSITION_MASK_BIT(m,index)     ( (m[((index+1)/TRANSITION_ENTRY_SIZE)]) |= ((signal_bit_array_t)1 << ((index+1)%TRANSITION_ENTRY_SIZE)) )
 #define CLEAR_TRANSITION_BIT(t,index)   ( (t->signals[((index+1)/TRANSITION_ENTRY_SIZE)]) &= ~(((signal_bit_array_t)1 << ((index+1)%TRANSITION_ENTRY_SIZE))) )
 #define TEST_SIGNAL_ARRAY_BIT(arr,index)    ( (arr[((index+1)/TRANSITION_ENTRY_SIZE)]) & ((signal_bit_array_t)1 << ((index+1)%TRANSITION_ENTRY_SIZE)) )
 #define SET_SIGNAL_ARRAY_BIT(arr,index)     ( (arr[((index+1)/TRANSITION_ENTRY_SIZE)]) |= ((signal_bit_array_t)1 << ((index+1)%TRANSITION_ENTRY_SIZE)) )
@@ -233,6 +234,11 @@ uint32_t automaton_automaton_get_in_degree(automaton_automaton* current_automato
 uint32_t automaton_automaton_get_out_degree(automaton_automaton* current_automaton, uint32_t state);
 void automaton_automaton_resize_to_state(automaton_automaton* current_automaton, uint32_t state);
 automaton_transition* automaton_automaton_get_transitions(automaton_automaton* current_automaton, uint32_t state);
+bool automaton_automaton_transition_monitored_lt(automaton_automaton* current_automaton, automaton_transition* left, automaton_transition* right);
+bool automaton_automaton_transition_monitored_eq(automaton_automaton* current_automaton, automaton_transition* left, automaton_transition* right);
+bool automaton_automaton_transition_lt(automaton_automaton* current_automaton, automaton_transition* left, automaton_transition* right);
+bool automaton_automaton_transition_eq(automaton_automaton* current_automaton, automaton_transition* left, automaton_transition* right);
+void automaton_automaton_order_transitions(automaton_automaton* current_automaton);
 bool automaton_automaton_add_transition(automaton_automaton* current_automaton, automaton_transition* transition);
 bool automaton_automaton_has_transition(automaton_automaton* current_automaton, automaton_transition* transition);
 bool automaton_automaton_remove_transition(automaton_automaton* current_automaton, automaton_transition* transition);

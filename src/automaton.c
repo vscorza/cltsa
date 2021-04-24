@@ -215,6 +215,8 @@ void automaton_automaton_copy(automaton_automaton* source, automaton_automaton* 
 		}
 
 	}
+	for(i = 0; i < FIXED_SIGNALS_COUNT; i++) target->monitored_mask[i]	= source->monitored_mask[i];
+	target->ordered	= source->ordered;
 }
 automaton_automata* automaton_automata_clone(automaton_automata* source){
 	automaton_automata* copy		= malloc(sizeof(automaton_automata));
@@ -469,6 +471,10 @@ void automaton_automaton_initialize(automaton_automaton* automaton, char* name, 
 			automaton->liveness_inverted_valuations	= NULL;
 		}
 	}
+	for(i = 0; i < FIXED_SIGNALS_COUNT; i++) automaton->monitored_mask[i]	= 0x0;
+	for(i = 0; i < ctx->global_alphabet->count;i++)
+		if(ctx->global_alphabet->list[i].type == INPUT_SIG)SET_TRANSITION_MASK_BIT((automaton->monitored_mask), i);
+	automaton->ordered	= false;
 }
 void automaton_range_initialize(automaton_range* range, char* name, uint32_t lower_value, uint32_t upper_value){
 	if(name != NULL){
@@ -1015,8 +1021,107 @@ void automaton_automaton_resize_to_state(automaton_automaton* current_automaton,
 	}
 
 }
+bool automaton_automaton_transition_monitored_lt(automaton_automaton* current_automaton, automaton_transition* left,
+		automaton_transition* right){
+	uint32_t i;
+	for(i = 0; i < FIXED_SIGNALS_COUNT; i++){
+		if((left->signals[i] & current_automaton->monitored_mask[i]) <
+				(right->signals[i] & current_automaton->monitored_mask[i]))
+			return true;
+	}
+	return false;
+}
+bool automaton_automaton_transition_monitored_eq(automaton_automaton* current_automaton, automaton_transition* left,
+		automaton_transition* right){
+	uint32_t i;
+	for(i = 0; i < FIXED_SIGNALS_COUNT; i++){
+		if((left->signals[i] & current_automaton->monitored_mask[i]) !=
+				(right->signals[i] & current_automaton->monitored_mask[i]))
+			return false;
+	}
+	return true;
+}
+bool automaton_automaton_transition_lt(automaton_automaton* current_automaton, automaton_transition* left,
+		automaton_transition* right){
+	uint32_t i;
+	for(i = 0; i < FIXED_SIGNALS_COUNT; i++) if(left->signals[i] < right->signals[i]) return true;
+	return false;
+}
+bool automaton_automaton_transition_eq(automaton_automaton* current_automaton, automaton_transition* left,
+		automaton_transition* right){
+	uint32_t i;
+	for(i = 0; i < FIXED_SIGNALS_COUNT; i++) if(left->signals[i] != right->signals[i])return false;
+	return true;
+}
+void automaton_automaton_monitored_order_transitions(automaton_automaton* current_automaton){
+	if(current_automaton->ordered) return;
+	uint32_t i, j, k;
+	uint32_t max_degree = 0;
+	for(i = 0; i < current_automaton->transitions_count; i++){
+		if(current_automaton->out_degree[i] > max_degree)max_degree	= current_automaton->out_degree[i];
+		if(current_automaton->in_degree[i] > max_degree)max_degree	= current_automaton->in_degree[i];
+	}
+	automaton_transition *tmp_transitions		= calloc(max_degree, sizeof(automaton_transition));
+	bool *checked_transitions					= calloc(max_degree, sizeof(bool));
+	automaton_transition *min_transition	= NULL;
+	uint32_t min_index	= 0;
+	for(i = 0; i < current_automaton->transitions_count; i++){
+		//order outgoing transitions
+		if(current_automaton->out_degree[i] > 1){
+			//clear checked bookkeeping struct
+			for(j = 0; j < current_automaton->out_degree[i]; j++)
+				checked_transitions[j]	= false;
+			min_transition	= NULL;
+			//selection sort
+			for(j = 0; j < current_automaton->out_degree[i]; j++){
+				for(k = 0; k < current_automaton->out_degree[i]; k++){
+					//if already picked skip
+					if(checked_transitions[k])continue;
+					//if min is NULL or current transition < min update
+					if(min_transition == NULL || (automaton_automaton_transition_monitored_lt(current_automaton,
+							&(current_automaton->transitions[i][k]), min_transition))){
+						min_transition	= &(current_automaton->transitions[i][k]);
+						min_index	= k;
+					}
+				}
+				//copy in order to tmp_struct
+				checked_transitions[min_index]	= true;
+				automaton_transition_copy(&(current_automaton->transitions[i][min_index]), &(tmp_transitions[j]));
+				min_transition = NULL;
+			}
+			//ordered insertion into source
+			for(j = 0; j < current_automaton->out_degree[i]; j++)
+				automaton_transition_copy(&(tmp_transitions[j]), &(current_automaton->transitions[i][j]));
+		}
+		//order incoming transitions
+		if(current_automaton->in_degree[i] > 1){
+			for(j = 0; j < current_automaton->in_degree[i]; j++)
+				checked_transitions[j]	= false;
+			for(j = 0; j < current_automaton->in_degree[i]; j++){
+				for(k = 0; k < current_automaton->in_degree[i]; k++){
+					if(checked_transitions[k])continue;
+					if(min_transition == NULL || (automaton_automaton_transition_monitored_lt(current_automaton,
+							&(current_automaton->inverted_transitions[i][k]), min_transition))){
+						min_transition	= &(current_automaton->inverted_transitions[i][k]);
+						min_index	= k;
+					}
+				}
+				checked_transitions[min_index]	= true;
+				automaton_transition_copy(&(current_automaton->inverted_transitions[i][min_index]), &(tmp_transitions[j]));
+				min_transition	= NULL;
+			}
+			for(j = 0; j < current_automaton->in_degree[i]; j++)
+				automaton_transition_copy(&(tmp_transitions[j]),&(current_automaton->inverted_transitions[i][j]));
+		}
+
+	}
+	free(tmp_transitions);
+	free(checked_transitions);
+	current_automaton->ordered	= true;
+}
 bool automaton_automaton_add_transition(automaton_automaton* current_automaton, automaton_transition* transition){
 	if(automaton_automaton_has_transition(current_automaton, transition)) return false;
+	current_automaton->ordered	 = false;
 	uint32_t i;
 	uint32_t from_state	= transition->state_from;
 	uint32_t to_state	= transition->state_to;
@@ -1102,6 +1207,7 @@ bool automaton_automaton_remove_transition(automaton_automaton* current_automato
 	}
 	if(!transition_found)
 		return false;
+	current_automaton->ordered	= false;
 	//remove from transitions
 	if(index > -1){
 		automaton_transition_destroy(&(current_automaton->transitions[from_state][index]), false);

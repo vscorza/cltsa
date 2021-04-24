@@ -1,6 +1,9 @@
 TODO:
 =====
 - cltsa
+	- automaton_automaton_monitored_order_transitions
+		- probar
+		- correr valgrind
 	- cambio en el algoritmo de sintesis
 		- escribir tests
 			- criteria

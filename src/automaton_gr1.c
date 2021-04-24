@@ -423,6 +423,7 @@ void automaton_get_gr1_liveness_indexes(automaton_automaton* game_automaton, cha
 
 automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automaton, char** assumptions, uint32_t assumptions_count
 		, char** guarantees, uint32_t guarantees_count, bool print_ranking){
+	automaton_automaton_monitored_order_transitions(game_automaton);
 	clock_t begin = clock();
 	__ranking_link_id++;
 	_print_ranking	= print_ranking;

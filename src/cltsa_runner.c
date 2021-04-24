@@ -1646,7 +1646,7 @@ void run_gr1_initialization_tests(){
 	char **assumptions	= NULL, **goals	= NULL;
 	uint32_t *max_delta	= NULL;
 	bool test_result	= false;
-	//CASE: lose by deadlock
+	/**** CASE: lose by deadlock *****/
 	//build
 	build_automaton_and_ranking_for_tests(&assumptions_count, &goals_count,
 			&assumptions_indexes, &guarantees_indexes, &assumptions, &goals,

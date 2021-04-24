@@ -27,7 +27,7 @@ typedef uint8_t fluent_count_t;
 typedef uint16_t signal_bit_array_t;
 
 #define TRANSITION_ENTRY_SIZE 16
-#define FIXED_SIGNALS_COUNT	12//4
+#define FIXED_SIGNALS_COUNT	8//4
 /****************
 ==== ENUMS ====
 ****************/
@@ -161,6 +161,8 @@ typedef struct automaton_str{
 	automaton_transitions_pool*	transitions_pool;
 	automaton_bucket_list**	inverted_valuations;
 	automaton_bucket_list**	liveness_inverted_valuations;
+	signal_bit_array_t		monitored_mask[FIXED_SIGNALS_COUNT];
+	bool					ordered;
 } automaton_automaton;
 
 /** AUTOMATA **/
