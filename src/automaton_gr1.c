@@ -90,11 +90,25 @@ automaton_ranking* automaton_state_best_successor_ranking(automaton_automaton* g
 	automaton_ranking* current_value;
 	uint32_t i, j, to_state;
 	j = satisfies_guarantee? (current_guarantee + 1) % guarantee_count : current_guarantee;
+	/**
+	 * Transitions should be ordered by monitored signals
+	 */
 	//TODO: apply SIMD
+	bool new_monitored	= false;
 	for(i = 0; i < game_automaton->out_degree[state]; i++){
-		//if transition is controllable in non-controllable state, then skip
+		if(i > 0)
+			new_monitored = !(automaton_automaton_transition_monitored_eq(game_automaton,
+					&(game_automaton->transitions[state][i - 1]),
+					&(game_automaton->transitions[state][i])));
+		if(new_monitored){
+			if(min_value == RANKING_INFINITY){
+				max_value	= RANKING_INFINITY;
 
-		if(!is_controllable && !TRANSITION_IS_INPUT((&game_automaton->transitions[state][i])))continue;
+			}else if((automaton_ranking_gt(min_ranking, max_ranking))){
+				max_ranking	= min_ranking;
+			}
+			min_value	= RANKING_INFINITY;
+		}
 		to_state	= game_automaton->transitions[state][i].state_to;
 		//if(to_state == state)continue;
 		current_value	= ((automaton_ranking*)automaton_concrete_bucket_get_entry(ranking[j], to_state));
@@ -103,29 +117,27 @@ automaton_ranking* automaton_state_best_successor_ranking(automaton_automaton* g
 		if(min_ranking == NULL){
 			min_value = max_value = current_value->value;
 			min_ranking = max_ranking = current_value;
-		}
-		if(is_controllable){
-			if(automaton_ranking_lt(current_value, min_ranking)){
-			//if((min_value >= current_value->value) || (current_value->value != RANKING_INFINITY && min_value == RANKING_INFINITY)){
-				min_value 	= current_value->value;
-				min_ranking	= current_value;
-			}
-		}else{
-			if(automaton_ranking_gt(current_value, max_ranking)){
-			//if((max_value <= current_value->value) || (current_value->value == RANKING_INFINITY && min_value != RANKING_INFINITY)){
-				max_value 	= current_value->value;
-				max_ranking	= current_value;
-			}
+		}else if(new_monitored){
+			min_value = current_value->value;
+			min_ranking = current_value;
+		}else if(automaton_ranking_lt(current_value, min_ranking)){
+			min_value 	= current_value->value;
+			min_ranking	= current_value;
 		}
 	}
-	automaton_ranking* return_value = is_controllable ? min_ranking : max_ranking;
+	if(min_value == RANKING_INFINITY)
+		max_value	= RANKING_INFINITY;
+	else if((automaton_ranking_gt(min_ranking, max_ranking))){
+		max_ranking	= min_ranking;
+	}
 #if DEBUG_SYNTHESIS
 	if(_print_ranking)
 		if(return_value == NULL){
 			printf("NO PROPER PREDECESSOR FOR RANKING\n");
 		}
 #endif
-	return return_value;
+
+	return max_ranking;
 }
 //return query for: left > right
 bool automaton_ranking_gt(automaton_ranking* left, automaton_ranking* right){

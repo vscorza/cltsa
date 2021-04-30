@@ -1,9 +1,9 @@
 TODO:
 =====
+- para responder no realizabilidad, se pueden inicializar los rankings en max-delta -1 y ver si se estabiliza ahí?
 - cltsa
-	- automaton_automaton_monitored_order_transitions
-		- probar
-		- correr valgrind
+	- check automaton monitored transition order
+		- write tests
 	- cambio en el algoritmo de sintesis
 		- escribir tests
 			- criteria

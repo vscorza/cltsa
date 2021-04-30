@@ -1664,11 +1664,78 @@ void run_gr1_initialization_tests(){
 	//test realizability
 	test_result	= automaton_is_gr1_realizable(game_automaton, assumptions, assumptions_count,
 			goals, goals_count);
-	print_test_result(!test_result, "DEADLOCK TEST", "lose by deadlock realizability test");
 	//destroy automaton
 	destroy_automaton_and_ranking_for_tests(game_automaton, assumptions_count, goals_count,
 			assumptions_indexes, guarantees_indexes, assumptions, goals, ranking_system, max_delta);
+	print_test_result(!test_result, "DEADLOCK TEST", "lose by deadlock realizability test");
+	/**** CASE: avoid sigma trap (empty transtiions) *****/
+	//build
+	build_automaton_and_ranking_for_tests(&assumptions_count, &goals_count,
+			&assumptions_indexes, &guarantees_indexes, &assumptions, &goals,
+			&ranking_system, &max_delta,
+			&game_automaton, TEST_AVOID_SIGMA_NO_LABEL);
+	//test partial increment
 
+	//test update
+
+	//test realizability
+	test_result	= automaton_is_gr1_realizable(game_automaton, assumptions, assumptions_count,
+			goals, goals_count);
+	print_test_result(test_result, "AVOID SIGMA NO LABEL", "win by avoiding sigma trap (empty transitions)");
+	//destroy automaton
+	destroy_automaton_and_ranking_for_tests(game_automaton, assumptions_count, goals_count,
+			assumptions_indexes, guarantees_indexes, assumptions, goals, ranking_system, max_delta);
+	/**** CASE: alternating goals *****/
+	//build
+	build_automaton_and_ranking_for_tests(&assumptions_count, &goals_count,
+			&assumptions_indexes, &guarantees_indexes, &assumptions, &goals,
+			&ranking_system, &max_delta,
+			&game_automaton, TEST_ALTERNATING_GOALS);
+	//test partial increment
+
+	//test update
+
+	//test realizability
+	test_result	= automaton_is_gr1_realizable(game_automaton, assumptions, assumptions_count,
+			goals, goals_count);
+	print_test_result(test_result, "ALTERNATING GOALS", "win by satisfying several goals");
+	//destroy automaton
+	destroy_automaton_and_ranking_for_tests(game_automaton, assumptions_count, goals_count,
+			assumptions_indexes, guarantees_indexes, assumptions, goals, ranking_system, max_delta);
+	/**** CASE: avoid sigma trap *****/
+	//build
+	build_automaton_and_ranking_for_tests(&assumptions_count, &goals_count,
+			&assumptions_indexes, &guarantees_indexes, &assumptions, &goals,
+			&ranking_system, &max_delta,
+			&game_automaton, TEST_AVOID_SIGMA_TRAP);
+	//test partial increment
+
+	//test update
+
+	//test realizability
+	test_result	= automaton_is_gr1_realizable(game_automaton, assumptions, assumptions_count,
+			goals, goals_count);
+	print_test_result(test_result, "AVOID SIGMA", "win by avoiding sigma trap");
+	//destroy automaton
+	destroy_automaton_and_ranking_for_tests(game_automaton, assumptions_count, goals_count,
+			assumptions_indexes, guarantees_indexes, assumptions, goals, ranking_system, max_delta);
+	/**** CASE: lose by entering sigma trap *****/
+	//build
+	build_automaton_and_ranking_for_tests(&assumptions_count, &goals_count,
+			&assumptions_indexes, &guarantees_indexes, &assumptions, &goals,
+			&ranking_system, &max_delta,
+			&game_automaton, TEST_LOSE_SIGMA_TRAP);
+	//test partial increment
+
+	//test update
+
+	//test realizability
+	test_result	= automaton_is_gr1_realizable(game_automaton, assumptions, assumptions_count,
+			goals, goals_count);
+	print_test_result(!test_result, "LOSE SIGMA TRAP", "lose by entering sigma trap");
+	//destroy automaton
+	destroy_automaton_and_ranking_for_tests(game_automaton, assumptions_count, goals_count,
+			assumptions_indexes, guarantees_indexes, assumptions, goals, ranking_system, max_delta);
 }
 void run_ranking_arithmetic_tests(){
 	automaton_ranking *left	= automaton_ranking_create(0, 0);
