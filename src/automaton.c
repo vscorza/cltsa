@@ -1293,7 +1293,7 @@ uint32_t* automaton_automaton_distance_to_state(automaton_automaton* automaton, 
 
 	}
 
-	automaton_concrete_bucket_destroy(pending_list);
+	automaton_concrete_bucket_destroy(pending_list, true);
 	free(visited);
 	return distances;
 }

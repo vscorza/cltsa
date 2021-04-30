@@ -955,7 +955,7 @@ void run_concrete_bucket_list_tests(){
 		automaton_concrete_bucket_pop_entry(list, &current_item);
 			snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "ITEM at %d: <%d,%d>\n", i, current_item.a, current_item.b);
 	}
-	automaton_concrete_bucket_destroy(list);
+	automaton_concrete_bucket_destroy(list, true);
 
 	char * expected = test_get_output_content("tests/expected_output/run_concrete_bucket_list_tests.exp");
 	bool txt_cmp = strcmp(buff, expected) == 0;
@@ -1049,8 +1049,8 @@ void run_fast_pool_tests(){
 	size_t item_size	= sizeof(test_item_pool);
 	test_item_pool** pool_ref1	= malloc(MAX_POOL_COUNT * sizeof(test_item_pool*));
 	test_item_pool** pool_ref2	= malloc(MAX_POOL_COUNT * sizeof(test_item_pool*));
-	test_item_pool** pool_frag1	= malloc(MAX_POOL_COUNT * sizeof(uint32_t));
-	test_item_pool** pool_frag2	= malloc(MAX_POOL_COUNT * sizeof(uint32_t));
+	test_item_pool** pool_frag1	= malloc(MAX_POOL_COUNT * sizeof(test_item_pool*));
+	test_item_pool** pool_frag2	= malloc(MAX_POOL_COUNT * sizeof(test_item_pool*));
 
 
 	char *buff = calloc(MAX_POOL_COUNT * 200, sizeof(char));
@@ -1144,7 +1144,7 @@ void run_automaton_composite_hash_table_small_tests(){
 		for(i = 0; i < 2; i++)current_composite_state[i]	= 0;
 		uint32_t current_index = 2 - 1;
 		uint32_t *witnesses	= calloc(100 * 2, sizeof(uint32_t));
-		bool *initialized	= calloc(100, sizeof(uint32_t));
+		bool *initialized	= calloc(100, sizeof(bool));
 		uint32_t current_state	= automaton_composite_hash_table_get_state(table, current_composite_state);
 		bool tests_passed = true;
 		while(true){
@@ -1498,14 +1498,15 @@ void build_automaton_and_ranking_for_tests(uint32_t* assumptions_count, uint32_t
 	automaton_transition* t_out3	= automaton_transition_create(0, 1);
 	automaton_transition_add_signal_event(t_out3, ctx, out_3);
 	automaton_transition* t_empty	= automaton_transition_create(0, 1);
-	automaton_automaton_add_initial_state(*game_automaton, 0);
+
 	switch(type){
 	case TEST_LOSE_DEADLOCK://1
 		automaton_transition_set_from_to(t_in_in2, 0, 1); automaton_automaton_add_transition(*game_automaton, t_in_in2);
 		automaton_transition_set_from_to(t_in_in2, 1, 1); automaton_automaton_add_transition(*game_automaton, t_in_in2);
 		automaton_transition_set_from_to(t_in_in2_out2, 0, 2); automaton_automaton_add_transition(*game_automaton, t_in_in2_out2);
 		automaton_transition_set_from_to(t_in3, 2, 0); automaton_automaton_add_transition(*game_automaton, t_in3);
-		automaton_transition_set_from_to(t_in_in2_out3, 0, 3); automaton_automaton_add_transition(*game_automaton, t_in_in2_out3);
+		automaton_transition_set_from_to(t_in_in2_out3, 0, 3);
+		automaton_automaton_add_transition(*game_automaton, t_in_in2_out3);
 		automaton_transition_set_from_to(t_in3, 3, 0); automaton_automaton_add_transition(*game_automaton, t_in3);
 		automaton_transition_set_from_to(t_in, 0, 4); automaton_automaton_add_transition(*game_automaton, t_in);
 		break;
@@ -1541,8 +1542,12 @@ void build_automaton_and_ranking_for_tests(uint32_t* assumptions_count, uint32_t
 		automaton_transition_set_from_to(t_in3, 3, 0); automaton_automaton_add_transition(*game_automaton, t_in3);
 		break;
 	}
+	automaton_automaton_add_initial_state(*game_automaton, 0);
 	//embed fluents
-	automaton_automaton* return_automaton	= automaton_automata_compose(game_automaton, SYNCHRONOUS, 1, true, "TEST");
+	automaton_automaton** automata		= malloc(sizeof(automaton_automaton*) * 1);
+	automata[0]							= *game_automaton;
+	automaton_automaton* return_automaton	= automaton_automata_compose(automata, SYNCHRONOUS, 1, true, "TEST");
+	free(automata);
 	automaton_automaton_destroy(*game_automaton);
 	*game_automaton	= return_automaton;
 	//get liveness indexes in global fluents list
@@ -1594,7 +1599,7 @@ void destroy_automaton_and_ranking_for_tests(automaton_automaton *game_automaton
 		automaton_concrete_bucket_list **ranking_system, uint32_t *max_delta){
 	uint32_t i = 0;
 	for(i = 0; i < guarantees_count; i++){
-		automaton_concrete_bucket_destroy(ranking_system[i]);
+		automaton_concrete_bucket_destroy(ranking_system[i],true);
 	}
 	free(ranking_system); ranking_system	= NULL;
 	automaton_automata_context* ctx	= game_automaton->context;

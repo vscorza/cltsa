@@ -868,12 +868,12 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 	//destroy structures
 	free(max_delta);
 	for(i = 0; i < guarantees_count; i++){
-		automaton_concrete_bucket_destroy(ranking_list[i]);
+		automaton_concrete_bucket_destroy(ranking_list[i], true);
 	}
 	free(ranking_list);
 	automaton_pending_state_max_heap_destroy(pending_list);
 	for(i = 0; i < guarantees_count; i++)
-		automaton_concrete_bucket_destroy(key_lists[i]);
+		automaton_concrete_bucket_destroy(key_lists[i], true);
 	free(key_lists);
 	free(assumptions_indexes);
 	free(guarantees_indexes);

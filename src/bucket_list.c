@@ -144,7 +144,7 @@ void automaton_ptr_bucket_list_initialize(automaton_ptr_bucket_list* bucket, uin
 }
 void automaton_ptr_bucket_list_copy(automaton_ptr_bucket_list* target, automaton_ptr_bucket_list* source){
 	if(target->count != source->count){
-		automaton_ptr_bucket_destroy(target);
+		automaton_ptr_bucket_destroy(target, false);
 		automaton_ptr_bucket_list_initialize(target, source->count);
 	}
 	uint32_t i, j;
@@ -305,7 +305,7 @@ void automaton_ptr_bucket_reset(automaton_ptr_bucket_list* list){
 	list->has_last_index		= false;
 }
 
-void automaton_ptr_bucket_destroy(automaton_ptr_bucket_list* list){
+void automaton_ptr_bucket_destroy(automaton_ptr_bucket_list* list, bool free_base){
 	uint32_t i;
 	for(i = 0; i < list->count; i++){
 		free(list->buckets[i]);
@@ -313,7 +313,8 @@ void automaton_ptr_bucket_destroy(automaton_ptr_bucket_list* list){
 	free(list->buckets);
 	free(list->bucket_count);
 	free(list->bucket_size);
-	free(list);
+	if(free_base)
+		free(list);
 }
 
 /*************************
@@ -347,7 +348,7 @@ void automaton_concrete_bucket_list_initialize(automaton_concrete_bucket_list* b
 
 void automaton_concrete_bucket_list_copy(automaton_concrete_bucket_list* target, automaton_concrete_bucket_list* source){
 	if(target->count != source->count || target->sizeof_element != source->sizeof_element || target->extractor_func != source->extractor_func){
-		automaton_concrete_bucket_destroy(target);
+		automaton_concrete_bucket_destroy(target, false);
 		automaton_concrete_bucket_list_initialize(target, source->count, source->extractor_func, source->sizeof_element);
 	}
 	target->sizeof_element			= source->sizeof_element;
@@ -550,7 +551,7 @@ void automaton_concrete_bucket_reset(automaton_concrete_bucket_list* list){
 	list->has_last_index		= false;
 }
 
-void automaton_concrete_bucket_destroy(automaton_concrete_bucket_list* list){
+void automaton_concrete_bucket_destroy(automaton_concrete_bucket_list* list, bool free_base){
 	uint32_t i;
 	for(i = 0; i < list->count; i++){
 		free(list->buckets[i]);
@@ -559,7 +560,8 @@ void automaton_concrete_bucket_destroy(automaton_concrete_bucket_list* list){
 	free(list->buckets);
 	free(list->bucket_count);
 	free(list->bucket_size);
-	free(list);
+	if(free_base)
+		free(list);
 }
 
 

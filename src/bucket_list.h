@@ -53,7 +53,7 @@ void* automaton_ptr_bucket_pop_entry(automaton_ptr_bucket_list* list);
 bool automaton_ptr_bucket_add_entry(automaton_ptr_bucket_list* list, void* entry, uint32_t key);
 bool automaton_ptr_bucket_remove_entry(automaton_ptr_bucket_list* list, void* entry, uint32_t key);
 void automaton_ptr_bucket_reset(automaton_ptr_bucket_list* list);
-void automaton_ptr_bucket_destroy(automaton_ptr_bucket_list* list);
+void automaton_ptr_bucket_destroy(automaton_ptr_bucket_list* list, bool free_base);
 
 #define GET_CONCRETE_BUCKET_LIST_ENTRY(list, bucket_index, index)	((void*)(((uintptr_t)(list->buckets[bucket_index])) + (uintptr_t)((index) * list->sizeof_element)))
 #define GET_CONCRETE_BUCKET_SINGLE_ENTRY(list, bucket, index)	((void*)(((uintptr_t)bucket) + (uintptr_t)((index) * list->sizeof_element)))
@@ -85,7 +85,7 @@ void automaton_concrete_bucket_pop_entry(automaton_concrete_bucket_list* list, v
 bool automaton_concrete_bucket_add_entry(automaton_concrete_bucket_list* list, void* entry);
 bool automaton_concrete_bucket_remove_entry(automaton_concrete_bucket_list* list, void* entry);
 void automaton_concrete_bucket_reset(automaton_concrete_bucket_list* list);
-void automaton_concrete_bucket_destroy(automaton_concrete_bucket_list* list);
+void automaton_concrete_bucket_destroy(automaton_concrete_bucket_list* list, bool free_base);
 
 
 #endif /* BUCKET_LIST_H_ */

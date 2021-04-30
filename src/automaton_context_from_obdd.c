@@ -1132,9 +1132,9 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 
 	free(env_state); free(sys_state); free(tmp_state_valuation);
 	free(obdd_on_signals_indexes); free(obdd_off_signals_indexes);
-	automaton_concrete_bucket_destroy(theta_env_bucket_list);automaton_concrete_bucket_destroy(theta_sys_bucket_list);
-	automaton_concrete_bucket_destroy(rho_env_bucket_list);automaton_concrete_bucket_destroy(rho_sys_bucket_list);
-	automaton_concrete_bucket_destroy(rho_env_processed_bucket_list);automaton_concrete_bucket_destroy(rho_sys_processed_bucket_list);
+	automaton_concrete_bucket_destroy(theta_env_bucket_list, true);automaton_concrete_bucket_destroy(theta_sys_bucket_list,true);
+	automaton_concrete_bucket_destroy(rho_env_bucket_list, true);automaton_concrete_bucket_destroy(rho_sys_bucket_list, true);
+	automaton_concrete_bucket_destroy(rho_env_processed_bucket_list, true);automaton_concrete_bucket_destroy(rho_sys_processed_bucket_list, true);
 	free(x_alphabet); free(y_alphabet); free(x_p_alphabet); free(y_p_alphabet);free(x_y_alphabet); free(x_y_x_p_alphabet); free(x_p_y_p_alphabet); free(signals_alphabet);
 	free(not_x_p_alphabet); free(not_y_p_alphabet);
 	free(x_alphabet_o); free(y_alphabet_o); free(x_p_alphabet_o); free(y_p_alphabet_o);free(x_y_alphabet_o); free(x_y_x_p_alphabet_o); free(x_p_y_p_alphabet_o); free(signals_alphabet_o);

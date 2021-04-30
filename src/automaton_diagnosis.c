@@ -855,7 +855,7 @@ uint32_t** automaton_automaton_traces_to_deadlock(automaton_automaton* automaton
 
 	}
 
-	automaton_concrete_bucket_destroy(pending_list);
+	automaton_concrete_bucket_destroy(pending_list, true);
 
 	uint32_t **deadlock_traces = calloc(*count, sizeof(uint32_t*));
 	uint32_t *local_sizes	= calloc(*count,sizeof(uint32_t));
