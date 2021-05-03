@@ -1461,7 +1461,6 @@ void build_automaton_and_ranking_for_tests(uint32_t* assumptions_count, uint32_t
 	uint32_t fluents_count			= 4;
 	//create context
 	automaton_automata_context* ctx	= automaton_automata_context_create("Context 1", alphabet, fluents_count, fluents, 0, NULL, NULL);
-	automaton_automata_context_print(ctx, "\t", "\n");
 	uint32_t local_alphabet_count	= 6;
 	uint32_t* local_alphabet		= malloc(sizeof(uint32_t) * local_alphabet_count);
 	local_alphabet[0]				= automaton_alphabet_get_signal_index(alphabet, in);
@@ -1657,9 +1656,6 @@ void run_gr1_initialization_tests(){
 			&assumptions_indexes, &guarantees_indexes, &assumptions, &goals,
 			&ranking_system, &max_delta,
 			&game_automaton, TEST_AVOID_SIGMA_TRAP);
-	automaton_automaton_print(game_automaton, false, true, true, "", "");
-	automaton_automaton_monitored_order_transitions(game_automaton);
-	automaton_automaton_print(game_automaton, false, true, true, "", "");
 
 	//test partial increment
 
@@ -1673,7 +1669,6 @@ void run_gr1_initialization_tests(){
 	destroy_automaton_and_ranking_for_tests(game_automaton, assumptions_count, goals_count,
 			assumptions_indexes, guarantees_indexes, assumptions, goals, ranking_system, max_delta);
 
-	return;
 	/**** CASE: lose by deadlock *****/
 	//build
 	build_automaton_and_ranking_for_tests(&assumptions_count, &goals_count,
