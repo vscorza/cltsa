@@ -87,6 +87,7 @@ automaton_ranking* automaton_state_best_successor_ranking(automaton_automaton* g
 	automaton_ranking* min_ranking	= NULL;
 	int32_t max_value			= RANKING_INFINITY;
 	automaton_ranking* max_ranking	= NULL;
+
 	automaton_ranking* current_value;
 	uint32_t i, j, to_state;
 	j = satisfies_guarantee? (current_guarantee + 1) % guarantee_count : current_guarantee;
@@ -103,11 +104,14 @@ automaton_ranking* automaton_state_best_successor_ranking(automaton_automaton* g
 		if(new_monitored){
 			if(min_value == RANKING_INFINITY){
 				max_value	= RANKING_INFINITY;
-
-			}else if((automaton_ranking_gt(min_ranking, max_ranking))){
+			}else if((max_ranking == NULL) || (automaton_ranking_gt(min_ranking, max_ranking))){
 				max_ranking	= min_ranking;
 			}
 			min_value	= RANKING_INFINITY;
+#if DEBUG_SYNTHESIS
+			printf("[New monitored]Best succ. for %d ranking %d is %d with value %d\n", state, current_guarantee,
+					max_ranking->value, max_ranking->assumption_to_satisfy);
+#endif
 		}
 		to_state	= game_automaton->transitions[state][i].state_to;
 		//if(to_state == state)continue;
@@ -116,7 +120,7 @@ automaton_ranking* automaton_state_best_successor_ranking(automaton_automaton* g
 		if(current_value == NULL)continue;
 		if(min_ranking == NULL){
 			min_value = max_value = current_value->value;
-			min_ranking = max_ranking = current_value;
+			min_ranking = current_value;
 		}else if(new_monitored){
 			min_value = current_value->value;
 			min_ranking = current_value;
@@ -124,17 +128,28 @@ automaton_ranking* automaton_state_best_successor_ranking(automaton_automaton* g
 			min_value 	= current_value->value;
 			min_ranking	= current_value;
 		}
+#if DEBUG_SYNTHESIS
+		printf("[Min ranking]%d <%d:%d, %d>\n", state, current_guarantee,
+				min_ranking->assumption_to_satisfy, min_ranking->value);
+		if(max_ranking == NULL)
+			printf("[Max ranking]%d <%d:_, _>\n", state, current_guarantee);
+		else
+			printf("[Max ranking]%d <%d:%d, %d>\n", state, current_guarantee,
+					max_ranking->assumption_to_satisfy, max_ranking->value);
+#endif
 	}
 	if(min_value == RANKING_INFINITY)
 		max_value	= RANKING_INFINITY;
-	else if((automaton_ranking_gt(min_ranking, max_ranking))){
+	else if((max_ranking == NULL) || (automaton_ranking_gt(min_ranking, max_ranking))){
 		max_ranking	= min_ranking;
 	}
 #if DEBUG_SYNTHESIS
 	if(_print_ranking)
-		if(return_value == NULL){
+		if(max_ranking == NULL)
 			printf("NO PROPER PREDECESSOR FOR RANKING\n");
-		}
+		else
+			printf("[Best succ]%d <%d:%d, %d>\n", state, current_guarantee,
+				max_ranking->state, max_ranking->value);
 #endif
 
 	return max_ranking;
@@ -905,7 +920,7 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 bool automaton_is_gr1_realizable(automaton_automaton* game_automaton, char** assumptions, uint32_t assumptions_count
 		, char** guarantees, uint32_t guarantees_count){
 	automaton_automaton* strategy = automaton_get_gr1_strategy(game_automaton, assumptions, assumptions_count,
-			guarantees, guarantees_count, false);
+			guarantees, guarantees_count, true);
 	bool is_realizable = (strategy->transitions_count != 0
 			&& strategy->out_degree[strategy->initial_states[0]] > 0);
 	automaton_automaton_destroy(strategy);

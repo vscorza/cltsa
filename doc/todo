@@ -1,7 +1,7 @@
 TODO:
 =====
-- para responder no realizabilidad, se pueden inicializar los rankings en max-delta -1 y ver si se estabiliza ahí?
 - cltsa
+	- review strategy build automaton_gr1.c:705-880
 	- check automaton monitored transition order
 		- write tests
 	- cambio en el algoritmo de sintesis
@@ -80,12 +80,11 @@ TODO:
 	- tablas comparativas
 	- introducir clts como necesidad para ejecutar los casos (refs de definitions nuevo)
 	- ref. a un arxiv
-- validar plan de trabajo para diagnostico
 - rankings
 	- mejorar legibilidad de pruebas
 	- armar ejemplos
-- ejecutar plan de trabajo para diagnostico
-- revisar como se extrae la estrategia del ranking clts
+- revisar como se extrae la estrategia del ranking clts	
+- para responder no realizabilidad, se pueden inicializar los rankings en max-delta -1 y ver si se estabiliza ahí?
 - add cites
 	- DFS cited from "Verification by Augmented Finitary Abstraction"
 	- Presented in "Algorithmic verification of linear temporal logic specifications"

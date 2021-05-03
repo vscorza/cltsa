@@ -1651,6 +1651,29 @@ void run_gr1_initialization_tests(){
 	char **assumptions	= NULL, **goals	= NULL;
 	uint32_t *max_delta	= NULL;
 	bool test_result	= false;
+	/**** CASE: avoid sigma trap *****/
+	//build
+	build_automaton_and_ranking_for_tests(&assumptions_count, &goals_count,
+			&assumptions_indexes, &guarantees_indexes, &assumptions, &goals,
+			&ranking_system, &max_delta,
+			&game_automaton, TEST_AVOID_SIGMA_TRAP);
+	automaton_automaton_print(game_automaton, false, true, true, "", "");
+	automaton_automaton_monitored_order_transitions(game_automaton);
+	automaton_automaton_print(game_automaton, false, true, true, "", "");
+
+	//test partial increment
+
+	//test update
+
+	//test realizability
+	test_result	= automaton_is_gr1_realizable(game_automaton, assumptions, assumptions_count,
+			goals, goals_count);
+	print_test_result(test_result, "AVOID SIGMA", "win by avoiding sigma trap");
+	//destroy automaton
+	destroy_automaton_and_ranking_for_tests(game_automaton, assumptions_count, goals_count,
+			assumptions_indexes, guarantees_indexes, assumptions, goals, ranking_system, max_delta);
+
+	return;
 	/**** CASE: lose by deadlock *****/
 	//build
 	build_automaton_and_ranking_for_tests(&assumptions_count, &goals_count,
@@ -1702,23 +1725,7 @@ void run_gr1_initialization_tests(){
 	//destroy automaton
 	destroy_automaton_and_ranking_for_tests(game_automaton, assumptions_count, goals_count,
 			assumptions_indexes, guarantees_indexes, assumptions, goals, ranking_system, max_delta);
-	/**** CASE: avoid sigma trap *****/
-	//build
-	build_automaton_and_ranking_for_tests(&assumptions_count, &goals_count,
-			&assumptions_indexes, &guarantees_indexes, &assumptions, &goals,
-			&ranking_system, &max_delta,
-			&game_automaton, TEST_AVOID_SIGMA_TRAP);
-	//test partial increment
 
-	//test update
-
-	//test realizability
-	test_result	= automaton_is_gr1_realizable(game_automaton, assumptions, assumptions_count,
-			goals, goals_count);
-	print_test_result(test_result, "AVOID SIGMA", "win by avoiding sigma trap");
-	//destroy automaton
-	destroy_automaton_and_ranking_for_tests(game_automaton, assumptions_count, goals_count,
-			assumptions_indexes, guarantees_indexes, assumptions, goals, ranking_system, max_delta);
 	/**** CASE: lose by entering sigma trap *****/
 	//build
 	build_automaton_and_ranking_for_tests(&assumptions_count, &goals_count,

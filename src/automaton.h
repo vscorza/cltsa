@@ -14,7 +14,7 @@
 #include "automaton_composite_hash_table.h"
 #include "y.tab.h"
 
-#define VERBOSE 0
+#define VERBOSE 1
 
 #define COMPOSE_SYNCH	1
 #define PARTIAL_SHARE	2
@@ -27,8 +27,8 @@
 #define USE_COMPOSITE_HASH_TABLE 1
 
 #define DEBUG_COMPOSITION 0
-#define DEBUG_SYNTHESIS 0
-#define DEBUG_STRATEGY_BUILD 0
+#define DEBUG_SYNTHESIS 1
+#define DEBUG_STRATEGY_BUILD 1
 #define DEBUG_COMPOSITE_TREE 0
 #define DEBUG_UNREAL 0
 #define DEBUG_DD 0
@@ -39,7 +39,7 @@
 #define DISTANCE_BUCKET_SIZE 1000
 #define PRINT_PARTIAL_COMPOSITION 0
 
-#define PRINT_PARTIAL_SYNTHESIS 0
+#define PRINT_PARTIAL_SYNTHESIS 1
 
 #define PRINT_HTML 0
 
