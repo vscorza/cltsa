@@ -1,35 +1,19 @@
 TODO:
 =====
 - cltsa
-	- review strategy build automaton_gr1.c:705-880
-	- check automaton monitored transition order
-		- write tests
 	- cambio en el algoritmo de sintesis
 		- escribir tests
-			- criteria
-				- test 
-					- infinity
-					- satisfies assumption
-					- satisfies goal
-					- satisfies both
 			- de implementacion
-				- fluent_embedding
 				- automaton_ranking_tests
 					X eq
 					X gt
 					- increment
 					- update
-				- stabilization					
 					- add_unstable_pred
 					- best_successor
 					- is_stable
-		- implementar cambios
-			- ranking (desarrollar)
-				- cambiar sucesores
-				- cambiar algoritmos de estabilización
-			- estrategias
-				- cambiar creación de estrategia desde rankings
-		- correr tests
+					- monitored transition order
+		- correr tests					
 	- traducción a lts
 		- definir casos de estudio
 		- escribir tests
