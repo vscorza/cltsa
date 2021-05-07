@@ -23,47 +23,40 @@
  * @param x_count number of input variables in the specification
  * @param y_count number of output variables in the specification
  */
-void automaton_set_composed_valuation(bool* valuation, bool* partial_valuation, uint32_t valuation_offset, bool is_initial, bool is_input
-		, uint32_t x_count, uint32_t y_count){
+void automaton_set_composed_valuation(bool* valuation, bool* partial_valuation
+		, uint32_t x_y_count){
 	uint32_t i;
-
-	uint32_t offset_size	= (is_initial) ? (is_input? x_count : x_count + y_count) : (is_input? x_count : y_count);
-	uint32_t left_offset	= is_initial? 0 : (is_input? x_count + y_count: x_count);
-	for(i = 0; i < offset_size; i++)valuation[left_offset + i]	= partial_valuation[offset_size * valuation_offset + i];
+	for(i = 0; i < x_y_count; i++)valuation[i]	= partial_valuation[x_y_count + i];
 }
 
 uint64_t __global_signals_count = 0;
 uint32_t __global_max_signals	= 0;
 bool automaton_add_transition_from_valuations(obdd_mgr* mgr, automaton_automaton* automaton, uint32_t from_state, uint32_t to_state, bool* from_valuation,
-		bool* to_valuation, bool* adjusted_valuation, bool is_initial, bool is_input, uint32_t x_count, uint32_t y_count, uint32_t* obdd_on_indexes, uint32_t* obdd_off_indexes,
-		uint32_t* x_y_alphabet, uint32_t* x_y_x_p_alphabet, uint32_t* x_y_order){
+		bool* to_valuation, bool is_initial, bool is_input, uint32_t x_y_count, uint32_t* obdd_on_indexes, uint32_t* obdd_off_indexes,
+		uint32_t* x_y_alphabet, uint32_t* x_y_order){
 	uint32_t i, j, fluent_index, fluent_count	= automaton->context->liveness_valuations_count;
 	automaton_transition* transition		= automaton_transition_create(from_state, to_state);
 	//TODO: optimize alphabet indexes computation
 #if DEBUG_LTL_AUTOMATON
-	uint32_t to_state_size	= is_input? (is_initial? x_count : x_count * 2 + y_count) : (x_count + y_count);
-	uint32_t from_state_size	= !is_input? (is_initial? x_count+y_count : x_count * 2 + y_count) : (is_initial? x_count : x_count + y_count);
 	printf("(");
-	for(i = 0; i < from_state_size; i++)
+	for(i = 0; i < x_y_count; i++)
 		printf("%s", from_valuation[i]?"1":"0");
 	printf("):%d-[", from_state);
 #endif
 	uint32_t signal_dict_index;
-	uint32_t var_count = is_input ? x_count : y_count;
-	uint32_t left_offset	= is_input ? 0 : x_count;
-	uint32_t right_offset	= is_input ? (is_initial? 0 : x_count + y_count) : x_count;
+	uint32_t var_count = x_y_count;
 	bool take_on;
 #if DEBUG_LTL_AUTOMATON
 	bool has_action = false;
 #endif
 	for(i = 0; i < var_count; i++){
 		if(!is_initial){
-			if(from_valuation[left_offset + i] != to_valuation[right_offset + i]){
+			if(from_valuation[i] != to_valuation[i]){
 #if DEBUG_LTL_AUTOMATON
 				has_action 	= true;
 #endif
-				take_on				= from_valuation[left_offset + i]; //is_input? from_valuation[left_offset + i] : !from_valuation[left_offset + i];
-				signal_dict_index	= (take_on? obdd_off_indexes[left_offset + i]: obdd_on_indexes[left_offset + i]);
+				take_on				= from_valuation[i]; //is_input? from_valuation[left_offset + i] : !from_valuation[left_offset + i];
+				signal_dict_index	= (take_on? obdd_off_indexes[i]: obdd_on_indexes[i]);
 				automaton_transition_add_signal_event_ID(transition, automaton->context, signal_dict_index, INPUT_SIG);
 #if DEBUG_LTL_AUTOMATON
 				printf("(%d:%s:%s)%s", signal_dict_index, automaton->context->global_alphabet->list[signal_dict_index].name,
@@ -74,9 +67,9 @@ bool automaton_add_transition_from_valuations(obdd_mgr* mgr, automaton_automaton
 #if DEBUG_LTL_AUTOMATON
 			has_action 	= true;
 #endif
-			take_on		= to_valuation[right_offset + i];
+			take_on		= to_valuation[i];
 			if(take_on){
-				signal_dict_index	= (take_on? obdd_on_indexes[right_offset + i]: obdd_off_indexes[right_offset + i]);
+				signal_dict_index	= (take_on? obdd_on_indexes[i]: obdd_off_indexes[i]);
 				automaton_transition_add_signal_event_ID(transition, automaton->context, signal_dict_index, INPUT_SIG);
 #if DEBUG_LTL_AUTOMATON
 				printf("(%d:%s:%s)%s", signal_dict_index, automaton->context->global_alphabet->list[signal_dict_index].name,
@@ -127,21 +120,8 @@ bool automaton_add_transition_from_valuations(obdd_mgr* mgr, automaton_automaton
 			fluent_index	= GET_STATE_FLUENT_INDEX(fluent_count, to_state, i);
 			//evaluate each liveness formula on landing state to check if formula is satisfied and then set bit
 			if(!is_initial){
-				if(is_input){
-					//TODO:
-					//restrict x according to x' in to_valuation
-					for(j = 0; j < x_count; j++)
-						adjusted_valuation[j]	= to_valuation[x_count + y_count + j];
-					for(j = 0; j < y_count; j++)
-						adjusted_valuation[x_count + j]	= from_valuation[x_count + j];
-					obdd_sat_vector	= obdd_satisfies_vector(automaton->context->liveness_valuations[i],
-							x_y_alphabet, adjusted_valuation, x_count + y_count, x_y_order);
-
-							//x_y_x_p_alphabet, to_valuation, x_count * 2 + y_count);
-				}else{
-					obdd_sat_vector	= obdd_satisfies_vector(automaton->context->liveness_valuations[i],
-							x_y_alphabet, to_valuation, x_count + y_count, x_y_order);
-				}
+				obdd_sat_vector	= obdd_satisfies_vector(automaton->context->liveness_valuations[i],
+						x_y_alphabet, to_valuation, x_y_count, x_y_order);
 				if(obdd_sat_vector){
 #if DEBUG_LTL_AUTOMATON
 					printf("1");
@@ -164,18 +144,18 @@ bool automaton_add_transition_from_valuations(obdd_mgr* mgr, automaton_automaton
 
 
 void automaton_add_transition_from_obdd_valuation(obdd_mgr* mgr, automaton_automaton* ltl_automaton,
-		obdd_composite_state* env_state, obdd_composite_state* sys_state, obdd_state_tree* obdd_state_map,
-		uint32_t x_count, uint32_t y_count, uint32_t x_y_count, uint32_t x_y_x_p_count,
-		uint32_t* x_y_alphabet, uint32_t* x_y_x_p_alphabet, uint32_t* x_y_order,
-		uint32_t signals_count, bool* valuation, bool* hashed_valuation, bool* adjusted_valuation,
-		automaton_bool_array_hash_table* x_y_hash_table, automaton_bool_array_hash_table* x_y_x_p_hash_table,
+		obdd_composite_state* from_state, obdd_composite_state* to_state, obdd_state_tree* obdd_state_map,
+		uint32_t x_y_count,
+		uint32_t* x_y_alphabet, uint32_t* x_y_order,
+		uint32_t signals_count, bool* valuation, bool* hashed_valuation,
+		automaton_bool_array_hash_table* x_y_hash_table,
 		uint32_t* obdd_on_signals_indexes, uint32_t* obdd_off_signals_indexes){
 	uint32_t j;
 	bool has_transition;
 	//xy ->xy'
 	//automaton_set_composed_valuation(env_state->valuation, valuations, i, false, true, x_y_x_p_alphabet, x_count, y_count);
-	for(j = 0; j < x_y_count; j++)sys_state->valuation[j]	= valuation[j];
-	for(j = 0; j < x_y_x_p_count; j++)env_state->valuation[j]	= valuation[j];
+	for(j = 0; j < x_y_count; j++)to_state->valuation[j]	= valuation[x_y_count + j];
+	for(j = 0; j < x_y_count; j++)from_state->valuation[j]	= valuation[j];
 #if DEBUG_LTL_AUTOMATON
 	printf("sys val.:");
 	for(j = 0; j < x_y_count; j++)printf("%d\t",sys_state->valuation[j]);
@@ -183,21 +163,19 @@ void automaton_add_transition_from_obdd_valuation(obdd_mgr* mgr, automaton_autom
 	for(j = 0; j < x_y_x_p_count; j++)printf("%d\t",env_state->valuation[j]);
 	printf("\n");
 #endif
-	hashed_valuation		= automaton_bool_array_hash_table_add_or_get_entry(x_y_x_p_hash_table, env_state->valuation, true);
-	env_state->state		= obdd_state_tree_get_key(obdd_state_map, env_state->valuation, x_y_x_p_count);
-	sys_state->state		= obdd_state_tree_get_key(obdd_state_map, sys_state->valuation, x_y_count);
-	for(j = 0; j < x_y_count; j++)adjusted_valuation[j] = 0;
-	for(j = 0; j < x_count; j++)adjusted_valuation[j] = hashed_valuation[x_y_count + j];
+	hashed_valuation		= automaton_bool_array_hash_table_add_or_get_entry(x_y_hash_table, to_state->valuation, true);
+	from_state->state		= obdd_state_tree_get_key(obdd_state_map, from_state->valuation, x_y_count);
+	to_state->state			= obdd_state_tree_get_key(obdd_state_map, to_state->valuation, x_y_count);
 #if DEBUG_LTL_AUTOMATON
 	printf("Adjusted valuation:[");
 	for(j = 0; j < x_y_count; j++)
 		printf("%s", adjusted_valuation[j] ? "1" : "0");
 	printf("]\n");
 #endif
-	has_transition	= automaton_add_transition_from_valuations(mgr, ltl_automaton, sys_state->state, env_state->state
-			, env_state->valuation, hashed_valuation, adjusted_valuation, false, true
-			, x_count, y_count
-			, obdd_on_signals_indexes, obdd_off_signals_indexes, x_y_alphabet, x_y_x_p_alphabet
+	has_transition	= automaton_add_transition_from_valuations(mgr, ltl_automaton, from_state->state, to_state->state
+			, from_state->valuation, hashed_valuation,false, true
+			, x_y_count
+			, obdd_on_signals_indexes, obdd_off_signals_indexes, x_y_alphabet
 			, x_y_order);
 
 
@@ -212,50 +190,16 @@ void automaton_add_transition_from_obdd_valuation(obdd_mgr* mgr, automaton_autom
 	printf("[ADDED]");
 #endif
 	}
-	//xyx'->x'y'
-	//automaton_set_composed_valuation(sys_state->valuation, valuations, i, false, false, signals_alphabet, x_count, y_count);
-	//move Y'->XY
-	for(j = 0; j < x_y_count; j++)sys_state->valuation[j]	= valuation[x_y_count  + j];
-#if DEBUG_LTL_AUTOMATON
-	printf("env val.:");
-	for(j = 0; j < x_y_x_p_count; j++)printf("%d\t",env_state->valuation[j]);
-
-	printf("\t sys val.:");
-	for(j = 0; j < x_y_count; j++)printf("%d\t",sys_state->valuation[j]);
-	printf("\n");
-#endif
-	//move X'->X
-	//for(j =0; j < x_count; j++)env_state->valuation[j] = env_state->valuation[x_y_count + j];
-	hashed_valuation		= automaton_bool_array_hash_table_add_or_get_entry(x_y_hash_table, sys_state->valuation, true);
-	//before getting state for sys_valuation copy X' part form env state into X part of sys state
-	//for(j = 0; j < x_count; j++)sys_state->valuation[j]	= env_state->valuation[x_y_count + j];
-	sys_state->state		= obdd_state_tree_get_key(obdd_state_map, sys_state->valuation, x_y_count);
-	has_transition	= automaton_add_transition_from_valuations(mgr, ltl_automaton, env_state->state, sys_state->state
-			, env_state->valuation, hashed_valuation, adjusted_valuation, false, false
-			, x_count, y_count
-			, obdd_on_signals_indexes, obdd_off_signals_indexes, x_y_alphabet, x_y_x_p_alphabet, x_y_order);
-#if DEBUG_LTL_AUTOMATON
-	printf("(%d-[", env_state->state);
-	for(j = 0; j < x_y_count; j++)
-		printf("%s", sys_state->valuation[j] ? "1" : "0");
-	printf("]->%d)%s", sys_state->state, has_transition? "" : "*");
-#endif
-
-	if(!has_transition){
-#if DEBUG_LTL_AUTOMATON
-		printf("[ADDED]");
-#endif
-	}
 }
 
-void automaton_add_transitions_from_valuations(obdd_mgr* mgr, obdd* root, automaton_automaton* automaton, uint32_t* valuations_count, uint32_t* valuation_img, uint32_t img_count,
+void automaton_add_transitions_from_valuations(obdd_mgr* mgr, obdd* root, automaton_automaton* automaton, uint32_t* valuations_count,
 		bool* dont_care_list, bool* partial_valuation, bool* initialized_values, bool* valuation_set, obdd_node** last_nodes,
-		obdd_composite_state* env_state, obdd_composite_state* sys_state, obdd_state_tree* obdd_state_map, uint32_t x_count, uint32_t y_count, uint32_t x_y_count, uint32_t x_y_x_p_count,
-		uint32_t* x_y_alphabet, uint32_t* x_y_x_p_alphabet, uint32_t* x_y_order, uint32_t signals_count, bool* hashed_valuation, bool* adjusted_valuation, automaton_bool_array_hash_table* x_y_hash_table,
-		automaton_bool_array_hash_table* x_y_x_p_hash_table, uint32_t* obdd_on_signals_indexes, uint32_t* obdd_off_signals_indexes){
+		obdd_composite_state* from_state, obdd_composite_state* to_state, obdd_state_tree* obdd_state_map, uint32_t x_y_count,
+		uint32_t* x_y_alphabet, uint32_t* x_y_order, uint32_t signals_count, bool* hashed_valuation, automaton_bool_array_hash_table* x_y_hash_table,
+		uint32_t* obdd_on_signals_indexes, uint32_t* obdd_off_signals_indexes){
 	int32_t i, j, dont_cares_count = 0, variable_index;
 	uint32_t nodes_count;
-	bool* valuation	= calloc(img_count, sizeof(bool));
+	bool* valuation	= calloc(x_y_count, sizeof(bool));
 	*valuations_count			= 0;
 	uint32_t variables_count	= mgr->vars_dict->size - 2;
 	int32_t last_bit_index		= -1;
@@ -270,14 +214,15 @@ void automaton_add_transitions_from_valuations(obdd_mgr* mgr, obdd* root, automa
 	obdd_node* current_node		= root->root_obdd;
 	obdd_node* last_node;
 
-	//solve case where var_ID is 0 (obdd == true, retrieve all values for img)
+
 	if(current_node->var_ID == mgr->false_obdd->root_obdd->var_ID){
 		free(valuation);
 		return;
 	}
+	//solve case where var_ID is 0 (obdd == true, retrieve all values for img)
 	if(current_node->var_ID == mgr->true_obdd->root_obdd->var_ID){
 		dont_cares_count	= 1;
-		for(i = 0; i < img_count; i++)
+		for(i = 0; i < x_y_count; i++)
 			dont_cares_count *= 2;
 		//get new valuations according to dont care list
 		uint32_t modulo	= dont_cares_count;
@@ -304,17 +249,18 @@ void automaton_add_transitions_from_valuations(obdd_mgr* mgr, obdd* root, automa
 		uint32_t k;
 		uint32_t img_index;
 		for(k = 0; k < (uint32_t)dont_cares_count; k++){
-			for(i = 0; i < (int32_t)img_count; i++)
+			for(i = 0; i < (int32_t)x_y_count; i++)
 				valuation_set[i] = false;
 			last_bit_index = -1;
 			for(i = 0; i < (int32_t)variables_count; i++){
 				variable_index	= -1;
 				//only setting odd variables
-				for(j = 0; j < (int32_t)img_count && variable_index < 0; j++){
-					if(valuation_img[j] == (uint32_t)i + 2){
-						variable_index	= valuation_img[j] - 2;
+				for(j = 0; j < (int32_t)x_y_count && variable_index < 0; j++){
+					if(x_y_alphabet[j] == (uint32_t)i + 2){
+						variable_index	= x_y_alphabet[j] - 2;
 						img_index		= j;
 						valuation_set[j]	= true;
+						break;
 					}
 				}
 
@@ -329,15 +275,15 @@ void automaton_add_transitions_from_valuations(obdd_mgr* mgr, obdd* root, automa
 					}
 				}
 			}
-			for(j = 0; j < (int32_t)img_count; j++){
+			for(j = 0; j < (int32_t)x_y_count; j++){
 				if(!valuation_set[j]){
-					printf("Value not set for %s on valuation %d\n", dictionary_key_for_value(mgr->vars_dict, valuation_img[j]), *valuations_count + k );
+					printf("Value not set for %s on valuation %d\n", dictionary_key_for_value(mgr->vars_dict, x_y_alphabet[j]), *valuations_count + k );
 					exit(-1);
 				}
 			}
-			automaton_add_transition_from_obdd_valuation(mgr, automaton, env_state, sys_state, obdd_state_map,
-					x_count, y_count, x_y_count, x_y_x_p_count,x_y_alphabet, x_y_x_p_alphabet, x_y_order, signals_count, valuation,
-					hashed_valuation, adjusted_valuation, x_y_hash_table, x_y_x_p_hash_table, obdd_on_signals_indexes, obdd_off_signals_indexes);
+			automaton_add_transition_from_obdd_valuation(mgr, automaton, from_state, to_state, obdd_state_map,
+					x_y_count, x_y_alphabet, x_y_order, signals_count, valuation,
+					hashed_valuation, x_y_hash_table, obdd_on_signals_indexes, obdd_off_signals_indexes);
 #if DEBUG_OBDD_VALUATIONS
 			printf("[");
 			for(i = 0; i < (int32_t)img_count; i++){
@@ -399,9 +345,10 @@ void automaton_add_transitions_from_valuations(obdd_mgr* mgr, obdd* root, automa
 				for(i = 0; i < (int32_t)variables_count; i++){
 					if(dont_care_list[i]){
 						variable_index	= -1;
-						for(j = 0; j < (int32_t)img_count; j++)
-							if(valuation_img[j] == (uint32_t)i + 2){
-								variable_index	= valuation_img[j] - 2;
+						for(j = 0; j < (int32_t)x_y_count; j++)
+							if(x_y_alphabet[j] == (uint32_t)i + 2){
+								variable_index	= x_y_alphabet[j] - 2;
+								valuation_set[j]	= true;
 								break;
 							}
 						if(variable_index >= 0)
@@ -440,15 +387,15 @@ void automaton_add_transitions_from_valuations(obdd_mgr* mgr, obdd* root, automa
 				uint32_t k;
 				uint32_t img_index;
 				for(k = 0; k < (uint32_t)dont_cares_count; k++){
-					for(i = 0; i < (int32_t)img_count; i++)
+					for(i = 0; i < (int32_t)x_y_count; i++)
 						valuation_set[i] = false;
 					last_bit_index = -1;
 					for(i = 0; i < (int32_t)variables_count; i++){
 						variable_index	= -1;
 						//only setting odd variables
-						for(j = 0; j < (int32_t)img_count && variable_index < 0; j++){
-							if(valuation_img[j] == (uint32_t)i + 2){
-								variable_index	= valuation_img[j] - 2;
+						for(j = 0; j < (int32_t)x_y_count && variable_index < 0; j++){
+							if(x_y_alphabet[j] == (uint32_t)i + 2){
+								variable_index	= x_y_alphabet[j] - 2;
 								img_index		= j;
 								valuation_set[j]	= true;
 							}
@@ -465,15 +412,15 @@ void automaton_add_transitions_from_valuations(obdd_mgr* mgr, obdd* root, automa
 							}
 						}
 					}
-					for(j = 0; j < (int32_t)img_count; j++){
+					for(j = 0; j < (int32_t)x_y_count; j++){
 						if(!valuation_set[j]){
-							printf("Value not set for %s on valuation %d\n", dictionary_key_for_value(mgr->vars_dict, valuation_img[j]), *valuations_count + k );
+							printf("Value not set for %s on valuation %d\n", dictionary_key_for_value(mgr->vars_dict, x_y_alphabet[j]), *valuations_count + k );
 							exit(-1);
 						}
 					}
-					automaton_add_transition_from_obdd_valuation(mgr, automaton, env_state, sys_state, obdd_state_map,
-							x_count, y_count, x_y_count, x_y_x_p_count,x_y_alphabet, x_y_x_p_alphabet, x_y_order,signals_count, valuation,
-							hashed_valuation, adjusted_valuation, x_y_hash_table, x_y_x_p_hash_table,
+					automaton_add_transition_from_obdd_valuation(mgr, automaton, from_state, to_state, obdd_state_map,
+							x_y_count, x_y_alphabet, x_y_order,signals_count, valuation,
+							hashed_valuation, x_y_hash_table,
 							obdd_on_signals_indexes, obdd_off_signals_indexes);
 #if DEBUG_OBDD_VALUATIONS
 					printf("[");
@@ -524,7 +471,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	char current_dict_entry[255];
 	parser_get_primed_variables();
 
-	uint32_t x_count = 0, y_count = 0, x_p_count = 0, y_p_count = 0, x_y_count = 0, x_y_x_p_count = 0, x_p_y_p_count = 0, signals_count = 0, not_x_p_count = 0, not_y_p_count =0;
+	uint32_t x_count = 0, y_count = 0, x_y_count = 0, signals_count = 0;
 	uint32_t alphabet_element_index;
 	int32_t global_index;
 	bool is_primed;
@@ -555,9 +502,9 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 		global_index	= automaton_alphabet_get_value_index(ctx->global_alphabet, current_key);
 		is_input		= ctx->global_alphabet->list[global_index].type == INPUT_SIG;
 		if(is_input){
-			if(is_primed)x_p_count++; else x_count++;
+			if(!is_primed)x_count++;
 		}else{
-			if(is_primed)y_p_count++; else y_count++;
+			if(!is_primed)y_count++;
 		}
 		signals_count++;
 		strcpy(current_dict_entry, mgr->vars_dict->entries[i].key);
@@ -568,33 +515,19 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 		local_alphabet[current_element++]	= automaton_alphabet_get_value_index(ctx->global_alphabet, current_dict_entry);
 	}
 
-	not_x_p_count = signals_count - x_p_count;
-	not_y_p_count = signals_count - y_p_count;
 	/**
 	 * get x, y, x', y' alphabets
 	 */
 	uint32_t* x_alphabet	= malloc(sizeof(uint32_t) * x_count);
 	uint32_t* y_alphabet	= malloc(sizeof(uint32_t) * y_count);
 	uint32_t* x_y_alphabet	= malloc(sizeof(uint32_t) * (x_count + y_count));
-	uint32_t* x_y_x_p_alphabet	= malloc(sizeof(uint32_t) * (x_count * 2 + y_count));
-	uint32_t* x_p_alphabet	= malloc(sizeof(uint32_t) * x_p_count);
-	uint32_t* y_p_alphabet	= malloc(sizeof(uint32_t) * y_p_count);
-	uint32_t* x_p_y_p_alphabet	= malloc(sizeof(uint32_t) * (y_p_count + x_p_count));
 	uint32_t* signals_alphabet	= malloc(sizeof(uint32_t) * signals_count);
-	uint32_t* not_x_p_alphabet	= malloc(sizeof(uint32_t) * not_x_p_count);
-	uint32_t* not_y_p_alphabet	= malloc(sizeof(uint32_t) * not_y_p_count);
 	//set of duplicated alphabets respecting obdd original ordering for usage within the restrict function
 	uint32_t* x_alphabet_o	= malloc(sizeof(uint32_t) * x_count);
 	uint32_t* y_alphabet_o	= malloc(sizeof(uint32_t) * y_count);
 	uint32_t* x_y_alphabet_o	= malloc(sizeof(uint32_t) * (x_count + y_count));
-	uint32_t* x_y_x_p_alphabet_o	= malloc(sizeof(uint32_t) * (x_count * 2 + y_count));
-	uint32_t* x_p_alphabet_o	= malloc(sizeof(uint32_t) * x_p_count);
-	uint32_t* y_p_alphabet_o	= malloc(sizeof(uint32_t) * y_p_count);
-	uint32_t* x_p_y_p_alphabet_o	= malloc(sizeof(uint32_t) * (y_p_count + x_p_count));
 	uint32_t* signals_alphabet_o	= malloc(sizeof(uint32_t) * signals_count);
-	uint32_t* not_x_p_alphabet_o	= malloc(sizeof(uint32_t) * not_x_p_count);
-	uint32_t* not_y_p_alphabet_o	= malloc(sizeof(uint32_t) * not_y_p_count);
-	x_count = 0, y_count = 0, x_p_count = 0, y_p_count = 0,signals_count = 0, x_y_count = 0, x_y_x_p_count = 0, not_x_p_count = 0, not_y_p_count = 0;
+	x_count = 0, y_count = 0, signals_count = 0, x_y_count = 0;
 	for(i = 0; i < mgr->vars_dict->size; i++){//X
 		//avoid searching for the true/false variables
 		if((strcmp(mgr->vars_dict->entries[i].key, TRUE_VAR) == 0) || (strcmp(mgr->vars_dict->entries[i].key, FALSE_VAR) == 0))	continue;
@@ -608,15 +541,10 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 		if(!is_primed){
 			x_y_alphabet_o[x_y_count++] = i;
 			if(is_input){x_alphabet_o[x_count++] = i;}else{y_alphabet_o[y_count++] = i;}
-		}else{
-			if(is_input){x_p_alphabet_o[x_p_count++] = i;}else{y_p_alphabet_o[y_p_count++] = i;}
 		}
-		if(!(is_primed && !is_input))x_y_x_p_alphabet_o[x_y_x_p_count++] = i;
 		signals_alphabet_o[signals_count++]	= i;
-		if(!is_primed || !is_input)not_x_p_alphabet_o[not_x_p_count++] = i;
-		if(!is_primed || is_input)not_y_p_alphabet_o[not_y_p_count++] = i;
 	}
-	x_count = 0, y_count = 0, x_p_count = 0, y_p_count = 0,signals_count = 0, x_y_count = 0, x_y_x_p_count = 0, not_x_p_count = 0, not_y_p_count = 0;
+	x_count = 0, y_count = 0, signals_count = 0, x_y_count = 0;
 	//this code seems repeated but should be kept this way since enforces
 	//sequentialization of X Y X' Y' variables
 	for(i = 0; i < mgr->vars_dict->size; i++){//X
@@ -629,14 +557,10 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 		strcpy(current_key, mgr->vars_dict->entries[i].key);strcat(current_key, SIGNAL_ON_SUFFIX);
 		global_index	= automaton_alphabet_get_value_index(ctx->global_alphabet, current_key);
 		is_input		= ctx->global_alphabet->list[global_index].type == INPUT_SIG;
-		if(is_input){if(is_primed){x_p_alphabet[x_p_count++]	= i; }else x_alphabet[x_count++]	= i;
-		}else{if(is_primed)y_p_alphabet[y_p_count++]	= i; else y_alphabet[y_count++]	= i;}
-		if(is_primed){ x_p_y_p_alphabet[x_p_y_p_count++] = i;}
+		if(is_input){if(!is_primed)x_alphabet[x_count++]	= i;
+		}else{if(!is_primed)y_alphabet[y_count++]	= i;}
 		if(is_input && !is_primed){
-			not_x_p_alphabet_o[not_x_p_count++] = i;
-			not_y_p_alphabet_o[not_y_p_count++] = i;
 			x_y_alphabet[x_y_count++] = i;
-			x_y_x_p_alphabet[x_y_x_p_count++] = i;
 			signals_alphabet[signals_count++]	= i;
 			strcpy(current_dict_entry, mgr->vars_dict->entries[i].key);	strcat(current_dict_entry, SIGNAL_ON_SUFFIX);
 			obdd_on_signals_indexes[obdd_on_count++]			= automaton_alphabet_get_value_index(ctx->global_alphabet, current_dict_entry);//dictionary_value_for_key(mgr->vars_dict, current_dict_entry);
@@ -659,10 +583,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 			}
 			is_input		= ctx->global_alphabet->list[global_index].type == INPUT_SIG;
 			if(!is_primed && !is_input){
-				not_x_p_alphabet_o[not_x_p_count++] = i;
-				not_y_p_alphabet_o[not_y_p_count++] = i;
 				x_y_alphabet[x_y_count++] = i;
-				x_y_x_p_alphabet[x_y_x_p_count++] = i;
 				signals_alphabet[signals_count++]	= i;
 				strcpy(current_dict_entry, mgr->vars_dict->entries[i].key);	strcat(current_dict_entry, SIGNAL_ON_SUFFIX);
 				obdd_on_signals_indexes[obdd_on_count++]		= automaton_alphabet_get_value_index(ctx->global_alphabet, current_dict_entry);//dictionary_value_for_key(mgr->vars_dict, current_dict_entry);
@@ -685,8 +606,6 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 					}
 		is_input		= ctx->global_alphabet->list[global_index].type == INPUT_SIG;
 		if(is_primed && is_input){
-			not_y_p_alphabet_o[not_y_p_count++] = i;
-			x_y_x_p_alphabet[x_y_x_p_count++] = i;
 			signals_alphabet[signals_count++]	= i;
 		}
 	}
@@ -705,7 +624,6 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 					}
 		is_input		= ctx->global_alphabet->list[global_index].type == INPUT_SIG;
 		if(is_primed && !is_input){
-			not_x_p_alphabet_o[not_x_p_count++] = i;
 			signals_alphabet[signals_count++]	= i;
 		}
 	}
@@ -719,7 +637,6 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	//initialize boolean array hash tables
 	automaton_bool_array_hash_table *x_y_hash_table	= automaton_bool_array_hash_table_create(x_y_count);
 	automaton_bool_array_hash_table *x_hash_table	= automaton_bool_array_hash_table_create(x_count);
-	automaton_bool_array_hash_table *x_y_x_p_hash_table	= automaton_bool_array_hash_table_create(x_y_x_p_count);
 	bool *hashed_valuation = NULL;
 
 
@@ -761,7 +678,6 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	obdd* sys_rho_composed				= NULL;
 	obdd* env_sys_rho_composed			= NULL;
 
-	bool *adjusted_valuation			= calloc(x_y_count, sizeof(bool));
 
 	//build ordered ref for x_y_alphabet to be used in fluent satisfaction
 	uint32_t* x_y_order	= calloc(x_y_count, sizeof(uint32_t));
@@ -919,20 +835,12 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	uint32_t current_valuations_count;
 	uint32_t valuations_size	= mgr->vars_dict->size * 2 * LIST_INITIAL_SIZE;
 	bool* valuations			= calloc(sizeof(bool), valuations_size);
-	obdd_composite_state* env_state = obdd_composite_state_create(0, x_count * 2 + y_count);
 	obdd_composite_state* sys_state = obdd_composite_state_create(0, x_count + y_count);
+	obdd_composite_state* env_state = obdd_composite_state_create(0, x_count + y_count);
 	uint32_t fluent_count	= x_count + y_count;
 	obdd_state_tree* obdd_state_map	= obdd_state_tree_create(x_count * 2 + y_count);
-	automaton_concrete_bucket_list* theta_env_bucket_list	= automaton_concrete_bucket_list_create(
-			LTL_BUCKET_SIZE, obdd_composite_state_extractor, sizeof(uint32_t) + sizeof(bool) * (x_count * 2 + y_count) );
-	automaton_concrete_bucket_list* theta_sys_bucket_list	= automaton_concrete_bucket_list_create(
-			LTL_BUCKET_SIZE, obdd_composite_state_extractor, sizeof(uint32_t) + sizeof(bool) * (x_count + y_count));
-	automaton_concrete_bucket_list* rho_env_bucket_list	= automaton_concrete_bucket_list_create(
-			LTL_BUCKET_SIZE, obdd_composite_state_extractor, sizeof(uint32_t) + sizeof(bool) * (x_count * 2 + y_count) );
 	automaton_concrete_bucket_list* rho_sys_bucket_list	= automaton_concrete_bucket_list_create(
 			LTL_BUCKET_SIZE, obdd_composite_state_extractor, sizeof(uint32_t) + sizeof(bool) * (x_count + y_count));
-	automaton_concrete_bucket_list* rho_env_processed_bucket_list	= automaton_concrete_bucket_list_create(
-			LTL_PROCESSED_BUCKET_SIZE, obdd_composite_state_extractor, sizeof(uint32_t) + sizeof(bool) * (x_count * 2 + y_count) );
 	automaton_concrete_bucket_list* rho_sys_processed_bucket_list	= automaton_concrete_bucket_list_create(
 			LTL_PROCESSED_BUCKET_SIZE, obdd_composite_state_extractor, sizeof(uint32_t) + sizeof(bool) * (x_count + y_count));
 	sys_state->state		= 0;//obdd_state_tree_get_key(obdd_state_map, sys_state->valuation, x_y_count);
@@ -958,25 +866,26 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 
 ////////////////////////////////////////////
 
-	//NEW BODD CONSTRUCTION APPROACH
+	//NEW OBDD CONSTRUCTION APPROACH
 	bool* tmp_state_valuation = calloc((x_count * 2 + y_count), sizeof(bool));
 	bool has_transition;
 
-	obdd_get_valuations(mgr, env_theta_composed, &valuations, &valuations_size, &current_valuations_count, x_alphabet, x_count
+	obdd_get_valuations(mgr, env_theta_composed, &valuations, &valuations_size, &current_valuations_count, x_y_alphabet, x_y_count
 			, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes);
 #if DEBUG_LTL_AUTOMATON
 	printf("Init env valuations\n");
-	obdd_print_valuations_names(mgr, valuations, current_valuations_count, x_alphabet, x_count);
+	obdd_print_valuations_names(mgr, valuations, current_valuations_count, x_y_alphabet, x_y_count);
 #endif
 
 	for(i = 0; i < current_valuations_count; i++){
-		automaton_set_composed_valuation(env_state->valuation, valuations, i, true, true, x_count, y_count);
-		hashed_valuation		= automaton_bool_array_hash_table_add_or_get_entry(x_y_hash_table, env_state->valuation, true);
-		env_state->state		= obdd_state_tree_get_key(obdd_state_map, env_state->valuation, x_count);
-		has_transition	= automaton_add_transition_from_valuations(mgr, ltl_automaton, sys_state->state, env_state->state
-				, sys_state->valuation, hashed_valuation, adjusted_valuation, true, true
-				, x_count, y_count
-				, obdd_on_signals_indexes, obdd_off_signals_indexes, x_y_alphabet, x_y_x_p_alphabet, x_y_order);
+		//automaton_set_composed_valuation(env_state->valuation, valuations, i, true, true, x_count, y_count);
+		for(j = 0; j < x_y_count; j++)sys_state->valuation[j]	= valuations[x_y_count * i + j];
+		hashed_valuation		= automaton_bool_array_hash_table_add_or_get_entry(x_y_hash_table, sys_state->valuation, true);
+		sys_state->state		= obdd_state_tree_get_key(obdd_state_map, sys_state->valuation, x_y_count);
+		has_transition	= automaton_add_transition_from_valuations(mgr, ltl_automaton, 0, sys_state->state
+				, sys_state->valuation, hashed_valuation, true, true
+				, x_y_count
+				, obdd_on_signals_indexes, obdd_off_signals_indexes, x_y_alphabet, x_y_order);
 		if(!has_transition){
 #if DEBUG_LTL_AUTOMATON
 			printf("(%d-[", sys_state->state);
@@ -989,7 +898,6 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 				fflush(stdout);
 			}
 #endif
-			automaton_concrete_bucket_add_entry(theta_env_bucket_list, env_state);
 		}
 
 		if(!has_transition && !automaton_concrete_bucket_has_entry(rho_sys_bucket_list, sys_state)){
@@ -1008,51 +916,6 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	uint32_t state_ptr = 0;
 	obdd* obdd_current_state	= NULL;
 	obdd* obdd_restricted_state	= NULL;
-
-	if(theta_env_bucket_list->composite_count > 0){
-		do{
-			automaton_concrete_bucket_pop_entry(theta_env_bucket_list, env_state);
-			hashed_valuation		= automaton_bool_array_hash_table_add_or_get_entry(x_hash_table, env_state->valuation, true);
-			obdd_current_state	= obdd_restrict_vector(env_sys_theta_composed, x_alphabet, hashed_valuation, x_count);
-			obdd_get_valuations(mgr, obdd_current_state, &valuations, &valuations_size, &current_valuations_count, x_y_alphabet, x_y_count
-					, dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes);
-#if DEBUG_LTL_AUTOMATON
-			printf("%d-[", sys_state->state);
-			for(j = 0; j < x_y_count; j++)
-				printf("%s", env_state->valuation[j] ? "1" : "0");
-			printf("]\n");
-			obdd_print_valuations_names(mgr, valuations, current_valuations_count, x_y_alphabet, x_y_count);
-#endif
-			for(i = 0; i < current_valuations_count; i++){
-				automaton_set_composed_valuation(sys_state->valuation, valuations, i, true, false, x_count, y_count);
-				sys_state->state		= obdd_state_tree_get_key(obdd_state_map, sys_state->valuation, x_y_count);
-				hashed_valuation		= automaton_bool_array_hash_table_add_or_get_entry(x_y_hash_table, sys_state->valuation, true);
-
-				has_transition	= automaton_add_transition_from_valuations(mgr, ltl_automaton, env_state->state, sys_state->state
-						, env_state->valuation, hashed_valuation, adjusted_valuation, true, false
-						, x_count, y_count
-						, obdd_on_signals_indexes, obdd_off_signals_indexes, x_y_alphabet, x_y_x_p_alphabet, x_y_order);
-#if DEBUG_LTL_AUTOMATON
-				printf("(%d-[", env_state->state);
-					for(j = 0; j < x_count + y_count; j++)
-						printf("%s", sys_state->valuation[j] ? "1" : "0");
-					state_counter++;
-					printf("]->%d)%s\n", sys_state->state,!has_transition && !automaton_concrete_bucket_has_entry(rho_sys_bucket_list, sys_state)? "*":"");
-					if(state_counter % 1000 == 0){
-						printf("States processed for ltl: %d\n", state_counter);
-						fflush(stdout);
-					}
-#endif
-				if(!has_transition && !automaton_concrete_bucket_has_entry(rho_sys_bucket_list, sys_state)){
-					automaton_concrete_bucket_add_entry(rho_sys_bucket_list, sys_state);
-				}
-			}
-			obdd_destroy(obdd_current_state);
-#if DEBUG_LTL_AUTOMATON
-			fflush(stdout);
-#endif
-		}while(theta_env_bucket_list->composite_count > 0);
-	}
 #define CNTR_LIMIT 200
 #if VERBOSE || DEBUG_LTL_AUTOMATON
 	printf("[#obdd nodes:val.size:val.count:bucket_count]\n");
@@ -1071,25 +934,13 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	env_sys_rho_composed	= and_obdd;
 #endif
 
-	automaton_add_transitions_from_valuations(mgr, env_sys_rho_composed, ltl_automaton, &current_valuations_count, signals_alphabet, signals_count,
-			dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, env_state, sys_state, obdd_state_map, x_count, y_count, x_y_count, x_y_x_p_count,
-			x_y_alphabet, x_y_x_p_alphabet, x_y_order, signals_count, hashed_valuation, adjusted_valuation, x_y_hash_table,
-			x_y_x_p_hash_table, obdd_on_signals_indexes, obdd_off_signals_indexes);
+	automaton_add_transitions_from_valuations(mgr, env_sys_rho_composed, ltl_automaton, &current_valuations_count,
+			dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, env_state, sys_state, obdd_state_map, x_y_count,
+			x_y_alphabet, x_y_order, signals_count, hashed_valuation, x_y_hash_table,
+			obdd_on_signals_indexes, obdd_off_signals_indexes);
 #if VERBOSE || DEBUG_LTL_AUTOMATON
 	//TODO:print cache table info
 #endif
-/*
-	uint32_t deadlocks = 0;
-	for(i = 0; i < ltl_automaton->transitions_count; i++)
-		if(ltl_automaton->out_degree[i] == 0 && ltl_automaton->in_degree[i] > 0)deadlocks++;
-	printf("\n\n %d DEADLOCKS before removal, %d states \n\n", deadlocks, ltl_automaton->transitions_count);
-	automaton_automaton_remove_deadlocks(ltl_automaton);
-	//automaton_compact_states(ltl_automaton);
-	deadlocks = 0;
-	for(i = 0; i < ltl_automaton->transitions_count; i++)
-		if(ltl_automaton->out_degree[i] == 0 && ltl_automaton->in_degree[i] > 0)deadlocks++;
-	printf("\n\n %d DEADLOCKS after removal, %d states \n\n", deadlocks, ltl_automaton->transitions_count);
-*/
 
 
 /////////////////////////////////////
@@ -1107,7 +958,6 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	 * once rho_env_bucket_list is empty we start again with rho_bucket_list until both lists are empty
 	 */
 	free(x_y_order);
-	free(adjusted_valuation);
 	free(initialized_values);
 	free(valuation_set);
 	free(last_nodes);
@@ -1128,17 +978,13 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 
 	automaton_bool_array_hash_table_destroy(x_y_hash_table);
 	automaton_bool_array_hash_table_destroy(x_hash_table);
-	automaton_bool_array_hash_table_destroy(x_y_x_p_hash_table);
-
-	free(env_state); free(sys_state); free(tmp_state_valuation);
+	free(env_state);
+	free(sys_state); free(tmp_state_valuation);
 	free(obdd_on_signals_indexes); free(obdd_off_signals_indexes);
-	automaton_concrete_bucket_destroy(theta_env_bucket_list, true);automaton_concrete_bucket_destroy(theta_sys_bucket_list,true);
-	automaton_concrete_bucket_destroy(rho_env_bucket_list, true);automaton_concrete_bucket_destroy(rho_sys_bucket_list, true);
-	automaton_concrete_bucket_destroy(rho_env_processed_bucket_list, true);automaton_concrete_bucket_destroy(rho_sys_processed_bucket_list, true);
-	free(x_alphabet); free(y_alphabet); free(x_p_alphabet); free(y_p_alphabet);free(x_y_alphabet); free(x_y_x_p_alphabet); free(x_p_y_p_alphabet); free(signals_alphabet);
-	free(not_x_p_alphabet); free(not_y_p_alphabet);
-	free(x_alphabet_o); free(y_alphabet_o); free(x_p_alphabet_o); free(y_p_alphabet_o);free(x_y_alphabet_o); free(x_y_x_p_alphabet_o); free(x_p_y_p_alphabet_o); free(signals_alphabet_o);
-	free(not_x_p_alphabet_o);free(not_y_p_alphabet_o);
+	automaton_concrete_bucket_destroy(rho_sys_bucket_list, true);
+	automaton_concrete_bucket_destroy(rho_sys_processed_bucket_list, true);
+	free(x_alphabet); free(y_alphabet); free(x_y_alphabet); free(signals_alphabet);
+	free(x_alphabet_o); free(y_alphabet_o); free(x_y_alphabet_o); free(signals_alphabet_o);
 	free(local_alphabet);
 	obdd_state_tree_destroy(state_map);
 	obdd_state_tree_destroy(obdd_state_map);

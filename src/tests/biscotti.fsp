@@ -2,7 +2,7 @@ set Global_Alphabet = {cook, finishedCooking, cooking, moveToBelt, overHeated}
 set Controllable_Alphabet = {cook, moveToBelt}
 
 BISCOTTI = (cook->COOKING),
-COOKING = (cooking->COOKING | finishedCooking->FINISHED | cook->OVERHEATED), 
+COOKING = (cooking->COOKING | finishedCooking->FINISHED | <cook,finishedCooking>->OVERHEATED), 
 FINISHED = (cook->COOKING | moveToBelt->BISCOTTI),  
 OVERHEATED = (overHeated->OVERHEATED).
 

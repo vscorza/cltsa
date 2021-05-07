@@ -130,22 +130,22 @@ void automaton_indexes_syntax_eval_strings(automaton_parsing_tables* tables, aut
 		, uint32_t*** values, char*** a, int32_t* a_count, automaton_indexes_syntax* indexes);
 //void automaton_indexes_syntax_eval_strings(automaton_parsing_tables* tables, automaton_indexes_valuation* valuation, char*** a, int32_t* a_count, automaton_indexes_syntax* indexes);
 bool automaton_add_transition_from_valuations(obdd_mgr* mgr, automaton_automaton* automaton, uint32_t from_state, uint32_t to_state, bool* from_valuation,
-		bool* to_valuation, bool* adjusted_valuation, bool is_initial, bool is_input, uint32_t x_count, uint32_t y_count, uint32_t* obdd_on_indexes, uint32_t* obdd_off_indexes,
-		uint32_t* x_y_alphabet, uint32_t* x_y_x_p_alphabet, uint32_t* x_y_order);
-void automaton_set_composed_valuation(bool* valuation, bool* partial_valuation, uint32_t valuation_offset, bool is_initial, bool is_input
-		, uint32_t x_count, uint32_t y_count);
+		bool* to_valuation, bool is_initial, bool is_input, uint32_t x_y_count, uint32_t* obdd_on_indexes, uint32_t* obdd_off_indexes,
+		uint32_t* x_y_alphabet, uint32_t* x_y_order);
+void automaton_set_composed_valuation(bool* valuation, bool* partial_valuation
+		, uint32_t x_y_count);
 void automaton_add_transition_from_obdd_valuation(obdd_mgr* mgr, automaton_automaton* ltl_automaton,
-		obdd_composite_state* env_state, obdd_composite_state* sys_state, obdd_state_tree* obdd_state_map,
-		uint32_t x_count, uint32_t y_count, uint32_t x_y_count, uint32_t x_y_x_p_count,
-		uint32_t* x_y_alphabet, uint32_t* x_y_x_p_alphabet, uint32_t* x_y_order,
-		uint32_t signals_count, bool* valuation, bool* hashed_valuation, bool* adjusted_valuation,
-		automaton_bool_array_hash_table* x_y_hash_table, automaton_bool_array_hash_table* x_y_x_p_hash_table,
+		obdd_composite_state* from_state, obdd_composite_state* to_state, obdd_state_tree* obdd_state_map,
+		uint32_t x_y_count,
+		uint32_t* x_y_alphabet, uint32_t* x_y_order,
+		uint32_t signals_count, bool* valuation, bool* hashed_valuation,
+		automaton_bool_array_hash_table* x_y_hash_table,
 		uint32_t* obdd_on_signals_indexes, uint32_t* obdd_off_signals_indexes);
-void automaton_add_transitions_from_valuations(obdd_mgr* mgr, obdd* root, automaton_automaton* automaton, uint32_t* valuations_count, uint32_t* valuation_img, uint32_t img_count,
+void automaton_add_transitions_from_valuations(obdd_mgr* mgr, obdd* root, automaton_automaton* automaton, uint32_t* valuations_count,
 		bool* dont_care_list, bool* partial_valuation, bool* initialized_values, bool* valuation_set, obdd_node** last_nodes,
-		obdd_composite_state* env_state, obdd_composite_state* sys_state, obdd_state_tree* obdd_state_map, uint32_t x_count, uint32_t y_count, uint32_t x_y_count, uint32_t x_y_x_p_count,
-		uint32_t* x_y_alphabet, uint32_t* x_y_x_p_alphabet, uint32_t* x_y_order, uint32_t signals_count, bool* hashed_valuation, bool* adjusted_valuation, automaton_bool_array_hash_table* x_y_hash_table,
-		automaton_bool_array_hash_table* x_y_x_p_hash_table, uint32_t* obdd_on_signals_indexes, uint32_t* obdd_off_signals_indexes);
+		obdd_composite_state* from_state, obdd_composite_state* to_state, obdd_state_tree* obdd_state_map, uint32_t x_y_count,
+		uint32_t* x_y_alphabet, uint32_t* x_y_order, uint32_t signals_count, bool* hashed_valuation, automaton_bool_array_hash_table* x_y_hash_table,
+		uint32_t* obdd_on_signals_indexes, uint32_t* obdd_off_signals_indexes);
 automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_context* ctx, char* name, obdd** env_theta_obdd, uint32_t env_theta_count, obdd** sys_theta_obdd, uint32_t sys_theta_count
 		, obdd** env_rho_obdd, uint32_t env_rho_count, obdd** sys_rho_obdd, uint32_t sys_rho_count, automaton_parsing_tables* tables);
 

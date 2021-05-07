@@ -14,7 +14,23 @@
 #include "automaton_composite_hash_table.h"
 #include "y.tab.h"
 
+/****************************
+ * DEBUG FLAGS
+ ****************************/
 #define VERBOSE 0
+#define DEBUG_COMPOSITION 0
+#define DEBUG_SYNTHESIS 0
+#define DEBUG_STRATEGY_BUILD 1
+#define DEBUG_COMPOSITE_TREE 0
+#define DEBUG_UNREAL 0
+#define DEBUG_DD 0
+#define PRINT_PARTIAL_SYNTHESIS 0
+#define PRINT_HTML 0
+
+
+/****************************
+ * FUNCTIONAL FLAGS
+ ****************************/
 
 #define COMPOSE_SYNCH	1
 #define PARTIAL_SHARE	2
@@ -26,22 +42,11 @@
 
 #define USE_COMPOSITE_HASH_TABLE 1
 
-#define DEBUG_COMPOSITION 0
-#define DEBUG_SYNTHESIS 0
-#define DEBUG_STRATEGY_BUILD 0
-#define DEBUG_COMPOSITE_TREE 0
-#define DEBUG_UNREAL 0
-#define DEBUG_DD 0
-
 #define BUCKET_SIZE		10000//1000000
 #define FLUENT_BUCKET_SIZE 1000//10000
 #define RANKING_BUCKET_SIZE 10000
 #define DISTANCE_BUCKET_SIZE 1000
 #define PRINT_PARTIAL_COMPOSITION 0
-
-#define PRINT_PARTIAL_SYNTHESIS 0
-
-#define PRINT_HTML 0
 
 #define AUT_TAU_CONSTANT	"<>"
 

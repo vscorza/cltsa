@@ -1,6 +1,16 @@
 TODO:
 =====
 - cltsa
+	- revisar construcción de estrategia
+		- automaton_gr1:770-834
+	- cambio en la traducción de obdds
+		- revisar tests
+		- re escribir tests
+			- de implementacion
+		- implementar cambios
+			- cambiar theta
+			- cambiar rho
+		- correr tests
 	- cambio en el algoritmo de sintesis
 		- escribir tests
 			- de implementacion
@@ -15,18 +25,12 @@ TODO:
 					- monitored transition order
 		- correr tests					
 	- traducción a lts
+		- formalizar
+			- qué pasa con estados mixtos?
 		- definir casos de estudio
 		- escribir tests
 			- de implementacion
 		- escribir traducción
-		- correr tests
-	- cambio en la traducción de obdds
-		- revisar tests
-		- re escribir tests
-			- de implementacion
-		- implementar cambios
-			- cambiar theta
-			- cambiar rho
 		- correr tests
 	- definicion de valuaciones por estados
 		- revisar tests
