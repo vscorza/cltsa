@@ -767,68 +767,55 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 					}
 					new_monitored	= false;
 					//keep min succ for each monitored option
-					for(l = 0; l < game_automaton->out_degree[current_ranking->state]; l++){
-						if(l > 0)
-							new_monitored = !(automaton_automaton_transition_monitored_eq(game_automaton,
-									&(game_automaton->transitions[current_ranking->state][l - 1]),
-									&(game_automaton->transitions[current_ranking->state][l])));
-						if(new_monitored){
-							if(min_ranking){
-								min_ranking = (automaton_ranking*)automaton_concrete_bucket_get_entry(ranking_list[succ_guarantee], current_transition->state_to);
-								min_transition	= &(game_automaton->transitions[current_ranking->state][l]);
-							}
-							if(!strategy_maps_is_set[i][min_ranking->state]){
-								strategy_maps[i][min_ranking->state]	= last_strategy_state++;
-								strategy_maps_is_set[i][min_ranking->state]	= true;
-							}
-							succ_ranking		=  (automaton_ranking*)automaton_concrete_bucket_get_entry(ranking_list[succ_guarantee], min_transition->state_to);
-							if(!strategy_maps_is_set[succ_guarantee][succ_ranking->state]){
-								strategy_maps[succ_guarantee][succ_ranking->state]	= last_strategy_state++;
-								strategy_maps_is_set[succ_guarantee][succ_ranking->state] = true;
-							}
-							automaton_transition_copy(min_transition, strategy_transition);
-							strategy_transition->state_from	= strategy_maps[i][min_ranking->state];
-							strategy_transition->state_to	= strategy_maps[succ_guarantee][succ_ranking->state];
+					if(game_automaton->out_degree[current_ranking->state] > 0){
+						for(l = 0; l <= game_automaton->out_degree[current_ranking->state]; l++){
+							if(l > 0 && l < game_automaton->out_degree[current_ranking->state])
+								new_monitored = !(automaton_automaton_transition_monitored_eq(game_automaton,
+										&(game_automaton->transitions[current_ranking->state][l - 1]),
+										&(game_automaton->transitions[current_ranking->state][l])));
+							if(new_monitored || (l == game_automaton->out_degree[current_ranking->state])){
+								if((min_ranking == NULL)){
+									current_transition	= &(game_automaton->transitions[current_ranking->state][(l == game_automaton->out_degree[current_ranking->state])? (l - 1): l]);
+									succ_ranking		=  (automaton_ranking*)automaton_concrete_bucket_get_entry(ranking_list[succ_guarantee], current_transition->state_to);
+									min_value	= succ_ranking->value;
+									min_ranking = succ_ranking;
+									min_transition	= current_transition;
+								}else{
+									succ_ranking		=  (automaton_ranking*)automaton_concrete_bucket_get_entry(ranking_list[succ_guarantee], min_transition->state_to);
+								}
+								if(!strategy_maps_is_set[i][min_ranking->state]){
+									strategy_maps[i][min_ranking->state]	= last_strategy_state++;
+									strategy_maps_is_set[i][min_ranking->state]	= true;
+								}
+								if(!strategy_maps_is_set[succ_guarantee][succ_ranking->state]){
+									strategy_maps[succ_guarantee][succ_ranking->state]	= last_strategy_state++;
+									strategy_maps_is_set[succ_guarantee][succ_ranking->state] = true;
+								}
+								automaton_transition_copy(min_transition, strategy_transition);
+								strategy_transition->state_from	= strategy_maps[i][current_ranking->state];
+								strategy_transition->state_to	= strategy_maps[succ_guarantee][succ_ranking->state];
 #if DEBUG_STRATEGY_BUILD
-							printf("(g:%d)[ADD] From (",i);
-							automaton_transition_print(min_transition, strategy->context, "", "", -1);
-							printf(") strategy transition: ");
-							automaton_transition_print(strategy_transition, strategy->context, "", "\n", __automaton_global_print_id);
+								printf("(g:%d)[ADD%s] From (",i, (l == game_automaton->out_degree[current_ranking->state])? "*" : "");
+								automaton_transition_print(min_transition, strategy->context, "", "", -1);
+								printf(") strategy transition: ");
+								automaton_transition_print(strategy_transition, strategy->context, "", "\n", __automaton_global_print_id);
 #endif
-							automaton_automaton_add_transition(strategy, strategy_transition);
-							min_value	= RANKING_INFINITY;
+								automaton_automaton_add_transition(strategy, strategy_transition);
+								min_value	= RANKING_INFINITY;
+								min_ranking = NULL;
+								min_transition	= NULL;
+							}
+							if(l < game_automaton->out_degree[current_ranking->state]){
+								current_transition	= &(game_automaton->transitions[current_ranking->state][l]);
+								succ_ranking		=  (automaton_ranking*)automaton_concrete_bucket_get_entry(ranking_list[succ_guarantee], current_transition->state_to);
+								if((min_ranking == NULL) || automaton_ranking_lt(succ_ranking, min_ranking)){
+									min_value	= succ_ranking->value;
+									min_ranking = succ_ranking;
+									min_transition	= current_transition;
+								}
+							}
 						}
-						current_transition	= &(game_automaton->transitions[current_ranking->state][l]);
-						succ_ranking		=  (automaton_ranking*)automaton_concrete_bucket_get_entry(ranking_list[succ_guarantee], current_transition->state_to);
-						if(min_ranking == NULL || new_monitored){
-							min_ranking = succ_ranking;
-							min_transition	= current_transition;
-						}else if(automaton_ranking_lt(succ_ranking, min_ranking)){
-							min_value 	= succ_ranking->value;
-							min_ranking	= succ_ranking;
-							min_transition = current_transition;
-						}
 					}
-
-					if(!strategy_maps_is_set[i][current_ranking->state]){
-						strategy_maps[i][current_ranking->state]	= last_strategy_state++;
-						strategy_maps_is_set[i][current_ranking->state]	= true;
-					}
-					succ_ranking		=  (automaton_ranking*)automaton_concrete_bucket_get_entry(ranking_list[succ_guarantee], min_transition->state_to);
-					if(!strategy_maps_is_set[succ_guarantee][succ_ranking->state]){
-						strategy_maps[succ_guarantee][succ_ranking->state]	= last_strategy_state++;
-						strategy_maps_is_set[succ_guarantee][succ_ranking->state] = true;
-					}
-					automaton_transition_copy(min_transition, strategy_transition);
-					strategy_transition->state_from	= strategy_maps[i][min_ranking->state];
-					strategy_transition->state_to	= strategy_maps[succ_guarantee][succ_ranking->state];
-#if DEBUG_STRATEGY_BUILD
-					printf("(g:%d)[ADD*] From (",i);
-					automaton_transition_print(min_transition, strategy->context, "", "", -1);
-					printf(") strategy transition: ");
-					automaton_transition_print(strategy_transition, strategy->context, "", "\n", __automaton_global_print_id);
-#endif
-					automaton_automaton_add_transition(strategy, strategy_transition);
 					//add initial state if not already added
 					if(strategy->initial_states_count == 0 && current_ranking->state == game_automaton->initial_states[0]){
 #if DEBUG_STRATEGY_BUILD
@@ -836,103 +823,6 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 #endif
 						automaton_automaton_add_initial_state(strategy, strategy_maps[i][current_ranking->state]);
 					}
-
-					/*
-					for(l = 0; l < game_automaton->out_degree[current_ranking->state]; l++){
-						current_transition	= &(game_automaton->transitions[current_ranking->state][l]);
-						succ_ranking		=  (automaton_ranking*)automaton_concrete_bucket_get_entry(ranking_list[succ_guarantee], current_transition->state_to);
-						//TODO: check this condition
-						if(succ_ranking == NULL){
-							continue;
-						}
-						//check if succ ranking is better than current
-						if(!is_controllable
-						||
-						(may_increase && succ_ranking->value != RANKING_INFINITY)
-						||
-						(
-							!may_increase
-							&&
-							(
-								(
-									(
-										((succ_ranking->value != RANKING_INFINITY) && (current_ranking->value > succ_ranking->value))
-										||
-										(
-											current_ranking->value == RANKING_INFINITY
-											&& succ_ranking->value != RANKING_INFINITY
-										)
-									)
-									||
-									(
-										(current_ranking->value == succ_ranking->value)
-										&&
-										(current_ranking->assumption_to_satisfy > succ_ranking->assumption_to_satisfy)
-									)
-								)
-								||
-								(
-									(current_ranking->assumption_to_satisfy == succ_ranking->assumption_to_satisfy)
-									&&
-									(current_ranking->value == succ_ranking->value)
-									&&
-									(!automaton_bucket_has_entry(game_automaton->inverted_valuations[assumptions_indexes[current_ranking->assumption_to_satisfy]], current_ranking->state))
-								)
-							)
-						))
-						{
-							if(!strategy_maps_is_set[i][current_ranking->state]){
-								strategy_maps[i][current_ranking->state]	= last_strategy_state++;
-								strategy_maps_is_set[i][current_ranking->state]	= true;
-							}
-							if(!strategy_maps_is_set[succ_guarantee][succ_ranking->state]){
-								strategy_maps[succ_guarantee][succ_ranking->state]	= last_strategy_state++;
-								strategy_maps_is_set[succ_guarantee][succ_ranking->state] = true;
-							}
-							bool is_input	= false;
-							automaton_transition_copy(current_transition, strategy_transition);
-							strategy_transition->state_from	= strategy_maps[i][current_ranking->state];
-							strategy_transition->state_to	= strategy_maps[succ_guarantee][succ_ranking->state];
-							for(m = 0; m < (ctx)->global_alphabet->count; m++){
-								if(TEST_TRANSITION_BIT(current_transition, m)){
-									automaton_signal_event * evt =
-											&(ctx->global_alphabet->list[m]);
-									if(evt->type == INPUT_SIG){
-										is_input = true;
-										break;
-									}
-								}
-							}
-							if((!is_controllable && (is_input || TRANSITION_IS_INPUT(current_transition))) || (succ_ranking->value != RANKING_INFINITY && !(!is_controllable && !is_input))){
-#if DEBUG_STRATEGY_BUILD
-								printf("(g:%d)[ADD] From (",i);
-								automaton_transition_print(current_transition, strategy->context, "", "", -1);
-								printf(") strategy transition: ");
-								automaton_transition_print(strategy_transition, strategy->context, "", "\n", __automaton_global_print_id);
-#endif
-								automaton_automaton_add_transition(strategy, strategy_transition);
-
-							}
-#if DEBUG_STRATEGY_BUILD
-							else{
-								printf("(g:%d)[INF] From(",i);
-								automaton_transition_print(current_transition, strategy->context, "", "", -1);
-								printf(")strategy transition:");
-								automaton_transition_print(strategy_transition, strategy->context, "", "\n", __automaton_global_print_id);
-							}
-#endif
-
-							//add initial state if not already added
-							if(strategy->initial_states_count == 0 && current_ranking->state == game_automaton->initial_states[0]){
-#if DEBUG_STRATEGY_BUILD
-								printf("(g:%d)[INI] Initial state added as %d\n",i, strategy_maps[i][current_ranking->state]);
-#endif
-								automaton_automaton_add_initial_state(strategy, strategy_maps[i][current_ranking->state]);
-							}
-						}
-					}
-					*/
-
 				}
 			}
 		}

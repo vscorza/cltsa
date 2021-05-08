@@ -1797,6 +1797,9 @@ void run_functional_tests(){
 	run_automaton_composite_hash_table_tests();
 	run_automaton_export_test();
 	run_automaton_import_test();
+	//GR1 TESTS
+	run_ranking_arithmetic_tests();
+	run_gr1_initialization_tests();
 	//DRY TESTS
 	run_parse_test("tests/composition_types.fsp", "compositions type");
 	run_parse_test("tests/biscotti.fsp", "biscotti");
@@ -1815,8 +1818,8 @@ void run_functional_tests(){
 	run_parse_test("tests/genbuf_2_sndrs_debug.fsp", "GenBuf 2 sndrs(debug version)");//GENBUF 2 Sndrs debug version
 	run_parse_test("tests/nonreal_test_1.fsp", "non realizable test 1");
 	run_parse_test("tests/localizer.fsp", "non realizable localizer test");
-	run_parse_test("tests/exploration-robot-realizable_test.fsp", "realizable exploration robot test");
-	run_parse_test("tests/exploration-robot-unrealizable_test.fsp", "unrealizable exploration robot test");
+	//run_parse_test("tests/exploration-robot-realizable_test.fsp", "realizable exploration robot test");
+	//run_parse_test("tests/exploration-robot-unrealizable_test.fsp", "unrealizable exploration robot test");
 }
 void run_load_tests(){
 	run_parse_test("tests/k_10_100_graph.fsp",  "k 10, 100 graph tests");

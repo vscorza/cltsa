@@ -24,5 +24,10 @@ ltl fluent Ass = (x).
 ltl fluent Goal	= (y).
 
 |f| ENV =(AUTOMATA ||_c GAME_LTL).
+
 |gr1| <{F_Ass}><{F_Goal, Goal}> STRAT = ENV.
 
+ENV >> "/tmp/mixed_signals_ENV_G.rep".
+STRAT >> "/tmp/mixed_signals_strat.rep".
+AUTOMATA >> "/tmp/mixed_signals_automata.rep".
+GAME_LTL >> "/tmp/mixed_signals_game_ltl.rep".

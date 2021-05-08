@@ -1,32 +1,16 @@
 TODO:
 =====
 - cltsa
-	- revisar construcción de estrategia
-		- automaton_gr1:770-834
+	- mixed-signals 
+		- está agregando 2 a y 2 b por composicion entre game_ltl y automata _c
 	- cambio en la traducción de obdds
 		- revisar tests
-		- re escribir tests
-			- de implementacion
-		- implementar cambios
-			- cambiar theta
-			- cambiar rho
-		- correr tests
-	- cambio en el algoritmo de sintesis
-		- escribir tests
-			- de implementacion
-				- automaton_ranking_tests
-					X eq
-					X gt
-					- increment
-					- update
-					- add_unstable_pred
-					- best_successor
-					- is_stable
-					- monitored transition order
-		- correr tests					
 	- traducción a lts
 		- formalizar
 			- qué pasa con estados mixtos?
+			- ejemplo biscotti
+				- revisar legalidad asynch/synch
+				- hay noción superadora o son semánticas distintas?
 		- definir casos de estudio
 		- escribir tests
 			- de implementacion

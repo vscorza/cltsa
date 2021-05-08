@@ -156,42 +156,16 @@ int main (int argc, char** argv){
 		//run_parse_test("tests/konighoefer_examples.fsp", "non realizable test 1 konig");
 		//GENERAL TESTS
 		//run_all_tests();
+
 		//run_functional_tests();
 
-		/*
-		run_obdd_tree_tests();
-		run_small_obdd_tests();
-		run_next_obdd_tests();
-		run_obdd_tests();
-		run_obdd_valuations();
-		run_obdd_exists();
-		run_automaton_string_list_test();
-		run_concrete_bucket_list_tests();
-		run_ordered_list_tests();
-		run_max_heap_tests();
-		run_report_tests();
-		run_fast_pool_tests();
-		run_bool_array_hash_table_tests();
-		run_obdd_cache_tests();
-		run_obdd_fast_lists_tests();
-		run_automaton_composite_hash_table_small_tests();
-		run_automaton_composite_hash_table_tests();
-		run_automaton_export_test();
-		run_automaton_import_test();
-		*/
-		//DRY TESTS
-		//run_parse_test("tests/composition_types.fsp", "compositions type");
-		run_parse_test("tests/biscotti.fsp", "biscotti");
-		/*
-		run_parse_test("tests/ranges_1.fsp",  "range tests 1");
-		run_parse_test("tests/ranges_2.fsp",  "range 2 test");
-		run_parse_test("tests/ranges_3.fsp",  "range 3 test");
-		run_parse_test("tests/ranges_4.fsp",  "range 4 test");
-		run_parse_test("tests/ranges_5.fsp",  "range 5 test");
-		run_parse_test("tests/ranges_6.fsp",  "range 6 test");
-		run_ranking_arithmetic_tests();
-		run_gr1_initialization_tests();
-*/
+		run_parse_test("tests/exploration-robot-realizable_test.fsp", "realizable exploration robot test");
+		//run_parse_test("tests/exploration-robot-unrealizable_test.fsp", "unrealizable exploration robot test");
+
+/*
+	*/
+
+
 		//run_parse_test("tests/biscotti.fsp", "biscotti");
 		//run_parse_test("tests/current_sut.fsp", "current_SUT");
 		//run_automaton_composite_hash_table_tests();

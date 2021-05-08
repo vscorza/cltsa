@@ -154,7 +154,7 @@ void automaton_add_transition_from_obdd_valuation(obdd_mgr* mgr, automaton_autom
 	bool has_transition;
 	//xy ->xy'
 	//automaton_set_composed_valuation(env_state->valuation, valuations, i, false, true, x_y_x_p_alphabet, x_count, y_count);
-	for(j = 0; j < x_y_count; j++)to_state->valuation[j]	= valuation[x_y_count + j];
+	for(j = 0; j < x_y_count; j++)to_state->valuation[j]	= valuation[j];
 	for(j = 0; j < x_y_count; j++)from_state->valuation[j]	= valuation[j];
 #if DEBUG_LTL_AUTOMATON
 	printf("sys val.:");
