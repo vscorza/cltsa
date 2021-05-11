@@ -3,6 +3,7 @@ TODO:
 - cltsa
 	- mixed-signals 
 		- está agregando 2 a y 2 b por composicion entre game_ltl y automata _c
+		- problema en el signal index del automata que viene de ltl, revisar volcado y alfabetos locales
 	- cambio en la traducción de obdds
 		- revisar tests
 	- traducción a lts

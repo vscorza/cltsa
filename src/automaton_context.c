@@ -502,6 +502,7 @@ automaton_alphabet* automaton_parsing_tables_get_global_alphabet(automaton_parsi
 				sig_event = automaton_signal_event_create(signal_name, is_controllable? OUTPUT_SIG : INPUT_SIG);
 				automaton_alphabet_add_signal_event(global_alphabet, sig_event);
 				automaton_signal_event_destroy(sig_event, true);
+				/*
 				strcpy(signal_name, global_values[i]);
 				strcat(signal_name, SIGNAL_PRIME_SUFFIX);
 				strcat(signal_name, SIGNAL_ON_SUFFIX);
@@ -514,6 +515,7 @@ automaton_alphabet* automaton_parsing_tables_get_global_alphabet(automaton_parsi
 				sig_event = automaton_signal_event_create(signal_name, is_controllable? OUTPUT_SIG : INPUT_SIG);
 				automaton_alphabet_add_signal_event(global_alphabet, sig_event);
 				automaton_signal_event_destroy(sig_event, true);
+				*/
 			}
 	}
 	return global_alphabet;

@@ -74,7 +74,7 @@
 #define TRANSITION_IS_INPUT(transition)	(((transition)->signals[0]&((signal_bit_array_t)0x1))==true)
 #define TRANSITION_SET_INPUT(transition)	(transition)->signals[0] |= ((signal_bit_array_t)0x1);
 #define TRANSITION_CLEAR_INPUT(transition)	(transition)->signals[0] &= ~((signal_bit_array_t)0x1);
-#define TRANSITION_EQUALS(t1, t2, result) result = true; result &= t1->state_from == t2->state_from; result &= t1->state_to == t2->state_to; uint32_t _p_ = 0;  for(_p_ = 0; _p_ < FIXED_SIGNALS_COUNT; _p_++)result &= t1->signals[_p_] == t2->signals[_p_];
+#define TRANSITION_EQUALS(t1, t2, result) result = true; result &= t1->state_from == t2->state_from; result &= t1->state_to == t2->state_to; uint32_t _p_ = 0;  for(_p_ = 0; (_p_ < FIXED_SIGNALS_COUNT) && result; _p_++)result &= (t1->signals[_p_] == t2->signals[_p_]);
 
 #define AUT_SER_OBJ_START "<"
 #define AUT_SER_OBJ_END ">"
