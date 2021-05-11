@@ -27,6 +27,11 @@
 #define PRINT_PARTIAL_SYNTHESIS 0
 #define PRINT_HTML 0
 
+#define DEBUG_PARSE_STATES 0
+#define DEBUG_LTL_AUTOMATON 1
+#define DEBUG_OBDD_DEADLOCK 0
+#define DEADLOCK_TRACE_COUNT 0
+
 
 /****************************
  * FUNCTIONAL FLAGS

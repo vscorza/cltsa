@@ -122,6 +122,10 @@ S_72 = (<>-> S_19|<f1.on,f2.off>-> S_22),
 S_73 = (<>-> S_28|<f1.on,f2.off>-> S_15).
 
 STRAT >> "/tmp/two_lifts_strat.rep".
+GAME_LTL >> "/tmp/two_lifts_game_ltl.rep".
+GAME_FSP >> "/tmp/two_lifts_game_fsp.rep".
+STRAT >> "/tmp/two_lifts_strat.rep".
+STRAT_P >> "/tmp/two_lifts_strat_p.rep".
 //TESTS
 equals FATAL_Game_Lift_2_FSP_VS_LTL(GAME_LTL, GAME_FSP).
 equals FATAL_Game_Lift_2_STRAT_VS_STRAT_p(STRAT, STRAT_p).
