@@ -157,8 +157,8 @@ int main (int argc, char** argv){
 		//GENERAL TESTS
 		//run_all_tests();
 
-		//run_functional_tests();
-		run_parse_test("tests/two_floors_lift.fsp", "lift 2 floors");//lift 2 floors
+		run_functional_tests();
+		//run_parse_test("tests/two_floors_lift.fsp", "lift 2 floors");//lift 2 floors
 
 		//run_parse_test("tests/mixed_3_signals_2_labels.fsp", "mixed model 3 signals 2 labels");//mixed model 3 signals 2 labels
 		//run_parse_test("tests/exploration-robot-unrealizable_test.fsp", "unrealizable exploration robot test");
