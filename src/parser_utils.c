@@ -43,9 +43,14 @@ void automaton_program_add_obdd_primed_variables(){
 	int32_t i, old_size = dict->size;
 	char prime_name[255];
 	for (i = 2; i < old_size; i++){
-		strcpy(prime_name, dict->entries[i].key);
-		strcat(prime_name, SIGNAL_PRIME_SUFFIX);
-		parser_add_primed_variables(dictionary_add_entry(dict, prime_name), dict->entries[i].value);
+		char *substr	= strstr(dict->entries[i].key, SIGNAL_PRIME_SUFFIX);
+		int position = substr - dict->entries[i].key;
+		bool is_suffix = position == (strlen(dict->entries[i].key) - strlen(SIGNAL_PRIME_SUFFIX));
+		if(substr == NULL || (!is_suffix)){
+			strcpy(prime_name, dict->entries[i].key);
+			strcat(prime_name, SIGNAL_PRIME_SUFFIX);
+			parser_add_primed_variables(dictionary_add_entry(dict, prime_name), dict->entries[i].value);
+		}
 	}
 }
 automaton_set_syntax* automaton_set_syntax_create_concurrent(char* string_terminal, automaton_indexes_syntax* indexes){

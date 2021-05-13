@@ -123,8 +123,24 @@ orderExp:
 	'{' orderedVariables '}'				{}
 	;
 orderedVariables:
-	t_IDENT '<' orderedVariables			{dictionary_add_entry(parser_get_obdd_mgr()->vars_dict, $1);free($1);}											
-	|t_IDENT								{dictionary_add_entry(parser_get_obdd_mgr()->vars_dict, $1);free($1);}
+	t_IDENT '<' orderedVariables			{
+	
+												uint32_t var_ID = dictionary_add_entry(parser_get_obdd_mgr()->vars_dict, $1);
+												char prime_name[255];
+												strcpy(prime_name, $1);
+												strcat(prime_name, SIGNAL_PRIME_SUFFIX);
+												parser_add_primed_variables(dictionary_add_entry(parser_get_obdd_mgr()->vars_dict, prime_name), var_ID);
+												free($1);
+											}											
+	|t_IDENT								{
+	
+												uint32_t var_ID = dictionary_add_entry(parser_get_obdd_mgr()->vars_dict, $1);
+												char prime_name[255];
+												strcpy(prime_name, $1);
+												strcat(prime_name, SIGNAL_PRIME_SUFFIX);
+												parser_add_primed_variables(dictionary_add_entry(parser_get_obdd_mgr()->vars_dict, prime_name), var_ID);
+												free($1);
+											}
 	|										{}
 	;
 setDef:

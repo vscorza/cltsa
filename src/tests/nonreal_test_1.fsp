@@ -46,6 +46,7 @@ S_14 = (<x1.off,x2.on>-> S_15),
 S_15 = (<>-> S_11).
 
 DIAG >> "/tmp/non_real_strat_diag.rep".
+TEST >> "/tmp/non_real_test.rep".
 
 // tests
 equals FATAL_Non_Real_Test_1_Diag(STRAT,DIAG).
