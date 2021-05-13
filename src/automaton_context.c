@@ -2400,10 +2400,17 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 				}
 			}
 #if VERBOSE
-			if(winning_region_automaton->transitions_count == 0){
-				printf("[Unreal.] %s over %s is NOT REALIZABLE\n", gr1_game->name, game_automaton->name);
-			}else{
+
+			/*if(winning_region_automaton->transitions_count == 0){
+			printf("[Unreal.] %s over %s is NOT REALIZABLE\n", gr1_game->name, game_automaton->name);
+		}else{
+			printf("[Real.] %s over %s is REALIZABLE\n", gr1_game->name, game_automaton->name);
+		}		*/
+			if((winning_region_automaton->transitions_count != 0
+					&& winning_region_automaton->out_degree[winning_region_automaton->initial_states[0]] > 0)){
 				printf("[Real.] %s over %s is REALIZABLE\n", gr1_game->name, game_automaton->name);
+			}else{
+				printf("[Unreal.] %s over %s is NOT REALIZABLE\n", gr1_game->name, game_automaton->name);
 			}
 #endif
 			if(winning_region_automaton->transitions_count == 0 && is_diagnosis != 0){

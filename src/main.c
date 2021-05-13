@@ -158,8 +158,12 @@ int main (int argc, char** argv){
 		//run_all_tests();
 
 		run_functional_tests();
+
+		//run_parse_test("tests/nonreal_test_1.fsp", "non realizable test 1");
 		//run_parse_test("tests/mixed_3_signals_2_labels.fsp", "mixed model 3 signals 2 labels");//mixed model 3 signals 2 labels
 		//run_parse_test("tests/two_floors_lift.fsp", "lift 2 floors");//lift 2 floors
+		//run_parse_test("tests/nonreal_test_1_realizable_version.fsp", "non realizable test 1 (realizable version)");
+		//run_parse_test("tests/nonreal_test_2_realizable_version.fsp", "non realizable test 2 (realizable version)");
 		//run_parse_test("tests/nonreal_test_1.fsp", "non realizable test 1");
 
 		//run_parse_test("tests/exploration-robot-unrealizable_test.fsp", "unrealizable exploration robot test");

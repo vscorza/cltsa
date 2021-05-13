@@ -118,7 +118,13 @@ bool automaton_add_transition_from_valuations(obdd_mgr* mgr, automaton_automaton
 	bool obdd_sat_vector = false;
 	if(!has_transition){
 #if DEBUG_LTL_AUTOMATON
-		printf("% V:");
+	printf("(");
+	for(i = 0; i < x_y_count; i++)
+		printf("%s", to_valuation[i]?"1":"0");
+	printf(")(");
+	for(i = 0; i < x_y_count; i++)
+		printf("%d", x_y_alphabet[i]);
+	printf(")V:");
 #endif
 		for(i = 0; i < fluent_count; i++){
 			fluent_index	= GET_STATE_FLUENT_INDEX(fluent_count, to_state, i);
@@ -623,6 +629,9 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	printf("]\nXY alphabet\n[");
 	for(i = 0; i < x_y_count; i++)
 		printf("%s%s", mgr->vars_dict->entries[x_y_alphabet[i]].key, i == x_y_count - 1 ? "" : ",");
+	printf("]\nXY ordered alphabet\n[");
+	for(i = 0; i < x_y_count; i++)
+		printf("%s%s", mgr->vars_dict->entries[x_y_alphabet_o[i]].key, i == x_y_count - 1 ? "" : ",");
 	printf("]\nXYX'Y' alphabet\n[");
 	for(i = 0; i < signals_count; i++)
 		printf("%s%s", mgr->vars_dict->entries[signals_alphabet[i]].key, i == signals_count - 1 ? "" : ",");
@@ -660,9 +669,9 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 		current_var		= 0;
 		var_initialized	= false;
 		for(j = 0; j < x_y_count; j++){
-			if(x_y_alphabet[j] > last_var && (x_y_alphabet[j] < current_var || !var_initialized)){
+			if(x_y_alphabet_o[j] > last_var && (x_y_alphabet_o[j] < current_var || !var_initialized)){
 				var_initialized	= true;
-				current_var		= x_y_alphabet[j];
+				current_var		= x_y_alphabet_o[j];
 				biggest_index	= (int32_t)j;
 			}
 		}
@@ -855,7 +864,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 		has_transition	= automaton_add_transition_from_valuations(mgr, ltl_automaton, 0, sys_state->state
 				, env_state->valuation, hashed_valuation, true, true
 				, x_y_count, x_count
-				, obdd_on_signals_indexes, obdd_off_signals_indexes, x_y_alphabet, x_y_order);
+				, obdd_on_signals_indexes, obdd_off_signals_indexes, x_y_alphabet_o, x_y_order);
 		if(!has_transition){
 #if DEBUG_LTL_AUTOMATON
 			printf("(%d-[", sys_state->state);
@@ -912,7 +921,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 #endif
 	automaton_add_transitions_from_valuations(mgr, env_sys_rho_composed, ltl_automaton, &current_valuations_count,
 			dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes, env_state, sys_state, obdd_state_map, x_y_count, x_count,
-			x_y_alphabet, x_y_order, signals_count, hashed_valuation, x_y_hash_table,
+			x_y_alphabet_o, x_y_order, signals_count, hashed_valuation, x_y_hash_table,
 			obdd_on_signals_indexes, obdd_off_signals_indexes);
 #if VERBOSE || DEBUG_LTL_AUTOMATON
 	//TODO:print cache table info
