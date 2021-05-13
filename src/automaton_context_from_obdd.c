@@ -607,7 +607,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	bool *hashed_valuation = NULL;
 
 
-#if DEBUG_LTL_AUTOMATON || 1
+#if DEBUG_LTL_AUTOMATON
 	printf("OBDD mgr dict order\n[");
 	for(i = 0; i < mgr->vars_dict->size; i++)
 			printf("%s%s", mgr->vars_dict->entries[i].key, i == mgr->vars_dict->size - 1 ? "" : ",");
