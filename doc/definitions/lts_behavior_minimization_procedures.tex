@@ -1,0 +1,204 @@
+
+The strategy to find a minimal non realizable control problem is to incrementally remove transitions preserving an alternating Sub-LTS relation until a local minimum is reached.  A minimal non realizable control problem is reached when any further reduction of the current Sub-LTS renders the problem realizable.
+The first procedure explores the semi-lattice defined by Alternating Sub-LTS relation starting with the original automaton and moving downwards by performing minimal reductions. 
+
+\begin{figure}[bt]
+	\centering
+	\SmallPicture
+	%\ShowFrame
+	\VCDraw{
+		\begin{VCPicture}{(-4,-2.2)(4,4)}
+			\SetEdgeLabelScale{1.4}
+			\State[1]{(-3,0)}{1}
+			\State[2]{(0,2)}{2}        
+			\State[3]{(3,4)}{3}
+			\State[4]{(3,2)}{4}        
+			\State[5]{(0,0)}{5}                
+			\State[6]{(3,0)}{6}                        
+			\State[7]{(0,-2)}{7}                                
+			\State[8]{(3,-2)}{8}                                        
+			\Initial[w]{1}
+			\EdgeL{1}{2}{u_1}
+			\EdgeL{1}{5}{u_2}						
+			\LoopE{6}{g}
+			\EdgeL{1}{7}{u_3}										
+			\ChgEdgeLineStyle{dashed} 
+			\EdgeL{2}{3}{c_1}		
+			\EdgeL{2}{4}{c_2}				
+			\EdgeL{5}{6}{c_1}								
+			\EdgeL{7}{8}{c_2}												
+		\end{VCPicture}
+	}
+	\caption{Several conflicts example ($E$).}
+	\label{fig:fig.several-conflicts}
+	\MediumPicture
+\end{figure}
+
+\begin{figure}[bt]
+	\centering
+	\SmallPicture
+	%\ShowFrame
+	\VCDraw{
+		\begin{VCPicture}{(-4,-1.2)(4,2)}
+			\SetEdgeLabelScale{1.4}
+			\State[1]{(-3,0)}{1}
+			\State[2]{(0,0)}{2}        
+			\State[3]{(3,2)}{3}
+			\State[4]{(3,0)}{4}        
+			\Initial[w]{1}
+			\EdgeL{1}{2}{u_1}
+			\ChgEdgeLineStyle{dashed} 
+			\EdgeL{2}{3}{c_1}		
+			\EdgeL{2}{4}{c_2}				
+		\end{VCPicture}
+	}
+	\caption{Several conflicts example minimization($E_1$).}
+	\label{fig:fig.several-conflicts-min1}
+	\MediumPicture
+\end{figure}
+
+\begin{figure}[bt]
+	\centering
+	\SmallPicture
+	%\ShowFrame
+	\VCDraw{
+		\begin{VCPicture}{(-4,-.6)(4,1)}
+			\SetEdgeLabelScale{1.4}
+			\State[1]{(-3,0)}{1}
+			\State[7]{(0,0)}{7}        
+			\State[8]{(3,0)}{8}        
+			\Initial[w]{1}
+			\EdgeL{1}{7}{u_3}
+			\ChgEdgeLineStyle{dashed} 
+			\EdgeL{7}{8}{c_2}				
+		\end{VCPicture}
+	}
+	\caption{Several conflicts example minimization($E_2$).}
+	\label{fig:fig.several-conflicts-min2}
+	\MediumPicture
+\end{figure}
+
+Consider the example of Figure~\ref{fig:fig.several-conflicts} where the system has to satisfy the liveness goal of
+achieving $g$ infinitely often (expressed
+by the LTL formula $\square \Diamond g$)
+with $\Sigma = \{u_1, u_2, u_3, c_1, c_2, g\}$ and 
+$\mathcal{C} = \{c_1, c_2, g\}$, the original LTS $E$ will be
+at the top of the semi lattice while $E_1$ (depicted in figure \ref{fig:fig.several-conflicts-min1}) and $E_2$ (depicted in 
+figure \ref{fig:fig.several-conflicts-min2}) will be at 
+the bottom.  In between there is, for example, the Alternating Sub-LTSs
+obtained by removing just one non controllable transition.  
+The automaton obtained by removing $\{u_1, u_3\}$ is not shown
+since it is realizable. 
+
+\begin{figure}[ht]
+	\begin{center}
+		\input{dfscode} 
+		\caption{Minimization Algorithm}
+		\label{fig:dfs-code}
+	\end{center}
+\end{figure}
+
+We can now describe the algorithm as
+presented in figure \ref{fig:dfs-code}. The algorithm first removes all controllable transitions from
+mixed states A, this step can be performed since it
+can be interpreted as the successive removals of controllable 
+transitions with each satisfying the Alternating Sub-LTS definition 
+and preserving non realizability because if it was non realizable
+for the mixed state it will remain non realizable when the controllable transitions are removed since int the game built from
+the automaton at each mixed state the environment
+wins the race condition, always picking the next move when allowed.
+The next step initializes the set of 
+candidate transitions
+for removal at B and the effective list
+to be removed at each iteration \texttt{to\_remove} at
+C.  The latter keeps track of the transitions
+removed along our search down the space of
+Alternating Sub-LTSs for $E$.  The exploration
+will continue until the candidate set is empty.
+At each cycle starting at D the set is updated E by 
+removing those transitions that were already removed by the reduction
+at F or because they would induce a deadlock 
+($d_{out}(E', t.from) == 1$ checks if there is only one
+outgoing transition in the state from which \textbf{t} originates).
+The
+reduction, at F, looks for the closest
+Alternating Sub-LTS obtained after removing 
+transitions in \texttt{to\_remove} from $E$.
+Then it checks for realizability G.  If the control problem is non
+realizable the candidate set and the last 
+Alternating Sub-LTS $E'$ are updated (since further minimization is 
+possible), otherwise a one step backtrack
+is triggered by removing the transition under test from
+the effective set \texttt{to\_remove} H.
+This is actually the backtracking point where the algorithm
+shifts the search sideways in the semi-lattice instead of downwards.
+Once the candidate set has been completely explored
+the last non realizability preserving LTS $E'$ is
+returned as a minimal Alternating Sub-LTS
+for $E$ and $\mathcal{C}$ I.
+Notice that
+in the step H the transition $t$ was removed
+from the candidate set but was retained in $E'$.  What happens if
+the transition could have been removed further down the semi lattice?  Removing $t$ from $E'$ and reducing the Alternating Sub-LTS 
+$E_{new}$ accordingly would render the control problem realizable.  Suppose that
+the search continued preserving $t$ and removing other candidates
+$t_1, \ldots, t_n$ from $E'$ getting the Alternating Sub-LTS
+$E_{1,\ldots,n}$ that still contains $t$ while preserving non realizability.
+If we were to remove $t$ from $E_{1,\ldots,n}$ after reducing it
+to the closest Alternating Sub-LTS we would get a new LTS
+$E'_{new}$ that can be Alternating Sub-LTS for $E_{new}$, and from lemma
+\ref{def:induction-preserves} it will render the control problem
+realizable.  We showed this way that if we are looking for just one
+conflict we can immediately remove the transition that yielded realizability 
+from the candidate set without jeopardizing minimality.
+%\input{optimizations}
+The procedure is complete w.r.t to the problem statement because
+if a solution for the problem exists (for the sake of simplicity
+suppose that there is only one possible minimal alternating sub-LTS $E'$
+satisfying unrealizability), then the algorithm will effectively, and progressively,
+reduce it to $E'$, if the problem has multiple solutions the
+algorithm will yield one of those.
+
+The procedure is sound w.r.t to the problem statement since 
+at every step it holds that $E' \sublts E$ so the alternating condition
+is met.  The realizability check ensures that the output keeps the
+control problem unrealizable, and the minimality is satisfied by
+checking that every closest alternating sub-LTS is realizable at the
+final iteration in conjunction with lemma  ~\ref{def:induction-preserves}.\\
+
+We introduced two modifications to the algorithm
+to improve the time taken to compute the minimization.
+The first optimization transforms the candidate set $\mathcal{T}_u$
+into a list and orders it according to the distance of its elements 
+with respect to the initial state.  The idea is to try and cut
+as aggressively as possible first and see if a big cut still
+preserves the non realizability cause.  The second optimization
+looks for non controllable strips within the  input automaton
+$E$, that is, sequences of non controllable actions without branches.
+For each of these sequences only one action is
+added to $\mathcal{T}_u$ since, if removed from $E'$
+when looking for a minimal sub LTS all the others have to be removed
+as well to preserve alternation.
+
+Lemma ~\ref{def:induction-preserves} shows that we can keep removing
+elements from a set $\mathcal{T}_u$ of candidate non controllable
+transitions, reducing $E$ to its closest Alternating Sub-LTS.
+Once we can not,
+while preserving non-realizability, remove
+anything else we have reached an Alternating Sub-LTS that is also minimal.
+This follows from the fact that
+no closest Alternating Sub-LTS exists bellow it that preserves non realizability.
+If all the closest Alternating Sub-LTSs in its neighborhood 
+are realizable the current LTS is minimal.
+
+
+\begin{lemma}\label{def:induction-preserves}(\emph{Alternating Sub-LTSs preserve realizability})
+	Let $E$ be the LTS for the non realizable control problem
+	$\mathcal{I}=<E,\mathcal{C}, \varphi>$, and $E_1$, $E_2$ two LTSs s.t. 
+	$E_2 \sublts E_1 \sublts E$ and
+	$\mathcal{I}_1=<E_1, \mathcal{C}, \varphi>$, $\mathcal{I}_2=<E_2, \mathcal{C}, \varphi>$, if $\mathcal{I}_1$ is realizable then $\mathcal{I}_2$ is also realizable.
+\end{lemma}
+
+
+The second procedure uses the Delta Debugging technique presented in ~\cite{DBLP:journals/tse/ZellerH02} to accelerate the search space exploration. Instead of reducing the automaton by applying an atomic reduction at a time Delta Debugging tries to achieve a minimal diagnosis by partitioning the problem $\Delta$ into $n$ uniform subsets ($\Delta = \bigcup_{i=1}^n \Delta_i $) and then it first checks its elements $\Delta_i$ for a non realizable smaller case, if none is found it proceeds by looking at the complement $\Delta \setminus \Delta_i$ of each element in the partition. If no smaller candidate was found it increases the granularity by updating $n$ as $max(2n,|\Delta|)$. This cycle is repeated until $n$ can not be further increased ($n \geq |\Delta|$). 
+In our application of Delta Debugging the set $\Delta$ is the set of non controllable transitions in the original plant. Instead of descending regularly down the semi lattice, Delta Debugging tries to jump further down by removing a subset of transitions from the current candidate. We can briefly prove that the application of the technique is sound since Delta Debugging ensures 1-minimality, i.e. that removing any single element from the resulting minmization breaks non realizability which in conjunction with lemma ~\ref{def:induction-preserves} implies minimality.

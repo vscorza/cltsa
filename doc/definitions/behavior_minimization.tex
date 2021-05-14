@@ -1,0 +1,16 @@
+
+In this section we formalize the problem of minimizing behavior while preserving unrealizability. In the next section we define a minimization procedure.
+
+Assume an unrealizable specification of the form $\mathcal{I} = <E, \mathcal{C}, \varphi>$. Our aim is to automatically produce an unrealizable specification $\mathcal{I'} = <E', \mathcal{C}, \varphi>$ where $E'$ has less behavior than $E$ and the witnesses for the unrealizablity of $\mathcal{I'}$ (i.e., the counter strategies) are also witnesses for the unrealizability of $\mathcal{I}$.  Furthermore, we aim for $E'$ to be minimal in the sense that it cannot be further reduced while having its associated counter strategies preserved in  $\mathcal{I}$.
+Thus, an engineer focusing on why  $\mathcal{I'}$ is unrealizable can gain insight on why $\mathcal{I}$ is unrealizable. 
+We will first introduce the definitions and techniques related to LTS control problems behavior minimization and then their CLTS counterparts.
+
+\subsection{LTS behavior minimization}
+\input{lts_behavior_minimization}
+\subsection{LTS Behavior Minimization Procedures}
+\input{lts_behavior_minimization_procedures}
+
+\subsection{CLTS behavior minimization}
+\input{clts_behavior_minimization}
+\subsection{CLTS Behavior Minimization Procedures}
+\input{clts_behavior_minimization_procedures}
