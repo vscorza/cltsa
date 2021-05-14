@@ -1,20 +1,23 @@
 TODO:
 =====
+- redefinir recortes para clts
+	- definiciones
+		- pasar minimization a definitions
+		- pasar de games a clts
+		- redefinir sub-game
+		- re-escribir demos y demás
+	- pruebas
+		- desarrollar
+- implementar recortes para clts
+	- revisar tests
+	- definir casos de estudio
+	- re escribir tests
+		- de implementacion
+		- de casos de estudio
+	- implementar cambios
+		- cambiar estrategia de recorte de a un paso
+	- correr tests
 - cltsa
-	- analyze and study old version of automaton_add_transitions_from_valuations
-	- cambio en la traducción de obdds
-		- revisar tests
-	- traducción a lts
-		- formalizar
-			- qué pasa con estados mixtos?
-			- ejemplo biscotti
-				- revisar legalidad asynch/synch
-				- hay noción superadora o son semánticas distintas?
-		- definir casos de estudio
-		- escribir tests
-			- de implementacion
-		- escribir traducción
-		- correr tests
 	- definicion de valuaciones por estados
 		- revisar tests
 		- definir casos de estudio
@@ -27,25 +30,22 @@ TODO:
 			- conversión a modelos
 			- composición		
 		- correr tests
+	- traducción a lts
+		- formalizar
+			- qué pasa con estados mixtos?
+			- ejemplo biscotti
+				- revisar legalidad asynch/synch
+				- hay noción superadora o son semánticas distintas?
+		- definir casos de estudio
+		- escribir tests
+			- de implementacion
+		- escribir traducción
+		- correr tests
 -re-escribir casos de estudio
 	- cambio en el algoritmo de sintesis
 	- traducción a lts
 	- cambio en la traducción de obdds
 	- definicion de valuaciones por estados
-- redefinir recortes para clts
-	- definiciones
-		- desarrollar
-	- pruebas
-		- desarrollar
-- implementar recortes para clts
-	- revisar tests
-	- definir casos de estudio
-	- re escribir tests
-		- de implementacion
-		- de casos de estudio
-	- implementar cambios
-		- desarrollar
-	- correr tests
 - plan de trabajo para diagnostico
 	- armar caso para lts
 	- tablas comparativas
