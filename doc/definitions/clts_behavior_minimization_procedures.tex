@@ -1,105 +1,17 @@
 
-The strategy to find a minimal non realizable control problem is to incrementally remove transitions preserving an alternating Sub-LTS relation until a local minimum is reached.  A minimal non realizable control problem is reached when any further reduction of the current Sub-LTS renders the problem realizable.
-The first procedure explores the semi-lattice defined by Alternating Sub-LTS relation starting with the original automaton and moving downwards by performing minimal reductions. 
-
-\begin{figure}[bt]
-	\centering
-	\SmallPicture
-	%\ShowFrame
-	\VCDraw{
-		\begin{VCPicture}{(-4,-2.2)(4,4)}
-			\SetEdgeLabelScale{1.4}
-			\State[1]{(-3,0)}{1}
-			\State[2]{(0,2)}{2}        
-			\State[3]{(3,4)}{3}
-			\State[4]{(3,2)}{4}        
-			\State[5]{(0,0)}{5}                
-			\State[6]{(3,0)}{6}                        
-			\State[7]{(0,-2)}{7}                                
-			\State[8]{(3,-2)}{8}                                        
-			\Initial[w]{1}
-			\EdgeL{1}{2}{u_1}
-			\EdgeL{1}{5}{u_2}						
-			\LoopE{6}{g}
-			\EdgeL{1}{7}{u_3}										
-			\ChgEdgeLineStyle{dashed} 
-			\EdgeL{2}{3}{c_1}		
-			\EdgeL{2}{4}{c_2}				
-			\EdgeL{5}{6}{c_1}								
-			\EdgeL{7}{8}{c_2}												
-		\end{VCPicture}
-	}
-	\caption{Several conflicts example ($E$).}
-	\label{fig:fig.several-conflicts}
-	\MediumPicture
-\end{figure}
-
-\begin{figure}[bt]
-	\centering
-	\SmallPicture
-	%\ShowFrame
-	\VCDraw{
-		\begin{VCPicture}{(-4,-1.2)(4,2)}
-			\SetEdgeLabelScale{1.4}
-			\State[1]{(-3,0)}{1}
-			\State[2]{(0,0)}{2}        
-			\State[3]{(3,2)}{3}
-			\State[4]{(3,0)}{4}        
-			\Initial[w]{1}
-			\EdgeL{1}{2}{u_1}
-			\ChgEdgeLineStyle{dashed} 
-			\EdgeL{2}{3}{c_1}		
-			\EdgeL{2}{4}{c_2}				
-		\end{VCPicture}
-	}
-	\caption{Several conflicts example minimization($E_1$).}
-	\label{fig:fig.several-conflicts-min1}
-	\MediumPicture
-\end{figure}
-
-\begin{figure}[bt]
-	\centering
-	\SmallPicture
-	%\ShowFrame
-	\VCDraw{
-		\begin{VCPicture}{(-4,-.6)(4,1)}
-			\SetEdgeLabelScale{1.4}
-			\State[1]{(-3,0)}{1}
-			\State[7]{(0,0)}{7}        
-			\State[8]{(3,0)}{8}        
-			\Initial[w]{1}
-			\EdgeL{1}{7}{u_3}
-			\ChgEdgeLineStyle{dashed} 
-			\EdgeL{7}{8}{c_2}				
-		\end{VCPicture}
-	}
-	\caption{Several conflicts example minimization($E_2$).}
-	\label{fig:fig.several-conflicts-min2}
-	\MediumPicture
-\end{figure}
-
-Consider the example of Figure~\ref{fig:fig.several-conflicts} where the system has to satisfy the liveness goal of
-achieving $g$ infinitely often (expressed
-by the LTL formula $\square \Diamond g$)
-with $\Sigma = \{u_1, u_2, u_3, c_1, c_2, g\}$ and 
-$\mathcal{C} = \{c_1, c_2, g\}$, the original LTS $E$ will be
-at the top of the semi lattice while $E_1$ (depicted in figure \ref{fig:fig.several-conflicts-min1}) and $E_2$ (depicted in 
-figure \ref{fig:fig.several-conflicts-min2}) will be at 
-the bottom.  In between there is, for example, the Alternating Sub-LTSs
-obtained by removing just one non controllable transition.  
-The automaton obtained by removing $\{u_1, u_3\}$ is not shown
-since it is realizable. 
+As in the LTS case, the strategy to find a minimal non realizable control problem is to incrementally remove transitions while preserving the alternating Sub-LTS between steps until a local minimum is reached.  A minimal non realizable CLTS control problem is reached when any further reduction of the current Sub-LTS renders the problem realizable.
+The first procedure explores the semi-lattice defined by Alternating Sub-CLTS relation starting with the original automaton and moving downwards by performing minimal reductions. 
 
 \begin{figure}[ht]
 	\begin{center}
-		\input{dfscode} 
+		\input{clts_dfscode} 
 		\caption{Minimization Algorithm}
-		\label{fig:dfs-code}
+		\label{fig:clts_dfs-code}
 	\end{center}
 \end{figure}
 
 We can now describe the algorithm as
-presented in figure \ref{fig:dfs-code}. The algorithm first removes all controllable transitions from
+presented in figure \ref{fig:clts_dfs-code}. The algorithm first removes all controllable transitions from
 mixed states A, this step can be performed since it
 can be interpreted as the successive removals of controllable 
 transitions with each satisfying the Alternating Sub-LTS definition 

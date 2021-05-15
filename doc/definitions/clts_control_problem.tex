@@ -14,8 +14,8 @@ In this section we present the background required to define a CLTS control prob
 \begin{definition}
 	\label{def:legal_clts} \emph{(Legality w.r.t. $E$ and $\controlSet$)} 
 	Given two CLTS instances \cltsDefShareSigmaIdx{C} and \cltsDefShareSigmaIdx{E}, where $\Sigma$ is partitioned into actions controlled and monitored, i.e.: $\Sigma=\controlSet \; \uplus \;\nonControlSet$, we say that $C$ is a legal CLTS for $E$ w.r.t. \controlSet if the following holds for all $(s_E,s_C) \in E \parallel C$:
-	\[\forall L_{\nonControlSet}\text{ s.t. }  (s_E, L, s'_E) \in \Delta_E \wedge L|_{\nonControlSet} = L_{\nonControlSet}:( \exists (s_C, L', s'_C) \in \Delta_C \wedge L'|_{\nonControlSet} = L_{\nonControlSet})\]
-	\[\forall (s_C, L, s'_C) \in \Delta_C:( \exists (s_E, L, s'_E) \in \Delta_E)\]
+	\[\forall \actionLabel_{\nonControlSet}\text{ s.t. }  (s_E, \actionLabel, s'_E) \in \Delta_E \wedge \actionLabel|_{\nonControlSet} = \actionLabel_{\nonControlSet}:( \exists (s_C, \actionLabel', s'_C) \in \Delta_C \wedge \actionLabel'|_{\nonControlSet} = \actionLabel_{\nonControlSet})\]
+	\[\forall (s_C, \actionLabel, s'_C) \in \Delta_C:( \exists (s_E, \actionLabel, s'_E) \in \Delta_E)\]
 	The first property will be referred to as \emph{legality openness} and the second as \emph{legality inclusion}.
 \end{definition}
 
