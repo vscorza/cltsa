@@ -36,14 +36,9 @@ STRAT >> "/tmp/nonreal_test_1.rep".
 
 
 DIAG =S_0,
-S_0 = (<>-> S_1),
-S_1 = (<>-> S_2),
-S_2 = (x2.on-> S_3),
-S_3 = (<>-> S_11),
-S_11 = (<x1.on,x2.off>-> S_13),
-S_13 = (<>-> S_14),
-S_14 = (<x1.off,x2.on>-> S_15),
-S_15 = (<>-> S_11).
+S_0 = (<> -> x2.on-> S_1),
+S_1 = (<x1.on,x2.off>-> S_2),
+S_2 = (<x1.off,x2.on>-> S_1).
 
 DIAG >> "/tmp/non_real_strat_diag.rep".
 TEST >> "/tmp/non_real_test.rep".

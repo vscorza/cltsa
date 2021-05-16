@@ -33,27 +33,18 @@ ltl fluent A_2		= (x1 && x2).
 
 STRAT_p = S_0,
 S_0 = (<>-> S_1),
-S_1 = (<>-> S_2),
-S_2 = (x2.on-> S_3|<x1.on,x2.on>-> S_4),
-S_3 = (<>-> S_5),
-S_4 = (<>-> S_6),
-S_5 = (x2.off-> S_13|<x1.on,x2.off>-> S_14),
-S_6 = (<x1.off,x2.off,x3.on>-> S_7|<x2.off,x3.on>-> S_8),
-S_7 = (y1.on-> S_9),
-S_8 = (y1.on-> S_10),
-S_9 = (<x2.on,x3.off>-> S_18|<x1.on,x2.on,x3.off>-> S_19),
-S_10 = (<x1.off,x2.on,x3.off>-> S_11|<x2.on,x3.off>-> S_12),
-S_11 = (y1.off-> S_5),
-S_12 = (y1.off-> S_6),
-S_13 = (<>-> S_2),
-S_14 = (<>-> S_15),
-S_15 = (<x1.off,x2.on>-> S_16|x2.on-> S_17),
-S_16 = (<>-> S_5),
-S_17 = (<>-> S_6),
-S_18 = (y1.off-> S_5),
-S_19 = (y1.off-> S_6).
+S_1 = (x2.on-> S_2|<x1.on,x2.on>-> S_3),
+S_2 = (x2.off-> S_1|<x1.on,x2.off>-> S_6),
+S_3 = (<x2.off,x3.on,y1.on>-> S_5|<x1.off,x2.off,x3.on,y1.on>-> S_4),
+S_4 = (<x2.on,x3.off,y1.off>-> S_2|<x1.on,x2.on,x3.off,y1.off>-> S_3),
+S_5 = (<x2.on,x3.off,y1.off>-> S_3|<x1.off,x2.on,x3.off,y1.off>-> S_2),
+S_6 = (x2.on-> S_3|<x1.off,x2.on>-> S_2).
 
 // tests
 equals FATAL_NON_REAL_REALIZABLE_VERSION(STRAT, STRAT_p).
+
+ENV >> "/tmp/non_real_test_1_realizable_env.rep".
+STRAT >> "/tmp/non_real_test_1_realizable_strat.rep".
+STRAT_P >> "/tmp/non_real_test_1_realizable_strat_p.rep".
 
 
