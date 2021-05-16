@@ -603,47 +603,66 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_autom
 		, char** guarantees, uint32_t guarantees_count, uint32_t *steps, uint32_t **steps_sizes
 		, struct timeval **steps_times, uint32_t *steps_size){
 	//candidate transitions lists
+	int32_t i,j,k, from_step = 0;
 	uint32_t t_size = LIST_INITIAL_SIZE, t_count = 0;
-	uint32_t *t_states	= calloc(t_size, sizeof(uint32_t)), *t_indexes = calloc(t_size, sizeof(uint32_t));
+	uint32_t *t_states	= calloc(t_size, sizeof(uint32_t)), *t_indexes = calloc(t_size, sizeof(uint32_t))
+		, *t_indexes_count = calloc(t_size, sizeof(uint32_t));
 	//transitions to remove lists
 	uint32_t r_size = LIST_INITIAL_SIZE, r_count = 0;
-	uint32_t *r_states	= calloc(r_size, sizeof(uint32_t)), *r_indexes = calloc(r_size, sizeof(uint32_t));
+	uint32_t *r_states	= calloc(r_size, sizeof(uint32_t)), *r_indexes = calloc(r_size, sizeof(uint32_t))
+		, *r_indexes_count = calloc(r_size, sizeof(uint32_t));
 
-	int32_t i,j,k, from_step = 0;
+	automaton_automaton_monitored_order_transitions(game_automaton);
+
 	uint32_t new_size; uint32_t *ptr;
-
-	//get a master copy of the game, remove controllable transitions from mixed states,
-		//initialize list of non controllable transitions
 	automaton_automaton *master	= automaton_automaton_clone(game_automaton);
 	automaton_automaton_add_initial_state(master, game_automaton->initial_states[0]);
 	automaton_transition *current_transition	= NULL;
+
+	bool new_monitored	= false;
+	uint32_t to_state;
+	int32_t last_t_index	= 0, current_range;
+
+	//add all options, if only one monitored option is available per state do not add
 	for(i = 0; i < master->transitions_count; i++){
-		for(j = master->out_degree[i] - 1; j >= 0; j--){
-			current_transition = &(master->transitions[i][j]);
-			if(!master->is_controllable[i]){
-				if(!(TRANSITION_IS_INPUT(current_transition)))
-					automaton_automaton_remove_transition(master, current_transition);
-			}
-		}
-	}
-	for(i = 0; i < master->transitions_count; i++){
-		for(j = master->out_degree[i] - 1; j >= 0; j--){
-			current_transition = &(master->transitions[i][j]);
-			if(!master->is_controllable[i]){
-				if(TRANSITION_IS_INPUT(current_transition)){
-					if(t_count == t_size){
-						new_size	= t_size * LIST_INCREASE_FACTOR;
-						ptr	= realloc(t_states, new_size * sizeof(uint32_t));
-						if(ptr == NULL){printf("Could not allocate memory[automaton_get_gr1_unrealizable_minimization:1]\n"); exit(-1);}
-						t_states	= ptr;
-						ptr	= realloc(t_indexes, new_size * sizeof(uint32_t));
-						if(ptr == NULL){printf("Could not allocate memory[automaton_get_gr1_unrealizable_minimization:2]\n"); exit(-1);}
-						t_indexes	= ptr;					t_size		= new_size;
-					}
-					t_states[t_count]	= i;	t_indexes[t_count++]	= j;
+		new_monitored	= false;
+		for(j = 0; j < game_automaton->out_degree[i]; j++){
+			if(j > 0)
+				new_monitored = !(automaton_automaton_transition_monitored_eq(game_automaton,
+						&(game_automaton->transitions[i][j - 1]),
+						&(game_automaton->transitions[i][j])));
+			if(new_monitored){
+
+				//add set of options to t_states, t_indexes
+				if(t_count == (t_size - 1)){//always leave room for one more item for check after loop
+					ptr	= realloc(t_states, new_size * sizeof(uint32_t));
+					if(ptr == NULL){printf("Could not allocate memory[automaton_get_gr1_unrealizable_minimization:1]\n"); exit(-1);}
+					t_states	= ptr;
+					ptr	= realloc(t_indexes, new_size * sizeof(uint32_t));
+					if(ptr == NULL){printf("Could not allocate memory[automaton_get_gr1_unrealizable_minimization:2]\n"); exit(-1);}
+					t_indexes	= ptr;
+					ptr	= realloc(t_indexes_count, new_size * sizeof(uint32_t));
+					if(ptr == NULL){printf("Could not allocate memory[automaton_get_gr1_unrealizable_minimization:3]\n"); exit(-1);}
+					t_indexes_count	= ptr;
+					t_size		= new_size;
 				}
+				current_range		= j - last_t_index;
+				t_states[t_count]	= i;
+				t_indexes[t_count]	= last_t_index;
+				t_indexes_count[t_count++]	= current_range;
+				last_t_index	= j;
 			}
 		}
+		//if never set by new_monitored don't add to t_states, t_indexes (was only monitored option)
+		if(new_monitored){
+			//add set of options to t_states, t_indexes
+			current_range		= game_automaton->out_degree[i] - last_t_index;
+			t_states[t_count]	= i;
+			t_indexes[t_count]	= last_t_index;
+			t_indexes_count[t_count++]	= current_range;
+			last_t_index	= j;
+		}
+
 	}
 	//automaton_automaton_remove_deadlocks(master);
 	automaton_automaton_remove_unreachable_states(master);
@@ -657,22 +676,22 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_autom
 		automaton_minimization_adjust_steps_report(steps, steps_sizes, steps_times, steps_size);
 		gettimeofday(&tval_before, NULL);
 		//get next candidate
-		current_transition	= &(master->transitions[t_states[t_count - 1]][t_indexes[t_count - 1]]); t_count--;
 		//do not consider missing transitions or transitions that would induce deadlocks
-		while(minimization->out_degree[current_transition->state_from] == 1){
+		while(minimization->out_degree[t_states[t_count - 1]] == 1){
 			if(t_count == 0){
 				minimized = true;
 				break;
 			}
-
-			current_transition	= &(master->transitions[t_states[t_count - 1]][t_indexes[t_count - 1]]); t_count--;
+			t_count--;
 		}
 		if(minimized){
 			automaton_automaton_destroy(minimization);
 			minimization = automaton_automaton_clone(master);
 			for(i =0 ; i < r_count; i++){
-				current_transition	= &(master->transitions[r_states[i]][r_indexes[i]]);
-				automaton_automaton_remove_transition(minimization, current_transition);
+				for(j = 0; j < r_indexes_count[i]; j++){
+					current_transition	= &(master->transitions[r_states[i]][r_indexes[i]+j]);
+					automaton_automaton_remove_transition(minimization, current_transition);
+				}
 			}
 			break;
 		}
@@ -680,28 +699,39 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_autom
 		if(r_count == r_size){
 			new_size	= r_size * LIST_INCREASE_FACTOR;
 			ptr	= realloc(r_states, new_size * sizeof(uint32_t));
-			if(ptr == NULL){printf("Could not allocate memory[automaton_get_gr1_unrealizable_minimization:3]\n"); exit(-1);}
+			if(ptr == NULL){printf("Could not allocate memory[automaton_get_gr1_unrealizable_minimization:4]\n"); exit(-1);}
 			r_states	= ptr;
 			ptr	= realloc(r_indexes, new_size * sizeof(uint32_t));
-			if(ptr == NULL){printf("Could not allocate memory[automaton_get_gr1_unrealizable_minimization:4]\n"); exit(-1);}
-			r_indexes	= ptr;					r_size		= new_size;
+			if(ptr == NULL){printf("Could not allocate memory[automaton_get_gr1_unrealizable_minimization:5]\n"); exit(-1);}
+			r_indexes	= ptr;
+			ptr	= realloc(r_indexes_count, new_size * sizeof(uint32_t));
+			if(ptr == NULL){printf("Could not allocate memory[automaton_get_gr1_unrealizable_minimization:6]\n"); exit(-1);}
+			r_indexes_count	= ptr;
+			r_size		= new_size;
 		}
-		r_states[r_count]	= t_states[t_count];	r_indexes[r_count++]	= t_indexes[t_count];
+		r_states[r_count]	= t_states[t_count];
+		r_indexes[r_count]	= t_indexes[t_count];
+		r_indexes_count[r_count++]	= t_indexes_count[t_count];
 
-		automaton_automaton_remove_transition(minimization, current_transition);
+		for(j = 0; j < r_indexes_count[i]; j++){
+			current_transition	= &(master->transitions[r_states[t_count - 1]][r_indexes[t_count - 1]+j]);
+			automaton_automaton_remove_transition(minimization, current_transition);
+		}
+
 		//automaton_automaton_remove_deadlocks(minimization);
 		automaton_automaton_remove_unreachable_states(minimization);
 		automaton_automaton_update_valuations(minimization);
 
 		if(automaton_is_gr1_realizable(minimization, assumptions, assumptions_count,
 				guarantees, guarantees_count) || minimization->out_degree[minimization->initial_states[0]] == 0){
-			automaton_automaton_add_transition(minimization, current_transition);
 			r_count--;
 			automaton_automaton_destroy(minimization);
 			minimization = automaton_automaton_clone(master);
 			for(i =0 ; i < r_count; i++){
-				current_transition	= &(master->transitions[r_states[i]][r_indexes[i]]);
-				automaton_automaton_remove_transition(minimization, current_transition);
+				for(j = 0; j < r_indexes_count[i]; j++){
+					current_transition	= &(master->transitions[r_states[i]][r_indexes[i]+j]);
+					automaton_automaton_remove_transition(minimization, current_transition);
+				}
 			}
 			//automaton_automaton_remove_deadlocks(minimization);
 			automaton_automaton_remove_unreachable_states(minimization);
@@ -735,8 +765,10 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_autom
 		automaton_automaton_destroy(minimization);
 		minimization = automaton_automaton_clone(master);
 		for(i =0 ; i < r_count; i++){
-			current_transition	= &(master->transitions[r_states[i]][r_indexes[i]]);
-			automaton_automaton_remove_transition(minimization, current_transition);
+			for(j = 0; j < r_indexes_count[i]; j++){
+				current_transition	= &(master->transitions[r_states[i]][r_indexes[i]+j]);
+				automaton_automaton_remove_transition(minimization, current_transition);
+			}
 		}
 		//automaton_automaton_remove_deadlocks(minimization);
 		automaton_automaton_remove_unreachable_states(minimization);
@@ -747,8 +779,8 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_autom
 		printf("[%d,%d]Returning last from %d\n", t_count, r_count, from_step);
 	}
 
-	free(t_states); free(t_indexes);
-	free(r_states); free(r_indexes);
+	free(t_states); free(t_indexes); free(t_indexes_count);
+	free(r_states); free(r_indexes); free(r_indexes_count);
 	//print rankings
 	automaton_automaton* strategy = automaton_get_gr1_strategy(minimization, assumptions, assumptions_count,
 			guarantees, guarantees_count, true);

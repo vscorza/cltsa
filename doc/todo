@@ -1,22 +1,23 @@
 TODO:
 =====
-- redefinir recortes para clts
-	- definiciones
-		x pasar minimization a definitions
-		- pasar de games a clts
-		- redefinir sub-game
-		- re-escribir demos y demás
-	- pruebas
-		- desarrollar
 - implementar recortes para clts
+	- implementar cambios
+		- cambiar estrategia de recorte de a un paso
+		- definir conjunto de conjunto de transiciones
+		- versión clásica
+			- implementar
+			- correr tests
+		- versión dd
+			- implementar
+			- correr tests
+
 	- revisar tests
 	- definir casos de estudio
 	- re escribir tests
 		- de implementacion
 		- de casos de estudio
-	- implementar cambios
-		- cambiar estrategia de recorte de a un paso
-	- correr tests
+	- definiciones
+		- re-escribir demos y demás	
 - cltsa
 	- definicion de valuaciones por estados
 		- revisar tests
