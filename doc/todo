@@ -2,10 +2,10 @@ TODO:
 =====
 - implementar recortes para clts
 	- implementar cambios
-		- cambiar estrategia de recorte de a un paso
-		- definir conjunto de conjunto de transiciones
-		- versión clásica
-			- implementar
+		X cambiar estrategia de recorte de a un paso
+		X definir conjunto de conjunto de transiciones
+		X versión clásica
+			X implementar
 			- correr tests
 		- versión dd
 			- implementar
@@ -43,15 +43,13 @@ TODO:
 		- escribir traducción
 		- correr tests
 -re-escribir casos de estudio
-	- cambio en el algoritmo de sintesis
-	- traducción a lts
-	- cambio en la traducción de obdds
 	- definicion de valuaciones por estados
 - plan de trabajo para diagnostico
 	- armar caso para lts
 	- tablas comparativas
 	- introducir clts como necesidad para ejecutar los casos (refs de definitions nuevo)
 	- ref. a un arxiv
+	- re escribir problema y solución
 - rankings
 	- mejorar legibilidad de pruebas
 	- armar ejemplos
