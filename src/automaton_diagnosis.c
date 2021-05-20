@@ -185,6 +185,7 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2_c_i_complem
 		//automaton_automaton_remove_deadlocks(minimization);
 		automaton_automaton_remove_unreachable_states(minimization);
 		automaton_automaton_update_valuations(minimization);
+		bool cleared_bit	= false;
 		if(automaton_is_gr1_realizable(minimization, assumptions, assumptions_count,
 				guarantees, guarantees_count) || minimization->out_degree[minimization->initial_states[0]] == 0){
 			automaton_automaton_destroy(minimization);
@@ -208,6 +209,8 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2_c_i_complem
 					current_linear_index++;
 				}
 				if((current_linear_index >= first_linear_index && current_linear_index <= last_linear_index)){
+					if(TEST_BITVECTOR_BIT(partition_bit_vector, i))
+						cleared_bit	= true;
 					CLEAR_BITVECTOR_BIT(partition_bit_vector, i);
 					if(minimization->out_degree[t_states[i]] > t_indexes_count[i]){
 						for(j = 0; j < t_indexes_count[i]; j++){
@@ -220,7 +223,8 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2_c_i_complem
 				}
 			}
 
-			if(partitions_count > transitions_kept_size || removed == 0){
+			//if(partitions_count > transitions_kept_size || removed == 0){
+			if(!cleared_bit){
 #if DEBUG_UNREAL
 				printf("(minimal)partitions_count:%d\tkept:%d\tremoved:%d\n",partitions_count
 						, transitions_kept_size, removed);
@@ -355,6 +359,7 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2_c_i(automat
 		//automaton_automaton_remove_deadlocks(minimization);
 		automaton_automaton_remove_unreachable_states(minimization);
 		automaton_automaton_update_valuations(minimization);
+		bool cleared_bit	= false;
 		if(automaton_is_gr1_realizable(minimization, assumptions, assumptions_count,
 				guarantees, guarantees_count) || minimization->out_degree[minimization->initial_states[0]] == 0){
 			automaton_automaton_destroy(minimization);
@@ -373,7 +378,10 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2_c_i(automat
 					current_linear_index++;
 				}
 				if((current_linear_index < first_linear_index || current_linear_index > last_linear_index)&& TEST_BITVECTOR_BIT(partition_bit_vector, i)){
+					if(TEST_BITVECTOR_BIT(partition_bit_vector, i))
+						cleared_bit	= true;
 					CLEAR_BITVECTOR_BIT(partition_bit_vector, i);
+
 					if(minimization->out_degree[t_states[i]] > t_indexes_count[i]){
 						for(j = 0; j < t_indexes_count[i]; j++){
 							automaton_automaton_remove_transition(minimization, &(master->transitions[t_states[i]][t_indexes[i]+j]));
@@ -384,7 +392,9 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2_c_i(automat
 					transitions_kept_size++;
 				}
 			}
-			if(partitions_count > transitions_kept_size || removed == 0){
+
+			//if(partitions_count > transitions_kept_size || removed == 0){
+			if(!cleared_bit){
 #if DEBUG_UNREAL
 				printf("(minimal)partitions:%d\tkept:%d\tremoved:%d\n", partitions_count
 						, transitions_kept_size, removed);
@@ -392,7 +402,6 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2_c_i(automat
 				automaton_automaton_destroy(inner_automaton);
 				return minimization;
 			}
-
 			partitions_count = 2;
 			gettimeofday(&tval_after, NULL);
 			timersub(&tval_after, &tval_before, &((*steps_times)[*steps]));
