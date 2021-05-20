@@ -72,6 +72,10 @@ void automaton_pending_state_destroy(automaton_pending_state*  pending_state){
 }
 
 
+#if DEBUG_SYNTHESIS
+	uint32_t __count_updates_gr1	= 0;
+	uint32_t __count_upgrades_gr1_tabs = 6;
+#endif
 bool _print_ranking;
 /**
  * best_j(v)
@@ -108,9 +112,10 @@ automaton_ranking* automaton_state_best_successor_ranking(automaton_automaton* g
 			}
 			min_value	= RANKING_INFINITY;
 			min_ranking	= NULL;
+			new_monitored	= false;
 #if DEBUG_SYNTHESIS
-			printf("[New monitored]Best succ. for %d ranking %d is %d with value %d\n", state, current_guarantee,
-						max_ranking->value, max_ranking->assumption_to_satisfy);
+			//printf("[?!]\t%d\ts:%d[Min](_, _)\t[Max](%d, %d)", current_guarantee,state,
+				//max_ranking->assumption_to_satisfy, max_ranking->value);
 #endif
 		}
 		to_state	= game_automaton->transitions[state][i].state_to;
@@ -122,27 +127,15 @@ automaton_ranking* automaton_state_best_successor_ranking(automaton_automaton* g
 			min_value = current_value->value;
 			min_ranking = current_value;
 		}
-#if DEBUG_SYNTHESIS
-		printf("[Min ranking]%d <%d:%d, %d>\n", state, current_guarantee,
-				min_ranking->assumption_to_satisfy, min_ranking->value);
-		if(max_ranking == NULL)
-			printf("[Max ranking]%d <%d:_, _>\n", state, current_guarantee);
-		else
-			printf("[Max ranking]%d <%d:%d, %d>\n", state, current_guarantee,
-					max_ranking->assumption_to_satisfy, max_ranking->value);
-#endif
 	}
 	if((min_value == RANKING_INFINITY) || (max_ranking == NULL) || (automaton_ranking_gt(min_ranking, max_ranking))){
 		max_ranking	= min_ranking;
 		max_value	= min_value;
 	}
 #if DEBUG_SYNTHESIS
-	if(_print_ranking)
-		if(max_ranking == NULL)
-			printf("NO PROPER PREDECESSOR FOR RANKING\n");
-		else
-			printf("[Best succ]%d <%d:%d, %d>\n", state, current_guarantee,
-				max_ranking->state, max_ranking->value);
+	if(max_ranking == NULL){
+		printf("NO PROPER PREDECESSOR FOR RANKING\n");
+	}
 #endif
 
 	return max_ranking;
@@ -203,14 +196,10 @@ bool automaton_state_is_stable(automaton_automaton* game_automaton, uint32_t sta
 	if(sr == NULL){
 #if DEBUG_SYNTHESIS
 	if(_print_ranking)
-		printf("[S ] %d <%d:_, _> No best successor\n", state, j);
+		printf("[S ]\t%d <%d:_, _> No best successor\n", state, j);
 #endif
 		return true;
 	}
-#if DEBUG_SYNTHESIS
-	if(_print_ranking)
-		printf("[S ] %d <%d:%d,%d> best succ. for %d",sr->state,j, sr->value, sr->assumption_to_satisfy,state);
-#endif
 	/**
 	 * is ranking good?
 	 */
@@ -228,7 +217,7 @@ bool automaton_state_is_stable(automaton_automaton* game_automaton, uint32_t sta
 	}
 #if DEBUG_SYNTHESIS
  	if(_print_ranking)
- 		printf(" (%s)\n", is_stable? "stable" : "unstable");
+ 		printf("%s%s", is_stable? "\t[stable]\t" : "", (is_stable && (__count_updates_gr1++ % __count_upgrades_gr1_tabs) == 0) ? "\n": "");
 #endif
 	return is_stable;
 }
@@ -250,8 +239,8 @@ void automaton_add_unstable_predecessors(automaton_automaton* game_automaton, au
 		//if(!automaton_state_is_stable(game_automaton, current_transition->state_from, ranking, current_guarantee, guarantee_count
 		//		, assumptions_count, guarantees_indexes, assumptions_indexes, first_assumption_index) || current_transition->is_input){
 #if DEBUG_SYNTHESIS
-	if(_print_ranking)
-		printf("[->] %d <%d:_, _> Pushing into pending pred. for state %d\n", current_transition->state_from, current_guarantee, state);
+	//if(_print_ranking)
+		//printf("[->] %d <%d:_, _> Pushing into pending pred. for state %d\n", current_transition->state_from, current_guarantee, state);
 #endif
 			//check if entry exists in the pending structure, if so update previous value
 			current_ranking							= ((automaton_ranking*)automaton_concrete_bucket_get_entry(ranking[current_guarantee], current_transition->state_from));
@@ -314,6 +303,7 @@ void automaton_ranking_increment(automaton_automaton* game_automaton, automaton_
 	}
 }
 
+
 void automaton_ranking_update(automaton_automaton* game_automaton, automaton_concrete_bucket_list** ranking, automaton_ranking* current_ranking, uint32_t* max_delta
 		, uint32_t current_guarantee, uint32_t guarantee_count, uint32_t assumptions_count
 		, uint32_t* guarantees_indexes, uint32_t* assumptions_indexes, uint32_t first_assumption_index){
@@ -323,17 +313,11 @@ void automaton_ranking_update(automaton_automaton* game_automaton, automaton_con
 	 */
 	automaton_ranking* best_ranking		= automaton_state_best_successor_ranking(game_automaton, current_ranking->state, ranking, current_guarantee, guarantee_count, guarantees_indexes);
 #if DEBUG_SYNTHESIS
+	bool satisfies_guarantee	= false;
 	if(_print_ranking){
 		uint32_t fluent_index		= GET_STATE_FLUENT_INDEX(game_automaton->context->global_fluents_count,
 				current_ranking->state, guarantees_indexes[current_guarantee]);
-		bool satisfies_guarantee	= TEST_FLUENT_BIT(game_automaton->valuations, fluent_index);
-		printf("[B ] %d <%d:%d, %d> best succ <%d, %d>", current_ranking->state, current_guarantee, current_ranking->value
-				, current_ranking->assumption_to_satisfy, best_ranking->value, best_ranking->assumption_to_satisfy);
-		if(satisfies_guarantee){
-			printf("satisfies %d\n", current_guarantee);
-		}else{
-			printf("\n");
-		}
+		satisfies_guarantee	= TEST_FLUENT_BIT(game_automaton->valuations, fluent_index);
 	}
 #endif
 	/**
@@ -341,11 +325,6 @@ void automaton_ranking_update(automaton_automaton* game_automaton, automaton_con
 	 */
 	automaton_ranking_increment(game_automaton, ranking, best_ranking, current_ranking->state, max_delta, current_guarantee, guarantee_count, assumptions_count
 			, guarantees_indexes, assumptions_indexes, first_assumption_index, &incr_ranking);
-#if DEBUG_SYNTHESIS
-	if(_print_ranking)
-		printf("[In] %d <%d:%d, %d> incr <%d, %d>\n", current_ranking->state, current_guarantee, current_ranking->value
-			, current_ranking->assumption_to_satisfy, incr_ranking.value, incr_ranking.assumption_to_satisfy);
-#endif
 
 	/**
 	 * update to max between current ranking and the next
@@ -359,10 +338,9 @@ void automaton_ranking_update(automaton_automaton* game_automaton, automaton_con
 		current_ranking->assumption_to_satisfy	= incr_ranking.assumption_to_satisfy;
 	}
 #if DEBUG_SYNTHESIS
-	if(_print_ranking)
-	printf("[U ] %d <%d:%d, %d> update <%d, %d> was <%d, %d>\n", current_ranking->state, current_guarantee, current_ranking->value
-			, current_ranking->assumption_to_satisfy, incr_ranking.value, incr_ranking.assumption_to_satisfy
-			, old_value, old_ass);
+	printf("\t[U]<%d,%d,(%d,%d)->(%d,%d)> <%d,(%d,%d)>%s", incr_ranking.state, current_guarantee, old_value, old_ass,
+			incr_ranking.value, incr_ranking.assumption_to_satisfy, best_ranking->state, best_ranking->value, best_ranking->assumption_to_satisfy,
+			(__count_updates_gr1++ % __count_upgrades_gr1_tabs) == 0? "\n":"");
 #endif
 }
 
@@ -553,7 +531,7 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 #if DEBUG_SYNTHESIS
 	if(_print_ranking){
 		printf("!!STABILIZING GR1 GAME FOR %s!!\n", strategy_name);
-		printf("[Action] State <ranking index:ranking value, assumption to satisfy> ...\n");
+		printf("[Action]<State, goal,(ranking,assumption)>\n");
 	}
 #endif
 	automaton_pending_state* state_location;
@@ -586,7 +564,8 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 		current_ranking			= (automaton_ranking*)automaton_concrete_bucket_get_entry(ranking_list[current_pending_state.goal_to_satisfy], current_pending_state.state);
 #if DEBUG_SYNTHESIS
 		if(_print_ranking)
-			printf("[<-] %d <%d:%d, %d> Pop from pending with ranking\n", current_pending_state.state, current_pending_state.goal_to_satisfy, current_ranking->value, current_ranking->assumption_to_satisfy);
+			printf("\t[<-]<%d,%d,(%d,%d)>%s", current_pending_state.state, current_pending_state.goal_to_satisfy, current_ranking->value, current_ranking->assumption_to_satisfy
+					, (__count_updates_gr1++ % __count_upgrades_gr1_tabs) == 0 ? "\n": "");
 #endif
 		if(current_ranking->value == RANKING_INFINITY){
 			pending_processed++;
@@ -608,7 +587,8 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 				, guarantees_indexes, assumptions_indexes, first_assumption_index);
 #if DEBUG_SYNTHESIS
 	if(_print_ranking)
-		printf("[Pr] %d <%d:%d, %d> Adding unstable preds.\n", current_pending_state.state, current_pending_state.goal_to_satisfy, current_ranking->value, current_ranking->assumption_to_satisfy);
+		printf("\t[->]<%d,%d,(%d, %d)>%s" , current_pending_state.state, current_pending_state.goal_to_satisfy, current_ranking->value, current_ranking->assumption_to_satisfy
+				, (__count_updates_gr1++ % __count_upgrades_gr1_tabs) == 0 ? "\n": "");
 #endif
 		automaton_add_unstable_predecessors(game_automaton, pending_list, key_lists[goal_to_satisfy], current_pending_state.state
 				, ranking_list, current_pending_state.goal_to_satisfy, guarantees_count
@@ -804,6 +784,7 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 								min_value	= RANKING_INFINITY;
 								min_ranking = NULL;
 								min_transition	= NULL;
+								new_monitored	= false;
 							}
 							if(l < game_automaton->out_degree[current_ranking->state]){
 								current_transition	= &(game_automaton->transitions[current_ranking->state][l]);

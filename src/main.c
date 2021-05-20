@@ -157,7 +157,10 @@ int main (int argc, char** argv){
 		//GENERAL TESTS
 		//run_all_tests();
 
-		run_functional_tests();
+		//run_functional_tests();
+		//run_parse_test_linear("tests/exploration-robot-realizable_test_debug.fsp", "unrealizable exploration robot test");
+		run_parse_test("tests/exploration-robot-realizable_test_debug.fsp", "unrealizable exploration robot test");
+
 		//run_parse_test("tests/genbuf_4_sndrs_no_automaton.fsp", "GenBuf 4 sndrs(no automaton)");//GENBUF 4 sndrs
 
 		//run_parse_test("tests/nonreal_test_1.fsp", "non realizable test 1");

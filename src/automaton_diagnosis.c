@@ -14,58 +14,23 @@ extern int __automaton_global_print_id;
 automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd(automaton_automaton* game_automaton, char** assumptions, uint32_t assumptions_count
 		, char** guarantees, uint32_t guarantees_count, uint32_t *steps, uint32_t **steps_sizes
 		, struct timeval **steps_times, uint32_t *steps_size){
-	//candidate transitions lists
-	uint32_t t_size = LIST_INITIAL_SIZE, t_count = 0;
-	uint32_t *t_states	= calloc(t_size, sizeof(uint32_t)), *t_indexes = calloc(t_size, sizeof(uint32_t));
 
 	int32_t i,j,k, from_step = 0;
-	uint32_t new_size; uint32_t *ptr;
 	uint32_t non_controllable_size	= 0;
 
+	uint32_t t_size, t_count;
+	uint32_t *t_states, *t_indexes, *t_indexes_count;
+	//transitions to remove lists
+	uint32_t r_size, r_count = 0;
+	uint32_t *r_states, *r_indexes, *r_indexes_count;
 
-	//get a master copy of the game, remove controllable transitions from mixed states,
-	//initialize list of non controllable transitions
-	automaton_automaton *master	= automaton_automaton_clone(game_automaton);
-	automaton_automaton_add_initial_state(master, game_automaton->initial_states[0]);
-	automaton_transition *current_transition	= NULL;
-	for(i = 0; i < master->transitions_count; i++){
-		for(j = master->out_degree[i] - 1; j >= 0; j--){
-			current_transition = &(master->transitions[i][j]);
-			if(TRANSITION_IS_INPUT(current_transition))non_controllable_size++;
-			if(!master->is_controllable[i]){
-				if(!(TRANSITION_IS_INPUT(current_transition)))
-					automaton_automaton_remove_transition(master, current_transition);
-			}
-		}
-	}
-	for(i = 0; i < master->transitions_count; i++){
-		for(j = master->out_degree[i] - 1; j >= 0; j--){
-			if( master->out_degree[i] <= 1)continue;
-			current_transition = &(master->transitions[i][j]);
-			if(!master->is_controllable[i]){
-				if(TRANSITION_IS_INPUT(current_transition)){
-					if(t_count == t_size){
-						new_size	= t_size * LIST_INCREASE_FACTOR;
-						ptr	= realloc(t_states, new_size * sizeof(uint32_t));
-						if(ptr == NULL){printf("Could not allocate memory[automaton_get_gr1_unrealizable_minimization_dd:1]\n"); exit(-1);}
-						t_states	= ptr;
-						ptr	= realloc(t_indexes, new_size * sizeof(uint32_t));
-						if(ptr == NULL){printf("Could not allocate memory[automaton_get_gr1_unrealizable_minimization_dd:2]\n"); exit(-1);}
-						t_indexes	= ptr;					t_size		= new_size;
-					}
-					t_states[t_count]	= i;	t_indexes[t_count++]	= j;
-				}
-			}
-		}
-	}
-	//automaton_automaton_remove_deadlocks(master);
-	automaton_automaton_remove_unreachable_states(master);
-	automaton_automaton_update_valuations(master);
+	automaton_automaton *master = automaton_get_gr1_unrealizable_prepare_structs(game_automaton, &t_size, &t_count, &t_states, &t_indexes, &t_indexes_count,
+			 &r_size, &r_count, &r_states, &r_indexes, &r_indexes_count);
 
-	int32_t vector_size			= (int32_t)ceil(non_controllable_size / sizeof(uint8_t));
+	int32_t vector_size			= (int32_t)ceil(t_count / sizeof(uint8_t));
 	uint8_t *partition_bit_vector	= calloc(vector_size, sizeof(uint8_t));
-	for(i = 0; i < vector_size;i++)partition_bit_vector[i]	= 0xFFFF;
-	uint32_t transitions_kept_size  = non_controllable_size;
+	for(i = 0; i < (int32_t)vector_size;i++)partition_bit_vector[i]	= (uint8_t)0xFFFF;
+	uint32_t transitions_kept_size  = t_count;
 	uint32_t partitions_count		= 2;
 #if DEBUG_UNREAL
 			printf("Minimizing %s through delta debugging\n", master->name);
@@ -74,24 +39,7 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd(automaton_au
 #if DEBUG_DD
 	if(t_count < 256){
 		printf("Character meaning: \n▪\tkept\nx\tkept single trans.\n▫\tcurr.removed\nˆ\tcouldnt't remove single trans.\n◦\tprev.removed\n");
-		/*
-		 * 					if(t_count < 256){
-						printf("▫");//curr.removed
-				if(automaton_automaton_has_transition(inner_automaton, current_transition)){
-					if(t_count < 256)
-						if(inner_automaton->out_degree[current_transition->state_from] > 1){
-							printf("▪");//kept
-						}else{
-							printf("x");//kept single trans.
-						}
-				}else{
-					if(t_count < 256){
-						if(inner_automaton->out_degree[current_transition->state_from] == 1)
-							printf("ˆ");//single trans.
-						else
-							printf("◦");//prev.removed
-					}
-		 * */
+
 		//remove transitions that are in the current partition
 		printf("[");
 		for(i = 0; i < vector_size;i++)printf("%02x",partition_bit_vector[i]);
@@ -108,9 +56,11 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd(automaton_au
 #endif
 	automaton_automaton *minimized	= automaton_automaton_clone(master);
 	automaton_automaton *result 	= automaton_get_gr1_unrealizable_minimization_dd2(master, minimized, assumptions, assumptions_count, guarantees, guarantees_count
-			, partition_bit_vector, transitions_kept_size, partitions_count, t_count, t_size, t_states, t_indexes, false, 0, steps
+			, partition_bit_vector, transitions_kept_size, partitions_count, t_count, t_size, t_states, t_indexes, t_indexes_count, false, 0, steps
 			, steps_sizes, steps_times, steps_size);
-	free(t_states); free(t_indexes); free(partition_bit_vector);
+	free(t_states); free(t_indexes); free(t_indexes_count);
+	free(r_states); free(r_indexes); free(r_indexes_count);
+	free(partition_bit_vector);
 	//print rankings
 	/*
 	automaton_automaton* strategy = automaton_get_gr1_strategy(result, assumptions, assumptions_count,
@@ -142,13 +92,13 @@ void automaton_minimization_adjust_steps_report(uint32_t *steps, uint32_t **step
 automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2_c_i_complement(automaton_automaton* master, automaton_automaton* minimized, automaton_automaton *inner_automaton
 		, char** assumptions, uint32_t assumptions_count
 		, char** guarantees, uint32_t guarantees_count, uint8_t *partition_bit_vector, uint32_t transitions_kept_size
-		, uint32_t partitions_count, uint32_t t_count, uint32_t t_size, uint32_t *t_states, uint32_t *t_indexes
+		, uint32_t partitions_count, uint32_t t_count, uint32_t t_size, uint32_t *t_states, uint32_t *t_indexes, uint32_t *t_indexes_count
 		, bool start_with_complement, uint32_t last_partition
 		, uint32_t *steps, uint32_t **steps_sizes, struct timeval **steps_times, uint32_t *steps_size){
 	//bit indexes refer to locations in the whole transition space, linear indexes refer to locations in the kept transitions
 	automaton_automaton *return_automaton	= NULL, *minimization = NULL;
 	uint32_t last_linear_index = 0, first_linear_index = 0;
-	uint32_t removed = 0, dd = 0, i;
+	uint32_t removed = 0, dd = 0, i, j;
 	int32_t current_linear_index = -1;
 	struct timeval tval_before, tval_after;
 	float step	= transitions_kept_size / (partitions_count * 1.0f);
@@ -186,18 +136,19 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2_c_i_complem
 			if(t_count < 256 && index_changed)
 				if(current_linear_index == first_linear_index)printf(">");
 #endif
-			current_transition	= &(master->transitions[t_states[i]][t_indexes[i]]);
 			if(((current_linear_index >= first_linear_index && current_linear_index <= last_linear_index))
 					&& (TEST_BITVECTOR_BIT(partition_bit_vector, i))
-					 && (minimization->out_degree[current_transition->state_from] > 1)){
-				automaton_automaton_remove_transition(minimization, current_transition);
-				removed++;
+					 && (minimization->out_degree[t_states[i]] > t_indexes_count[i])){
+				for(j = 0; j < t_indexes_count[i]; j++){
+					automaton_automaton_remove_transition(minimization, &(master->transitions[t_states[i]][t_indexes[i]+j]));
+					removed++;
+				}
 #if DEBUG_DD
 				if(t_count < 256)
 					printf("▫");//curr.removed
-			}	else if(automaton_automaton_has_transition(minimization, current_transition)){
+			}	else if(automaton_automaton_has_transition(minimization, &(master->transitions[t_states[i]][t_indexes[i]]))){
 				if(t_count < 256){
-					if(inner_automaton->out_degree[current_transition->state_from] > 1){
+					if(inner_automaton->out_degree[t_states[i]] > 1){
 						printf("▪");//kept
 					}else{
 						printf("x");//kept single trans.
@@ -205,7 +156,7 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2_c_i_complem
 				}
 			}else{
 				if(t_count < 256){
-					if(inner_automaton->out_degree[current_transition->state_from] == 1){
+					if(inner_automaton->out_degree[t_states[i]] == 1){
 						printf("ˆ");//single trans.
 					}else{
 						printf("◦");//prev.removed
@@ -223,7 +174,7 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2_c_i_complem
 			printf("]Partition (%d) vector\n",dd);
 			printf("[");
 			for(i = 0; i < t_count; i++)printf("%s",automaton_automaton_has_transition(minimization, &(master->transitions[t_states[i]][t_indexes[i]]))? "▪" : "▫");
-			printf("]Effective partition(removed:%d)\n",removed);
+			printf("]Effective partition(removed:%d)(kept:%d)\n",removed, transitions_kept_size);
 			for(i = 0; i < t_count; i++)printf("%s",TEST_BITVECTOR_BIT(partition_bit_vector, i)? "▪" : "▫");
 			printf("]Bit vector (new)\n");
 		}
@@ -245,7 +196,7 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2_c_i_complem
 			printf("(compl. to part. %d unrealizable)\n", dd);
 #endif
 			gettimeofday(&tval_before, NULL);
-			removed = 0;
+			//removed = 0;
 			current_linear_index = -1; transitions_kept_size = 0;
 #if DEBUG_DD
 			if(t_count < 256)
@@ -258,10 +209,12 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2_c_i_complem
 				}
 				if((current_linear_index >= first_linear_index && current_linear_index <= last_linear_index)){
 					CLEAR_BITVECTOR_BIT(partition_bit_vector, i);
-					current_transition	= &(master->transitions[t_states[i]][t_indexes[i]]);
-					if(minimization->out_degree[current_transition->state_from] > 1)
-						automaton_automaton_remove_transition(minimization, current_transition);
-					removed++;
+					if(minimization->out_degree[t_states[i]] > t_indexes_count[i]){
+						for(j = 0; j < t_indexes_count[i]; j++){
+							automaton_automaton_remove_transition(minimization, &(master->transitions[t_states[i]][t_indexes[i]+j]));
+							removed++;
+						}
+					}
 				}else{
 					transitions_kept_size++;
 				}
@@ -269,7 +222,8 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2_c_i_complem
 
 			if(partitions_count > transitions_kept_size || removed == 0){
 #if DEBUG_UNREAL
-				printf("(minimal)\n");
+				printf("(minimal)partitions_count:%d\tkept:%d\tremoved:%d\n",partitions_count
+						, transitions_kept_size, removed);
 #endif
 				automaton_automaton_destroy(inner_automaton);
 				return minimization;
@@ -285,7 +239,7 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2_c_i_complem
 			timersub(&tval_after, &tval_before, &((*steps_times)[*steps]));
 			(*steps_sizes)[*steps]	= minimization->transitions_composite_count;
 			return_automaton = automaton_get_gr1_unrealizable_minimization_dd2(master, minimization, assumptions, assumptions_count, guarantees, guarantees_count
-					, partition_bit_vector, transitions_kept_size, partitions_count, t_count, t_size, t_states, t_indexes, true, next_partition
+					, partition_bit_vector, transitions_kept_size, partitions_count, t_count, t_size, t_states, t_indexes, t_indexes_count, true, next_partition
 					, steps, steps_sizes, steps_times, steps_size);
 			automaton_automaton_destroy(inner_automaton);
 			automaton_automaton_destroy(minimization);
@@ -297,13 +251,13 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2_c_i_complem
 automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2_c_i(automaton_automaton* master, automaton_automaton* minimized, automaton_automaton *inner_automaton
 		, char** assumptions, uint32_t assumptions_count
 		, char** guarantees, uint32_t guarantees_count, uint8_t *partition_bit_vector, uint32_t transitions_kept_size
-		, uint32_t partitions_count, uint32_t t_count, uint32_t t_size, uint32_t *t_states, uint32_t *t_indexes
+		, uint32_t partitions_count, uint32_t t_count, uint32_t t_size, uint32_t *t_states, uint32_t *t_indexes, uint32_t *t_indexes_count
 		, bool start_with_complement, uint32_t last_partition
 		, uint32_t *steps, uint32_t **steps_sizes, struct timeval **steps_times, uint32_t *steps_size){
 	//bit indexes refer to locations in the whole transition space, linear indexes refer to locations in the kept transitions
 	automaton_automaton *return_automaton	= NULL, *minimization = NULL;
 	uint32_t last_linear_index = 0, first_linear_index = 0;
-	uint32_t removed = 0, dd = 0, i;
+	uint32_t removed = 0, dd = 0, i, j;
 	int32_t current_linear_index = -1;
 	struct timeval tval_before, tval_after;
 	float step	= transitions_kept_size / (partitions_count * 1.0f);
@@ -347,18 +301,24 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2_c_i(automat
 			if(t_count < 256 && index_changed)
 				if(current_linear_index == first_linear_index)printf("<");
 #endif
-			current_transition	= &(master->transitions[t_states[i]][t_indexes[i]]);
 			if((current_linear_index < first_linear_index || current_linear_index > last_linear_index)
 					&& TEST_BITVECTOR_BIT(partition_bit_vector, i)
-					&& (minimization->out_degree[current_transition->state_from] > 1)){
-				automaton_automaton_remove_transition(minimization, current_transition);
-				removed++;
+					&& (minimization->out_degree[t_states[i]] > t_indexes_count[i])){
+					for(j = 0; j < t_indexes_count[i]; j++){
+						automaton_automaton_remove_transition(minimization, &(master->transitions[t_states[i]][t_indexes[i]+j]));
+						removed++;
+#if DEBUG_UNREAL && 0
+						printf("Removing:");
+						automaton_transition_print(&(master->transitions[t_states[i]][t_indexes[i]+j]), minimization->context, "", "\n",0);
+#endif
+					}
+
 #if DEBUG_DD
 				if(t_count < 256)
 					printf("▫");//curr.removed
-			}	else if(automaton_automaton_has_transition(minimization, current_transition)){
+			}	else if(automaton_automaton_has_transition(minimization, &(master->transitions[t_states[i]][t_indexes[0]]))){
 				if(t_count < 256){
-					if(inner_automaton->out_degree[current_transition->state_from] > 1){
+					if(inner_automaton->out_degree[t_states[i]] > 1){
 						printf("▪");//kept
 					}else{
 						printf("x");//kept single trans.
@@ -366,7 +326,7 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2_c_i(automat
 				}
 			}else{
 				if(t_count < 256){
-					if(inner_automaton->out_degree[current_transition->state_from] == 1){
+					if(inner_automaton->out_degree[t_states[i]] == 1){
 						printf("ˆ");//single trans.
 					}else{
 						printf("◦");//prev.removed
@@ -384,7 +344,7 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2_c_i(automat
 			printf("]Partition (%d) vector\n",dd);
 			printf("[");
 			for(i = 0; i < t_count; i++)printf("%s",automaton_automaton_has_transition(minimization, &(master->transitions[t_states[i]][t_indexes[i]]))? "▪" : "▫");
-			printf("]Effective partition(removed:%d)\n",removed);
+			printf("]Effective partition(removed:%d)(kept:%d)\n",removed,transitions_kept_size);
 			for(i = 0; i < t_count; i++)printf("%s",TEST_BITVECTOR_BIT(partition_bit_vector, i)? "▪" : "▫");
 			printf("]Bit vector (new)\n");
 		}
@@ -405,7 +365,7 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2_c_i(automat
 #if DEBUG_UNREAL
 			printf("(part. %d unrealizable)\n", dd);
 #endif
-			removed = 0;
+			//removed = 0;
 			current_linear_index = -1; transitions_kept_size = 0;
 			//bit vector sets to false anything outside the range
 			for(i = 0; i < t_count; i++){
@@ -414,17 +374,20 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2_c_i(automat
 				}
 				if((current_linear_index < first_linear_index || current_linear_index > last_linear_index)&& TEST_BITVECTOR_BIT(partition_bit_vector, i)){
 					CLEAR_BITVECTOR_BIT(partition_bit_vector, i);
-					current_transition	= &(master->transitions[t_states[i]][t_indexes[i]]);
-					if(minimization->out_degree[current_transition->state_from] > 1)
-						automaton_automaton_remove_transition(minimization, current_transition);
-					removed++;
+					if(minimization->out_degree[t_states[i]] > t_indexes_count[i]){
+						for(j = 0; j < t_indexes_count[i]; j++){
+							automaton_automaton_remove_transition(minimization, &(master->transitions[t_states[i]][t_indexes[i]+j]));
+							removed++;
+						}
+					}
 				}else if(TEST_BITVECTOR_BIT(partition_bit_vector, i)){
 					transitions_kept_size++;
 				}
 			}
 			if(partitions_count > transitions_kept_size || removed == 0){
 #if DEBUG_UNREAL
-				printf("(minimal)\n");
+				printf("(minimal)partitions:%d\tkept:%d\tremoved:%d\n", partitions_count
+						, transitions_kept_size, removed);
 #endif
 				automaton_automaton_destroy(inner_automaton);
 				return minimization;
@@ -435,7 +398,7 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2_c_i(automat
 			timersub(&tval_after, &tval_before, &((*steps_times)[*steps]));
 			(*steps_sizes)[*steps]	= minimization->transitions_composite_count;
 			return_automaton = automaton_get_gr1_unrealizable_minimization_dd2(master, minimization, assumptions, assumptions_count, guarantees, guarantees_count
-					, partition_bit_vector, transitions_kept_size, partitions_count, t_count, t_size, t_states, t_indexes, false, 0, steps
+					, partition_bit_vector, transitions_kept_size, partitions_count, t_count, t_size, t_states, t_indexes, t_indexes_count, false, 0, steps
 					, steps_sizes, steps_times, steps_size);
 			automaton_automaton_destroy(inner_automaton);
 			automaton_automaton_destroy(minimization);
@@ -467,7 +430,7 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2_c_i(automat
 automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2(automaton_automaton* master, automaton_automaton* minimized
 		, char** assumptions, uint32_t assumptions_count
 		, char** guarantees, uint32_t guarantees_count, uint8_t *partition_bit_vector, uint32_t transitions_kept_size
-		, uint32_t partitions_count, uint32_t t_count, uint32_t t_size, uint32_t *t_states, uint32_t *t_indexes
+		, uint32_t partitions_count, uint32_t t_count, uint32_t t_size, uint32_t *t_states, uint32_t *t_indexes, uint32_t *t_indexes_count
 		, bool start_with_complement, uint32_t last_partition
 		, uint32_t *steps, uint32_t **steps_sizes, struct timeval **steps_times, uint32_t *steps_size){
 	(*steps)++;
@@ -500,9 +463,15 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2(automaton_a
 		current_transition	= &(master->transitions[t_states[i]][t_indexes[i]]);
 		if(!(TEST_BITVECTOR_BIT(partition_bit_vector, i)) ){
 			if(automaton_automaton_has_transition(inner_automaton, current_transition)
-					&& inner_automaton->out_degree[current_transition->state_from] > 1){
-				removed++;
-				automaton_automaton_remove_transition(inner_automaton, current_transition);
+					&& inner_automaton->out_degree[t_states[i]] > t_indexes_count[i]){
+				for(j = 0; j < t_indexes_count[i]; j++){
+					removed++;
+					automaton_automaton_remove_transition(inner_automaton, &(master->transitions[t_states[i]][t_indexes[i]+j]));
+#if DEBUG_UNREAL && 0
+					printf("Removing:");
+					automaton_transition_print(&(master->transitions[t_states[i]][t_indexes[i]+j]), inner_automaton->context, "", "\n",0);
+#endif
+				}
 #if DEBUG_DD
 				if(t_count < 256)
 					printf("▫");//curr.removed
@@ -550,20 +519,20 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2(automaton_a
 #endif
 	if(!start_with_complement){
 		return_automaton = automaton_get_gr1_unrealizable_minimization_dd2_c_i(master, minimization, inner_automaton, assumptions, assumptions_count, guarantees, guarantees_count
-				, partition_bit_vector, transitions_kept_size, partitions_count, t_count, t_size, t_states, t_indexes, false, 0, steps
+				, partition_bit_vector, transitions_kept_size, partitions_count, t_count, t_size, t_states, t_indexes, t_indexes_count, false, 0, steps
 				, steps_sizes, steps_times, steps_size);
 		if(return_automaton != NULL)return return_automaton;
 		return_automaton = automaton_get_gr1_unrealizable_minimization_dd2_c_i_complement(master, minimization, inner_automaton, assumptions, assumptions_count, guarantees, guarantees_count
-						, partition_bit_vector, transitions_kept_size, partitions_count, t_count, t_size, t_states, t_indexes, true, last_partition, steps
+						, partition_bit_vector, transitions_kept_size, partitions_count, t_count, t_size, t_states, t_indexes, t_indexes_count, true, last_partition, steps
 						, steps_sizes, steps_times, steps_size);
 		if(return_automaton != NULL)return return_automaton;
 	}else{
 		return_automaton = automaton_get_gr1_unrealizable_minimization_dd2_c_i_complement(master, minimization, inner_automaton, assumptions, assumptions_count, guarantees, guarantees_count
-				, partition_bit_vector, transitions_kept_size, partitions_count, t_count, t_size, t_states, t_indexes, true, last_partition, steps
+				, partition_bit_vector, transitions_kept_size, partitions_count, t_count, t_size, t_states, t_indexes, t_indexes_count, true, last_partition, steps
 				, steps_sizes, steps_times, steps_size);
 		if(return_automaton != NULL)return return_automaton;
 		return_automaton = automaton_get_gr1_unrealizable_minimization_dd2_c_i(master, minimization, inner_automaton, assumptions, assumptions_count, guarantees, guarantees_count
-						, partition_bit_vector, transitions_kept_size, partitions_count, t_count, t_size, t_states, t_indexes, false, 0, steps
+						, partition_bit_vector, transitions_kept_size, partitions_count, t_count, t_size, t_states, t_indexes, t_indexes_count, false, 0, steps
 						, steps_sizes, steps_times, steps_size);
 		if(return_automaton != NULL)return return_automaton;
 	}
@@ -577,13 +546,13 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2(automaton_a
 #endif
 		(*steps_sizes)[*steps]	= inner_automaton->transitions_composite_count;
 		return_automaton	= automaton_get_gr1_unrealizable_minimization_dd2(master, inner_automaton, assumptions, assumptions_count, guarantees, guarantees_count
-				, partition_bit_vector, transitions_kept_size, partitions_count, t_count, t_size, t_states, t_indexes, false, 0
+				, partition_bit_vector, transitions_kept_size, partitions_count, t_count, t_size, t_states, t_indexes, t_indexes_count, false, 0
 				, steps, steps_sizes, steps_times, steps_size);
 		automaton_automaton_destroy(inner_automaton);
 		return return_automaton;
 	}else{
 #if DEBUG_UNREAL
-			printf("(minimal)\n");
+		printf("(minimal)kept:%d\tremoved:%d\n", transitions_kept_size, removed);
 #endif
 		(*steps_sizes)[*steps]	= minimized->transitions_composite_count;
 		if(automaton_is_gr1_realizable(inner_automaton, assumptions, assumptions_count,
@@ -599,18 +568,20 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2(automaton_a
 	}
 }
 
-automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_automaton* game_automaton, char** assumptions, uint32_t assumptions_count
-		, char** guarantees, uint32_t guarantees_count, uint32_t *steps, uint32_t **steps_sizes
-		, struct timeval **steps_times, uint32_t *steps_size){
+automaton_automaton *automaton_get_gr1_unrealizable_prepare_structs(automaton_automaton *game_automaton,
+		uint32_t *t_size, uint32_t *t_count, uint32_t **t_states, uint32_t **t_indexes, uint32_t **t_indexes_count,
+		uint32_t *r_size, uint32_t *r_count, uint32_t **r_states, uint32_t **r_indexes, uint32_t **r_indexes_count){
 	//candidate transitions lists
-	int32_t i,j,k, from_step = 0;
-	uint32_t t_size = LIST_INITIAL_SIZE, t_count = 0;
-	uint32_t *t_states	= calloc(t_size, sizeof(uint32_t)), *t_indexes = calloc(t_size, sizeof(uint32_t))
-		, *t_indexes_count = calloc(t_size, sizeof(uint32_t));
+	int32_t i,j,k;
+	*t_size = LIST_INITIAL_SIZE, *t_count = 0;
+	*t_states	= calloc(*t_size, sizeof(uint32_t));
+	*t_indexes = calloc(*t_size, sizeof(uint32_t));
+	*t_indexes_count = calloc(*t_size, sizeof(uint32_t));
 	//transitions to remove lists
-	uint32_t r_size = LIST_INITIAL_SIZE, r_count = 0;
-	uint32_t *r_states	= calloc(r_size, sizeof(uint32_t)), *r_indexes = calloc(r_size, sizeof(uint32_t))
-		, *r_indexes_count = calloc(r_size, sizeof(uint32_t));
+	*r_size = LIST_INITIAL_SIZE, r_count = 0;
+	*r_states	= calloc(*r_size, sizeof(uint32_t));
+	*r_indexes = calloc(*r_size, sizeof(uint32_t));
+	*r_indexes_count = calloc(*r_size, sizeof(uint32_t));
 
 	automaton_automaton_monitored_order_transitions(game_automaton);
 
@@ -619,6 +590,92 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_autom
 	automaton_automaton_add_initial_state(master, game_automaton->initial_states[0]);
 	automaton_transition *current_transition	= NULL;
 
+	bool new_monitored = false, was_set	= false;
+	uint32_t to_state;
+	int32_t last_t_index	= 0, current_range;
+
+	//add all options, if only one monitored option is available per state do not add
+	for(i = 0; i < master->transitions_count; i++){
+		new_monitored	= false;
+		last_t_index = 0;
+		was_set	= false;
+		for(j = 0; j < game_automaton->out_degree[i]; j++){
+			if(j > 0)
+				new_monitored = !(automaton_automaton_transition_monitored_eq(game_automaton,
+						&(game_automaton->transitions[i][j - 1]),
+						&(game_automaton->transitions[i][j])));
+			if(new_monitored){
+
+				//add set of options to t_states, t_indexes
+				if(*t_count >= (*t_size - 2)){//always leave room for one more item for check after loop
+					new_size	= (*t_count + 2) * LIST_INCREASE_FACTOR;
+					ptr	= realloc(*t_states, new_size * sizeof(uint32_t));
+					if(ptr == NULL){printf("Could not allocate memory[automaton_get_gr1_unrealizable_minimization:1]\n"); exit(-1);}
+					*t_states	= ptr;
+					ptr	= realloc(*t_indexes, new_size * sizeof(uint32_t));
+					if(ptr == NULL){printf("Could not allocate memory[automaton_get_gr1_unrealizable_minimization:2]\n"); exit(-1);}
+					*t_indexes	= ptr;
+					ptr	= realloc(*t_indexes_count, new_size * sizeof(uint32_t));
+					if(ptr == NULL){printf("Could not allocate memory[automaton_get_gr1_unrealizable_minimization:3]\n"); exit(-1);}
+					*t_indexes_count	= ptr;
+					*t_size		= new_size;
+				}
+				current_range		= j - last_t_index;
+				(*t_states)[*t_count]	= i;
+				(*t_indexes)[*t_count]	= last_t_index;
+				(*t_indexes_count)[*t_count]	= current_range;
+				*t_count	= *t_count + 1;
+				last_t_index	= j;
+				new_monitored	= false;
+				was_set			= true;
+			}
+		}
+		//if never set by new_monitored don't add to t_states, t_indexes (was only monitored option)
+		if(was_set){
+			//add set of options to t_states, t_indexes
+			current_range		= game_automaton->out_degree[i] - last_t_index;
+			(*t_states)[*t_count]	= i;
+			(*t_indexes)[*t_count]	= last_t_index;
+			(*t_indexes_count)[*t_count]	= current_range;
+			*t_count	= *t_count + 1;
+			last_t_index	= j;
+		}
+
+	}
+#if DEBUG_UNREAL
+	printf("[Recreated indexes][from_state:index:inner_index](trans)\n");
+	for(i = 0; i < *t_count; i++){
+		for(j = 0; j < (*t_indexes_count)[i]; j++){
+			printf("[%d:%d:%d]", (*t_states)[i], i, (*t_indexes)[i] + j);
+			automaton_transition_print(&(game_automaton->transitions[(*t_states)[i]][(*t_indexes)[i] + j]), game_automaton->context, "","\n",0);
+		}
+	}
+	printf("\n");
+#endif
+	//automaton_automaton_remove_deadlocks(master);
+	automaton_automaton_remove_unreachable_states(master);
+	automaton_automaton_update_valuations(master);
+	return master;
+}
+
+automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_automaton* game_automaton, char** assumptions, uint32_t assumptions_count
+		, char** guarantees, uint32_t guarantees_count, uint32_t *steps, uint32_t **steps_sizes
+		, struct timeval **steps_times, uint32_t *steps_size){
+	//candidate transitions lists
+	int32_t i,j,k, from_step = 0;
+	uint32_t t_size, t_count;
+	uint32_t *t_states, *t_indexes, *t_indexes_count;
+	//transitions to remove lists
+	uint32_t r_size, r_count = 0;
+	uint32_t *r_states, *r_indexes, *r_indexes_count;
+
+	automaton_automaton *master = automaton_get_gr1_unrealizable_prepare_structs(game_automaton, &t_size, &t_count, &t_states, &t_indexes, &t_indexes_count,
+			 &r_size, &r_count, &r_states, &r_indexes, &r_indexes_count);
+
+	uint32_t new_size; uint32_t *ptr;
+
+	automaton_transition *current_transition	= NULL;
+/*
 	bool new_monitored	= false;
 	uint32_t to_state;
 	int32_t last_t_index	= 0, current_range;
@@ -635,6 +692,7 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_autom
 
 				//add set of options to t_states, t_indexes
 				if(t_count == (t_size - 1)){//always leave room for one more item for check after loop
+					new_size	= t_size * LIST_INCREASE_FACTOR;
 					ptr	= realloc(t_states, new_size * sizeof(uint32_t));
 					if(ptr == NULL){printf("Could not allocate memory[automaton_get_gr1_unrealizable_minimization:1]\n"); exit(-1);}
 					t_states	= ptr;
@@ -667,6 +725,7 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_autom
 	//automaton_automaton_remove_deadlocks(master);
 	automaton_automaton_remove_unreachable_states(master);
 	automaton_automaton_update_valuations(master);
+	*/
 	automaton_automaton *minimization	= automaton_automaton_clone(master);
 
 	bool minimized	= false;
@@ -678,13 +737,14 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_autom
 		//get next candidate
 		//do not consider missing transitions or transitions that would induce deadlocks
 		while(minimization->out_degree[t_states[t_count - 1]] == 1){
+			t_count--;
 			if(t_count == 0){
 				minimized = true;
 				break;
 			}
-			t_count--;
 		}
 		if(minimized){
+			/*
 			automaton_automaton_destroy(minimization);
 			minimization = automaton_automaton_clone(master);
 			for(i =0 ; i < r_count; i++){
@@ -692,7 +752,7 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_autom
 					current_transition	= &(master->transitions[r_states[i]][r_indexes[i]+j]);
 					automaton_automaton_remove_transition(minimization, current_transition);
 				}
-			}
+			}*/
 			break;
 		}
 		//evaluate next reduction
@@ -709,15 +769,21 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_autom
 			r_indexes_count	= ptr;
 			r_size		= new_size;
 		}
-		r_states[r_count]	= t_states[t_count];
-		r_indexes[r_count]	= t_indexes[t_count];
-		r_indexes_count[r_count++]	= t_indexes_count[t_count];
+		if(minimization->out_degree[t_states[t_count -1]] > t_indexes_count[t_count - 1]){
+			r_states[r_count]	= t_states[t_count-1];
+			r_indexes[r_count]	= t_indexes[t_count-1];
+			r_indexes_count[r_count++]	= t_indexes_count[t_count-1];
 
-		for(j = 0; j < r_indexes_count[i]; j++){
-			current_transition	= &(master->transitions[r_states[t_count - 1]][r_indexes[t_count - 1]+j]);
-			automaton_automaton_remove_transition(minimization, current_transition);
+			for(j = 0; j < r_indexes_count[r_count - 1] ; j++){
+				current_transition	= &(master->transitions[r_states[r_count - 1]][r_indexes[r_count - 1]+j]);
+				automaton_automaton_remove_transition(minimization, current_transition);
+#if DEBUG_UNREAL && 0
+			printf("Removing:");
+			automaton_transition_print(current_transition, minimization->context, "", "\n",0);
+#endif
+			}
 		}
-
+		t_count--;
 		//automaton_automaton_remove_deadlocks(minimization);
 		automaton_automaton_remove_unreachable_states(minimization);
 		automaton_automaton_update_valuations(minimization);
@@ -737,7 +803,7 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_autom
 			automaton_automaton_remove_unreachable_states(minimization);
 			automaton_automaton_update_valuations(minimization);
 #if DEBUG_UNREAL
-			printf("Minimizing [%d,%d,R,%d]\n", t_count, r_count,steps);
+			printf("Minimizing [%d,%d,R,%d](Real.)\n", t_count, r_count,steps);
 #endif
 		}else{
 			/*
@@ -749,7 +815,7 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_autom
 			automaton_automaton_update_valuations(minimization);
 			from_step = steps;
 #if DEBUG_UNREAL
-			printf("Minimizing [%d,%d,N,%d]\n", t_count, r_count, from_step);
+			printf("Minimizing [%d,%d,N,%d](Unreal.)\n", t_count, r_count, from_step);
 #endif
 		}
 		gettimeofday(&tval_after, NULL);
@@ -787,6 +853,9 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_autom
 	automaton_automaton_destroy(strategy);
 
 	automaton_automaton_destroy(master);
+#if DEBUG_UNREAL
+	automaton_automaton_print(minimization, false, false, false, "", "");
+#endif
 	return minimization;
 }
 

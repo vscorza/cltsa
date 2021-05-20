@@ -27,6 +27,7 @@ TODO:
 			- de implementacion
 		- implementar cambios
 			- sintaxis
+				- permitir definir sintaxis sobre rangos, conjuntos
 			- parsing
 			- conversión a modelos
 			- composición		

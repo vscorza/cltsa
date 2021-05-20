@@ -22,8 +22,8 @@
 #define DEBUG_SYNTHESIS 0
 #define DEBUG_STRATEGY_BUILD 0
 #define DEBUG_COMPOSITE_TREE 0
-#define DEBUG_UNREAL 0
-#define DEBUG_DD 0
+#define DEBUG_UNREAL 1
+#define DEBUG_DD 1
 #define PRINT_PARTIAL_SYNTHESIS 0
 #define PRINT_HTML 0
 
@@ -240,6 +240,7 @@ bool automaton_valuation_add_fluent(automaton_valuation* valuation, automaton_au
 /** AUTOMATA_CONTEXT **/
 uint32_t automaton_automata_context_get_fluent_index(automaton_automata_context* ctx, automaton_fluent* fluent);
 /** AUTOMATON OPERATIONS **/
+void automaton_automaton_monitored_order_transitions(automaton_automaton* current_automaton);
 uint32_t automaton_automaton_get_in_degree(automaton_automaton* current_automaton, uint32_t state);
 uint32_t automaton_automaton_get_out_degree(automaton_automaton* current_automaton, uint32_t state);
 void automaton_automaton_resize_to_state(automaton_automaton* current_automaton, uint32_t state);
@@ -264,25 +265,28 @@ bool automaton_is_gr1_realizable(automaton_automaton* game_automaton, char** ass
 		, char** guarantees, uint32_t guarantees_count);
 void automaton_minimization_adjust_steps_report(uint32_t *steps, uint32_t **steps_sizes,
 		struct timeval **steps_times, uint32_t *steps_size);
+automaton_automaton *automaton_get_gr1_unrealizable_prepare_structs(automaton_automaton *game_automaton,
+		uint32_t *t_size, uint32_t *t_count, uint32_t **t_states, uint32_t **t_indexes, uint32_t **t_indexes_count,
+		uint32_t *r_size, uint32_t *r_count, uint32_t **r_states, uint32_t **r_indexes, uint32_t **r_indexes_count);
 automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd(automaton_automaton* game_automaton, char** assumptions, uint32_t assumptions_count
 		, char** guarantees, uint32_t guarantees_count, uint32_t *steps, uint32_t **steps_sizes
 		, struct timeval **steps_times, uint32_t *steps_size);
 automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2_c_i_complement(automaton_automaton* master, automaton_automaton* minimized, automaton_automaton *inner_automaton
 		, char** assumptions, uint32_t assumptions_count
 		, char** guarantees, uint32_t guarantees_count, uint8_t *partition_bit_vector, uint32_t transitions_kept_size
-		, uint32_t partitions_count, uint32_t t_count, uint32_t t_size, uint32_t *t_states, uint32_t *t_indexes
+		, uint32_t partitions_count, uint32_t t_count, uint32_t t_size, uint32_t *t_states, uint32_t *t_indexes, uint32_t *t_indexes_count
 		, bool start_with_complement, uint32_t last_partition
 		, uint32_t *steps, uint32_t **steps_sizes, struct timeval **steps_times, uint32_t *steps_size);
 automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2_c_i(automaton_automaton* master, automaton_automaton* minimized, automaton_automaton *inner_automaton
 		, char** assumptions, uint32_t assumptions_count
 		, char** guarantees, uint32_t guarantees_count, uint8_t *partition_bit_vector, uint32_t transitions_kept_size
-		, uint32_t partitions_count, uint32_t t_count, uint32_t t_size, uint32_t *t_states, uint32_t *t_indexes
+		, uint32_t partitions_count, uint32_t t_count, uint32_t t_size, uint32_t *t_states, uint32_t *t_indexes, uint32_t *t_indexes_count
 		, bool start_with_complement, uint32_t last_partition
 		, uint32_t *steps, uint32_t **steps_sizes, struct timeval **steps_times, uint32_t *steps_size);
 automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2(automaton_automaton* master, automaton_automaton *minimized
 		, char** assumptions, uint32_t assumptions_count
 		, char** guarantees, uint32_t guarantees_count, uint8_t *partition_bit_vector, uint32_t transitions_kept_size, uint32_t paritions_count
-		, uint32_t t_count, uint32_t t_size, uint32_t *t_states, uint32_t *t_indexes, bool start_with_complement, uint32_t last_partition, uint32_t *steps, uint32_t **steps_sizes
+		, uint32_t t_count, uint32_t t_size, uint32_t *t_states, uint32_t *t_indexes, uint32_t *t_indexes_count, bool start_with_complement, uint32_t last_partition, uint32_t *steps, uint32_t **steps_sizes
 		, struct timeval **steps_times, uint32_t *steps_size);
 automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_automaton* game_automaton, char** assumptions, uint32_t assumptions_count
 		, char** guarantees, uint32_t guarantees_count, uint32_t *steps, uint32_t **steps_sizes
