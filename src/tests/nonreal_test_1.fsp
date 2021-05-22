@@ -35,12 +35,16 @@ ltl fluent A_2		= (x2).
 STRAT >> "/tmp/nonreal_test_1.rep".
 
 
-DIAG =S_0,
-S_0 = (<> -> x2.on-> S_1),
-S_1 = (<x1.on,x2.off>-> S_2),
-S_2 = (<x1.off,x2.on>-> S_1).
+DIAG = S_0,
+S_0 = (<>-> S_1),
+S_1 = (<x1.on,x2.on>-> S_3),
+S_2 = (<x1.on,x2.off>-> S_6),
+S_3 = (<x2.off,x3.on,y1.on>-> S_5),
+S_5 = (<x1.off,x2.on,x3.off,y1.off>-> S_2),
+S_6 = (<x1.off,x2.on>-> S_2).
 
-DIAG >> "/tmp/non_real_strat_diag.rep".
+STRAT >> "/tmp/non_real_strat.rep".
+DIAG >> "/tmp/non_real_diag.rep".
 TEST >> "/tmp/non_real_test.rep".
 
 // tests

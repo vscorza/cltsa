@@ -25,7 +25,7 @@ automaton_set_syntax* automaton_set_syntax_create(bool is_ident, uint32_t count,
 		for(i = 0; i < count; i++) set->labels_count[i]	= labels_count[i];
 		set->labels			= malloc(sizeof(automaton_label_syntax**) * count);
 		for(i = 0; i < count; i++){
-			set->labels[i]	= calloc(labels_count[i], sizeof(automaton_label_syntax));
+			set->labels[i]	= calloc(labels_count[i], sizeof(automaton_label_syntax*));
 			for(j = 0; j < labels_count[i]; j++){
 				(set->labels[i])[j]	= labels[i][j];
 			}
@@ -132,7 +132,7 @@ automaton_set_syntax* automaton_set_syntax_create_from_ident(char* ident){
 	return automaton_set_syntax_create(true, 0, NULL, NULL, ident);
 }
 automaton_set_def_syntax* automaton_set_def_syntax_create(automaton_set_syntax* set, char* name){
-	automaton_set_def_syntax* set_def	= malloc(sizeof(automaton_set_syntax));
+	automaton_set_def_syntax* set_def	= malloc(sizeof(automaton_set_def_syntax));
 	set_def->set		= set;
 	aut_dupstr(&(set_def->name), name);
 	return set_def;
@@ -171,7 +171,7 @@ automaton_index_syntax* automaton_index_syntax_create(bool is_expr, bool is_rang
 	return index;
 }
 automaton_indexes_syntax* automaton_indexes_syntax_create(automaton_index_syntax* first_index){
-	automaton_indexes_syntax* indexes	= malloc(sizeof(automaton_index_syntax));
+	automaton_indexes_syntax* indexes	= malloc(sizeof(automaton_indexes_syntax));
 	indexes->count		= 1;
 	indexes->indexes	= malloc(sizeof(automaton_index_syntax*) * indexes->count);
 	indexes->indexes[0]	= first_index;
@@ -245,7 +245,7 @@ automaton_transition_syntax* automaton_transition_syntax_add_trace(automaton_tra
 automaton_transitions_syntax* automaton_transitions_syntax_create(automaton_transition_syntax* transition){
 	automaton_transitions_syntax* transitions	= malloc(sizeof(automaton_transitions_syntax));
 	transitions->count	= 1;
-	transitions->transitions	= malloc(sizeof(automaton_transitions_syntax*) * transitions->count);
+	transitions->transitions	= malloc(sizeof(automaton_transition_syntax*) * transitions->count);
 	transitions->transitions[0]	= transition;
 	return transitions;
 }
@@ -365,7 +365,7 @@ automaton_component_syntax* automaton_component_syntax_create(char* ident, char*
 automaton_program_syntax* automaton_program_syntax_create(automaton_statement_syntax* first_statement){
 	automaton_program_syntax* program	= malloc(sizeof(automaton_program_syntax));
 	program->count	= 1;
-	program->statements	= malloc(sizeof(automaton_statement_syntax) * program->count);
+	program->statements	= malloc(sizeof(automaton_statement_syntax*) * program->count);
 	program->statements[0]	= first_statement;
 	return program;
 }

@@ -47,6 +47,21 @@ fluent F_Broadcast = <bCast,{unload,load,n,s,e,w,stall,correct}> initially 1
 PLANT >> "/tmp/exploration_robot_realizable_plant.rep".
 STRAT >> "/tmp/exploration_robot_realizable_strat.rep".
 
+DIAG_p = S_0,
+S_0 = (correct-> S_1),
+S_1 = (s-> S_2|e-> S_3),
+S_2 = (correct-> S_10),
+S_3 = (correct-> S_4),
+S_4 = (s-> S_5|w-> S_6),
+S_5 = (bCast-> S_11),
+S_6 = (bCast-> S_7),
+S_7 = (s-> S_8|e-> S_9),
+S_8 = (correct-> S_10),
+S_9 = (correct-> S_4),
+S_10 = (e-> S_5|n-> S_6),
+S_11 = (w-> S_8|n-> S_9).
+|f|PLANT = (STRAT_p).
+
 
 // tests
-//equals FATAL_ROBOT_REALIZABLE(STRAT, STRAT_P).
+equals FATAL_ROBOT_REALIZABLE_DEBUG(STRAT, DIAG_p).

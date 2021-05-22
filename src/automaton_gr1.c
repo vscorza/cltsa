@@ -683,8 +683,12 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 */
 	bool is_winning	= true;
 	for(i = 0; i < guarantees_count; i++){
-		is_winning	&= ((automaton_ranking*)automaton_concrete_bucket_get_entry(ranking_list[i],
-			game_automaton->initial_states[0]))->value != RANKING_INFINITY;
+		automaton_ranking *initial_ranking	= ((automaton_ranking*)automaton_concrete_bucket_get_entry(ranking_list[i],
+				game_automaton->initial_states[0]));
+		if(initial_ranking == NULL){
+			is_winning	= false; break;
+		}
+		is_winning	&= initial_ranking->value != RANKING_INFINITY;
 		if(!is_winning)break;
 	}
 	if(is_winning){

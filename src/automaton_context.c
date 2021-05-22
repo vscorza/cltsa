@@ -637,7 +637,14 @@ automaton_indexes_valuation* automaton_indexes_valuation_create_from_indexes(aut
 			if(indexes->indexes[i]->expr->type == INTEGER_TERMINAL_TYPE_AUT){
 				sprintf(name, "%d", indexes->indexes[i]->expr->integer_terminal);
 			}else{
-				sprintf(name, "%s", indexes->indexes[i]->expr->string_terminal);
+				int32_t index			 	=
+						automaton_parsing_tables_get_entry_index(tables, CONST_ENTRY_AUT,indexes->indexes[i]->expr->string_terminal);
+				if(index != -1){
+					sprintf(name, "%s", indexes->indexes[i]->expr->string_terminal);
+					lower_index	= upper_index	= tables->const_entries[index]->valuation.int_value;
+				}else{
+					sprintf(name, "%s", indexes->indexes[i]->expr->string_terminal);
+				}
 			}
 		}else{
 			sprintf(name, "%s", indexes->indexes[i]->lower_ident);
@@ -1603,7 +1610,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 	return true;
 }
 
-bool automaton_statement_syntax_to_constant(automaton_automata_context* ctx, automaton_expression_syntax* const_def_syntax
+bool automaton_statement_syntax_to_constant(automaton_expression_syntax* const_def_syntax
 		, automaton_parsing_tables* tables){
 	uint32_t main_index	= automaton_parsing_tables_get_entry_index(tables, CONST_ENTRY_AUT, const_def_syntax->string_terminal);
 	tables->const_entries[main_index]->solved				= true;
@@ -1656,7 +1663,7 @@ automaton_indexes_valuation *automaton_indexes_valuation_merge(automaton_indexes
 	valuation->count	= first->count + count;
 	valuation->ranges	= calloc(valuation->count, sizeof(automaton_range*));
 	valuation->total_combinations = first->total_combinations;
-	valuation->current_values	= calloc(valuation->count, sizeof(uint32_t));
+	valuation->current_values	= calloc(valuation->count, sizeof(int32_t));
 	for(i = 0; i < first->count; i++){
 		valuation->ranges[i]	= automaton_range_clone(first->ranges[i]);
 		valuation->current_values[i]	= first->current_values[i];
@@ -1691,28 +1698,37 @@ automaton_indexes_valuation *automaton_indexes_valuation_merge(automaton_indexes
  */
 void automaton_indexes_valuation_set_to_label(automaton_parsing_tables* tables, automaton_indexes_valuation* current, automaton_indexes_valuation* next
 		, automaton_indexes_syntax* to_indexes, char* label, char* target){
-	if((next == NULL && current == NULL) || to_indexes == NULL){
+	if(/*(next == NULL && current == NULL) ||*/ to_indexes == NULL){
 		strcpy(target, label);
 		return;
 	}
 	uint32_t i, j;
-	automaton_indexes_valuation *valuation = automaton_indexes_valuation_merge(current, next);
 	sprintf(target, "%s", label);
 	char name[40];
 	char *from_ident, *to_ident;
-	if((next != NULL || current != NULL) && to_indexes != NULL){
-		for(j = 0; j < to_indexes->count; j++){
-			if(to_indexes->indexes[j]->is_expr && (to_indexes->indexes[j]->expr->type == UPPER_IDENT_TERMINAL_TYPE_AUT ||
-					to_indexes->indexes[j]->expr->type == IDENT_TERMINAL_TYPE_AUT)){
-				snprintf(target + strlen(target), sizeof(target), "_%d", automaton_indexes_valuation_get_value(valuation, to_indexes->indexes[j]->expr->string_terminal));
-			}else if(to_indexes->indexes[j]->is_expr){
-				snprintf(target + strlen(target), sizeof(target), "_%d", automaton_expression_syntax_evaluate(tables, to_indexes->indexes[j]->expr, valuation));
+	automaton_indexes_valuation *valuation	= NULL;
+	if(next == NULL && current == NULL){
+		valuation	= automaton_indexes_valuation_create();
+	}else{
+		valuation = automaton_indexes_valuation_merge(current, next);
+	}
+	for(j = 0; j < to_indexes->count; j++){
+		if(to_indexes->indexes[j]->is_expr && (to_indexes->indexes[j]->expr->type == UPPER_IDENT_TERMINAL_TYPE_AUT ||
+				to_indexes->indexes[j]->expr->type == IDENT_TERMINAL_TYPE_AUT)){
+			int32_t index			 	= automaton_parsing_tables_get_entry_index(tables, CONST_ENTRY_AUT, to_indexes->indexes[j]->expr->string_terminal);
+			if(index != -1){
+				snprintf(target + strlen(target), sizeof(target), "_%d", tables->const_entries[index]->valuation.int_value);
 			}else{
-				to_ident	= to_indexes->indexes[j]->lower_ident;
-				snprintf(target + strlen(target), sizeof(target), "_%s", to_ident);
+				snprintf(target + strlen(target), sizeof(target), "_%d", automaton_indexes_valuation_get_value(valuation, to_indexes->indexes[j]->expr->string_terminal));
 			}
+		}else if(to_indexes->indexes[j]->is_expr){
+			snprintf(target + strlen(target), sizeof(target), "_%d", automaton_expression_syntax_evaluate(tables, to_indexes->indexes[j]->expr, valuation));
+		}else{
+			to_ident	= to_indexes->indexes[j]->lower_ident;
+			snprintf(target + strlen(target), sizeof(target), "_%s", to_ident);
 		}
 	}
+
 	automaton_indexes_valuation_destroy(valuation);
 }
 
@@ -2088,7 +2104,7 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 	//build constants and ranges
 	for(i = 0; i < program->count; i++){
 		if(program->statements[i]->type == CONST_AUT)
-			automaton_statement_syntax_to_constant(ctx, program->statements[i]->const_def, tables);
+			automaton_statement_syntax_to_constant(program->statements[i]->const_def, tables);
 		if(program->statements[i]->type == RANGE_AUT)
 			automaton_statement_syntax_to_range(ctx, program->statements[i]->range_def, tables);
 	}

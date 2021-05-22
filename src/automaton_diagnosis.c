@@ -848,10 +848,12 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization(automaton_autom
 		//automaton_automaton_remove_deadlocks(minimization);
 		automaton_automaton_remove_unreachable_states(minimization);
 		automaton_automaton_update_valuations(minimization);
+#if DEBUG_UNREAL
 		printf("[%d,%d,R,%d]\n", t_count, r_count,steps);
 		printf("[%d,%d]Returning restored from %d\n", t_count, r_count, from_step);
 	}else{
 		printf("[%d,%d]Returning last from %d\n", t_count, r_count, from_step);
+#endif
 	}
 
 	free(t_states); free(t_indexes); free(t_indexes_count);

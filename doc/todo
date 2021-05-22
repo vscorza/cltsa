@@ -18,6 +18,7 @@ TODO:
 		- de casos de estudio
 	- definiciones
 		- re-escribir demos y demás	
+	- escribir casos de prueba para composicion, sintesis y exportar automatas vacios
 - cltsa
 	- definicion de valuaciones por estados
 		- revisar tests

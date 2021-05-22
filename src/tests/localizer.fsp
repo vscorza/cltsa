@@ -13,14 +13,16 @@ L[e:ErrorLimit]	= (when(e < MaxError) {<bCast,n>,<bCast,s>,<bCast,e>,<bCast,w>} 
 		| correct -> L[1]),
 L_error	= ({n,s,e,w} -> L_error).
 
-DIAG = (correct -> <bCast,n> -> <bCast,n> -> STRAT_P_2),
-STRAT_P_2 = ({n,s,e,w}->STRAT_P_2).
+DIAG = ({<bCast,n>,<bCast,s>,<bCast,e>,<bCast,w>} -> correct -> STRAT_P_2),
+STRAT_P_2 = (correct->STRAT_P_2).
 
 |f|PLANT = (LOCALIZER).
 
 fluent F_Broadcast = <bCast,{n,s,e,w,correct}> initially 1
 ltl fluent A_Dummy = (true || !true).
 |gr1| <{A_Dummy}><{F_Broadcast}> STRAT = PLANT.
+
+STRAT >> "/tmp/localizer_strat_diag.rep".
 
 // tests
 equals FATAL_Localizer_Diag(STRAT,DIAG).

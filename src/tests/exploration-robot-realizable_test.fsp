@@ -1,3 +1,4 @@
+
 //GenBuf example taken from Synthesis of Reactive(1) Designs 2 senders
 set Global_Alphabet = {n,s,e,w,load,unload,drop,correct,bCast}
 set Controllable_Alphabet = {n,s,e,w}
@@ -5,21 +6,25 @@ set Controllable_Alphabet = {n,s,e,w}
 set Global_Signals	= {Dummy}
 order 				= {}
 const Min = 1 //this must always be odd
-const Max = 2
+const Max = 4
 range Pos = Min..Max
 const MaxError	= 3
 range ErrorLimit	= 1..MaxError
 
 //Concrete
-MAZE = M[1][1], 
+MAZE = M[Min][Min], 
 M[r:Pos][c:Pos] = ( 
-				when(r < Max) s->M[r+1][c]
-				| when(c > Min) w->M[r][c-1]
-				| when(c < Max) e->M[r][c+1]
-				| when((r == Max) * (c == Max)) {drop,load}->M[r][c]
-				| when(r > Min) n->M[r-1][c]
-				| when((r == Min) * (c == Min)) unload->M[r][c]
-).
+				when((r < (Max - 1)) + ((r < Max) * (c < Max))  ) s->M[r+1][c]
+				| when((c < (Max - 1)) + ((c < Max) * (r < Max))  ) e->M[r][c+1]
+				| when((r > (Min + 1)) + ((r > Min) * (c > Min))) n->M[r-1][c]
+				| when((c > (Min +1)) + ((c > Min) * (r > Min))) w->M[r][c-1]
+				| when((r == (Max - 1)) * (c == Max) ) s->M_max
+				| when((c == (Max - 1)) * (r == Max)) e->M_max
+				| when((r == (Min + 1)) * (c == Min)) n->M_min
+				| when((c == (Min + 1) )*  (r == Min)) w->M_min
+),
+M_max = (unload->M[Max][Max]),
+M_min = (drop -> M_min | load->M[Min][Min]).
 
 ARM = ({n,s,e,w}->ARM | drop ->KEEP_TRYING | load->JUST_LOADED),
 KEEP_TRYING = (drop->KEEP_TRYING | load ->JUST_LOADED),
@@ -33,23 +38,172 @@ L[e:ErrorLimit]	= (when(e < MaxError) {n,s,w,e,drop,load,unload} -> L_B[e+1]
 L_B[e:ErrorLimit]	= (bCast -> L[e] | correct -> L[1]),
 L_error	= ({n,s,w,e,drop,load,unload} -> L_error).
 
-||C = (MAZE ||_c ARM).
+//||C = (MAZE ||_c ARM).
+|f|PLANT = (MAZE ||_c  LOCALIZER).
+//||T = (MAZE ||_c LOCALIZER).
+||A_ARM_LOCALIZER = (ARM ||_c LOCALIZER).
+||A_MAZE_LOCALIZER = (LOCALIZER ||_c MAZE).
+||A_MAZE_ARM = (ARM ||_c MAZE).
 
-|f|PLANT = (MAZE || ARM || LOCALIZER).
-
-//fluent F_Load = <load, {unload,n,s,e,w,drop,correct,bCast}>
+fluent F_Load = <load, {unload,n,s,e,w,drop,correct,bCast}>
 fluent F_Unload = <unload, {load,n,s,e,w,drop,correct,bCast}>
 fluent F_Dont_Drop = <load, drop> initially 1
 fluent F_Broadcast = <bCast,{unload,load,n,s,e,w,stall,correct}> initially 1
-//|gr1| <{F_Dont_Drop, F_Broadcast}><{F_Load, F_Unload, F_Broadcast}> STRAT = PLANT.
-|gr1| <{F_Dont_Drop, F_Broadcast}><{ F_Unload}> STRAT = PLANT.
+|gr1| <{F_Dont_Drop, F_Broadcast}><{F_Load, F_Unload, F_Broadcast}> STRAT = PLANT.
 
+
+A_ARM_LOCALIZER >> "/tmp/exploration_robot_realizable_arm_localizer.rep".
+A_MAZE_LOCALIZER >> "/tmp/exploration_robot_realizable_maze_localizer.rep".
+A_MAZE_ARM >> "/tmp/exploration_robot_realizable_maze_arm.rep".
 MAZE >> "/tmp/exploration_robot_realizable_maze.rep".
 ARM >> "/tmp/exploration_robot_realizable_arm.rep".
 LOCALIZER >> "/tmp/exploration_robot_realizable_localizer.rep".
 PLANT >> "/tmp/exploration_robot_realizable_plant.rep".
 STRAT >> "/tmp/exploration_robot_realizable_strat.rep".
 
-
+STRAT_p = S_0,
+S_0 = (bCast-> S_1|correct-> S_2),
+S_1 = (s-> S_4),
+S_2 = (s-> S_3),
+S_3 = (bCast-> S_5|correct-> S_6),
+S_4 = (bCast-> S_152|correct-> S_153),
+S_5 = (n-> S_11),
+S_6 = (s-> S_56),
+S_11 = (bCast-> S_237|correct-> S_165),
+S_22 = (bCast-> S_140|correct-> S_141),
+S_24 = (bCast-> S_236|correct-> S_171),
+S_31 = (bCast-> S_172|correct-> S_153),
+S_36 = (s-> S_120),
+S_50 = (n-> S_51),
+S_51 = (s-> S_50),
+S_55 = (s-> S_137),
+S_56 = (bCast-> S_57|correct-> S_58),
+S_57 = (n-> S_31),
+S_58 = (s-> S_59),
+S_59 = (bCast-> S_60|correct-> S_61),
+S_60 = (n-> S_138),
+S_61 = (e-> S_67),
+S_67 = (bCast-> S_68|correct-> S_69),
+S_68 = (n-> S_132),
+S_69 = (e-> S_75),
+S_70 = (bCast-> S_71|correct-> S_72),
+S_71 = (n-> S_74),
+S_72 = (s-> S_75),
+S_74 = (bCast-> S_215|correct-> S_204),
+S_75 = (bCast-> S_76|correct-> S_77),
+S_76 = (n-> S_126),
+S_77 = (n-> S_70),
+S_78 = (bCast-> S_79|correct-> S_80),
+S_79 = (n-> S_122),
+S_80 = (n-> S_86),
+S_85 = (bCast-> S_212|correct-> S_163),
+S_86 = (bCast-> S_87|correct-> S_88),
+S_87 = (n-> S_90),
+S_88 = (s-> S_78),
+S_90 = (bCast-> S_214|correct-> S_210),
+S_97 = (s-> S_103),
+S_98 = (n-> S_104),
+S_103 = (s-> S_121),
+S_104 = (s-> S_98),
+S_111 = (n-> S_113),
+S_112 = (n-> S_78),
+S_113 = (bCast-> S_213|correct-> S_202),
+S_116 = (n-> S_98),
+S_120 = (s-> S_131),
+S_121 = (n-> S_103),
+S_122 = (bCast-> S_211|correct-> S_207),
+S_126 = (bCast-> S_225|correct-> S_195),
+S_131 = (e-> S_121),
+S_132 = (bCast-> S_231|correct-> S_189),
+S_137 = (e-> S_131),
+S_138 = (bCast-> S_234|correct-> S_183),
+S_140 = (drop-> S_145|load-> S_146),
+S_141 = (drop-> S_166|load-> S_167),
+S_145 = (drop-> S_145|load-> S_146),
+S_146 = (s-> S_177),
+S_147 = (bCast-> S_173|correct-> S_156),
+S_152 = (n-> S_11),
+S_153 = (n-> S_157),
+S_154 = (bCast-> S_155|correct-> S_156),
+S_155 = (w-> S_11),
+S_156 = (w-> S_157),
+S_157 = (bCast-> S_164|correct-> S_165),
+S_158 = (bCast-> S_159|correct-> S_160),
+S_159 = (n-> S_147),
+S_160 = (n-> S_154),
+S_161 = (bCast-> S_162|correct-> S_163),
+S_162 = (w-> S_147),
+S_163 = (w-> S_154),
+S_164 = (drop-> S_22|load-> S_24),
+S_165 = (drop-> S_166|load-> S_167),
+S_166 = (bCast-> S_168|correct-> S_141),
+S_167 = (bCast-> S_170|correct-> S_171),
+S_168 = (drop-> S_22|load-> S_24),
+S_170 = (s-> S_262),
+S_171 = (s-> S_240),
+S_172 = (s-> S_55),
+S_173 = (s-> S_36),
+S_177 = (s-> S_273),
+S_183 = (n-> S_4),
+S_189 = (n-> S_158),
+S_195 = (n-> S_196),
+S_196 = (bCast-> S_203|correct-> S_204),
+S_202 = (n-> S_205),
+S_203 = (n-> S_85),
+S_204 = (n-> S_161),
+S_205 = (bCast-> S_206|correct-> S_207),
+S_206 = (n-> S_90),
+S_207 = (n-> S_208),
+S_208 = (bCast-> S_209|correct-> S_210),
+S_209 = (w-> S_85),
+S_210 = (w-> S_161),
+S_211 = (s-> S_98),
+S_212 = (s-> S_97),
+S_213 = (n-> S_104),
+S_214 = (s-> S_104),
+S_215 = (s-> S_103),
+S_225 = (s-> S_121),
+S_231 = (s-> S_131),
+S_234 = (s-> S_137),
+S_236 = (s-> S_177),
+S_237 = (drop-> S_145|load-> S_146),
+S_240 = (bCast-> S_241|correct-> S_242),
+S_241 = (s-> S_345),
+S_242 = (s-> S_284),
+S_262 = (bCast-> S_263|correct-> S_242),
+S_263 = (s-> S_273),
+S_273 = (s-> S_275),
+S_275 = (e-> S_276),
+S_276 = (e-> S_277),
+S_277 = (n-> S_278),
+S_278 = (s-> S_277),
+S_283 = (n-> S_50),
+S_284 = (bCast-> S_285|correct-> S_286),
+S_285 = (s-> S_287),
+S_286 = (s-> S_288),
+S_287 = (bCast-> S_344|correct-> S_290),
+S_288 = (bCast-> S_289|correct-> S_290),
+S_289 = (e-> S_294),
+S_290 = (e-> S_295),
+S_294 = (bCast-> S_341|correct-> S_297),
+S_295 = (bCast-> S_296|correct-> S_297),
+S_296 = (e-> S_301),
+S_297 = (e-> S_302),
+S_301 = (bCast-> S_335|correct-> S_304),
+S_302 = (bCast-> S_303|correct-> S_304),
+S_303 = (e-> S_339),
+S_304 = (e-> S_328),
+S_328 = (bCast-> S_329|correct-> S_330),
+S_329 = (unload-> S_331),
+S_330 = (unload-> S_332),
+S_331 = (bCast-> S_116|correct-> S_112),
+S_332 = (bCast-> S_111|correct-> S_112),
+S_335 = (n-> S_278),
+S_339 = (bCast-> S_340|correct-> S_330),
+S_340 = (unload-> S_283),
+S_341 = (e-> S_277),
+S_344 = (e-> S_276),
+S_345 = (bCast-> S_346|correct-> S_286),
+S_346 = (s-> S_275).
 // tests
-//equals FATAL_ROBOT_REALIZABLE(STRAT, STRAT_P).
+equals FATAL_ROBOT_REALIZABLE(STRAT, STRAT_p).
