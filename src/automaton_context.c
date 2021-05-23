@@ -2124,7 +2124,47 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 			fluents[fluent_count++]			= tables->fluent_entries[fluent_index]->valuation.fluent_value;
 		}
 	}
+	//get set of state fluents
+	automaton_vstates_fluent_syntax *vstates_fluent	= NULL;
+	uint32_t vstates_fluent_count	= 0;
+	char** vstates_fluent_names		= NULL;
+	bool fluent_found	= false;
+	for(i = 0; i < program->count; i++){
+		if(program->statements[i]->type == VSTATES_FLUENT_AUT){
+			if(vstates_fluent_names	== NULL){
+				vstates_fluent_count++;
+				vstates_fluent_names	= calloc(1, sizeof(char*));
+				aut_dupstr(&(vstates_fluent_names[0]), program->statements[i]->vstates_syntax->name);
+			}else{
+				fluent_found	= false;
+				for(j = 0; j < vstates_fluent_count; j++){
+					if(strcmp(vstates_fluent_names[j], program->statements[i]->vstates_syntax->name) == 0){
+						fluent_found	= true;
+						break;
+					}
+				}
+				if(!fluent_found){
+					vstates_fluent_count++;
+					char** ptr = realloc(vstates_fluent_names, vstates_fluent_count, sizeof(char*));
+					if(ptr == NULL){
+						printf("Could not allocate memory for vstates_fluent_names\n");
+						exit(-1);
+					}
+					vstates_fluent_names	= ptr;
+					aut_dupstr(&(vstates_fluent_names[vstates_fluent_count - 1]), program->statements[i]->vstates_syntax->name);
 
+				}
+			}
+		}
+	}
+
+
+	for(i = 0; i < program->count; i++){
+		if(program->statements[i]->type == VSTATES_FLUENT_AUT){
+			aut_dupstr(&(vstates_fluent_names[i]), program->statements[i]->vstates_syntax->name);
+
+		}
+	}
 	//get ltl rules
 	uint32_t ltl_automata_count = 0;
 	char** ltl_automata_names	= NULL;
@@ -2228,7 +2268,10 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 		}
 	}
 	//get fluents
-	automaton_automata_context_initialize(ctx, ctx_name, global_alphabet, fluent_count, fluents, liveness_formulas_count, liveness_formulas, liveness_formulas_names);
+	automaton_automata_context_initialize(ctx, ctx_name, global_alphabet, fluent_count, fluents, liveness_formulas_count, liveness_formulas,
+			vstates_fluent_count, vstates_fluent_names, liveness_formulas_names);
+	for(i = 0; i < vstates_fluent_count; i++)free(vstates_fluent_names[i]);
+	free(vstates_fluent_names);
 	free(fluents);
 	automaton_alphabet_destroy(global_alphabet);
 #if VERBOSE

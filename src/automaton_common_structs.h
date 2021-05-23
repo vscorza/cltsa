@@ -124,6 +124,8 @@ typedef struct automata_context_str{
 	uint32_t			liveness_valuations_count;
 	obdd**				liveness_valuations;
 	char**				liveness_valuations_names;
+	uint32_t			state_valuations_count;
+	char**				state_valuations_names;
 } automaton_automata_context;
 typedef struct automaton_transitions_pool_str{
 	uint32_t entries_size_count;
@@ -154,6 +156,8 @@ typedef struct automaton_str{
 	uint32_t				initial_states_count;
 	uint32_t*				initial_states;
 	bool					is_game;
+	uint32_t				state_valuations_declarations_count;
+	uint32_t*				state_valuations_declarations;
 	uint32_t				valuations_size;
 	uint32_t*				valuations;
 	uint32_t				liveness_valuations_size;

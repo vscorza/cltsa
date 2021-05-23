@@ -382,7 +382,8 @@ automaton_program_syntax* automaton_program_syntax_add_statement(automaton_progr
 automaton_statement_syntax* automaton_statement_syntax_create(automaton_statement_type_syntax type, automaton_composition_syntax* composition_def,
 		automaton_expression_syntax* range_def, automaton_expression_syntax* const_def, automaton_fluent_syntax* fluent_def,
 		automaton_set_def_syntax* set_def, automaton_gr1_game_syntax* gr1_game_def, ltl_rule_syntax* ltl_rule, ltl_fluent_syntax* ltl_fluent,
-		automaton_equivalence_check_syntax* equivalence_check, automaton_import_syntax* import_syntax){
+		automaton_equivalence_check_syntax* equivalence_check, automaton_import_syntax* import_syntax,
+		automaton_vstates_fluent_syntax* vstates_fluent_syntax){
 	automaton_statement_syntax* statement	= malloc(sizeof(automaton_statement_syntax));
 	statement->type	= type;
 	statement->composition_def	= composition_def;
@@ -395,8 +396,53 @@ automaton_statement_syntax* automaton_statement_syntax_create(automaton_statemen
 	statement->ltl_fluent_def	= ltl_fluent;
 	statement->equivalence_check	= equivalence_check;
 	statement->import_def		= import_syntax;
+	statement->vstates_syntax	= vstates_fluent_syntax;
 	return statement;
 }
+
+automaton_vstates_syntax* automaton_vstates_syntax_concat_range(automaton_vstates_syntax* vstates, automaton_state_label_syntax* state){
+	vstates->count++;
+	automaton_expression_syntax** ptr	= realloc(vstates->list
+			, sizeof(automaton_state_label_syntax*) * vstates->count);
+	if(ptr == NULL){
+		printf("Could not allocate more space for vstates list\n");
+		exit(-1);
+	}
+	vstates->list	= ptr;
+	vstates->list[vstates->count - 1]	= state;
+	return vstates;
+}
+automaton_vstates_syntax* automaton_vstates_syntax_create_from_state(automaton_state_label_syntax* state){
+	automaton_vstates_syntax* vstates	= malloc(sizeof(automaton_vstates_syntax));
+	vstates->count	= 1;
+	vstates->list	= malloc(sizeof(automaton_state_label_syntax*));
+	vstates->list[0]= state;
+	return vstates;
+}
+
+void automaton_vstates_syntax_destroy(automaton_vstates_syntax* vstates){
+	uint32_t i;
+	for(i = 0; i < vstates->count; i++){
+		automaton_state_label_syntax_destroy(vstates->list[i]);
+	}
+	free(vstates->list); vstates->list = NULL;
+	free(vstates);
+}
+
+automaton_vstates_fluent_syntax* automaton_vstates_fluent_syntax_create(char* name, char* automaton_name, automaton_vstates_syntax* states){
+	automaton_vstates_fluent_syntax* vstates_fluent	= malloc(sizeof(automaton_vstates_fluent_syntax));
+	aut_dupstr(&(vstates_fluent->name), name);
+	aut_dupstr(&(vstates_fluent->automaton_name), automaton_name);
+	vstates_fluent->vstates	= states;
+	return vstates_fluent;
+}
+void automaton_vstates_fluent_syntax_destroy(automaton_vstates_fluent_syntax* vstates_fluent){
+	automaton_vstates_fluent_syntax_destroy(vstates_fluent->vstates);
+	free(vstates_fluent->name);
+	free(vstates_fluent->automaton_name);
+	free(vstates_fluent);
+}
+
 
 ltl_rule_syntax* ltl_rule_syntax_create(bool is_theta, bool is_env, char* name, char* game_structure_name, obdd* obdd){
 	ltl_rule_syntax* ltl_rule	= malloc(sizeof(ltl_rule_syntax));
@@ -445,6 +491,7 @@ void automaton_statement_syntax_destroy(automaton_statement_syntax* statement){
 	case LTL_RULE_AUT: ltl_rule_syntax_destroy(statement->ltl_rule_def);break;
 	case LTL_FLUENT_AUT: ltl_fluent_syntax_destroy(statement->ltl_fluent_def); break;
 	case EQUIV_CHECK_AUT: automaton_equivalence_check_syntax_destroy(statement->equivalence_check);break;
+	case VSTATES_FLUENT_AUT: automaton_vstates_fluent_syntax_destroy(statement->vstates_syntax);break;
 	case GOAL_AUT: break;
 	}
 	free(statement);

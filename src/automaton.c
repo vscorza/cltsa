@@ -122,6 +122,11 @@ void automaton_automata_context_copy(automaton_automata_context* source, automat
 		target->liveness_valuations[i]	= obdd_clone(source->liveness_valuations[i]);
 		aut_dupstr(&(target->liveness_valuations_names[i]), source->liveness_valuations_names[i]);
 	}
+	target->state_valuations_count		= source->state_valuations_count;
+	target->state_valuations_names	= malloc(sizeof(char*) * target->state_valuations_count);
+	for(i = 0; i < target->state_valuations_count; i++){
+		aut_dupstr(&(target->state_valuations_names[i]), source->state_valuations_names[i]);
+	}
 }
 automaton_automaton* automaton_automaton_clone(automaton_automaton* source){
 	automaton_automaton* copy		= malloc(sizeof(automaton_automaton));
@@ -138,6 +143,9 @@ void automaton_automaton_copy(automaton_automaton* source, automaton_automaton* 
 	target->local_alphabet_count	= source->local_alphabet_count;
 	target->local_alphabet			= malloc(sizeof(uint32_t) * target->local_alphabet_count);
 	for(i = 0; i < target->local_alphabet_count; i++){ target->local_alphabet[i]	= source->local_alphabet[i]; }
+	target->state_valuations_declarations_count	= source->state_valuations_declarations_count;
+	target->state_valuations_declarations	= malloc(sizeof(uint32_t) * target->state_valuations_declarations_count);
+	for(i = 0; i < target->state_valuations_declarations_count; i++){ target->state_valuations_declarations[i]	= source->state_valuations_declarations[i]; }
 	target->transitions_composite_count	= source->transitions_composite_count;
 	target->transitions_count		= source->transitions_count;
 	target->transitions_size		= source->transitions_size;
@@ -301,14 +309,18 @@ automaton_valuation* automaton_valuation_create(uint32_t state){
 	return valuation;
 }
 automaton_automata_context* automaton_automata_context_create(char* name, automaton_alphabet* alphabet, uint32_t fluents_count, automaton_fluent** fluents, uint32_t liveness_valuations_count
-		, obdd** liveness_valuations, char** liveness_valuations_names){
+		, obdd** liveness_valuations, char** liveness_valuations_names, uint32_t state_valuations_count, char** state_valuations_names){
 	automaton_automata_context* ctx		= malloc(sizeof(automaton_automata_context));
-	automaton_automata_context_initialize(ctx, name, alphabet, fluents_count, fluents, liveness_valuations_count, liveness_valuations, liveness_valuations_names);
+	automaton_automata_context_initialize(ctx, name, alphabet, fluents_count, fluents, liveness_valuations_count,
+			liveness_valuations, liveness_valuations_names, state_valuations_count, state_valuations_names);
+
 	return ctx;
 }
-automaton_automaton* automaton_automaton_create(char* name, automaton_automata_context* ctx, uint32_t local_alphabet_count, uint32_t* local_alphabet, bool is_game, bool built_from_ltl){
+automaton_automaton* automaton_automaton_create(char* name, automaton_automata_context* ctx, uint32_t local_alphabet_count, uint32_t* local_alphabet
+		, uint32_t state_fluents_declared_count, uint32_t* state_fluents_declared, bool is_game, bool built_from_ltl){
 	automaton_automaton* automaton		= malloc(sizeof(automaton_automaton));
-	automaton_automaton_initialize(automaton, name, ctx, local_alphabet_count, local_alphabet, is_game, built_from_ltl);
+	automaton_automaton_initialize(automaton, name, ctx, local_alphabet_count, local_alphabet, state_fluents_declared_count
+			, state_fluents_declared, is_game, built_from_ltl);
 	return automaton;
 }
 automaton_range* automaton_range_create(char* name, uint32_t lower_value, uint32_t upper_value){
@@ -359,7 +371,7 @@ void automaton_valuation_initialize(automaton_valuation* valuation, uint32_t sta
 	valuation->active_fluents		= NULL;
 }
 void automaton_automata_context_initialize(automaton_automata_context* ctx, char* name, automaton_alphabet* alphabet, uint32_t fluents_count, automaton_fluent** fluents, uint32_t liveness_valuations_count, obdd** liveness_valuations
-		, char** liveness_valuations_names){
+		, char** liveness_valuations_names, uint32_t state_valuations_count, char** state_valuations_names){
 	ctx->name					= malloc(sizeof(char) * (strlen(name) + 1));
 	strcpy(ctx->name, name);
 	ctx->global_alphabet		= automaton_alphabet_clone(alphabet);
@@ -376,8 +388,14 @@ void automaton_automata_context_initialize(automaton_automata_context* ctx, char
 		ctx->liveness_valuations[i]	= obdd_clone(liveness_valuations[i]);
 		aut_dupstr(&(ctx->liveness_valuations_names[i]), liveness_valuations_names[i]);
 	}
+	ctx->state_valuations_count	= state_valuations_count;
+	ctx->state_valuations_names	= malloc(sizeof(char*) * state_valuations_count);
+	for(i = 0; i < ctx->state_valuations_count; i++){
+		aut_dupstr(&(ctx->state_valuations_names[i]), state_valuations_names[i]);
+	}
 }
-void automaton_automaton_initialize(automaton_automaton* automaton, char* name, automaton_automata_context* ctx, uint32_t local_alphabet_count, uint32_t* local_alphabet, bool is_game, bool built_from_ltl){
+void automaton_automaton_initialize(automaton_automaton* automaton, char* name, automaton_automata_context* ctx, uint32_t local_alphabet_count, uint32_t* local_alphabet
+		, uint32_t state_fluents_declared_count, uint32_t* state_fluents_declared, bool is_game, bool built_from_ltl){
 	automaton->built_from_ltl			= built_from_ltl;
 	automaton->name						= malloc(sizeof(char) * (strlen(name) + 1));
 	strcpy(automaton->name, name);
@@ -415,6 +433,11 @@ void automaton_automaton_initialize(automaton_automaton* automaton, char* name, 
 		}
 		//for(j = 0; j < automaton->local_alphabet_count; j++){printf("%d.", automaton->local_alphabet[j]);	}printf("\n");
 	}
+	automaton->state_valuations_declarations	= state_fluents_declared_count > 0? malloc(sizeof(uint32_t) * state_fluents_declared_count) : NULL;
+	automaton->state_valuations_declarations_count		= state_fluents_declared_count;
+	for(i = 0; i < state_fluents_declared_count; i++)
+		automaton->state_valuations_declarations[i]	= state_fluents_declared[i];
+
 	automaton->transitions_size			= LIST_INITIAL_SIZE;
 	automaton->transitions_count		= 0;
 	automaton->transitions_composite_count	= 0;
@@ -555,9 +578,16 @@ void automaton_automata_context_destroy(automaton_automata_context* ctx){
 		free(ctx->liveness_valuations);
 	if(ctx->liveness_valuations_names != NULL)
 		free(ctx->liveness_valuations_names);
+	for(i = 0; i < ctx->state_valuations_count; i++){
+		free(ctx->state_valuations_names[i]);
+	}
+	if(ctx->state_valuations_names != NULL)
+		free(ctx->state_valuations_names);
 	ctx->liveness_valuations	= NULL;
 	ctx->liveness_valuations_names	= NULL;
 	ctx->liveness_valuations_count	= 0;
+	ctx->state_valuations_names	= NULL;
+	ctx->state_valuations_count	= 0;
 	ctx->name					= NULL;
 	ctx->global_alphabet		= NULL;
 	ctx->global_fluents_count	= 0;
@@ -567,6 +597,7 @@ void automaton_automata_context_destroy(automaton_automata_context* ctx){
 void automaton_automaton_destroy(automaton_automaton* automaton){
 	free(automaton->name);
 	free(automaton->local_alphabet);
+	free(automaton->state_valuations_declarations);
 	uint32_t i,j;
 	for(i = 0; i < automaton->transitions_size; i++){
 		for(j = 0; j < automaton->out_degree[i]; j++){
@@ -608,6 +639,8 @@ void automaton_automaton_destroy(automaton_automaton* automaton){
 	automaton->context		= NULL;
 	automaton->local_alphabet_count	= 0;
 	automaton->local_alphabet		= NULL;
+	automaton->state_valuations_declarations_count	= 0;
+	automaton->state_valuations_declarations	= NULL;
 	automaton->transitions_size		= 0;
 	automaton->transitions_count	= 0;
 	automaton->max_out_degree		= 0;

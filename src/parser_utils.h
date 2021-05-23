@@ -70,7 +70,8 @@ typedef enum {
 	GOAL_AUT,
 	LTL_RULE_AUT,
 	LTL_FLUENT_AUT,
-	EQUIV_CHECK_AUT
+	EQUIV_CHECK_AUT,
+	VSTATES_FLUENT_AUT
 } automaton_statement_type_syntax;
 typedef enum {
 	ASYNCH_AUT,
@@ -197,11 +198,21 @@ typedef struct automaton_statement_syntax_str{
 	struct ltl_fluent_syntax_str* ltl_fluent_def;
 	struct automaton_equivalence_check_syntax_str* equivalence_check;
 	struct automaton_import_syntax_str* import_def;
+	struct automaton_vstates_fluent_syntax_str* vstates_syntax;
 }automaton_statement_syntax;
 typedef struct automaton_program_syntax_str{
 	uint32_t count;
 	struct automaton_statement_syntax_str** statements;
 }automaton_program_syntax;
+typedef struct automaton_vstates_syntax_str{
+	uint32_t count;
+	struct automaton_state_label_syntax_str** list;
+}automaton_vstates_syntax;
+typedef struct automaton_vstates_fluent_syntax_str{
+	char* name;
+	char* automaton_name;
+	struct automaton_vstates_syntax_str* vstates;
+}automaton_vstates_fluent_syntax;
 typedef struct ltl_rule_syntax_str{
 	bool is_theta;
 	bool is_env;
@@ -289,9 +300,15 @@ automaton_program_syntax* automaton_program_syntax_add_statement(automaton_progr
 automaton_statement_syntax* automaton_statement_syntax_create(automaton_statement_type_syntax type, automaton_composition_syntax* composition_def,
 		automaton_expression_syntax* range_def, automaton_expression_syntax* const_def, automaton_fluent_syntax* fluent_def,
 		automaton_set_def_syntax* set_def, automaton_gr1_game_syntax* gr1_game_def, ltl_rule_syntax* ltl_rule_def, ltl_fluent_syntax* ltl_fluent_def,
-		automaton_equivalence_check_syntax* equivalence_check, automaton_import_syntax* import_syntax);
+		automaton_equivalence_check_syntax* equivalence_check, automaton_import_syntax* import_syntax,
+		automaton_vstates_fluent_syntax* vstates_fluent_syntax);
 automaton_import_syntax *automaton_import_syntax_create(char *name, char *filename);
 bool automaton_syntax_is_reserved(char* token);
+automaton_vstates_syntax* automaton_vstates_syntax_concat_state(automaton_vstates_syntax* vstates, automaton_state_label_syntax* state);
+automaton_vstates_syntax* automaton_vstates_syntax_create_from_state(automaton_state_label_syntax* state);
+void automaton_vstates_syntax_destroy(automaton_vstates_syntax* vstates);
+automaton_vstates_fluent_syntax* automaton_vstates_fluent_syntax_create(char* name, char* automaton_name, automaton_vstates_syntax* states);
+void automaton_vstates_fluent_syntax_destroy(automaton_vstates_fluent_syntax* vstates_fluent);
 ltl_rule_syntax* ltl_rule_syntax_create(bool is_theta, bool is_env, char* name, char* game_structure_name, obdd* obdd);
 ltl_fluent_syntax* automaton_ltl_fluent_syntax_create(char* name, obdd* obdd);
 obdd_mgr* parser_get_obdd_mgr();
