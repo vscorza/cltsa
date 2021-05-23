@@ -143,8 +143,6 @@ void automaton_automaton_copy(automaton_automaton* source, automaton_automaton* 
 	target->local_alphabet_count	= source->local_alphabet_count;
 	target->local_alphabet			= malloc(sizeof(uint32_t) * target->local_alphabet_count);
 	for(i = 0; i < target->local_alphabet_count; i++){ target->local_alphabet[i]	= source->local_alphabet[i]; }
-	target->state_valuations_declarations_count	= source->state_valuations_declarations_count;
-	target->state_valuations_declarations	= malloc(sizeof(uint32_t) * target->state_valuations_declarations_count);
 	for(i = 0; i < target->state_valuations_declarations_count; i++){ target->state_valuations_declarations[i]	= source->state_valuations_declarations[i]; }
 	target->transitions_composite_count	= source->transitions_composite_count;
 	target->transitions_count		= source->transitions_count;
@@ -212,6 +210,17 @@ void automaton_automaton_copy(automaton_automaton* source, automaton_automaton* 
 			target->liveness_valuations_size	= 0;
 			target->liveness_valuations			= NULL;
 			target->liveness_inverted_valuations= NULL;
+		}
+		if(source->context->state_valuations_count > 0){
+			target->state_valuations_declarations_count	= source->state_valuations_declarations_count;
+			target->state_valuations_declarations	= malloc(sizeof(uint32_t) * target->state_valuations_declarations_count);
+			for(i = 0; i < target->context->state_valuations_count; i++){
+				target->inverted_state_valuations[i]	= automaton_bucket_list_clone(source->inverted_state_valuations[i]);
+			}
+		}else{
+			target->state_valuations_declarations_count	= 0;
+			target->state_valuations_declarations	= NULL;
+			target->inverted_state_valuations	= NULL;
 		}
 		if(source->context->global_fluents_count > 0){
 			target->inverted_valuations						= calloc(target->context->global_fluents_count, sizeof(automaton_bucket_list*));
@@ -395,7 +404,7 @@ void automaton_automata_context_initialize(automaton_automata_context* ctx, char
 	}
 }
 void automaton_automaton_initialize(automaton_automaton* automaton, char* name, automaton_automata_context* ctx, uint32_t local_alphabet_count, uint32_t* local_alphabet
-		, uint32_t state_fluents_declared_count, uint32_t* state_fluents_declared, bool is_game, bool built_from_ltl){
+		, bool is_game, bool built_from_ltl){
 	automaton->built_from_ltl			= built_from_ltl;
 	automaton->name						= malloc(sizeof(char) * (strlen(name) + 1));
 	strcpy(automaton->name, name);
@@ -433,10 +442,6 @@ void automaton_automaton_initialize(automaton_automaton* automaton, char* name, 
 		}
 		//for(j = 0; j < automaton->local_alphabet_count; j++){printf("%d.", automaton->local_alphabet[j]);	}printf("\n");
 	}
-	automaton->state_valuations_declarations	= state_fluents_declared_count > 0? malloc(sizeof(uint32_t) * state_fluents_declared_count) : NULL;
-	automaton->state_valuations_declarations_count		= state_fluents_declared_count;
-	for(i = 0; i < state_fluents_declared_count; i++)
-		automaton->state_valuations_declarations[i]	= state_fluents_declared[i];
 
 	automaton->transitions_size			= LIST_INITIAL_SIZE;
 	automaton->transitions_count		= 0;
@@ -492,6 +497,20 @@ void automaton_automaton_initialize(automaton_automaton* automaton, char* name, 
 			automaton->liveness_valuations_size	= 0;
 			automaton->liveness_valuations	= NULL;
 			automaton->liveness_inverted_valuations	= NULL;
+		}
+		if(automaton->context->state_valuations_count > 0){
+			automaton->state_valuations_declarations_count			= GET_FLUENTS_ARR_SIZE(automaton->context->state_valuations_count, automaton->transitions_size);
+			//automaton->liveness_valuations_size			= new_size;
+			automaton->state_valuations_declarations 	= calloc(automaton->state_valuations_declarations_count, sizeof(uint32_t) );
+			automaton->inverted_state_valuations		= malloc(sizeof(automaton_bucket_list*) * automaton->context->state_valuations_count);
+			for(i = 0; i < automaton->context->state_valuations_count; i++){
+				automaton->inverted_state_valuations[i]	= automaton_bucket_list_create(FLUENT_BUCKET_SIZE);
+			}
+
+		}else{
+			automaton->state_valuations_declarations_count		= 0;
+			automaton->state_valuations_declarations	= NULL;
+			automaton->inverted_state_valuations		= NULL;
 		}
 	}
 	for(i = 0; i < FIXED_SIGNALS_COUNT; i++) automaton->monitored_mask[i]	= 0x0;
@@ -622,7 +641,6 @@ void automaton_automaton_destroy(automaton_automaton* automaton){
 		for(i = 0; i < automaton->context->global_fluents_count; i++)
 			automaton_bucket_destroy(automaton->inverted_valuations[i]);
 		if(automaton->valuations_size > 0){
-
 			free(automaton->inverted_valuations);
 			free(automaton->valuations);
 		}
@@ -634,6 +652,14 @@ void automaton_automaton_destroy(automaton_automaton* automaton){
 			free(automaton->liveness_inverted_valuations);
 		if(automaton->liveness_valuations != NULL)
 			free(automaton->liveness_valuations);
+		if(automaton->state_valuations_declarations_count > 0){
+			for(i = 0; i < automaton->context->state_valuations_count; i++)
+				automaton_bucket_destroy(automaton->inverted_state_valuations[i]);
+		}
+		if(automaton->inverted_state_valuations != NULL)
+			free(automaton->inverted_state_valuations);
+		if(automaton->state_valuations_declarations != NULL)
+			free(automaton->state_valuations_declarations);
 	}
 	automaton->name			= NULL;
 	automaton->context		= NULL;

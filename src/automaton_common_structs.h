@@ -165,6 +165,7 @@ typedef struct automaton_str{
 	automaton_transitions_pool*	transitions_pool;
 	automaton_bucket_list**	inverted_valuations;
 	automaton_bucket_list**	liveness_inverted_valuations;
+	automaton_bucket_list**	inverted_state_valuations;
 	signal_bit_array_t		monitored_mask[FIXED_SIGNALS_COUNT];
 	bool					ordered;
 } automaton_automaton;
