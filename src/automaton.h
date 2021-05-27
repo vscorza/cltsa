@@ -128,7 +128,7 @@ automaton_valuation* automaton_valuation_create(uint32_t state);
 automaton_automata_context* automaton_automata_context_create(char* name, automaton_alphabet* alphabet, uint32_t fluents_count, automaton_fluent** fluents, uint32_t liveness_valuations_count, obdd** liveness_valuations
 		, char** liveness_valuations_names, uint32_t state_valuations_count, char** state_valuations_names);
 automaton_automaton* automaton_automaton_create(char* name, automaton_automata_context* ctx, uint32_t local_alphabet_count, uint32_t* local_alphabet
-		, uint32_t state_fluents_declared_count, uint32_t* state_fluents_declared, bool is_game, bool built_from_ltl);
+		, bool is_game, bool built_from_ltl);
 automaton_range* automaton_range_create(char* name, uint32_t lower_value, uint32_t upper_value);
 automaton_indexes_valuation* automaton_indexes_valuation_create();
 /** INIT FUNCTIONS **/

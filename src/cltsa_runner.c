@@ -1290,7 +1290,7 @@ void run_automaton_tests(){
 	automaton_fluent_add_ending_signals(fluents[1], alphabet, 1, &in);
 
 	uint32_t fluents_count			= 2;
-	automaton_automata_context* ctx	= automaton_automata_context_create("Context 1", alphabet, fluents_count, fluents, 0, NULL, NULL);
+	automaton_automata_context* ctx	= automaton_automata_context_create("Context 1", alphabet, fluents_count, fluents, 0, NULL, NULL, 0, NULL);
 	automaton_automata_context_print(ctx, "\t", "\n");
 	uint32_t* local_alphabet_1		= malloc(sizeof(uint32_t) * 2);
 	local_alphabet_1[0]				= automaton_alphabet_get_signal_index(alphabet, in);
@@ -1364,7 +1364,7 @@ void run_report_tests(){
 	char** liveness_valuations_names	= malloc(sizeof(char*) * 2);
 	liveness_valuations_names[0]		= "ass_1";
 	liveness_valuations_names[1]		= "goal_1";
-	automaton_automata_context *ctx		= automaton_automata_context_create("CTX", alphabet, 1, fluents, 2, liveness_valuations, liveness_valuations_names);
+	automaton_automata_context *ctx		= automaton_automata_context_create("CTX", alphabet, 1, fluents, 2, liveness_valuations, liveness_valuations_names, 0, NULL);
 	automaton_transition *t1	= automaton_transition_create(0, 1);
 	automaton_transition_add_signal_event(t1, ctx, x1);
 	automaton_transition_add_signal_event(t1, ctx, y1);
@@ -1460,7 +1460,7 @@ void build_automaton_and_ranking_for_tests(uint32_t* assumptions_count, uint32_t
 	automaton_fluent_add_ending_signals(fluents[3], alphabet, 1, &in_3);
 	uint32_t fluents_count			= 4;
 	//create context
-	automaton_automata_context* ctx	= automaton_automata_context_create("Context 1", alphabet, fluents_count, fluents, 0, NULL, NULL);
+	automaton_automata_context* ctx	= automaton_automata_context_create("Context 1", alphabet, fluents_count, fluents, 0, NULL, NULL, 0, NULL);
 	uint32_t local_alphabet_count	= 6;
 	uint32_t* local_alphabet		= malloc(sizeof(uint32_t) * local_alphabet_count);
 	local_alphabet[0]				= automaton_alphabet_get_signal_index(alphabet, in);

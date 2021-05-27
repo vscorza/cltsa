@@ -156,8 +156,10 @@ typedef struct automaton_str{
 	uint32_t				initial_states_count;
 	uint32_t*				initial_states;
 	bool					is_game;
-	uint32_t				state_valuations_declarations_count;
-	uint32_t*				state_valuations_declarations;
+	uint32_t				state_valuations_size;
+	uint32_t*				state_valuations;
+	uint32_t				state_valuations_declared_size;
+	uint32_t*				state_valuations_declared;
 	uint32_t				valuations_size;
 	uint32_t*				valuations;
 	uint32_t				liveness_valuations_size;

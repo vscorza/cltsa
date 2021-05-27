@@ -644,7 +644,7 @@ automaton_automaton* automaton_build_automaton_from_obdd(automaton_automata_cont
 	printf("]\n");
 #endif
 	//get automaton
-	automaton_automaton* ltl_automaton	= automaton_automaton_create(name, ctx, local_alphabet_count, local_alphabet, 0, NULL, true, true);
+	automaton_automaton* ltl_automaton	= automaton_automaton_create(name, ctx, local_alphabet_count, local_alphabet, true, true);
 
 	/**
 	 * get the conjunction of rho and theta formulae

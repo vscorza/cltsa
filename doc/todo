@@ -7,7 +7,10 @@ TODO:
 		- implementar cambios
 			- conversión a modelos
 				x extend structs, create, clone, destroy
-				- add list of state fluents to automata
+				x add list of state fluents to automata
+					x construct name to set of states in context when parsing
+					x pass sets to automaton creation
+					x traduce sets to state_valuations
 				x add valuations before embedding fluents at
 					automaton_statement_syntax_to_automaton
 			- composición		

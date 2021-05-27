@@ -400,7 +400,7 @@ automaton_statement_syntax* automaton_statement_syntax_create(automaton_statemen
 	return statement;
 }
 
-automaton_vstates_syntax* automaton_vstates_syntax_concat_range(automaton_vstates_syntax* vstates, automaton_state_label_syntax* state){
+automaton_vstates_syntax* automaton_vstates_syntax_concat_state(automaton_vstates_syntax* vstates, automaton_state_label_syntax* state){
 	vstates->count++;
 	automaton_expression_syntax** ptr	= realloc(vstates->list
 			, sizeof(automaton_state_label_syntax*) * vstates->count);
