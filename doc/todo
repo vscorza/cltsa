@@ -6,15 +6,21 @@ TODO:
 		x definir sintaxis
 		- implementar cambios
 			- conversión a modelos
-				x extend structs, create, clone, destroy
-				x add list of state fluents to automata
-					x construct name to set of states in context when parsing
-					x pass sets to automaton creation
-					x traduce sets to state_valuations
-				x add valuations before embedding fluents at
-					automaton_statement_syntax_to_automaton
+				- agregar debugging output
+				- probar 
+					- sintaxis básica
+						- 1 estado por nombre
+						- 3 estados por nombre
+						- nombre y 2 rangos
+						- idem 2 automátas
 			- composición		
 				- sólo se chequea conformidad sobre modelos declarados explicitamente, si un modelo no predica sobre una valuación no se lo tiene en cuenta para restringir la composición
+				- agregar debugging output
+				- probar 
+					- sintaxis básica
+						- 1 estado por nombre en 2 automatas
+						- 3 estados por nombre en 2 automátas
+						- nombre y 2 rangos en 3 autómatas
 			- import/export actualizar con informacion de vstates
 		- revisar tests
 		- definir casos de estudio

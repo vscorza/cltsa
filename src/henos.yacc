@@ -99,8 +99,8 @@ statement:
 	|gr1									{$$ = automaton_statement_syntax_create(GR_1_AUT, NULL, NULL, NULL, NULL, NULL, $1, NULL, NULL, NULL, NULL, NULL);}
 	|ltlAutRule								{$$ = automaton_statement_syntax_create(LTL_RULE_AUT, NULL, NULL, NULL, NULL, NULL, NULL, $1, NULL, NULL, NULL, NULL);}
 	|ltlFluent								{$$ = automaton_statement_syntax_create(LTL_FLUENT_AUT, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $1, NULL, NULL, NULL);}
-	|stateFluent							{$$ = automaton_statement_syntax_create(LTL_FLUENT_AUT, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $1);}	
-	|equalsExp								{$$ = automaton_statement_syntax_create(VSTATES_FLUENT_AUT, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $1, NULL, NULL);}
+	|stateFluent							{$$ = automaton_statement_syntax_create(VSTATES_FLUENT_AUT, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $1);}	
+	|equalsExp								{$$ = automaton_statement_syntax_create(EQUIV_CHECK_AUT, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $1, NULL, NULL);}
 	;
 label:
 	concurrentLabel							{$$ = $1;}

@@ -224,9 +224,11 @@ void automaton_automaton_copy(automaton_automaton* source, automaton_automaton* 
 				target->state_valuations_declared[i]	= source->state_valuations_declared[i];
 			}
 		}else{
-			target->state_valuations_size	= 0;
-			target->state_valuations	= NULL;
-			target->inverted_state_valuations	= NULL;
+			target->state_valuations_size			= 0;
+			target->state_valuations				= NULL;
+			target->inverted_state_valuations		= NULL;
+			target->state_valuations_declared_size	= 0;
+			target->state_valuations_declared		= NULL;
 		}
 		if(source->context->global_fluents_count > 0){
 			target->inverted_valuations						= calloc(target->context->global_fluents_count, sizeof(automaton_bucket_list*));
@@ -504,20 +506,11 @@ void automaton_automaton_initialize(automaton_automaton* automaton, char* name, 
 			automaton->liveness_valuations	= NULL;
 			automaton->liveness_inverted_valuations	= NULL;
 		}
-		if(automaton->context->state_valuations_count > 0){
-			automaton->state_valuations_size			= GET_FLUENTS_ARR_SIZE(automaton->context->state_valuations_count, automaton->transitions_size);
-			//automaton->liveness_valuations_size			= new_size;
-			automaton->state_valuations 	= calloc(automaton->state_valuations_size, FLUENT_ENTRY_SIZE );
-			automaton->inverted_state_valuations		= malloc(sizeof(automaton_bucket_list*) * automaton->context->state_valuations_count);
-			for(i = 0; i < automaton->context->state_valuations_count; i++){
-				automaton->inverted_state_valuations[i]	= automaton_bucket_list_create(FLUENT_BUCKET_SIZE);
-			}
-
-		}else{
-			automaton->state_valuations_size		= 0;
-			automaton->state_valuations	= NULL;
-			automaton->inverted_state_valuations		= NULL;
-		}
+		automaton->state_valuations_size			= 0;
+		automaton->state_valuations					= NULL;
+		automaton->inverted_state_valuations		= NULL;
+		automaton->state_valuations_declared_size 	= 0;
+		automaton->state_valuations_declared		= NULL;
 	}
 	for(i = 0; i < FIXED_SIGNALS_COUNT; i++) automaton->monitored_mask[i]	= 0x0;
 	for(i = 0; i < ctx->global_alphabet->count;i++)
@@ -622,7 +615,6 @@ void automaton_automata_context_destroy(automaton_automata_context* ctx){
 void automaton_automaton_destroy(automaton_automaton* automaton){
 	free(automaton->name);
 	free(automaton->local_alphabet);
-	free(automaton->state_valuations);
 	uint32_t i,j;
 	for(i = 0; i < automaton->transitions_size; i++){
 		for(j = 0; j < automaton->out_degree[i]; j++){
@@ -668,6 +660,7 @@ void automaton_automaton_destroy(automaton_automaton* automaton){
 			free(automaton->state_valuations);
 		if(automaton->state_valuations_declared != NULL)
 			free(automaton->state_valuations_declared);
+
 	}
 	automaton->name			= NULL;
 	automaton->context		= NULL;

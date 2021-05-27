@@ -1586,6 +1586,10 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 			automaton->state_valuations	= calloc(automaton->state_valuations_size, FLUENT_ENTRY_SIZE);
 			automaton->state_valuations_declared_size = GET_FLUENTS_ARR_SIZE(ctx->state_valuations_count, 1);
 			automaton->state_valuations_declared	= calloc(automaton->state_valuations_declared_size, FLUENT_ENTRY_SIZE);
+			automaton->inverted_state_valuations		= malloc(sizeof(automaton_bucket_list*) * automaton->context->state_valuations_count);
+			for(i = 0; i < automaton->context->state_valuations_count; i++){
+				automaton->inverted_state_valuations[i]	= automaton_bucket_list_create(FLUENT_BUCKET_SIZE);
+			}
 			//set declared mask
 			bool index_found	= false;
 			for(i = 0; i < ctx->state_valuations_count; i++){
@@ -1621,8 +1625,11 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 						//add state to valuation set
 						//***********
 						//(uint32_t)label_position
-						fluent_index	= GET_STATE_FLUENT_INDEX(ctx->state_valuations_count, label_position, i);
+						fluent_index	= GET_STATE_FLUENT_INDEX(ctx->state_valuations_count, label_position, vstates_ctx_indexes[i]);
 						SET_FLUENT_BIT(automaton->state_valuations, fluent_index);
+						automaton_bucket_add_entry(automaton->inverted_state_valuations[vstates_ctx_indexes[i]],
+								label_position);
+
 					}
 					for(s = 0; s < explicit_start_state_count; s++){
 						if(explicit_start_valuations[s] != NULL)
@@ -2383,7 +2390,7 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 	}
 	//get fluents
 	automaton_automata_context_initialize(ctx, ctx_name, global_alphabet, fluent_count, fluents, liveness_formulas_count, liveness_formulas,
-			vstates_fluent_count, vstates_fluent_names, liveness_formulas_names);
+			liveness_formulas_names, vstates_fluent_count, vstates_fluent_names);
 	for(i = 0; i < vstates_fluent_count; i++)free(vstates_fluent_names[i]);
 	free(vstates_fluent_names);
 	free(fluents);
