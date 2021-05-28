@@ -535,7 +535,7 @@ void automaton_automaton_serialize_report(FILE *f, automaton_automaton *automato
 		for(j = 0; j < automaton->context->state_valuations_count; j++){
 			if(automaton->is_game && automaton->state_valuations_declared_size > 0){
 				fluent_index	= GET_STATE_FLUENT_INDEX(automaton->context->state_valuations_count, i, j);
-				fprintf(f, "%d%s", TEST_FLUENT_BIT(automaton->state_valuations, fluent_index) ? "1" : "0", j == (automaton->context->state_valuations_count - 1)? "" :  AUT_SER_SEP);
+				fprintf(f, "%s%s", TEST_FLUENT_BIT(automaton->state_valuations, fluent_index) ? "1" : "0", j == (automaton->context->state_valuations_count - 1)? "" :  AUT_SER_SEP);
 			}else{
 				fprintf(f, "%s%s", "0",  j == (automaton->context->state_valuations_count - 1)? "" :  AUT_SER_SEP);
 			}

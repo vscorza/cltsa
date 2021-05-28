@@ -390,13 +390,46 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 	uint32_t composite_initial_state	= automaton_composite_tree_get_key(tree, frontier);
 #endif
 
-	composite_frontier[0]			= composite_initial_state;
+	composite_frontier[0]				= composite_initial_state;
 	automaton_bucket_add_entry(bucket_list, composite_initial_state);
 	automaton_automaton_add_initial_state(composition, composite_initial_state);
-	uint32_t fluent_count			= ctx->global_fluents_count;
+	uint32_t fluent_count				= ctx->global_fluents_count;
 	uint32_t liveness_valuations_count	= ctx->liveness_valuations_count;
+	uint32_t vstates_count				= ctx->state_valuations_count;
+	uint32_t* vstates_partial_mask		= NULL;
+	uint32_t* current_vstates			= NULL;
+	uint32_t vstates_automata_count		= 0;
+	uint32_t* vstates_automata_indexes	= NULL;
 	// set initial state valuation
 	if(is_game){
+		if(vstates_count > 0){
+			composition->state_valuations_declared_size	= GET_FLUENTS_ARR_SIZE(vstates_count, 1);
+			composition->state_valuations_declared	= calloc(composition->state_valuations_declared_size, FLUENT_ENTRY_SIZE);
+			composition->state_valuations_size	= GET_FLUENTS_ARR_SIZE(vstates_count, composition->transitions_size);
+			composition->state_valuations		= calloc(composition->state_valuations_size, FLUENT_ENTRY_SIZE);
+			vstates_partial_mask				= calloc(composition->state_valuations_declared_size, FLUENT_ENTRY_SIZE);
+			current_vstates						= calloc(composition->state_valuations_declared_size, FLUENT_ENTRY_SIZE);
+			composition->inverted_state_valuations	= calloc(vstates_count, sizeof(automaton_bucket_list*));
+			for(i = 0; i < vstates_count; i++){
+				composition->inverted_state_valuations[i]	= automaton_bucket_list_create(FLUENT_BUCKET_SIZE);
+			}
+		}
+		//get declared valuations in composition as disjunction of components declarations
+		for(i = 0; i < automata_count; i++)
+			if(automata[i]->state_valuations_declared_size > 0)
+				vstates_automata_count++;
+		vstates_automata_indexes	= calloc(vstates_automata_count, sizeof(uint32_t));
+		vstates_automata_count	= 0;
+		for(i = 0; i < automata_count; i++){
+			if(automata[i]->state_valuations_declared_size > 0){
+				vstates_automata_indexes[vstates_automata_count]	= i;
+				vstates_automata_count++;
+				for(j = 0; j < composition->state_valuations_declared_size; j++){
+					composition->state_valuations_declared[j] =
+							composition->state_valuations_declared[j] | automata[i]->state_valuations_declared[j];
+				}
+			}
+		}
 		uint32_t fluent_index;
 		for(i = 0; i < fluent_count; i++){
 			fluent_index	= GET_STATE_FLUENT_INDEX(fluent_count, 0, i);
@@ -409,6 +442,11 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 			fluent_index	= GET_STATE_FLUENT_INDEX(liveness_valuations_count, 0, i);
 			//TODO:we are assuming fluents start as false
 			CLEAR_FLUENT_BIT(composition->liveness_valuations, fluent_index);
+		}
+		for(i = 0; i < vstates_count; i++){
+			fluent_index	= GET_STATE_FLUENT_INDEX(vstates_count, 0, i);
+			//TODO:we are assuming fluents start as false
+			CLEAR_FLUENT_BIT(composition->state_valuations, fluent_index);
 		}
 	}
 #if DEBUG_COMPOSITION
@@ -511,7 +549,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 		for(i = 0; i < FIXED_SIGNALS_COUNT; i++)label_accum[i]	= (signal_bit_array_t)0x0;
 
 
-		bool viable; bool not_considered; bool local_overlap;
+		bool viable, not_considered, local_overlap, vstates_consistent;
 		//explore possible combinations of transitions
 
 		while(!automaton_automata_idxs_is_max(idxs, automata_count)){
@@ -708,77 +746,132 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 				}else{
 					TRANSITION_CLEAR_INPUT(current_transition);
 				}
-				//current_transition->is_input	= is_input;
-				automaton_automaton_add_transition(composition, current_transition);
-#if DEBUG_COMPOSITION
-				printf("\t[+] Adding trans: %d {", current_transition->state_from);
-				for(k = 0; k < (TRANSITION_ENTRY_SIZE * FIXED_SIGNALS_COUNT) - 1; k++){
-					if(TEST_TRANSITION_BIT(current_transition, k)){
-						printf("%s ", automata[0]->context->global_alphabet->list[k].name);
+				//check if transition can be added (if vstates are consistent between components)
+				//state is consistent if:
+				//   (a_i & mask_i & mask & a_{i-1}) == (a_i & mask_i & mask)
+				//then we update:
+				//   mask <- mask | mask_i
+				//   a_{i-1} = a_i | a_{i-1}
+
+				uint32_t current_vstates_index	= 0;
+				vstates_consistent	= true;
+				if(vstates_automata_count > 1){
+					//initialize accumulator to the first value
+					for(i = 0; i < composition->state_valuations_declared_size; i++){
+						vstates_partial_mask[i]	= automata[vstates_automata_indexes[0]]->state_valuations_declared[i];
+						current_vstates_index	= GET_FLUENTS_ARR_SIZE(ctx->state_valuations_count, current_to_state[vstates_automata_indexes[0]]) + i;
+						current_vstates[i]	= automata[vstates_automata_indexes[0]]->state_valuations[current_vstates_index];
 					}
-				}
-				printf("}->[");
-				for(l = 0; l < automata_count; l++){
-					printf("%s%d", l > 0 ? "," : "", current_to_state[l]);
-				}
-				printf("]:%d\n", current_transition->state_to);
-#endif
-				// set state valuation
-				if(is_game){
-					uint32_t fluent_index;
-					uint32_t fluent_automata_index;
-					int32_t state_position	= -1;
-					bool state_found;
-					for(i = 0; i < fluent_count; i++){
-						fluent_index	= GET_STATE_FLUENT_INDEX(fluent_count, composite_to, i);
-						//set new valuation
-						fluent_automata_index	= automata_count + i;
-						if(current_to_state[fluent_automata_index] == 1){
-							//Check if it should be added to the inverted valuation list
-							state_found		= automaton_bucket_has_entry(composition->inverted_valuations[i], composite_to);
-							if(!state_found){
-								automaton_bucket_add_entry(composition->inverted_valuations[i], composite_to);
+					//perform the comparison detailed above and update mask, vstates when possible
+					for(i = 1; i < vstates_automata_count && vstates_consistent; i++){
+						for(j = 0; j < composition->state_valuations_declared_size; j++){
+							current_vstates_index	= GET_FLUENTS_ARR_SIZE(ctx->state_valuations_count, current_to_state[vstates_automata_indexes[i]]) + j;
+							if((vstates_partial_mask[j] & current_vstates[j] & automata[vstates_automata_indexes[i]]->state_valuations_declared[j]
+								& automata[vstates_automata_indexes[i]]->state_valuations[current_vstates_index]) !=
+								(vstates_partial_mask[j] & automata[vstates_automata_indexes[i]]->state_valuations_declared[j]
+								& automata[vstates_automata_indexes[i]]->state_valuations[current_vstates_index])){
+								vstates_consistent	= false;
+								break;
 							}
-							SET_FLUENT_BIT(composition->valuations, fluent_index);
-						}else{
-							CLEAR_FLUENT_BIT(composition->valuations, fluent_index);
+							vstates_partial_mask[j]	= vstates_partial_mask[j]
+								| automata[vstates_automata_indexes[i]]->state_valuations_declared[j];
+							current_vstates[j] 		= current_vstates[j]  | automata[vstates_automata_indexes[i]]->state_valuations[j];
 						}
 					}
-					//set liveness valuations
-					for(i = 0; i < liveness_valuations_count; i++){
-						bool current_valuation = true;
-						for(j = 0; j < automata_count; j++){
-							if(automata[j]->built_from_ltl){
-								fluent_index	= GET_STATE_FLUENT_INDEX(liveness_valuations_count, current_to_state[j], i);
-								current_valuation = current_valuation && TEST_FLUENT_BIT(automata[j]->liveness_valuations, fluent_index);
-							}
-							if(!current_valuation)break;
-						}
-						fluent_index	= GET_STATE_FLUENT_INDEX(liveness_valuations_count, composite_to, i);
-						if(current_valuation){
-							//Check if it should be added to the inverted valuation list
-							state_found		= automaton_bucket_has_entry(composition->liveness_inverted_valuations[i], composite_to);
-							//
-							if(!state_found){
-								automaton_bucket_add_entry(composition->liveness_inverted_valuations[i], composite_to);
-							}
-							SET_FLUENT_BIT(composition->liveness_valuations, fluent_index);
-						}else{
-							CLEAR_FLUENT_BIT(composition->liveness_valuations, fluent_index);
+				}else{
+					for(i = 0; i < composition->state_valuations_declared_size; i++)
+						current_vstates[i]	= 0x0;
+				}
+				if(vstates_consistent){
+
+					automaton_automaton_add_transition(composition, current_transition);
+	#if DEBUG_COMPOSITION
+					printf("\t[+] Adding trans: %d {", current_transition->state_from);
+					for(k = 0; k < (TRANSITION_ENTRY_SIZE * FIXED_SIGNALS_COUNT) - 1; k++){
+						if(TEST_TRANSITION_BIT(current_transition, k)){
+							printf("%s ", automata[0]->context->global_alphabet->list[k].name);
 						}
 					}
-				}
-				transitions_added_count++;
+					printf("}->[");
+					for(l = 0; l < automata_count; l++){
+						printf("%s%d", l > 0 ? "," : "", current_to_state[l]);
+					}
+					printf("]:%d\n", current_transition->state_to);
+	#endif
+					// set state valuation
+					if(is_game){
+						uint32_t fluent_index;
+						uint32_t fluent_automata_index;
+						int32_t state_position	= -1;
+						bool state_found;
+						for(i = 0; i < fluent_count; i++){
+							fluent_index	= GET_STATE_FLUENT_INDEX(fluent_count, composite_to, i);
+							//set new valuation
+							fluent_automata_index	= automata_count + i;
+							if(current_to_state[fluent_automata_index] == 1){
+								//Check if it should be added to the inverted valuation list
+								state_found		= automaton_bucket_has_entry(composition->inverted_valuations[i], composite_to);
+								if(!state_found){
+									automaton_bucket_add_entry(composition->inverted_valuations[i], composite_to);
+								}
+								SET_FLUENT_BIT(composition->valuations, fluent_index);
+							}else{
+								CLEAR_FLUENT_BIT(composition->valuations, fluent_index);
+							}
+						}
+						//set liveness valuations
+						for(i = 0; i < liveness_valuations_count; i++){
+							bool current_valuation = true;
+							for(j = 0; j < automata_count; j++){
+								if(automata[j]->built_from_ltl){
+									fluent_index	= GET_STATE_FLUENT_INDEX(liveness_valuations_count, current_to_state[j], i);
+									current_valuation = current_valuation && TEST_FLUENT_BIT(automata[j]->liveness_valuations, fluent_index);
+								}
+								if(!current_valuation)break;
+							}
+							fluent_index	= GET_STATE_FLUENT_INDEX(liveness_valuations_count, composite_to, i);
+							if(current_valuation){
+								//Check if it should be added to the inverted valuation list
+								state_found		= automaton_bucket_has_entry(composition->liveness_inverted_valuations[i], composite_to);
+								//
+								if(!state_found){
+									automaton_bucket_add_entry(composition->liveness_inverted_valuations[i], composite_to);
+								}
+								SET_FLUENT_BIT(composition->liveness_valuations, fluent_index);
+							}else{
+								CLEAR_FLUENT_BIT(composition->liveness_valuations, fluent_index);
+							}
+						}
+						//set vstates valuations
+						//TODO: set
+						bool has_state_valuation	= false;
+						for(j = 0; j < composition->state_valuations_declared_size; j++){
+							current_vstates_index	= GET_FLUENTS_ARR_SIZE(ctx->state_valuations_count, composite_to) + j;
+							composition->state_valuations[current_vstates_index]	= current_vstates[j];
+							has_state_valuation	= has_state_valuation | (current_vstates[j] != 0x0);
+						}
+						//update inverted valuations if needed
+						if(has_state_valuation){
+							for(j = 0; j < vstates_count; j++){
+								fluent_index	= GET_STATE_FLUENT_INDEX(vstates_count, 0, j);
+								if(TEST_FLUENT_BIT(current_vstates, fluent_index)){
+									automaton_bucket_add_entry(composition->inverted_state_valuations[j], composite_to);
+								}
+							}
+						}
+					}
+					transitions_added_count++;
 #if VERBOSE
-				if(transitions_added_count % 10000 == 0){
-					printf("\t[!] Added %d transitions\n", transitions_added_count);
-					fflush(stdout);
-				}
-				if((found_hits + found_misses) % 5000 == 0){
-					printf("\t[!] %d hits, %d misses\n", found_hits, found_misses);
-					fflush(stdout);
-				}
+					if(transitions_added_count % 10000 == 0){
+						printf("\t[!] Added %d transitions\n", transitions_added_count);
+						fflush(stdout);
+					}
+					if((found_hits + found_misses) % 5000 == 0){
+						printf("\t[!] %d hits, %d misses\n", found_hits, found_misses);
+						fflush(stdout);
+					}
 #endif
+				}
 				automaton_transition_destroy(current_transition, true);
 				// expand frontier
 				bool found = automaton_bucket_has_entry(bucket_list, composite_to);
@@ -817,6 +910,9 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 			automaton_automata_compose_increment_idxs(idxs, idxs_size, idxs_skip, automata_count);
 		}
 	}
+	if(vstates_partial_mask != NULL)free(vstates_partial_mask);
+	if(vstates_automata_indexes != NULL)free(vstates_automata_indexes);
+	if(current_vstates != NULL)free(current_vstates);
 #if VERBOSE
 	printf("TOTAL Composition has [%09d] states and [%09d] transitions run for [%08f] KEY ACCESS.: [Misses:%li,hits:%li]\n", tree->max_value, composition->transitions_composite_count, (double)(clock() - begin) / CLOCKS_PER_SEC, found_misses, found_hits);
 #endif

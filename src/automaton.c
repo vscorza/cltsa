@@ -1067,26 +1067,33 @@ void automaton_automaton_resize_to_state(automaton_automaton* current_automaton,
 
 	uint32_t old_valuations_size, new_valuations_size;
 	if(current_automaton->is_game){
-		uint32_t* new_valuations;
+		uint32_t* valuations_ptr	= NULL;
 		if(current_automaton->context->global_fluents_count > 0){
-			old_valuations_size						= GET_FLUENTS_ARR_SIZE(current_automaton->context->global_fluents_count, old_size);
-			current_automaton->valuations_size		= GET_FLUENTS_ARR_SIZE(current_automaton->context->global_fluents_count, current_automaton->transitions_size);
-			new_valuations 							= calloc(current_automaton->valuations_size, sizeof(uint32_t));
-			for(i = 0; i < old_valuations_size; i++){
-				new_valuations[i]					= current_automaton->valuations[i];
+			current_automaton->valuations_size	= GET_FLUENTS_ARR_SIZE(current_automaton->context->global_fluents_count, current_automaton->transitions_size);
+			valuations_ptr	= realloc(current_automaton->valuations,
+					current_automaton->valuations_size * FLUENT_ENTRY_SIZE);
+			if(valuations_ptr == NULL){
+				printf("Could not allocate memory for vstates_ptr\n");exit(-1);
 			}
-			free(current_automaton->valuations);
-			current_automaton->valuations			= new_valuations;
+			current_automaton->valuations	= valuations_ptr;
 		}
 		if(current_automaton->context->liveness_valuations_count > 0){
-			old_valuations_size						= GET_FLUENTS_ARR_SIZE(current_automaton->context->liveness_valuations_count, old_size);
 			current_automaton->liveness_valuations_size	= GET_FLUENTS_ARR_SIZE(current_automaton->context->liveness_valuations_count, current_automaton->transitions_size);
-			new_valuations 							= calloc(current_automaton->liveness_valuations_size, sizeof(uint32_t));
-			for(i = 0; i < old_valuations_size; i++){
-				new_valuations[i]					= current_automaton->liveness_valuations[i];
+			valuations_ptr	= realloc(current_automaton->liveness_valuations,
+					current_automaton->liveness_valuations_size * FLUENT_ENTRY_SIZE);
+			if(valuations_ptr == NULL){
+				printf("Could not allocate memory for vstates_ptr\n");exit(-1);
 			}
-			free(current_automaton->liveness_valuations);
-			current_automaton->liveness_valuations	= new_valuations;
+			current_automaton->liveness_valuations	= valuations_ptr;
+		}
+		if(current_automaton->context->state_valuations_count > 0){
+			current_automaton->state_valuations_size	= GET_FLUENTS_ARR_SIZE(current_automaton->context->state_valuations_count, current_automaton->transitions_size);
+			valuations_ptr	= realloc(current_automaton->state_valuations,
+					current_automaton->state_valuations_size * FLUENT_ENTRY_SIZE);
+			if(valuations_ptr == NULL){
+				printf("Could not allocate memory for vstates_ptr\n");exit(-1);
+			}
+			current_automaton->state_valuations	= valuations_ptr;
 		}
 	}
 
