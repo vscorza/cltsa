@@ -369,7 +369,7 @@ void automaton_automaton_check_load_context(FILE *f, automaton_automata_context 
 			exit(-1);
 		}
 		current 	= 	fgetc(f);
-		if(current != AUT_SER_OBJ_END_CHAR || current == EOF) {
+		if(current != AUT_SER_SEP_CHAR || current == EOF) {
 			printf("Corrupted object\n");
 			exit(-1);
 		}
@@ -390,7 +390,7 @@ void automaton_automaton_check_load_context(FILE *f, automaton_automata_context 
 			exit(-1);
 		}
 		current 	= 	fgetc(f);
-		if(current != AUT_SER_SEP_CHAR || current == EOF) {
+		if(current != AUT_SER_OBJ_END_CHAR || current == EOF) {
 			printf("Corrupted object\n");
 			exit(-1);
 		}

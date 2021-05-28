@@ -471,7 +471,7 @@ void automaton_automaton_serialize_report(FILE *f, automaton_automaton *automato
 	for(i = 0; i < automaton->local_alphabet_count; i++){
 		fprintf(f, "%d%s", automaton->local_alphabet[i], i == (automaton->local_alphabet_count - 1)? "" :  AUT_SER_SEP);
 	}
-	fprintf(f, "%s%d%s%s", AUT_SER_SEP, automaton->context->state_valuations_count, AUT_SER_SEP, AUT_SER_ARRAY_START);
+	fprintf(f, "%s%s%d%s%s", AUT_SER_ARRAY_END, AUT_SER_SEP, automaton->context->state_valuations_count, AUT_SER_SEP, AUT_SER_ARRAY_START);
 	for(i = 0; i < automaton->context->state_valuations_count; i++){
 		if(automaton->state_valuations_declared_size == 0){
 			fprintf(f, "0%s", i == (automaton->context->state_valuations_count - 1)? "" :  AUT_SER_SEP);

@@ -157,8 +157,12 @@ int main (int argc, char** argv){
 		//GENERAL TESTS
 		//run_all_tests();
 
-		//run_functional_tests();
-		run_parse_test("tests/biscotti_vstates.fsp", "biscotti vstates");
+		run_functional_tests();
+		//run_parse_test("tests/biscotti_vstates.fsp", "biscotti vstates");
+		//run_automaton_export_test();
+		//run_automaton_import_test();
+
+
 
 		//run_parse_test("tests/exploration-robot-realizable_test_debug.fsp", "unrealizable exploration robot test");
 		//run_parse_test("tests/exploration-robot-realizable_test_debug.fsp", "unrealizable exploration robot test");
