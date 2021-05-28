@@ -1580,6 +1580,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 		//set state valuations
 		//initialize valuations structs
 		if(current_vstates_count > 0){
+			automaton->is_game	= true;
 			uint32_t* vstates_ctx_indexes	= calloc(current_vstates_count, sizeof(uint32_t));
 
 			automaton->state_valuations_size	= GET_FLUENTS_ARR_SIZE(ctx->state_valuations_count, automaton->transitions_size);
@@ -1607,21 +1608,9 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 			}
 			uint32_t fluent_index;
 			for(i = 0; i < current_vstates_count; i++){
-				for(j = 0; j < current_vstates_syntaxes[i]; j++){
-					explicit_start_valuation 	= automaton_indexes_valuation_create_from_indexes(tables, current_vstates_syntaxes[i]->list[j]);
-
-					automaton_indexes_syntax_eval_strings(tables,explicit_start_valuation
-							,&explicit_start_valuations, &explicit_start_state_count, &explicit_start_state_size, &indexes_values, &ret_value, &count, current_vstates_syntaxes[i]->list[j]);
-					for(j = 0; j < count; j++){free(ret_value[j]);free(indexes_values[j]);}
-					free(ret_value); ret_value = NULL;
-					free(indexes_values); indexes_values = NULL;
-
-					explicit_start_states	= calloc(explicit_start_state_count, sizeof(uint32_t));
-					labels_list->sorted	= false;
-					for(j = 0; j < count; j++){
-						automaton_indexes_valuation_set_from_label(tables, explicit_start_valuations[j], current_vstates_syntaxes[i]->list[j]->indexes,
-								current_vstates_syntaxes[i]->list[j]->name, label_indexes);
-						aut_push_string_to_list(labels_list, label_indexes, &label_position);
+				for(j = 0; j < current_vstates_syntaxes[i]->count; j++){
+					if(current_vstates_syntaxes[i]->list[j]->indexes == NULL){
+						aut_push_string_to_list(labels_list, current_vstates_syntaxes[i]->list[j]->name, &label_position);
 						//add state to valuation set
 						//***********
 						//(uint32_t)label_position
@@ -1629,15 +1618,38 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 						SET_FLUENT_BIT(automaton->state_valuations, fluent_index);
 						automaton_bucket_add_entry(automaton->inverted_state_valuations[vstates_ctx_indexes[i]],
 								label_position);
+					}else{
+						explicit_start_valuation 	= automaton_indexes_valuation_create_from_indexes(tables, current_vstates_syntaxes[i]->list[j]->indexes);
 
+						automaton_indexes_syntax_eval_strings(tables,explicit_start_valuation
+								,&explicit_start_valuations, &explicit_start_state_count, &explicit_start_state_size, &indexes_values, &ret_value, &count, current_vstates_syntaxes[i]->list[j]);
+						for(j = 0; j < count; j++){free(ret_value[j]);free(indexes_values[j]);}
+						free(ret_value); ret_value = NULL;
+						free(indexes_values); indexes_values = NULL;
+
+						explicit_start_states	= calloc(explicit_start_state_count, sizeof(uint32_t));
+						labels_list->sorted	= false;
+						for(j = 0; j < count; j++){
+							automaton_indexes_valuation_set_from_label(tables, explicit_start_valuations[j], current_vstates_syntaxes[i]->list[j]->indexes,
+									current_vstates_syntaxes[i]->list[j]->name, label_indexes);
+							aut_push_string_to_list(labels_list, label_indexes, &label_position);
+							//add state to valuation set
+							//***********
+							//(uint32_t)label_position
+							fluent_index	= GET_STATE_FLUENT_INDEX(ctx->state_valuations_count, label_position, vstates_ctx_indexes[i]);
+							SET_FLUENT_BIT(automaton->state_valuations, fluent_index);
+							automaton_bucket_add_entry(automaton->inverted_state_valuations[vstates_ctx_indexes[i]],
+									label_position);
+
+						}
+						for(s = 0; s < explicit_start_state_count; s++){
+							if(explicit_start_valuations[s] != NULL)
+								automaton_indexes_valuation_destroy(explicit_start_valuations[s]);
+						}
+						free(explicit_start_valuations);explicit_start_valuations	= NULL;
+						free(explicit_start_states);explicit_start_states			= NULL;
+						explicit_start_state_count	= explicit_start_state_size		= 0;
 					}
-					for(s = 0; s < explicit_start_state_count; s++){
-						if(explicit_start_valuations[s] != NULL)
-							automaton_indexes_valuation_destroy(explicit_start_valuations[s]);
-					}
-					free(explicit_start_valuations);explicit_start_valuations	= NULL;
-					free(explicit_start_states);explicit_start_states			= NULL;
-					explicit_start_state_count	= explicit_start_state_size		= 0;
 				}
 			}
 
@@ -2197,23 +2209,24 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 	automaton_vstates_fluent_syntax *vstates_fluent	= NULL;
 	uint32_t vstates_fluent_count	= 0;
 	char** vstates_fluent_names		= NULL;
+
+	int32_t fluent_automaton_index	 = -1;
 	automaton_vstates_fluent_syntax	*vstates_syntax	= NULL;
-	bool new_vstates_entry	= false;
 	uint32_t vstates_automata_count	= 0;
 	char** vstates_automata_names	= NULL;
 	uint32_t* vstates_automata_states_count	= NULL;
+	char*** vstates_automata_fluent_names		= NULL;
 	automaton_vstates_syntax*** automaton_vstates_automata_states	= NULL;
 	for(i = 0; i < program->count; i++){
 		if(program->statements[i]->type == VSTATES_FLUENT_AUT){
 			fluent_index	= -1;
-			new_vstates_entry	= false;
+
 			vstates_syntax	= program->statements[i]->vstates_syntax;
 			if(vstates_fluent_names	== NULL){
 				vstates_fluent_count++;
 				vstates_fluent_names	= calloc(1, sizeof(char*));
 				aut_dupstr(&(vstates_fluent_names[0]), vstates_syntax->name);
 				fluent_index	= 0;
-				new_vstates_entry	= true;
 			}else{
 				for(j = 0; j < vstates_fluent_count; j++){
 					if(strcmp(vstates_fluent_names[j], vstates_syntax->name) == 0){
@@ -2232,52 +2245,75 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 					aut_dupstr(&(vstates_fluent_names[vstates_fluent_count - 1]), vstates_syntax->name);
 				}
 			}
-			if(new_vstates_entry){
+
+			if(vstates_automata_names == NULL){
 				vstates_automata_count++;
-				if(vstates_automata_names != NULL){
+				vstates_automata_names	= calloc(1, sizeof(char*));
+				aut_dupstr(&(vstates_automata_names[0]),vstates_syntax->automaton_name);
+				fluent_automaton_index	= 0;
+				vstates_automata_states_count			= calloc(1, sizeof(uint32_t));
+				vstates_automata_states_count[0]		= 1;
+				vstates_automata_fluent_names			= calloc(1, sizeof(char**));
+				vstates_automata_fluent_names[0]		= calloc(1, sizeof(char*));
+				automaton_vstates_automata_states		= calloc(1, sizeof(automaton_vstates_fluent_syntax**));
+				automaton_vstates_automata_states[0]	= calloc(1, sizeof(automaton_vstates_fluent_syntax*));
+			}else{
+				fluent_automaton_index	 = -1;
+				for(j = 0; j < vstates_automata_count; j++){
+					if(strcmp(vstates_automata_names[j], vstates_syntax->automaton_name)==0){
+						fluent_automaton_index	= j;
+						break;
+					}
+				}
+				if(fluent_automaton_index == -1){
+					vstates_automata_count++;
+					fluent_automaton_index	= vstates_automata_count - 1;
 					char** names_ptr	=realloc(vstates_automata_names, vstates_automata_count * sizeof(char*));
 					if(names_ptr == NULL){
 						printf("Could not allocate memory for vstates_automata_names\n");exit(-1);
 					}
 					vstates_automata_names	= names_ptr;
-				}else{
-					vstates_automata_names	= calloc(1, sizeof(char*));
-				}
-				aut_dupstr(&(vstates_automata_names[vstates_automata_count - 1]),vstates_syntax->automaton_name);
-				if(vstates_automata_states_count != NULL){
+					aut_dupstr(&(vstates_automata_names[fluent_automaton_index]),vstates_syntax->automaton_name);
 					uint32_t* vstates_count_ptr	= realloc(vstates_automata_states_count, vstates_automata_count * sizeof(uint32_t));
 					if(vstates_count_ptr == NULL){
 						printf("Could not allocate memory for vstates_count_ptr\n");exit(-1);
 					}
 					vstates_automata_states_count	= vstates_count_ptr;
-				}else{
-					vstates_automata_states_count	= calloc(1, sizeof(uint32_t));
-				}
-				vstates_automata_states_count[vstates_automata_count - 1]	= 0;
-				if(automaton_vstates_automata_states != NULL){
+					vstates_automata_states_count[fluent_automaton_index]	= 1;
 					automaton_vstates_fluent_syntax*** vstates_states_ptr	=realloc(automaton_vstates_automata_states, vstates_automata_count * sizeof(automaton_vstates_fluent_syntax**));
 					if(vstates_states_ptr == NULL){
 						printf("Could not allocate memory for automaton_vstates_automata_states\n");exit(-1);
 					}
 					automaton_vstates_automata_states	= vstates_states_ptr;
-				}else{
-					automaton_vstates_automata_states	= calloc(1, sizeof(automaton_vstates_fluent_syntax**));
-				}
-				automaton_vstates_automata_states[vstates_automata_count - 1]	= NULL;
+					automaton_vstates_automata_states[fluent_automaton_index]	= calloc(1, sizeof(automaton_vstates_fluent_syntax*));
 
-			}
-			vstates_automata_states_count[fluent_index]++;
-			if(automaton_vstates_automata_states[fluent_index] != NULL){
-			automaton_vstates_fluent_syntax** vstates_states_single_ptr	=realloc(automaton_vstates_automata_states[fluent_index]
-																												   , vstates_automata_states_count[fluent_index] * sizeof(automaton_vstates_fluent_syntax*));
-				if(vstates_states_single_ptr == NULL){
-					printf("Could not allocate memory for automaton_vstates_automata_states[%d]\n", fluent_index);exit(-1);
+					char*** fluents_names_ptr	=realloc(vstates_automata_fluent_names, vstates_automata_count * sizeof(char**));
+					if(fluents_names_ptr == NULL){
+						printf("Could not allocate memory for vstates_automata_fluent_names\n");exit(-1);
+					}
+					vstates_automata_fluent_names	= fluents_names_ptr;
+					vstates_automata_fluent_names[fluent_automaton_index]	= calloc(1, sizeof(char*));
+
+				}else{
+					vstates_automata_states_count[fluent_automaton_index]++;
+					automaton_vstates_fluent_syntax** vstates_states_single_ptr	=realloc(automaton_vstates_automata_states[fluent_automaton_index]
+					   , vstates_automata_states_count[fluent_automaton_index] * sizeof(automaton_vstates_fluent_syntax*));
+					if(vstates_states_single_ptr == NULL){
+						printf("Could not allocate memory for automaton_vstates_automata_states[%d]\n", fluent_automaton_index);exit(-1);
+					}
+					automaton_vstates_automata_states[fluent_automaton_index]	= vstates_states_single_ptr;
+
+					char** fluent_names_ptr	=realloc(vstates_automata_fluent_names[fluent_automaton_index]
+						, vstates_automata_states_count[fluent_automaton_index] * sizeof(char*));
+					if(fluent_names_ptr == NULL){
+						printf("Could not allocate memory for vstates_automata_states_count[%d]\n", fluent_automaton_index);exit(-1);
+					}
+					vstates_automata_fluent_names[fluent_automaton_index]	= fluent_names_ptr;
 				}
-				automaton_vstates_automata_states[fluent_index]	= vstates_states_single_ptr;
-			}else{
-				automaton_vstates_automata_states[fluent_index]	= calloc(1, sizeof(automaton_vstates_fluent_syntax*));
 			}
-			automaton_vstates_automata_states[fluent_index][vstates_automata_states_count[fluent_index]]	=
+			aut_dupstr(&(vstates_automata_fluent_names[fluent_automaton_index][vstates_automata_states_count[fluent_automaton_index]-1]),
+					vstates_syntax->name);
+			automaton_vstates_automata_states[fluent_automaton_index][vstates_automata_states_count[fluent_automaton_index]-1]	=
 					vstates_syntax->vstates;
 		}
 	}
@@ -2466,7 +2502,7 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 					if(strcmp(vstates_automata_names[j], program->statements[i]->composition_def->name) == 0){
 						current_vstates_count	= vstates_automata_states_count[j];
 						current_vstates_syntaxes	= automaton_vstates_automata_states[j];
-						current_vstates_names		= vstates_fluent_names[j];
+						current_vstates_names		= vstates_automata_fluent_names[j];
 						break;
 					}
 				}
@@ -2730,10 +2766,16 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 	for(i = 0; i < vstates_automata_count; i++){
 		free(vstates_automata_names[i]);
 		free(automaton_vstates_automata_states[i]);
+		for(j = 0; j < vstates_automata_states_count[i]; j++)
+			free(vstates_automata_fluent_names[i][j]);
+		free(vstates_automata_fluent_names[i]);
 	}
-	free(vstates_automata_states_count);
-	free(vstates_automata_names);
-	free(automaton_vstates_automata_states);
+	if(vstates_automata_count > 0){
+		free(vstates_automata_states_count);
+		free(vstates_automata_names);
+		free(automaton_vstates_automata_states);
+		free(vstates_automata_fluent_names);
+	}
 
 	//run equivalence checks
 #if VERBOSE

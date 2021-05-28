@@ -506,12 +506,20 @@ void automaton_automaton_initialize(automaton_automaton* automaton, char* name, 
 			automaton->liveness_valuations	= NULL;
 			automaton->liveness_inverted_valuations	= NULL;
 		}
-		automaton->state_valuations_size			= 0;
-		automaton->state_valuations					= NULL;
-		automaton->inverted_state_valuations		= NULL;
-		automaton->state_valuations_declared_size 	= 0;
-		automaton->state_valuations_declared		= NULL;
+	}else{
+		automaton->valuations_size	= 0;
+		automaton->valuations		= NULL;
+		automaton->inverted_valuations	= NULL;
+		automaton->liveness_valuations_size	= 0;
+		automaton->liveness_valuations	= NULL;
+		automaton->liveness_inverted_valuations	= NULL;
+
 	}
+	automaton->state_valuations_size			= 0;
+	automaton->state_valuations					= NULL;
+	automaton->inverted_state_valuations		= NULL;
+	automaton->state_valuations_declared_size 	= 0;
+	automaton->state_valuations_declared		= NULL;
 	for(i = 0; i < FIXED_SIGNALS_COUNT; i++) automaton->monitored_mask[i]	= 0x0;
 	for(i = 0; i < ctx->global_alphabet->count;i++)
 		if(ctx->global_alphabet->list[i].type == INPUT_SIG)SET_TRANSITION_MASK_BIT((automaton->monitored_mask), i);

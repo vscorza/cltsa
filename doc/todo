@@ -5,8 +5,9 @@ TODO:
 	- definicion de valuaciones por estados
 		x definir sintaxis
 		- implementar cambios
+			- agregar debugging output
+			- import/export actualizar con informacion de vstates
 			- conversión a modelos
-				- agregar debugging output
 				- probar 
 					- sintaxis básica
 						- 1 estado por nombre
@@ -21,7 +22,6 @@ TODO:
 						- 1 estado por nombre en 2 automatas
 						- 3 estados por nombre en 2 automátas
 						- nombre y 2 rangos en 3 autómatas
-			- import/export actualizar con informacion de vstates
 		- revisar tests
 		- definir casos de estudio
 		- re escribir tests
@@ -38,12 +38,6 @@ TODO:
 			- de implementacion
 		- escribir traducción
 		- correr tests
-	- serializacion
-		- reimplementar volcando el contenido binario de arreglos
-			- trans
-			- valuaciones
-		- agregar utilidades de compresión
-			-https://en.wikipedia.org/wiki/Lempel%E2%80%93Ziv%E2%80%93Markov_chain_algorithm			
 -re-escribir casos de estudio
 	- definicion de valuaciones por estados
 - plan de trabajo para diagnostico
@@ -52,6 +46,14 @@ TODO:
 	- introducir clts como necesidad para ejecutar los casos (refs de definitions nuevo)
 	- ref. a un arxiv
 	- re escribir problema y solución
+- cltsa
+	- serializacion
+		- reimplementar volcando el contenido binario de arreglos
+			- trans
+			- valuaciones
+		- agregar utilidades de compresión
+			-https://en.wikipedia.org/wiki/Lempel%E2%80%93Ziv%E2%80%93Markov_chain_algorithm			
+
 - rankings
 	- mejorar legibilidad de pruebas
 	- armar ejemplos

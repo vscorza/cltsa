@@ -437,7 +437,7 @@ automaton_vstates_fluent_syntax* automaton_vstates_fluent_syntax_create(char* na
 	return vstates_fluent;
 }
 void automaton_vstates_fluent_syntax_destroy(automaton_vstates_fluent_syntax* vstates_fluent){
-	automaton_vstates_fluent_syntax_destroy(vstates_fluent->vstates);
+	automaton_vstates_syntax_destroy(vstates_fluent->vstates);
 	free(vstates_fluent->name);
 	free(vstates_fluent->automaton_name);
 	free(vstates_fluent);

@@ -303,7 +303,7 @@ vstates:
 	|										{$$	= NULL;}
 	;	
 stateFluent:
-	t_VAL_STATE t_FLUENT t_UPPER_IDENT t_IN t_UPPER_IDENT  '=' '{' vstates '}' '.'	{$$ = automaton_vstates_fluent_syntax_create($3, $5, $8);free($1); free($2);free($3);free($4);free($5);free($8);}
+	t_VAL_STATE t_FLUENT t_UPPER_IDENT t_IN t_UPPER_IDENT  '=' '{' vstates '}' '.'	{$$ = automaton_vstates_fluent_syntax_create($3, $5, $8);free($1); free($2);free($3);free($4);free($5);}
 ltlFluent:
 	t_LTL t_FLUENT t_UPPER_IDENT '=' ltlAutExp '.'	{$$ = automaton_ltl_fluent_syntax_create($3, $5);free($1); free($2);free($3);}
 ltlAutRule:
