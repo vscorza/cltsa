@@ -313,6 +313,7 @@ void automaton_automaton_check_alphabet(FILE *f, automaton_alphabet *alphabet, c
 	}
 	automaton_alphabet_destroy(current_alphabet);
 }
+
 void automaton_automaton_check_load_context(FILE *f, automaton_automata_context *ctx, char **buf, uint32_t *buf_size,
 		char *last_finalizer){
 	char current 	= 	fgetc(f);
@@ -327,6 +328,8 @@ void automaton_automaton_check_load_context(FILE *f, automaton_automata_context 
 	char **fluents		= NULL;
 	uint32_t liveness_count	= 0;
 	char **liveness_names		= NULL;
+	uint32_t vstates_count	= 0;
+	char **vstates_names		= NULL;
 	automaton_automaton_check_alphabet(f, ctx->global_alphabet, buf, buf_size, last_finalizer);
 	current	= fgetc(f);
 	if(current != AUT_SER_SEP_CHAR || current == EOF) {
@@ -374,33 +377,62 @@ void automaton_automaton_check_load_context(FILE *f, automaton_automata_context 
 		liveness_names	= automaton_automaton_load_string_array(f, &sep_chars, 3, buf, buf_size, last_finalizer,
 				&liveness_count);
 	}
-	if(ctx->liveness_valuations_count != liveness_count){
-		printf("Liveness count mismatch\n");
-		//exit(-1);
-	}
-	if(ctx->global_fluents_count != fluents_count){
-		printf("Fluents count mismatch\n");
-		//exit(-1);
+	count		= automaton_automaton_load_int(f, &sep_char, 1, buf, buf_size, last_finalizer);
+	if(count == 0){
+		current 	= 	fgetc(f);
+		if(current != AUT_SER_ARRAY_START_CHAR || current == EOF) {
+			printf("Corrupted array\n");
+			exit(-1);
+		}
+		current 	= 	fgetc(f);
+		if(current != AUT_SER_ARRAY_END_CHAR || current == EOF) {
+			printf("Corrupted array\n");
+			exit(-1);
+		}
+		current 	= 	fgetc(f);
+		if(current != AUT_SER_SEP_CHAR || current == EOF) {
+			printf("Corrupted object\n");
+			exit(-1);
+		}
+	}else{
+		vstates_names	= automaton_automaton_load_string_array(f, &sep_chars, 3, buf, buf_size, last_finalizer,
+				&vstates_count);
 	}
 	uint32_t i;
-	for(i = 0; i < liveness_count; i++){
-		if(ctx->liveness_valuations_count == liveness_count){
+	if(ctx->liveness_valuations_count != liveness_count){
+		printf("Liveness count mismatch\n");
+	}else{
+		for(i = 0; i < liveness_count; i++){
 			if(strcmp(ctx->liveness_valuations_names[i], liveness_names[i]) != 0){
 				printf("Liveness instance mismatch\n");
 			}
+			free(liveness_names[i]);
 		}
-		free(liveness_names[i]);
 	}
-	for(i = 0; i < fluents_count; i++){
-		if(ctx->global_fluents_count == fluents_count){
+	if(ctx->global_fluents_count != fluents_count){
+		printf("Fluents count mismatch\n");
+	}else{
+		for(i = 0; i < fluents_count; i++){
 			if(strcmp(ctx->global_fluents[i].name, fluents[i]) != 0){
 				printf("Fluents instance mismatch\n");
 			}
+			free(fluents[i]);
 		}
-		free(fluents[i]);
 	}
+	if(ctx->state_valuations_count != vstates_count){
+		printf("Vstates count mismatch\n");
+	}else{
+		for(i = 0; i < vstates_count; i++){
+			if(strcmp(ctx->state_valuations_names[i], vstates_names[i]) != 0){
+				printf("Vstate instance mismatch\n");
+			}
+			free(vstates_names[i]);
+		}
+	}
+
 	if(liveness_names != NULL)free(liveness_names);
 	if(fluents != NULL)free(fluents);
+	if(vstates_names != NULL)free(vstates_names);
 }
 
 automaton_transition *automaton_automaton_load_transition(FILE *f, automaton_automata_context *ctx,
@@ -431,7 +463,12 @@ automaton_transition *automaton_automaton_load_transition(FILE *f, automaton_aut
 
 	return transition;
 }
-
+/*
+ * <name,ctx,local_alphabet_count,[sig_1.idx,..,sig_N.idx],vstates_monitored_count,[vstates_mon1,..,vstates_monN]
+,trans_count,[trans_1,..,trans_M],init_count,[init_i,..,init_K],[[val_s_0_f_0,..,val_s_0_f_L],..,[val_s_T_f_0,..,val_s_T_f_L]]
+,[[val_s_0_l_0,..,val_s_0_l_R],..,[val_s_T_l_0,..,val_s_T_l_R]]
+,[[vstate_s_0_f_0,..,vstate_s_0_f_V],..,[vstate_s_T_f_0,..,vstate_s_T_f_R]]>
+ */
 automaton_automaton *automaton_automaton_load_report(automaton_automata_context *ctx, char *filename){
 	FILE *f = fopen(filename, "r+");
 	char current, dst;
@@ -456,6 +493,8 @@ automaton_automaton *automaton_automaton_load_report(automaton_automata_context 
 	uint32_t local_alphabet_count	= 0;
 	uint32_t *local_alphabet	= NULL;
 	bool *input_alphabet	= NULL;
+	uint32_t monitored_vstates_intermediate_count	= 0;
+	bool* monitored_vstates_intermediate	= NULL;
 	current = fgetc(f);
 	if(current != AUT_SER_SEP_CHAR || current == EOF){
 		printf("Corrupted array\n");
@@ -488,6 +527,38 @@ automaton_automaton *automaton_automaton_load_report(automaton_automata_context 
 	}
 	automaton_automaton *result = automaton_automaton_create(name, ctx, local_alphabet_count, local_alphabet, false, false);
 	free(name);
+	count		= automaton_automaton_load_int(f, &sep_char, 1, &buf, &buf_size, &last_finalizer);
+	uint32_t fluent_index;
+	if(count == 0){
+		current 	= 	fgetc(f);
+		if(current != AUT_SER_ARRAY_START_CHAR || current == EOF) {
+			printf("Corrupted array\n");
+			exit(-1);
+		}
+		current 	= 	fgetc(f);
+		if(current != AUT_SER_ARRAY_END_CHAR || current == EOF) {
+			printf("Corrupted array\n");
+			exit(-1);
+		}
+		current 	= 	fgetc(f);
+		if(current != AUT_SER_SEP_CHAR || current == EOF) {
+			printf("Corrupted object\n");
+			exit(-1);
+		}
+	}else{
+		monitored_vstates_intermediate_count	= 0;
+		monitored_vstates_intermediate	= automaton_automaton_load_bool_array(f, &sep_char, 1, &buf, &buf_size, &last_finalizer,
+				&monitored_vstates_intermediate_count);
+		result->state_valuations_declared_size = GET_FLUENTS_ARR_SIZE(ctx->state_valuations_count,0);
+		result->state_valuations_declared	= calloc(result->state_valuations_declared_size, FLUENT_ENTRY_SIZE);
+		for(i = 0; i < monitored_vstates_intermediate_count; i++){
+			if(monitored_vstates_intermediate[i]){
+				fluent_index	= GET_STATE_FLUENT_INDEX(ctx->state_valuations_count, 0, i);
+				SET_FLUENT_BIT(result->state_valuations_declared, fluent_index);
+			}
+		}
+	}
+
 	count		= automaton_automaton_load_int(f, &sep_char, 1, &buf, &buf_size, &last_finalizer);
 	if(count == 0){
 		current 	= 	fgetc(f);

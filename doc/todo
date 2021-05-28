@@ -5,8 +5,14 @@ TODO:
 	- definicion de valuaciones por estados
 		x definir sintaxis
 		- implementar cambios
-			- agregar debugging output
 			- import/export actualizar con informacion de vstates
+				- importer
+					x automaton_automaton_check_load_context
+					x automaton_automaton_load_report
+				- experiment launcher
+					- update importing
+			- composición		
+				- sólo se chequea conformidad sobre modelos declarados explicitamente, si un modelo no predica sobre una valuación no se lo tiene en cuenta para restringir la composición
 			- conversión a modelos
 				- probar 
 					- sintaxis básica
@@ -14,8 +20,8 @@ TODO:
 						- 3 estados por nombre
 						- nombre y 2 rangos
 						- idem 2 automátas
+			- agregar debugging output						
 			- composición		
-				- sólo se chequea conformidad sobre modelos declarados explicitamente, si un modelo no predica sobre una valuación no se lo tiene en cuenta para restringir la composición
 				- agregar debugging output
 				- probar 
 					- sintaxis básica

@@ -176,14 +176,23 @@ void automaton_automaton_print(automaton_automaton* current_automaton, bool prin
 		printf("}\n");
 	}
 	if(print_valuations && current_automaton->is_game){
+		uint32_t fluent_index;
+		bool satisfies_valuation;
+		printf("%sMonitored state valuations:{", prefix2);
+		bool first_state	= true;
+		for(i = 0; i < ctx->state_valuations_count; i++){
+			fluent_index		= GET_STATE_FLUENT_INDEX(ctx->state_valuations_count, 0, i);
+			satisfies_valuation	= TEST_FLUENT_BIT(current_automaton->state_valuations_declared, fluent_index);
+			printf("%s%s", first_state? ",": "", ctx->state_valuations_names[i]);
+			first_state	= false;
+		}
+		printf("}\n");
 		printf("%sValuations:\n%s", prefix2, prefix2);
 		for(j = 0; j < ctx->global_fluents_count; j++){
 			printf(ctx->global_fluents[j].name);
 			if(j < (ctx->global_fluents_count - 1))printf(",");
 		}
 		printf("\n%s", prefix2);
-		uint32_t fluent_index;
-		bool satisfies_valuation;
 		for(i = 0; i < current_automaton->transitions_count; i ++){
 			printf("s_%d:", i);
 			for(j = 0; j < ctx->global_fluents_count; j++){
@@ -195,6 +204,12 @@ void automaton_automaton_print(automaton_automaton* current_automaton, bool prin
 			for(j = 0; j < ctx->liveness_valuations_count; j++){
 				fluent_index		= GET_STATE_FLUENT_INDEX(ctx->liveness_valuations_count, i, j);
 				satisfies_valuation	= TEST_FLUENT_BIT(current_automaton->liveness_valuations, fluent_index);
+				printf(satisfies_valuation? "1" : "0");
+			}
+			printf(" ");
+			for(j = 0; j < ctx->state_valuations_count; j++){
+				fluent_index		= GET_STATE_FLUENT_INDEX(ctx->state_valuations_count, i, j);
+				satisfies_valuation	= TEST_FLUENT_BIT(current_automaton->state_valuations, fluent_index);
 				printf(satisfies_valuation? "1" : "0");
 			}
 			printf("\n%s", prefix2);
@@ -394,7 +409,7 @@ void automaton_fluent_serialize_report(FILE *f, automaton_fluent *fluent){
 	}
 	fprintf(f, "%s%s%s%s", AUT_SER_ARRAY_END, AUT_SER_SEP, fluent->initial_valuation? "1" : "0", AUT_SER_OBJ_END);
 }
-//<name,alphabet,fluents_count,[f_1.name,..,f_n.name],liveness_count,[l_1.name,..,l_m.name]>
+//<name,alphabet,fluents_count,[f_1.name,..,f_n.name],liveness_count,[l_1.name,..,l_m.name],vstates_count,[v_1.name,..,v_k.name]>
 void automaton_automata_context_serialize_report(FILE *f, automaton_automata_context *ctx){
 	fprintf(f, "%s%s%s", AUT_SER_OBJ_START, ctx->name, AUT_SER_SEP);
 	automaton_alphabet_serialize_report(f, ctx->global_alphabet);
@@ -406,6 +421,10 @@ void automaton_automata_context_serialize_report(FILE *f, automaton_automata_con
 	fprintf(f, "%s%s%d%s%s", AUT_SER_ARRAY_END, AUT_SER_SEP, ctx->liveness_valuations_count, AUT_SER_SEP, AUT_SER_ARRAY_START);
 	for(i = 0; i < ctx->liveness_valuations_count; i++){
 		fprintf(f, "%s%s", ctx->liveness_valuations_names[i], i == (ctx->liveness_valuations_count - 1)? "" :  AUT_SER_SEP);
+	}
+	fprintf(f, "%s%s%d%s%s", AUT_SER_ARRAY_END, AUT_SER_SEP, ctx->state_valuations_count, AUT_SER_SEP, AUT_SER_ARRAY_START);
+	for(i = 0; i < ctx->state_valuations_count; i++){
+		fprintf(f, "%s%s", ctx->state_valuations_names[i], i == (ctx->state_valuations_count - 1)? "" :  AUT_SER_SEP);
 	}
 	fprintf(f, "%s%s", AUT_SER_ARRAY_END, AUT_SER_OBJ_END);
 }
@@ -435,19 +454,34 @@ void automaton_transition_serialize_report(FILE *f, automaton_transition *transi
 	fprintf(f, "%s%s%s%s", AUT_SER_ARRAY_END, AUT_SER_SEP, TRANSITION_IS_INPUT(transition)? "1" :"0",AUT_SER_OBJ_END);
 }
 /*
- * <name,ctx,local_alphabet_count,[sig_1.idx,..,sig_N.idx],trans_count,[trans_1,..,trans_M],init_count,[init_i,..,init_K],[[val_s_0_f_0,..,val_s_0_f_L],..,[val_s_T_f_0,..,val_s_T_f_L]]
-,[[val_s_0_l_0,..,val_s_0_l_R],..,[val_s_T_l_0,..,val_s_T_l_R]]>
+ * <name,ctx,local_alphabet_count,[sig_1.idx,..,sig_N.idx],vstates_monitored_count,[vstates_mon1,..,vstates_monN]
+,trans_count,[trans_1,..,trans_M],init_count,[init_i,..,init_K],[[val_s_0_f_0,..,val_s_0_f_L],..,[val_s_T_f_0,..,val_s_T_f_L]]
+,[[val_s_0_l_0,..,val_s_0_l_R],..,[val_s_T_l_0,..,val_s_T_l_R]]
+,[[vstate_s_0_f_0,..,vstate_s_0_f_V],..,[vstate_s_T_f_0,..,vstate_s_T_f_R]]>
  */
 void automaton_automaton_serialize_report(FILE *f, automaton_automaton *automaton){
-	fprintf(f, "%s%s%s", AUT_SER_OBJ_START, automaton->name, AUT_SER_SEP);
-	automaton_automata_context_serialize_report(f, automaton->context);
-	fprintf(f, "%s%d%s%s", AUT_SER_SEP, automaton->local_alphabet_count, AUT_SER_SEP, AUT_SER_ARRAY_START);
 	uint32_t i, j;
 	uint32_t fluent_index;
 	uint32_t fluent_count	= automaton->context->global_fluents_count;
 	uint32_t liveness_count	= automaton->context->liveness_valuations_count;
+	uint32_t vstates_count	= automaton->context->state_valuations_count;
+	fprintf(f, "%s%s%s", AUT_SER_OBJ_START, automaton->name, AUT_SER_SEP);
+	automaton_automata_context_serialize_report(f, automaton->context);
+	fprintf(f, "%s%d%s%s", AUT_SER_SEP, automaton->local_alphabet_count, AUT_SER_SEP, AUT_SER_ARRAY_START);
 	for(i = 0; i < automaton->local_alphabet_count; i++){
 		fprintf(f, "%d%s", automaton->local_alphabet[i], i == (automaton->local_alphabet_count - 1)? "" :  AUT_SER_SEP);
+	}
+	fprintf(f, "%s%d%s%s", AUT_SER_SEP, automaton->context->state_valuations_count, AUT_SER_SEP, AUT_SER_ARRAY_START);
+	for(i = 0; i < automaton->context->state_valuations_count; i++){
+		if(automaton->state_valuations_declared_size == 0){
+			fprintf(f, "0%s", i == (automaton->context->state_valuations_count - 1)? "" :  AUT_SER_SEP);
+		}else{
+		fluent_index	= GET_STATE_FLUENT_INDEX(automaton->context->state_valuations_count, 0, i);
+		//fprintf(f, "%d%s", TEST_FLUENT_BIT(automaton->state_valuations_declared, fluent_index) ? "1" : "0", i == (automaton->context->state_valuations_count - 1)? "" :  AUT_SER_SEP);
+		fprintf(f, "%d%s",
+				( automaton->state_valuations_declared[(fluent_index/32)] & (1 << (fluent_index%32)) )
+				? "1" : "0", i == (automaton->context->state_valuations_count - 1)? "" :  AUT_SER_SEP);
+		}
 	}
 	fprintf(f, "%s%s%d%s%s", AUT_SER_ARRAY_END, AUT_SER_SEP, automaton->transitions_count, AUT_SER_SEP, AUT_SER_ARRAY_START);
 	uint32_t current_count	= 0;
@@ -495,7 +529,20 @@ void automaton_automaton_serialize_report(FILE *f, automaton_automaton *automato
 		}
 		fprintf(f, "%s%s", AUT_SER_ARRAY_END, i == (automaton->transitions_count - 1) ? "" : AUT_SER_SEP);
 	}
+	fprintf(f, "%s%s%s", AUT_SER_ARRAY_END, AUT_SER_SEP, AUT_SER_ARRAY_START);
+	for(i = 0; i < automaton->transitions_count; i++){
+		fprintf(f, "%s", AUT_SER_ARRAY_START);
+		for(j = 0; j < automaton->context->state_valuations_count; j++){
+			if(automaton->is_game && automaton->state_valuations_declared_size > 0){
+				fluent_index	= GET_STATE_FLUENT_INDEX(automaton->context->state_valuations_count, i, j);
+				fprintf(f, "%d%s", TEST_FLUENT_BIT(automaton->state_valuations, fluent_index) ? "1" : "0", j == (automaton->context->state_valuations_count - 1)? "" :  AUT_SER_SEP);
+			}else{
+				fprintf(f, "%s%s", "0",  j == (automaton->context->state_valuations_count - 1)? "" :  AUT_SER_SEP);
+			}
 
+		}
+		fprintf(f, "%s%s", AUT_SER_ARRAY_END, i == (automaton->transitions_count - 1) ? "" : AUT_SER_SEP);
+	}
 	fprintf(f, "%s%s", AUT_SER_ARRAY_END, AUT_SER_OBJ_END);
 }
 void automaton_ranking_alphabet_serialize_report(FILE *f, automaton_alphabet *alphabet, uint32_t max_delta){
