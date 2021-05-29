@@ -9,15 +9,6 @@ OVERHEATED = (overHeated->OVERHEATED).
 vstate fluent F_NotCooking in BISCOTTI = {FINISHED, OVERHEATED}.
 vstate fluent F_MoveToBelt in BISCOTTI = {BISCOTTI}.
 
-|f| ENV_VSTATES	= (BISCOTTI). 
-
-BISCOTTI >> "/tmp/biscotti_vstates_env.rep".
-ENV_VSTATES >> "/tmp/biscotti_vstates_env_vstates.rep".
-
-/*
-fluent F_NotCooking = <{finishedCooking,overHeated}, cook> initially 1
-fluent F_MoveToBelt = <moveToBelt, cook>
-
 SUCCESSFULLY_COOKED_TWICE = (cook->cook->COOKED),
 COOKED = (moveToBelt->SUCCESSFULLY_COOKED_TWICE | cook->ERROR).
 || ENV =(BISCOTTI || SUCCESSFULLY_COOKED_TWICE). 
@@ -32,9 +23,8 @@ STRAT_p_3 = (cooking -> STRAT_p_3 | finishedCooking -> STRAT_p_4),
 STRAT_p_4 = (moveToBelt -> cook-> STRAT_p_1).
 
 // tests
-equals FATAL_Biscotti_Strategy(STRAT, STRAT_p).
+equals FATAL_Biscotti_Strategy_Vstates(STRAT, STRAT_p).
 
 ENV_G >> "/tmp/biscotti_ENV_G.rep".
 STRAT >> "/tmp/biscotti_strat.rep".
 STRAT_p >> "/tmp/biscotti_strat_p.rep".
-*/

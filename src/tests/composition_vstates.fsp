@@ -14,42 +14,64 @@ set Controllable_Alphabet = {}
 M_2 = (l_two[i:R_2_F]->M_2_V[i]),
 M_2_V[i:R_2_F] = (reset->M_2).
 
-
 M_3 = (l_three[i:R_3_F]->M_3_V[i]),
 M_3_V[i:R_3_F] = (reset->M_3).
 
+M_5 = (l_five[i:R_5_F]->M_5_V[i]),
+M_5_V[i:R_5_F] = (reset->M_5).
+
 |f|COMP_2_3	= (M_2 ||_s M_3).
+|f|COMP_2_5	= (M_2 ||_s M_5).
+|f|COMP_3_5	= (M_3 ||_s M_5).
+|f|COMP_2_3_5	= (M_2 ||_s M_3 ||_s M_5).
 
 vstate fluent F_OK in M_2 = {M_2_V_2}.
 vstate fluent F_OK in M_3 = {M_3_V_3}.
+vstate fluent F_OK in M_5 = {M_5_V_5}.
+
+vstate fluent F_START in M_2 = {M_2}.
+vstate fluent F_START in M_3 = {M_3}.
+vstate fluent F_START in M_5 = {M_5}.
+
+
+T_2_3_5 = (<l_five_1,l_three_1,l_two_1>-> S_1|<l_five_2,l_three_1,l_two_1>-> S_2|<l_five_3,l_three_1,l_two_1>-> S_3|<l_five_4,l_three_1,l_two_1>-> S_4|<l_five_1,l_three_2,l_two_1>-> S_6|<l_five_2,l_three_2,l_two_1>-> S_7|<l_five_3,l_three_2,l_two_1>-> S_8|<l_five_4,l_three_2,l_two_1>-> S_9|<l_five_5,l_three_3,l_two_2>-> S_30),
+S_1 = (reset-> S_0),
+S_2 = (reset-> S_0),
+S_3 = (reset-> S_0),
+S_4 = (reset-> S_0),
+S_6 = (reset-> S_0),
+S_7 = (reset-> S_0),
+S_8 = (reset-> S_0),
+S_9 = (reset-> S_0),
+S_30 = (reset-> S_0).
+
+T_2_5 = (<l_five_1,l_two_1>-> S_1|<l_five_2,l_two_1>-> S_2|<l_five_3,l_two_1>-> S_3|<l_five_4,l_two_1>-> S_4|<l_five_5,l_two_2>-> S_10),
+S_1 = (reset-> S_0),
+S_2 = (reset-> S_0),
+S_3 = (reset-> S_0),
+S_4 = (reset-> S_0),
+S_10 = (reset-> S_0).
+
+T_3_5 = (<l_five_1,l_three_1>-> S_1|<l_five_2,l_three_1>-> S_2|<l_five_3,l_three_1>-> S_3|<l_five_4,l_three_1>-> S_4|<l_five_1,l_three_2>-> S_6|<l_five_2,l_three_2>-> S_7|<l_five_3,l_three_2>-> S_8|<l_five_4,l_three_2>-> S_9|<l_five_5,l_three_3>-> S_15),
+S_1 = (reset-> S_0),
+S_2 = (reset-> S_0),
+S_3 = (reset-> S_0),
+S_4 = (reset-> S_0),
+S_6 = (reset-> S_0),
+S_7 = (reset-> S_0),
+S_8 = (reset-> S_0),
+S_9 = (reset-> S_0),
+S_15 = (reset-> S_0).
+
+equals FATAL_COMP_VSTATES_2_3_5(COMP_2_3_5, T_2_3_5).
+equals FATAL_COMP_VSTATES_3_5(COMP_3_5, T_3_5).
+equals FATAL_COMP_VSTATES_2_5(COMP_2_5, T_2_5).
+
 
 M_2 >> "/tmp/composition_vstates_m2.rep".
 M_3 >> "/tmp/composition_vstates_m3.rep".
+M_5 >> "/tmp/composition_vstates_m5.rep".
 COMP_2_3 >> "/tmp/composition_vstates_comp_2_3.rep".
-
-//M_2 = (l_two_1[i:R_2_C]->M_2_V_P[i]),
-//M_2_V_P[i:R_2_C] = (s[i]->M_2_V),
-//M_2_V = (reset->M_2).
-
-//M_2 = (<l_two[i:R_2][j:R_2_C],s[i*j]>->M_2_C[i][j]).
-//M_2 = (<l_two[1][j:R_2_C],s[j]>->M_2_V[j] | <l_two[i:R_2][j:R_2_C],s[i*j]>->M_2_C[i][j]),//
-//M_2_V[j:R_2_C] = (reset->M_2).
-//M_2_C[i:R2][j:R_2_C] = (reset->M_2).
-
-
-
-
-/*
-BISCOTTI = (cook->COOKING),
-COOKING = (cooking->COOKING | finishedCooking->FINISHED | <cook,finishedCooking>->OVERHEATED), 
-FINISHED = (cook->COOKING | moveToBelt->BISCOTTI),  
-OVERHEATED = (overHeated->OVERHEATED).
-
-vstate fluent F_NotCooking in BISCOTTI = {FINISHED, OVERHEATED}.
-vstate fluent F_MoveToBelt in BISCOTTI = {BISCOTTI}.
-
-|f| ENV_VSTATES	= (BISCOTTI). 
-
-BISCOTTI >> "/tmp/biscotti_vstates_env.rep".
-ENV_VSTATES >> "/tmp/biscotti_vstates_env_vstates.rep".
-*/
+COMP_2_5 >> "/tmp/composition_vstates_comp_2_5.rep".
+COMP_3_5 >> "/tmp/composition_vstates_comp_3_5.rep".
+COMP_2_3_5 >> "/tmp/composition_vstates_comp_2_3_5.rep".

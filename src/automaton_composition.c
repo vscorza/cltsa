@@ -766,7 +766,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 						if(current_vstates_index < (composition->state_valuations_declared_size - 1))
 							current_vstates[i]	|= ((double_fluent_entry_size_t) automata[vstates_automata_indexes[0]]->state_valuations[current_vstates_index + 1]) << FLUENT_ENTRY_SIZE;
 						fluent_index	= GET_STATE_FLUENT_INDEX(ctx->state_valuations_count, current_state[vstates_automata_indexes[0]], 0);
-						current_vstates[i]	= (current_vstates[i] >> fluent_index) & (0x1 << (ctx->state_valuations_count - 1));
+						current_vstates[i]	= (current_vstates[i] >> fluent_index) & (((double_fluent_entry_size_t)(~0x0)) >> (sizeof(double_fluent_entry_size_t) * 8 - ctx->state_valuations_count));
 					}
 					//perform the comparison detailed above and update mask, vstates when possible
 					for(i = 1; i < vstates_automata_count && vstates_consistent; i++){
@@ -778,7 +778,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 								new_vstates	|= ((double_fluent_entry_size_t)automata[vstates_automata_indexes[i]]->state_valuations[current_vstates_index + 1]) << FLUENT_ENTRY_SIZE;
 							fluent_index	= GET_STATE_FLUENT_INDEX(ctx->state_valuations_count, current_state[vstates_automata_indexes[i]], 0) % FLUENT_ENTRY_SIZE;
 
-							new_vstates	= (new_vstates >> fluent_index) & (0x1 << (ctx->state_valuations_count - 1));
+							new_vstates	= (new_vstates >> fluent_index) & (((double_fluent_entry_size_t)(~0x0)) >> (sizeof(double_fluent_entry_size_t) * 8 - ctx->state_valuations_count));
 
 							if((vstates_partial_mask[j] & automata[vstates_automata_indexes[i]]->state_valuations_declared[j] & new_vstates)
 									!= (current_vstates[j])){
@@ -799,7 +799,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 							if(current_vstates_index < (composition->state_valuations_declared_size - 1))
 								current_vstates[i]	|= ((double_fluent_entry_size_t) automata[vstates_automata_indexes[0]]->state_valuations[current_vstates_index + 1]) << FLUENT_ENTRY_SIZE;
 							fluent_index	= GET_STATE_FLUENT_INDEX(ctx->state_valuations_count, current_to_state[vstates_automata_indexes[0]], 0);
-							current_vstates[i]	= (current_vstates[i] >> fluent_index) & (0x1 << (ctx->state_valuations_count - 1));
+							current_vstates[i]	= (current_vstates[i] >> fluent_index) & (((double_fluent_entry_size_t)(~0x0)) >> (sizeof(double_fluent_entry_size_t) * 8 - ctx->state_valuations_count));
 						}
 						//perform the comparison detailed above and update mask, vstates when possible
 						for(i = 1; i < vstates_automata_count && vstates_consistent; i++){
@@ -811,7 +811,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 									new_vstates	|= ((double_fluent_entry_size_t)automata[vstates_automata_indexes[i]]->state_valuations[current_vstates_index + 1]) << FLUENT_ENTRY_SIZE;
 								fluent_index	= GET_STATE_FLUENT_INDEX(ctx->state_valuations_count, current_to_state[vstates_automata_indexes[i]], 0) % FLUENT_ENTRY_SIZE;
 
-								new_vstates	= (new_vstates >> fluent_index) & (0x1 << (ctx->state_valuations_count - 1));
+								new_vstates	= (new_vstates >> fluent_index) & (((double_fluent_entry_size_t)(~0x0)) >> (sizeof(double_fluent_entry_size_t) * 8 - ctx->state_valuations_count));
 
 								if((vstates_partial_mask[j] & automata[vstates_automata_indexes[i]]->state_valuations_declared[j] & new_vstates)
 										!= (current_vstates[j])){

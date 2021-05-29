@@ -2629,6 +2629,10 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 			uint32_t old_fluents_count						= 0;
 			automaton_fluent* old_fluents					= NULL;
 			automaton_fluent current_fluent;
+			uint32_t old_state_valuations_size				= 0;
+			uint32_t old_state_valuations_declared_size		= 0;
+			uint32_t* old_state_valuations					= NULL;
+			uint32_t* old_state_valuations_declared			= NULL;
 			current_fluent.ending_signals_count	= 0; current_fluent.ending_signals	= NULL;
 			current_fluent.ending_signals_element_count	= NULL; current_fluent.starting_signals_element_count = NULL;
 			current_fluent.starting_signals_count	= 0; current_fluent.starting_signals	= NULL;
@@ -2639,6 +2643,10 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 				old_inverted_valuations	= game_automaton->inverted_valuations;
 				old_valuations			= game_automaton->valuations;
 				old_valuations_size		= game_automaton->valuations_size;
+				old_state_valuations_size	= game_automaton->state_valuations_size;
+				old_state_valuations_declared_size	= game_automaton->state_valuations_declared_size;
+				old_state_valuations	= game_automaton->state_valuations;
+				old_state_valuations_declared	= game_automaton->state_valuations_declared;
 				old_fluents_count		= ctx->global_fluents_count;
 				old_fluents				= ctx->global_fluents;
 				ctx->global_fluents_count	+= ctx->liveness_valuations_count + ctx->state_valuations_count;
@@ -2650,7 +2658,7 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 					automaton_fluent_copy(&current_fluent, &(ctx->global_fluents[j]));
 				}
 				for(j = (old_fluents_count + ctx->liveness_valuations_count); j < ctx->global_fluents_count; j++){
-					current_fluent.name	= vstates_fluent_names[j - (old_fluents_count + ctx->liveness_valuations_count)];
+					current_fluent.name	= ctx->state_valuations_names[j - (old_fluents_count + ctx->liveness_valuations_count)];
 					automaton_fluent_copy(&current_fluent, &(ctx->global_fluents[j]));
 				}
 				uint32_t new_size					= GET_FLUENTS_ARR_SIZE(ctx->global_fluents_count, game_automaton->transitions_size);
@@ -2660,9 +2668,13 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 				for(j = 0; j < (int32_t)old_fluents_count; j++){
 					game_automaton->inverted_valuations[j]	= old_inverted_valuations[j];
 				}
-				for(j = (int32_t)old_fluents_count; j < (int32_t)ctx->global_fluents_count; j++){
+				for(j = (int32_t)old_fluents_count; j < (int32_t)ctx->global_fluents_count - ctx->state_valuations_count; j++){
 					game_automaton->inverted_valuations[j]	= game_automaton->liveness_inverted_valuations[j - old_fluents_count];
 				}
+				for(j = (int32_t)old_fluents_count + ctx->liveness_valuations_count; j < (int32_t)ctx->global_fluents_count; j++){
+					game_automaton->inverted_valuations[j]	= game_automaton->inverted_state_valuations[j - old_fluents_count - ctx->liveness_valuations_count];
+				}
+
 				for(j = 0; j < (int32_t)game_automaton->transitions_count; j++){
 					for(k = 0; k < old_fluents_count; k++){
 						fluent_index		= GET_STATE_FLUENT_INDEX(old_fluents_count, j, k);
@@ -2692,6 +2704,10 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 						}
 					}
 				}
+				game_automaton->state_valuations_size	= 0;
+				game_automaton->state_valuations_declared_size	= 0;
+				game_automaton->state_valuations		= NULL;
+				game_automaton->state_valuations_declared = NULL;
 			}
 			sprintf(set_name, "Assumption %s", gr1_game->name);
 			assumptions		= automaton_set_syntax_evaluate(tables, gr1_game->assumptions, &assumptions_count, set_name);
@@ -2798,6 +2814,10 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 				game_automaton->valuations_size		= old_valuations_size;
 				ctx->global_fluents_count			= old_fluents_count;
 				ctx->global_fluents					= old_fluents;
+				game_automaton->state_valuations_size	= old_state_valuations_size;
+				game_automaton->state_valuations_declared_size	= old_state_valuations_declared_size;
+				game_automaton->state_valuations		= old_state_valuations;
+				game_automaton->state_valuations_declared		= old_state_valuations_declared;
 			}
 			for(j = 0; j < assumptions_count; j++)
 				free(assumptions[j]);

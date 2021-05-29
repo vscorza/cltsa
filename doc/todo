@@ -2,26 +2,6 @@ TODO:
 =====
 - implementar recortes para clts
 - cltsa
-	- definicion de valuaciones por estados
-		x definir sintaxis
-		- implementar cambios
-			- pruebas
-				- singleton
-					- 1 estado por nombre
-					- 3 estados por nombre
-					- nombre y 2 rangos
-					- idem 2 automátas
-				- composición		
-					- 1 estado por nombre en 2 automatas
-					- 3 estados por nombre en 2 automátas
-					- nombre y 2 rangos en 3 autómatas
-					- (!) probar valuaciones directas e invertidas
-				- agregar tests a run_functional_tests
-		- revisar tests
-		- definir casos de estudio
-		- re escribir tests
-			- de implementacion
-		- correr tests
 	- traducción a lts
 		- formalizar
 			- qué pasa con estados mixtos?
@@ -35,7 +15,7 @@ TODO:
 		- correr tests
 	- exportar a vdhl
 		- versión básica
-	- sacar version dark al reporter
+	- corregir o sacar version dark al reporter
 -re-escribir casos de estudio
 	- definicion de valuaciones por estados
 - plan de trabajo para diagnostico
@@ -46,6 +26,7 @@ TODO:
 	- re escribir problema y solución
 - cltsa
 	- serializacion
+		- serializar valuaciones
 		- reimplementar volcando el contenido binario de arreglos
 			- trans
 			- valuaciones
