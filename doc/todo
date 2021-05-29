@@ -5,24 +5,18 @@ TODO:
 	- definicion de valuaciones por estados
 		x definir sintaxis
 		- implementar cambios
-			- composición		
-				- sólo se chequea conformidad sobre modelos declarados explicitamente, si un modelo no predica sobre una valuación no se lo tiene en cuenta para restringir la composición
-			- conversión a modelos
-				- probar 
-					- sintaxis básica
-						- 1 estado por nombre
-						- 3 estados por nombre
-						- nombre y 2 rangos
-						- idem 2 automátas
-			- agregar debugging output						
-			- composición		
-				- agregar debugging output
-				- probar 
-					- sintaxis básica
-						- 1 estado por nombre en 2 automatas
-						- 3 estados por nombre en 2 automátas
-						- nombre y 2 rangos en 3 autómatas
-							- (!) probar valuaciones directas e invertidas
+			- pruebas
+				- singleton
+					- 1 estado por nombre
+					- 3 estados por nombre
+					- nombre y 2 rangos
+					- idem 2 automátas
+				- composición		
+					- 1 estado por nombre en 2 automatas
+					- 3 estados por nombre en 2 automátas
+					- nombre y 2 rangos en 3 autómatas
+					- (!) probar valuaciones directas e invertidas
+				- agregar tests a run_functional_tests
 		- revisar tests
 		- definir casos de estudio
 		- re escribir tests
@@ -41,6 +35,7 @@ TODO:
 		- correr tests
 	- exportar a vdhl
 		- versión básica
+	- sacar version dark al reporter
 -re-escribir casos de estudio
 	- definicion de valuaciones por estados
 - plan de trabajo para diagnostico

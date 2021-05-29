@@ -1,0 +1,55 @@
+const TWO = 2
+const THREE = 3
+const FIVE = 5
+const MAX = TWO * THREE * FIVE
+
+range R_2_F = 1..2
+range R_3_F = 1..3
+range R_5_F = 1..5
+range R_MAX = 1..MAX
+
+set Global_Alphabet = {l_two[i:R_2_F], l_three[i:R_3_F], l_five[i:R_5_F],reset}
+set Controllable_Alphabet = {}
+
+M_2 = (l_two[i:R_2_F]->M_2_V[i]),
+M_2_V[i:R_2_F] = (reset->M_2).
+
+
+M_3 = (l_three[i:R_3_F]->M_3_V[i]),
+M_3_V[i:R_3_F] = (reset->M_3).
+
+|f|COMP_2_3	= (M_2 ||_s M_3).
+
+vstate fluent F_OK in M_2 = {M_2_V_2}.
+vstate fluent F_OK in M_3 = {M_3_V_3}.
+
+M_2 >> "/tmp/composition_vstates_m2.rep".
+M_3 >> "/tmp/composition_vstates_m3.rep".
+COMP_2_3 >> "/tmp/composition_vstates_comp_2_3.rep".
+
+//M_2 = (l_two_1[i:R_2_C]->M_2_V_P[i]),
+//M_2_V_P[i:R_2_C] = (s[i]->M_2_V),
+//M_2_V = (reset->M_2).
+
+//M_2 = (<l_two[i:R_2][j:R_2_C],s[i*j]>->M_2_C[i][j]).
+//M_2 = (<l_two[1][j:R_2_C],s[j]>->M_2_V[j] | <l_two[i:R_2][j:R_2_C],s[i*j]>->M_2_C[i][j]),//
+//M_2_V[j:R_2_C] = (reset->M_2).
+//M_2_C[i:R2][j:R_2_C] = (reset->M_2).
+
+
+
+
+/*
+BISCOTTI = (cook->COOKING),
+COOKING = (cooking->COOKING | finishedCooking->FINISHED | <cook,finishedCooking>->OVERHEATED), 
+FINISHED = (cook->COOKING | moveToBelt->BISCOTTI),  
+OVERHEATED = (overHeated->OVERHEATED).
+
+vstate fluent F_NotCooking in BISCOTTI = {FINISHED, OVERHEATED}.
+vstate fluent F_MoveToBelt in BISCOTTI = {BISCOTTI}.
+
+|f| ENV_VSTATES	= (BISCOTTI). 
+
+BISCOTTI >> "/tmp/biscotti_vstates_env.rep".
+ENV_VSTATES >> "/tmp/biscotti_vstates_env_vstates.rep".
+*/

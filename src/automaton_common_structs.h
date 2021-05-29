@@ -26,6 +26,7 @@ typedef uint8_t signal_t;
 typedef uint8_t fluent_count_t;
 typedef uint16_t signal_bit_array_t;
 
+
 #define TRANSITION_ENTRY_SIZE 16
 #define FIXED_SIGNALS_COUNT	8//4
 /****************

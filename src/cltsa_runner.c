@@ -1822,6 +1822,8 @@ void run_functional_tests(){
 	run_parse_test("tests/exploration-robot-unrealizable_test.fsp", "unrealizable exploration robot test");
 	run_parse_test("tests/exploration-robot-realizable_test_debug.fsp", "realizable exploration robot test debug version");
 	run_parse_test_linear("tests/exploration-robot-unrealizable_test_lineal.fsp", "unrealizable exploration robot test linear test");
+	run_parse_test("tests/biscotti_vstates.fsp", "biscotti vstates");
+	run_parse_test("tests/composition_vstates.fsp", "composition vstates");
 }
 void run_load_tests(){
 	run_parse_test("tests/k_10_100_graph.fsp",  "k 10, 100 graph tests");

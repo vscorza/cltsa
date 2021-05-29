@@ -391,6 +391,12 @@ void automaton_automata_context_initialize(automaton_automata_context* ctx, char
 		, char** liveness_valuations_names, uint32_t state_valuations_count, char** state_valuations_names){
 	ctx->name					= malloc(sizeof(char) * (strlen(name) + 1));
 	strcpy(ctx->name, name);
+	if(alphabet->count > (TRANSITION_ENTRY_SIZE *  FIXED_SIGNALS_COUNT)){
+		printf("[BUILD ERROR] Current build supports an alphabet of up to %d elements.\nAdjust TRANSITION_ENTRY_SIZE or FIXED_SIGNALS_COUNT and rebuild.\n",
+				(TRANSITION_ENTRY_SIZE *  FIXED_SIGNALS_COUNT));
+		printf("Provided alphabet has %d elements.\n", alphabet->count);
+		exit(-1);
+	}
 	ctx->global_alphabet		= automaton_alphabet_clone(alphabet);
 	ctx->global_fluents_count	= fluents_count;
 	ctx->global_fluents			= calloc(ctx->global_fluents_count, sizeof(automaton_fluent));

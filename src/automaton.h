@@ -55,7 +55,11 @@
 
 #define AUT_TAU_CONSTANT	"<>"
 
+//keep these values consistent
+typedef uint32_t fluent_entry_size_t;
+typedef uint64_t double_fluent_entry_size_t;
 #define FLUENT_ENTRY_SIZE	32
+
 #define GET_FLUENTS_ARR_SIZE(fluent_count, trans_size)	(1 + ((fluent_count * trans_size) / FLUENT_ENTRY_SIZE))
 #define GET_STATE_FLUENT_INDEX(fluent_count, state_index, fluent_index)	((state_index * fluent_count) + fluent_index)
 #define SET_FLUENT_BIT(arr,index)     ( arr[(index/FLUENT_ENTRY_SIZE)] |= (1 << (index%FLUENT_ENTRY_SIZE)) )

@@ -477,9 +477,8 @@ void automaton_automaton_serialize_report(FILE *f, automaton_automaton *automato
 			fprintf(f, "0%s", i == (automaton->context->state_valuations_count - 1)? "" :  AUT_SER_SEP);
 		}else{
 		fluent_index	= GET_STATE_FLUENT_INDEX(automaton->context->state_valuations_count, 0, i);
-		//fprintf(f, "%d%s", TEST_FLUENT_BIT(automaton->state_valuations_declared, fluent_index) ? "1" : "0", i == (automaton->context->state_valuations_count - 1)? "" :  AUT_SER_SEP);
-		fprintf(f, "%d%s",
-				( automaton->state_valuations_declared[(fluent_index/32)] & (1 << (fluent_index%32)) )
+		fprintf(f, "%s%s",
+				TEST_FLUENT_BIT(automaton->state_valuations_declared, fluent_index)
 				? "1" : "0", i == (automaton->context->state_valuations_count - 1)? "" :  AUT_SER_SEP);
 		}
 	}
