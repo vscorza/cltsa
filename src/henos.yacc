@@ -40,14 +40,15 @@ automaton_program_syntax* parsed_program = NULL;
 	automaton_import_syntax*		import_syntax;
 	automaton_synchronization_type_syntax composition_type;
 	automaton_vstates_syntax*		v_states;
-	automaton_vstates_fluent_syntax*	vstatesFluent;
+	automaton_vstates_fluent_syntax*	vstates_fluent;
+	automaton_serialization_syntax*	lts_serialization
 };
-%token	t_INTEGER t_IDENT t_UPPER_IDENT t_STRING t_CONST t_RANGE t_SET t_FLUENT t_DOTS t_WHEN t_GAME_COMPOSE t_PARALLEL t_GR_1 t_INITIALLY t_LTL t_ENV t_SYS t_RHO t_THETA t_IN t_THEN t_IFF t_AND t_NEXT t_CONCURRENT t_SYNCH t_ORDER t_EQUALS t_IMPORT t_EXPORT t_VAL_STATE 
+%token	t_INTEGER t_IDENT t_UPPER_IDENT t_STRING t_CONST t_RANGE t_SET t_FLUENT t_DOTS t_WHEN t_GAME_COMPOSE t_PARALLEL t_GR_1 t_INITIALLY t_LTL t_ENV t_SYS t_RHO t_THETA t_IN t_THEN t_IFF t_AND t_NEXT t_CONCURRENT t_SYNCH t_ORDER t_EQUALS t_IMPORT t_EXPORT t_VAL_STATE t_SEQ_LTS t_SEQ_TICK_LTS t_INTERLVD_LTS t_INTERLVD_TICK_LTS 
 %left '+' '-' ','
 %left '*' '/'
 
 
-%type<text> 				t_STRING t_IDENT t_UPPER_IDENT t_CONST t_RANGE t_SET t_FLUENT t_DOTS t_WHEN t_GAME_COMPOSE t_PARALLEL t_GR_1 t_INITIALLY t_LTL t_ENV t_SYS t_RHO t_THETA t_IN t_THEN t_IFF t_AND t_NEXT t_CONCURRENT t_SYNCH t_EQUALS t_IMPORT t_EXPORT t_VAL_STATE
+%type<text> 				t_STRING t_IDENT t_UPPER_IDENT t_CONST t_RANGE t_SET t_FLUENT t_DOTS t_WHEN t_GAME_COMPOSE t_PARALLEL t_GR_1 t_INITIALLY t_LTL t_ENV t_SYS t_RHO t_THETA t_IN t_THEN t_IFF t_AND t_NEXT t_CONCURRENT t_SYNCH t_EQUALS t_IMPORT t_EXPORT t_VAL_STATE t_SEQ_LTS t_SEQ_TICK_LTS t_INTERLVD_LTS t_INTERLVD_TICK_LTS
 %type<integer>				t_INTEGER fluentInitialCondition compositionType
 %type<expr>					exp exp2 exp3 exp4 constDef range rangeDef ltsTransitionPrefix
 %type<label>				label concurrentLabel 
@@ -76,8 +77,9 @@ automaton_program_syntax* parsed_program = NULL;
 %type<equal_expression>		equalsExp
 %type<import_syntax>		import
 %type<import_syntax>		export
-%type<vstatesFluent>			stateFluent
+%type<vstates_fluent>			stateFluent
 %type<v_states>				vstates		
+%type<lts_serialization> ltsConversion
 %%
 program:
 	statements								{parsed_program = $1; $$ = $1;}
@@ -87,20 +89,21 @@ statements:
 	|statement								{$$ = automaton_program_syntax_create($1);}
 	;
 statement:
-	import									{$$ = automaton_statement_syntax_create(IMPORT_AUT, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $1, NULL);}
-	|export									{$$ = automaton_statement_syntax_create(EXPORT_AUT, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $1, NULL);}
-	|menu									{$$ = automaton_statement_syntax_create(MENU_AUT, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);}
-	|constDef								{$$ = automaton_statement_syntax_create(CONST_AUT, NULL, NULL, $1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);}
-	|rangeDef								{$$ = automaton_statement_syntax_create(RANGE_AUT, NULL, $1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);}
-	|fluentDef								{$$ = automaton_statement_syntax_create(FLUENT_AUT, NULL, NULL, NULL, $1, NULL, NULL, NULL, NULL, NULL, NULL, NULL);}
-	|setDef									{$$ = automaton_statement_syntax_create(SET_AUT, NULL, NULL, NULL, NULL, $1, NULL, NULL, NULL, NULL, NULL, NULL);}
+	import									{$$ = automaton_statement_syntax_create(IMPORT_AUT, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $1, NULL, NULL);}
+	|export									{$$ = automaton_statement_syntax_create(EXPORT_AUT, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $1, NULL, NULL);}
+	|menu									{$$ = automaton_statement_syntax_create(MENU_AUT, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);}
+	|constDef								{$$ = automaton_statement_syntax_create(CONST_AUT, NULL, NULL, $1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);}
+	|rangeDef								{$$ = automaton_statement_syntax_create(RANGE_AUT, NULL, $1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);}
+	|fluentDef								{$$ = automaton_statement_syntax_create(FLUENT_AUT, NULL, NULL, NULL, $1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);}
+	|setDef									{$$ = automaton_statement_syntax_create(SET_AUT, NULL, NULL, NULL, NULL, $1, NULL, NULL, NULL, NULL, NULL, NULL, NULL);}
 	|orderDef								{automaton_program_add_obdd_primed_variables();}
-	|compositionDef							{$$ = automaton_statement_syntax_create(COMPOSITION_AUT, $1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);}
-	|gr1									{$$ = automaton_statement_syntax_create(GR_1_AUT, NULL, NULL, NULL, NULL, NULL, $1, NULL, NULL, NULL, NULL, NULL);}
-	|ltlAutRule								{$$ = automaton_statement_syntax_create(LTL_RULE_AUT, NULL, NULL, NULL, NULL, NULL, NULL, $1, NULL, NULL, NULL, NULL);}
-	|ltlFluent								{$$ = automaton_statement_syntax_create(LTL_FLUENT_AUT, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $1, NULL, NULL, NULL);}
-	|stateFluent							{$$ = automaton_statement_syntax_create(VSTATES_FLUENT_AUT, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $1);}	
-	|equalsExp								{$$ = automaton_statement_syntax_create(EQUIV_CHECK_AUT, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $1, NULL, NULL);}
+	|compositionDef							{$$ = automaton_statement_syntax_create(COMPOSITION_AUT, $1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);}
+	|gr1									{$$ = automaton_statement_syntax_create(GR_1_AUT, NULL, NULL, NULL, NULL, NULL, $1, NULL, NULL, NULL, NULL, NULL, NULL);}
+	|ltlAutRule								{$$ = automaton_statement_syntax_create(LTL_RULE_AUT, NULL, NULL, NULL, NULL, NULL, NULL, $1, NULL, NULL, NULL, NULL, NULL);}
+	|ltlFluent								{$$ = automaton_statement_syntax_create(LTL_FLUENT_AUT, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $1, NULL, NULL, NULL, NULL);}
+	|stateFluent							{$$ = automaton_statement_syntax_create(VSTATES_FLUENT_AUT, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $1, NULL);}	
+	|equalsExp								{$$ = automaton_statement_syntax_create(EQUIV_CHECK_AUT, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $1, NULL, NULL, NULL);}
+	|ltsConversion							{$$ = automaton_statement_syntax_create(LTS_SEQ_AUT, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $1);}
 	;
 label:
 	concurrentLabel							{$$ = $1;}
@@ -276,6 +279,11 @@ composition:
 	| t_PARALLEL t_UPPER_IDENT '=' '(' compositionExp ')'	{$$ = automaton_composition_syntax_create_from_ref($2, $5, false); free($1);free($2);free($5);}
 	| t_GAME_COMPOSE t_UPPER_IDENT '=' '(' compositionExp ')'	{$$ = automaton_composition_syntax_create_from_ref($2, $5, true); free($1);free($2);free($5);}	
 	;
+ltsConversion:
+	t_SEQ_LTS t_UPPER_IDENT t_IN t_UPPER_IDENT '.'	{$$ = automaton_serialization_syntax_create_from_ref($2, $4, true, false); free($1);free($2);free($3);free($4);}
+	|t_SEQ_TICK_LTS t_UPPER_IDENT t_IN t_UPPER_IDENT '.'	{$$ = automaton_serialization_syntax_create_from_ref($2, $4, true, true); free($1);free($2);free($3);free($4);}
+	|t_INTERLVD_LTS t_UPPER_IDENT t_IN t_UPPER_IDENT '.'	{$$ = automaton_serialization_syntax_create_from_ref($2, $4, false, false); free($1);free($2);free($3);free($4);}
+	|t_INTERLVD_TICK_LTS t_UPPER_IDENT t_IN t_UPPER_IDENT '.'	{$$ = automaton_serialization_syntax_create_from_ref($2, $4, false, true); free($1);free($2);free($3);free($4);}	
 gr1:
 	t_GR_1 '<' set '>' '<' set '>' t_UPPER_IDENT '=' t_UPPER_IDENT '.'			{$$ = automaton_gr1_game_syntax_create($8, $10, $3, $6); free($1);free($8); free($10);}
 compositionExp:

@@ -3,6 +3,10 @@ TODO:
 - implementar recortes para clts
 - cltsa
 	- traducción a lts
+		- implementar
+			- implementar automaton_autoaton* automaton_automaton_sequentialize(automaton_automaton *automaton, bool sequential, bool has_ticks)
+				- revisar estados intermedios según non piped transitions 
+			- implementar traducción en autoamton_context cuando revisa statement
 		- formalizar
 			- qué pasa con estados mixtos?
 			- ejemplo biscotti

@@ -88,6 +88,42 @@ initially		{
 					yylval.text=p;
 					return(t_DOTS);
 				}
+\|s\|			{
+					p=(char *)calloc(strlen(yytext)+1,sizeof(char));
+					strcpy(p,yytext);
+					#if DEBUG_LEX
+					printf("[keyword: <%s>]", yytext);
+					#endif
+					yylval.text=p;
+					return(t_SEQ_LTS);
+				}
+\|ts\|			{
+					p=(char *)calloc(strlen(yytext)+1,sizeof(char));
+					strcpy(p,yytext);
+					#if DEBUG_LEX
+					printf("[keyword: <%s>]", yytext);
+					#endif
+					yylval.text=p;
+					return(t_SEQ_TICK_LTS);
+				}
+\|i\|			{
+					p=(char *)calloc(strlen(yytext)+1,sizeof(char));
+					strcpy(p,yytext);
+					#if DEBUG_LEX
+					printf("[keyword: <%s>]", yytext);
+					#endif
+					yylval.text=p;
+					return(t_INTRLVD_LTS);
+				}
+\|ti\|			{
+					p=(char *)calloc(strlen(yytext)+1,sizeof(char));
+					strcpy(p,yytext);
+					#if DEBUG_LEX
+					printf("[keyword: <%s>]", yytext);
+					#endif
+					yylval.text=p;
+					return(t_INTERLVD_TICK_LTS);
+				}												
 \|f\|			{
 					p=(char *)calloc(strlen(yytext)+1,sizeof(char));
 					strcpy(p,yytext);

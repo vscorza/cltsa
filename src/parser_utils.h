@@ -71,7 +71,8 @@ typedef enum {
 	LTL_RULE_AUT,
 	LTL_FLUENT_AUT,
 	EQUIV_CHECK_AUT,
-	VSTATES_FLUENT_AUT
+	VSTATES_FLUENT_AUT,
+	LTS_SEQ_AUT
 } automaton_statement_type_syntax;
 typedef enum {
 	ASYNCH_AUT,
@@ -213,6 +214,12 @@ typedef struct automaton_vstates_fluent_syntax_str{
 	char* automaton_name;
 	struct automaton_vstates_syntax_str* vstates;
 }automaton_vstates_fluent_syntax;
+typedef struct automaton_serialization_syntax_str{
+	char* name;
+	char* automaton_name;
+	bool sequential;
+	bool has_ticks;
+}automaton_serialization_syntax
 typedef struct ltl_rule_syntax_str{
 	bool is_theta;
 	bool is_env;
@@ -309,6 +316,8 @@ automaton_vstates_syntax* automaton_vstates_syntax_create_from_state(automaton_s
 void automaton_vstates_syntax_destroy(automaton_vstates_syntax* vstates);
 automaton_vstates_fluent_syntax* automaton_vstates_fluent_syntax_create(char* name, char* automaton_name, automaton_vstates_syntax* states);
 void automaton_vstates_fluent_syntax_destroy(automaton_vstates_fluent_syntax* vstates_fluent);
+automaton_serialization_syntax* automaton_serialization_syntax_create_from_ref(char *name, char *automaton_name, bool sequential, bool has_ticks);
+void automaton_serialization_syntax_destroy(automaton_serialization_syntax* automaton_serialization);
 ltl_rule_syntax* ltl_rule_syntax_create(bool is_theta, bool is_env, char* name, char* game_structure_name, obdd* obdd);
 ltl_fluent_syntax* automaton_ltl_fluent_syntax_create(char* name, obdd* obdd);
 obdd_mgr* parser_get_obdd_mgr();

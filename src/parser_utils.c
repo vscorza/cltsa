@@ -443,6 +443,21 @@ void automaton_vstates_fluent_syntax_destroy(automaton_vstates_fluent_syntax* vs
 	free(vstates_fluent);
 }
 
+automaton_serialization_syntax* automaton_serialization_syntax_create_from_ref(char *name, char *automaton_name, bool sequential, bool has_ticks){
+	automaton_serialization_syntax* automaton_serialization = malloc(sizeof(automaton_serialization_syntax));
+	aut_dupstr(&(automaton_serialization->name), name);
+	aut_dupstr(&(automaton_serialization->automaton_name), automaton_name);
+	automaton_serialization->sequential	= sequential;
+	automaton_serialization->has_ticks	= has_ticks;
+	return automaton_serialization;
+}
+
+void automaton_serialization_syntax_destroy(automaton_serialization_syntax* automaton_serialization){
+	if(automaton_serialization->name != NULL)free(automaton_serialization->name);
+	if(automaton_serialization->automaton_name != NULL)free(automaton_serialization->automaton_name);
+	free(automaton_serialization);
+}
+
 
 ltl_rule_syntax* ltl_rule_syntax_create(bool is_theta, bool is_env, char* name, char* game_structure_name, obdd* obdd){
 	ltl_rule_syntax* ltl_rule	= malloc(sizeof(ltl_rule_syntax));
