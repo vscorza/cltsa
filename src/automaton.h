@@ -24,6 +24,7 @@
 #define DEBUG_COMPOSITE_TREE 0
 #define DEBUG_UNREAL 0
 #define DEBUG_DD 0
+#define DEBUG_SEQUENTIALIZATION 1
 #define PRINT_PARTIAL_SYNTHESIS 0
 #define PRINT_HTML 0
 
@@ -80,6 +81,9 @@ typedef uint64_t double_fluent_entry_size_t;
 #define TEST_SIGNAL_ARRAY_BIT(arr,index)    ( (arr[((index+1)/TRANSITION_ENTRY_SIZE)]) & ((signal_bit_array_t)1 << ((index+1)%TRANSITION_ENTRY_SIZE)) )
 #define SET_SIGNAL_ARRAY_BIT(arr,index)     ( (arr[((index+1)/TRANSITION_ENTRY_SIZE)]) |= ((signal_bit_array_t)1 << ((index+1)%TRANSITION_ENTRY_SIZE)) )
 #define CLEAR_SIGNAL_ARRAY_BIT(arr,index)   ( (arr[((index+1)/TRANSITION_ENTRY_SIZE)]) &= ~(((signal_bit_array_t)1 << ((index+1)%TRANSITION_ENTRY_SIZE))) )
+#define TEST_SIGNAL_KEY_BIT(key,index)    ( key & ((signal_bit_array_t)1 << ((index)%TRANSITION_ENTRY_SIZE)) )
+#define SET_SIGNAL_KEY_BIT(key,index)     ( key |= ((signal_bit_array_t)1 << ((index)%TRANSITION_ENTRY_SIZE)) )
+#define CLEAR_SIGNAL_KEY_BIT(key,index)   ( key &= ~(((signal_bit_array_t)1 << ((index)%TRANSITION_ENTRY_SIZE))) )
 #define GET_TRANSITION_SIGNAL_COUNT(transition) uint32_t signal_count = 0,_p_ = 0;for(_p_ = 0; _p_ < (TRANSITION_ENTRY_SIZE * FIXED_SIGNALS_COUNT) - 1; _p_++){if(TEST_TRANSITION_BIT((transition), _p_))signal_count++;}
 #define TRANSITION_IS_INPUT(transition)	(((transition)->signals[0]&((signal_bit_array_t)0x1))==true)
 #define TRANSITION_SET_INPUT(transition)	(transition)->signals[0] |= ((signal_bit_array_t)0x1);

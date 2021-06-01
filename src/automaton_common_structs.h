@@ -27,6 +27,9 @@ typedef uint8_t fluent_count_t;
 typedef uint16_t signal_bit_array_t;
 
 
+#define SYS_TICK	"■■■■sys■"
+#define ENV_TICK	"■■■■env■"
+
 #define TRANSITION_ENTRY_SIZE 16
 #define FIXED_SIGNALS_COUNT	8//4
 /****************

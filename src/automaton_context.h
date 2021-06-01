@@ -112,6 +112,8 @@ void automaton_statement_syntax_build_local_alphabet(automaton_automata_context*
 bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, automaton_composition_syntax* composition_syntax
 		, automaton_parsing_tables* tables, uint32_t current_vstates_count, char** current_vstates_names, automaton_vstates_syntax** current_vstates_syntaxes);
 automaton_range* automaton_range_syntax_evaluate(automaton_parsing_tables *tables, char* name, automaton_expression_syntax *range_def_syntax);
+automaton_automaton* automaton_automaton_sequentialize(automaton_automaton *automaton, char* copy_name,
+		bool sequential, bool has_ticks);
 bool automaton_statement_syntax_to_constant(automaton_expression_syntax* const_def_syntax
 		, automaton_parsing_tables* tables);
 bool automaton_statement_syntax_to_range(automaton_automata_context* ctx, automaton_expression_syntax* range_def_syntax

@@ -157,7 +157,8 @@ int main (int argc, char** argv){
 		//GENERAL TESTS
 		//run_all_tests();
 
-		run_functional_tests();
+		//run_functional_tests();
+		run_parse_test("tests/lts_serialization.fsp", "lts serialization");
 		//run_parse_test("tests/biscotti_vstates.fsp", "biscotti vstates");
 		//run_parse_test("tests/composition_vstates.fsp", "composition vstates");
 		//run_automaton_export_test();

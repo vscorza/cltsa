@@ -41,7 +41,7 @@ automaton_program_syntax* parsed_program = NULL;
 	automaton_synchronization_type_syntax composition_type;
 	automaton_vstates_syntax*		v_states;
 	automaton_vstates_fluent_syntax*	vstates_fluent;
-	automaton_serialization_syntax*	lts_serialization
+	automaton_serialization_syntax*	lts_serialization;
 };
 %token	t_INTEGER t_IDENT t_UPPER_IDENT t_STRING t_CONST t_RANGE t_SET t_FLUENT t_DOTS t_WHEN t_GAME_COMPOSE t_PARALLEL t_GR_1 t_INITIALLY t_LTL t_ENV t_SYS t_RHO t_THETA t_IN t_THEN t_IFF t_AND t_NEXT t_CONCURRENT t_SYNCH t_ORDER t_EQUALS t_IMPORT t_EXPORT t_VAL_STATE t_SEQ_LTS t_SEQ_TICK_LTS t_INTERLVD_LTS t_INTERLVD_TICK_LTS 
 %left '+' '-' ','

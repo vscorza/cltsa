@@ -200,6 +200,7 @@ typedef struct automaton_statement_syntax_str{
 	struct automaton_equivalence_check_syntax_str* equivalence_check;
 	struct automaton_import_syntax_str* import_def;
 	struct automaton_vstates_fluent_syntax_str* vstates_syntax;
+	struct automaton_serialization_syntax_str* serialization_syntax;
 }automaton_statement_syntax;
 typedef struct automaton_program_syntax_str{
 	uint32_t count;
@@ -219,7 +220,7 @@ typedef struct automaton_serialization_syntax_str{
 	char* automaton_name;
 	bool sequential;
 	bool has_ticks;
-}automaton_serialization_syntax
+}automaton_serialization_syntax;
 typedef struct ltl_rule_syntax_str{
 	bool is_theta;
 	bool is_env;
@@ -308,7 +309,7 @@ automaton_statement_syntax* automaton_statement_syntax_create(automaton_statemen
 		automaton_expression_syntax* range_def, automaton_expression_syntax* const_def, automaton_fluent_syntax* fluent_def,
 		automaton_set_def_syntax* set_def, automaton_gr1_game_syntax* gr1_game_def, ltl_rule_syntax* ltl_rule_def, ltl_fluent_syntax* ltl_fluent_def,
 		automaton_equivalence_check_syntax* equivalence_check, automaton_import_syntax* import_syntax,
-		automaton_vstates_fluent_syntax* vstates_fluent_syntax);
+		automaton_vstates_fluent_syntax* vstates_fluent_syntax, automaton_serialization_syntax* serialization_syntax);
 automaton_import_syntax *automaton_import_syntax_create(char *name, char *filename);
 bool automaton_syntax_is_reserved(char* token);
 automaton_vstates_syntax* automaton_vstates_syntax_concat_state(automaton_vstates_syntax* vstates, automaton_state_label_syntax* state);

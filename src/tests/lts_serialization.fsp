@@ -1,0 +1,148 @@
+//lift example taken from Synthesis of Reactive(1) Designs 2 floors
+set Global_Alphabet = {}
+set Controllable_Alphabet = {}
+set Global_Signals	= {b1, b2, f1, f2}
+set Output_Signals	= {f1, f2}
+
+ltl env theta Init_Lift_e in GAME_LTL	= (!b1 && !b2).
+ltl sys theta Init_Lift_s in GAME_LTL	= (f1 && !f2).
+ltl env rho Env_Release_B in GAME_LTL	= [](((b1 && f1)-> X(!b1)) &&((b2 && f2)-> X(!b2))).
+ltl env rho Env_Keep_B in GAME_LTL		= [](((b1 && !f1)-> X(b1)) &&((b2 && !f2)-> X(b2))).
+ltl sys rho Sys_Mutex in GAME_LTL		= [](!(f1 && f2) && !(X(f1 && f2))).
+ltl sys rho Sys_Adj_Floors in GAME_LTL	= []((f1 -> X(f1 || f2)) && (f2 -> X(f1 || f2))).
+ltl sys rho Sys_Move_Iff_B in GAME_LTL	= []((f1 && X(f2))->(b1 || b2)).
+
+
+ltl fluent Ass = (b1 || !b1).
+ltl fluent Goal_Back_To_Ground			= (f1 || (b1 || b2)).
+ltl fluent Goal_Serve_Request_1			= ((b1->f1)).
+ltl fluent Goal_Serve_Request_2			= ((b2->f2)).
+
+|f| ENV =(GAME_LTL).
+//|gr1| <{Ass}><{Goal_Serve_Request_1,Goal_Serve_Request_2,Goal_Back_To_Ground}> STRAT = ENV.
+
+|ti| GAME_SERIAL_TICKS in GAME_LTL .
+//|i| GAME_SERIAL in GAME_LTL .
+
+
+//GAME_SERIAL >> "/tmp/lts_serialization_game_serial.rep".
+GAME_SERIAL_TICKS >> "/tmp/lts_serialization_game_serial_ticks.rep".
+
+//TESTS
+//equals FATAL_Game_Lift_2_FSP_VS_LTL(GAME_LTL, GAME_FSP).
+//equals FATAL_Game_Lift_2_STRAT_VS_STRAT_p(STRAT, STRAT_p).
+
+/*
+set Global_Alphabet = {■■■■env■,■■■■sys■}
+set Controllable_Alphabet = {}
+
+set Global_Signals	= {b1, b2, f1, f2}
+set Output_Signals	= {f1, f2}
+
+A = S_0,
+S_0 = (■■■■env■-> S_10),
+S_1 = (■■■■env■-> S_12|b1.on-> S_13|b2.on-> S_15|b1.on-> S_19),
+S_2 = (■■■■env■-> S_20|b1.on-> S_21|b2.on-> S_23|b1.on-> S_27|■■■■env■-> S_28|b1.on-> S_31|b2.on-> S_35|b1.on-> S_42),
+S_3 = (■■■■env■-> S_44|b2.on-> S_45|■■■■env■-> S_47|b2.on-> S_50),
+S_4 = (b2.off-> S_54|b1.on-> S_58|b2.off-> S_59|b1.on-> S_66),
+S_5 = (b2.off-> S_68|b2.off-> S_70),
+S_6 = (b1.off-> S_74|b1.off-> S_81|b1.off-> S_83|b1.off-> S_87),
+S_7 = (■■■■env■-> S_88|b1.on-> S_91|■■■■env■-> S_95|b1.on-> S_96),
+S_8 = (b1.off-> S_98|b1.off-> S_102),
+S_10 = (f1.on-> S_11),
+S_11 = (■■■■sys■-> S_1),
+S_12 = (■■■■sys■-> S_1),
+S_13 = (■■■■env■-> S_14),
+S_14 = (■■■■sys■-> S_6),
+S_15 = (■■■■env■-> S_16),
+S_16 = (■■■■sys■-> S_7),
+S_17 = (■■■■env■-> S_18),
+S_18 = (■■■■sys■-> S_8),
+S_19 = (b2.on-> S_17),
+S_20 = (■■■■sys■-> S_2),
+S_21 = (■■■■env■-> S_22),
+S_22 = (■■■■sys■-> S_3),
+S_23 = (■■■■env■-> S_24),
+S_24 = (■■■■sys■-> S_4),
+S_25 = (■■■■env■-> S_26),
+S_26 = (■■■■sys■-> S_5),
+S_27 = (b2.on-> S_25),
+S_28 = (f1.on-> S_30),
+S_29 = (■■■■sys■-> S_1),
+S_30 = (f2.off-> S_29),
+S_31 = (■■■■env■-> S_32),
+S_32 = (f1.on-> S_34),
+S_33 = (■■■■sys■-> S_6),
+S_34 = (f2.off-> S_33),
+S_35 = (■■■■env■-> S_36),
+S_36 = (f1.on-> S_38),
+S_37 = (■■■■sys■-> S_7),
+S_38 = (f2.off-> S_37),
+S_39 = (■■■■env■-> S_40),
+S_40 = (f1.on-> S_43),
+S_41 = (■■■■sys■-> S_8),
+S_42 = (b2.on-> S_39),
+S_43 = (f2.off-> S_41),
+S_44 = (■■■■sys■-> S_3),
+S_45 = (■■■■env■-> S_46),
+S_46 = (■■■■sys■-> S_5),
+S_47 = (f1.on-> S_49),
+S_48 = (■■■■sys■-> S_6),
+S_49 = (f2.off-> S_48),
+S_50 = (■■■■env■-> S_51),
+S_51 = (f1.on-> S_53),
+S_52 = (■■■■sys■-> S_8),
+S_53 = (f2.off-> S_52),
+S_54 = (■■■■env■-> S_55),
+S_55 = (■■■■sys■-> S_2),
+S_56 = (■■■■env■-> S_57),
+S_57 = (■■■■sys■-> S_3),
+S_58 = (b2.off-> S_56),
+S_59 = (■■■■env■-> S_60),
+S_60 = (f1.on-> S_62),
+S_61 = (■■■■sys■-> S_1),
+S_62 = (f2.off-> S_61),
+S_63 = (■■■■env■-> S_64),
+S_64 = (f1.on-> S_67),
+S_65 = (■■■■sys■-> S_6),
+S_66 = (b2.off-> S_63),
+S_67 = (f2.off-> S_65),
+S_68 = (■■■■env■-> S_69),
+S_69 = (■■■■sys■-> S_3),
+S_70 = (■■■■env■-> S_71),
+S_71 = (f1.on-> S_73),
+S_72 = (■■■■sys■-> S_6),
+S_73 = (f2.off-> S_72),
+S_74 = (■■■■env■-> S_75),
+S_75 = (f1.off-> S_77),
+S_76 = (■■■■sys■-> S_2),
+S_77 = (f2.on-> S_76),
+S_78 = (■■■■env■-> S_79),
+S_79 = (f1.off-> S_82),
+S_80 = (■■■■sys■-> S_4),
+S_81 = (b2.on-> S_78),
+S_82 = (f2.on-> S_80),
+S_83 = (■■■■env■-> S_84),
+S_84 = (■■■■sys■-> S_1),
+S_85 = (■■■■env■-> S_86),
+S_86 = (■■■■sys■-> S_7),
+S_87 = (b2.on-> S_85),
+S_88 = (f1.off-> S_90),
+S_89 = (■■■■sys■-> S_4),
+S_90 = (f2.on-> S_89),
+S_91 = (■■■■env■-> S_92),
+S_92 = (f1.off-> S_94),
+S_93 = (■■■■sys■-> S_5),
+S_94 = (f2.on-> S_93),
+S_95 = (■■■■sys■-> S_7),
+S_96 = (■■■■env■-> S_97),
+S_97 = (■■■■sys■-> S_8),
+S_98 = (■■■■env■-> S_99),
+S_99 = (f1.off-> S_101),
+S_100 = (■■■■sys■-> S_4),
+S_101 = (f2.on-> S_100),
+S_102 = (■■■■env■-> S_103),
+S_103 = (■■■■sys■-> S_7).
+
+A >> "/tmp/lts_serialization_A.rep".
+*/

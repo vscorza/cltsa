@@ -12,7 +12,7 @@ digit		[0-9]
 alpha		[a-fA-F]
 hextail		({digit}|{alpha}){1,8}
 hex			0[xX]{hextail}
-lower 		[a-z]
+lower 		[a-z■]
 upper 		[A-Z]
 octalDigit	[0-7]
 decDigit	[0-9]
@@ -113,7 +113,7 @@ initially		{
 					printf("[keyword: <%s>]", yytext);
 					#endif
 					yylval.text=p;
-					return(t_INTRLVD_LTS);
+					return(t_INTERLVD_LTS);
 				}
 \|ti\|			{
 					p=(char *)calloc(strlen(yytext)+1,sizeof(char));
