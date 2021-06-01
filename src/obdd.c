@@ -70,6 +70,13 @@ obdd_state_tree* obdd_state_tree_create(uint32_t key_length){
 	tree->entries_pool	= malloc(sizeof(obdd_state_tree_entry) * tree->entries_size);
 	return tree;
 }
+
+void obdd_state_tree_clear(obdd_state_tree* tree){
+	tree->max_value		= 1;
+	tree->first_entry_index	= -1;
+	tree->entries_count	= 0;
+}
+
 int32_t obdd_state_tree_entry_get_from_pool(obdd_state_tree* tree){
 	if(tree->entries_count >= tree->entries_size){
 		uint32_t new_size			= tree->entries_size * LIST_INCREASE_FACTOR;

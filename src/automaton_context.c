@@ -1769,7 +1769,7 @@ automaton_automaton* automaton_automaton_sequentialize(automaton_automaton *auto
 		bool sequential, bool has_ticks){
 	automaton_automaton *serialized_automaton	= automaton_automaton_create(copy_name, automaton->context, automaton->local_alphabet_count
 			, automaton->local_alphabet, automaton->is_game, automaton->built_from_ltl);
-	uint32_t i, j, k, l, m, env_index, sys_index, new_env_index, new_sys_index, new_local_alphabet_count = automaton->local_alphabet_count;
+	uint32_t i, j, k, l, m, n, env_index, sys_index, new_env_index, new_sys_index, new_local_alphabet_count = automaton->local_alphabet_count;
 	bool has_env = false, has_sys = false;
 	uint32_t env_local_count = 0, sys_local_count = 0;
 	for(i = 0; i < automaton->local_alphabet_count; i++){
@@ -1781,9 +1781,6 @@ automaton_automaton* automaton_automaton_sequentialize(automaton_automaton *auto
 	}
 	uint32_t env_lut_size	= 1 << env_local_count;
 	uint32_t sys_lut_size	= 1 << sys_local_count;
-
-	int32_t *env_lut	= env_local_count > 0? calloc(env_lut_size, sizeof(int32_t)) : NULL;
-	int32_t *sys_lut	= sys_local_count > 0? calloc(sys_lut_size, sizeof(int32_t)) : NULL;
 
 	automaton_signal_event	*env_tick	= automaton_signal_event_create(ENV_TICK, INPUT_SIG);
 	automaton_signal_event	*sys_tick	= automaton_signal_event_create(SYS_TICK, OUTPUT_SIG);
@@ -1836,7 +1833,11 @@ automaton_automaton* automaton_automaton_sequentialize(automaton_automaton *auto
 	//				initial sys: env tick state			final sys: sys tick state
 	//wo ticks: 	initial env: original from state	final env: initial sys state
 	//				initial sys: initial sys state		final sys: original to state
-	uint32_t current_entry, trans_accum;
+	uint32_t trans_accum;
+	obdd_state_tree *env_key_tree	= obdd_state_tree_create(env_local_count);
+	obdd_state_tree *sys_key_tree	= obdd_state_tree_create(sys_local_count);
+	bool *env_key_entry	= calloc(env_local_count, sizeof(bool));
+	bool *sys_key_entry	= calloc(sys_local_count, sizeof(bool));
 	uint32_t last_added_state	= automaton->transitions_count + 1;
 	uint32_t env_tick_from_state, env_tick_to_state, sys_tick_from_state, current_trans_env_count, current_trans_sys_count;
 	uint32_t current_factorial	= 1, total_factorial = 1;
@@ -1852,16 +1853,16 @@ automaton_automaton* automaton_automaton_sequentialize(automaton_automaton *auto
 	int32_t occurrences_cntr;
 	uint32_t previous_env, previous_sys;
 
+
 	for(i = 0; i < automaton->transitions_count; i++){
 #if DEBUG_SEQUENTIALIZATION
 				printf("[CLEAR]\tClearing LUTs\n");
 #endif
-		if(env_lut != NULL)for(j = 0; j < env_lut_size; j++)env_lut[j]	= -1;
-		if(sys_lut != NULL)for(j = 0; j < sys_lut_size; j++)sys_lut[j]	= -1;
 		env_tick_from_state	= last_added_state++;
 		env_tick_to_state	= last_added_state++;
 		sys_tick_from_state	= last_added_state++;
-
+		obdd_state_tree_clear(env_key_tree);
+		obdd_state_tree_clear(sys_key_tree);
 		for(k = 0; k < automaton->out_degree[i]; k++){
 			current_transition	= &(automaton->transitions[i][k]);
 #if DEBUG_SEQUENTIALIZATION
@@ -1901,161 +1902,189 @@ automaton_automaton* automaton_automaton_sequentialize(automaton_automaton *auto
 				env_tick_from_state	= current_trans_env_count == 0? current_transition->state_from : last_added_state++;
 				env_tick_to_state	= last_added_state++;
 				sys_tick_from_state	= current_trans_sys_count == 0 ? env_tick_to_state : last_added_state++;
-				env_tick_transition->state_from	= current_trans_env_count == 0? current_transition->state_from : env_tick_from_state;
+				env_tick_transition->state_from	= env_tick_from_state;
 				env_tick_transition->state_to	= env_tick_to_state;
-				sys_tick_transition->state_from	= current_trans_sys_count == 0 ? env_tick_to_state : sys_tick_from_state;
+				sys_tick_transition->state_from	= sys_tick_from_state;
 				sys_tick_transition->state_to	= current_transition->state_to;
+				//automaton_automaton_add_transition(serialized_automaton, sys_tick_transition);
+			}
+			uint32_t last_div	= 1, l_2;
+			//initialize factorial value for permutation computation
+			//partially clear luts
+			previous_env		= current_transition->state_from;
+			if(current_trans_env_count > 0){
+				total_factorial = 1;
+				env_key_tree->max_value	= last_added_state + 1;
+				if(!sequential)for(j = 0; j < current_trans_env_count; j++)total_factorial *= (j + 1);
+#if DEBUG_SEQUENTIALIZATION
+				printf("[ENV]\tComputing %d permutations\n", total_factorial);
+#endif
+
+
+				for(l = 0; l < total_factorial; l++){
+					l_2 = l;
+					last_div	= current_trans_env_count;
+					current_factorial	= total_factorial/last_div--;
+					for(j = 0; j < env_local_count; j++)env_key_entry[j] = false;
+					trans_accum			= 0;
+					previous_env		= current_transition->state_from;
+
+					for(j = 0; j < current_trans_env_count; j++){
+						current_signal_index	= !sequential? ((l_2) / (current_factorial)): 1;
+#if DEBUG_SEQUENTIALIZATION
+						printf("[SIG.INDEX]\tsig:%d\tcurr.fact:%d\tlast_div:%d\tl_2:%d\n", current_signal_index
+								, current_factorial, last_div, l_2);
+#endif
+						if(sequential){
+							m = j;
+						}else{
+							occurrences_cntr	= -1;
+							for(m = 0; m < current_trans_env_count; m++){
+								if(!TEST_SIGNAL_KEY_BIT(trans_accum, m))occurrences_cntr++;
+								if(occurrences_cntr == current_signal_index)break;
+							}
+						}
+						env_key_entry[trans_local_env_alphabet[m]] = true;
+
+						SET_TRANSITION_BIT(transition_to_add, trans_local_env_alphabet[m]);
+						SET_SIGNAL_KEY_BIT(trans_accum, m);
+#if DEBUG_SEQUENTIALIZATION
+						printf("[E.BOOL]\t");
+						for(n = 0; n < env_local_count; n++)
+							printf("%s", env_key_entry[n]? "1":"0");
+						printf("\n");
+						printf("[E.KEY]\tFound\t[%#010x]: %d\tm:(%d)\t[%s]\n", trans_accum
+									,obdd_state_tree_get_key(env_key_tree,
+											env_key_entry, env_local_count), m
+									,automaton->context->global_alphabet->list[trans_local_env_alphabet[m]].name);
+#endif
+						transition_to_add->state_from	= previous_env;
+						transition_to_add->state_to		= obdd_state_tree_get_key(env_key_tree,
+								env_key_entry, env_local_count);
+						automaton_automaton_add_transition(serialized_automaton, transition_to_add);
+#if DEBUG_SEQUENTIALIZATION
+						automaton_transition_print(transition_to_add, automaton->context, "[E]\t", "\n", 0);
+#endif
+						CLEAR_TRANSITION_BIT(transition_to_add, trans_local_env_alphabet[m]);
+						previous_env	= transition_to_add->state_to;
+						if(j < (current_trans_env_count-1)){
+							if(!sequential){
+								l_2 = l_2 % current_factorial;
+								current_factorial /= last_div--;
+							}
+						}else if(has_ticks){
+							env_tick_transition->state_from	= transition_to_add->state_to;
+							automaton_automaton_add_transition(serialized_automaton, env_tick_transition);
+#if DEBUG_SEQUENTIALIZATION
+							printf("[E.TICK]\tEnv tick:");
+							automaton_transition_print(env_tick_transition, automaton->context, "", "\n", 0);
+#endif
+						}
+					}
+				}
+			}else if(has_ticks){
+				automaton_automaton_add_transition(serialized_automaton, env_tick_transition);
+#if DEBUG_SEQUENTIALIZATION
+				printf("[E.TICK]\tEnv tick:");
+				automaton_transition_print(env_tick_transition, automaton->context, "", "\n", 0);
+#endif
+			}
+
+			if(current_trans_sys_count > 0){
+				total_factorial = 1;
+				sys_key_tree->max_value	= current_trans_env_count > 0 ? env_key_tree->max_value + 1
+						:  last_added_state + 1;
+				if(!sequential)for(j = 0; j < current_trans_sys_count; j++)total_factorial *= (j + 1);
+#if DEBUG_SEQUENTIALIZATION
+				printf("[SYS]\tComputing %d permutations\n", total_factorial);
+#endif
+				for(l = 0; l < total_factorial; l++){
+					l_2 = l;
+					last_div	= current_trans_sys_count;
+					current_factorial	= total_factorial/last_div--;
+					for(j = 0; j < sys_local_count; j++)sys_key_entry[j] = false;
+					trans_accum			= 0;
+					previous_sys		= has_ticks? env_tick_to_state : previous_env;
+					for(m = 0; m < current_trans_sys_count; m++){
+						sys_key_entry[trans_local_sys_alphabet[m]] = true;
+
+					}
+					//sys_key_tree->max_value	= last_added_state + 1;
+					transition_to_add->state_to		= obdd_state_tree_get_key(sys_key_tree,
+							sys_key_entry, sys_local_count);
+
+					for(j = 0; j < current_trans_sys_count; j++){
+						current_signal_index	= !sequential ? ((l_2) / (current_factorial)) : 1;
+#if DEBUG_SEQUENTIALIZATION
+						printf("[S.BOOL]\t");
+						for(n = 0; n < sys_local_count; n++)
+							printf("%s", sys_key_entry[n]? "1":"0");
+						printf("\n");
+						printf("[SIG.INDEX]\tsig:%d\tcurr.fact:%d\tlast_div:%d\tl_2:%d\n", current_signal_index
+								, current_factorial, last_div, l_2);
+#endif
+						if(sequential){
+							m = j;
+						}else{
+							occurrences_cntr	= -1;
+							for(m = 0; m < current_trans_sys_count; m++){
+								if(!TEST_SIGNAL_KEY_BIT(trans_accum, m))occurrences_cntr++;
+								if(occurrences_cntr == current_signal_index)break;
+							}
+						}
+						sys_key_entry[trans_local_sys_alphabet[m]] = true;
+						//sys_key_tree->max_value	= last_added_state + 1;
+						SET_TRANSITION_BIT(transition_to_add, trans_local_sys_alphabet[m]);
+						SET_SIGNAL_KEY_BIT(trans_accum, m);
+#if DEBUG_SEQUENTIALIZATION
+						printf("[S.KEY]\tFound\t[%#010x]: %d\tm:(%d)\t[%s]\n", trans_accum
+								,obdd_state_tree_get_key(sys_key_tree,
+										sys_key_entry, sys_local_count), m
+								,automaton->context->global_alphabet->list[trans_local_sys_alphabet[m]].name);
+#endif
+						transition_to_add->state_from	= previous_sys;
+						transition_to_add->state_to		= obdd_state_tree_get_key(sys_key_tree,
+								sys_key_entry, sys_local_count);
+
+#if DEBUG_SEQUENTIALIZATION
+						automaton_transition_print(transition_to_add, automaton->context, "[S]\t", "\n", 0);
+#endif
+						previous_sys	= transition_to_add->state_to;
+						if(j < (current_trans_sys_count-1)){
+							if(!sequential){
+								l_2 = l_2 % current_factorial;
+								current_factorial /= last_div--;
+							}
+						}else if(has_ticks){
+							sys_tick_transition->state_from	= transition_to_add->state_to;
+							automaton_automaton_add_transition(serialized_automaton, sys_tick_transition);
+#if DEBUG_SEQUENTIALIZATION
+							printf("[S.TICK]\tSys tick:");
+							automaton_transition_print(sys_tick_transition, automaton->context, "", "\n", 0);
+#endif
+						}else{
+							transition_to_add->state_to	= current_transition->state_to;
+						}
+						automaton_automaton_add_transition(serialized_automaton, transition_to_add);
+						CLEAR_TRANSITION_BIT(transition_to_add, trans_local_sys_alphabet[m]);
+					}
+				}
+			}else if(has_ticks){
 				automaton_automaton_add_transition(serialized_automaton, sys_tick_transition);
 #if DEBUG_SEQUENTIALIZATION
 				printf("[S.TICK]\tSys tick:");
 				automaton_transition_print(sys_tick_transition, automaton->context, "", "\n", 0);
 #endif
 			}
-			uint32_t last_div	= 1, l_2;
-			//initialize factorial value for permutation computation
-			if(!sequential){
-				//partially clear luts
 
-				if(current_trans_env_count > 0){
-					total_factorial = 1;
-					for(j = 0; j < current_trans_env_count; j++)total_factorial *= (j + 1);
-#if DEBUG_SEQUENTIALIZATION
-					printf("[ENV]\tComputing %d permutations\n", total_factorial);
-#endif
 
-					previous_env		= current_transition->state_from;
-					for(l = 0; l < total_factorial; l++){
-						l_2 = l;
-						last_div	= current_trans_env_count;
-						current_factorial	= total_factorial/last_div--;
-						current_entry		= 0;
-						trans_accum			= 0;
-						previous_env		= current_transition->state_from;
-
-						for(j = 0; j < current_trans_env_count; j++){
-							current_signal_index	= ((l_2) / (current_factorial));
-#if DEBUG_SEQUENTIALIZATION
-							printf("[SIG.INDEX]\tsig:%d\tcurr.fact:%d\tlast_div:%d\tl_2:%d\n", current_signal_index
-									, current_factorial, last_div, l_2);
-#endif
-							occurrences_cntr	= -1;
-							for(m = 0; m < current_trans_env_count; m++){
-								if(!TEST_SIGNAL_KEY_BIT(trans_accum, m))occurrences_cntr++;
-								if(occurrences_cntr == current_signal_index)break;
-							}
-							SET_SIGNAL_KEY_BIT(trans_accum, m);
-							SET_SIGNAL_KEY_BIT(current_entry, trans_local_env_alphabet[m]);
-							SET_TRANSITION_BIT(transition_to_add, trans_local_env_alphabet[m]);
-#if DEBUG_SEQUENTIALIZATION
-							if(env_lut[current_entry] == -1)
-								printf("[E.KEY]\tAdding\t[%#010x]: %d \tm:(%d)\t[%s]\n", current_entry, last_added_state, m
-										,automaton->context->global_alphabet->list[trans_local_env_alphabet[m]].name);
-							else
-								printf("[E.KEY]\tFound\t[%#010x]: %d\tm:(%d)\t[%s]\n", current_entry, env_lut[current_entry], m
-										,automaton->context->global_alphabet->list[trans_local_env_alphabet[m]].name);
-#endif
-							if(env_lut[current_entry] == -1)env_lut[current_entry] = last_added_state++;
-							transition_to_add->state_from	= previous_env;
-							transition_to_add->state_to		= env_lut[current_entry];
-							automaton_automaton_add_transition(serialized_automaton, transition_to_add);
-#if DEBUG_SEQUENTIALIZATION
-							automaton_transition_print(transition_to_add, automaton->context, "[E]\t", "\n", 0);
-#endif
-							CLEAR_TRANSITION_BIT(transition_to_add, trans_local_env_alphabet[m]);
-							previous_env	= env_lut[current_entry];
-							if(j < (current_trans_env_count-1)){
-								l_2 = l_2 % current_factorial;
-								current_factorial /= last_div--;
-							}else if(has_ticks){
-								env_tick_transition->state_from	= env_lut[current_entry];
-								automaton_automaton_add_transition(serialized_automaton, env_tick_transition);
-#if DEBUG_SEQUENTIALIZATION
-								printf("[E.TICK]\tEnv tick:");
-								automaton_transition_print(env_tick_transition, automaton->context, "", "\n", 0);
-#endif
-							}
-						}
-					}
-				}else if(has_ticks){
-					automaton_automaton_add_transition(serialized_automaton, env_tick_transition);
-#if DEBUG_SEQUENTIALIZATION
-					printf("[E.TICK]\tEnv tick:");
-					automaton_transition_print(env_tick_transition, automaton->context, "", "\n", 0);
-#endif
-				}
-
-				if(current_trans_sys_count > 0){
-					total_factorial = 1;
-					for(j = 0; j < current_trans_sys_count; j++)total_factorial *= (j + 1);
-#if DEBUG_SEQUENTIALIZATION
-					printf("[SYS]\tComputing %d permutations\n", total_factorial);
-#endif
-					for(l = 0; l < total_factorial; l++){
-						l_2 = l;
-						last_div	= current_trans_sys_count;
-						current_factorial	= total_factorial/last_div--;
-						current_entry		= 0;
-						trans_accum			= 0;
-						previous_sys		= has_ticks? env_tick_to_state : previous_env;
-						for(m = 0; m < current_trans_sys_count; m++)
-							SET_SIGNAL_KEY_BIT(current_entry, m);
-						sys_lut[current_entry] = has_ticks ? sys_tick_from_state : current_transition->state_to;
-						current_entry	= 0;
-
-						for(j = 0; j < current_trans_sys_count; j++){
-							current_signal_index	= ((l_2) / (current_factorial));
-#if DEBUG_SEQUENTIALIZATION
-							printf("[SIG.INDEX]\tsig:%d\tcurr.fact:%d\tlast_div:%d\tl_2:%d\n", current_signal_index
-									, current_factorial, last_div, l_2);
-#endif
-							occurrences_cntr	= -1;
-							for(m = 0; m < current_trans_sys_count; m++){
-								if(!TEST_SIGNAL_KEY_BIT(trans_accum, m))occurrences_cntr++;
-								if(occurrences_cntr == current_signal_index)break;
-							}
-							SET_SIGNAL_KEY_BIT(trans_accum, m);
-							SET_SIGNAL_KEY_BIT(current_entry, trans_local_sys_alphabet[m]);
-							SET_TRANSITION_BIT(transition_to_add, trans_local_sys_alphabet[m]);
-#if DEBUG_SEQUENTIALIZATION
-							if(sys_lut[current_entry] == -1)
-								printf("[S.KEY]\tAdding\t[%#010x]: %d \tm:(%d)\t[%s]\n", current_entry, last_added_state, m
-										,automaton->context->global_alphabet->list[trans_local_sys_alphabet[m]].name);
-							else
-								printf("[S.KEY]\tFound\t[%#010x]: %d\tm:(%d)\t[%s]\n", current_entry, sys_lut[current_entry], m
-										,automaton->context->global_alphabet->list[trans_local_sys_alphabet[m]].name);
-#endif
-
-							if(sys_lut[current_entry] == -1)sys_lut[current_entry] = last_added_state++;
-							transition_to_add->state_from	= previous_sys;
-							transition_to_add->state_to		= sys_lut[current_entry];
-							automaton_automaton_add_transition(serialized_automaton, transition_to_add);
-#if DEBUG_SEQUENTIALIZATION
-							automaton_transition_print(transition_to_add, automaton->context, "[S]\t", "\n", 0);
-#endif
-							CLEAR_TRANSITION_BIT(transition_to_add, trans_local_sys_alphabet[m]);
-							previous_sys	= sys_lut[current_entry];
-							if(j < (current_trans_sys_count-1)){
-								l_2 = l_2 % current_factorial;
-								current_factorial /= last_div--;
-							}else if(has_ticks){
-								sys_tick_transition->state_from	= env_lut[current_entry];
-								automaton_automaton_add_transition(serialized_automaton, sys_tick_transition);
-#if DEBUG_SEQUENTIALIZATION
-								printf("[S.TICK]\tSys tick:");
-								automaton_transition_print(sys_tick_transition, automaton->context, "", "\n", 0);
-#endif
-							}
-
-						}
-					}
-				}else if(has_ticks){
-					automaton_automaton_add_transition(serialized_automaton, sys_tick_transition);
-#if DEBUG_SEQUENTIALIZATION
-					printf("[S.TICK]\tSys tick:");
-					automaton_transition_print(sys_tick_transition, automaton->context, "", "\n", 0);
-#endif
-				}
-
+			if(current_trans_sys_count > 0){
+				last_added_state	= sys_key_tree->max_value;
+			}else if(current_trans_env_count > 0){
+				last_added_state	= env_key_tree->max_value;
+			}else{
+				if(!has_ticks)automaton_automaton_add_transition(serialized_automaton, current_transition);
+				last_added_state++;
 			}
 		}
 	}
@@ -2064,11 +2093,11 @@ automaton_automaton* automaton_automaton_sequentialize(automaton_automaton *auto
 	automaton_transition_destroy(env_tick_transition, true);
 	automaton_transition_destroy(sys_tick_transition, true);
 	automaton_transition_destroy(transition_to_add, true);
+	obdd_state_tree_destroy(env_key_tree);
+	obdd_state_tree_destroy(sys_key_tree);
+	free(env_key_entry); free(sys_key_entry);
 	free(trans_local_env_alphabet);
 	free(trans_local_sys_alphabet);
-	if(env_lut != NULL)free(env_lut);
-	if(sys_lut != NULL)free(sys_lut);
-	exit(-1);
 	return serialized_automaton;
 }
 
@@ -3237,18 +3266,37 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 	}
 	//export automata
 	char fsp_name[1024];
+	bool name_found;
 	for(j = 0; j < program->count; j++){
 		if(program->statements[j]->type == EXPORT_AUT){
+			name_found	= false;
+			//check first for equal names, otherwise look for prefixed values
 			for(i = 0; i < tables->composition_count; i++){
 				if(tables->composition_entries[i]->solved &&
-						strncmp(program->statements[j]->import_def->name,
-								tables->composition_entries[i]->valuation.automaton_value->name,
-								strlen(program->statements[j]->import_def->name))== 0){
+						strcmp(program->statements[j]->import_def->name,
+								tables->composition_entries[i]->valuation.automaton_value->name)== 0){
 						automaton_automaton_print_report(tables->composition_entries[i]->valuation.automaton_value,
 								program->statements[j]->import_def->filename);
 						sprintf(fsp_name, "%s.fsp", program->statements[j]->import_def->filename);
 						automaton_automaton_print_fsp(tables->composition_entries[i]->valuation.automaton_value,
 								fsp_name);
+						name_found	= true;
+						break;
+				}
+			}
+			if(!name_found){
+				for(i = 0; i < tables->composition_count; i++){
+					if(tables->composition_entries[i]->solved &&
+							strncmp(program->statements[j]->import_def->name,
+									tables->composition_entries[i]->valuation.automaton_value->name,
+									strlen(program->statements[j]->import_def->name))== 0){
+							automaton_automaton_print_report(tables->composition_entries[i]->valuation.automaton_value,
+									program->statements[j]->import_def->filename);
+							sprintf(fsp_name, "%s.fsp", program->statements[j]->import_def->filename);
+							automaton_automaton_print_fsp(tables->composition_entries[i]->valuation.automaton_value,
+									fsp_name);
+							break;
+					}
 				}
 			}
 		}

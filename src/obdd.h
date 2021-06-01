@@ -182,6 +182,7 @@ uint32_t obdd_state_tree_get_key(obdd_state_tree* tree, bool* valuation, int32_t
 void obdd_state_tree_destroy(obdd_state_tree* tree);
 void obdd_state_tree_entry_print(obdd_state_tree* tree, obdd_state_tree_entry* entry, char *buff, uint32_t buff_size);
 void obdd_state_tree_print(obdd_state_tree* tree, char *buff, uint32_t buff_size);
+void obdd_state_tree_clear(obdd_state_tree* tree);
 /** GLOBAL **/
 uint32_t get_next_mgr_ID();
 /** OBDD  MGR**/
