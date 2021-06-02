@@ -1,30 +1,5 @@
 TODO:
 =====
-- env_lut y sys_lut tienen que ser tries, no LUTs, no da el espacio sino
-	- hay un error de hecho porque no se está reseteando una entrada y está levantando basura
-- implementar recortes para clts
-- cltsa
-	- hay local alphabet repetidos en la serializacion del two_lift_controller
-	- traducción a lts
-		- implementar
-			- revisar estados intermedios según non piped transitions  
-				automaton_statement_syntax_to_automaton:1091 state iteration
-			- implementar automaton_autoaton* automaton_automaton_sequentialize(automaton_automaton *automaton, bool sequential, bool has_ticks)
-				
-			- implementar traducción en autoamton_context cuando revisa statement
-		- formalizar
-			- qué pasa con estados mixtos?
-			- ejemplo biscotti
-				- revisar legalidad asynch/synch
-				- hay noción superadora o son semánticas distintas?
-		- definir casos de estudio
-		- escribir tests
-			- de implementacion
-		- escribir traducción
-		- correr tests
-	- exportar a vdhl
-		- versión básica
-	- corregir o sacar version dark al reporter
 -re-escribir casos de estudio
 	- definicion de valuaciones por estados
 - plan de trabajo para diagnostico
@@ -40,8 +15,11 @@ TODO:
 			- trans
 			- valuaciones
 		- agregar utilidades de compresión
-			-https://en.wikipedia.org/wiki/Lempel%E2%80%93Ziv%E2%80%93Markov_chain_algorithm			
-
+			-https://en.wikipedia.org/wiki/Lempel%E2%80%93Ziv%E2%80%93Markov_chain_algorithm		
+- cltsa
+	- exportar a vdhl
+		- versión básica
+	- corregir o sacar version dark al reporter
 - rankings
 	- mejorar legibilidad de pruebas
 	- armar ejemplos

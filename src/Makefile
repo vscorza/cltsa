@@ -4,14 +4,8 @@ CC=clang
 #CPARAMS = -Wall -Wextra -pedantic -Wno-unused-variable -Wno-unused-parameter
 CPARAMS =  -Wno-unused-variable -Wno-unused-parameter -Wno-format -Wno-incompatible-pointer-types -Wno-int-conversion -Wno-pointer-integer-compare -Wno-string-compare -Wno-switch
 CLIBS = -lm
-CFLAGS= -g -O0
-#CFLAGS= -g -O3
-#CFLAGS= -fsanitize=address -g -O0 
-#CFLAGS= -fsanitize=address -g -O3
-#CFLAGS= -O3
-#CFLAGS= -O2
-#CFLAGS= -Ofast
-#CFLAGS= -g -lasan -fsanitize=address -fno-omit-frame-pointer -fuse-ld=gold -O0
+#CFLAGS= -g -O0
+CFLAGS= -g -O3
 NASM=nasm
 NASMFLAGS=-f elf64 -g -F DWARF
 LEX = lex
