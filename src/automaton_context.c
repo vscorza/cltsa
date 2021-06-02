@@ -1834,10 +1834,10 @@ automaton_automaton* automaton_automaton_sequentialize(automaton_automaton *auto
 	//wo ticks: 	initial env: original from state	final env: initial sys state
 	//				initial sys: initial sys state		final sys: original to state
 	uint32_t trans_accum;
-	obdd_state_tree *env_key_tree	= obdd_state_tree_create(env_local_count);
+	obdd_state_tree *env_key_tree	= obdd_state_tree_create(env_local_count + 1);
 	obdd_state_tree *sys_key_tree	= obdd_state_tree_create(sys_local_count);
-	bool *env_key_entry	= calloc(env_local_count, sizeof(bool));
-	bool *sys_key_entry	= calloc(sys_local_count, sizeof(bool));
+	bool *env_key_entry	= calloc(automaton->context->global_alphabet->count + 1, sizeof(bool));
+	bool *sys_key_entry	= calloc(automaton->context->global_alphabet->count, sizeof(bool));
 	uint32_t last_added_state	= automaton->transitions_count + 1;
 	uint32_t env_tick_from_state, env_tick_to_state, sys_tick_from_state, current_trans_env_count, current_trans_sys_count;
 	uint32_t current_factorial	= 1, total_factorial = 1;
@@ -1847,8 +1847,8 @@ automaton_automaton* automaton_automaton_sequentialize(automaton_automaton *auto
 	automaton_transition_add_signal_event(sys_tick_transition, automaton->context, sys_tick);
 	automaton_transition *env_tick_transition	= automaton_transition_create(0,0);
 	automaton_transition_add_signal_event(env_tick_transition, automaton->context, env_tick);
-	uint32_t *trans_local_env_alphabet	= calloc(automaton->local_alphabet_count, sizeof(uint32_t));
-	uint32_t *trans_local_sys_alphabet	= calloc(automaton->local_alphabet_count, sizeof(uint32_t));
+	uint32_t *trans_local_env_alphabet	= calloc(automaton->context->global_alphabet->count, sizeof(uint32_t));
+	uint32_t *trans_local_sys_alphabet	= calloc(automaton->context->global_alphabet->count, sizeof(uint32_t));
 	uint32_t current_signal_index;
 	int32_t occurrences_cntr;
 	uint32_t previous_env, previous_sys;
@@ -1899,12 +1899,9 @@ automaton_automaton* automaton_automaton_sequentialize(automaton_automaton *auto
 						exit(-1);
 			}
 			if(has_ticks){
-				env_tick_from_state	= current_trans_env_count == 0? current_transition->state_from : last_added_state++;
-				env_tick_to_state	= last_added_state++;
-				sys_tick_from_state	= current_trans_sys_count == 0 ? env_tick_to_state : last_added_state++;
-				env_tick_transition->state_from	= env_tick_from_state;
+				env_tick_transition->state_from	= current_trans_env_count == 0? current_transition->state_from : env_tick_from_state;
 				env_tick_transition->state_to	= env_tick_to_state;
-				sys_tick_transition->state_from	= sys_tick_from_state;
+				sys_tick_transition->state_from	= current_trans_sys_count == 0 ? env_tick_to_state : sys_tick_from_state;
 				sys_tick_transition->state_to	= current_transition->state_to;
 				//automaton_automaton_add_transition(serialized_automaton, sys_tick_transition);
 			}
@@ -1925,7 +1922,7 @@ automaton_automaton* automaton_automaton_sequentialize(automaton_automaton *auto
 					l_2 = l;
 					last_div	= current_trans_env_count;
 					current_factorial	= total_factorial/last_div--;
-					for(j = 0; j < env_local_count; j++)env_key_entry[j] = false;
+					for(j = 0; j < automaton->context->global_alphabet->count + 1; j++)env_key_entry[j] = false;
 					trans_accum			= 0;
 					previous_env		= current_transition->state_from;
 
@@ -1955,12 +1952,12 @@ automaton_automaton* automaton_automaton_sequentialize(automaton_automaton *auto
 						printf("\n");
 						printf("[E.KEY]\tFound\t[%#010x]: %d\tm:(%d)\t[%s]\n", trans_accum
 									,obdd_state_tree_get_key(env_key_tree,
-											env_key_entry, env_local_count), m
+											env_key_entry, automaton->context->global_alphabet->count + 1), m
 									,automaton->context->global_alphabet->list[trans_local_env_alphabet[m]].name);
 #endif
 						transition_to_add->state_from	= previous_env;
 						transition_to_add->state_to		= obdd_state_tree_get_key(env_key_tree,
-								env_key_entry, env_local_count);
+								env_key_entry, automaton->context->global_alphabet->count + 1);
 						automaton_automaton_add_transition(serialized_automaton, transition_to_add);
 #if DEBUG_SEQUENTIALIZATION
 						automaton_transition_print(transition_to_add, automaton->context, "[E]\t", "\n", 0);
@@ -1973,7 +1970,11 @@ automaton_automaton* automaton_automaton_sequentialize(automaton_automaton *auto
 								current_factorial /= last_div--;
 							}
 						}else if(has_ticks){
+							env_key_entry[automaton->context->global_alphabet->count] = true;
 							env_tick_transition->state_from	= transition_to_add->state_to;
+							env_tick_transition->state_to	= obdd_state_tree_get_key(env_key_tree,
+									env_key_entry, automaton->context->global_alphabet->count + 1);
+							previous_env	= env_tick_transition->state_to;
 							automaton_automaton_add_transition(serialized_automaton, env_tick_transition);
 #if DEBUG_SEQUENTIALIZATION
 							printf("[E.TICK]\tEnv tick:");
@@ -1983,9 +1984,11 @@ automaton_automaton* automaton_automaton_sequentialize(automaton_automaton *auto
 					}
 				}
 			}else if(has_ticks){
-				automaton_automaton_add_transition(serialized_automaton, env_tick_transition);
+				bool had_env	= automaton_automaton_add_transition(serialized_automaton, env_tick_transition);
+
+				previous_env	= env_tick_transition->state_to;
 #if DEBUG_SEQUENTIALIZATION
-				printf("[E.TICK]\tEnv tick:");
+				printf("[E.TICK]*\tEnv tick:");
 				automaton_transition_print(env_tick_transition, automaton->context, "", "\n", 0);
 #endif
 			}
@@ -2002,16 +2005,14 @@ automaton_automaton* automaton_automaton_sequentialize(automaton_automaton *auto
 					l_2 = l;
 					last_div	= current_trans_sys_count;
 					current_factorial	= total_factorial/last_div--;
-					for(j = 0; j < sys_local_count; j++)sys_key_entry[j] = false;
+					for(j = 0; j < automaton->context->global_alphabet->count; j++)sys_key_entry[j] = false;
 					trans_accum			= 0;
-					previous_sys		= has_ticks? env_tick_to_state : previous_env;
-					for(m = 0; m < current_trans_sys_count; m++){
-						sys_key_entry[trans_local_sys_alphabet[m]] = true;
-
+					previous_sys		= previous_env;
+					for(m = 0; m < current_trans_env_count; m++){
+						sys_key_entry[trans_local_env_alphabet[m]] = true;
 					}
-					//sys_key_tree->max_value	= last_added_state + 1;
-					transition_to_add->state_to		= obdd_state_tree_get_key(sys_key_tree,
-							sys_key_entry, sys_local_count);
+
+
 
 					for(j = 0; j < current_trans_sys_count; j++){
 						current_signal_index	= !sequential ? ((l_2) / (current_factorial)) : 1;
@@ -2039,12 +2040,12 @@ automaton_automaton* automaton_automaton_sequentialize(automaton_automaton *auto
 #if DEBUG_SEQUENTIALIZATION
 						printf("[S.KEY]\tFound\t[%#010x]: %d\tm:(%d)\t[%s]\n", trans_accum
 								,obdd_state_tree_get_key(sys_key_tree,
-										sys_key_entry, sys_local_count), m
+										sys_key_entry, automaton->context->global_alphabet->count), m
 								,automaton->context->global_alphabet->list[trans_local_sys_alphabet[m]].name);
 #endif
 						transition_to_add->state_from	= previous_sys;
 						transition_to_add->state_to		= obdd_state_tree_get_key(sys_key_tree,
-								sys_key_entry, sys_local_count);
+								sys_key_entry, automaton->context->global_alphabet->count);
 
 #if DEBUG_SEQUENTIALIZATION
 						automaton_transition_print(transition_to_add, automaton->context, "[S]\t", "\n", 0);
@@ -2070,9 +2071,10 @@ automaton_automaton* automaton_automaton_sequentialize(automaton_automaton *auto
 					}
 				}
 			}else if(has_ticks){
+				sys_tick_transition->state_from	= previous_env;
 				automaton_automaton_add_transition(serialized_automaton, sys_tick_transition);
 #if DEBUG_SEQUENTIALIZATION
-				printf("[S.TICK]\tSys tick:");
+				printf("[S.TICK]*\tSys tick:");
 				automaton_transition_print(sys_tick_transition, automaton->context, "", "\n", 0);
 #endif
 			}

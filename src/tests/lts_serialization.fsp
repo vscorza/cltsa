@@ -9,19 +9,16 @@ TEST = (<a,b,c,out>->TEST | <b,c>->TEST|out->TEST|out2->TEST|<out,out2>->TEST| <
 T2 = (<a,c,out>-> T2 | <> -> TEST).
 
 |ts| TEST_SERIAL_TICKS in TEST.
-//|s| TEST_SERIAL in TEST.
 |ti| TEST_INTRLVD_TICKS in TEST.
-//|i| TEST_INTRLVD in TEST.
 
-//GAME_SERIAL >> "/tmp/lts_serialization_game_serial.rep".
+
 TEST >> "/tmp/lts_serialization_test.rep".
-//TEST_SERIAL >> "/tmp/lts_serialization_test_serial.rep".
 TEST_SERIAL_TICKS >> "/tmp/lts_serialization_test_serial_ticks.rep".
-//TEST_INTRLVD >> "/tmp/lts_serialization_test_intrleaved.rep".
 TEST_INTRLVD_TICKS >> "/tmp/lts_serialization_test_interleaved_ticks.rep".
 
 
-/*
+////////////////////////////////////////
+
 set Global_Signals	= {b1, b2, f1, f2}
 set Output_Signals	= {f1, f2}
 
@@ -42,10 +39,9 @@ ltl fluent Goal_Serve_Request_2			= ((b2->f2)).
 |f| ENV =(GAME_LTL).
 //|gr1| <{Ass}><{Goal_Serve_Request_1,Goal_Serve_Request_2,Goal_Back_To_Ground}> STRAT = ENV.
 
-|ti| GAME_SERIAL_TICKS in GAME_LTL .
-GAME_SERIAL_TICKS >> "/tmp/lts_serialization_game_serial_ticks.rep".
+|ts| GAME_SERIAL_TICKS in GAME_LTL .
+|ti| GAME_INTRLVD_TICKS in GAME_LTL .
 
-*/
-//TESTS
-//equals FATAL_Game_Lift_2_FSP_VS_LTL(GAME_LTL, GAME_FSP).
-//equals FATAL_Game_Lift_2_STRAT_VS_STRAT_p(STRAT, STRAT_p).
+GAME >> "/tmp/lts_serialization_game.rep".
+GAME_SERIAL_TICKS >> "/tmp/lts_serialization_game_serial_ticks.rep".
+GAME_INTRLVD_TICKS >> "/tmp/lts_serialization_game_interleaved_ticks.rep".
