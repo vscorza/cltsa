@@ -1,7 +1,10 @@
 TODO:
 =====
--escribir y correr el ejemplo de composicion y secuencialización
--intentar encontrar un equivalente de la lógica ltl
+-corregir problemas con serializacion
+	-sin ticks el self loop del d no regresa
+	-no permite volver a componer algo serializado (por como está corriendo las fases en el automaton_context)
+	-escribir y correr el ejemplo de composicion y secuencialización (lts_serialization_composition_test)
+	-intentar encontrar un equivalente de la lógica ltl
 -re-escribir casos de estudio
 	- reescribir y comparar tamaños de 
 		- lift_controller
