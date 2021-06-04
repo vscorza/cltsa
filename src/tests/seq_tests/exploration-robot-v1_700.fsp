@@ -1,0 +1,38 @@
+//GenBuf example taken from Synthesis of Reactive(1) Designs 2 senders
+set Global_Alphabet = {n,s,e,w,load,unload,drop}
+set Controllable_Alphabet = {}
+
+set Global_Signals	= {dummy}
+order 				= {}
+const Min = 1 //this must always be odd
+const Max = 700
+range Pos = Min..Max
+
+//Concrete
+MAZE = M[1][1], 
+M[r:Pos][c:Pos] = ( 
+				when(r < Max) s->M[r+1][c]
+				| when(c > Min) w->M[r][c-1]
+				| when(c < Max) e->M[r][c+1]
+				| when((r == Max) * (c == Max)) {drop,load}->M[r][c]
+				| when(r > Min) n->M[r-1][c]
+				| when((r == Min) * (c == Min)) unload->M[r][c]
+).
+
+ARM = ({n,s,e,w}->ARM | drop ->KEEP_TRYING | load->JUST_LOADED),
+KEEP_TRYING = (drop->KEEP_TRYING | load ->JUST_LOADED),
+JUST_LOADED = ({n,s,e,w}->LOADED),
+LOADED = ({n,s,e,w}->LOADED | unload->JUST_UNLOADED),
+JUST_UNLOADED = ({n,s,e,w}->ARM).
+
+|f|PLANT = (MAZE || ARM).
+
+fluent F_Load = <load, {unload,n,s,e,w,drop,correct,bCast}>
+fluent F_Unload = <unload, {load,n,s,e,w,drop,correct,bCast}>
+fluent F_Dont_Drop = <load, drop> initially 1
+//Unreal
+//|gr1| <{F_Dont_Drop}><{F_Load, F_Unload}> STRAT = PLANT.
+//Real
+|gr1| <{F_Dont_Drop,F_Unload}><{F_Load, F_Unload}> STRAT = PLANT.
+//|gr1| <{A_Dummy}><{F_Load, F_Unload}> STRAT = PLANT.
+//STRAT >> "/tmp/exploration_robot_700_strat.rep".

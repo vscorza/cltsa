@@ -1,25 +1,51 @@
 TODO:
 =====
+-escribir y correr el ejemplo de composicion y secuencialización
+-intentar encontrar un equivalente de la lógica ltl
 -re-escribir casos de estudio
-	- definicion de valuaciones por estados
+	- reescribir y comparar tamaños de 
+		- lift_controller
+		- missing_assumption_lift_controller_1_n
+		- removed_env_safety_lift_controller_1_n
+		- missing_assumption_collector_1_n_in_v1
+		- collector (4)
+		- removed_env_safety_collector_1_n_in_v1
+		- exploration_robot_1_n (up to 20)
+		- missing_assumption_exploration_robot_1_n
+		- removed_env_safety_exploration_robot_1_n
+		- genbuf_1_n (up to 4)
+		- missing_assumption_genbuf_1_n
+		- removed_env_safety_genbuf_1_n
+		- ahb_1_n
+		- missing_assumption_ahb_1_n
+		- removed_env_safety_ahb_1_n
+	- testear y comparar con valuaciones por estados 
+		- genbuf_1_n
+		- ahb_1_n	
+			- mgr
+			- sched
+			- completo
 - plan de trabajo para diagnostico
 	- armar caso para lts
 	- tablas comparativas
-	- introducir clts como necesidad para ejecutar los casos (refs de definitions nuevo)
-	- ref. a un arxiv
-	- re escribir problema y solución
+	- boceto de
+		- introducir clts como necesidad para ejecutar los casos (refs de definitions nuevo)
+		- ref. a un arxiv
+		- re escribir problema y solución
+	- revisar archivo de mati
+	- reunion con sebas y vic
 - cltsa
 	- serializacion
 		- serializar valuaciones
 		- reimplementar volcando el contenido binario de arreglos
 			- trans
 			- valuaciones
-		- agregar utilidades de compresión
+		- evaluar agregar utilidades de compresión
 			-https://en.wikipedia.org/wiki/Lempel%E2%80%93Ziv%E2%80%93Markov_chain_algorithm		
-- cltsa
 	- exportar a vdhl
 		- versión básica
 	- corregir o sacar version dark al reporter
+	- agregar #include (archivos por clausura, evaluar no haya ciclos) y #define (con parámetros)
 - rankings
 	- mejorar legibilidad de pruebas
 	- armar ejemplos

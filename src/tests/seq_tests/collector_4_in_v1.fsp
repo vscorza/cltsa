@@ -1,0 +1,63 @@
+//  Parameterized Collector, Signals whether all input clients have delivered a token
+//  INPUTS {finished[n];} 
+//  OUTPUTS { allFinished;}
+//  ASSERT { &&[0 <= i < n](allFinished -> X (!allFinished W finished[i]));}
+//  GUARANTEES {G F allFinished <-> &&[0 <= i < n] G F finished[i];}
+
+set Global_Alphabet = {}
+set Controllable_Alphabet = {}
+
+set Global_Signals	= {in_0, in_1, in_2, in_3, allFinished, latch_0, latch_1, latch_2, latch_3}
+set Output_Signals	= {allFinished, latch_0, latch_1, latch_2, latch_3}
+order			= {}
+
+/***********
+**** THETA
+***********/
+ltl env theta Init_Collector_e in COLLECTOR	= (!in_0 && !in_1 && !in_2 && !in_3).
+ltl sys theta Init_Collector_s in COLLECTOR	= (!allFinished && !latch_0 && !latch_1 && !latch_2 && !latch_3).
+/***********
+**** SYS RHO
+***********/
+//update latches, up with input, down with allFinished
+ltl sys rho Latch_0_up in COLLECTOR		= [](in_0 -> X(latch_0)).
+ltl sys rho Latch_0_keep in COLLECTOR		= [](!(allFinished || in_0) -> (latch_0 <-> X(latch_0))).
+ltl sys rho Latch_0_down in COLLECTOR		= [](in_0 && allFinished && X(!in_0) -> X(!latch_0)).
+ltl sys rho Latch_1_up in COLLECTOR		= [](in_1 -> X(latch_1)).
+ltl sys rho Latch_1_keep in COLLECTOR		= [](!(allFinished || in_1) -> (latch_1 <-> X(latch_1))).
+ltl sys rho Latch_1_down in COLLECTOR		= [](in_1 && allFinished && X(!in_1) -> X(!latch_1)).
+ltl sys rho Latch_2_up in COLLECTOR		= [](in_2 -> X(latch_2)).
+ltl sys rho Latch_2_keep in COLLECTOR		= [](!(allFinished || in_2) -> (latch_2 <-> X(latch_2))).
+ltl sys rho Latch_2_down in COLLECTOR		= [](in_2 && allFinished && X(!in_2) -> X(!latch_2)).
+ltl sys rho Latch_3_up in COLLECTOR		= [](in_3 -> X(latch_3)).
+ltl sys rho Latch_3_keep in COLLECTOR		= [](!(allFinished || in_3) -> (latch_3 <-> X(latch_3))).
+ltl sys rho Latch_3_down in COLLECTOR		= [](in_3 && allFinished && X(!in_3) -> X(!latch_3)).
+//only set allFinished if every latch is up
+ltl sys rho Restrict_AllFinished in COLLECTOR	= [](allFinished -> (latch_0 && latch_1 && latch_2 && latch_3)).
+
+/***********
+**** ENV RHO
+***********/
+ltl env rho Dummy_e in COLLECTOR		= [](in_0 || !in_0).
+/***********
+**** FLUENTS
+***********/
+ltl fluent A_in_0		= (in_0).
+ltl fluent A_in_1		= (in_1).
+ltl fluent A_in_2		= (in_2).
+ltl fluent A_in_3		= (in_3).
+ltl fluent G			= (allFinished).
+/***********
+**** SYNTHESIS
+***********/
+|f| ENV =(COLLECTOR).
+|gr1| <{A_in_0,A_in_1,A_in_2,A_in_3}><{G}> STRAT = ENV.
+
+//STRAT >> "/tmp/collector_4_strat.rep".
+
+ENV >> "/tmp/collector_4_in_v1.fsp.game.rep".
+
+|ti| ENV_INTRLVD in ENV.
+|ts| ENV_SEQ in ENV.
+ENV_INTRLVD >> "/tmp/collector_4_in_v1.fsp.game_intrlvd.rep".
+ENV_SEQ >> "/tmp/collector_4_in_v1.fsp.game_seq.rep".

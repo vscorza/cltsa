@@ -157,11 +157,9 @@ int main (int argc, char** argv){
 		//GENERAL TESTS
 		//run_all_tests();
 
-		run_functional_tests();
-		//run_parse_test("tests/biscotti_vstates.fsp", "biscotti vstates");
-		//run_parse_test("tests/composition_vstates.fsp", "composition vstates");
-		//run_automaton_export_test();
-		//run_automaton_import_test();
+		//run_functional_tests();
+
+		run_parse_test("tests/seq_tests/genbuf_3_sndrs_no_automaton.fsp", "GenBuf 3 sndrs (SEQ)");
 
 
 
@@ -176,9 +174,6 @@ int main (int argc, char** argv){
 		//run_parse_test("tests/nonreal_test_2_realizable_version.fsp", "non realizable test 2 (realizable version)");
 		//run_parse_test("tests/nonreal_test_1.fsp", "non realizable test 1");
 		//run_parse_test("tests/exploration-robot-unrealizable_test.fsp", "unrealizable exploration robot test");
-
-/*
-	*/
 
 
 		//run_parse_test("tests/biscotti.fsp", "biscotti");

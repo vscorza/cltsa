@@ -129,3 +129,8 @@ ltl fluent G_7				= (empty || deq).
 //GENBUF >> "/tmp/genbuf_2_game.rep".
 
 //STRAT >> "/tmp/genbuf_2_strat.rep".
+ENV >> "/tmp/genbuf_2_sndrs_no_automaton.fsp.game.rep".
+|ti| ENV_INTRLVD in ENV.
+|ts| ENV_SEQ in ENV.
+ENV_INTRLVD >> "/tmp/genbuf_2_sndrs_no_automaton.fsp.game_intrlvd.rep".
+ENV_SEQ >> "/tmp/genbuf_2_sndrs_no_automaton.fsp.game_seq.rep".

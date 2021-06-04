@@ -1,0 +1,48 @@
+//GenBuf example taken from Synthesis of Reactive(1) Designs 2 senders
+set Global_Alphabet = {n,s,e,w,load,unload,stall,releaseNorth, releaseSouth}
+set Controllable_Alphabet = {n,s,e,w,load,unload}
+
+set Global_Signals	= {Dummy}
+order 				= {}
+//set Moves = {n,s,e,w}
+//set Actions = {load,unload}
+//set A = {Moves,Actions}
+const Min = 1 //this must always be odd
+const Max = 12
+range Pos = Min..Max
+
+//Concrete
+MAZE = M[1][1],
+M[r:Pos][c:Pos] = ( 
+				when(r > Min) n->M[r-1][c] 
+				| when(r < Max) s->M[r+1][c]
+				| when(c > Min) w->M[r][c-1]
+				| when(c < Max) e->M[r][c+1]
+				| when((r == Max) * (c == Max)) load->M[r][c]
+				| when((r == Min) * (c == Min)) unload->M[r][c]
+				| when((r == ((Max - Min)/2))) stall -> M[r][c]
+				| when((r > Min) * (r == ((Max - Min)/2))) <n, releaseNorth>->M[r-1][c] 
+				| when((r < Max) * (r == ((Max - Min)/2))) <s, releaseSouth>->M[r+1][c]		
+).
+
+
+ARM = (load->unload->ARM).
+
+||C = (MAZE ||_c ARM).
+
+|f|ROBOT_EXPLORE = (MAZE || ARM).
+
+fluent F_Load = <load, {unload,n,s,e,w,stall,releaseNorth, releaseSouth}>
+fluent F_Unload = <unload, {load,n,s,e,w,stall,releaseNorth, releaseSouth}>
+fluent F_ReleaseNorth = <releaseNorth,{unload,load,n,s,e,w,stall,releaseSouth}> initially 1
+fluent F_ReleaseSouth = <releaseSouth,{unload,load,n,s,e,w,stall,releaseNorth}> initially 1
+
+|gr1| <{F_ReleaseNorth,F_ReleaseSouth}><{F_Load, F_Unload}> STRAT = ROBOT_EXPLORE.
+
+STRAT >> "/tmp/exploration_robot_12_strat.rep".
+
+PLANT >> "/tmp/exploration-robot-v1_12.fsp.game.rep".
+|ti| ENV_INTRLVD in PLANT.
+|ts| ENV_SEQ in PLANT.
+ENV_INTRLVD >> "/tmp/exploration-robot-v1_12fsp.game_intrlvd.rep".
+ENV_SEQ >> "/tmp/exploration-robot-v1_12.fsp.game_seq.rep".

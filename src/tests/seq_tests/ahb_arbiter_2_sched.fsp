@@ -1,0 +1,49 @@
+//AHB Arbiter 2 masters - Scheduler - Synthesis of AMBA AHB from Formal Specification:A Case Study
+//Formulae marked with (i) means that part of it is parameterized
+set Global_Alphabet = {}
+set Controllable_Alphabet = {}
+
+set Global_Signals	= {hReq0, hReq1, decide, sel0, g10_1_0, g10_error}
+set Output_Signals	= {sel0, g10_1_0, g10_error}
+order 				= {}
+
+/***********
+**** THETA
+***********/
+//A9 (i)
+ltl env theta Init_Buffer_e in AHB	= (!hReq0 && !hReq1 && decide).
+ltl sys theta Init_Buffer_s in AHB	= (!sel0 && !g10_1_0 && !g10_error).
+/***********
+**** SYS RHO
+***********/
+//G9 if not deciding keep hgrant fixed (i)
+ltl sys rho G9 in AHB		= [](!decide -> ((sel0 <-> X(sel0)))).
+//G10 do not grant before hbusreq / if no busreq grant 0 (i)
+ltl sys rho G10_1_error in AHB	= [](g10_error -> X(g10_error && !sel0 && !g10_1_0)).
+
+ltl sys rho G10_1_0_0 in AHB	= []((!g10_error && !g10_1_0 && (sel0)) -> X(!g10_1_0)).
+ltl sys rho G10_1_0_1 in AHB	= []((!g10_error && !g10_1_0 && !(sel0)) -> X(g10_1_0)).
+ltl sys rho G10_1_1_1 in AHB	= []((!g10_error && g10_1_0 && !(sel0) && !hReq1) -> X(g10_1_0)).
+ltl sys rho G10_1_1_0 in AHB	= []((!g10_error && g10_1_0 && hReq1) -> X(!g10_1_0)).
+ltl sys rho G10_1_1_e in AHB	= []((!g10_error && g10_1_0 && (sel0) && !hReq1) -> X(g10_error)).
+
+ltl sys rho G10_grant0 in AHB	= []((decide && !hReq0 && !hReq1) -> X(!sel0)).
+
+/***********
+**** ENV RHO
+***********/
+/***********
+**** FLUENTS
+***********/
+ltl fluent A10			= (decide).
+//G11 (i)
+ltl fluent G10			= (!g10_error).
+ltl fluent G11_0		= (!hReq0 || (!sel0)).
+ltl fluent G11_1		= (!hReq1 || (sel0)).
+/***********
+**** SYNTHESIS
+***********/
+|f| ENV =(AHB).
+|gr1| <{A10}><{G11_0, G11_1}> STRAT = ENV.
+
+STRAT >> "/tmp/ahb_2_sched_strat.rep".

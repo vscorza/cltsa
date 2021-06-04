@@ -1,0 +1,98 @@
+//AHB Arbiter 2 masters - Burst manager - Synthesis of AMBA AHB from Formal Specification:A Case Study
+//Formulae marked with (i) means that part of it is parameterized
+set Global_Alphabet = {}
+set Controllable_Alphabet = {}
+
+set Global_Signals	= {hReq, hLock, hTrans0, hTrans1, hBurst0, hBurst1, hReady, hGrant0, 
+	hMastLock, decide, busReq, granted, a1_0, g2_0, g2_1, g3_0, g3_1, g3_2}
+set Output_Signals	= {hMastLock, decide, busReq, granted, a1_0, g2_0, g2_1, g3_0, g3_1, g3_2}
+order 				= {}
+/*
+	HTRANS1	HTRANS0
+	0	0	nonseq
+	0	1	seq
+	1	0	idle
+	HBURST1	HBURST0
+	0	0	single
+	0	1	incr4
+	1	0	incr (undetermined length)
+*/
+/***********
+**** THETA
+***********/
+//A9 (i)
+ltl env theta Init_Buffer_e in AHB	= (!hReq && !hLock && !hTrans0 && hTrans1 && !hBurst0 && !hBurst1 && !hReady).
+ltl sys theta Init_Buffer_s in AHB	= (!hMastLock && decide && !granted &&
+	!a1_0 && !g2_0 && !g2_1 && !g3_0 && !g3_1 && !g3_2).
+/***********
+**** SYS RHO
+***********/
+//G2 keep seq after incr burst until busreq released
+ltl sys rho G2_00_00 in AHB	= []((!g2_0 && !g2_1 && 
+	!(hMastLock && hBurst1 && !hBurst0 && hReady && !hTrans0 && !hTrans1)) -> X(!g2_0 && !g2_1)).
+ltl sys rho G2_00_01 in AHB	= []((!g2_0 && !g2_1 && 
+	hMastLock && hBurst1 && !hBurst0 && hReady && !hTrans0 && !hTrans1) -> X(g2_0 && !g2_1)).
+ltl sys rho G2_01_01 in AHB	= []((g2_0 && !g2_1 && hTrans0 && !hTrans1 && busReq) -> X(g2_0 && !g2_1)).
+ltl sys rho G2_01_00 in AHB	= []((g2_0 && !g2_1 && !busReq) -> X(!g2_0 && !g2_1)).
+ltl sys rho G2_01_10 in AHB	= []((g2_0 && !g2_1 && !(hTrans0 && !hTrans1) && busReq) -> X(!g2_0 && g2_1)).
+//G3 if in incr4 burst mode keep trans as seq until the fourth hready was raised
+ltl sys rho G3_000_000 in AHB	= []((!g3_0 && !g3_1 && !g3_2 && !(hMastLock && hBurst0 && !hBurst1 && hReady &&
+	!hTrans0 && !hTrans1)) -> X(!g3_0 && !g3_1 && !g3_2)).
+ltl sys rho G3_000_001 in AHB	= []((!g3_0 && !g3_1 && !g3_2 && hMastLock && hBurst0 && !hBurst1 && hReady &&
+	!hTrans0 && !hTrans1) -> X(g3_0 && !g3_1 && !g3_2)).
+ltl sys rho G3_001_001 in AHB	= []((g3_0 && !g3_1 && !g3_2 && !hReady && hTrans0 && !hTrans1) -> X(g3_0 && !g3_1 && !g3_2)).
+ltl sys rho G3_001_100 in AHB	= []((g3_0 && !g3_1 && !g3_2 && !(hTrans0 && !hTrans1)) -> X(!g3_0 && !g3_1 && g3_2)).
+ltl sys rho G3_001_010 in AHB	= []((g3_0 && !g3_1 && !g3_2 && hReady && hTrans0 && !hTrans1) -> X(!g3_0 && g3_1 && !g3_2)).
+ltl sys rho G3_010_010 in AHB	= []((!g3_0 && g3_1 && !g3_2 && !hReady && hTrans0 && !hTrans1) -> X(!g3_0 && g3_1 && !g3_2)).
+ltl sys rho G3_010_100 in AHB	= []((!g3_0 && g3_1 && !g3_2 && !(hTrans0 && !hTrans1)) -> X(!g3_0 && !g3_1 && g3_2)).
+ltl sys rho G3_010_011 in AHB	= []((!g3_0 && g3_1 && !g3_2 && hReady && hTrans0 && !hTrans1) -> X(g3_0 && g3_1 && !g3_2)).
+ltl sys rho G3_011_011 in AHB	= []((g3_0 && g3_1 && !g3_2 && !hReady && hTrans0 && !hTrans1) -> X(g3_0 && g3_1 && !g3_2)).
+ltl sys rho G3_011_100 in AHB	= []((g3_0 && g3_1 && !g3_2 && !(hTrans0 && !hTrans1)) -> X(!g3_0 && !g3_1 && g3_2)).
+ltl sys rho G3_011_000 in AHB	= []((g3_0 && g3_1 && !g3_2 && hReady && hTrans0 && !hTrans1) -> X(!g3_0 && !g3_1 && !g3_2)).
+ltl sys rho G3_100_100 in AHB	= []((!g3_0 && !g3_1 && g3_2) -> X(!g3_0 && !g3_1 && g3_2)).
+//G4 update granted when needed (i)
+ltl sys rho G4 in AHB		= []((decide && hReq) -> X(granted)).
+//G5 keep granted until hready
+ltl sys rho G5_0 in AHB		= []((granted && !hReady) -> X(granted)).
+ltl sys rho G5_1 in AHB		= []((granted && hReady) -> X(!granted)).
+//G7 if locked request granted update hmastlock (i) NOTE: this rule was relaxed, removing && hGrant
+ltl sys rho G7 in AHB		= []((hReady && hLock) -> X(hMastLock)).
+//G8 keep hmaster and hmastlock fixed while not hready or not granted (i)
+ltl sys rho G8_lock in AHB	= []((!hReady && !granted) -> (hMastLock <-> X(hMastLock))).
+
+/***********
+**** ENV RHO
+***********/
+//A1 release busreq after incr
+ltl env rho A1_0_0 in AHB	= []((!a1_0 && (!hMastLock || !(!hBurst0 && hBurst1))) -> X(!a1_0)).
+ltl env rho A1_0_1 in AHB	= []((!a1_0 && (hMastLock && (!hBurst0 && hBurst1))) -> X(a1_0)).
+ltl env rho A1_1_1 in AHB	= []((a1_0 && busReq) -> X(a1_0)).
+ltl env rho A1_1_1 in AHB	= []((a1_0 && !busReq) -> X(!a1_0)).
+//A3 if requesting lock also request bus (i)
+ltl env rho A3 in AHB		= []((!hReq && !hLock && X(hLock)) -> X(hReq)).
+//A4 keep trans and burst consistent while not released by slave
+ltl env rho A4_trans in AHB	= [](!hReady -> ((hTrans0 <-> X(hTrans0)) && (hTrans1 <-> X(hTrans1)))).
+ltl env rho A4_burst in AHB	= [](!hReady -> ((hBurst0 <-> X(hBurst0)) && (hBurst1 <-> X(hBurst1)))).
+//A5 htrans should not be followed by seq after idle
+ltl env rho A5 in AHB		= []((!hTrans0 && hTrans1) -> X(!(hTrans0 && !hTrans1))).
+//A6 update htrans from nonseq to seq after first hready from incr4
+ltl env rho A6 in AHB		= []((!hTrans0 && !hTrans1 && hBurst0 && !hBurst1 && hReady) 
+	-> X(hTrans0 && !hTrans1)).
+//A7 set nonseq trans if granted and hready
+ltl env rho A7 in AHB		= []((granted && hReady) -> X(!hTrans0 && !hTrans1)).
+//A8 if no busreq then htrans is set to idle (i)
+ltl env rho A8 in AHB		= []((!hReq) -> (!hTrans0 && hTrans1)).
+/***********
+**** FLUENTS
+***********/
+ltl fluent A1			= (!a1_0).
+ltl fluent A2			= (hReady).
+ltl fluent G2			= (!g2_0 && !g2_1).
+ltl fluent G3			= (!g3_0 && !g3_1 && !g3_2).
+/***********
+**** SYNTHESIS
+***********/
+|f| ENV =(AHB).
+|gr1| <{A1, A2}><{G2, G3}> STRAT = ENV.
+
+STRAT >> "/tmp/ahb_mgr_strat.rep".

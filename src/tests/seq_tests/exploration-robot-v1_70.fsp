@@ -1,0 +1,50 @@
+//GenBuf example taken from Synthesis of Reactive(1) Designs 2 senders
+set Global_Alphabet = {n,s,e,w,load,unload,drop,correct,bCast}
+set Controllable_Alphabet = {n,s,e,w}
+
+set Global_Signals	= {Dummy}
+order 				= {}
+const Min = 1 //this must always be odd
+const Max = 70
+range Pos = Min..Max
+const MaxError	= 6
+range ErrorLimit	= 1..MaxError
+
+//Concrete
+MAZE = M[1][1], 
+M[r:Pos][c:Pos] = ( 
+				when(r < Max) s->M[r+1][c]
+				| when(c > Min) w->M[r][c-1]
+				| when(c < Max) e->M[r][c+1]
+				| when((r == Max) * (c == Max)) {drop,load}->M[r][c]
+				| when(r > Min) n->M[r-1][c]
+				| when((r == Min) * (c == Min)) unload->M[r][c]
+).
+
+ARM = ({n,s,e,w}->ARM | drop ->KEEP_TRYING | load->JUST_LOADED),
+KEEP_TRYING = (drop->KEEP_TRYING | load ->JUST_LOADED),
+JUST_LOADED = ({n,s,e,w}->LOADED),
+LOADED = ({n,s,e,w}->LOADED | unload->JUST_UNLOADED),
+JUST_UNLOADED = ({n,s,e,w}->ARM).
+
+LOCALIZER = L_B[1],
+L[e:ErrorLimit]	= (when(e < MaxError) {n,s,w,e,drop,load,unload} -> L_B[e+1]
+		| when(e == MaxError) {n,s,w,e,drop,load,unload} -> L_error),
+L_B[e:ErrorLimit]	= (bCast -> L[e] | correct -> L[1]),
+L_error	= ({n,s,w,e,drop,load,unload} -> L_error).
+
+|f|PLANT = (MAZE || ARM || LOCALIZER).
+
+fluent F_Load = <load, {unload,n,s,e,w,drop,correct,bCast}>
+fluent F_Unload = <unload, {load,n,s,e,w,drop,correct,bCast}>
+fluent F_Dont_Drop = <load, drop> initially 1
+fluent F_Broadcast = <bCast,{unload,load,n,s,e,w,stall,correct}> initially 1
+|gr1| <{F_Dont_Drop, F_Broadcast}><{F_Load, F_Unload, F_Broadcast}> STRAT = PLANT.
+
+STRAT >> "/tmp/exploration_robot_70_strat.rep".
+
+PLANT >> "/tmp/exploration-robot-v1_70.fsp.game.rep".
+|ti| ENV_INTRLVD in PLANT.
+|ts| ENV_SEQ in PLANT.
+ENV_INTRLVD >> "/tmp/exploration-robot-v1_70.fsp.game_intrlvd.rep".
+ENV_SEQ >> "/tmp/exploration-robot-v1_70.fsp.game_seq.rep".

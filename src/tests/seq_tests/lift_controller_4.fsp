@@ -1,0 +1,35 @@
+//lift example taken from Synthesis of Reactive(1) Designs 4 floors
+set Global_Alphabet = {}
+set Controllable_Alphabet = {}
+
+set Global_Signals	= {b1, b2, b3, b4, f1, f2, f3, f4}
+set Output_Signals	= {f1, f2, f3, f4}
+
+ltl env theta Init_Lift_e in GAME_LTL	= (!b1 && !b2 && !b3 && !b4).
+ltl sys theta Init_Lift_s in GAME_LTL	= (f1 && !f2 && !f3 && !f4).
+ltl env rho Env_Release_B in GAME_LTL	= [](((b1 && f1)-> X(!b1)) &&((b2 && f2)-> X(!b2)) &&((b3 && f3)-> X(!b3)) &&((b4 && f4)-> X(!b4))).
+ltl env rho Env_Keep_B in GAME_LTL		= [](((b1 && !f1)-> X(b1)) &&((b2 && !f2)-> X(b2)) &&((b3 && !f3)-> X(b3)) &&((b4 && !f4)-> X(b4))).
+ltl sys rho Sys_Mutex in GAME_LTL		= [](!(f1 && f2) && !(f1 && f3) && !(f1 && f4)  && !(f2 && f3) && !(f2 && f4) && !(f3 && f4)).
+ltl sys rho Sys_Mutex_X in GAME_LTL		= [](X(!(f1 && f2) && !(f1 && f3) && !(f1 && f4)  && !(f2 && f3) && !(f2 && f4) && !(f3 && f4))).
+ltl sys rho Sys_Adj_Floors in GAME_LTL	= []((f1 -> X(f1 || f2)) && (f2 -> X(f1 || f2 || f3)) && (f3 -> X(f2 || f3 || f4)) && (f4 -> X(f3 || f4))).
+ltl sys rho Sys_Move_Iff_B in GAME_LTL	= [](((f1 && X(f2)) || (f2 && X(f3)) || (f3 && X(f4)))->(b1 || b2 || b3 || b4)).
+
+
+ltl fluent Ass_True = (b2||!b2).
+ltl fluent Goal_Back_To_Ground			= (f1 || (b1 || b2 || b3 || b4)).
+ltl fluent Goal_Serve_Request_1			= ((b1->f1)).
+ltl fluent Goal_Serve_Request_2			= ((b2->f2)).
+ltl fluent Goal_Serve_Request_3			= ((b3->f3)).
+ltl fluent Goal_Serve_Request_4			= ((b4->f4)).
+
+|f| ENV =(GAME_LTL).
+|gr1| <{Ass_True}><{Goal_Serve_Request_1,Goal_Serve_Request_2,Goal_Serve_Request_3,Goal_Serve_Request_4,Goal_Back_To_Ground}> STRAT = ENV.
+
+STRAT >> "/tmp/lift_controller_4.rep".
+ENV >> "/tmp/lift_controller_4.fsp.game.rep".
+|ti| ENV_INTRLVD in ENV.
+|ts| ENV_SEQ in ENV.
+ENV_INTRLVD >> "/tmp/lift_controller_4.fsp.game_intrlvd.rep".
+ENV_SEQ >> "/tmp/lift_controller_4.fsp.game_seq.rep".
+
+
