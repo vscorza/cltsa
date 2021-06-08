@@ -1,0 +1,47 @@
+range R = 1..2
+
+set Global_Alphabet = {}
+set Controllable_Alphabet = {}
+
+set Global_Signals	= {x, y, z}
+set Output_Signals	= {z}
+
+ltl env theta Init_e in A_LTL	= (!x && !y).
+ltl sys theta Init_s in A_LTL	= (!z).
+ltl env rho Env_Rho in A_LTL	= []((x <-> X(!x)) && (y <-> X(!y))).
+ltl sys rho Sys_Rho in A_LTL	= [](z <-> X(!z)).
+
+|ts| A_TS in A_LTL.
+|ti| A_TI in A_LTL.
+|s| A_S in A_LTL.
+|i| A_I in A_LTL.
+
+ltl env theta Init_e in B_LTL	= (!x && !y).
+ltl sys theta Init_s in B_LTL	= (!z).
+ltl env rho Env_Rho in B_LTL	= []((x <-> X(!x)) && X(!y)).
+ltl sys rho Sys_Rho in B_LTL	= [](z <-> X(!z)).
+
+|ts| B_TS in B_LTL.
+|ti| B_TI in B_LTL.
+|s| B_S in B_LTL.
+|i| B_I in B_LTL.
+
+A_LTL >> "/tmp/ltl_serialization_composition_test_a_ltl.rep".
+A_TS >> "/tmp/ltl_serialization_composition_test_a_ts.rep".
+A_TI >> "/tmp/ltl_serialization_composition_test_a_ti.rep".
+A_S >> "/tmp/ltl_serialization_composition_test_a_s.rep".
+A_I >> "/tmp/ltl_serialization_composition_test_a_i.rep".
+
+B_LTL >> "/tmp/ltl_serialization_composition_test_b_ltl.rep".
+B_TS >> "/tmp/ltl_serialization_composition_test_b_ts.rep".
+B_TI >> "/tmp/ltl_serialization_composition_test_b_ti.rep".
+B_S >> "/tmp/ltl_serialization_composition_test_b_s.rep".
+B_I >> "/tmp/ltl_serialization_composition_test_b_i.rep".
+
+||COMP_LTL = (A_LTL ||_c B_LTL).
+||COMP_LTL_S = (A_S||_c B_S).
+||COMP_LTL_I = (A_I||_c B_I).
+
+COMP_LTL >> "/tmp/ltl_serialization_composition_test_comp_ltl.rep".
+COMP_LTL_S >> "/tmp/ltl_serialization_composition_test_comp_ltl_s.rep".
+COMP_LTL_I >> "/tmp/ltl_serialization_composition_test_comp_ltl_i.rep".
