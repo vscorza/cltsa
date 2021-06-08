@@ -4,30 +4,21 @@ set Controllable_Alphabet = {out}
 //|i| GAME_SERIAL in GAME_LTL .
 
 A = (d -> A | <a,b,c,d,out>->A2).
-
 B = (d -> B | <a,b,c,out>->B2).
 
 ||COMP = (A || B).
 
 |ts| A_SERIAL in A.
 |ti| A_INTRLVD in A.
-|ts| B_SERIAL in B.
-|ti| B_INTRLVD in B.
-|ts| COMP_SERIALIZED in COMP.
-|ti| COMP_INTERLEAVED in COMP.
+|s| B_SERIAL in B.
+|i| B_INTRLVD in B.
 
+|s| COMP_SERIALIZED in COMP.
+|i| COMP_INTERLEAVED in COMP.
 
-A_INTRLVD_P = S_0,S_0 = (d-> S_0|a-> S_9|b-> S_17|c-> S_21),S_7 = (a-> S_16|b-> S_20|c-> S_22),S_9 = (b-> S_10|c-> S_14|d-> S_16),S_10 = (c-> S_11|d-> S_13),
-S_11 = (d-> S_12),S_12 = (out-> S_1),S_13 = (c-> S_12),S_14 = (b-> S_11|d-> S_15),S_15 = (b-> S_12),S_16 = (b-> S_13|c-> S_15),S_17 = (a-> S_10|c-> S_18|d-> S_20),
-S_18 = (a-> S_11|d-> S_19),S_19 = (a-> S_12),S_20 = (a-> S_13|c-> S_19),S_21 = (a-> S_14|b-> S_18|d-> S_22),S_22 = (a-> S_15|b-> S_19).
-A_SERIAL_P = S_0,S_0 = (d-> S_0|a-> S_9),S_9 = (b-> S_10),S_10 = (c-> S_11),S_11 = (d-> S_12),S_12 = (out-> S_1).
-B_INTRLVD_P = S_0,S_0 = (d-> S_0|a-> S_9|b-> S_13|c-> S_15),S_9 = (b-> S_10|c-> S_12),S_10 = (c-> S_11),S_11 = (out-> S_1),S_12 = (b-> S_11),S_13 = (a-> S_10|c-> S_14),
-S_14 = (a-> S_11),S_15 = (a-> S_12|b-> S_14).
-B_SERIAL_P = S_0,S_0 = (d-> S_0|a-> S_9),S_9 = (b-> S_10),S_10 = (c-> S_11),S_11 = (out-> S_1).
+||COMP_THEN_SERIALIZED	= (A_SERIAL || B_SERIAL).
 
-
-||COMP_THEN_SERIALIZED	= (A_SERIAL_P || B_SERIAL_P).
-||COMP_THEN_INTERLEAVED	= (A_INTRLVD_P || B_INTRLVD_P).
+||COMP_THEN_INTERLEAVED	= (A_INTRLVD || B_INTRLVD).
 
 A >> "/tmp/lts_serialization_composition_test_a.rep".
 B >> "/tmp/lts_serialization_composition_test_b.rep".
@@ -41,15 +32,9 @@ B_SERIAL_P >> "/tmp/lts_serialization_composition_test_b_serial_p.rep".
 A_INTRLVD_P >> "/tmp/lts_serialization_composition_test_a_intrlvd_p.rep".
 B_INTRLVD_p >> "/tmp/lts_serialization_composition_test_b_intrlvd_p.rep".
 
-
-
 COMP >> "/tmp/lts_serialization_composition_test_comp.rep".
 COMP_SERIALIZED >> "/tmp/lts_serialization_composition_test_comp_serial.rep".
 COMP_INTERLEAVED >> "/tmp/lts_serialization_composition_test_comp_intrlvd.rep".
 
-
-
-
-COMP_THEN_SERIALIZED >> "/tmp/lts_serialization_composition_test_comp_then_serial.rep".
 COMP_THEN_INTERLEAVED >> "/tmp/lts_serialization_composition_test_comp_then_intrlvd.rep".
-
+COMP_THEN_SERIALIZED >> "/tmp/lts_serialization_composition_test_comp_then_serial.rep".

@@ -38,10 +38,15 @@ B_TI >> "/tmp/ltl_serialization_composition_test_b_ti.rep".
 B_S >> "/tmp/ltl_serialization_composition_test_b_s.rep".
 B_I >> "/tmp/ltl_serialization_composition_test_b_i.rep".
 
+
 ||COMP_LTL = (A_LTL ||_c B_LTL).
-||COMP_LTL_S = (A_S||_c B_S).
-||COMP_LTL_I = (A_I||_c B_I).
+||COMP_LTL_S_C = (A_S||_c B_S).
+||COMP_LTL_I_C = (A_I||_c B_I).
+||COMP_LTL_A_S = (A_S|| B_S).
+||COMP_LTL_A_I = (A_I || B_I).
 
 COMP_LTL >> "/tmp/ltl_serialization_composition_test_comp_ltl.rep".
 COMP_LTL_S >> "/tmp/ltl_serialization_composition_test_comp_ltl_s.rep".
 COMP_LTL_I >> "/tmp/ltl_serialization_composition_test_comp_ltl_i.rep".
+COMP_LTL_A_I >> "/tmp/ltl_serialization_composition_test_comp_ltl_s_a.rep".
+COMP_LTL_A_S >> "/tmp/ltl_serialization_composition_test_comp_ltl_i_a.rep".

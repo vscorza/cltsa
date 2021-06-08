@@ -284,13 +284,17 @@ void automaton_automaton_check_alphabet(FILE *f, automaton_alphabet *alphabet, c
 	do {
 		automaton_signal_event *current_signal = automaton_automaton_load_signal_event(f, buf, buf_size, last_finalizer);
 		automaton_alphabet_add_signal_event(current_alphabet, current_signal);
-		automaton_signal_event_destroy(current_signal, true);
+
 		current = fgetc(f);
 		if(current != AUT_SER_ARRAY_END_CHAR && current != AUT_SER_SEP_CHAR) {
 			printf("Corrupted array\n");
 			exit(-1);
 		}
-
+		//if signals are ticks added for serialization add to global alphabet
+		if((strcmp(current_signal->name, ENV_TICK) == 0) || (strcmp(current_signal->name, SYS_TICK) == 0)){
+			automaton_alphabet_add_signal_event(alphabet, current_signal);
+		}
+		automaton_signal_event_destroy(current_signal, true);
 	}while(current != AUT_SER_ARRAY_END_CHAR);
 	current = fgetc(f);
 	if(current != AUT_SER_OBJ_END_CHAR) {

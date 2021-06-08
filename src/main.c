@@ -159,7 +159,7 @@ int main (int argc, char** argv){
 
 		//run_functional_tests();
 
-		run_parse_test("tests/seq_tests/genbuf_3_sndrs_no_automaton.fsp", "GenBuf 3 sndrs (SEQ)");
+		run_parse_test("tests/ltl_serialization_composition_test.fsp", "Serialization composition test");
 
 
 

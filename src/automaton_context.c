@@ -1802,18 +1802,18 @@ automaton_automaton* automaton_automaton_sequentialize(automaton_automaton *auto
 			if(automaton->local_alphabet[i] == env_index){has_env	= true;}
 			if(automaton->local_alphabet[i] == sys_index){has_sys	= true;}
 		}
-		if(!has_env) new_local_alphabet_count++;
-		if(!has_sys) new_local_alphabet_count++;
+		new_local_alphabet_count += 2;
+
 		new_env_index	= automaton->local_alphabet_count;
-		new_sys_index	= !has_env ? (automaton->local_alphabet_count + 1) : automaton->local_alphabet_count;
+		new_sys_index	= automaton->local_alphabet_count + 1;
 		uint32_t* local_alphabet_ptr	= realloc(serialized_automaton->local_alphabet, new_local_alphabet_count * sizeof(uint32_t));
 		if(local_alphabet_ptr == NULL){
 			printf("Could not allocate memory for new local alphabet;\n"); exit(-1);
 		}
 		serialized_automaton->local_alphabet_count	= new_local_alphabet_count;
 		serialized_automaton->local_alphabet	= local_alphabet_ptr;
-		if(!has_env){serialized_automaton->local_alphabet[new_env_index] = env_index; }
-		if(!has_sys){serialized_automaton->local_alphabet[new_sys_index] = sys_index; }
+		serialized_automaton->local_alphabet[new_env_index] = env_index;
+		serialized_automaton->local_alphabet[new_sys_index] = sys_index;
 #if DEBUG_SEQUENTIALIZATION
 		printf("[ALPHABET]\tLocal:[ ");
 		for(i = 0; i < automaton->local_alphabet_count; i++){
@@ -1956,8 +1956,11 @@ automaton_automaton* automaton_automaton_sequentialize(automaton_automaton *auto
 									,automaton->context->global_alphabet->list[trans_local_env_alphabet[m]].name);
 #endif
 						transition_to_add->state_from	= previous_env;
-						transition_to_add->state_to		= obdd_state_tree_get_key(env_key_tree,
+						transition_to_add->state_to		= (j == (current_trans_env_count-1) && !has_ticks && current_trans_sys_count == 0)?
+								current_transition->state_to
+								: obdd_state_tree_get_key(env_key_tree,
 								env_key_entry, automaton->context->global_alphabet->count + 1);
+
 						automaton_automaton_add_transition(serialized_automaton, transition_to_add);
 #if DEBUG_SEQUENTIALIZATION
 						automaton_transition_print(transition_to_add, automaton->context, "[E]\t", "\n", 0);
@@ -3175,9 +3178,30 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 	}else{
 		timersub(&tval_after, &tval_before, &tval_synthesis_result);
 	}
-	//build pending automat if needed for compositions needing gr1 solving
+
+	//serialize to lts
+	for(i = 0; i < program->count; i++)
+		if(program->statements[i]->type == LTS_SEQ_AUT){
+			automaton_serialization_syntax *serialization	= program->statements[i]->serialization_syntax;
+			uint32_t index			= automaton_parsing_tables_get_entry_index(tables, COMPOSITION_ENTRY_AUT, serialization->automaton_name);
+			if(index == -1){
+				printf("No automaton with name %s found when trying to serialize in %s\n", serialization->automaton_name, serialization->name);
+				exit(-1);
+			}
+			automaton_automaton *source_automaton	= tables->composition_entries[index]->valuation.automaton_value;
+			automaton_automaton *serialized_automaton	= automaton_automaton_sequentialize(source_automaton,
+					serialization->name, serialization->sequential, serialization->has_ticks);
+			main_index = automaton_parsing_tables_add_entry(tables, COMPOSITION_ENTRY_AUT, serialization->name,
+					serialized_automaton);
+			tables->composition_entries[main_index]->solved	= true;
+			tables->composition_entries[main_index]->valuation_count			= 1;
+			tables->composition_entries[main_index]->valuation.automaton_value	= serialized_automaton;
+		}
+
+	//build pending automat if needed for compositions needing gr1 solving or serializing
 	//build automata
 	pending_statements	= true;
+	current_count 		= 0;
 	while(pending_statements && current_count < program->count){
 		pending_statements	= false;
 		for(i = 0; i < program->count; i++){
@@ -3209,24 +3233,7 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 		free(vstates_automata_fluent_names);
 	}
 
-	//serialize to lts
-	for(i = 0; i < program->count; i++)
-		if(program->statements[i]->type == LTS_SEQ_AUT){
-			automaton_serialization_syntax *serialization	= program->statements[i]->serialization_syntax;
-			uint32_t index			= automaton_parsing_tables_get_entry_index(tables, COMPOSITION_ENTRY_AUT, serialization->automaton_name);
-			if(index == -1){
-				printf("No automaton with name %s found when trying to serialize in %s\n", serialization->automaton_name, serialization->name);
-				exit(-1);
-			}
-			automaton_automaton *source_automaton	= tables->composition_entries[index]->valuation.automaton_value;
-			automaton_automaton *serialized_automaton	= automaton_automaton_sequentialize(source_automaton,
-					serialization->name, serialization->sequential, serialization->has_ticks);
-			main_index = automaton_parsing_tables_add_entry(tables, COMPOSITION_ENTRY_AUT, serialization->name,
-					serialized_automaton);
-			tables->composition_entries[main_index]->solved	= true;
-			tables->composition_entries[main_index]->valuation_count			= 1;
-			tables->composition_entries[main_index]->valuation.automaton_value	= serialized_automaton;
-		}
+
 
 	//run equivalence checks
 #if VERBOSE

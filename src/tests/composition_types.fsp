@@ -32,7 +32,10 @@ S_4 = (<f,g>-> S_5|c-> S_6|<c,f,g>-> S_7),
 S_5 = (c-> S_7),
 S_6 = (<f,g>-> S_7),
 S_7 = (e-> S_0).
-CONCURRENT >> "/tmp/compositiion_types_concurrent.fsp".
+A >> "/tmp/compositiion_types_a.rep".
+CONCURRENT >> "/tmp/compositiion_types_concurrent.rep".
+SYNCHRONOUS >> "/tmp/compositiion_types_synch.rep".
+ASYNCHRONOUS >> "/tmp/compositiion_types_asynch.rep".
 
 // tests
 equals FATAL_Synch_Composition(SYNCHRONOUS, SYNCH_p).

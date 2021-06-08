@@ -190,12 +190,18 @@ bool automaton_automata_idxs_is_max(uint32_t *idxs, uint32_t automata_count){
 int32_t automaton_automata_check_overlap(signal_bit_array_t *accum_label, signal_bit_array_t *current_label, signal_bit_array_t *alphabet_overlap
 		, uint32_t alphabet_count){
 	uint32_t i;
+	//check if overlapping transitions are empty
+	for(i = 0; i < FIXED_SIGNALS_COUNT; i++){
+		if(accum_label[i] > 0 || current_label[i] > 0)break;
+		if(i == (FIXED_SIGNALS_COUNT - 1))return 0;
+	}
 	bool at_least_one_overlaps	= false;
 	bool at_least_one_does_not	= false;
 	bool no_overlapping			= true;
 	signal_bit_array_t mask_all = ~((signal_bit_array_t)0x0);
 	signal_bit_array_t mask_not1 = ~((signal_bit_array_t)0x1);
 	signal_bit_array_t current_mask;
+
 	for(i = 0; i < FIXED_SIGNALS_COUNT; i++){
 		current_mask = i==0? mask_not1 : mask_all;
 		if((alphabet_overlap[i]&current_mask)>(signal_bit_array_t)0x0){
@@ -572,8 +578,10 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 
 #endif
 			//initialize label accumulator
-			bool accum_set = false; bool is_input = false;//TRANSITION_IS_INPUT(automata[0]->transitions[current_state[0]]);
+			bool accum_set = false; bool is_input = false;
 			bool accum_input	= false;
+			bool label_not_empty	= false;
+			bool accum_not_empty	= false;
 			if(idxs[0] > 0){
 				is_input = is_input || TRANSITION_IS_INPUT(&(automata[0]->transitions[current_state[0]][idxs[0] - 1]));
 				accum_input = accum_input || TRANSITION_IS_INPUT(&(automata[0]->transitions[current_state[0]][idxs[0] - 1]));
@@ -586,17 +594,37 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 			viable = true;
 			//check if current combination is viable
 			for(j = 1; j < automata_count; j++){
+				label_not_empty	= false;
+				accum_not_empty	= false;
 				if(idxs[j] == 0){//transition not being considered
 					//is_input = is_input || TRANSITION_IS_INPUT(automata[j]->transitions[current_state[j]]);
 					not_considered = true;
-					for(k = 0; k < FIXED_SIGNALS_COUNT; k++)
+					for(k = 0; k < FIXED_SIGNALS_COUNT; k++){
 						current_label[k]	= (signal_bit_array_t)0x0;
+					}
 				}else{
 					is_input = is_input || TRANSITION_IS_INPUT(&(automata[j]->transitions[current_state[j]][idxs[j] - 1]));
 					not_considered = false;
 					for(k = 0; k < FIXED_SIGNALS_COUNT; k++)
 						current_label[k]	= automata[j]->transitions[current_state[j]][idxs[j] - 1].signals[k];
 				}
+
+				for(k = 0; k < FIXED_SIGNALS_COUNT; k++){
+					if(!not_considered)label_not_empty = label_not_empty || (automata[j]->transitions[current_state[j]][idxs[j] - 1].signals[k] != 0x0);
+					accum_not_empty = accum_not_empty || (label_accum[k] != 0x0);
+				}
+
+				if((!not_considered && (!label_not_empty && (!accum_set || accum_not_empty)))
+						|| (not_considered && accum_set && !accum_not_empty)
+						){
+#if DEBUG_COMPOSITION
+				printf("[BLOCKS](empty label not synching)\n");
+#endif
+					viable	= false;
+
+					break;
+				}
+
 				//check blocking
 				int32_t overlapping = automaton_automata_check_overlap(label_accum, current_label
 						, accumulated_alphabet_overlap[j], alphabet_count);

@@ -10,12 +10,15 @@ T2 = (<a,c,out>-> T2 | <> -> TEST).
 
 |ts| TEST_SERIAL_TICKS in TEST.
 |ti| TEST_INTRLVD_TICKS in TEST.
+|s| TEST_SERIAL in TEST.
+|i| TEST_INTRLVD in TEST.
 
 
 TEST >> "/tmp/lts_serialization_test.rep".
 TEST_SERIAL_TICKS >> "/tmp/lts_serialization_test_serial_ticks.rep".
 TEST_INTRLVD_TICKS >> "/tmp/lts_serialization_test_interleaved_ticks.rep".
-
+TEST_SERIAL >> "/tmp/lts_serialization_test_serial.rep".
+TEST_INTRLVD >> "/tmp/lts_serialization_test_interleaved.rep".
 
 ////////////////////////////////////////
 
