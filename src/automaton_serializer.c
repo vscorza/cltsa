@@ -453,9 +453,10 @@ void automaton_transition_serialize_report(FILE *f, automaton_transition *transi
 	}
 	fprintf(f, "%s%s%s%s", AUT_SER_ARRAY_END, AUT_SER_SEP, TRANSITION_IS_INPUT(transition)? "1" :"0",AUT_SER_OBJ_END);
 }
-//name\t |states|\t |delta|\t mean(delta(s))\t var(delta(s)\t |events total|\t mean(events(trans))\t var(events(trans))\t\n
+//name\t |states|\t |delta|\t mean(delta(s))\t var(delta(s)\t |events total|\t mean(events(trans))\t var(events(trans))\t |controllable options|\t mean(controllable options(s))\t var(controllable options(s))\n
 //|alphabet|\t x:occ_1:alphabet_1\t ... x:occ_N:alphabet_N\n (where x is C if controllable U otherwise, occ_i is the total number of occurrences per event)
 void automaton_automaton_serialize_metrics(FILE *f, automaton_automaton *automaton){
+	automaton_automaton_monitored_order_transitions(automaton);
 	double mean_delta_s	= (automaton->transitions_composite_count * 1.0f) / automaton->transitions_count;
 	uint32_t i, j, k;
 	//compute variance on delta(s)
@@ -485,16 +486,50 @@ void automaton_automaton_serialize_metrics(FILE *f, automaton_automaton *automat
 	for(i = 0; i < automaton->transitions_count; i++)
 		for(j=0; j < automaton->out_degree[i]; j++){
 			for(k = 0; k < alphabet_count; k++){
-				if(TEST_TRANSITION_BIT((&(automaton->transitions[i][j])), k))signal_occurrence[k]++;
+				if(TEST_TRANSITION_BIT((&(automaton->transitions[i][j])), k))
+					signal_occurrence[k]++;
 			}
 		}
+	//cmpute controllable options
+	bool new_monitored = false;
+	uint64_t controllable_options	= 0, current_controllable	= 0;
+	//add all options, if only one monitored option is available per state do not add
+	for(i = 0; i < automaton->transitions_count; i++){
+		new_monitored	= false;
+		for(j = 0; j < automaton->out_degree[i]; j++){
+			if(j > 0){
+				new_monitored = !(automaton_automaton_transition_monitored_eq(automaton,
+						&(automaton->transitions[i][j - 1]),
+						&(automaton->transitions[i][j])));
+			}else controllable_options++;
+			if(new_monitored)controllable_options++;
+		}
+	}
+	double mean_controllable_options	= (controllable_options * 1.0f) / automaton->transitions_composite_count;
+	//compute variance on events(t)
+	double variance_controllable_options = 0;
+	for(i = 0; i < automaton->transitions_count; i++){
+		current_controllable	= 0;
+		for(j=0; j < automaton->out_degree[i]; j++){
+			if(j > 0){
+				new_monitored = !(automaton_automaton_transition_monitored_eq(automaton,
+						&(automaton->transitions[i][j - 1]),
+						&(automaton->transitions[i][j])));
+			}else current_controllable++;
+			if(new_monitored)current_controllable++;
+		}
+		variance_controllable_options	+= (current_controllable - mean_controllable_options) * (current_controllable - mean_controllable_options);
+	}
+	variance_controllable_options	/= ((automaton->transitions_count - 1) * 1.0f);
 
-	fprintf(f, "%s\t%" PRIu64 "\t%" PRIu64 "\t%f\t%f%" PRIu64 "\t%f\t%f%\n%d\t", automaton->name, automaton->transitions_count, automaton->transitions_composite_count,
-			mean_delta_s, variance_delta_s, total_signals, mean_signals_t, variance_signals_t, alphabet_count);
+
+	fprintf(f, "%s\t%" PRIu64 "\t%" PRIu64 "\t%f\t%f%" PRIu64 "\t%f\t%f\t%" PRIu64 "\t%f\t%f%\n%d\t", automaton->name, automaton->transitions_count, automaton->transitions_composite_count,
+			mean_delta_s, variance_delta_s, total_signals, mean_signals_t, variance_signals_t, controllable_options, mean_controllable_options, variance_controllable_options, alphabet_count);
 	for(i = 0; i < alphabet_count; i++){
 		fprintf(f, "%s:%" PRIu64 ":%s%s", automaton->context->global_alphabet->list[i].type == INPUT_SIG ? "U" : "C", signal_occurrence[i], automaton->context->global_alphabet->list[i].name
 				, i < (alphabet_count -1)? "\t": "\n");
 	}
+	free(signal_occurrence);
 }
 
 /*

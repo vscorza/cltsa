@@ -50,3 +50,5 @@ COMP_LTL_S >> "/tmp/ltl_serialization_composition_test_comp_ltl_s.rep".
 COMP_LTL_I >> "/tmp/ltl_serialization_composition_test_comp_ltl_i.rep".
 COMP_LTL_A_I >> "/tmp/ltl_serialization_composition_test_comp_ltl_s_a.rep".
 COMP_LTL_A_S >> "/tmp/ltl_serialization_composition_test_comp_ltl_i_a.rep".
+
+A_LTL >>_m "/tmp/ltl_serialization_composition_test_comp_a.met".
