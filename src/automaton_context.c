@@ -3310,6 +3310,35 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 			}
 		}
 	}
+	//export metrics
+	for(j = 0; j < program->count; j++){
+		if(program->statements[j]->type == METRICS_AUT){
+			name_found	= false;
+			//check first for equal names, otherwise look for prefixed values
+			for(i = 0; i < tables->composition_count; i++){
+				if(tables->composition_entries[i]->solved &&
+						strcmp(program->statements[j]->import_def->name,
+								tables->composition_entries[i]->valuation.automaton_value->name)== 0){
+						automaton_automaton_print_metrics(tables->composition_entries[i]->valuation.automaton_value,
+								program->statements[j]->import_def->filename);
+						name_found	= true;
+						break;
+				}
+			}
+			if(!name_found){
+				for(i = 0; i < tables->composition_count; i++){
+					if(tables->composition_entries[i]->solved &&
+							strncmp(program->statements[j]->import_def->name,
+									tables->composition_entries[i]->valuation.automaton_value->name,
+									strlen(program->statements[j]->import_def->name))== 0){
+							automaton_automaton_print_metrics(tables->composition_entries[i]->valuation.automaton_value,
+									program->statements[j]->import_def->filename);
+							break;
+					}
+				}
+			}
+		}
+	}
 
 	//PRINT RESULTS
 	if(is_diagnosis != 0){

@@ -59,6 +59,7 @@ typedef enum {
 typedef enum {
 	IMPORT_AUT,
 	EXPORT_AUT,
+	METRICS_AUT,
 	MENU_AUT,
 	CONST_AUT,
 	RANGE_AUT,

@@ -453,6 +453,50 @@ void automaton_transition_serialize_report(FILE *f, automaton_transition *transi
 	}
 	fprintf(f, "%s%s%s%s", AUT_SER_ARRAY_END, AUT_SER_SEP, TRANSITION_IS_INPUT(transition)? "1" :"0",AUT_SER_OBJ_END);
 }
+//name\t |states|\t |delta|\t mean(delta(s))\t var(delta(s)\t |events total|\t mean(events(trans))\t var(events(trans))\t\n
+//|alphabet|\t x:occ_1:alphabet_1\t ... x:occ_N:alphabet_N\n (where x is C if controllable U otherwise, occ_i is the total number of occurrences per event)
+void automaton_automaton_serialize_metrics(FILE *f, automaton_automaton *automaton){
+	double mean_delta_s	= (automaton->transitions_composite_count * 1.0f) / automaton->transitions_count;
+	uint32_t i, j, k;
+	//compute variance on delta(s)
+	double variance_delta_s = 0;
+	for(i = 0; i < automaton->transitions_count; i++)variance_delta_s	+= (automaton->out_degree[i] - mean_delta_s) *  (automaton->out_degree[i] - mean_delta_s);
+	variance_delta_s	/= ((automaton->transitions_count - 1) * 1.0f);
+	uint32_t signal_count = 0,_p_ = 0;
+	uint64_t total_signals	= 0;
+	//compute total signals
+	for(i = 0; i < automaton->transitions_count; i++)
+		for(j=0; j < automaton->out_degree[i]; j++){
+			GET_TRANSITION_SIGNAL_COUNT_NO_VARS((&(automaton->transitions[i][j])));
+			total_signals	+= signal_count;
+		}
+	double mean_signals_t	= (total_signals * 1.0f) / automaton->transitions_composite_count;
+	//compute variance on events(t)
+	double variance_signals_t = 0;
+	for(i = 0; i < automaton->transitions_count; i++)
+		for(j=0; j < automaton->out_degree[i]; j++){
+			GET_TRANSITION_SIGNAL_COUNT_NO_VARS((&(automaton->transitions[i][j])));
+			variance_signals_t	+= (signal_count - mean_signals_t) * (signal_count - mean_signals_t);
+		}
+	variance_signals_t	/= ((automaton->transitions_composite_count - 1) * 1.0f);
+	//compute signal occurrences
+	uint32_t alphabet_count	= automaton->context->global_alphabet->count;
+	uint64_t *signal_occurrence	= calloc(alphabet_count, sizeof(uint64_t));
+	for(i = 0; i < automaton->transitions_count; i++)
+		for(j=0; j < automaton->out_degree[i]; j++){
+			for(k = 0; k < alphabet_count; k++){
+				if(TEST_TRANSITION_BIT((&(automaton->transitions[i][j])), k))signal_occurrence[k]++;
+			}
+		}
+
+	fprintf(f, "%s\t%" PRIu64 "\t%" PRIu64 "\t%f\t%f%" PRIu64 "\t%f\t%f%\n%d\t", automaton->name, automaton->transitions_count, automaton->transitions_composite_count,
+			mean_delta_s, variance_delta_s, total_signals, mean_signals_t, variance_signals_t, alphabet_count);
+	for(i = 0; i < alphabet_count; i++){
+		fprintf(f, "%s:%" PRIu64 ":%s%s", automaton->context->global_alphabet->list[i].type == INPUT_SIG ? "U" : "C", signal_occurrence[i], automaton->context->global_alphabet->list[i].name
+				, i < (alphabet_count -1)? "\t": "\n");
+	}
+}
+
 /*
  * <name,ctx,local_alphabet_count,[sig_1.idx,..,sig_N.idx],vstates_monitored_count,[vstates_mon1,..,vstates_monN]
 ,trans_count,[trans_1,..,trans_M],init_count,[init_i,..,init_K],[[val_s_0_f_0,..,val_s_0_f_L],..,[val_s_T_f_0,..,val_s_T_f_L]]
@@ -686,4 +730,14 @@ bool automaton_automaton_print_report(automaton_automaton *automaton, char *file
 	return true;
 }
 
-
+bool automaton_automaton_print_metrics(automaton_automaton *automaton, char *filename){
+	FILE *f = fopen(filename, "w");
+	if (f == NULL)
+	{
+		printf("Error opening file!(%s)\n", filename);
+	    return false;
+	}
+	automaton_automaton_serialize_metrics(f, automaton);
+	fclose(f);
+	return true;
+}

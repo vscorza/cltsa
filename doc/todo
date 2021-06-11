@@ -1,10 +1,13 @@
 TODO:
 =====
--corregir problemas con serializacion
-	-sin ticks el self loop del d no regresa
-	-no permite volver a componer algo serializado (por como está corriendo las fases en el automaton_context)
-	-escribir y correr el ejemplo de composicion y secuencialización (lts_serialization_composition_test)
-	-intentar encontrar un equivalente de la lógica ltl
+-agregar instruccion de informacion
+	- A >>_d "/tmp/a.diag".	reporta tamaño en estados, transiciones, varianza, media y mediana por estado, alfabeto, conrolable, señales totales, varianza, media y mediana, controlables media y mediana, por señal ocurrencias totales
+		X escribir sintaxis
+		X estructuras y funciones de syntax
+		x exporter
+			x computadar estadísticos
+			X guardar a archivo
+		- correr pruebas
 -re-escribir casos de estudio
 	- reescribir y comparar tamaños de 
 		- lift_controller
@@ -38,7 +41,15 @@ TODO:
 	- revisar archivo de mati
 	- reunion con sebas y vic
 - clts	
+	- extender reporter para mostrar metricas
 	- revisar composicion sincronización de etiquetas vacías
+	- minimización de controladores
+		- quedarse con el autómata donde se esconden las trans. controlables
+		- meter en pending todos estados donde se cambia valuación
+		- para cada estado en pending renombrar etiquetas de transiciones sacando las que estén compartidas entre todas las transiciones
+		- agregar a pending los pred.
+		- cuando se vacía pending se pueden reemplazar las tiras de estados lineales por contadores A = (when(t < len) -> A | when(t == len) -> A_2).
+		- revisar minimización de autómatas 
 - cltsa
 	- serializacion
 		- serializar valuaciones

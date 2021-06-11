@@ -495,6 +495,7 @@ void automaton_statement_syntax_destroy(automaton_statement_syntax* statement){
 	switch (statement->type){
 	case IMPORT_AUT:
 	case EXPORT_AUT:
+	case METRICS_AUT:
 		automaton_import_syntax_destroy(statement->import_def);break;
 	case MENU_AUT: break;
 	case CONST_AUT: automaton_expression_syntax_destroy(statement->const_def);break;

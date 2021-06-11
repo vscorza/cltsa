@@ -157,9 +157,9 @@ int main (int argc, char** argv){
 		//GENERAL TESTS
 		//run_all_tests();
 
-		//run_functional_tests();
+		run_functional_tests();
 
-		run_parse_test("tests/ltl_serialization_composition_test.fsp", "Serialization composition test");
+		//run_parse_test("tests/ltl_serialization_composition_test.fsp", "Serialization composition test");
 
 
 

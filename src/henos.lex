@@ -276,7 +276,16 @@ in				{
 					#endif
 					yylval.text=p;
 					return(t_EXPORT);
-				}				
+				}
+\>\>_m			{
+					p=(char *)calloc(strlen(yytext)+1,sizeof(char));
+					strcpy(p,yytext);
+					#if DEBUG_LEX
+					printf("[keyword: <%s>]", yytext);
+					#endif
+					yylval.text=p;
+					return(t_EXPORT_METRICS);
+				}									
 &&				{
 					p=(char *)calloc(strlen(yytext)+1,sizeof(char));
 					strcpy(p,yytext);

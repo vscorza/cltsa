@@ -43,12 +43,12 @@ automaton_program_syntax* parsed_program = NULL;
 	automaton_vstates_fluent_syntax*	vstates_fluent;
 	automaton_serialization_syntax*	lts_serialization;
 };
-%token	t_INTEGER t_IDENT t_UPPER_IDENT t_STRING t_CONST t_RANGE t_SET t_FLUENT t_DOTS t_WHEN t_GAME_COMPOSE t_PARALLEL t_GR_1 t_INITIALLY t_LTL t_ENV t_SYS t_RHO t_THETA t_IN t_THEN t_IFF t_AND t_NEXT t_CONCURRENT t_SYNCH t_ORDER t_EQUALS t_IMPORT t_EXPORT t_VAL_STATE t_SEQ_LTS t_SEQ_TICK_LTS t_INTERLVD_LTS t_INTERLVD_TICK_LTS 
+%token	t_INTEGER t_IDENT t_UPPER_IDENT t_STRING t_CONST t_RANGE t_SET t_FLUENT t_DOTS t_WHEN t_GAME_COMPOSE t_PARALLEL t_GR_1 t_INITIALLY t_LTL t_ENV t_SYS t_RHO t_THETA t_IN t_THEN t_IFF t_AND t_NEXT t_CONCURRENT t_SYNCH t_ORDER t_EQUALS t_IMPORT t_EXPORT t_VAL_STATE t_SEQ_LTS t_SEQ_TICK_LTS t_INTERLVD_LTS t_INTERLVD_TICK_LTS t_EXPORT_METRICS 
 %left '+' '-' ','
 %left '*' '/'
 
 
-%type<text> 				t_STRING t_IDENT t_UPPER_IDENT t_CONST t_RANGE t_SET t_FLUENT t_DOTS t_WHEN t_GAME_COMPOSE t_PARALLEL t_GR_1 t_INITIALLY t_LTL t_ENV t_SYS t_RHO t_THETA t_IN t_THEN t_IFF t_AND t_NEXT t_CONCURRENT t_SYNCH t_EQUALS t_IMPORT t_EXPORT t_VAL_STATE t_SEQ_LTS t_SEQ_TICK_LTS t_INTERLVD_LTS t_INTERLVD_TICK_LTS
+%type<text> 				t_STRING t_IDENT t_UPPER_IDENT t_CONST t_RANGE t_SET t_FLUENT t_DOTS t_WHEN t_GAME_COMPOSE t_PARALLEL t_GR_1 t_INITIALLY t_LTL t_ENV t_SYS t_RHO t_THETA t_IN t_THEN t_IFF t_AND t_NEXT t_CONCURRENT t_SYNCH t_EQUALS t_IMPORT t_EXPORT t_VAL_STATE t_SEQ_LTS t_SEQ_TICK_LTS t_INTERLVD_LTS t_INTERLVD_TICK_LTS t_EXPORT_METRICS
 %type<integer>				t_INTEGER fluentInitialCondition compositionType
 %type<expr>					exp exp2 exp3 exp4 constDef range rangeDef ltsTransitionPrefix
 %type<label>				label concurrentLabel 
@@ -77,6 +77,7 @@ automaton_program_syntax* parsed_program = NULL;
 %type<equal_expression>		equalsExp
 %type<import_syntax>		import
 %type<import_syntax>		export
+%type<import_syntax>		metrics
 %type<vstates_fluent>			stateFluent
 %type<v_states>				vstates		
 %type<lts_serialization> ltsConversion
@@ -91,6 +92,7 @@ statements:
 statement:
 	import									{$$ = automaton_statement_syntax_create(IMPORT_AUT, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $1, NULL, NULL);}
 	|export									{$$ = automaton_statement_syntax_create(EXPORT_AUT, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $1, NULL, NULL);}
+	|metrics								{$$ = automaton_statement_syntax_create(METRICS_AUT, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $1, NULL, NULL);}
 	|menu									{$$ = automaton_statement_syntax_create(MENU_AUT, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);}
 	|constDef								{$$ = automaton_statement_syntax_create(CONST_AUT, NULL, NULL, $1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);}
 	|rangeDef								{$$ = automaton_statement_syntax_create(RANGE_AUT, NULL, $1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);}
@@ -183,6 +185,9 @@ import:
 	t_UPPER_IDENT t_IMPORT  t_STRING '.'	{$$ = automaton_import_syntax_create($1,$3);free($1);free($2);free($3);}
 	;
 export:
+	t_UPPER_IDENT t_EXPORT  t_STRING '.'	{$$ = automaton_import_syntax_create($1,$3);free($1);free($2);free($3);}
+	;
+metrics:
 	t_UPPER_IDENT t_EXPORT  t_STRING '.'	{$$ = automaton_import_syntax_create($1,$3);free($1);free($2);free($3);}
 	;	
 menu:
