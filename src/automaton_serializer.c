@@ -455,7 +455,7 @@ void automaton_transition_serialize_report(FILE *f, automaton_transition *transi
 }
 //name\t |states|\t |delta|\t mean(delta(s))\t var(delta(s)\t |events total|\t mean(events(trans))\t var(events(trans))\t |controllable options|\t mean(controllable options(s))\t var(controllable options(s))\n
 //|alphabet|\t x:occ_1:alphabet_1\t ... x:occ_N:alphabet_N\n (where x is C if controllable U otherwise, occ_i is the total number of occurrences per event)
-void automaton_automaton_serialize_metrics(FILE *f, automaton_automaton *automaton){
+void automaton_automaton_serialize_metrics(FILE *f, automaton_automaton *automaton, bool is_html){
 	automaton_automaton_monitored_order_transitions(automaton);
 	double mean_delta_s	= (automaton->transitions_composite_count * 1.0f) / automaton->transitions_count;
 	uint32_t i, j, k;
@@ -523,11 +523,28 @@ void automaton_automaton_serialize_metrics(FILE *f, automaton_automaton *automat
 	variance_controllable_options	/= ((automaton->transitions_count - 1) * 1.0f);
 
 
-	fprintf(f, "%s\t%" PRIu64 "\t%" PRIu64 "\t%f\t%f%" PRIu64 "\t%f\t%f\t%" PRIu64 "\t%f\t%f%\n%d\t", automaton->name, automaton->transitions_count, automaton->transitions_composite_count,
-			mean_delta_s, variance_delta_s, total_signals, mean_signals_t, variance_signals_t, controllable_options, mean_controllable_options, variance_controllable_options, alphabet_count);
-	for(i = 0; i < alphabet_count; i++){
-		fprintf(f, "%s:%" PRIu64 ":%s%s", automaton->context->global_alphabet->list[i].type == INPUT_SIG ? "U" : "C", signal_occurrence[i], automaton->context->global_alphabet->list[i].name
-				, i < (alphabet_count -1)? "\t": "\n");
+	if(!is_html){
+		fprintf(f, "%s\t%" PRIu64 "\t%" PRIu64 "\t%f\t%f%" PRIu64 "\t%f\t%f\t%" PRIu64 "\t%f\t%f%\n%d\t", automaton->name, automaton->transitions_count, automaton->transitions_composite_count,
+				mean_delta_s, variance_delta_s, total_signals, mean_signals_t, variance_signals_t, controllable_options, mean_controllable_options, variance_controllable_options, alphabet_count);
+		for(i = 0; i < alphabet_count; i++){
+			fprintf(f, "%s:%" PRIu64 ":%s%s", automaton->context->global_alphabet->list[i].type == INPUT_SIG ? "U" : "C", signal_occurrence[i], automaton->context->global_alphabet->list[i].name
+					, i < (alphabet_count -1)? "\t": "\n");
+		}
+	}else{
+		fprintf(f, "<html>\n<head><title>%s metrics</title><style>table,th,td{border: 1px solid black;border-collapse:collapse;}</style></head>\n<body>", automaton->name);
+		fprintf(f, "<p><b>Automaton:</b> %s</p>", automaton->name);
+		fprintf(f, "<table>\n<tr><td><b>|S|</b></td><td><b>|Delta|</b></td><td><b>mean(out(s))</b></td><td><b>var(out(s))</b></td><td><b>|events|</b></td><td><b>mean(events(t))</b></td><td><b><b>var(events(t))</b></td>"\
+				"<td><b>|Delta.ctrl|</b></td><td><b>mean(out.ctrl(s))</b></td><td><b>var(out.ctrl(s))</b></td></tr>\n");
+
+		fprintf(f, "<tr><td>%" PRIu64 "</td><td>%" PRIu64 "</td><td>%f</td><td>%f</td><td>%" PRIu64 "</td><td>%f</td><td>%f</td><td>%" PRIu64 "</td><td>%f</td><td>%f</td></tr>\n</table>\n", automaton->transitions_count, automaton->transitions_composite_count,
+						mean_delta_s, variance_delta_s, total_signals, mean_signals_t, variance_signals_t,
+						controllable_options, mean_controllable_options, variance_controllable_options);
+		fprintf(f,"<p><b>Events occurrences count</b></p>\n<table>\n<tr><td><b>Signal Name</b></td><td><b>Controllable?</b></td><td><b>Occurrences</b></td></tr>\n");
+				for(i = 0; i < alphabet_count; i++){
+					fprintf(f, "<tr><td>%s</td><td>%s</td><td>%" PRIu64 "</td></tr>\n",
+							automaton->context->global_alphabet->list[i].name, automaton->context->global_alphabet->list[i].type == INPUT_SIG ? "" : "[*]", signal_occurrence[i]);
+				}
+		fprintf(f,"</table>\n</body>\n</html>");
 	}
 	free(signal_occurrence);
 }
@@ -765,14 +782,14 @@ bool automaton_automaton_print_report(automaton_automaton *automaton, char *file
 	return true;
 }
 
-bool automaton_automaton_print_metrics(automaton_automaton *automaton, char *filename){
+bool automaton_automaton_print_metrics(automaton_automaton *automaton, char *filename, bool is_html){
 	FILE *f = fopen(filename, "w");
 	if (f == NULL)
 	{
 		printf("Error opening file!(%s)\n", filename);
 	    return false;
 	}
-	automaton_automaton_serialize_metrics(f, automaton);
+	automaton_automaton_serialize_metrics(f, automaton, is_html);
 	fclose(f);
 	return true;
 }

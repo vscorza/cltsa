@@ -1,13 +1,7 @@
 TODO:
 =====
 -agregar instruccion de informacion
-	- A >>_d "/tmp/a.diag".	reporta tamaño en estados, transiciones, varianza, media y mediana por estado, alfabeto, conrolable, señales totales, varianza, media y mediana, controlables media y mediana, por señal ocurrencias totales
-		X escribir sintaxis
-		X estructuras y funciones de syntax
-		x exporter
-			x computadar estadísticos
-			X guardar a archivo
-		- correr pruebas
+	- profilear serialización de autómatas para ver si hay mejoras de performance evidentes
 -re-escribir casos de estudio
 	- reescribir y comparar tamaños de 
 		- lift_controller

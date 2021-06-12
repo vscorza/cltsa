@@ -3314,13 +3314,17 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 	for(j = 0; j < program->count; j++){
 		if(program->statements[j]->type == METRICS_AUT){
 			name_found	= false;
+			char new_filename[1024];
 			//check first for equal names, otherwise look for prefixed values
 			for(i = 0; i < tables->composition_count; i++){
 				if(tables->composition_entries[i]->solved &&
 						strcmp(program->statements[j]->import_def->name,
 								tables->composition_entries[i]->valuation.automaton_value->name)== 0){
 						automaton_automaton_print_metrics(tables->composition_entries[i]->valuation.automaton_value,
-								program->statements[j]->import_def->filename);
+								program->statements[j]->import_def->filename,false);
+						sprintf(new_filename, "%s.html", program->statements[j]->import_def->filename);
+						automaton_automaton_print_metrics(tables->composition_entries[i]->valuation.automaton_value,
+														new_filename,true);
 						name_found	= true;
 						break;
 				}
@@ -3332,7 +3336,10 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 									tables->composition_entries[i]->valuation.automaton_value->name,
 									strlen(program->statements[j]->import_def->name))== 0){
 							automaton_automaton_print_metrics(tables->composition_entries[i]->valuation.automaton_value,
-									program->statements[j]->import_def->filename);
+									program->statements[j]->import_def->filename, false);
+							sprintf(new_filename, "%s.html", program->statements[j]->import_def->filename);
+													automaton_automaton_print_metrics(tables->composition_entries[i]->valuation.automaton_value,
+																					new_filename,true);
 							break;
 					}
 				}
