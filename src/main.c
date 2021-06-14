@@ -165,7 +165,7 @@ int main (int argc, char** argv){
 		//run_parse_test("tests/seq_tests/exploration-robot-v1_6.fsp", "Exploration robot v1 (6) sequentialization test");
 		//run_parse_test("tests/seq_tests/genbuf_1_sndrs_no_automaton.fsp", "GenBuf 1 sndrs V2");
 		//run_parse_test("tests/seq_tests/genbuf_4_sndrs_no_automaton.fsp", "GenBuf 4 sndrs V2");
-		run_parse_test("tests/seq_tests/lift_controller_10.fsp", "Lift controller 10");
+		run_parse_test("tests/seq_tests/lift_controller_2.fsp", "Lift controller 2");
 
 
 		//run_parse_test("tests/exploration-robot-realizable_test_debug.fsp", "unrealizable exploration robot test");

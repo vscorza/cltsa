@@ -25,6 +25,9 @@ ltl fluent Goal_Serve_Request_2			= ((b2->f2)).
 
 STRAT >>_m "/tmp/lift_controller_2.diag".
 
+ENV >> "/tmp/lift_controller_2.fsp.game.rep".
+ENV_SEQ >> "/tmp/lift_controller_2.fsp.game_seq.rep".
+
 ENV >>_m "/tmp/lift_controller_2.fsp.game.diag".
 |ti| ENV_INTRLVD in ENV.
 |ts| ENV_SEQ in ENV.
