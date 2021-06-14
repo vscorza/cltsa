@@ -41,10 +41,10 @@ fluent F_Dont_Drop = <load, drop> initially 1
 fluent F_Broadcast = <bCast,{unload,load,n,s,e,w,stall,correct}> initially 1
 |gr1| <{F_Dont_Drop, F_Broadcast}><{F_Load, F_Unload, F_Broadcast}> STRAT = PLANT.
 
-STRAT >> "/tmp/exploration_robot_50_strat.rep".
+STRAT >>_m "/tmp/exploration_robot_50_strat.diag".
 
-PLANT >> "/tmp/exploration-robot-v1_50.fsp.game.rep".
+PLANT >>_m "/tmp/exploration-robot-v1_50.fsp.game.diag".
 |ti| ENV_INTRLVD in PLANT.
 |ts| ENV_SEQ in PLANT.
-ENV_INTRLVD >> "/tmp/exploration-robot-v1_50.fsp.game_intrlvd.rep".
-ENV_SEQ >> "/tmp/exploration-robot-v1_50.fsp.game_seq.rep".
+ENV_INTRLVD >>_m "/tmp/exploration-robot-v1_50.fsp.game_intrlvd.diag".
+ENV_SEQ >>_m "/tmp/exploration-robot-v1_50.fsp.game_seq.diag".

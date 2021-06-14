@@ -68,14 +68,10 @@ ltl fluent G_7				= (empty || deq).
 
 //*********** SYNTHESIS
 |f| ENV =(GENBUF).
-|gr1| <{A_rcvr_0, A_rcvr_0_b}><{G_1_2_sndr_0, G_12,G_7}> STRAT = ENV.
+//|gr1| <{A_rcvr_0, A_rcvr_0_b}><{G_1_2_sndr_0, G_12,G_7}> STRAT = ENV.
 
 |ti| ENV_INTRLVD in ENV.
 |ts| ENV_SEQ in ENV.
-STRAT >> "/tmp/genbuf_1_sndrs_no_automaton.rep".
-ENV >> "/tmp/genbuf_1_sndrs_no_automaton.fsp.game.rep".
-ENV_INTRLVD >> "/tmp/genbuf_1_sndrs_no_automaton.fsp.game_intrlvd.rep".
-ENV_SEQ >> "/tmp/genbuf_1_sndrs_no_automaton.fsp.game_seq.rep".
 
 STRAT >>_m "/tmp/genbuf_1_sndrs_no_automaton.diag".
 ENV >>_m "/tmp/genbuf_1_sndrs_no_automaton.fsp.game.diag".

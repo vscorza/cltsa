@@ -41,4 +41,4 @@ fluent F_Dont_Drop = <load, drop> initially 1
 fluent F_Broadcast = <bCast,{unload,load,n,s,e,w,stall,correct}> initially 1
 |gr1| <{F_Dont_Drop, F_Broadcast}><{F_Load, F_Unload, F_Broadcast}> STRAT = PLANT.
 
-STRAT >> "/tmp/exploration_robot_75_strat.rep".
+STRAT >>_m "/tmp/exploration_robot_75_strat.diag".

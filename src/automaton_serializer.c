@@ -457,8 +457,11 @@ void automaton_transition_serialize_report(FILE *f, automaton_transition *transi
 //|alphabet|\t x:occ_1:alphabet_1\t ... x:occ_N:alphabet_N\n (where x is C if controllable U otherwise, occ_i is the total number of occurrences per event)
 void automaton_automaton_serialize_metrics(FILE *f, automaton_automaton *automaton, bool is_html){
 	automaton_automaton_monitored_order_transitions(automaton);
-	double mean_delta_s	= (automaton->transitions_composite_count * 1.0f) / automaton->transitions_count;
 	uint32_t i, j, k;
+	uint64_t effective_state_count = 0;
+	for(i = 0; i < automaton->transitions_count; i++)if(automaton->out_degree[i] > 0 || automaton->in_degree[i] > 0)effective_state_count++;
+	double mean_delta_s	= (automaton->transitions_composite_count * 1.0f) / effective_state_count;
+
 	//compute variance on delta(s)
 	double variance_delta_s = 0;
 	for(i = 0; i < automaton->transitions_count; i++)variance_delta_s	+= (automaton->out_degree[i] - mean_delta_s) *  (automaton->out_degree[i] - mean_delta_s);
@@ -526,11 +529,11 @@ void automaton_automaton_serialize_metrics(FILE *f, automaton_automaton *automat
 		}
 		variance_controllable_options	+= (current_controllable - mean_controllable_options) * (current_controllable - mean_controllable_options);
 	}
-	variance_controllable_options	/= ((automaton->transitions_count - 1) * 1.0f);
+	variance_controllable_options	/= ((effective_state_count - 1) * 1.0f);
 
 
 	if(!is_html){
-		fprintf(f, "%s\t%" PRIu64 "\t%" PRIu64 "\t%f\t%f%" PRIu64 "\t%f\t%f\t%" PRIu64 "\t%f\t%f%\n%d\t", automaton->name, automaton->transitions_count, automaton->transitions_composite_count,
+		fprintf(f, "%s\t%" PRIu64 "\t%" PRIu64 "\t%f\t%f%" PRIu64 "\t%f\t%f\t%" PRIu64 "\t%f\t%f%\n%d\t", automaton->name, effective_state_count, automaton->transitions_composite_count,
 				mean_delta_s, variance_delta_s, total_signals, mean_signals_t, variance_signals_t, controllable_options, mean_controllable_options, variance_controllable_options, alphabet_count);
 		for(i = 0; i < alphabet_count; i++){
 			fprintf(f, "%s:%" PRIu64 ":%s%s", automaton->context->global_alphabet->list[i].type == INPUT_SIG ? "U" : "C", signal_occurrence[i], automaton->context->global_alphabet->list[i].name
@@ -542,7 +545,7 @@ void automaton_automaton_serialize_metrics(FILE *f, automaton_automaton *automat
 		fprintf(f, "<table>\n<tr><td><b>|S|</b></td><td><b>|Delta|</b></td><td><b>mean(out(s))</b></td><td><b>var(out(s))</b></td><td><b>|events|</b></td><td><b>mean(events(t))</b></td><td><b><b>var(events(t))</b></td>"\
 				"<td><b>|Delta.ctrl|</b></td><td><b>mean(out.ctrl(s))</b></td><td><b>var(out.ctrl(s))</b></td></tr>\n");
 
-		fprintf(f, "<tr><td>%" PRIu64 "</td><td>%" PRIu64 "</td><td>%f</td><td>%f</td><td>%" PRIu64 "</td><td>%f</td><td>%f</td><td>%" PRIu64 "</td><td>%f</td><td>%f</td></tr>\n</table>\n", automaton->transitions_count, automaton->transitions_composite_count,
+		fprintf(f, "<tr><td>%" PRIu64 "</td><td>%" PRIu64 "</td><td>%f</td><td>%f</td><td>%" PRIu64 "</td><td>%f</td><td>%f</td><td>%" PRIu64 "</td><td>%f</td><td>%f</td></tr>\n</table>\n", effective_state_count, automaton->transitions_composite_count,
 						mean_delta_s, variance_delta_s, total_signals, mean_signals_t, variance_signals_t,
 						controllable_options, mean_controllable_options, variance_controllable_options);
 		fprintf(f,"<p><b>Events occurrences count</b></p>\n<table>\n<tr><td><b>Signal Name</b></td><td><b>Controllable?</b></td><td><b>Occurrences</b></td></tr>\n");

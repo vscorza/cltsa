@@ -125,4 +125,4 @@ ltl fluent G11_1		= (!g11_1_0).
 |f| ENV =(AHB).
 |gr1| <{A1, A2}><{G2, G3, G10_1, G11_0, G11_1}> STRAT = ENV.
 
-STRAT >> "/tmp/ahb_2_strat.rep".
+STRAT >>_m "/tmp/ahb_2_strat.diag".

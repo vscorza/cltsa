@@ -36,10 +36,10 @@ ltl fluent Goal_Serve_Request_6			= ((b6->f6)).
 |gr1| <{Ass_True}><{Goal_Serve_Request_1,Goal_Serve_Request_2,Goal_Serve_Request_3,Goal_Serve_Request_4,Goal_Serve_Request_5
 	,Goal_Serve_Request_6,Goal_Back_To_Ground}> STRAT = ENV.
 
-STRAT >> "/tmp/lift_controller_6.rep".
-ENV >> "/tmp/lift_controller_6.fsp.game.rep".
+STRAT >>_m "/tmp/lift_controller_6.diag".
+ENV >>_m "/tmp/lift_controller_6.fsp.game.diag".
 |ti| ENV_INTRLVD in ENV.
 |ts| ENV_SEQ in ENV.
-ENV_INTRLVD >> "/tmp/lift_controller_6.fsp.game_intrlvd.rep".
-ENV_SEQ >> "/tmp/lift_controller_6.fsp.game_seq.rep".
+ENV_INTRLVD >>_m "/tmp/lift_controller_6.fsp.game_intrlvd.diag".
+ENV_SEQ >>_m "/tmp/lift_controller_6.fsp.game_seq.diag".
 

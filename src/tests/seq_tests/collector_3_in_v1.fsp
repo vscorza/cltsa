@@ -49,11 +49,11 @@ ltl fluent G			= (allFinished).
 |f| ENV =(COLLECTOR).
 |gr1| <{A_in_0,A_in_1,A_in_2}><{G}> STRAT = ENV.
 
-//STRAT >> "/tmp/collector_3_strat.rep".
+//STRAT >>_m "/tmp/collector_3_strat.diag".
 
-ENV >> "/tmp/collector_3_in_v1.fsp.game.rep".
+ENV >>_m "/tmp/collector_3_in_v1.fsp.game.diag".
 
 |ti| ENV_INTRLVD in ENV.
 |ts| ENV_SEQ in ENV.
-ENV_INTRLVD >> "/tmp/collector_3_in_v1.fsp.game_intrlvd.rep".
-ENV_SEQ >> "/tmp/collector_3_in_v1.fsp.game_seq.rep".
+ENV_INTRLVD >>_m "/tmp/collector_3_in_v1.fsp.game_intrlvd.diag".
+ENV_SEQ >>_m "/tmp/collector_3_in_v1.fsp.game_seq.diag".
