@@ -128,4 +128,4 @@ ltl fluent G_7				= (empty || deq).
 
 //GENBUF >> "/tmp/genbuf_2_game.rep".
 
-//STRAT >> "/tmp/genbuf_2_strat.rep".
+STRAT >> "/tmp/genbuf_2_strat.rep".

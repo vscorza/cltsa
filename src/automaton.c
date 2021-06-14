@@ -1009,7 +1009,17 @@ bool automaton_automaton_has_transition(automaton_automaton* current_automaton, 
 	if(out_degree == 0)
 		return false;
 	bool result = false;
+	uint32_t fixed_max_count	= (uint32_t)ceil(current_automaton->context->global_alphabet->count*1.0f) / (sizeof(signal_bit_array_t) * 8);
 	for(i = 0; i < out_degree; i++){
+		result = true;
+		result &= transition->state_from == (&current_transitions[i])->state_from;
+		if(!result)continue;
+		result &= transition->state_to == (&current_transitions[i])->state_to;
+		if(!result)continue;
+		for(j = 0; (j < fixed_max_count) && result; j++){
+			result &= (transition->signals[j] == (&current_transitions[i])->signals[j]);
+			if(!result)break;
+		}
 		TRANSITION_EQUALS(transition, (&current_transitions[i]), result);
 		if(result)return true;
 	}

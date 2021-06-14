@@ -465,18 +465,24 @@ void automaton_automaton_serialize_metrics(FILE *f, automaton_automaton *automat
 	variance_delta_s	/= ((automaton->transitions_count - 1) * 1.0f);
 	uint32_t signal_count = 0,_p_ = 0;
 	uint64_t total_signals	= 0;
+	uint32_t fixed_max_count	= (uint32_t)ceil(automaton->context->global_alphabet->count*1.0f) / (sizeof(signal_bit_array_t) * 8);
+	uint32_t signals_bytecount	= (sizeof(signal_bit_array_t) * fixed_max_count);
 	//compute total signals
 	for(i = 0; i < automaton->transitions_count; i++)
 		for(j=0; j < automaton->out_degree[i]; j++){
+			/*
 			GET_TRANSITION_SIGNAL_COUNT_NO_VARS((&(automaton->transitions[i][j])));
 			total_signals	+= signal_count;
+			*/
+			for(k = 0; k < signals_bytecount; k++)total_signals	+= __builtin_popcount(automaton->transitions[i][j].signals[k]);
 		}
 	double mean_signals_t	= (total_signals * 1.0f) / automaton->transitions_composite_count;
 	//compute variance on events(t)
 	double variance_signals_t = 0;
 	for(i = 0; i < automaton->transitions_count; i++)
 		for(j=0; j < automaton->out_degree[i]; j++){
-			GET_TRANSITION_SIGNAL_COUNT_NO_VARS((&(automaton->transitions[i][j])));
+			signal_count = 0;
+			for(k = 0; k < signals_bytecount; k++)signal_count	+= __builtin_popcount(automaton->transitions[i][j].signals[k]);
 			variance_signals_t	+= (signal_count - mean_signals_t) * (signal_count - mean_signals_t);
 		}
 	variance_signals_t	/= ((automaton->transitions_composite_count - 1) * 1.0f);

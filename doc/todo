@@ -35,7 +35,6 @@ TODO:
 	- revisar archivo de mati
 	- reunion con sebas y vic
 - clts	
-	- extender reporter para mostrar metricas
 	- revisar composicion sincronización de etiquetas vacías
 	- minimización de controladores
 		- quedarse con el autómata donde se esconden las trans. controlables

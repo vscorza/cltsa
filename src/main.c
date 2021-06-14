@@ -159,8 +159,10 @@ int main (int argc, char** argv){
 
 		//run_functional_tests();
 
-		run_parse_test("tests/ltl_serialization_composition_test.fsp", "Serialization composition test");
-
+		//run_parse_test("tests/ltl_serialization_composition_test.fsp", "Serialization composition test");
+		//run_parse_test("tests/seq_tests/exploration-robot-v1_6.fsp", "Exploration robot v1 (6) sequentialization test");
+		run_parse_test("tests/seq_tests/genbuf_1_sndrs_no_automaton.fsp", "GenBuf 1 sndrs V2");
+		run_parse_test("tests/seq_tests/genbuf_2_sndrs_no_automaton.fsp", "GenBuf 2 sndrs V2");
 
 
 		//run_parse_test("tests/exploration-robot-realizable_test_debug.fsp", "unrealizable exploration robot test");
