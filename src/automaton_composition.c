@@ -614,17 +614,6 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 					accum_not_empty = accum_not_empty || (label_accum[k] != 0x0);
 				}
 
-				if((!not_considered && (!label_not_empty && (!accum_set || accum_not_empty)))
-						|| (not_considered && accum_set && !accum_not_empty)
-						){
-#if DEBUG_COMPOSITION
-				printf("[BLOCKS](empty label not synching)\n");
-#endif
-					viable	= false;
-
-					break;
-				}
-
 				//check blocking
 				int32_t overlapping = automaton_automata_check_overlap(label_accum, current_label
 						, accumulated_alphabet_overlap[j], alphabet_count);
@@ -647,6 +636,18 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 
 				fflush(stdout);
 #endif
+
+				if((!not_considered && (!label_not_empty && (!accum_set /* || (accum_not_empty )*/)))
+						|| (not_considered && accum_set && !accum_not_empty)
+						){
+#if DEBUG_COMPOSITION
+				printf("[BLOCKS](empty label not synching, label %s considered%s)\n", not_considered ? "not" : "", accum_set? " accum set":"");
+#endif
+					viable	= false;
+
+					break;
+				}
+
 				if(overlapping == 1){//partial synch not allowed
 					viable = false;
 #if DEBUG_COMPOSITION
@@ -654,6 +655,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 #endif
 					break;
 				}
+
 				if(synch_type[j] == ASYNCHRONOUS && overlapping == -1 && idxs[j] > 0 && accum_set){//no overlapping not allowed in asynch
 					viable = false;
 #if DEBUG_COMPOSITION

@@ -17,13 +17,12 @@ TODO:
 		- ahb_1_n
 		- missing_assumption_ahb_1_n
 		- removed_env_safety_ahb_1_n
-	- testear y comparar con valuaciones por estados 
+	- testear y comparar con valuaciones por estados (los primeros números son prometedores)
 		- genbuf_1_n
 		- ahb_1_n	
 			- mgr
 			- sched
 			- completo
-	- el diagnostico de conteo de señales da números raros, revisar lift controller, cantidad de eventos para seq vs game
 - plan de trabajo para diagnostico
 	- armar caso para lts
 	- tablas comparativas

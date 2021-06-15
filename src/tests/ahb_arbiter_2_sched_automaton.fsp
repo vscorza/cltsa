@@ -3,8 +3,8 @@
 set Global_Alphabet = {}
 set Controllable_Alphabet = {}
 
-set Global_Signals	= {hReq0, hReq1, decide, sel0, g10_1_0, g10_error}
-set Output_Signals	= {sel0, g10_1_0, g10_error}
+set Global_Signals	= {hReq0, hReq1, decide, sel0}
+set Output_Signals	= {sel0}
 order 				= {}
 
 /***********
@@ -12,22 +12,27 @@ order 				= {}
 ***********/
 //A9 (i)
 ltl env theta Init_Buffer_e in AHB	= (!hReq0 && !hReq1 && decide).
-ltl sys theta Init_Buffer_s in AHB	= (!sel0 && !g10_1_0 && !g10_error).
+ltl sys theta Init_Buffer_s in AHB	= (!sel0).
 /***********
 **** SYS RHO
 ***********/
 //G9 if not deciding keep hgrant fixed (i)
 ltl sys rho G9 in AHB		= [](!decide -> ((sel0 <-> X(sel0)))).
 //G10 do not grant before hbusreq / if no busreq grant 0 (i)
+G10 = G_10_00,
+G_10_00 = (<> -> G_10_00 | sel0.on -> G_10_ERROR | hReq0.on -> G_10_10 | <hReq0.on, sel0.on> -> G_10_11),
+G_10_10 = (<> -> G_10_10 | sel0.on -> G_10_11 | hReq0.off -> G_10_00_b | <sel0.on, hReq0.off> -> G_10_01),
+G_10_01 = (<> -> G_10_ERROR | sel0.off -> G_10_00 | hReq0.on -> G_10_11 | <sel0.off, hReq0.on> -> G_10_10),
+G_10_00_b = (<> -> G_10_00_b | sel0.on -> G_10_01 | hReq0.on -> G_10_10 | <sel0.on, hReq0.on> -> G_10_11).
+/*
 ltl sys rho G10_1_error in AHB	= [](g10_error -> X(g10_error && !sel0 && !g10_1_0)).
-
 ltl sys rho G10_1_0_0 in AHB	= []((!g10_error && !g10_1_0 && (sel0)) -> X(!g10_1_0)).
 ltl sys rho G10_1_0_1 in AHB	= []((!g10_error && !g10_1_0 && !(sel0)) -> X(g10_1_0)).
 ltl sys rho G10_1_1_1 in AHB	= []((!g10_error && g10_1_0 && !(sel0) && !hReq1) -> X(g10_1_0)).
 ltl sys rho G10_1_1_0 in AHB	= []((!g10_error && g10_1_0 && hReq1) -> X(!g10_1_0)).
 ltl sys rho G10_1_1_e in AHB	= []((!g10_error && g10_1_0 && (sel0) && !hReq1) -> X(g10_error)).
-
 ltl sys rho G10_grant0 in AHB	= []((decide && !hReq0 && !hReq1) -> X(!sel0)).
+*/
 
 /***********
 **** ENV RHO
@@ -35,16 +40,18 @@ ltl sys rho G10_grant0 in AHB	= []((decide && !hReq0 && !hReq1) -> X(!sel0)).
 /***********
 **** FLUENTS
 ***********/
-ltl fluent A10			= (decide).
+//ltl fluent A10			= (decide).
 //G11 (i)
-ltl fluent G10			= (!g10_error).
-ltl fluent G11_0		= (!hReq0 || (!sel0)).
-ltl fluent G11_1		= (!hReq1 || (sel0)).
+//ltl fluent G10			= (!g10_error).
+//ltl fluent G11_0		= (!hReq0 || (!sel0)).
+//ltl fluent G11_1		= (!hReq1 || (sel0)).
 /***********
 **** SYNTHESIS
 ***********/
-|f| ENV =(AHB).
-|gr1| <{A10}><{G11_0, G11_1}> STRAT = ENV.
+|f| ENV =(AHB ||_c G10).
+//|gr1| <{A10}><{G11_0, G11_1}> STRAT = ENV.
 
-ENV >> "/tmp/ahb_2_sched_env.rep".
-STRAT >>_m "/tmp/ahb_2_sched_strat.diag".
+ENV >> "/tmp/ahb_2_sched_aut_env.rep".
+AHB >> "/tmp/ahb_2_sched_aut_ahb.rep".
+G10 >> "/tmp/ahb_2_sched_aut_g10.rep".
+//STRAT >>_m "/tmp/ahb_2_sched_strat.diag".
