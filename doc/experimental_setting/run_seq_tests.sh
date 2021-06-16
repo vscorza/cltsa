@@ -1,7 +1,5 @@
 #!/bin/bash
-DST_DIR=$1
-OUTPUT_DIR=$2
-CLTSA_DIR=$3
+CLTSA_DIR=$1
 
 echo "::[Running seq tests]::"
 cd ${CLTSA_DIR}
