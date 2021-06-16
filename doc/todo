@@ -3,26 +3,15 @@ TODO:
 -re-escribir casos de estudio
 	- reescribir y comparar tamaños de 
 		- lift_controller (2,4,6) (8,10) solo seq
-		- missing_assumption_lift_controller_1_n
-		- removed_env_safety_lift_controller_1_n
-		- missing_assumption_collector_1_n_in_v1
 		- collector (6)
-		- removed_env_safety_collector_1_n_in_v1
 		- exploration_robot_1_n (up to 20)
-		- missing_assumption_exploration_robot_1_n
-		- removed_env_safety_exploration_robot_1_n
 		- genbuf_1_n (up to 2) (3-4) solamente seq
-		- missing_assumption_genbuf_1_n
-		- removed_env_safety_genbuf_1_n
-		- ahb_1_n
+		- ahb_1_n (2,3,4)
 		- missing_assumption_ahb_1_n
 		- removed_env_safety_ahb_1_n
-	- testear y comparar con valuaciones por estados (los primeros números son prometedores)
-		- genbuf_1_n
-		- ahb_1_n	
-			- mgr
-			- sched
-			- completo
+	- corregir reporte de diagnostico con controlabilidad segun seq tests
+	- escribir sh de run seq tets
+	- escribir merge file de run seq tests
 - plan de trabajo para diagnostico
 	- armar caso para lts
 	- tablas comparativas
@@ -33,6 +22,12 @@ TODO:
 	- revisar archivo de mati
 	- reunion con sebas y vic
 - clts	
+	- testear y comparar con valuaciones por estados (los primeros números son prometedores, ahb_arbiter_2_sched_automaton)
+		- genbuf_1_n
+		- ahb_1_n	
+			- mgr
+			- sched
+			- completo
 	- revisar composicion sincronización de etiquetas vacías
 	- minimización de controladores
 		- quedarse con el autómata donde se esconden las trans. controlables

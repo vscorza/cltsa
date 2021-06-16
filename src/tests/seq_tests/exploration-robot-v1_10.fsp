@@ -35,7 +35,7 @@ fluent F_Dont_Drop = <load, drop> initially 1
 //Real
 |gr1| <{F_Dont_Drop,F_Unload}><{F_Load, F_Unload}> STRAT = PLANT.
 //|gr1| <{A_Dummy}><{F_Load, F_Unload}> STRAT = PLANT.
-STRAT >>_m "/tmp/exploration_robot_10_strat.diag".
+//STRAT >>_m "/tmp/exploration_robot_10_strat.diag".
 
 PLANT >>_m "/tmp/exploration-robot-v1_10.fsp.game.diag".
 |ti| ENV_INTRLVD in PLANT.
