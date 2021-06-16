@@ -173,7 +173,7 @@ int main (int argc, char** argv){
 		//run_parse_test("tests/seq_tests/ahb_arbiter_6_sched.fsp", "Ahb 6 arbiter");
 		//run_parse_test("tests/ltl_fsp_composition_test.fsp", "LTL composition test");
 		//run_parse_test("tests/ltl_serialization_composition_test.fsp", "Serialization composition test");
-		run_parse_test("tests/seq_tests/exploration-robot-v1_250.fsp", "Exploration robot v1 (6) sequentialization test");
+		run_parse_test("tests/seq_tests/exploration-robot-v1_50.fsp", "Exploration robot v1 (6) sequentialization test");
 		//run_parse_test("tests/exploration-robot-realizable_test_debug.fsp", "unrealizable exploration robot test");
 		//run_parse_test("tests/exploration-robot-realizable_test_debug.fsp", "unrealizable exploration robot test");
 		//run_parse_test("tests/exploration-robot-realizable_test.fsp", "unrealizable exploration robot test");

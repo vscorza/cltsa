@@ -182,7 +182,7 @@ void automaton_alphabet_serialize_report(FILE *f, automaton_alphabet *alphabet);
 void automaton_transition_serialize_report(FILE *f, automaton_transition *transition);
 void automaton_automaton_serialize_report(FILE *f, automaton_automaton *automaton);
 bool automaton_automaton_print_report(automaton_automaton *automaton, char *filename);
-void automaton_automaton_serialize_metrics(FILE *f, automaton_automaton *automaton, bool is_html);
+void automaton_automaton_serialize_metrics(FILE *f, char* filename, automaton_automaton *automaton, bool is_html);
 bool automaton_automaton_print_metrics(automaton_automaton *automaton, char *filename, bool is_html);
 void automaton_ranking_alphabet_serialize_report(FILE *f, automaton_alphabet *alphabet, uint32_t max_delta);
 void automaton_ranking_automata_context_serialize_report(FILE *f, automaton_automata_context *ctx, uint32_t max_delta);

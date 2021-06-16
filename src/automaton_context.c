@@ -2585,7 +2585,10 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 	uint32_t results_minimization_steps = 0, results_alphabet_size = 0, results_guarantees_count = 0,
 		results_assumptions_count = 0, results_plant_states = 0, results_plant_transitions = 0,
 		results_minimization_states = 0, results_minimization_transitions = 0,
-		results_plant_controllable_transitions = 0, results_minimization_controllable_transitions = 0;
+		results_plant_controllable_transitions = 0, results_minimization_controllable_transitions = 0,
+		results_plant_controllable_options	= 0, results_minimization_controllable_options = 0, current_controllable = 0;
+	bool new_monitored = false;
+
 
 
 #if VERBOSE
@@ -3074,6 +3077,21 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 						results_plant_controllable_transitions++;
 				}
 			}
+			results_plant_controllable_options	= 0;
+			//add all options, if only one monitored option is available per state do not add
+			for(i = 0; i < game_automaton->transitions_count; i++){
+				new_monitored	= false;
+				for(j = 0; j < game_automaton->out_degree[i]; j++){
+					if(j > 0){
+						new_monitored = !(automaton_automaton_transition_monitored_eq(game_automaton,
+								&(game_automaton->transitions[i][j - 1]),
+								&(game_automaton->transitions[i][j])));
+					}else results_plant_controllable_options++;
+					if(new_monitored)results_plant_controllable_options++;
+				}
+			}
+
+
 #if VERBOSE
 
 			/*if(winning_region_automaton->transitions_count == 0){
@@ -3112,6 +3130,20 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 						results_minimization_controllable_transitions++;
 				}
 			}
+			results_minimization_controllable_options	= 0;
+			//add all options, if only one monitored option is available per state do not add
+			for(i = 0; i < winning_region_automaton->transitions_count; i++){
+				new_monitored	= false;
+				for(j = 0; j < winning_region_automaton->out_degree[i]; j++){
+					if(j > 0){
+						new_monitored = !(automaton_automaton_transition_monitored_eq(winning_region_automaton,
+								&(winning_region_automaton->transitions[i][j - 1]),
+								&(winning_region_automaton->transitions[i][j])));
+					}else results_minimization_controllable_options++;
+					if(new_monitored)results_minimization_controllable_options++;
+				}
+			}
+
 			main_index = automaton_parsing_tables_add_entry(tables, COMPOSITION_ENTRY_AUT, gr1_game->name, winning_region_automaton);
 
 			uint32_t namelen	= strlen(gr1_game->name) + 12;
@@ -3357,13 +3389,13 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 			if(!append_result)
 				fprintf(experimental_results, "name,realizable,ltl_model_build_time,model_build_time,composition_time," \
 						"synthesis_time,diagnosis_time,alphabet_size,guarantees_count," \
-						"assumptions_count,plant_states,plant_transitions,plant_controllable_transitions,minimization_states," \
-						"minimization_transitions,minimization_controllable_transitions,search_method," \
+						"assumptions_count,plant_states,plant_transitions,plant_controllable_transitions,plant_controllable_options,minimization_states," \
+						"minimization_transitions,minimization_controllable_transitions,minimization_controllable_options,search_method," \
 						"diagnosis_steps\n");
 			fprintf(experimental_results, "%s,%s,%ld.%06ld,%ld.%06ld,%ld.%06ld," \
 					"%ld.%06ld,%ld.%06ld,%d,%d," \
-					"%d,%d,%d,%d,%d," \
-					"%d,%d,%s," \
+					"%d,%d,%d,%d,%d,%d," \
+					"%d,%d,%d,%s," \
 					"%d\n",
 					test_name, nonreal? "false":"true", tval_ltl_model_build_result.tv_sec, tval_ltl_model_build_result.tv_usec,
 							tval_model_build_result.tv_sec, tval_model_build_result.tv_usec,
@@ -3371,8 +3403,8 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 							tval_synthesis_result.tv_sec, tval_synthesis_result.tv_usec,
 							tval_minimization_result.tv_sec, tval_minimization_result.tv_usec,
 							ctx->global_alphabet->count, results_guarantees_count, results_assumptions_count,
-							results_plant_states, results_plant_transitions, results_plant_controllable_transitions,
-							results_minimization_states, results_minimization_transitions, results_minimization_controllable_transitions,
+							results_plant_states, results_plant_transitions, results_plant_controllable_transitions, results_plant_controllable_options,
+							results_minimization_states, results_minimization_transitions, results_minimization_controllable_transitions, results_minimization_controllable_options,
 							is_diagnosis & DD_SEARCH ? "DD" : "linear",
 							steps);
 			sprintf(target_name, "%s.csv", steps_filename);

@@ -455,7 +455,7 @@ void automaton_transition_serialize_report(FILE *f, automaton_transition *transi
 }
 //name\t |states|\t |delta|\t mean(delta(s))\t var(delta(s)\t |events total|\t mean(events(trans))\t var(events(trans))\t |controllable options|\t mean(controllable options(s))\t var(controllable options(s))\n
 //|alphabet|\t x:occ_1:alphabet_1\t ... x:occ_N:alphabet_N\n (where x is C if controllable U otherwise, occ_i is the total number of occurrences per event)
-void automaton_automaton_serialize_metrics(FILE *f, automaton_automaton *automaton, bool is_html){
+void automaton_automaton_serialize_metrics(FILE *f, char* filename, automaton_automaton *automaton, bool is_html){
 	automaton_automaton_monitored_order_transitions(automaton);
 	uint32_t i, j, k;
 	uint64_t effective_state_count = 0;
@@ -539,11 +539,11 @@ void automaton_automaton_serialize_metrics(FILE *f, automaton_automaton *automat
 
 
 	if(!is_html){
-		fprintf(f, "%s\t%" PRIu64 "\t%" PRIu64 "\t%f\t%f%" PRIu64 "\t%f\t%f\t%" PRIu64 "\t%f\t%f%\n%d\t", automaton->name, effective_state_count, automaton->transitions_composite_count,
+		fprintf(f, "%s,%s,%" PRIu64 ",%" PRIu64 ",%f,%f%" PRIu64 ",%f,%f,%" PRIu64 ",%f,%f\n%d,", filename, automaton->name, effective_state_count, automaton->transitions_composite_count,
 				mean_delta_s, variance_delta_s, total_signals, mean_signals_t, variance_signals_t, controllable_options, mean_controllable_options, variance_controllable_options, alphabet_count);
 		for(i = 0; i < alphabet_count; i++){
 			fprintf(f, "%s:%" PRIu64 ":%s%s", automaton->context->global_alphabet->list[i].type == INPUT_SIG ? "U" : "C", signal_occurrence[i], automaton->context->global_alphabet->list[i].name
-					, i < (alphabet_count -1)? "\t": "\n");
+					, i < (alphabet_count -1)? ",": "\n");
 		}
 	}else{
 		fprintf(f, "<html>\n<head><title>%s metrics</title><style>table,th,td{border: 1px solid black;border-collapse:collapse;}</style></head>\n<body>", automaton->name);
@@ -804,7 +804,7 @@ bool automaton_automaton_print_metrics(automaton_automaton *automaton, char *fil
 		printf("Error opening file!(%s)\n", filename);
 	    return false;
 	}
-	automaton_automaton_serialize_metrics(f, automaton, is_html);
+	automaton_automaton_serialize_metrics(f, filename, automaton, is_html);
 	fclose(f);
 	return true;
 }
