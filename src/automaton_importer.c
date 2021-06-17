@@ -477,7 +477,7 @@ automaton_automaton *automaton_automaton_load_report(automaton_automata_context 
 	FILE *f = fopen(filename, "r+");
 	char current, dst;
 	if (f == NULL){
-		printf("Error opening file!(%s)\n", filename);
+		printf("Error opening file![importer:load_report](%s)\n", filename);
 		return false;
 	}
 	current = fgetc(f);

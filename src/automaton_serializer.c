@@ -251,7 +251,7 @@ bool automaton_automaton_print_fsp(automaton_automaton* current_automaton, char*
 	FILE *f = fopen(filename, "w");
 	if (f == NULL)
 	{
-	    printf("Error opening file!(%s)\n", filename);
+	    printf("Error opening file![serial:print_fsp](%s)\n", filename);
 	    return false;
 	}
 	uint32_t i,j,k, controllable_transitions = 0;
@@ -307,7 +307,7 @@ bool automaton_automaton_print_dot(automaton_automaton* current_automaton, char*
 	FILE *f = fopen(filename, "w");
 	if (f == NULL)
 	{
-		printf("Error opening file!(%s)\n", filename);
+		printf("Error opening file![serial:print_dot](%s)\n", filename);
 	    return false;
 	}
 
@@ -539,7 +539,7 @@ void automaton_automaton_serialize_metrics(FILE *f, char* filename, automaton_au
 
 
 	if(!is_html){
-		fprintf(f, "%s,%s,%" PRIu64 ",%" PRIu64 ",%f,%f%" PRIu64 ",%f,%f,%" PRIu64 ",%f,%f\n%d,", filename, automaton->name, effective_state_count, automaton->transitions_composite_count,
+		fprintf(f, "%s,%s,%" PRIu64 ",%" PRIu64 ",%f,%f,%" PRIu64 ",%f,%f,%" PRIu64 ",%f,%f\n%d,", filename, automaton->name, effective_state_count, automaton->transitions_composite_count,
 				mean_delta_s, variance_delta_s, total_signals, mean_signals_t, variance_signals_t, controllable_options, mean_controllable_options, variance_controllable_options, alphabet_count);
 		for(i = 0; i < alphabet_count; i++){
 			fprintf(f, "%s:%" PRIu64 ":%s%s", automaton->context->global_alphabet->list[i].type == INPUT_SIG ? "U" : "C", signal_occurrence[i], automaton->context->global_alphabet->list[i].name
@@ -712,7 +712,7 @@ bool automaton_ranking_print_report(automaton_automaton *automaton,
 
 		if (f == NULL)
 		{
-			printf("Error opening file!(%s)\n", filename);
+			printf("Error opening file![serial:print_ranking_report](%s)\n", filename);
 			return false;
 		}
 
@@ -781,6 +781,7 @@ bool automaton_ranking_print_report(automaton_automaton *automaton,
 		}
 
 		fprintf(f, "%s%s", AUT_SER_ARRAY_END, AUT_SER_OBJ_END);
+		fclose(f);
 	}
 	free(filename);
 	return true;
@@ -789,7 +790,7 @@ bool automaton_automaton_print_report(automaton_automaton *automaton, char *file
 	FILE *f = fopen(filename, "w");
 	if (f == NULL)
 	{
-		printf("Error opening file!(%s)\n", filename);
+		printf("Error opening file![serial:print_automaton_report](%s)\n", filename);
 	    return false;
 	}
 	automaton_automaton_serialize_report(f, automaton);
@@ -801,7 +802,7 @@ bool automaton_automaton_print_metrics(automaton_automaton *automaton, char *fil
 	FILE *f = fopen(filename, "w");
 	if (f == NULL)
 	{
-		printf("Error opening file!(%s)\n", filename);
+		printf("Error opening file![serial:print_metrics](%s)\n", filename);
 	    return false;
 	}
 	automaton_automaton_serialize_metrics(f, filename, automaton, is_html);
