@@ -70,16 +70,16 @@ lift <- subset(summ_unreal, grepl("Lift\\.Controller\\.\\d\\.\\(missing", name))
 lift_removed <- subset(summ_unreal, grepl("Lift\\.Controller\\.\\d\\.\\(removed", name))
 genbuf_missing <- subset(summ_unreal, grepl("Genbuf\\.\\d\\.\\(missing", name))
 genbuf_removed <- subset(summ_unreal, grepl("Genbuf\\.\\d\\.\\(removed", name))
-ahb_missing <- subset(summ_unreal, grepl("AHB\\.\\d\\.\\(missing", name))
-ahb_removed <- subset(summ_unreal, grepl("AHB\\.\\d\\.\\(removed", name))
+ahb_missing <- subset(summ_unreal, grepl("AHB\\.Scheduler\\.\\d\\.\\(missing", name))
+ahb_removed <- subset(summ_unreal, grepl("AHB\\.Scheduler\\.\\d\\.\\(removed", name))
 collector_missing <- subset(summ_unreal, grepl("Collector\\.\\d\\.\\(missing", name))
 collector_removed <- subset(summ_unreal, grepl("Collector\\.\\d\\.\\(removed", name))
 robot_samples <- subset(summ_unreal, grepl("Robot\\.\\d*\\.\\(missing", name))
 robot_removed <- subset(summ_unreal, grepl("Robot\\.\\d*\\.\\(removed", name))
 
 lift_real <- subset(summ_real, grepl("Lift", name))
-genbuf_real <- subset(summ_real, grepl("Genbuf", name))
-ahb_real <- subset(summ_real, grepl("AHB", name))
+genbuf_real <- subset(summ_real, grepl("GenBuf", name))
+ahb_real <- subset(summ_real, grepl("Ahb", name))
 collector_real <- subset(summ_real, grepl("Collector", name))
 robot_real <- subset(summ_real, grepl("Robot", name))
 
@@ -378,3 +378,42 @@ m_control_robot <- ggplot(robot_samples, aes(x=m_c_coeff_r, y=m_m_coeff_r)) +
 postscript(file="/home/mariano/code/henos-automata/doc/experimental_setting/tmp_results/compared_graphs.ps")
 grid.arrange(sizediag_g_ass, sizediag_safety, sizediag_collector, sizediag_exploration, plantminsize_g_ass, plantminsize_safety, plantminsize_collector, plantminsize_exploration, control_g_ass, control_safety, control_collector, control_robot, m_control_g_ass, m_control_safety, m_control_collector, m_control_robot, ncol=4)
 dev.off()
+
+
+seq_composite <- read.csv(file='/home/mariano/code/henos-automata/doc/experimental_setting/tmp_results/seq_data_composite.csv')
+seq_composite_game <- dplyr::filter(seq_composite, !grepl("intrlvd",filename) & !grepl("seq",filename))
+seq_composite_intrlvd <- dplyr::filter(seq_composite, grepl("intrlvd",filename))
+seq_composite_seq <- dplyr::filter(seq_composite, grepl("seq",filename))
+seq_composite_game_intrlvd_conform <- seq_composite_game[-c(21,22,23,27),]
+
+seq_composite_game$states_ratio <- seq_composite_game$states_count / seq_composite_seq$states_count
+seq_composite_game$transitions_ratio <- seq_composite_game$transitions_count / seq_composite_seq$transitions_count;
+seq_composite_game_intrlvd_conform$states_ratio <- seq_composite_game_intrlvd_conform$states_count / seq_composite_intrlvd$states_count
+seq_composite_game_intrlvd_conform$transitions_ratio <- seq_composite_game_intrlvd_conform$transitions_count / seq_composite_intrlvd$transitions_count;
+
+postscript(file="/home/mariano/code/henos-automata/doc/experimental_setting/tmp_results/seq_state_seq.ps")
+m_seq_state_seq <- ggplot(seq_composite_game, aes(x=states_count, y=states_ratio)) +
+  labs(title="Seq. states reduction ratio") +
+  xlab("|S_E|") +
+  ylab("Reduction") +
+  scale_y_log10() +
+  scale_x_log10() +	
+  geom_point(color='red') +
+  #geom_smooth(method='lm')	 +
+  scale_colour_Publication()+ theme_Publication()
+printf(m_seq_state_seq)
+dev.off()
+
+postscript(file="/home/mariano/code/henos-automata/doc/experimental_setting/tmp_results/seq_trans_seq.ps")
+m_seq_trans_seq <- ggplot(seq_composite_game, aes(x=transitions_count, y=transitions_ratio)) +
+  labs(title="Seq. transition reduction ratio") +
+  xlab("|Delta_E|") +
+  ylab("Reduction") +
+  scale_y_log10() +
+  scale_x_log10() +	
+  geom_point(color='red') +
+  #geom_smooth(method='lm')	 +
+  scale_colour_Publication()+ theme_Publication()
+printf(m_seq_trans_seq)
+dev.off()
+

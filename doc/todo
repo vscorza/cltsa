@@ -1,19 +1,5 @@
 TODO:
 =====
--re-escribir casos de estudio
-	x reescribir y comparar tamaños de 
-		- lift_controller (2,4,6) (8,10) solo seq
-		- collector (6)
-		- exploration_robot_1_n (up to 20)
-		- genbuf_1_n (up to 2) (3-4) solamente seq
-		- ahb_1_n (2,3,4)
-		- missing_assumption_ahb_1_n
-		- removed_env_safety_ahb_1_n
-	x corregir reporte de diagnostico con controlabilidad segun seq tests
-	x escribir sh de run seq tets
-	- escribir merge file de run seq tests
-	- correr tests
-	- escribir scripts de R
 - plan de trabajo para diagnostico
 	- armar caso para lts
 	- tablas comparativas
