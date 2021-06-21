@@ -681,7 +681,7 @@ void automaton_ranking_automata_context_serialize_report(FILE *f, automaton_auto
 	for(i = 0; i < ctx->liveness_valuations_count; i++){
 		fprintf(f, "%s%s", ctx->liveness_valuations_names[i], i == (ctx->liveness_valuations_count - 1)? "" :  AUT_SER_SEP);
 	}
-	fprintf(f, "%s%s", AUT_SER_ARRAY_END, AUT_SER_OBJ_END);
+	fprintf(f, "%s%s0%s%s%s%s", AUT_SER_ARRAY_END, AUT_SER_SEP, AUT_SER_SEP, AUT_SER_ARRAY_START, AUT_SER_ARRAY_END, AUT_SER_OBJ_END);
 }
 void automaton_ranking_transition_serialize_report(FILE *f, automaton_transition *transition,uint32_t ranking_value){
 	fprintf(f, "%s%d%s%d%s%d%s%s", AUT_SER_OBJ_START, transition->state_from, AUT_SER_SEP, transition->state_to, AUT_SER_SEP, 1 /*transition->signals_count + 1*/, AUT_SER_SEP, AUT_SER_ARRAY_START);
@@ -730,7 +730,19 @@ bool automaton_ranking_print_report(automaton_automaton *automaton,
 		for(i = 0; i < max_delta[r]; i++){
 			fprintf(f, "%d%s", automaton->context->global_alphabet->count + 1 + i, i == (max_delta[r] - 1)? "" :  AUT_SER_SEP);
 		}
+		fprintf(f, "%s%s%d%s%s", AUT_SER_ARRAY_END, AUT_SER_SEP, automaton->context->state_valuations_count, AUT_SER_SEP, AUT_SER_ARRAY_START);
+		for(i = 0; i < automaton->context->state_valuations_count; i++){
+			if(automaton->state_valuations_declared_size == 0){
+				fprintf(f, "0%s", i == (automaton->context->state_valuations_count - 1)? "" :  AUT_SER_SEP);
+			}else{
+			fluent_index	= GET_STATE_FLUENT_INDEX(automaton->context->state_valuations_count, 0, i);
+			fprintf(f, "%s%s",
+					TEST_FLUENT_BIT(automaton->state_valuations_declared, fluent_index)
+					? "1" : "0", i == (automaton->context->state_valuations_count - 1)? "" :  AUT_SER_SEP);
+			}
+		}
 		fprintf(f, "%s%s%d%s%s", AUT_SER_ARRAY_END, AUT_SER_SEP, automaton->transitions_count, AUT_SER_SEP, AUT_SER_ARRAY_START);
+
 		uint32_t current_count	= 0;
 		int32_t ranking_value;
 		bool first_transition	= true;
@@ -779,7 +791,20 @@ bool automaton_ranking_print_report(automaton_automaton *automaton,
 			}
 			fprintf(f, "%s%s", AUT_SER_ARRAY_END, i == (automaton->transitions_count - 1) ? "" : AUT_SER_SEP);
 		}
+		fprintf(f, "%s%s%s", AUT_SER_ARRAY_END, AUT_SER_SEP, AUT_SER_ARRAY_START);
+		for(i = 0; i < automaton->transitions_count; i++){
+			fprintf(f, "%s", AUT_SER_ARRAY_START);
+			for(j = 0; j < automaton->context->state_valuations_count; j++){
+				if(automaton->is_game && automaton->state_valuations_declared_size > 0){
+					fluent_index	= GET_STATE_FLUENT_INDEX(automaton->context->state_valuations_count, i, j);
+					fprintf(f, "%s%s", TEST_FLUENT_BIT(automaton->state_valuations, fluent_index) ? "1" : "0", j == (automaton->context->state_valuations_count - 1)? "" :  AUT_SER_SEP);
+				}else{
+					fprintf(f, "%s%s", "0",  j == (automaton->context->state_valuations_count - 1)? "" :  AUT_SER_SEP);
+				}
 
+			}
+			fprintf(f, "%s%s", AUT_SER_ARRAY_END, i == (automaton->transitions_count - 1) ? "" : AUT_SER_SEP);
+		}
 		fprintf(f, "%s%s", AUT_SER_ARRAY_END, AUT_SER_OBJ_END);
 		fclose(f);
 	}
