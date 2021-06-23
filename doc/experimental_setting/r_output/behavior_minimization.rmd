@@ -43,26 +43,31 @@ summ_real <- realizable_composite %>%
 genbuf_missing <- subset(summ_unreal, grepl("Genbuf\\.\\d\\.\\(missing", name))
 genbuf_removed <- subset(summ_unreal, grepl("Genbuf\\.\\d\\.\\(removed", name))
 collector_missing <- subset(summ_unreal, grepl("Collector\\.\\d\\.\\(missing", name))
-robot_samples <- subset(summ_unreal, grepl("Robot", name))
+robot_missing <- subset(summ_unreal, grepl("Robot", name) & grepl("missing", name))
+robot_removed <- subset(summ_unreal, grepl("Robot", name) & grepl("removed", name))
 
 genbuf_real <- subset(summ_real, grepl("Genbuf", name))
+genbuf_real_b <- genbuf_real[1:(nrow(genbuf_real)-1),]
 collector_real <- subset(summ_real, grepl("Collector", name))
 robot_real <- subset(summ_real, grepl("Robot", name))
 
 genbuf_missing$reduction_ctrl <- genbuf_missing$plant_trans / genbuf_real$plant_trans
 genbuf_missing$ctrl_states <- genbuf_real$plant_states
 genbuf_missing$ctrl_transitions <- genbuf_real$plant_trans
-genbuf_removed$reduction_ctrl <- genbuf_removed$plant_trans / genbuf_real$plant_trans
-genbuf_removed$ctrl_states <- genbuf_real$plant_states
-genbuf_removed$ctrl_transitions <- genbuf_real$plant_trans
+genbuf_removed$reduction_ctrl <- genbuf_removed$plant_trans / genbuf_real_b$plant_trans
+genbuf_removed$ctrl_states <- genbuf_real_b$plant_states
+genbuf_removed$ctrl_transitions <- genbuf_real_b$plant_trans
 collector_missing$reduction_ctrl <- collector_missing$plant_trans / collector_real$plant_trans
 collector_missing$ctrl_states <- collector_real$plant_states
 collector_missing$ctrl_transitions <- collector_real$plant_trans
-robot_samples$reduction_ctrl <- robot_samples$plant_trans / robot_real$plant_trans
-robot_samples$ctrl_states <- robot_real$plant_states
-robot_samples$ctrl_transitions <- robot_real$plant_trans
+robot_missing$reduction_ctrl <- robot_missing$plant_trans / robot_real$plant_trans
+robot_missing$ctrl_states <- robot_real$plant_states
+robot_missing$ctrl_transitions <- robot_real$plant_trans
+robot_removed$reduction_ctrl <- robot_removed$plant_trans / robot_real$plant_trans
+robot_removed$ctrl_states <- robot_real$plant_states
+robot_removed$ctrl_transitions <- robot_real$plant_trans
 
-composite_table <- rbind(collector_missing, robot_samples, genbuf_missing, genbuf_removed)
+composite_table <- rbind(collector_missing, robot_missing, robot_removed, genbuf_missing, genbuf_removed)
 
 print(xtable(composite_table, type = "latex"), file = "/home/mariano/code/henos-automata/doc/experimental_setting/tmp_results/experimental_data.tex")
 
@@ -175,8 +180,16 @@ sizediag_collector <- ggplot(collector_missing, aes(x=plant_transitions, y=diagn
 	scale_x_log10() +	
 	geom_point(color='red') +	
 	geom_smooth(method='lm')	
-sizediag_exploration <- ggplot(robot_samples, aes(x=plant_transitions, y=diagnosis_time)) +
-	labs(title="Robot") +
+sizediag_exploration <- ggplot(robot_removed, aes(x=plant_transitions, y=diagnosis_time)) +
+	labs(title="Robot.safety") +
+	xlab(expression(paste("|",Delta["E"],"|"))) +
+	ylab("Diagnosis time (s)") +
+	scale_y_log10() +
+	scale_x_log10() +	
+	geom_point(color='red') +	
+	geom_smooth(method='lm')
+sizediag_exploration <- ggplot(robot_missing, aes(x=plant_transitions, y=diagnosis_time)) +
+	labs(title="Robot.ass") +
 	xlab(expression(paste("|",Delta["E"],"|"))) +
 	ylab("Diagnosis time (s)") +
 	scale_y_log10() +
@@ -207,8 +220,16 @@ plantminsize_collector <- ggplot(collector_missing, aes(x=plant_transitions, y=m
 	scale_x_log10() +	
 	geom_point(color='red') 
 #+	geom_smooth(method='lm')	
-plantminsize_exploration <- ggplot(robot_samples, aes(x=plant_transitions, y=minimization_transitions)) +
-	labs(title="Robot") +
+plantminsize_exploration <- ggplot(robot_removed, aes(x=plant_transitions, y=minimization_transitions)) +
+	labs(title="Robot.safety") +
+	xlab(expression(paste("|",Delta[E],"|"))) +
+	ylab(expression(paste("|",Delta[paste("E","'")],"|"))) +
+	scale_y_log10() +
+	scale_x_log10() +	
+	geom_point(color='red') +	
+	geom_smooth(method='lm')	
+plantminsize_exploration <- ggplot(robot_missing, aes(x=plant_transitions, y=minimization_transitions)) +
+	labs(title="Robot.ass") +
 	xlab(expression(paste("|",Delta[E],"|"))) +
 	ylab(expression(paste("|",Delta[paste("E","'")],"|"))) +
 	scale_y_log10() +
@@ -245,10 +266,20 @@ control_collector <- ggplot(collector_missing, aes(x=c_coeff_c, y=m_coeff_c)) +
 	scale_x_log10() +	
 	geom_point(color='red') 
 # +	geom_smooth(method='lm')
-c_coeff_r = robot_samples$plant_controllable_transitions / robot_samples$plant_transitions	
-m_coeff_r = robot_samples$minimization_transitions / robot_samples$plant_transitions	
-control_robot <- ggplot(robot_samples, aes(x=c_coeff_r, y=m_coeff_r)) +
-	labs(title="Robot") +
+c_coeff_r = robot_removed$plant_controllable_transitions / robot_removed$plant_transitions	
+m_coeff_r = robot_removed$minimization_transitions / robot_removed$plant_transitions	
+control_robot <- ggplot(robot_removed, aes(x=c_coeff_r, y=m_coeff_r)) +
+	labs(title="Robot.safety") +
+	xlab("Controllability") +
+	ylab("Reduction") +
+	scale_y_log10() +
+	scale_x_log10() +	
+	geom_point(color='red') +
+	geom_smooth(method='lm')	
+c_coeff_r = robot_missing$plant_controllable_transitions / robot_missing$plant_transitions	
+m_coeff_r = robot_missing$minimization_transitions / robot_missing$plant_transitions	
+control_robot <- ggplot(robot_missing, aes(x=c_coeff_r, y=m_coeff_r)) +
+	labs(title="Robot.ass") +
 	xlab("Controllability") +
 	ylab("Reduction") +
 	scale_y_log10() +
@@ -285,20 +316,30 @@ m_control_collector <- ggplot(collector_missing, aes(x=m_c_coeff_c, y=m_m_coeff_
 	scale_x_log10() +	
 	geom_point(color='red') +
   geom_smooth(method='lm')
-m_c_coeff_r = robot_samples$minimization_controllable_transitions / robot_samples$plant_transitions	
-m_m_coeff_r = robot_samples$minimization_transitions / robot_samples$plant_transitions	
-m_control_robot <- ggplot(robot_samples, aes(x=m_c_coeff_r, y=m_m_coeff_r)) +
-	labs(title="Robot") +
+m_c_coeff_r = robot_removed$minimization_controllable_transitions / robot_removed$plant_transitions	
+m_m_coeff_r = robot_removed$minimization_transitions / robot_removed$plant_transitions	
+m_control_robot_safety <- ggplot(robot_removed, aes(x=m_c_coeff_r, y=m_m_coeff_r)) +
+	labs(title="Robot.safety") +
 	xlab("Min. Cont.") +
 	ylab("Reduction") +
 	scale_y_log10() +
 	scale_x_log10() +	
 	geom_point(color='red') +
-	geom_smooth(method='lm')	
+	geom_smooth(method='lm')
+m_c_coeff_r = robot_missing$minimization_controllable_transitions / robot_missing$plant_transitions	
+m_m_coeff_r = robot_missing$minimization_transitions / robot_missing$plant_transitions	
+m_control_robot_g_ass <- ggplot(robot_missing, aes(x=m_c_coeff_r, y=m_m_coeff_r)) +
+	labs(title="Robot.safety") +
+	xlab("Min. Cont.") +
+	ylab("Reduction") +
+	scale_y_log10() +
+	scale_x_log10() +	
+	geom_point(color='red') +
+	geom_smooth(method='lm')
 ```
 
 ```{r echo=FALSE}
-grid.arrange(sizediag_g_ass, sizediag_safety, sizediag_collector, sizediag_exploration, plantminsize_g_ass, plantminsize_safety, plantminsize_collector, plantminsize_exploration, control_g_ass, control_safety, control_collector, control_robot, m_control_g_ass, m_control_safety, m_control_collector, m_control_robot, ncol=4)
+grid.arrange(sizediag_g_ass, sizediag_safety, sizediag_collector, sizediag_exploration, plantminsize_g_ass, plantminsize_safety, plantminsize_collector, plantminsize_exploration, control_g_ass, control_safety, control_collector, control_robot, m_control_g_ass, m_control_safety, m_control_collector, m_control_robot_safety, m_control_robot_g_ass, ncol=4)
 ```
 
 ## Minimization progression
@@ -421,20 +462,38 @@ hist_collector_rel_liv <- ggplot(collector_missing, aes(x=relative_time_liveness
   xlab("Minimization rate") +
   ylab("Count") + 
     geom_histogram(color="black",fill="white")
-robot_samples$m_coeff = robot_samples$minimization_transitions / robot_samples$plant_transitions
-robot_samples$relative_time = robot_samples$diagnosis_time / robot_samples$plant_transitions
-robot_samples$relative_time_liveness = robot_samples$diagnosis_time / (robot_samples$plant_transitions + robot_samples$assumptions_count + robot_samples$guarantees_count)
-hist_robot <- ggplot(robot_samples, aes(x=m_coeff)) + 
-  labs(title="Minimization distribution", subtitle="Robot Explorer") +
+robot_removed$m_coeff = robot_removed$minimization_transitions / robot_removed$plant_transitions
+robot_removed$relative_time = robot_removed$diagnosis_time / robot_removed$plant_transitions
+robot_removed$relative_time_liveness = robot_removed$diagnosis_time / (robot_removed$plant_transitions + robot_removed$assumptions_count + robot_removed$guarantees_count)
+hist_robot <- ggplot(robot_removed, aes(x=m_coeff)) + 
+  labs(title="Minimization distribution", subtitle="Robot Explorer env. safety") +
   xlab("Minimization rate") +
   ylab("Count") + 
     geom_histogram(color="black",fill="white")
-hist_robot_rel <- ggplot(robot_samples, aes(x=relative_time)) + 
+hist_robot_rel <- ggplot(robot_removed, aes(x=relative_time)) + 
   labs(title=expression(paste("Min. time / |",Delta["E"],"|")), subtitle="Robot Explorer") +
   xlab("Minimization rate") +
   ylab("Count") + 
     geom_histogram(color="black",fill="white")
-hist_robot_rel_liv <- ggplot(robot_samples, aes(x=relative_time_liveness)) + 
+hist_robot_rel_liv <- ggplot(robot_removed, aes(x=relative_time_liveness)) + 
+  labs(title=expression(paste("Min. time / (|",Delta["E"],"|* liveness)")), subtitle="Robot Explorer") +
+  xlab("Minimization rate") +
+  ylab("Count") + 
+    geom_histogram(color="black",fill="white")
+robot_missing$m_coeff = robot_missing$minimization_transitions / robot_missing$plant_transitions
+robot_missing$relative_time = robot_missing$diagnosis_time / robot_missing$plant_transitions
+robot_missing$relative_time_liveness = robot_missing$diagnosis_time / (robot_missing$plant_transitions + robot_missing$assumptions_count + robot_missing$guarantees_count)
+hist_robot <- ggplot(robot_missing, aes(x=m_coeff)) + 
+  labs(title="Minimization distribution", subtitle="Robot Explorer miss. ass.") +
+  xlab("Minimization rate") +
+  ylab("Count") + 
+    geom_histogram(color="black",fill="white")
+hist_robot_rel <- ggplot(robot_missing, aes(x=relative_time)) + 
+  labs(title=expression(paste("Min. time / |",Delta["E"],"|")), subtitle="Robot Explorer") +
+  xlab("Minimization rate") +
+  ylab("Count") + 
+    geom_histogram(color="black",fill="white")
+hist_robot_rel_liv <- ggplot(robot_missing, aes(x=relative_time_liveness)) + 
   labs(title=expression(paste("Min. time / (|",Delta["E"],"|* liveness)")), subtitle="Robot Explorer") +
   xlab("Minimization rate") +
   ylab("Count") + 
@@ -669,13 +728,14 @@ ggplot(collector_missing, aes(x=c_coeff, y=m_coeff)) +
 	geom_smooth(method='lm')	
 ```
 
-# Exploration robot missing assumption
+
+# Exploration robot removed safety
 
 ## Minimization and controllability
 
 ```{r echo=FALSE}
 #sive vs diagnosis time
-ggplot(robot_samples, aes(x=plant_transitions, y=diagnosis_time)) +
+ggplot(robot_removed, aes(x=plant_transitions, y=diagnosis_time)) +
 	labs(title="Size vs diagnosis time") +
 	xlab(expression(paste("|",Delta["E"],"|"))) +
 	ylab("Diagnosis time (s)") +
@@ -689,7 +749,7 @@ ggplot(robot_samples, aes(x=plant_transitions, y=diagnosis_time)) +
 
 ```{r echo=FALSE}
 #plant size vs minimization time	
-ggplot(robot_samples, aes(x=plant_transitions, y=minimization_transitions)) +
+ggplot(robot_removed, aes(x=plant_transitions, y=minimization_transitions)) +
 	labs(title="Plant size vs minimization size") +
 	xlab(expression(paste("|",Delta[E],"|"))) +
 	ylab(expression(paste("|",Delta[paste("E","'")],"|"))) +
@@ -703,9 +763,56 @@ ggplot(robot_samples, aes(x=plant_transitions, y=minimization_transitions)) +
 
 ```{r echo=FALSE}
 #plant controllability vs minimization amount
-c_coeff = robot_samples$plant_controllable_transitions / robot_samples$plant_transitions	
-m_coeff = robot_samples$minimization_transitions / robot_samples$plant_transitions	
-ggplot(robot_samples, aes(x=c_coeff, y=m_coeff)) +
+c_coeff = robot_removed$plant_controllable_transitions / robot_removed$plant_transitions	
+m_coeff = robot_removed$minimization_transitions / robot_removed$plant_transitions	
+ggplot(robot_removed, aes(x=c_coeff, y=m_coeff)) +
+	labs(title="Plant controllability vs minimization amount") +
+	xlab("Controllability") +
+	ylab("Reduction") +
+	scale_y_log10() +
+	scale_x_log10() +	
+	geom_point(color='red') +
+	geom_smooth(method='lm')	
+```
+
+
+# Exploration robot missing assumption
+
+## Minimization and controllability
+
+```{r echo=FALSE}
+#sive vs diagnosis time
+ggplot(robot_missing, aes(x=plant_transitions, y=diagnosis_time)) +
+	labs(title="Size vs diagnosis time") +
+	xlab(expression(paste("|",Delta["E"],"|"))) +
+	ylab("Diagnosis time (s)") +
+	scale_y_log10() +
+	scale_x_log10() +	
+	geom_point(color='red') +	
+	geom_smooth(method='lm')
+```
+
+## Plant vs minimization time
+
+```{r echo=FALSE}
+#plant size vs minimization time	
+ggplot(robot_missing, aes(x=plant_transitions, y=minimization_transitions)) +
+	labs(title="Plant size vs minimization size") +
+	xlab(expression(paste("|",Delta[E],"|"))) +
+	ylab(expression(paste("|",Delta[paste("E","'")],"|"))) +
+	scale_y_log10() +
+	scale_x_log10() +	
+	geom_point(color='red') +	
+	geom_smooth(method='lm')
+```
+
+## Plant controllability vs minimization rate
+
+```{r echo=FALSE}
+#plant controllability vs minimization amount
+c_coeff = robot_missing$plant_controllable_transitions / robot_missing$plant_transitions	
+m_coeff = robot_missing$minimization_transitions / robot_missing$plant_transitions	
+ggplot(robot_missing, aes(x=c_coeff, y=m_coeff)) +
 	labs(title="Plant controllability vs minimization amount") +
 	xlab("Controllability") +
 	ylab("Reduction") +

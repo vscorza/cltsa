@@ -1,6 +1,6 @@
 # CLTSA
 
-CLTSA is intended as tool for modeling, verifying and synthesizing reactive systems through the use of a mix of FSP and game structures LTL syntax.
+CLTSA is intended as a tool for modeling, verifying, synthesizing and diagnosing reactive systems through the use of a mix of FSP and game structures LTL syntax (CFSP).
 
 ## Getting Started
 

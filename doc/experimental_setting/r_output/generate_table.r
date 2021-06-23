@@ -78,8 +78,8 @@ robot_samples <- subset(summ_unreal, grepl("Robot\\.\\d*\\.\\(missing", name))
 robot_removed <- subset(summ_unreal, grepl("Robot\\.\\d*\\.\\(removed", name))
 
 lift_real <- subset(summ_real, grepl("Lift", name))
-genbuf_real <- subset(summ_real, grepl("GenBuf", name))
-ahb_real <- subset(summ_real, grepl("Ahb", name))
+genbuf_real <- subset(summ_real, grepl("Genbuf", name))
+ahb_real <- subset(summ_real, grepl("AHB", name))
 collector_real <- subset(summ_real, grepl("Collector", name))
 robot_real <- subset(summ_real, grepl("Robot", name))
 
@@ -391,6 +391,11 @@ seq_composite_game$transitions_ratio <- seq_composite_game$transitions_count / s
 seq_composite_game_intrlvd_conform$states_ratio <- seq_composite_game_intrlvd_conform$states_count / seq_composite_intrlvd$states_count
 seq_composite_game_intrlvd_conform$transitions_ratio <- seq_composite_game_intrlvd_conform$transitions_count / seq_composite_intrlvd$transitions_count;
 
+seq_composite_game_no_robot <- dplyr::filter(seq_composite_game, !grepl("robot",filename))
+seq_composite_game_robot <- dplyr::filter(seq_composite_game, !grepl("robot",filename))
+seq_composite_game_intrlvd_conform_no_robot <- dplyr::filter(seq_composite_game_intrlvd_conform, !grepl("robot",filename))
+seq_composite_game_intrlvd_conform_robot <- dplyr::filter(seq_composite_game_intrlvd_conform, !grepl("robot",filename))
+
 postscript(file="/home/mariano/code/henos-automata/doc/experimental_setting/tmp_results/seq_state_seq.ps")
 m_seq_state_seq <- ggplot(seq_composite_game, aes(x=states_count, y=states_ratio)) +
   labs(title="Seq. states reduction ratio") +
@@ -401,7 +406,7 @@ m_seq_state_seq <- ggplot(seq_composite_game, aes(x=states_count, y=states_ratio
   geom_point(color='red') +
   #geom_smooth(method='lm')	 +
   scale_colour_Publication()+ theme_Publication()
-printf(m_seq_state_seq)
+print(m_seq_state_seq)
 dev.off()
 
 postscript(file="/home/mariano/code/henos-automata/doc/experimental_setting/tmp_results/seq_trans_seq.ps")
@@ -414,6 +419,6 @@ m_seq_trans_seq <- ggplot(seq_composite_game, aes(x=transitions_count, y=transit
   geom_point(color='red') +
   #geom_smooth(method='lm')	 +
   scale_colour_Publication()+ theme_Publication()
-printf(m_seq_trans_seq)
+print(m_seq_trans_seq)
 dev.off()
 

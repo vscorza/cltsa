@@ -1,31 +1,49 @@
 % latex table generated in R 3.6.3 by xtable 1.8-4 package
-% Thu Jun 17 21:34:19 2021
+% Wed Jun 23 17:25:03 2021
 \begin{tabular}{|l|rr|rr|rr|rr|}
   \hline & \multicolumn{2}{c|}{Diagnosis}&\multicolumn{2}{c|}{Plant ($E$)} & \multicolumn{2}{c|}{Minimization ($v_{\mathcal{U}}$)} & \multicolumn{2}{c|}{Controller ($v_{\mathcal{C}}$)}\\ \hline
 Name & Diag. time(s) & Diag. steps & $|\varphi_e + \varphi_s|$ & $|\Delta_E|$ & $|\Delta_{E'}|$ & $|\Delta_{E'}|/|\Delta_{E}|$ & $|\Delta_{C}|$ & $|\Delta_{E'}|/|\Delta_{C}|$ \\ 
   \hline
-Lift Controller 2 (missing assumption) & $<$1 & 3 & 5 & 52 & 4 &  7.6923 \% & 116 &  44.8276 \% \\ 
-  Lift Controller 4 (missing assumption) & $<$1 & 8 & 7 & 1088 & 4 &  0.3676 \% & 3238 &  33.6010 \% \\ 
-  Lift Controller 6 (missing assumption) & 2 & 12 & 9 & 15720 & 4 &  0.0254 \% & 61400 &  25.6026 \% \\ 
-  Lift Controller 8 (missing assumption) & 205 & 17 & 11 & 195040 & 20 &  0.0103 \% & 937004 &  20.8153 \% \\ 
-  Collector 1 (missing assumption) & $<$1 & 4 & 2 & 42 & 4 &  9.5238 \% & 32 &  12.5000 \% \\ 
-  Collector 2 (missing assumption) & $<$1 & 17 & 2 & 282 & 10 &  3.5461 \% & 207 &   4.8309 \% \\ 
-  Collector 3 (missing assumption) & $<$1 & 20 & 3 & 2034 & 14 &  0.6883 \% & 1424 &   0.9831 \% \\ 
-  Collector 4 (missing assumption) & 1 & 38 & 4 & 15138 & 10 &  0.0661 \% & 10326 &   0.0968 \% \\ 
-  Collector 5 (missing assumption) & 7 & 43 & 5 & 114882 & 8 &  0.0070 \% & 77306 &   0.0103 \% \\ 
-  Exploration Robot 12 (missing assumption) & $<$1 & 6 & 3 & 1320 & 202 & 15.3030 \% & 162 & 124.6914 \% \\ 
-  Exploration Robot 15 (missing assumption) & $<$1 & 2 & 3 & 2010 & 365 & 18.1592 \% & 320 & 114.0625 \% \\ 
-  Exploration Robot 18 (missing assumption) & $<$1 & 2 & 3 & 2844 & 512 & 18.0028 \% & 456 & 112.2807 \% \\ 
-  Exploration Robot 21 (missing assumption) & 2 & 7 & 3 & 3822 & 775 & 20.2773 \% & 698 & 111.0315 \% \\ 
-  Exploration Robot 24 (missing assumption) & 4 & 7 & 3 & 4944 & 970 & 19.6197 \% & 894 & 108.5011 \% \\ 
-  Exploration Robot 27 (missing assumption) & 2 & 2 & 3 & 6210 & 1301 & 20.9501 \% & 1220 & 106.6393 \% \\ 
-  Exploration Robot 30 (missing assumption) & 2 & 2 & 3 & 7620 & 1568 & 20.5774 \% & 1476 & 106.2331 \% \\ 
-  Exploration Robot 6 (missing assumption) & $<$1 & 2 & 3 & 361 & 30 &  8.3102 \% & 174 &  17.2414 \% \\ 
-  Exploration Robot 9 (missing assumption) & $<$1 & 6 & 3 & 774 & 116 & 14.9871 \% & 86 & 134.8837 \% \\ 
-  Genbuf 1 (missing assumption) & $<$1 & 6 & 4 & 273 & 48 & 17.5824 \% & 307 &  88.9251 \% \\ 
-  Genbuf 2 (missing assumption) & 13 & 42 & 5 & 28706 & 284 &  0.9893 \% & 78008 &  36.7988 \% \\ 
-  Genbuf 3 (missing assumption) & 1659 & 84 & 6 & 528650 & 1443 &  0.2730 \% & 1918013 &  27.5624 \% \\ 
-  Genbuf 1 (removed safety) & $<$1 & 10 & 5 & 1388 & 8 &  0.5764 \% & 307 &   2.6059 \% \\ 
-  Genbuf 2 (removed safety) & 1076 & 194 & 8 & 142850 & 834 &  0.5838 \% & 78008 &   1.0691 \% \\ 
+Lift Controller 2 (missing liveness) & $<$1 & 5 & 5 & 33 & 2 &  6.0606 \% & 48 &     68.7500 \% \\ 
+  Lift Controller 4 (missing liveness) & $<$1 & 9 & 7 & 763 & 2 &  0.2621 \% & 1516 &     50.3298 \% \\ 
+  Lift Controller 6 (missing liveness) & $<$1 & 13 & 9 & 11345 & 2 &  0.0176 \% & 29244 &     38.7943 \% \\ 
+  Lift Controller 8 (missing liveness) & 21 & 17 & 11 & 142551 & 2 &  0.0014 \% & 73 & 195275.3425 \% \\ 
+  Lift Controller 2 (removed safety) & $<$1 & 6 & 2 & 33 & 3 &  9.0909 \% & 48 &     68.7500 \% \\ 
+  Lift Controller 4 (removed safety) & $<$1 & 18 & 6 & 871 & 3 &  0.3444 \% & 1516 &     57.4538 \% \\ 
+  Lift Controller 6 (removed safety) & $<$1 & 14 & 8 & 13775 & 3 &  0.0218 \% & 29244 &     47.1037 \% \\ 
+  Lift Controller 8 (removed safety) & 8 & 31 & 10 & 177543 & 3 &  0.0017 \% & 73 & 243209.5890 \% \\ 
+  Collector 1 (missing liveness) & $<$1 & 4 & 2 & 23 & 2 &  8.6957 \% & 8 &     25.0000 \% \\ 
+  Collector 2 (missing liveness) & $<$1 & 18 & 2 & 135 & 4 &  2.9630 \% & 60 &      6.6667 \% \\ 
+  Collector 3 (missing liveness) & $<$1 & 36 & 3 & 881 & 5 &  0.5675 \% & 490 &      1.0204 \% \\ 
+  Collector 4 (missing liveness) & $<$1 & 47 & 4 & 6099 & 5 &  0.0820 \% & 3996 &      0.1251 \% \\ 
+  Collector 5 (missing liveness) & 3 & 56 & 5 & 43913 & 5 &  0.0114 \% & 32338 &      0.0155 \% \\ 
+  Collector 1 (removed safety) & $<$1 & 5 & 2 & 29 & 3 & 10.3448 \% & 8 &     37.5000 \% \\ 
+  Collector 2 (removed safety) & $<$1 & 16 & 3 & 177 & 15 &  8.4746 \% & 60 &     25.0000 \% \\ 
+  Collector 3 (removed safety) & $<$1 & 26 & 4 & 1187 & 15 &  1.2637 \% & 490 &      3.0612 \% \\ 
+  Collector 4 (removed safety) & $<$1 & 25 & 5 & 8397 & 15 &  0.1786 \% & 3996 &      0.3754 \% \\ 
+  Collector 5 (removed safety) & 3 & 36 & 6 & 61547 & 15 &  0.0244 \% & 32338 &      0.0464 \% \\ 
+  Exploration Robot 100 (missing liveness) & $<$1 & 17 & 3 & 79209 & 2 &  0.0025 \% & 79209 &      0.0025 \% \\ 
+  Exploration Robot 200 (missing liveness) & 4 & 19 & 3 & 318409 & 2 & $<1e^{-5}$ \% & 318409 & $<1e^{-5}$ \% \\ 
+  Exploration Robot 300 (missing liveness) & 11 & 20 & 3 & 717609 & 2 & $<1e^{-5}$ \% & 717609 & $<1e^{-5}$ \% \\ 
+  Exploration Robot 400 (missing liveness) & 27 & 21 & 3 & 1276809 & 2 & $<1e^{-5}$ \% & 1276809 & $<1e^{-5}$ \% \\ 
+  Exploration Robot 500 (missing liveness) & 41 & 21 & 3 & 1996009 & 4 & $<1e^{-5}$ \% & 1996009 & $<1e^{-5}$ \% \\ 
+  Exploration Robot 600 (missing liveness) & 100 & 22 & 3 & 2875213 & 2 & $<1e^{-5}$ \% & 2875209 & $<1e^{-5}$ \% \\ 
+  Exploration Robot 100 (removed safety) & $<$1 & 16 & 3 & 39605 & 4 &  0.0101 \% & 79209 &      0.0050 \% \\ 
+  Exploration Robot 200 (removed safety) & 2 & 18 & 3 & 159205 & 4 &  0.0025 \% & 318409 &      0.0013 \% \\ 
+  Exploration Robot 300 (removed safety) & 5 & 19 & 3 & 358805 & 4 &  0.0011 \% & 717609 & $<1e^{-5}$ \% \\ 
+  Exploration Robot 400 (removed safety) & 11 & 20 & 3 & 638405 & 4 & $<1e^{-5}$ \% & 1276809 & $<1e^{-5}$ \% \\ 
+  Exploration Robot 500 (removed safety) & 15 & 20 & 3 & 998005 & 4 & $<1e^{-5}$ \% & 1996009 & $<1e^{-5}$ \% \\ 
+  Exploration Robot 600 (removed safety) & 31 & 21 & 3 & 1437605 & 4 & $<1e^{-5}$ \% & 2875209 & $<1e^{-5}$ \% \\ 
+  Genbuf 1 (missing assumption) & $<$1 & 15 & 4 & 142 & 36 & 25.3521 \% & 32 &    443.7500 \% \\ 
+  Genbuf 2 (missing assumption) & 47 & 166 & 5 & 22673 & 139 &  0.6131 \% & 265 &   8555.8491 \% \\ 
+  Genbuf 3 (missing assumption) & 1695 & 272 & 6 & 470313 & 781 &  0.1661 \% & 1601 &  29376.2024 \% \\ 
+  Genbuf 1 (removed safety) & $<$1 & 19 & 5 & 763 & 69 &  9.0433 \% & 32 &    215.6250 \% \\ 
+  Genbuf 2 (removed safety) & 1179 & 379 & 8 & 114433 & 2500 &  2.1847 \% & 265 &    943.3962 \% \\ 
+  AHB Scheduler 2 (missing assumption) & $<$1 & 32 & 3 & 805 & 11 &  1.3665 \% & 417 &      2.6379 \% \\ 
+  AHB Scheduler 3 (missing assumption) & $<$1 & 45 & 4 & 8545 & 12 &  0.1404 \% & 6529 &      0.1838 \% \\ 
+  AHB Scheduler 4 (missing assumption) & 5 & 52 & 5 & 143425 & 4 &  0.0028 \% & 8 &     50.0000 \% \\ 
+  AHB Scheduler 2 (removed safety) & $<$1 & 37 & 3 & 547 & 19 &  3.4735 \% & 417 &      4.5564 \% \\ 
+  AHB Scheduler 3 (removed safety) & $<$1 & 48 & 4 & 8545 & 35 &  0.4096 \% & 6529 &      0.5361 \% \\ 
+  AHB Scheduler 4 (removed safety) & 3 & 42 & 5 & 89089 & 9 &  0.0101 \% & 8 &    112.5000 \% \\ 
    \hline
 \end{tabular}

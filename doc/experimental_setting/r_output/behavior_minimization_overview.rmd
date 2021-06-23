@@ -26,7 +26,8 @@ library(knitr)
 library(scales)
 suppressMessages(library(dplyr))
 suppressMessages(library(ggplot2))
-experimental_composite <- read.csv(file='/home/mariano/code/henos-automata/doc/experimental_setting/tmp_results/general_data_composite.csv')
+#experimental_composite <- read.csv(file='/home/mariano/code/henos-automata/doc/experimental_setting/tmp_results/general_data_composite.csv')
+experimental_composite <- read.csv(file='/home/mariano/code/henos-automata/doc/experimental_setting/tmp_results/unrealizable_data_composite.csv')
 genbuf_missing <- subset(experimental_composite, grepl("automaton_missing_assumption", name, fixed=TRUE))
 genbuf_removed <- subset(experimental_composite, grepl("automaton_removed_env_safety", name, fixed=TRUE))
 collector_missing <- subset(experimental_composite, grepl("v1_missing_assumption", name, fixed=TRUE))
@@ -111,6 +112,130 @@ ggplot(experimental_composite, aes(x=c_coeff, y=m_coeff)) +
 	scale_x_log10() +	
 	geom_point(color='red') +
 	geom_smooth(method='lm')	
+```
+
+# Sequntialization of CLTS structures
+
+## Sequential translation (signal based)
+
+```{r echo=FALSE}
+seq_composite <- read.csv(file='/home/mariano/code/henos-automata/doc/experimental_setting/tmp_results/seq_data_composite.csv')
+seq_composite_game <- dplyr::filter(seq_composite, !grepl("intrlvd",filename) & !grepl("seq",filename))
+seq_composite_intrlvd <- dplyr::filter(seq_composite, grepl("intrlvd",filename))
+seq_composite_seq <- dplyr::filter(seq_composite, grepl("seq",filename))
+seq_composite_game_intrlvd_conform <- seq_composite_game[-c(21,22,23,27),]
+
+seq_composite_game$states_ratio <- seq_composite_game$states_count / seq_composite_seq$states_count
+seq_composite_game$transitions_ratio <- seq_composite_game$transitions_count / seq_composite_seq$transitions_count;
+seq_composite_game_intrlvd_conform$states_ratio <- seq_composite_game_intrlvd_conform$states_count / seq_composite_intrlvd$states_count
+seq_composite_game_intrlvd_conform$transitions_ratio <- seq_composite_game_intrlvd_conform$transitions_count / seq_composite_intrlvd$transitions_count;
+
+seq_composite_game_no_robot <- dplyr::filter(seq_composite_game, !grepl("robot",filename))
+seq_composite_game_robot <- dplyr::filter(seq_composite_game, grepl("robot",filename))
+seq_composite_game_intrlvd_conform_no_robot <- dplyr::filter(seq_composite_game_intrlvd_conform, !grepl("robot",filename))
+seq_composite_game_intrlvd_conform_robot <- dplyr::filter(seq_composite_game_intrlvd_conform, !grepl("robot",filename))
+
+ggplot(seq_composite_game_no_robot, aes(x=states_count, y=states_ratio)) +
+  labs(title="Seq. states reduction ratio (signal based)") +
+  xlab("|S_E|") +
+  ylab("Reduction") +
+  scale_y_log10() +
+  scale_x_log10() +	
+  geom_point(color='red') +	
+	geom_smooth(method='lm')
+
+ggplot(seq_composite_game_no_robot, aes(x=transitions_count, y=transitions_ratio)) +
+  labs(title="Seq. transition reduction ratio (signal based)") +
+  xlab("|Delta_E|") +
+  ylab("Reduction") +
+  scale_y_log10() +
+  scale_x_log10() +	
+  geom_point(color='red')  +	
+	geom_smooth(method='lm')
+
+ggplot(seq_composite_game_no_robot, aes(x=mean_signals_t, y=states_ratio)) +
+  labs(title="Seq. states reduction ratio vs mean signals") +
+  xlab("mean(signals per trans.)") +
+  ylab("Reduction") +
+  scale_y_log10() +
+  scale_x_log10() +	
+  geom_point(color='red')  +	
+	geom_smooth(method='lm')
+
+ggplot(seq_composite_game_no_robot, aes(x=mean_signals_t, y=transitions_ratio)) +
+  labs(title="Seq. transition reduction ratio vs mean signals") +
+  xlab("mean(signals per trans.)") +
+  ylab("Reduction") +
+  scale_y_log10() +
+  scale_x_log10() +	
+  geom_point(color='red')  +	
+	geom_smooth(method='lm')
+```
+
+## Sequential translation (event based)
+
+```{r echo=FALSE}
+ggplot(seq_composite_game_robot, aes(x=states_count, y=states_ratio)) +
+  labs(title="Seq. states reduction ratio (event based)") +
+  xlab("|S_E|") +
+  ylab("Reduction") +
+  scale_y_log10() +
+  scale_x_log10() +	
+  geom_point(color='red') +	
+	geom_smooth(method='lm')
+
+ggplot(seq_composite_game_robot, aes(x=transitions_count, y=transitions_ratio)) +
+  labs(title="Seq. transition reduction ratio (event based)") +
+  xlab("|Delta_E|") +
+  ylab("Reduction") +
+  scale_y_log10() +
+  scale_x_log10() +	
+  geom_point(color='red') +	
+	geom_smooth(method='lm')
+```
+
+## Interleaved translation(signal based)
+
+```{r echo=FALSE}
+ggplot(seq_composite_game_intrlvd_conform_no_robot, aes(x=states_count, y=states_ratio)) +
+  labs(title="Seq. states reduction ratio (signal based)") +
+  xlab("|S_E|") +
+  ylab("Reduction") +
+  scale_y_log10() +
+  scale_x_log10() +	
+  geom_point(color='red') +	
+	geom_smooth(method='lm')
+
+ggplot(seq_composite_game_intrlvd_conform_no_robot, aes(x=transitions_count, y=transitions_ratio)) +
+  labs(title="Seq. transition reduction ratio (signal based)") +
+  xlab("|Delta_E|") +
+  ylab("Reduction") +
+  scale_y_log10() +
+  scale_x_log10() +	
+  geom_point(color='red') +	
+	geom_smooth(method='lm')
+```
+
+## Interleaved translation (event based)
+```{r echo=FALSE}
+
+ggplot(seq_composite_game_intrlvd_conform_robot, aes(x=states_count, y=states_ratio)) +
+  labs(title="Seq. states reduction ratio (event based)") +
+  xlab("|S_E|") +
+  ylab("Reduction") +
+  scale_y_log10() +
+  scale_x_log10() +	
+  geom_point(color='red') +	
+	geom_smooth(method='lm')
+
+ggplot(seq_composite_game_intrlvd_conform_robot, aes(x=transitions_count, y=transitions_ratio)) +
+  labs(title="Seq. transition reduction ratio (event based)") +
+  xlab("|Delta_E|") +
+  ylab("Reduction") +
+  scale_y_log10() +
+  scale_x_log10() +	
+  geom_point(color='red') +	
+	geom_smooth(method='lm')
 ```
 
 # Compared graphs
