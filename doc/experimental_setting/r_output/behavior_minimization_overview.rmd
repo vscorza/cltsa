@@ -15,6 +15,7 @@ knitr::opts_chunk$set(echo = FALSE,
 #install.packages("magrittr")
 #install.packages("ggplot2")
 #install.packages("jsonlite")
+#install.packages("plot3D")
 library(dplyr)
 library(magrittr)
 library(ggplot2)
@@ -24,6 +25,8 @@ library(grid)
 library(lattice)
 library(knitr)
 library(scales)
+library(plot3D)
+library(stringr)
 suppressMessages(library(dplyr))
 suppressMessages(library(ggplot2))
 #experimental_composite <- read.csv(file='/home/mariano/code/henos-automata/doc/experimental_setting/tmp_results/general_data_composite.csv')
@@ -116,17 +119,23 @@ ggplot(experimental_composite, aes(x=c_coeff, y=m_coeff)) +
 
 # Sequntialization of CLTS structures
 
-## Sequential translation (signal based)
-
 ```{r echo=FALSE}
 seq_composite <- read.csv(file='/home/mariano/code/henos-automata/doc/experimental_setting/tmp_results/seq_data_composite.csv')
+
+seq_composite_genbuf_4 <- dplyr::filter(seq_composite, grepl("genbuf_4",filename))
+seq_composite_arbiter_3 <- dplyr::filter(seq_composite, grepl("arbiter_3",filename))
+
 seq_composite_game <- dplyr::filter(seq_composite, !grepl("intrlvd",filename) & !grepl("seq",filename))
 seq_composite_intrlvd <- dplyr::filter(seq_composite, grepl("intrlvd",filename))
 seq_composite_seq <- dplyr::filter(seq_composite, grepl("seq",filename))
 seq_composite_game_intrlvd_conform <- seq_composite_game[-c(21,22,23,27),]
 
+seq_composite_game$seq_states <- seq_composite_seq$states_count
+seq_composite_game$seq_transitions <- seq_composite_seq$transitions_count
 seq_composite_game$states_ratio <- seq_composite_game$states_count / seq_composite_seq$states_count
 seq_composite_game$transitions_ratio <- seq_composite_game$transitions_count / seq_composite_seq$transitions_count;
+seq_composite_game_intrlvd_conform$intrlvd_states <- seq_composite_intrlvd$states_count
+seq_composite_game_intrlvd_conform$intrlvd_transitions <- seq_composite_intrlvd$transitions_count
 seq_composite_game_intrlvd_conform$states_ratio <- seq_composite_game_intrlvd_conform$states_count / seq_composite_intrlvd$states_count
 seq_composite_game_intrlvd_conform$transitions_ratio <- seq_composite_game_intrlvd_conform$transitions_count / seq_composite_intrlvd$transitions_count;
 
@@ -134,6 +143,88 @@ seq_composite_game_no_robot <- dplyr::filter(seq_composite_game, !grepl("robot",
 seq_composite_game_robot <- dplyr::filter(seq_composite_game, grepl("robot",filename))
 seq_composite_game_intrlvd_conform_no_robot <- dplyr::filter(seq_composite_game_intrlvd_conform, !grepl("robot",filename))
 seq_composite_game_intrlvd_conform_robot <- dplyr::filter(seq_composite_game_intrlvd_conform, !grepl("robot",filename))
+```
+
+## Reduction table (concurrent vs sequential)
+
+```{r echo=FALSE}
+#, col.names=c("Specification","Diagnosis(s)","Liveness fluents", "Plant transitions", "Min. transitions","Minimization pct.(%)","Min. steps")
+table_seq_composite_game_no_robot <- subset(seq_composite_game_no_robot, select = c(filename, states_count, seq_states, states_ratio, transitions_count, seq_transitions, transitions_ratio, mean_delta_s, mean_signals_t))
+table_seq_composite_game_no_robot$filename <- str_replace_all(table_seq_composite_game_no_robot$filename, "/tmp/", "")
+table_seq_composite_game_no_robot$filename <- str_replace_all(table_seq_composite_game_no_robot$filename, ".diag", "")
+table_seq_composite_game_no_robot$filename <- str_replace_all(table_seq_composite_game_no_robot$filename, ".game", "")
+table_seq_composite_game_no_robot$filename <- str_replace_all(table_seq_composite_game_no_robot$filename, ".fsp", "")
+table_seq_composite_game_no_robot$filename <- str_replace_all(table_seq_composite_game_no_robot$filename, "_", " ")
+kable(table_seq_composite_game_no_robot, caption = "Concurrent vs seq", col.names=c("Specification","#States","#Seq. states","#States/#Seq. states", "#Transitions", "#Seq. trans", "#Trans/#Seq, Trans","Mean out(s)","Mean signals per trans."))
+```
+
+## Reduction table (concurrent vs interleaved)
+
+```{r echo=FALSE}
+#, col.names=c("Specification","Diagnosis(s)","Liveness fluents", "Plant transitions", "Min. transitions","Minimization pct.(%)","Min. steps")
+table_intrlvd_composite_game_no_robot <- subset(seq_composite_game_intrlvd_conform_no_robot, select = c(filename, states_count, intrlvd_states, states_ratio, transitions_count, intrlvd_transitions, transitions_ratio, mean_delta_s, mean_signals_t))
+table_intrlvd_composite_game_no_robot$filename <- str_replace_all(table_intrlvd_composite_game_no_robot$filename, "/tmp/", "")
+table_intrlvd_composite_game_no_robot$filename <- str_replace_all(table_intrlvd_composite_game_no_robot$filename, ".diag", "")
+table_intrlvd_composite_game_no_robot$filename <- str_replace_all(table_intrlvd_composite_game_no_robot$filename, ".game", "")
+table_intrlvd_composite_game_no_robot$filename <- str_replace_all(table_intrlvd_composite_game_no_robot$filename, ".fsp", "")
+table_intrlvd_composite_game_no_robot$filename <- str_replace_all(table_intrlvd_composite_game_no_robot$filename, "_", " ")
+kable(table_intrlvd_composite_game_no_robot, caption = "Concurrent vs interleaved", col.names=c("Specification","#States","#Intrlvd. States","#States/#Intrlvd. States", "#Transitions","#Intrlvd. Trans", "#Trans/#Intrlvd. Trans","Mean out(s)","Mean signals per trans."))
+```
+
+## Mean signal count vs space reduction (seq, signal based)
+
+```{r echo=FALSE}
+x <- seq_composite_game_no_robot$states_count
+y <- seq_composite_game_no_robot$states_ratio
+z <- seq_composite_game_no_robot$mean_signals_t
+# Compute the linear regression 
+fit <- lm(z ~ x + y)
+# create a grid from the x and y values (min to max) and predict values for every point
+# this will become the regression plane
+grid.lines = 20
+x.pred <- seq(min(x), max(x), length.out = grid.lines)
+y.pred <- seq(min(y), max(y), length.out = grid.lines)
+xy <- expand.grid( x = x.pred, y = y.pred)
+z.pred <- matrix(predict(fit, newdata = xy), 
+                 nrow = grid.lines, ncol = grid.lines)
+# create the fitted points for droplines to the surface
+fitpoints <- predict(fit)
+# scatter plot with regression plane
+scatter3D(x, y, z, pch = 19, cex = 1,colvar = NULL, col="red", theta = -30, phi = 0, bty="b",
+          xlab = "|S|", ylab = "|S|/|S'|", zlab = "mean sig. x trans.", surf = list(x = x.pred, y = y.pred, z = z.pred,  
+                      facets = TRUE, fit = fitpoints, col=ramp.col (col = c("dodgerblue3","seagreen2"), n = 300, alpha=0.5), border="black"), main = "Mean signal count vs space reduction (seq, signal based)")
+ 
+```
+
+## Mean signal count vs space reduction (seq, signal based)
+
+```{r echo=FALSE}
+x <- seq_composite_game_no_robot$transitions_count
+y <- seq_composite_game_no_robot$transitions_ratio
+z <- seq_composite_game_no_robot$mean_signals_t
+# Compute the linear regression 
+fit <- lm(z ~ x + y)
+# create a grid from the x and y values (min to max) and predict values for every point
+# this will become the regression plane
+grid.lines = 20
+x.pred <- seq(min(x), max(x), length.out = grid.lines)
+y.pred <- seq(min(y), max(y), length.out = grid.lines)
+xy <- expand.grid( x = x.pred, y = y.pred)
+z.pred <- matrix(predict(fit, newdata = xy), 
+                 nrow = grid.lines, ncol = grid.lines)
+# create the fitted points for droplines to the surface
+fitpoints <- predict(fit)
+# scatter plot with regression plane
+scatter3D(x, y, z, pch = 19, cex = 1,colvar = NULL, col="red", theta = -30, phi = 0, bty="b",
+          xlab = "|Delta|", ylab = "|Delta|/|Delta'|", zlab = "mean sig. x trans.", surf = list(x = x.pred, y = y.pred, z = z.pred,  
+                      facets = TRUE, fit = fitpoints, col=ramp.col (col = c("dodgerblue3","seagreen2"), n = 300, alpha=0.5), border="black"), main = "Mean signal count vs trans. reduction (seq, signal based)")
+ 
+```
+
+## Sequential translation (signal based)
+
+```{r echo=FALSE}
+
 
 ggplot(seq_composite_game_no_robot, aes(x=states_count, y=states_ratio)) +
   labs(title="Seq. states reduction ratio (signal based)") +

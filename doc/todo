@@ -1,8 +1,9 @@
 TODO:
 =====
+- revisar reporte de transiciones en la serialización, el composite parece no estar bien
 - plan de trabajo para diagnostico
-	- armar caso para lts
-	- tablas comparativas
+	X armar caso para lts
+	X tablas comparativas
 	- boceto de
 		- introducir clts como necesidad para ejecutar los casos (refs de definitions nuevo)
 		- ref. a un arxiv

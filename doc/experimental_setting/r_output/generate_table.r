@@ -1,4 +1,4 @@
-list.of.packages <- c("xtable","dplyr","magrittr","ggplot2","grid","ggthemes","gridExtra","lattice","base")
+list.of.packages <- c("xtable","dplyr","magrittr","ggplot2","grid","ggthemes","gridExtra","lattice","base","plot3D")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
 library(base)
@@ -9,6 +9,7 @@ library(ggplot2)
 library(gridExtra)
 library(lattice)
 require(scales)
+
 
 
 theme_Publication <- function(base_size=14, base_family="libertine") {
