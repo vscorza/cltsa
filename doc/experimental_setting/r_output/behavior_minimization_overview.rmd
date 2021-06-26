@@ -134,11 +134,12 @@ seq_composite_game$seq_states <- seq_composite_seq$states_count
 seq_composite_game$seq_transitions <- seq_composite_seq$transitions_count
 seq_composite_game$states_ratio <- seq_composite_game$states_count / seq_composite_seq$states_count
 seq_composite_game$transitions_ratio <- seq_composite_game$transitions_count / seq_composite_seq$transitions_count;
+seq_composite_game$states_ratio_vs_mean_signals <- seq_composite_game$mean_signals_t / (seq_composite_game$states_count / seq_composite_seq$states_count);
 seq_composite_game_intrlvd_conform$intrlvd_states <- seq_composite_intrlvd$states_count
 seq_composite_game_intrlvd_conform$intrlvd_transitions <- seq_composite_intrlvd$transitions_count
 seq_composite_game_intrlvd_conform$states_ratio <- seq_composite_game_intrlvd_conform$states_count / seq_composite_intrlvd$states_count
 seq_composite_game_intrlvd_conform$transitions_ratio <- seq_composite_game_intrlvd_conform$transitions_count / seq_composite_intrlvd$transitions_count;
-
+seq_composite_game_intrlvd_conform$states_ratio_vs_mean_signals <- seq_composite_game_intrlvd_conform$mean_signals_t / (seq_composite_game_intrlvd_conform$states_count / seq_composite_intrlvd$states_count);
 seq_composite_game_no_robot <- dplyr::filter(seq_composite_game, !grepl("robot",filename))
 seq_composite_game_robot <- dplyr::filter(seq_composite_game, grepl("robot",filename))
 seq_composite_game_intrlvd_conform_no_robot <- dplyr::filter(seq_composite_game_intrlvd_conform, !grepl("robot",filename))
