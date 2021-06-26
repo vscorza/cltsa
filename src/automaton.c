@@ -1233,15 +1233,9 @@ bool automaton_automaton_add_transition(automaton_automaton* current_automaton, 
 
 	if(old_out_degree  >= old_out_size){
 		current_automaton->out_size[from_state]	= (old_out_size * LIST_INCREASE_FACTOR);
-		automaton_transition* new_out	= calloc(current_automaton->out_size[from_state], sizeof(automaton_transition));
-		for(i = 0; i < old_out_degree; i++){
-				automaton_transition_copy(&(current_automaton->transitions[from_state][i]), &(new_out[i]));
-				automaton_transition_destroy(&(current_automaton->transitions[from_state][i]), false);
-		}
-		for(i = old_out_degree; i < current_automaton->out_size[from_state]; i++){
-			automaton_transition_initialize(&(new_out[i]), 0, 0);
-		}
-		free(current_automaton->transitions[from_state]);
+		automaton_transition* new_out	= realloc(current_automaton->transitions[from_state], current_automaton->out_size[from_state] * sizeof(automaton_transition));
+		if(new_out == NULL){printf("Could not allocate memory for out transitions at state %d\n", from_state); exit(-1);}
+		memset(&(new_out[old_out_degree]), 0, (current_automaton->out_size[from_state] - old_out_degree) * sizeof(automaton_transition));
 		current_automaton->transitions[from_state]	= new_out;
 	}
 	if(TRANSITION_IS_INPUT(transition))
@@ -1249,15 +1243,9 @@ bool automaton_automaton_add_transition(automaton_automaton* current_automaton, 
 	automaton_transition_copy(transition, &(current_automaton->transitions[from_state][old_out_degree]));
 	if(old_in_degree  >= old_in_size){
 		current_automaton->in_size[to_state]	= (old_in_size * LIST_INCREASE_FACTOR);
-		automaton_transition* new_in	= calloc(current_automaton->in_size[to_state], sizeof(automaton_transition));
-		for(i = 0; i < old_in_degree; i++){
-			automaton_transition_copy(&(current_automaton->inverted_transitions[to_state][i]), &(new_in[i]));
-			automaton_transition_destroy(&(current_automaton->inverted_transitions[to_state][i]), false);
-		}
-		for(i = old_in_degree; i < current_automaton->in_size[to_state]; i++){
-			automaton_transition_initialize(&(new_in[i]), 0, 0);
-		}
-		free(current_automaton->inverted_transitions[to_state]);
+		automaton_transition* new_in	= realloc(current_automaton->inverted_transitions[to_state], current_automaton->in_size[to_state] * sizeof(automaton_transition));
+		if(new_in == NULL){printf("Could not allocate memory for in transitions at state %d\n", to_state); exit(-1);}
+		memset(&(new_in[old_in_degree]), 0, (current_automaton->in_size[to_state] - old_in_degree) * sizeof(automaton_transition));
 		current_automaton->inverted_transitions[to_state]	= new_in;
 	}
 
