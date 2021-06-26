@@ -1,6 +1,6 @@
 TODO:
 =====
-- revisar reporte de transiciones en la serialización, el composite parece no estar bien
+- armar un ejemplo chico que tenga muchas señales por transición pero sea pequeño (que alterne pares, o alterne casi todas menos un contador)
 - plan de trabajo para diagnostico
 	X armar caso para lts
 	X tablas comparativas
