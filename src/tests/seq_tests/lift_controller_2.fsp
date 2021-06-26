@@ -23,7 +23,7 @@ ltl fluent Goal_Serve_Request_2			= ((b2->f2)).
 |f| ENV =(GAME_LTL).
 |gr1| <{Ass_True}><{Goal_Serve_Request_1,Goal_Serve_Request_2,Goal_Back_To_Ground}> STRAT = ENV.
 
-STRAT >>_m "/tmp/lift_controller_2.diag".
+//STRAT >>_m "/tmp/lift_controller_2.diag".
 
 ENV >> "/tmp/lift_controller_2.fsp.game.rep".
 ENV_SEQ >> "/tmp/lift_controller_2.fsp.game_seq.rep".
