@@ -3079,13 +3079,13 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 			}
 			results_plant_controllable_options	= 0;
 			//add all options, if only one monitored option is available per state do not add
-			for(i = 0; i < game_automaton->transitions_count; i++){
+			for(j = 0; j < game_automaton->transitions_count; j++){
 				new_monitored	= false;
-				for(j = 0; j < game_automaton->out_degree[i]; j++){
-					if(j > 0){
+				for(k = 0; k < game_automaton->out_degree[j]; k++){
+					if(k > 0){
 						new_monitored = !(automaton_automaton_transition_monitored_eq(game_automaton,
-								&(game_automaton->transitions[i][j - 1]),
-								&(game_automaton->transitions[i][j])));
+								&(game_automaton->transitions[j][k - 1]),
+								&(game_automaton->transitions[j][k])));
 					}else results_plant_controllable_options++;
 					if(new_monitored)results_plant_controllable_options++;
 				}
@@ -3132,13 +3132,13 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 			}
 			results_minimization_controllable_options	= 0;
 			//add all options, if only one monitored option is available per state do not add
-			for(i = 0; i < winning_region_automaton->transitions_count; i++){
+			for(j = 0; j < winning_region_automaton->transitions_count; j++){
 				new_monitored	= false;
-				for(j = 0; j < winning_region_automaton->out_degree[i]; j++){
-					if(j > 0){
+				for(k = 0; k < winning_region_automaton->out_degree[j]; k++){
+					if(k > 0){
 						new_monitored = !(automaton_automaton_transition_monitored_eq(winning_region_automaton,
-								&(winning_region_automaton->transitions[i][j - 1]),
-								&(winning_region_automaton->transitions[i][j])));
+								&(winning_region_automaton->transitions[j][k - 1]),
+								&(winning_region_automaton->transitions[j][k])));
 					}else results_minimization_controllable_options++;
 					if(new_monitored)results_minimization_controllable_options++;
 				}

@@ -41,4 +41,14 @@ ltl fluent G			= (allFinished).
 |f| ENV =(COLLECTOR).
 |gr1| <{A_in_0}><{G}> STRAT = ENV.
 
-//STRAT >> "/tmp/collector_1_strat.rep".
+|ti| TI_ENV in COLLECTOR.
+|i| I_ENV in COLLECTOR.
+
+STRAT >> "/tmp/collector_1_strat.rep".
+COLLECTOR >> "/tmp/collector_1_ENV.rep".
+TI_ENV >> "/tmp/collector_1_ENV_ti.rep".
+I_ENV >> "/tmp/collector_1_ENV_i.rep".
+
+COLLECTOR >>_m "/tmp/collector_1_ENV.diag".
+TI_ENV >>_m "/tmp/collector_1_ENV_ti.diag".
+I_ENV >>_m "/tmp/collector_1_ENV_i.diag".

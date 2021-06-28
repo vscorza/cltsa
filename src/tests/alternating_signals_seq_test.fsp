@@ -1,0 +1,45 @@
+set Global_Alphabet = {}
+set Controllable_Alphabet = {}
+
+set Global_Signals	= {x_1, x_2, x_3,  x_4, y_1, y_2}
+set Output_Signals	= {y_1, y_2}
+
+ltl env theta Init_e in GAME_LTL	= (x_1 && !x_2 && x_3 && !x_4).
+ltl sys theta Init_s in GAME_LTL	= (!y_1 && !y_2).
+ltl env rho Env_Rho in GAME_LTL	= []((x_1 <-> X(!x_1)) && (x_2 <-> X(!x_2)) && (x_3 <-> X(!x_3)) && (x_4 <-> X(!x_4))).
+ltl sys rho Sys_Rho in GAME_LTL	= [](((!y_1 && !y_2) <-> X(y_1 && !y_2)) && ((y_1 && !y_2) <-> X(!y_1 && y_2)) && ((!y_1 && y_2) <-> X(y_1 && y_2)) && ((y_1 && y_2) <-> X(!y_1 && !y_2))).
+
+|s| GAME_LTL_S in GAME_LTL.
+|i| GAME_LTL_I in GAME_LTL.
+|ts| GAME_LTL_TS in GAME_LTL.
+|ti| GAME_LTL_TI in GAME_LTL.
+
+GAME_LTL >> "/tmp/alternating_signals_game_ltl.rep".
+GAME_LTL_S >> "/tmp/alternating_signals_game_ltl_s.rep".
+GAME_LTL_I >> "/tmp/alternating_signals_game_ltl_i.rep".
+GAME_LTL_TS >> "/tmp/alternating_signals_game_ltl_ts.rep".
+GAME_LTL_TI >> "/tmp/alternating_signals_game_ltl_ti.rep".
+
+GAME_LTL >>_m "/tmp/alternating_signals_game_ltl.diag".
+GAME_LTL_TI >>_m "/tmp/alternating_signals_game_ltl_ti.diag".
+GAME_LTL_I >>_m "/tmp/alternating_signals_game_ltl_i.diag".
+
+ltl env theta Init_e in MUX_GAME_LTL	= ((x_1 && !x_2 && !x_3 && !x_4) || (!x_1 && x_2 && !x_3 && !x_4) || (!x_1 && !x_2 && x_3 && !x_4) || (!x_1 && !x_2 && !x_3 && x_4)).
+ltl sys theta Init_s in MUX_GAME_LTL	= (!y_1 && !y_2).
+ltl env rho Env_Rho in MUX_GAME_LTL	= []((x_1 && !x_2 && !x_3 && !x_4) || (!x_1 && x_2 && !x_3 && !x_4) || (!x_1 && !x_2 && x_3 && !x_4) || (!x_1 && !x_2 && !x_3 && x_4)).
+ltl sys rho Sys_Rho in MUX_GAME_LTL	= [](((!y_1 && !y_2) <-> X(y_1 && !y_2)) && ((y_1 && !y_2) <-> X(!y_1 && y_2)) && ((!y_1 && y_2) <-> X(y_1 && y_2)) && ((y_1 && y_2) <-> X(!y_1 && !y_2))).
+
+|s| MUX_GAME_LTL_S in MUX_GAME_LTL.
+|i| MUX_GAME_LTL_I in MUX_GAME_LTL.
+|ts| MUX_GAME_LTL_TS in MUX_GAME_LTL.
+|ti| MUX_GAME_LTL_TI in MUX_GAME_LTL.
+
+MUX_GAME_LTL >> "/tmp/alternating_signals_game_ltl_m.rep".
+MUX_GAME_LTL_S >> "/tmp/alternating_signals_game_ltl_m_s.rep".
+MUX_GAME_LTL_I >> "/tmp/alternating_signals_game_ltl_m_i.rep".
+MUX_GAME_LTL_TS >> "/tmp/alternating_signals_game_ltl_m_ts.rep".
+MUX_GAME_LTL_TI >> "/tmp/alternating_signals_game_ltl_m_ti.rep".
+
+MUX_GAME_LTL >>_m "/tmp/alternating_signals_game_ltl_m.diag".
+MUX_GAME_LTL_TI >>_m "/tmp/alternating_signals_game_ltl_m_ti.diag".
+MUX_GAME_LTL_I >>_m "/tmp/alternating_signals_game_ltl_m_i.diag".
