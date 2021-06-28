@@ -180,10 +180,10 @@ ggplot(table_seq_composite_game_no_robot, aes(x=trans_times_mean_signals_vs_seq_
   
 	geom_smooth(method='lm')
 
-ggplot(table_seq_composite_game_no_robot, aes(x=states_ratio, y=trans_vs_states, label=filename)) +
+ggplot(table_seq_composite_game_no_robot, aes(x=1/states_ratio, y=trans_vs_states, label=filename)) +
   geom_point() +geom_text(aes(label=filename),hjust=0, vjust=0)+
   labs(title="Seq. size explanation 2") +
-  xlab("#States/#Seq. States") +
+  xlab("#Seq. #States/States") +
   ylab("#Trans./#States") +	
   geom_point(color='red') +	
     scale_y_log10() +
