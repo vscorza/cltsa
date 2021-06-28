@@ -470,13 +470,12 @@ void automaton_automaton_serialize_metrics(FILE *f, char* filename, automaton_au
 	variance_delta_s	/= ((automaton->transitions_count - 1) * 1.0f);
 	uint32_t signal_count = 0,_p_ = 0;
 	uint64_t total_signals	= 0;
-	uint32_t fixed_max_count	= (uint32_t)ceil(automaton->context->global_alphabet->count*1.0f / (sizeof(signal_bit_array_t) * 8));
-	uint32_t signals_bytecount	= (sizeof(signal_bit_array_t) * fixed_max_count);
+	uint32_t signals_intcount	= (uint32_t)ceil(automaton->context->global_alphabet->count*1.0f / (sizeof(int) * 8));
 	//compute total signals
 	int current_value;
 	for(i = 0; i < automaton->transitions_count; i++)
 		for(j=0; j < automaton->out_degree[i]; j++){
-			for(k = 0; k < signals_bytecount; k++){
+			for(k = 0; k < signals_intcount; k++){
 				current_value = k == 0? (((int*)(&(automaton->transitions[i][j].signals)))[k]) & ((int)~0x1) :
 						(((int*)(&(automaton->transitions[i][j].signals)))[k]);
 				total_signals	+= __builtin_popcount(current_value);
@@ -488,7 +487,7 @@ void automaton_automaton_serialize_metrics(FILE *f, char* filename, automaton_au
 	for(i = 0; i < automaton->transitions_count; i++)
 		for(j=0; j < automaton->out_degree[i]; j++){
 			signal_count = 0;
-			for(k = 0; k < signals_bytecount; k++){
+			for(k = 0; k < signals_intcount; k++){
 				current_value = k == 0? (((int*)(&(automaton->transitions[i][j].signals)))[k]) & ((int)~0x1) :
 						(((int*)(&(automaton->transitions[i][j].signals)))[k]);
 				signal_count	+= __builtin_popcount(current_value);
