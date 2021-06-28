@@ -45,7 +45,7 @@ ltl fluent G			= (allFinished).
 
 ENV >>_m "/tmp/collector_1_in_v1.fsp.game.diag".
 
-|ti| ENV_INTRLVD in ENV.
-|ts| ENV_SEQ in ENV.
-ENV_INTRLVD >>_m "/tmp/collector_1_in_v1.fsp.game_intrlvd.diag".
-ENV_SEQ >>_m "/tmp/collector_1_in_v1.fsp.game_seq.diag".
+//|ti| ENV_INTRLVD in ENV.
+//|ts| ENV_SEQ in ENV.
+//ENV_INTRLVD >>_m "/tmp/collector_1_in_v1.fsp.game_intrlvd.diag".
+//ENV_SEQ >>_m "/tmp/collector_1_in_v1.fsp.game_seq.diag".

@@ -135,11 +135,19 @@ seq_composite_game$seq_transitions <- seq_composite_seq$transitions_count
 seq_composite_game$states_ratio <- seq_composite_game$states_count / seq_composite_seq$states_count
 seq_composite_game$transitions_ratio <- seq_composite_game$transitions_count / seq_composite_seq$transitions_count;
 seq_composite_game$states_ratio_vs_mean_signals <- seq_composite_game$mean_signals_t / (seq_composite_game$states_count / seq_composite_seq$states_count);
+seq_composite_game$trans_times_mean_signals <- (seq_composite_game$mean_signals_t+2) * seq_composite_game$transitions_count;
+seq_composite_game$trans_times_mean_signals_vs_seq_states <- (seq_composite_game$seq_states - seq_composite_game$states_count) / seq_composite_game$trans_times_mean_signals;
+seq_composite_game$trans_vs_states <- seq_composite_game$transitions_count / seq_composite_game$states_count;
+
 seq_composite_game_intrlvd_conform$intrlvd_states <- seq_composite_intrlvd$states_count
 seq_composite_game_intrlvd_conform$intrlvd_transitions <- seq_composite_intrlvd$transitions_count
 seq_composite_game_intrlvd_conform$states_ratio <- seq_composite_game_intrlvd_conform$states_count / seq_composite_intrlvd$states_count
 seq_composite_game_intrlvd_conform$transitions_ratio <- seq_composite_game_intrlvd_conform$transitions_count / seq_composite_intrlvd$transitions_count;
 seq_composite_game_intrlvd_conform$states_ratio_vs_mean_signals <- seq_composite_game_intrlvd_conform$mean_signals_t / (seq_composite_game_intrlvd_conform$states_count / seq_composite_intrlvd$states_count);
+seq_composite_game_intrlvd_conform$trans_times_mean_signals <- (seq_composite_game_intrlvd_conform$mean_signals_t+2) * seq_composite_game_intrlvd_conform$transitions_count;
+seq_composite_game_intrlvd_conform$trans_times_mean_signals_vs_intrlvd_states <- (seq_composite_game_intrlvd_conform$intrlvd_states - seq_composite_game_intrlvd_conform$states_count) / seq_composite_game_intrlvd_conform$trans_times_mean_signals;
+seq_composite_game_intrlvd_conform$trans_vs_states <- seq_composite_game_intrlvd_conform$transitions_count / seq_composite_game_intrlvd_conform$states_count;
+
 seq_composite_game_no_robot <- dplyr::filter(seq_composite_game, !grepl("robot",filename))
 seq_composite_game_robot <- dplyr::filter(seq_composite_game, grepl("robot",filename))
 seq_composite_game_intrlvd_conform_no_robot <- dplyr::filter(seq_composite_game_intrlvd_conform, !grepl("robot",filename))
@@ -150,26 +158,50 @@ seq_composite_game_intrlvd_conform_robot <- dplyr::filter(seq_composite_game_int
 
 ```{r echo=FALSE}
 #, col.names=c("Specification","Diagnosis(s)","Liveness fluents", "Plant transitions", "Min. transitions","Minimization pct.(%)","Min. steps")
-table_seq_composite_game_no_robot <- subset(seq_composite_game_no_robot, select = c(filename, states_count, seq_states, states_ratio, transitions_count, seq_transitions, transitions_ratio, mean_delta_s, mean_signals_t))
+table_seq_composite_game_no_robot <- subset(seq_composite_game_no_robot, select = c(filename, states_count, seq_states, states_ratio, transitions_count, seq_transitions, transitions_ratio, mean_delta_s, mean_signals_t, trans_times_mean_signals, trans_times_mean_signals_vs_seq_states, trans_vs_states))
 table_seq_composite_game_no_robot$filename <- str_replace_all(table_seq_composite_game_no_robot$filename, "/tmp/", "")
 table_seq_composite_game_no_robot$filename <- str_replace_all(table_seq_composite_game_no_robot$filename, ".diag", "")
 table_seq_composite_game_no_robot$filename <- str_replace_all(table_seq_composite_game_no_robot$filename, ".game", "")
 table_seq_composite_game_no_robot$filename <- str_replace_all(table_seq_composite_game_no_robot$filename, ".fsp", "")
 table_seq_composite_game_no_robot$filename <- str_replace_all(table_seq_composite_game_no_robot$filename, "_", " ")
-kable(table_seq_composite_game_no_robot, caption = "Concurrent vs seq", col.names=c("Specification","#States","#Seq. states","#States/#Seq. states", "#Transitions", "#Seq. trans", "#Trans/#Seq, Trans","Mean out(s)","Mean signals per trans."))
+kable(table_seq_composite_game_no_robot, caption = "Concurrent vs seq", col.names=c("Specification","#States","#Seq. states","#States/#Seq. states", "#Transitions", "#Seq. trans", "#Trans/#Seq, Trans","Mean out(s)","Mean signals per trans.", "#Trans x mean signals", "#Seq. states/#Trans x mean signals", "#Trans./#States"))
+```
+
+
+## Explaining sequential size correlation (event based)
+
+```{r echo=FALSE}
+ggplot(table_seq_composite_game_no_robot, aes(x=trans_times_mean_signals_vs_seq_states, y=trans_vs_states, label=filename)) +
+  geom_point() +geom_text(aes(label=filename),hjust=0, vjust=0)+
+  labs(title="Seq. size explanation 1") +
+  xlab("#Seq. states/#Trans x mean signals") +
+  ylab("#Trans./#States") +	
+  geom_point(color='red') +	
+  
+	geom_smooth(method='lm')
+
+ggplot(table_seq_composite_game_no_robot, aes(x=states_ratio, y=trans_vs_states, label=filename)) +
+  geom_point() +geom_text(aes(label=filename),hjust=0, vjust=0)+
+  labs(title="Seq. size explanation 2") +
+  xlab("#States/#Seq. States") +
+  ylab("#Trans./#States") +	
+  geom_point(color='red') +	
+    scale_y_log10() +
+    scale_x_log10() +
+	geom_smooth(method='lm')
 ```
 
 ## Reduction table (concurrent vs interleaved)
 
 ```{r echo=FALSE}
 #, col.names=c("Specification","Diagnosis(s)","Liveness fluents", "Plant transitions", "Min. transitions","Minimization pct.(%)","Min. steps")
-table_intrlvd_composite_game_no_robot <- subset(seq_composite_game_intrlvd_conform_no_robot, select = c(filename, states_count, intrlvd_states, states_ratio, transitions_count, intrlvd_transitions, transitions_ratio, mean_delta_s, mean_signals_t))
+table_intrlvd_composite_game_no_robot <- subset(seq_composite_game_intrlvd_conform_no_robot, select = c(filename, states_count, intrlvd_states, states_ratio, transitions_count, intrlvd_transitions, transitions_ratio, mean_delta_s, mean_signals_t, trans_times_mean_signals, trans_times_mean_signals_vs_intrlvd_states, trans_vs_states))
 table_intrlvd_composite_game_no_robot$filename <- str_replace_all(table_intrlvd_composite_game_no_robot$filename, "/tmp/", "")
 table_intrlvd_composite_game_no_robot$filename <- str_replace_all(table_intrlvd_composite_game_no_robot$filename, ".diag", "")
 table_intrlvd_composite_game_no_robot$filename <- str_replace_all(table_intrlvd_composite_game_no_robot$filename, ".game", "")
 table_intrlvd_composite_game_no_robot$filename <- str_replace_all(table_intrlvd_composite_game_no_robot$filename, ".fsp", "")
 table_intrlvd_composite_game_no_robot$filename <- str_replace_all(table_intrlvd_composite_game_no_robot$filename, "_", " ")
-kable(table_intrlvd_composite_game_no_robot, caption = "Concurrent vs interleaved", col.names=c("Specification","#States","#Intrlvd. States","#States/#Intrlvd. States", "#Transitions","#Intrlvd. Trans", "#Trans/#Intrlvd. Trans","Mean out(s)","Mean signals per trans."))
+kable(table_intrlvd_composite_game_no_robot, caption = "Concurrent vs interleaved", col.names=c("Specification","#States","#Intrlvd. States","#States/#Intrlvd. States", "#Transitions","#Intrlvd. Trans", "#Trans/#Intrlvd. Trans","Mean out(s)","Mean signals per trans.", "#Trans x mean signals", "#Intrlvd. states/#Trans x mean signals", "#Trans./#States"))
 ```
 
 ## Mean signal count vs space reduction (seq, signal based)
