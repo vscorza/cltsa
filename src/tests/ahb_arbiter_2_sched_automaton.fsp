@@ -54,4 +54,4 @@ ltl sys rho G10_grant0 in AHB	= []((decide && !hReq0 && !hReq1) -> X(!sel0)).
 ENV >> "/tmp/ahb_2_sched_aut_env.rep".
 AHB >> "/tmp/ahb_2_sched_aut_ahb.rep".
 G10 >> "/tmp/ahb_2_sched_aut_g10.rep".
-//STRAT >>_m "/tmp/ahb_2_sched_strat.diag".
+STRAT >>_m "/tmp/ahb_2_sched_strat.diag".

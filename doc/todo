@@ -1,30 +1,41 @@
 TODO:
 =====
-- armar un ejemplo chico que tenga muchas señales por transición pero sea pequeño (que alterne pares, o alterne casi todas menos un contador)
 - plan de trabajo para diagnostico
 	X armar caso para lts
 	X tablas comparativas
 	- boceto de
-		- introducir clts como necesidad para ejecutar los casos (refs de definitions nuevo)
-		- ref. a un arxiv
-		- re escribir problema y solución
-	- revisar archivo de mati
+		- re-escribir versión ahb genbuf, revisar realizabilidad-no realizabilidad
+		- correr tests
+		- escribir presentación 
+			- motivación clts
+			- tablas nuevas
+				- comparación con tablas anteriores
+		- nueva versión del paper
+			- introducir clts como necesidad para ejecutar los casos (refs de definitions nuevo)
+			- ref. a un arxiv
+			- re escribir problema y solución
+		- testear y comparar con valuaciones por estados (los primeros números son prometedores, ahb_arbiter_2_sched_automaton)
+			- genbuf_1_n
+			- ahb_1_n	
+				- mgr
+				- sched
+				- completo			
 	- reunion con sebas y vic
 - clts	
-	- testear y comparar con valuaciones por estados (los primeros números son prometedores, ahb_arbiter_2_sched_automaton)
-		- genbuf_1_n
-		- ahb_1_n	
-			- mgr
-			- sched
-			- completo
+	- revisar archivo de mati			
 	- revisar composicion sincronización de etiquetas vacías
 	- minimización de controladores
-		- quedarse con el autómata donde se esconden las trans. controlables
-		- meter en pending todos estados donde se cambia valuación
-		- para cada estado en pending renombrar etiquetas de transiciones sacando las que estén compartidas entre todas las transiciones
-		- agregar a pending los pred.
-		- cuando se vacía pending se pueden reemplazar las tiras de estados lineales por contadores A = (when(t < len) -> A | when(t == len) -> A_2).
-		- revisar minimización de autómatas 
+		- idea vieja
+			- quedarse con el autómata donde se esconden las trans. controlables
+			- meter en pending todos estados donde se cambia valuación
+			- para cada estado en pending renombrar etiquetas de transiciones sacando las que estén compartidas entre todas las transiciones
+			- agregar a pending los pred.
+			- cuando se vacía pending se pueden reemplazar las tiras de estados lineales por contadores A = (when(t < len) -> A | when(t == len) -> A_2).
+			- revisar minimización de autómatas 
+		- idea nueva
+			- quitar todas las no controlables que se pueda
+				- ver si se puede probar complejidad del problema
+			- correr minimización de hopcroft sobre el resultado
 - cltsa
 	- serializacion
 		- serializar valuaciones
@@ -85,14 +96,6 @@ TODO:
 		- explain how per case which mutations were evaluated
 		- rephrase scalability add it as a point to validation
 		- explain that there why there are no other liveness specs from syntcomp (if ahb is not added)
-- vic changes
-    	- Cross-paper keep consistent terminology according to what is kept in the background section
-	- Motivation review example, doesn't like the safety keep condition, "idle controller"
-- do a general review on validation and related work
-- discussion
-	- move references to symbolic to discussion
-- meeting
-
 - after paper
 	- Dalal, write monitored adjustment operator
 		- syntax
@@ -104,24 +107,12 @@ TODO:
 		- prove correct decomposition of ahb arbiter into modules
 	- phd meeting	
 		- plan paper for clts, tool and general thesis layout
-	- review master thesis subjects for p d crisfoforis
 	- examples
-		- add syntax support (state fluent XX = (s_i, ..., s_j) in name.
 		- use mm512 operations for ordered list in aut_push_string_to_list
-		- review ciolek thesis
-		- write example from ltl_paxos_2 paper (Towards Modeling and Model Checking Fault-Tolerant Distributed Algorithms) (https://www.youtube.com/watch?v=-Bl5GleEN5s)
-		- ivy (kenneth mcmillan)
-			- add leader election/multi paxos example (https://www.discotec.org/2020/invited#kenneth-mcmillan)
-			- risc v memory coherence
 		- check spectra (maoz) repository for unrealizable specs
 		- review https://www.cl.cam.ac.uk/~sf502/regressions/rmem/help.html for examples
 		- update values and validation section
 		- run tests for genbuf 4, 5, 6
-	- allow to define buchi fluent based on accepting state, for instance for automaton based properties in genbuf
-		- transform values as in fluents
-		- write tests
-		- run test and profile
-		- test genbuf and amba with automata
 	- for non-realizability reduce diagnosis to single liveness goal not being satisfied
 	- run tests with dd, linear, dd wo last_partition optimization, goal minimization
 	- java client
@@ -130,7 +121,6 @@ TODO:
 		- syntax highlight strings
 		- undo/redo 
 		- signals view as complement to automaton
-	- add exception when FIXED_SIGNALS_COUNT or BITVECTOR_ENTRY_SIZE is not enough, add parameters to make
 	- review literature and tools
 		- review Interpolation-Based Semantic Gate Extraction and its Applications to QBF Preprocessing (https://www.ac.tuwien.ac.at/people/fslivovsky/)	
 		- review papers gr_1_star, performance_heuristics for gr1, minimal assumption refinement gr1 and synthesizing adaptive test stategies papers
