@@ -4,23 +4,22 @@ TODO:
 	X armar caso para lts
 	X tablas comparativas
 	- boceto de
-		- re-escribir versión ahb genbuf, revisar realizabilidad-no realizabilidad
-		- correr tests
 		- escribir presentación 
 			- motivación clts
 			- tablas nuevas
 				- comparación con tablas anteriores
+	- reunion con sebas y vic
 		- nueva versión del paper
-			- introducir clts como necesidad para ejecutar los casos (refs de definitions nuevo)
+			- introducir clts como necesidad para ejecutar los casos 
+			- copiar refs de definitions nuevo
 			- ref. a un arxiv
 			- re escribir problema y solución
-		- testear y comparar con valuaciones por estados (los primeros números son prometedores, ahb_arbiter_2_sched_automaton)
-			- genbuf_1_n
+	- re-escribir versión ahb genbuf, revisar realizabilidad-no realizabilidad
+		- testear y comparar con valuaciones por estados
 			- ahb_1_n	
-				- mgr
-				- sched
 				- completo			
-	- reunion con sebas y vic
+		- correr tests
+	
 - clts	
 	- revisar archivo de mati			
 	- revisar composicion sincronización de etiquetas vacías
