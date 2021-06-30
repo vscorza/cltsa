@@ -3,6 +3,12 @@ TODO:
 - plan de trabajo para diagnostico
 	X armar caso para lts
 	X tablas comparativas
+	- agregar posibilidad de eliminar transiciones mixtas en un juego
+	- revisar casos de MTSA para pasar a clts
+	- presentar reportes por caso de estudio
+		- proporción de reducción
+		- tiempos
+	- tomar un ejemplo de reactive y mostar como sería un diagnóstico que usa konighoefer, jvts y behavior
 	- boceto de
 		- escribir presentación 
 			- motivación clts
