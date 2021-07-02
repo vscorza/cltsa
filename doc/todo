@@ -1,5 +1,12 @@
 TODO:
 =====
+- poner a correr una versión de MTSA
+	- agregar funcionalidad que quite estados mixtos al resolver gr1
+	- evaluar casos que pinchen en /home/mariano/git_repo/henos/henos-automata/src/tests/mtsa/testsLTS 
+	- traducir seleccionados
+	- probar tiempos
+	- mutar para no realizabilidad
+	- generar reportes
 - plan de trabajo para diagnostico
 	X armar caso para lts
 	X tablas comparativas
