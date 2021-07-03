@@ -176,6 +176,7 @@ typedef struct automaton_composition_syntax_str{
 	struct automaton_state_syntax_str** states;
 	struct automaton_component_syntax_str** components;
 	bool is_game;
+	bool no_mixed_states;
 }automaton_composition_syntax;
 typedef struct automaton_equivalence_check_syntax_str{
 	char* name;
@@ -299,7 +300,7 @@ automaton_states_syntax* automaton_states_syntax_create(automaton_state_syntax* 
 automaton_states_syntax* automaton_states_syntax_add_state(automaton_states_syntax* states, automaton_state_syntax* state);
 automaton_equivalence_check_syntax* automaton_equality_check_syntax_create(char* name, char* left,char* right);
 automaton_composition_syntax* automaton_composition_syntax_create_from_states(automaton_states_syntax* states);
-automaton_composition_syntax* automaton_composition_syntax_create_from_ref(char* name, automaton_components_syntax* components, bool is_game);
+automaton_composition_syntax* automaton_composition_syntax_create_from_ref(char* name, automaton_components_syntax* components, bool is_game, bool no_mixed_states);
 automaton_gr1_game_syntax* automaton_gr1_game_syntax_create(char* name, char* composition_name, automaton_set_syntax* assumptions, automaton_set_syntax* goals);
 automaton_components_syntax* automaton_components_syntax_create(automaton_component_syntax* component);
 automaton_components_syntax* automaton_components_syntax_add_component(automaton_components_syntax* components, automaton_component_syntax* component, automaton_synchronization_type_syntax type);

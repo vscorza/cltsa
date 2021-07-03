@@ -43,12 +43,12 @@ automaton_program_syntax* parsed_program = NULL;
 	automaton_vstates_fluent_syntax*	vstates_fluent;
 	automaton_serialization_syntax*	lts_serialization;
 };
-%token	t_INTEGER t_IDENT t_UPPER_IDENT t_STRING t_CONST t_RANGE t_SET t_FLUENT t_DOTS t_WHEN t_GAME_COMPOSE t_PARALLEL t_GR_1 t_INITIALLY t_LTL t_ENV t_SYS t_RHO t_THETA t_IN t_THEN t_IFF t_AND t_NEXT t_CONCURRENT t_SYNCH t_ORDER t_EQUALS t_IMPORT t_EXPORT t_VAL_STATE t_SEQ_LTS t_SEQ_TICK_LTS t_INTERLVD_LTS t_INTERLVD_TICK_LTS t_EXPORT_METRICS 
+%token	t_INTEGER t_IDENT t_UPPER_IDENT t_STRING t_CONST t_RANGE t_SET t_FLUENT t_DOTS t_WHEN t_GAME_COMPOSE t_GAME_COMPOSE_NO_MIXED_STATES t_PARALLEL t_GR_1 t_INITIALLY t_LTL t_ENV t_SYS t_RHO t_THETA t_IN t_THEN t_IFF t_AND t_NEXT t_CONCURRENT t_SYNCH t_ORDER t_EQUALS t_IMPORT t_EXPORT t_VAL_STATE t_SEQ_LTS t_SEQ_TICK_LTS t_INTERLVD_LTS t_INTERLVD_TICK_LTS t_EXPORT_METRICS 
 %left '+' '-' ','
 %left '*' '/'
 
 
-%type<text> 				t_STRING t_IDENT t_UPPER_IDENT t_CONST t_RANGE t_SET t_FLUENT t_DOTS t_WHEN t_GAME_COMPOSE t_PARALLEL t_GR_1 t_INITIALLY t_LTL t_ENV t_SYS t_RHO t_THETA t_IN t_THEN t_IFF t_AND t_NEXT t_CONCURRENT t_SYNCH t_EQUALS t_IMPORT t_EXPORT t_VAL_STATE t_SEQ_LTS t_SEQ_TICK_LTS t_INTERLVD_LTS t_INTERLVD_TICK_LTS t_EXPORT_METRICS
+%type<text> 				t_STRING t_IDENT t_UPPER_IDENT t_CONST t_RANGE t_SET t_FLUENT t_DOTS t_WHEN t_GAME_COMPOSE t_GAME_COMPOSE_NO_MIXED_STATES t_PARALLEL t_GR_1 t_INITIALLY t_LTL t_ENV t_SYS t_RHO t_THETA t_IN t_THEN t_IFF t_AND t_NEXT t_CONCURRENT t_SYNCH t_EQUALS t_IMPORT t_EXPORT t_VAL_STATE t_SEQ_LTS t_SEQ_TICK_LTS t_INTERLVD_LTS t_INTERLVD_TICK_LTS t_EXPORT_METRICS
 %type<integer>				t_INTEGER fluentInitialCondition compositionType
 %type<expr>					exp exp2 exp3 exp4 constDef range rangeDef ltsTransitionPrefix
 %type<label>				label concurrentLabel 
@@ -281,8 +281,9 @@ compositionDef:
 	;
 composition:
 	ltsStates								{$$ = automaton_composition_syntax_create_from_states($1); free($1);}
-	| t_PARALLEL t_UPPER_IDENT '=' '(' compositionExp ')'	{$$ = automaton_composition_syntax_create_from_ref($2, $5, false); free($1);free($2);free($5);}
-	| t_GAME_COMPOSE t_UPPER_IDENT '=' '(' compositionExp ')'	{$$ = automaton_composition_syntax_create_from_ref($2, $5, true); free($1);free($2);free($5);}	
+	| t_PARALLEL t_UPPER_IDENT '=' '(' compositionExp ')'	{$$ = automaton_composition_syntax_create_from_ref($2, $5, false, false); free($1);free($2);free($5);}
+	| t_GAME_COMPOSE t_UPPER_IDENT '=' '(' compositionExp ')'	{$$ = automaton_composition_syntax_create_from_ref($2, $5, true, false); free($1);free($2);free($5);}
+	| t_GAME_COMPOSE_NO_MIXED_STATES t_UPPER_IDENT '=' '(' compositionExp ')'	{$$ = automaton_composition_syntax_create_from_ref($2, $5, true, true); free($1);free($2);free($5);}		
 	;
 ltsConversion:
 	t_SEQ_LTS t_UPPER_IDENT t_IN t_UPPER_IDENT '.'	{$$ = automaton_serialization_syntax_create_from_ref($2, $4, true, false); free($1);free($2);free($3);free($4);}

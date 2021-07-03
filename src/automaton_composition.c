@@ -246,11 +246,12 @@ bool automaton_automata_compose_increment_idxs(uint32_t *idxs, uint32_t *idxs_si
  * @param synch_type the array of synchronization types to be applied sequentially and pairwise for the provided automata
  * @param automata_count the number of automata to be composed
  * @param is_game true if the resulting automaton will hold valuations on its states, false otherwise
+ * @param no_mixed_states true if the resulting automaton will have no mixed states (controllable transitions from non controllable states will be removed)
  * @param composition_name the name of the composition as specified in the syntax
  * @return the CLTS resulting from applying the composition type according to synch_type definitions over automata
  */
 automaton_automaton* automaton_automata_compose(automaton_automaton** automata, automaton_synchronization_type* synch_type, uint32_t automata_count
-		, bool is_game, char* composition_name){
+		, bool is_game, bool no_mixed_states, char* composition_name){
 	clock_t begin = clock();
 	uint32_t transitions_added_count	= 0;
 	uint32_t i, j, k, l, m, n, o, p;
@@ -1008,6 +1009,21 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 	free(current_label);free(frontier);free(composite_frontier);free(current_state);free(current_to_state);
 	free(idxs);free(idxs_size);free(label_accum);free(idxs_skip);free(automata_accum);
 	free(alphabet);
+	//remove controllable transitions from mixed states
+	if(no_mixed_states){
+		for(i = 0; i < composition->transitions_count; i++){
+			if(!(composition->is_controllable[i])){
+				for(j = composition->out_degree[i] - 1; j >= 0; j--){
+					if(!TRANSITION_IS_INPUT(&(composition->transitions[i][j]))){
+						automaton_automaton_remove_transition(composition, &(composition->transitions[i][j]));
+					}
+				}
+			}
+		}
+		automaton_automaton_update_valuation(composition);
+	}
+
+
 #if USE_COMPOSITE_HASH_TABLE
 	automaton_composite_hash_table_destroy(tree);
 #else

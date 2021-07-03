@@ -133,6 +133,15 @@ initially		{
 					yylval.text=p;
 					return(t_GAME_COMPOSE);
 				}
+\|F\|			{
+					p=(char *)calloc(strlen(yytext)+1,sizeof(char));
+					strcpy(p,yytext);
+					#if DEBUG_LEX
+					printf("[keyword: <%s>]", yytext);
+					#endif
+					yylval.text=p;
+					return(t_GAME_COMPOSE_NO_MIXED_STATES);
+				}				
 \|gr1\|			{
 					p=(char *)calloc(strlen(yytext)+1,sizeof(char));
 					strcpy(p,yytext);

@@ -743,7 +743,7 @@ bool automaton_statement_syntax_to_composition(automaton_automata_context* ctx, 
 	//if is game build fluents and add to automata
 	uint32_t composition_count	= composition_syntax->count;
 	aut_context_log("composing.\n");
-	automaton_automaton* automaton	= automaton_automata_compose(automata, synch_type, composition_count, composition_syntax->is_game
+	automaton_automaton* automaton	= automaton_automata_compose(automata, synch_type, composition_count, composition_syntax->is_game, composition_syntax->no_mixed_states
 			, composition_syntax->name);//SYNCHRONOUS);
 	tables->composition_entries[main_index]->solved	= true;
 	tables->composition_entries[main_index]->valuation_count			= 1;
