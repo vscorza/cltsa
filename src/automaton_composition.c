@@ -1013,13 +1013,14 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 	if(no_mixed_states){
 		for(i = 0; i < composition->transitions_count; i++){
 			if(!(composition->is_controllable[i])){
-				for(j = composition->out_degree[i] - 1; j >= 0; j--){
+				for(j = composition->out_degree[i] - 1; ((int32_t)j) >= 0; j--){
 					if(!TRANSITION_IS_INPUT(&(composition->transitions[i][j]))){
 						automaton_automaton_remove_transition(composition, &(composition->transitions[i][j]));
 					}
 				}
 			}
 		}
+		automaton_automaton_remove_unreachable_states(composition);
 		automaton_automaton_update_valuation(composition);
 	}
 
