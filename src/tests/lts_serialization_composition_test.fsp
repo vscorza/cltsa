@@ -38,3 +38,55 @@ COMP_INTERLEAVED >> "/tmp/lts_serialization_composition_test_comp_intrlvd.rep".
 
 COMP_THEN_INTERLEAVED >> "/tmp/lts_serialization_composition_test_comp_then_intrlvd.rep".
 COMP_THEN_SERIALIZED >> "/tmp/lts_serialization_composition_test_comp_then_serial.rep".
+
+//TESTS
+
+A_SERIAL_P = S_0,
+S_0 = (d-> S_7|a-> S_10),
+S_7 = (■■■■env■-> S_8),
+S_8 = (■■■■sys■-> S_0),
+S_10 = (b-> S_11),
+S_11 = (c-> S_12),
+S_12 = (d-> S_13),
+S_13 = (■■■■env■-> S_14),
+S_14 = (out-> S_16),
+S_16 = (■■■■sys■-> S_1).
+A_INTRLVD_P = S_0,
+S_0 = (d-> S_7|a-> S_10|b-> S_19|c-> S_23),
+S_7 = (■■■■env■-> S_8|a-> S_18|b-> S_22|c-> S_24),
+S_8 = (■■■■sys■-> S_0),
+S_10 = (b-> S_11|c-> S_16|d-> S_18),
+S_11 = (c-> S_12|d-> S_15),
+S_12 = (d-> S_13),
+S_13 = (■■■■env■-> S_14),
+S_14 = (out-> S_26),
+S_15 = (c-> S_13),
+S_16 = (b-> S_12|d-> S_17),
+S_17 = (b-> S_13),
+S_18 = (b-> S_15|c-> S_17),
+S_19 = (a-> S_11|c-> S_20|d-> S_22),
+S_20 = (a-> S_12|d-> S_21),
+S_21 = (a-> S_13),
+S_22 = (a-> S_15|c-> S_21),
+S_23 = (a-> S_16|b-> S_20|d-> S_24),
+S_24 = (a-> S_17|b-> S_21),
+S_26 = (■■■■sys■-> S_1).
+B_SERIAL_P = S_0,
+S_0 = (d-> S_0|a-> S_8),
+S_8 = (b-> S_9),
+S_9 = (c-> S_10),
+S_10 = (out-> S_1).
+B_INTRLVD_P = S_0,
+S_0 = (d-> S_0|a-> S_8|b-> S_12|c-> S_14),
+S_8 = (b-> S_9|c-> S_11),
+S_9 = (c-> S_10),
+S_10 = (out-> S_1),
+S_11 = (b-> S_10),
+S_12 = (a-> S_9|c-> S_13),
+S_13 = (a-> S_10),
+S_14 = (a-> S_11|b-> S_13).
+
+equals FATAL_LTS_SERIALIZATION_A_SERIAL(A_SERIAL, A_SERIAL_P).
+equals FATAL_LTS_SERIALIZATION_A_INTRLVD(A_INTRLVD, A_INTRLVD_P).
+equals FATAL_LTS_SERIALIZATION_B_SERIAL(B_SERIAL, B_SERIAL_P).
+equals FATAL_LTS_SERIALIZATION_B_INTRLVD(B_INTRLVD, B_INTRLVD_P).

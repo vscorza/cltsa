@@ -1,8 +1,6 @@
 TODO:
 =====
 - poner a correr una versión de MTSA
-	X agregar funcionalidad que quite estados mixtos al resolver gr1
-	- escribir tests para probar funcionalidad que quite estados mixtos al resolver gr1
 	- evaluar casos que pinchen en /home/mariano/git_repo/henos/henos-automata/src/tests/mtsa/testsLTS 
 	- traducir seleccionados
 	- probar tiempos

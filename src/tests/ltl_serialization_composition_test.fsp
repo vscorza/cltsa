@@ -49,8 +49,8 @@ B_I >> "/tmp/ltl_serialization_composition_test_b_i.rep".
 ||COMP_LTL_A_I = (A_I || B_I).
 
 COMP_LTL >> "/tmp/ltl_serialization_composition_test_comp_ltl.rep".
-COMP_LTL_S >> "/tmp/ltl_serialization_composition_test_comp_ltl_s.rep".
-COMP_LTL_I >> "/tmp/ltl_serialization_composition_test_comp_ltl_i.rep".
+COMP_LTL_S_C >> "/tmp/ltl_serialization_composition_test_comp_ltl_s_c.rep".
+COMP_LTL_I_C >> "/tmp/ltl_serialization_composition_test_comp_ltl_i_c.rep".
 COMP_LTL_A_I >> "/tmp/ltl_serialization_composition_test_comp_ltl_s_a.rep".
 COMP_LTL_A_S >> "/tmp/ltl_serialization_composition_test_comp_ltl_i_a.rep".
 COMP_LTL_S_S >> "/tmp/ltl_serialization_composition_test_comp_ltl_s_s.rep".
@@ -58,3 +58,44 @@ COMP_LTL_I_S >> "/tmp/ltl_serialization_composition_test_comp_ltl_i_s.rep".
 
 
 A_LTL >>_m "/tmp/ltl_serialization_composition_test_comp_a.met".
+
+//TESTS
+B_TS_P = S_0,
+S_0 = (■■■■env■-> S_5),
+S_1 = (x.on-> S_12),
+S_2 = (x.off-> S_20),
+S_5 = (■■■■sys■-> S_1),
+S_12 = (■■■■env■-> S_13),
+S_13 = (z.on-> S_15),
+S_15 = (■■■■sys■-> S_2),
+S_20 = (■■■■env■-> S_21),
+S_21 = (z.off-> S_23),
+S_23 = (■■■■sys■-> S_1).
+
+B_TI_P = S_0,
+S_0 = (■■■■env■-> S_5),
+S_1 = (x.on-> S_12),
+S_2 = (x.off-> S_20),
+S_5 = (■■■■sys■-> S_1),
+S_12 = (■■■■env■-> S_13),
+S_13 = (z.on-> S_15),
+S_15 = (■■■■sys■-> S_2),
+S_20 = (■■■■env■-> S_21),
+S_21 = (z.off-> S_23),
+S_23 = (■■■■sys■-> S_1).
+
+equals FATAL_LTL_COMP_B_TS(B_TS, B_TS_P).
+equals FATAL_LTL_COMP_B_TI(B_TI, B_TI_P).
+
+COMP_LTL_S_S_P = S_0,
+S_0 = (<>-> S_1),
+S_1 = (x.on-> S_2).
+COMP_LTL_S_C_P = S_0,
+S_0 = (<>-> S_1),
+S_1 = (x.on-> S_2).
+COMP_LTL_P = S_0,
+S_0 = (<>-> S_1).
+
+equals FATAL_LTL_COMP_LTL_S_S(COMP_LTL_S_S, COMP_LTL_S_S_P).
+equals FATAL_LTL_COMP_LTL_S_S(COMP_LTL_S_C, COMP_LTL_S_C_P).
+equals FATAL_LTL_COMP_LTL_S_S(COMP_LTL, COMP_LTL_P).

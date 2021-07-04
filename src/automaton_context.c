@@ -765,6 +765,17 @@ void automaton_statement_syntax_find_add_local_element(char *element_to_find, au
 	int32_t element_global_index= -1;
 	int32_t element_position	= (*local_alphabet_count);
 	int32_t m;
+	automaton_signal_event *current_signal;
+	if(strcmp(element_to_find, ENV_TICK) == 0){
+		current_signal	= automaton_signal_event_create(ENV_TICK, INPUT_SIG);
+		automaton_alphabet_add_signal_event(ctx->global_alphabet, current_signal);
+		automaton_signal_event_destroy(current_signal, true);
+	}
+	if(strcmp(element_to_find, SYS_TICK) == 0){
+		current_signal	= automaton_signal_event_create(SYS_TICK, OUTPUT_SIG);
+		automaton_alphabet_add_signal_event(ctx->global_alphabet, current_signal);
+		automaton_signal_event_destroy(current_signal, true);
+	}
 	for(m = 0; m < (int32_t)ctx->global_alphabet->count; m++){
 		if(strcmp(ctx->global_alphabet->list[m].name, element_to_find) == 0){
 			element_global_index = m;

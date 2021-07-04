@@ -159,7 +159,7 @@ int main (int argc, char** argv){
 
 		//run_functional_tests();
 		//run_parse_test("tests/collector_1_in_v1.fsp", "Collector 2 inputs");//Collector 2 inputs
-		run_parse_test("tests/biscotti.fsp", "Collector 2 inputs");//Collector 2 inputs
+		run_parse_test("tests/ltl_serialization_composition_test.fsp", "Serialization composition test");
 
 		//run_parse_test("tests/lift_controller_2.fsp", "Lift controller 2");
 		//run_parse_test("tests/lift_controller_8.fsp", "Lift controller 2");

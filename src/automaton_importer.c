@@ -301,12 +301,13 @@ void automaton_automaton_check_alphabet(FILE *f, automaton_alphabet *alphabet, c
 		printf("Corrupted object\n");
 		exit(-1);
 	}
+	uint32_t i;
 	//check current alphabet against parameter
 	if(alphabet->count != current_alphabet->count){
 		printf("Alphabet count differs from host\n");
 		//exit(-1);
 	}
-	uint32_t i;
+
 	if(alphabet->count == current_alphabet->count){
 		for(i = 0; i < alphabet->count; i++){
 			if(strcmp(alphabet->list[i].name, current_alphabet->list[i].name) != 0){
