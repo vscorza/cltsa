@@ -1,0 +1,87 @@
+const Machines = 4
+const Workload = 2
+const Capacity = 2
+range R_Machines = 0..Machines
+range R_Capacity = 0..Capacity
+range R_Workload = 0..Workload
+set Global_Alphabet = {get_1,put_1,get_2,put_2,get_3,put_3,get_4,put_4,return_1, return_2, return_3, return_4, reject,accept}
+set Controllable_Alphabet = {get_1,get_2,get_3,get_4}
+
+Machine_0 = Working[0], Working[wl:R_Workload] =
+    (when (wl < Workload) get_1   -> Working[wl+1] |
+     when (wl > 0)        put_2 -> Working[wl-1] ).
+Machine_1 = Working[0], Working[wl:R_Workload] =
+    (when (wl < Workload) get_1   -> Working[wl+1] |
+     when (wl > 0)        put_2 -> Working[wl-1] ).
+Machine_2 = Working[0], Working[wl:R_Workload] =
+    (when (wl < Workload) get_2   -> Working[wl+1] |
+     when (wl > 0)        put_3 -> Working[wl-1] ).     
+Machine_3 = Working[0], Working[wl:R_Workload] =
+    (when (wl < Workload) get_3   -> Working[wl+1] |
+     when (wl > 0)        put_4 -> Working[wl-1] ).     
+
+TU = Idle,
+  Idle    = (get_4 -> Testing | return_2 -> Idle | return_3 -> Idle| return_4 -> Idle),
+  Testing = (return_1 -> reject -> Idle |
+             accept -> Idle | return_2 -> Testing | return_3 -> Testing| return_4 -> Testing).
+
+
+
+Buffer_1 = Operative[0],
+  Operative[c:R_Capacity] = (
+    when (c > 0)         get_1    -> Operative[c-1] |
+    when (c == 0)        get_1    -> ERROR          |
+    when (c < Capacity)  put_1    -> Operative[c+1] |
+    when (c == Capacity) put_1    -> ERROR          |
+    when (c < Capacity)  return_1 -> Operative[c+1] |
+    when (c == Capacity) return_1 -> ERROR          ).
+Buffer_2 = Operative[0],
+  Operative[c:R_Capacity] = (
+    when (c > 0)         get_2    -> Operative[c-1] |
+    when (c == 0)        get_2    -> ERROR          |
+    when (c < Capacity)  put_2    -> Operative[c+1] |
+    when (c == Capacity) put_2    -> ERROR          |
+    when (c < Capacity)  return_2 -> Operative[c+1] |
+    when (c == Capacity) return_2 -> ERROR          ).
+Buffer_3 = Operative[0],
+  Operative[c:R_Capacity] = (
+    when (c > 0)         get_3    -> Operative[c-1] |
+    when (c == 0)        get_3    -> ERROR          |
+    when (c < Capacity)  put_3    -> Operative[c+1] |
+    when (c == Capacity) put_3    -> ERROR          |
+    when (c < Capacity)  return_3 -> Operative[c+1] |
+    when (c == Capacity) return_3 -> ERROR          ).    
+Buffer_4 = Operative[0],
+  Operative[c:R_Capacity] = (
+    when (c > 0)         get_4    -> Operative[c-1] |
+    when (c == 0)        get_4    -> ERROR          |
+    when (c < Capacity)  put_4    -> Operative[c+1] |
+    when (c == Capacity) put_4    -> ERROR          |
+    when (c < Capacity)  return_4 -> Operative[c+1] |
+    when (c == Capacity) return_4 -> ERROR          ).    
+
+/*****************************************************************************/
+
+||Plant = (Machine_0 || Machine_1 || Machine_2 || Machine_3 ||  Buffer_1 || Buffer_2 || Buffer_3 || Buffer_4 ||  TU).
+
+||TEST = (Machine_0 || Machine_1 || Buffer_1 || Buffer_2  || TU).
+
+Plant >>_m "/tmp/TL_4_2.met".
+//Plant >> "/tmp/TL_4_2_plant.rep".
+Machine_3 >> "/tmp/TL_4_2_m_3.rep".
+Buffer_2 >> "/tmp/TL_4_2_b_2.rep".
+TU >> "/tmp/TL_4_2_tu.rep".
+TEST >> "/tmp/TL_4_2_test.rep".
+
+
+/*
+controllerSpec Goal = {
+  controllable = {get[0..Machines]}
+  marking = {accept,reject}
+  nonblocking
+}
+
+controller ||MonolithicController = Plant~{Goal}.
+
+heuristic ||DirectedController = Plant~{Goal}.
+*/

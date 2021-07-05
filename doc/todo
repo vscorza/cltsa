@@ -1,7 +1,9 @@
 TODO:
 =====
 - poner a correr una versión de MTSA
-	- evaluar casos que pinchen en /home/mariano/git_repo/henos/henos-automata/src/tests/mtsa/testsLTS 
+	- armar lista de casos de publicaciones del labo
+		- priorizando que vengan de otro mundo
+		- y que escalen
 	- traducir seleccionados
 	- probar tiempos
 	- mutar para no realizabilidad
