@@ -346,6 +346,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 #endif
 
 	automaton_bucket_list* bucket_list	= automaton_bucket_list_create(BUCKET_SIZE);
+	automaton_bucket_list* processed_list	= automaton_bucket_list_create(BUCKET_SIZE);
 	uint32_t max_degree_sum		= 0;	uint32_t max_signals_count	= 0;
 	uint32_t max_out_degree		= 0;
 	// compute max_signals_count
@@ -470,6 +471,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 		printf("[p] pop frontier state %d:[", from_state);
 #endif
 		automaton_bucket_remove_entry(bucket_list, from_state);
+		automaton_bucket_add_entry(processed_list, from_state);
 		//check if frontier state was already decomposed
 		if(composition->out_degree[from_state] > 0){
 			frontier_count--;
@@ -955,7 +957,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 				}
 				automaton_transition_destroy(current_transition, true);
 				// expand frontier
-				bool found = automaton_bucket_has_entry(bucket_list, composite_to);
+				bool found = automaton_bucket_has_entry(bucket_list, composite_to) || automaton_bucket_has_entry(processed_list, composite_to);
 				if(found){found_hits++;}else{found_misses++;}
 				if(!found){
 					composite_frontier[frontier_count]	= composite_to;
@@ -1031,6 +1033,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 	automaton_composite_tree_destroy(tree);
 #endif
 	automaton_bucket_destroy(bucket_list);
+	automaton_bucket_destroy(processed_list);
 
 	return composition;
 }

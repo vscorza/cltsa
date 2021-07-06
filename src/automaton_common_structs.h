@@ -31,7 +31,7 @@ typedef uint16_t signal_bit_array_t;
 #define ENV_TICK	"■■■■env■"
 
 #define TRANSITION_ENTRY_SIZE 16
-#define FIXED_SIGNALS_COUNT	8//4
+#define FIXED_SIGNALS_COUNT	2//4
 /****************
 ==== ENUMS ====
 ****************/

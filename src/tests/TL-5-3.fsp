@@ -72,7 +72,12 @@ Buffer_5 = Operative[0],
     when (c == Capacity) return_5 -> ERROR          ).    
 /*****************************************************************************/
 
-||Plant = (Machine_0 || Machine_1 || Machine_2 || Machine_3 || Machine_4 || Buffer_1 || Buffer_2 || Buffer_3 || Buffer_4 || Buffer_5 || TU).
+||Plant_1 = (Machine_0 || Buffer_1).
+||Plant_2 = (Machine_1 || Buffer_2).
+||Plant_3 = (Machine_3 || Buffer_4).
+||Plant_4 = (Machine_4 || Buffer_5).
+
+||Plant = (Plant_1 || Plant_2 || Plant_3 || Plant_4 || TU).
 
 ||TEST = (Machine_4 || Buffer_5 || TU).
 

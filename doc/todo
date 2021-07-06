@@ -4,6 +4,8 @@ TODO:
 	- armar lista de casos de publicaciones del labo
 		- priorizando que vengan de otro mundo
 		- y que escalen
+			- Compositional Supervisory Control via Reactive Synthesis and Automated Planning: AT, BW, CM, DP, TA, TL
+	- add specific composition algorithm when all operators are asynch/synch
 	- traducir seleccionados
 	- probar tiempos
 	- mutar para no realizabilidad

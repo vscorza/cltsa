@@ -86,8 +86,13 @@ Buffer_6 = Operative[0],
 
 /*****************************************************************************/
 
-||Plant = (Machine_0 || Machine_1 || Machine_2 || Machine_3 || Machine_4 || Machine_5 || Buffer_1 || Buffer_2 || Buffer_3 || Buffer_4 || Buffer_5 || Buffer_6 ||  TU).
+||Plant_1 = (Machine_0 || Buffer_1).
+||Plant_2 = (Machine_1 || Buffer_2).
+||Plant_3 = (Machine_3 || Buffer_4).
+||Plant_4 = (Machine_4 || Buffer_5).
+||Plant_5 = (Machine_5 || Buffer_6).
 
+||Plant = (Plant_1 || Plant_2 || Plant_3 || Plant_4 || Plant_5 || TU).
 ||TEST = (Machine_4 || Buffer_6 || TU).
 
 Plant >>_m "/tmp/TL_6_6.met".
