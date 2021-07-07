@@ -69,7 +69,7 @@ Buffer_4 = Operative[0],
 ||TEST = (Machine_0 || Machine_1 || Buffer_1 || Buffer_2  || TU).
 
 Plant >>_m "/tmp/TL_4_2.met".
-Plant >> "/tmp/TL_4_2_plant.rep".
+//Plant >> "/tmp/TL_4_2_plant.rep".
 Machine_3 >> "/tmp/TL_4_2_m_3.rep".
 Buffer_2 >> "/tmp/TL_4_2_b_2.rep".
 TU >> "/tmp/TL_4_2_tu.rep".

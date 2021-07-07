@@ -15,7 +15,7 @@ uint32_t automaton_automata_get_composite_state(uint32_t states_count, uint32_t*
 	return 0;
 }
 
-void automaton_automata_add_ordered_union_of_signals(automaton_automata_context* ctx, uint32_t* signals_union, uint32_t* signals_union_count, automaton_transition* left_transition
+inline void automaton_automata_add_ordered_union_of_signals(automaton_automata_context* ctx, uint32_t* signals_union, uint32_t* signals_union_count, automaton_transition* left_transition
 		, automaton_transition* right_transition, automaton_transition* target_transition){
 	uint32_t i;
 	for( i = 0; i < FIXED_SIGNALS_COUNT; i++)target_transition->signals[i] = left_transition->signals[i] | right_transition->signals[i];
@@ -95,7 +95,7 @@ uint32_t* automaton_automata_get_union_alphabet(automaton_automata_context **ctx
 	return alphabet;
 }
 
-void automaton_automata_add_pending_transitions(automaton_automaton **automata, uint32_t automata_count, uint32_t from_state, uint32_t *partial_states, bool *partial_set_states
+inline void automaton_automata_add_pending_transitions(automaton_automaton **automata, uint32_t automata_count, uint32_t from_state, uint32_t *partial_states, bool *partial_set_states
 	, uint32_t *current_state, automaton_transition** pending, uint32_t *pending_count, uint32_t max_degree_sum){
 	uint32_t i, j, k;
 	uint32_t current_out_degree			= 0;
@@ -133,7 +133,7 @@ void automaton_automata_add_pending_transitions(automaton_automaton **automata, 
  * @param automata_count the number of automata being composed
  * @return true if the max value for the indexes is reached, false otherwise
  */
-bool automaton_automata_compose_increment_idxs(uint32_t *idxs, uint32_t *idxs_sizes, bool** idxs_skip, uint32_t automata_count){
+inline bool automaton_automata_compose_increment_idxs(uint32_t *idxs, uint32_t *idxs_sizes, bool** idxs_skip, uint32_t automata_count){
 	int32_t i = automata_count;
 	bool set_anew = false;
 	do{
@@ -172,7 +172,7 @@ bool automaton_automata_compose_increment_idxs(uint32_t *idxs, uint32_t *idxs_si
  * @param automata_count the number of automata to be composed
  * @return true if indexes have reach maximum value, false otherwise
  */
-bool automaton_automata_idxs_is_max(uint32_t *idxs, uint32_t automata_count){
+inline bool automaton_automata_idxs_is_max(uint32_t *idxs, uint32_t automata_count){
 	int32_t i;
 	for(i = 0; i < automata_count; i++){
 		if(idxs[i] != 0)return false;
@@ -187,7 +187,7 @@ bool automaton_automata_idxs_is_max(uint32_t *idxs, uint32_t automata_count){
  * @param alphabet_overlap a boolean array describing which elements should be considered in the check
  * @return 0 if overlapping is total, 1 if overlapping is partial, -1 if overlapping is empty
  */
-int32_t automaton_automata_check_overlap(signal_bit_array_t *accum_label, signal_bit_array_t *current_label, signal_bit_array_t *alphabet_overlap
+inline int32_t automaton_automata_check_overlap(signal_bit_array_t *accum_label, signal_bit_array_t *current_label, signal_bit_array_t *alphabet_overlap
 		, uint32_t alphabet_count){
 	uint32_t i;
 	//check if overlapping transitions are empty

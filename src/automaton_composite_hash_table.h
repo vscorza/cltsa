@@ -54,6 +54,6 @@ typedef struct automaton_composite_hash_table_str{
 
 automaton_composite_hash_table *automaton_composite_hash_table_create(uint32_t automata_count, uint32_t *automata_state_count);
 void automaton_composite_hash_table_resize(automaton_composite_hash_table* table);
-uint32_t automaton_composite_hash_table_get_state(automaton_composite_hash_table *table, uint32_t *composite_states);
+inline uint32_t automaton_composite_hash_table_get_state(automaton_composite_hash_table *table, uint32_t *composite_states);
 void automaton_composite_hash_table_destroy(automaton_composite_hash_table *table);
 #endif /* AUTOMATON_COMPOSITE_HASH_TABLE_H_ */
