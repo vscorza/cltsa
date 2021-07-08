@@ -1,102 +1,84 @@
 const Machines = 5
-const Workload = 3
-const Capacity = 3
+const Workload = 2
+const Capacity = 2
 range R_Machines = 0..Machines
 range R_Capacity = 0..Capacity
 range R_Workload = 0..Workload
-set Global_Alphabet = {get_1,put_1,get_2,put_2,get_3,put_3,get_4,put_4,get_5,put_5,return_1, return_2, return_3, return_4, return_5, reject,accept}
-set Controllable_Alphabet = {get_1,get_2,get_3,get_4,get_5}
+set Global_Alphabet = {idle, get_0, get_1,put_1,get_2,put_2,get_3,put_3,get_4,put_4,get_5,put_5,get_6,put_6,return_1, reject,accept}
+set Controllable_Alphabet = {get_0,get_1,get_2,get_3,get_4,get_5,get_6}
 
 Machine_0 = Working[0], Working[wl:R_Workload] =
-    (when (wl < Workload) get_1   -> Working[wl+1] |
-     when (wl > 0)        put_2 -> Working[wl-1] ).
+    (	when(wl == 0) idle -> Working[wl] |
+	when (wl < Workload) get_0   -> Working[wl+1] |
+     when (wl > 0)        put_1 -> Working[wl-1] ).
 Machine_1 = Working[0], Working[wl:R_Workload] =
-    (when (wl < Workload) get_1   -> Working[wl+1] |
+    (	when (wl < Workload) get_1   -> Working[wl+1] |
      when (wl > 0)        put_2 -> Working[wl-1] ).
 Machine_2 = Working[0], Working[wl:R_Workload] =
-    (when (wl < Workload) get_2   -> Working[wl+1] |
-     when (wl > 0)        put_3 -> Working[wl-1] ).     
+    (	when (wl < Workload) get_2   -> Working[wl+1] |
+     when (wl > 0)        put_3 -> Working[wl-1] ).
 Machine_3 = Working[0], Working[wl:R_Workload] =
-    (when (wl < Workload) get_3   -> Working[wl+1] |
-     when (wl > 0)        put_4 -> Working[wl-1] ).     
+    (	when (wl < Workload) get_3   -> Working[wl+1] |
+     when (wl > 0)        put_4 -> Working[wl-1] ).
 Machine_4 = Working[0], Working[wl:R_Workload] =
-    (when (wl < Workload) get_4   -> Working[wl+1] |
-     when (wl > 0)        put_5 -> Working[wl-1] ).     
-
-TU = Idle,
-  Idle    = (get_5 -> Testing | return_2 -> Idle | return_3 -> Idle| return_4 -> Idle | return_5 -> Idle),
-  Testing = (return_1 -> reject -> Idle |
-             accept -> Idle | return_2 -> Testing | return_3 -> Testing| return_4 -> Testing | return_5 -> Testing).
-
-
+    (	when (wl < Workload) get_4   -> Working[wl+1] |
+     when (wl > 0)        put_5 -> Working[wl-1] ).
+Machine_5 = Working[0], Working[wl:R_Workload] =
+    (	when (wl < Workload) get_5   -> Working[wl+1] |
+     when (wl > 0)        put_6 -> Working[wl-1] ).
 
 Buffer_1 = Operative[0],
-  Operative[c:R_Capacity] = (
+Operative[c:R_Capacity] = (
     when (c > 0)         get_1    -> Operative[c-1] |
-    when (c == 0)        get_1    -> ERROR          |
-    when (c < Capacity)  put_1    -> Operative[c+1] |
-    when (c == Capacity) put_1    -> ERROR          |
-    when (c < Capacity)  return_1 -> Operative[c+1] |
-    when (c == Capacity) return_1 -> ERROR          ).
+    when (c < Capacity)  {put_1,return_1}    -> Operative[c+1] ).
 Buffer_2 = Operative[0],
-  Operative[c:R_Capacity] = (
+Operative[c:R_Capacity] = (
     when (c > 0)         get_2    -> Operative[c-1] |
-    when (c == 0)        get_2    -> ERROR          |
-    when (c < Capacity)  put_2    -> Operative[c+1] |
-    when (c == Capacity) put_2    -> ERROR          |
-    when (c < Capacity)  return_2 -> Operative[c+1] |
-    when (c == Capacity) return_2 -> ERROR          ).
+    when (c < Capacity)  put_2    -> Operative[c+1] ).
 Buffer_3 = Operative[0],
-  Operative[c:R_Capacity] = (
+Operative[c:R_Capacity] = (
     when (c > 0)         get_3    -> Operative[c-1] |
-    when (c == 0)        get_3    -> ERROR          |
-    when (c < Capacity)  put_3    -> Operative[c+1] |
-    when (c == Capacity) put_3    -> ERROR          |
-    when (c < Capacity)  return_3 -> Operative[c+1] |
-    when (c == Capacity) return_3 -> ERROR          ).    
+    when (c < Capacity)  put_3    -> Operative[c+1] ).
 Buffer_4 = Operative[0],
-  Operative[c:R_Capacity] = (
+Operative[c:R_Capacity] = (
     when (c > 0)         get_4    -> Operative[c-1] |
-    when (c == 0)        get_4    -> ERROR          |
-    when (c < Capacity)  put_4    -> Operative[c+1] |
-    when (c == Capacity) put_4    -> ERROR          |
-    when (c < Capacity)  return_4 -> Operative[c+1] |
-    when (c == Capacity) return_4 -> ERROR          ).    
+    when (c < Capacity)  put_4    -> Operative[c+1] ).
 Buffer_5 = Operative[0],
-  Operative[c:R_Capacity] = (
+Operative[c:R_Capacity] = (
     when (c > 0)         get_5    -> Operative[c-1] |
-    when (c == 0)        get_5    -> ERROR          |
-    when (c < Capacity)  put_5    -> Operative[c+1] |
-    when (c == Capacity) put_5    -> ERROR          |
-    when (c < Capacity)  return_5 -> Operative[c+1] |
-    when (c == Capacity) return_5 -> ERROR          ).    
+    when (c < Capacity)  put_5    -> Operative[c+1] ).
+Buffer_6 = Operative[0],
+Operative[c:R_Capacity] = (
+    when (c > 0)         get_6    -> Operative[c-1] |
+    when (c < Capacity)  put_6    -> Operative[c+1] ).
+
+TU = Idle,
+  Idle    = (get_6 -> Testing),
+  Testing = (return_1 -> reject -> Idle |
+             accept -> Idle).
+
+
 /*****************************************************************************/
 
 ||Plant_1 = (Machine_0 || Buffer_1).
 ||Plant_2 = (Machine_1 || Buffer_2).
-||Plant_3 = (Machine_3 || Buffer_4).
-||Plant_4 = (Machine_4 || Buffer_5).
-
-||Plant = (Plant_1 || Plant_2 || Plant_3 || Plant_4 || TU).
-
-||TEST = (Machine_4 || Buffer_5 || TU).
-
-Plant >>_m "/tmp/TL_5_3.met".
-//Plant >> "/tmp/TL_6_6_plant.rep".
-Machine_4 >> "/tmp/TL_5_3_m_4.rep".
-Buffer_5 >> "/tmp/TL_5_3_b_5.rep".
-TU >> "/tmp/TL_5_3_tu.rep".
-TEST >> "/tmp/TL_5_3_test.rep".
+||Plant_3 = (Machine_2 || Buffer_3).
+||Plant_4 = (Machine_3 || Buffer_4).
+||Plant_5 = (Machine_4 || Buffer_5).
+||Plant_6 = (Machine_5 || Buffer_6).
+||Plant_T = (Plant_1 || Plant_2 || Plant_3 || Plant_4 || Plant_5 || Plant_6 ||  TU).
 
 
-/*
-controllerSpec Goal = {
-  controllable = {get[0..Machines]}
-  marking = {accept,reject}
-  nonblocking
-}
+fluent F_GOAL = <get_1, {reject,accept}>
+fluent F_Ass = <accept, reject> initially 1
+fluent F_Get_0 = <get_0, put_1>
 
-controller ||MonolithicController = Plant~{Goal}.
+|f| ENV = (Plant_T).
 
-heuristic ||DirectedController = Plant~{Goal}.
-*/
+|gr1| <{F_Ass,F_Get_0}><{F_GOAL}>  STRAT = ENV.
+//|gr1| <{F_Ass}><{F_GOAL}>  NO_STRAT = ENV.
+//STRAT >> "/tmp/TL_4_2_strat.rep".
+STRAT >>_m "/tmp/TL_5_3_strat.met".
+//NO_STRAT >> "/tmp/TL_4_2_diag.rep".
+//NO_STRAT >>_m "/tmp/TL_4_2_diag.met".
+ENV >>_m "/tmp/tl_5_3_env.met".

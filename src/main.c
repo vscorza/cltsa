@@ -160,10 +160,10 @@ int main (int argc, char** argv){
 		//run_functional_tests();
 		//run_parse_test("tests/collector_1_in_v1.fsp", "Collector 2 inputs");//Collector 2 inputs
 		//run_parse_test("tests/ltl_serialization_composition_test.fsp", "Serialization composition test");
-		run_parse_test("tests/TL-2-2.fsp", "Serialization composition test");
+		//run_parse_test("tests/TL-2-2.fsp", "Serialization composition test");
 		//run_parse_test("tests/TL-4-2.fsp", "Serialization composition test");
 		//run_parse_test("tests/TL-4-2_precompute.fsp", "Serialization composition test");
-		//run_parse_test("tests/TL-5-3.fsp", "Serialization composition test");
+		run_parse_test("tests/TL-5-3.fsp", "Serialization composition test");
 		//run_parse_test("tests/TL-6-6.fsp", "Serialization composition test");
 
 		//run_parse_test("tests/lift_controller_2.fsp", "Lift controller 2");
