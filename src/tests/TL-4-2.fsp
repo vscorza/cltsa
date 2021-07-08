@@ -62,28 +62,21 @@ Buffer_4 = Operative[0],
 
 /*****************************************************************************/
 
-||Plant_M = (Machine_0 || Machine_1 || Machine_2 || Machine_3).
-||Plant_B = ( Buffer_1 || Buffer_2 || Buffer_3 || Buffer_4 ||  TU).
-||Plant = (Plant_M || Plant_B).
+fluent F_GOAL = <get_4, {reject,accept}>
+fluent F_Ass = <accept, reject> initially 1
 
-||TEST = (Machine_0 || Machine_1 || Buffer_1 || Buffer_2  || TU).
+||Plant_1 = (Machine_0 || Buffer_1).
+||Plant_2 = (Machine_1 || Buffer_2).
+||Plant_3 = (Machine_2 || Buffer_3).
+||Plant_4 = (Machine_3 || Buffer_4).
+
+||Plant = (Plant_1 || Plant_2 || Plant_3 || Plant_4 || TU).
 
 Plant >>_m "/tmp/TL_4_2.met".
-//Plant >> "/tmp/TL_4_2_plant.rep".
-Machine_3 >> "/tmp/TL_4_2_m_3.rep".
-Buffer_2 >> "/tmp/TL_4_2_b_2.rep".
-TU >> "/tmp/TL_4_2_tu.rep".
-TEST >> "/tmp/TL_4_2_test.rep".
 
+|F| NO_MIXED_ENV = (Plant).
 
-/*
-controllerSpec Goal = {
-  controllable = {get[0..Machines]}
-  marking = {accept,reject}
-  nonblocking
-}
+|gr1| <{F_Ass}><{F_GOAL}>  STRAT = NO_MIXED_ENV.
 
-controller ||MonolithicController = Plant~{Goal}.
-
-heuristic ||DirectedController = Plant~{Goal}.
-*/
+STRAT >> "/tmp/TL_4_2_strat.rep".
+STRAT >>_m "/tmp/TL_4_2_strat.met".

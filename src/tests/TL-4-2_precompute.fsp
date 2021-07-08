@@ -1,0 +1,15 @@
+set Global_Alphabet = {get_1,put_1,get_2,put_2,get_3,put_3,get_4,put_4,return_1, return_2, return_3, return_4, reject,accept}
+set Controllable_Alphabet = {get_1,get_2,get_3,get_4}
+
+Plant << "/tmp/TL_4_2_plant.rep".
+Plant >>_m "/tmp/TL_4_2.met".
+
+fluent F_GOAL = <get_4, {reject,accept}>
+fluent F_Ass = <accept, reject> initially 1
+
+|F| NO_MIXED_ENV = (Plant).
+
+|gr1| <{F_Ass}><{F_GOAL}>  STRAT = NO_MIXED_ENV.
+
+STRAT >> "/tmp/TL_4_2_strat.rep".
+STRAT >>_m "/tmp/TL_4_2_strat.met".

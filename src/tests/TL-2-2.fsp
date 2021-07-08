@@ -1,0 +1,71 @@
+const Machines = 2
+const Workload = 1
+const Capacity = 1
+range R_Machines = 0..Machines
+range R_Capacity = 0..Capacity
+range R_Workload = 0..Workload
+set Global_Alphabet = {idle, get_0, get_1,put_1,get_2,put_2,get_3,put_3,return_1, reject,accept}
+set Controllable_Alphabet = {get_0,get_1,get_2,get_3}
+
+Machine_0 = Working[0], Working[wl:R_Workload] =
+    (	when(wl == 0) idle -> Working[wl] |
+	when (wl < Workload) get_0   -> Working[wl+1] |
+     when (wl > 0)        put_1 -> Working[wl-1] ).
+
+Buffer_1 = Operative[0],
+Operative[c:R_Capacity] = (
+    when (c > 0)         get_1    -> Operative[c-1] |
+    when (c < Capacity)  {put_1,return_1}    -> Operative[c+1] ).
+
+TU = Idle,
+  Idle    = (get_1 -> Testing),
+  Testing = (return_1 -> reject -> Idle |
+             accept -> Idle).
+
+/////////////////////////////////////////////////////////
+
+
+Machine_1 = Working[0], Working[wl:R_Workload] =
+    (when (wl < Workload) get_1   -> Working[wl+1] |
+     when (wl > 0)        put_2 -> Working[wl-1] ).
+
+
+Buffer_2 = Operative[0],
+  Operative[c:R_Capacity] = (
+    when (c > 0)         get_2    -> Operative[c-1] |
+    when (c == 0)        get_2    -> ERROR          |
+    when (c < Capacity)  put_2    -> Operative[c+1] |
+    when (c == Capacity) put_2    -> ERROR          ).
+
+/*****************************************************************************/
+
+||Plant_1 = (Machine_0 || Buffer_1).
+||Plant_2 = (Machine_1 || Buffer_2).
+||Plant_T = (Plant_1 ||  TU).
+
+//||Plant_T = (Plant_1 || Plant_2 || TU).
+
+fluent F_GOAL = <get_1, {reject,accept}>
+fluent F_Ass = <accept, reject> initially 1
+fluent F_Get_0 = <get_0, put_1>
+/*
+vstate fluent F_DECIDE in TU = {Testing}.
+vstate fluent F_DECIDE in Buffer_1 = {ERROR}.
+*/
+|f| ENV = (Plant_T).
+
+|gr1| <{F_Ass,F_Get_0}><{F_GOAL}>  STRAT = ENV.
+/*
+||Plant = (Plant_1 || Plant_2 || Plant_3 || Plant_4 || TU).
+Plant >>_m "/tmp/TL_4_2.met".
+|F| NO_MIXED_ENV = (Plant).
+|gr1| <{F_Ass}><{F_GOAL}>  STRAT = NO_MIXED_ENV.
+*/
+STRAT >> "/tmp/TL_2_2_strat.rep".
+STRAT >>_m "/tmp/TL_2_2_strat.met".
+Machine_0 >> "/tmp/tl_2_2_m_0.rep".
+Buffer_1 >> "/tmp/tl_2_2_b_1.rep".
+TU >> "/tmp/tl_2_2_tu.rep".
+Plant_1 >> "/tmp/tl_2_2_p_1.rep".
+Plant_T >> "/tmp/tl_2_2_m_t.rep".
+ENV >> "/tmp/tl_2_2_env.rep".
