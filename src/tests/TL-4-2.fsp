@@ -45,6 +45,8 @@ TU = Idle,
              accept -> Idle).
 
 
+TU_remove = (get_4 -> TU).
+
 /*****************************************************************************/
 
 ||Plant_1 = (Machine_0 || Buffer_1).
@@ -53,17 +55,24 @@ TU = Idle,
 ||Plant_4 = (Machine_3 || Buffer_4).
 ||Plant_T = (Plant_1 || Plant_2 || Plant_3 || Plant_4 ||  TU).
 
+||Plant_T_remove = (Plant_1 || Plant_2 || Plant_3 || Plant_4 ||  TU_remove).
+
 
 fluent F_GOAL = <get_1, {reject,accept}>
 fluent F_Ass = <accept, reject> initially 1
 fluent F_Get_0 = <get_0, put_1>
 
 |f| ENV = (Plant_T).
+|f| ENV_remove = (Plant_T_remove).
 
-|gr1| <{F_Ass,F_Get_0}><{F_GOAL}>  STRAT = ENV.
+|gr1| <{F_Get_0}><{F_GOAL}>  STRAT = ENV.
 |gr1| <{F_Ass}><{F_GOAL}>  NO_STRAT = ENV.
+|gr1| <{F_Get_0}><{F_GOAL}>  REMOVE_NO_STRAT = ENV_remove.
 STRAT >> "/tmp/TL_4_2_strat.rep".
 STRAT >>_m "/tmp/TL_4_2_strat.met".
 NO_STRAT >> "/tmp/TL_4_2_diag.rep".
 NO_STRAT >>_m "/tmp/TL_4_2_diag.met".
+REMOVE_NO_STRAT >> "/tmp/TL_4_2_diag_remove.rep".
+REMOVE_NO_STRAT >>_m "/tmp/TL_4_2_diag_remove.met".
 ENV >>_m "/tmp/tl_4_2_env.met".
+

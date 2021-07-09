@@ -34,6 +34,10 @@ Monitor_0 = (eat_0 -> Done),
   Done = (eat_0 -> Done | eat_all -> Monitor_0).
 Monitor_1 = (eat_1 -> Done),
   Done = (eat_1 -> Done | eat_all -> Monitor_1).
+Monitor_0_remove = (eat_0 -> Done),
+  Done = (eat_0 -> Done).
+Monitor_1_remove = (eat_1 -> Done),
+  Done = (eat_1 -> Done).
 
 /*****************************************************************************/
 
@@ -41,6 +45,7 @@ Monitor_1 = (eat_1 -> Done),
 ||Plant_1 = (Philosopher_0 || Philosopher_1 || Fork_0 ||  Fork_1).
 ||Plant_0 = (Philosopher_0 || Fork_0).
 
+||Plant_remove = (Philosopher_0 || Philosopher_1 || Fork_0 ||  Fork_1 || Monitor_0_remove || Monitor_1_remove).
 /*****************************************************************************/
 
 
@@ -48,6 +53,7 @@ fluent F_Ass = <eat_all, eat[r:R_Phil]> initially 1
 fluent F_GOAL = <eat_all, eat[r:R_Phil]>
 
 |F| ENV = (Plant).
+|F| REMOVE_ENV = (Plant_remove).
 
 Philosopher_0 >> "/tmp/DP_2_2_ph_0.rep".
 Fork_0 >> "/tmp/DP_2_2_f_0.rep".
@@ -57,10 +63,15 @@ Plant_0 >> "/tmp/DP_2_2_plant_0.rep".
 
 |gr1| <{F_Ass}><{F_GOAL}>  STRAT = ENV.
 |gr1| <{}><{F_GOAL}>  NO_STRAT = ENV.
+|gr1| <{}><{F_GOAL}>  REMOVE_NO_STRAT = REMOVE_ENV.
 //STRAT >> "/tmp/TL_4_2_strat.rep".
 STRAT >>_m "/tmp/DP_2_2_strat.met".
 STRAT >> "/tmp/DP_2_2_strat.rep".
+NO_STRAT >>_m "/tmp/DP_2_2_diag.met".
 NO_STRAT >> "/tmp/DP_2_2_diag.rep".
+REMOVE_NO_STRAT >>_m "/tmp/DP_2_2_remove_diag.met".
+REMOVE_NO_STRAT >> "/tmp/DP_2_2_remove_diag.rep".
+
 ENV >> "/tmp/DP_2_2_env.rep".
 ENV >>_m "/tmp/DP_2_2_env.met".
 
