@@ -187,7 +187,7 @@ inline bool automaton_automata_idxs_is_max(uint32_t *idxs, uint32_t automata_cou
  * @param alphabet_overlap a boolean array describing which elements should be considered in the check
  * @return 0 if overlapping is total, 1 if overlapping is partial, -1 if overlapping is empty
  */
-inline int32_t automaton_automata_check_overlap(signal_bit_array_t *accum_label, signal_bit_array_t *current_label, signal_bit_array_t *alphabet_overlap
+int32_t automaton_automata_check_overlap(signal_bit_array_t *accum_label, signal_bit_array_t *current_label, signal_bit_array_t *alphabet_overlap
 		, uint32_t alphabet_count){
 	uint32_t i;
 	//check if overlapping transitions are empty

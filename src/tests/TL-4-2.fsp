@@ -1,6 +1,6 @@
 const Machines = 4
-const Workload = 2
-const Capacity = 2
+const Workload = 1
+const Capacity = 1
 range R_Machines = 0..Machines
 range R_Capacity = 0..Capacity
 range R_Workload = 0..Workload
@@ -61,9 +61,9 @@ fluent F_Get_0 = <get_0, put_1>
 |f| ENV = (Plant_T).
 
 |gr1| <{F_Ass,F_Get_0}><{F_GOAL}>  STRAT = ENV.
-//|gr1| <{F_Ass}><{F_GOAL}>  NO_STRAT = ENV.
-//STRAT >> "/tmp/TL_4_2_strat.rep".
+|gr1| <{F_Ass}><{F_GOAL}>  NO_STRAT = ENV.
+STRAT >> "/tmp/TL_4_2_strat.rep".
 STRAT >>_m "/tmp/TL_4_2_strat.met".
-//NO_STRAT >> "/tmp/TL_4_2_diag.rep".
-//NO_STRAT >>_m "/tmp/TL_4_2_diag.met".
+NO_STRAT >> "/tmp/TL_4_2_diag.rep".
+NO_STRAT >>_m "/tmp/TL_4_2_diag.met".
 ENV >>_m "/tmp/tl_4_2_env.met".
