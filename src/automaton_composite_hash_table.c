@@ -21,7 +21,9 @@ automaton_composite_hash_table *automaton_composite_hash_table_create(uint32_t a
 	//get max order
 	uint32_t max_order = 1;
 	for(i = 0; i < automata_count; i++){
-		if(automata_state_count[i] == 0){printf("Automaton state count was zero\n"); exit(-1);}
+		if(automata_state_count[i] == 0){printf("Automaton state count was zero\n");
+			//exit(-1);
+		}
 		max_order *= i+1;
 	}
 	max_order *= automata_count + 1;

@@ -42,7 +42,7 @@ TODO:
 			- ahb_1_n	
 				- completo			
 		- correr tests
-	
+	- revisar patterns for property specification ...
 - clts	
 	- revisar archivo de mati			
 	- add specific composition algorithm when all operators are asynch/synch

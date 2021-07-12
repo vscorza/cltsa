@@ -133,7 +133,7 @@ inline void automaton_automata_add_pending_transitions(automaton_automaton **aut
  * @param automata_count the number of automata being composed
  * @return true if the max value for the indexes is reached, false otherwise
  */
-inline bool automaton_automata_compose_increment_idxs(uint32_t *idxs, uint32_t *idxs_sizes, bool** idxs_skip, uint32_t automata_count){
+bool automaton_automata_compose_increment_idxs(uint32_t *idxs, uint32_t *idxs_sizes, bool** idxs_skip, uint32_t automata_count){
 	int32_t i = automata_count;
 	bool set_anew = false;
 	do{
@@ -172,7 +172,7 @@ inline bool automaton_automata_compose_increment_idxs(uint32_t *idxs, uint32_t *
  * @param automata_count the number of automata to be composed
  * @return true if indexes have reach maximum value, false otherwise
  */
-inline bool automaton_automata_idxs_is_max(uint32_t *idxs, uint32_t automata_count){
+bool automaton_automata_idxs_is_max(uint32_t *idxs, uint32_t automata_count){
 	int32_t i;
 	for(i = 0; i < automata_count; i++){
 		if(idxs[i] != 0)return false;

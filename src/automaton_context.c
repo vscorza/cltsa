@@ -863,6 +863,12 @@ void automaton_statement_syntax_build_local_alphabet(automaton_automata_context*
 				transition	= state->transitions[j];
 				//TODO: take guards into consideration
 				for(k = 0; k < (int32_t)transition->count; k++){
+					if(transition->condition != NULL && k == 0){
+						//if(!automaton_expression_syntax_evaluate(tables, transition->condition, current_valuations_count > 0 ? current_valuations[current_valuations_count - 1]: NULL)){
+						if(!automaton_expression_syntax_evaluate(tables, transition->condition, current_valuations_count > 0 ? current_valuations[current_valuations_count -1]: NULL)){
+							continue;
+						}
+					}
 					trace_label	= transition->labels[k];
 					for(l = 0; l < (int32_t)trace_label->count; l++){
 						trace_label_atom	= trace_label->atoms[l];
@@ -2332,12 +2338,21 @@ void automaton_indexes_syntax_eval_strings(automaton_parsing_tables* tables, aut
 			j++;
 		}else{
 			if(last_valuation != NULL){
-				for(k = 0; k < last_valuation->count; k++){
-					if(strcmp(last_valuation->ranges[k]->name, indexes->indexes[i]->expr->string_terminal) == 0){
-						current_index[j]	= lower_index[j] = upper_index[j]	= last_valuation->current_values[k];
-						j++;
+				if(indexes->indexes[i]->expr->string_terminal != NULL){
+					for(k = 0; k < last_valuation->count; k++){
+						if(strcmp(last_valuation->ranges[k]->name, indexes->indexes[i]->expr->string_terminal) == 0){
+							current_index[j]	= lower_index[j] = upper_index[j]	= last_valuation->current_values[k];
+							j++;
+						}
 					}
+				}else{
+					//automaton_expression_syntax_evaluate(automaton_parsing_tables* tables, automaton_expression_syntax* expr, automaton_indexes_valuation* indexes_valuation)
+					current_index[j]= automaton_expression_syntax_evaluate(tables, indexes->indexes[i]->expr, last_valuation);
+					j++;
 				}
+			}else{
+				printf("Valuation and indexes mismatch [automaton_indexes_syntax_eval_strings]");
+				exit(-1);
 			}
 		}
 	}
@@ -2390,8 +2405,10 @@ void automaton_indexes_syntax_eval_strings(automaton_parsing_tables* tables, aut
 			}
 			snprintf(buffer + strlen(buffer), sizeof(buffer), "_%d", current_index[j]);
 			new_values[i][j]	= current_index[j];
+			//if(indexes->indexes[j]->expr->string_terminal == NULL){}
 			for(k = 0; k < current_valuation->count; k++){
-				if((indexes->indexes[j]->is_expr && strcmp(current_valuation->ranges[k]->name, indexes->indexes[j]->expr->string_terminal) == 0)
+				if((indexes->indexes[j]->is_expr && indexes->indexes[j]->expr->string_terminal != NULL
+						&& strcmp(current_valuation->ranges[k]->name, indexes->indexes[j]->expr->string_terminal) == 0)
 						|| (!(indexes->indexes[j]->is_expr) && strcmp(current_valuation->ranges[k]->name, indexes->indexes[j]->lower_ident) == 0)){
 					current_valuation->current_values[k]	= current_index[j];
 					break;

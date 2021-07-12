@@ -1,0 +1,57 @@
+const K = 1
+const  Areas = 2*K + 1
+const  Init = 0
+const  Last = Areas  - 1
+const  Center = Areas / 2
+range R_Area = Init..Last
+range R_K = 0..(K-1)
+range R_Bool = 0..1
+
+set Global_Alphabet = {mouse_move[k:R_K][r:R_Area], cat_move[k:R_K][r:R_Area], cat_turn, mouse_turn, eaten}
+set Controllable_Alphabet = {mouse_move[k:R_K][r:R_Area]}
+
+/*****************************************************************************/
+
+Mouse_0 = Act[Areas -1][0],
+Act[a:R_Area][eaten:R_Bool] = (
+	cat_move[r:R_K][c:R_Area] ->Act[a][((eaten == 1) + ((a == c) * (a != Center))) > 0] |
+	when (eaten == 0) mouse_move_0[a] -> Act[a][eaten] |
+	when ((eaten == 0)* ((a+1)  <= Last)) mouse_move_0[a+1]  -> Act[a+1][eaten] |
+	when ((eaten == 0)* ((a-1)  >= Init)) mouse_move_0[a-1]  -> Act[a-1][eaten] ).
+
+Cat_0 = Act[0],
+Act[a:R_Area] = (cat_move_0[a] -> Act[a] |
+	when ((a+1)  <= Last) cat_move_0[a+1]  -> Act[a+1] |
+	when ((a-1) >= Init) cat_move_0[a-1]  -> Act[a-1] ).
+
+
+
+/*****************************************************************************/
+
+Cat_0 >> "/tmp/CM_2_cat.rep".
+Mouse_0 >> "/tmp/CM_2_mouse.rep".
+||Plant = (Mouse_0 || Cat_0).
+Plant >> "/tmp/CM_2_p.rep".
+
+
+
+fluent F_Ass = <cat_move_0[Center], {cat_move_0[Center -1],cat_move_0[Center +1]}>
+fluent F_GOAL = <mouse_move_0[Center], {mouse_move_0[Center -1],mouse_move_0[Center +1]}>
+|F| ENV = (Plant).
+|gr1| <{F_Ass}><{F_GOAL}>  STRAT = ENV.
+STRAT >>_m "/tmp/CM_2_strat.met".
+STRAT >> "/tmp/CM_2_strat.rep".
+ENV >> "/tmp/CM_2_env.rep".
+ENV >>_m "/tmp/CM_2_env.met".
+|gr1| <{}><{F_GOAL}>  NO_STRAT = ENV.
+NO_STRAT >>_m "/tmp/CM_2_diag.met".
+NO_STRAT >> "/tmp/CM_2_diag.rep".
+
+
+//|F| REMOVE_ENV = (Plant_remove).
+//|gr1| <{}><{F_GOAL}>  REMOVE_NO_STRAT = REMOVE_ENV.
+
+
+//REMOVE_NO_STRAT >>_m "/tmp/CM_2_remove_diag.met".
+//REMOVE_NO_STRAT >> "/tmp/CM_2_remove_diag.rep".
+
