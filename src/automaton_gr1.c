@@ -758,7 +758,7 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 										&(game_automaton->transitions[current_ranking->state][l - 1]),
 										&(game_automaton->transitions[current_ranking->state][l])));
 							if(new_monitored || (l == game_automaton->out_degree[current_ranking->state])){
-								if((min_ranking == NULL)){
+								if(min_ranking == NULL){
 									current_transition	= &(game_automaton->transitions[current_ranking->state][(l == game_automaton->out_degree[current_ranking->state])? (l - 1): l]);
 									succ_ranking		=  (automaton_ranking*)automaton_concrete_bucket_get_entry(ranking_list[succ_guarantee], current_transition->state_to);
 									min_value	= succ_ranking->value;

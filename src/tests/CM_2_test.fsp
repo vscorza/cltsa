@@ -67,7 +67,8 @@ ENV >>_m "/tmp/CM_2_env.met".
 
 
 
-|gr1| <{}><{G_GOAL}>  NO_STRAT = ENV.
+|gr1| <{A_Ass}><{G_GOAL}>  NO_STRAT = ENV.
+
 NO_STRAT >>_m "/tmp/CM_2_diag.met".
 NO_STRAT >> "/tmp/CM_2_diag.rep".
 
@@ -106,15 +107,10 @@ S_2 = (mouse_move_0_1-> S_1),
 S_3 = (mouse_move_0_1-> S_4),
 S_4 = (cat_move_0_0-> S_2|cat_move_0_1-> S_3).
 
-NO_STRAT_P  = S_0,
-S_0 = (mouse_move_0_1-> S_1),
-S_1 = (cat_move_0_0-> S_2),
-S_2 = (mouse_move_0_1-> S_1|mouse_move_0_0-> S_11),
-S_11 = (cat_move_0_2-> S_12),
-S_12 = (mouse_move_0_2-> S_11|mouse_move_0_0-> S_11|mouse_move_0_1-> S_1).
 
 // tests
-equals FATAL_Simple_Range(ENV, ENV_P).
-equals FATAL_Simple_Range(STRAT, STRAT_P).
-equals FATAL_Simple_Range(NO_STRAT, NO_STRAT_P).
+equals FATAL_CAT_MOUSE_ENV_TEST(ENV, ENV_P).
+equals FATAL_CAT_MOUSE_STRAT_TEST(STRAT, STRAT_P).
+
+
 

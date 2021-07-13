@@ -785,11 +785,13 @@ void automaton_statement_syntax_find_add_local_element(char *element_to_find, au
 	}
 	if(element_global_index == -1){
 		//TODO: report local element not found
+#if VERBOSE
 		printf("Looking for: %s [NOT FOUND]\nGlobal Alphabet:\n(", element_to_find);
 		for(m = 0; m < (int32_t)ctx->global_alphabet->count; m++){
 			printf("%s%s", ctx->global_alphabet->list[m].name, m < ((int32_t)ctx->global_alphabet->count - 1)? ",":"");
 		}
 		printf(")\n");
+#endif
 		if(could_be_guarded)
 			return;
 		else
@@ -2182,7 +2184,8 @@ automaton_indexes_valuation *automaton_indexes_valuation_merge(automaton_indexes
 		valuation->ranges[i]	= automaton_range_clone(first->ranges[i]);
 		valuation->current_values[i]	= first->current_values[i];
 	}
-	for(k = 0; k < count; k++){
+	//for(k = 0; k < count; k++){
+	k = 0;
 		for(i = 0; i < second->count; i++){
 			found = false;
 			for(j = 0; j < first->count; j++){
@@ -2195,9 +2198,10 @@ automaton_indexes_valuation *automaton_indexes_valuation_merge(automaton_indexes
 				valuation->ranges[first->count + k]	= automaton_range_clone(second->ranges[i]);
 				valuation->current_values[first->count + k]	= second->current_values[i];
 				valuation->total_combinations *= second->ranges[i]->upper_value - second->ranges[i]->lower_value;
+				k++;
 			}
 		}
-	}
+	//}
 	return valuation;
 }
 
@@ -2321,9 +2325,9 @@ void automaton_indexes_syntax_eval_strings(automaton_parsing_tables* tables, aut
 	automaton_string_list *ret_value	= automaton_string_list_create(true, false);
 	int32_t inner_count			= 0;
 	int32_t effective_count	= indexes->count;
-	lower_index	= malloc(sizeof(int32_t) * effective_count);
-	upper_index	= malloc(sizeof(int32_t) * effective_count);
-	current_index	= malloc(sizeof(int32_t) * effective_count);
+	lower_index	= calloc(effective_count, sizeof(int32_t));
+	upper_index	= calloc(effective_count, sizeof(int32_t));
+	current_index	= calloc(effective_count, sizeof(int32_t));
 	j = 0;
 
 	//compute total combinations and initialize indexes
