@@ -760,8 +760,9 @@ bool automaton_statement_syntax_to_composition(automaton_automata_context* ctx, 
  * @param ctx automata context over which current automata is initialized
  * @param local_alphabet_count a placeholder for the local alphabet count after adding the element (if not present)
  * @param local_alphabet the local alphabet where the element will be added (if needed)
+ * @param could_be_guarded is a boolean that indicates that the element could be behind a falsifiable guard, thus could be a false addition (should fix)
  */
-void automaton_statement_syntax_find_add_local_element(char *element_to_find, automaton_automata_context* ctx, uint32_t *local_alphabet_count, uint32_t **local_alphabet){
+void automaton_statement_syntax_find_add_local_element(char *element_to_find, automaton_automata_context* ctx, uint32_t *local_alphabet_count, uint32_t **local_alphabet, bool could_be_guarded){
 	int32_t element_global_index= -1;
 	int32_t element_position	= (*local_alphabet_count);
 	int32_t m;
@@ -789,7 +790,10 @@ void automaton_statement_syntax_find_add_local_element(char *element_to_find, au
 			printf("%s%s", ctx->global_alphabet->list[m].name, m < ((int32_t)ctx->global_alphabet->count - 1)? ",":"");
 		}
 		printf(")\n");
-		exit(-1);
+		if(could_be_guarded)
+			return;
+		else
+			exit(-1);
 	}
 	for(m = 0; m < (int32_t)(*local_alphabet_count); m++){
 		if((*local_alphabet)[m] == (uint32_t)element_global_index){
@@ -859,17 +863,14 @@ void automaton_statement_syntax_build_local_alphabet(automaton_automata_context*
 				}
 				current_valuations[current_valuations_count++] 	= automaton_indexes_valuation_create_from_indexes(tables, state->label->indexes);
 			}
+			//TODO: this is an incomplete solution to the problem of finding alphabet elements after a falsifiable guard
+			bool could_be_guarded	= false;
 			for(j = 0; j < (int32_t)state->transitions_count; j++){
 				transition	= state->transitions[j];
 				//TODO: take guards into consideration
 				for(k = 0; k < (int32_t)transition->count; k++){
-					if(transition->condition != NULL && k == 0){
-						//if(!automaton_expression_syntax_evaluate(tables, transition->condition, current_valuations_count > 0 ? current_valuations[current_valuations_count - 1]: NULL)){
-						if(!automaton_expression_syntax_evaluate(tables, transition->condition, current_valuations_count > 0 ? current_valuations[current_valuations_count -1]: NULL)){
-							continue;
-						}
-					}
 					trace_label	= transition->labels[k];
+					could_be_guarded = transition->condition != NULL && k == 0;
 					for(l = 0; l < (int32_t)trace_label->count; l++){
 						trace_label_atom	= trace_label->atoms[l];
 						atom_label			= trace_label_atom->label;
@@ -894,11 +895,10 @@ void automaton_statement_syntax_build_local_alphabet(automaton_automata_context*
 								for(n = 0; n < count;n++)free(indexes_values[n]);
 								free(indexes_values); indexes_values = NULL;
 								for(n = 0; n < count; n++){
-									automaton_statement_syntax_find_add_local_element(ret_value[n], ctx, local_alphabet_count, local_alphabet);
-
+									automaton_statement_syntax_find_add_local_element(ret_value[n], ctx, local_alphabet_count, local_alphabet, could_be_guarded);
 								}
 							}else{
-								automaton_statement_syntax_find_add_local_element(atom_label->string_terminal, ctx, local_alphabet_count, local_alphabet);
+								automaton_statement_syntax_find_add_local_element(atom_label->string_terminal, ctx, local_alphabet_count, local_alphabet, could_be_guarded);
 							}
 						}else{
 							for(n = 0; n < (int32_t)(atom_label->set->count); n++){
@@ -920,10 +920,10 @@ void automaton_statement_syntax_build_local_alphabet(automaton_automata_context*
 										for(n = 0; n < count;n++)free(indexes_values[n]);
 										free(indexes_values); indexes_values = NULL;
 										for(n = 0; n < count; n++){
-											automaton_statement_syntax_find_add_local_element(ret_value[n], ctx, local_alphabet_count, local_alphabet);
+											automaton_statement_syntax_find_add_local_element(ret_value[n], ctx, local_alphabet_count, local_alphabet, could_be_guarded);
 										}
 									}else{
-										automaton_statement_syntax_find_add_local_element(atom_label->set->labels[n][o]->string_terminal, ctx, local_alphabet_count, local_alphabet);
+										automaton_statement_syntax_find_add_local_element(atom_label->set->labels[n][o]->string_terminal, ctx, local_alphabet_count, local_alphabet, could_be_guarded);
 									}
 								}
 							}
@@ -1095,8 +1095,9 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 					automaton_automaton_add_initial_state(automaton, to_state);
 					first_state_set	= true;
 				}else{
+					//TODO: correct this
 					//partial incomplete solution to state to state ref: (S[i:R] = S_p[i].) converted to (S[i:R] = (<> -> S_p[i]).
-					//create empty transitions
+					//creates empty transitions
 					current_automaton_transition[0]	= automaton_transition_create(current_from_state[0], to_state);
 					automaton_automaton_add_transition(automaton, current_automaton_transition[0]);
 					automaton_transition_destroy(current_automaton_transition[0], true);
@@ -2126,9 +2127,9 @@ automaton_automaton* automaton_automaton_sequentialize(automaton_automaton *auto
 bool automaton_statement_syntax_to_constant(automaton_expression_syntax* const_def_syntax
 		, automaton_parsing_tables* tables){
 	uint32_t main_index	= automaton_parsing_tables_get_entry_index(tables, CONST_ENTRY_AUT, const_def_syntax->string_terminal);
+	tables->const_entries[main_index]->valuation.int_value	= automaton_expression_syntax_evaluate(tables, const_def_syntax, NULL);
 	tables->const_entries[main_index]->solved				= true;
 	tables->const_entries[main_index]->valuation_count		= 1;
-	tables->const_entries[main_index]->valuation.int_value	= automaton_expression_syntax_evaluate(tables, const_def_syntax, NULL);
 	return false;
 }
 
@@ -2328,27 +2329,23 @@ void automaton_indexes_syntax_eval_strings(automaton_parsing_tables* tables, aut
 	//compute total combinations and initialize indexes
 	for(i = 0; i < indexes->count; i++){
 		if(!(indexes->indexes[i]->is_expr)){
-			automaton_index_syntax_get_range(tables, indexes->indexes[i], &(lower_index[j]), &(upper_index[j]));
-			if(lower_index[j] > upper_index[j]){//TODO: report bad index
-				lower_index[j]	= 	upper_index[j]	= 	current_index[j]	= -1;
+			automaton_index_syntax_get_range(tables, indexes->indexes[i], &(lower_index[i]), &(upper_index[i]));
+			if(lower_index[i] > upper_index[i]){//TODO: report bad index
+				lower_index[i]	= 	upper_index[i]	= 	current_index[i]	= -1;
 			}else{
-				total_combinations *= (uint32_t)(upper_index[j] - lower_index[j] + 1);
-				current_index[j]	= lower_index[j];
+				total_combinations *= (uint32_t)(upper_index[i] - lower_index[i] + 1);
+				current_index[i]	= lower_index[i];
 			}
-			j++;
 		}else{
 			if(last_valuation != NULL){
 				if(indexes->indexes[i]->expr->string_terminal != NULL){
 					for(k = 0; k < last_valuation->count; k++){
 						if(strcmp(last_valuation->ranges[k]->name, indexes->indexes[i]->expr->string_terminal) == 0){
-							current_index[j]	= lower_index[j] = upper_index[j]	= last_valuation->current_values[k];
-							j++;
+							current_index[i]	= lower_index[i] = upper_index[i]	= last_valuation->current_values[k];
 						}
 					}
 				}else{
-					//automaton_expression_syntax_evaluate(automaton_parsing_tables* tables, automaton_expression_syntax* expr, automaton_indexes_valuation* indexes_valuation)
 					current_index[j]= automaton_expression_syntax_evaluate(tables, indexes->indexes[i]->expr, last_valuation);
-					j++;
 				}
 			}else{
 				printf("Valuation and indexes mismatch [automaton_indexes_syntax_eval_strings]");

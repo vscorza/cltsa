@@ -640,6 +640,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 				fflush(stdout);
 #endif
 
+				// (considered && label_has_signals && !accum_set) || not_considered && accum_set
 				if((!not_considered && (!label_not_empty && (!accum_set /* || (accum_not_empty )*/)))
 						|| (not_considered && accum_set && !accum_not_empty)
 						){

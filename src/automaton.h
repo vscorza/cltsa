@@ -132,7 +132,7 @@ void automaton_indexes_valuation_copy(automaton_indexes_valuation* source, autom
 automaton_signal_event* automaton_signal_event_create(char* name, automaton_signal_type type);
 automaton_alphabet* automaton_alphabet_create();
 automaton_transition* automaton_transition_create(uint32_t from_state, uint32_t to_state);
-automaton_fluent* automaton_fluent_create(char* name, bool initial_valuation);
+automaton_fluent* automaton_fluent_create(char* Centername, bool initial_valuation);
 automaton_valuation* automaton_valuation_create(uint32_t state);
 automaton_automata_context* automaton_automata_context_create(char* name, automaton_alphabet* alphabet, uint32_t fluents_count, automaton_fluent** fluents, uint32_t liveness_valuations_count, obdd** liveness_valuations
 		, char** liveness_valuations_names, uint32_t state_valuations_count, char** state_valuations_names);
