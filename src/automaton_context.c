@@ -785,17 +785,23 @@ void automaton_statement_syntax_find_add_local_element(char *element_to_find, au
 	}
 	if(element_global_index == -1){
 		//TODO: report local element not found
+		if(could_be_guarded){
 #if VERBOSE
-		printf("Looking for: %s [NOT FOUND]\nGlobal Alphabet:\n(", element_to_find);
-		for(m = 0; m < (int32_t)ctx->global_alphabet->count; m++){
-			printf("%s%s", ctx->global_alphabet->list[m].name, m < ((int32_t)ctx->global_alphabet->count - 1)? ",":"");
-		}
-		printf(")\n");
+			printf("Looking for: %s [NOT FOUND]\nGlobal Alphabet:\n(", element_to_find);
+			for(m = 0; m < (int32_t)ctx->global_alphabet->count; m++){
+				printf("%s%s", ctx->global_alphabet->list[m].name, m < ((int32_t)ctx->global_alphabet->count - 1)? ",":"");
+			}
+			printf(")\n");
 #endif
-		if(could_be_guarded)
 			return;
-		else
+		}else{
+			printf("Looking for: %s [NOT FOUND]\nGlobal Alphabet:\n(", element_to_find);
+			for(m = 0; m < (int32_t)ctx->global_alphabet->count; m++){
+				printf("%s%s", ctx->global_alphabet->list[m].name, m < ((int32_t)ctx->global_alphabet->count - 1)? ",":"");
+			}
+			printf(")\n");
 			exit(-1);
+		}
 	}
 	for(m = 0; m < (int32_t)(*local_alphabet_count); m++){
 		if((*local_alphabet)[m] == (uint32_t)element_global_index){
@@ -1749,6 +1755,9 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 
 			free(vstates_ctx_indexes);
 		}
+
+		automaton_automaton_remove_unreachable_states(automaton);
+
 		///////////
 
 		if(ret_value != NULL){

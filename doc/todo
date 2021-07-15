@@ -43,6 +43,11 @@ TODO:
 				- completo			
 		- correr tests
 	- revisar patterns for property specification ...
+- post paper
+	- revisar construccion de alfabeto local
+	- indices para automatas y forall
+	- indices para ltl game structures
+	- renombrar/esconder
 - clts	
 	- revisar archivo de mati			
 	- add specific composition algorithm when all operators are asynch/synch

@@ -21,7 +21,8 @@ Act[a:R_Area][eaten:R_Bool] = (
 	when (eaten == 0) mouse_move_0[a] -> Act[a][eaten] |
 	when ((eaten == 0)* ((a+1)  <= Last)) mouse_move_0[a+1]  -> Act[a+1][eaten] |
 	when ((eaten == 0)* ((a-1)  >= Init)) mouse_move_0[a-1]  -> Act[a-1][eaten] |
-	when(eaten == 1) rotting_0 -> Act[a][eaten]).
+	when(eaten == 1) rotting_0 -> Act[a][eaten]),
+EXTEND = (mouse_move_0[a:R_Area]->EXTEND).
 
 
 Mouse_0_Remove = Act[Areas -1][0],
@@ -29,14 +30,22 @@ Act[a:R_Area][eaten:R_Bool] = (
 	when(eaten == 0) cat_move[r:R_K][c:R_Area] ->Act[a][((a == c) * (a != Center))] |
 	when(eaten == 1) cat_move[r:R_K][c:R_Area] ->Act[a][1] |
 	when (eaten == 0) mouse_move_0[a] -> Act[a][eaten] |
-	when ((eaten == 0)* ((a+1)  < Center)) mouse_move_0[a+1]  -> Act[a+1][eaten] |
-	when ((eaten == 0)* ((a-1)  >= Init)) mouse_move_0[a-1]  -> Act[a-1][eaten] |
-	when(eaten == 1) rotting_0 -> Act[a][eaten]).
+	when ((eaten == 0)* ((a+1)  <= Last)) mouse_move_0[a+1]  -> Act[a+1][eaten] |
+	when ((eaten == 0)* ((a-1)  > Center)) mouse_move_0[a-1]  -> Act[a-1][eaten] |
+	when(eaten == 1) rotting_0 -> Act[a][eaten]),
+EXTEND = (mouse_move_0[a:R_Area]->EXTEND).
 
 Cat_0 = Act[0],
 Act[a:R_Area] = (cat_move_0[a] -> Act[a] |
 	when ((a+1)  <= Last) cat_move_0[a+1]  -> Act[a+1] |
-	when ((a-1) >= Init) cat_move_0[a-1]  -> Act[a-1] ).
+	when ((a-1) >= Init) cat_move_0[a-1]  -> Act[a-1] ),
+EXTEND = (cat_move_0[a:R_Area]->EXTEND).
+
+Cat_0_Remove = Act[0],
+Act[a:R_Area] = (cat_move_0[a] -> Act[a] |
+	when ((a+1)  < Center) cat_move_0[a+1]  -> Act[a+1] |
+	when ((a-1) >= Init) cat_move_0[a-1]  -> Act[a-1] ),
+EXTEND = (cat_move_0[a:R_Area]->EXTEND).
 
 ARBITER = MOUSE_TURN[0],
 MOUSE_TURN[k:R_K] = (when (k < (K-1)){mouse_move[k][r:R_Area],rotting[k]} -> MOUSE_TURN[k+1] | when(k == (K-1)) {mouse_move[k][r:R_Area],rotting[k]} -> CAT_TURN[0]),
@@ -44,73 +53,93 @@ CAT_TURN[k:R_K] = ( when (k < (K-1))cat_move[k][r:R_Area] -> CAT_TURN[k+1] | whe
 
 //*****************************************************************************
 
-ARBITER >> "/tmp/CM_2_arbiter.rep".
-
-Cat_0 >> "/tmp/CM_2_cat.rep".
-Mouse_0 >> "/tmp/CM_2_mouse.rep".
-
-||Plant = (Mouse_0 || ARBITER || Cat_0 || ARBITER).
-Plant >> "/tmp/CM_2_p.rep".
-
-
-||Remove_Plant = (Mouse_0_Remove || Cat_0).
-Mouse_0_Remove >> "/tmp/CM_2_mouse_remove.rep".
-fluent A_Ass = <cat_move_0_1, {cat_move_0_0,cat_move_0_2}>
-fluent G_GOAL = <mouse_move_0_1, {mouse_move_0_0,mouse_move_0_2,rotting_0}>
-
+||Plant = (Mouse_0 || Cat_0  || ARBITER).
 |F| ENV = (Plant).
-|gr1| <{A_Ass}><{G_GOAL}>  STRAT = ENV.
-STRAT >>_m "/tmp/CM_2_strat.met".
-STRAT >> "/tmp/CM_2_strat.rep".
+||Remove_Plant = (Mouse_0_Remove || ARBITER || Cat_0).
+|F| REMOVE_ENV = (Remove_Plant).
+
+fluent A_Ass = <cat_move_0_1, {cat_move_0_0,cat_move_0_2}>
+fluent A_No_Ass = <cat_move_0_0, cat_move_0_1>
+fluent G_CAT = <cat_move_0_1, {cat_move_0_0,cat_move_0_2}>
+fluent G_MOUSE = <mouse_move_0_1, {mouse_move_0_0,mouse_move_0_2,rotting_0}>
+
+|gr1| <{A_Ass}><{G_CAT, G_MOUSE}>  STRAT = ENV.
+|gr1| <{A_No_Ass}><{G_CAT, G_MOUSE}>  NO_STRAT = ENV.
+|gr1| <{A_Ass}><{G_CAT, G_MOUSE}>  REMOVE_NO_STRAT = REMOVE_ENV.
+
+//EXPORTS
+
 ENV >> "/tmp/CM_2_env.rep".
 ENV >>_m "/tmp/CM_2_env.met".
-
-
-
-|gr1| <{A_Ass}><{G_GOAL}>  NO_STRAT = ENV.
-
-NO_STRAT >>_m "/tmp/CM_2_diag.met".
-NO_STRAT >> "/tmp/CM_2_diag.rep".
-
-|F| REMOVE_ENV = (Remove_Plant).
-Plant_Remove >> "/tmp/CM_2_plant_remove.rep".
+Cat_0 >> "/tmp/CM_2_cat.rep".
+Mouse_0 >> "/tmp/CM_2_mouse.rep".
+Plant >> "/tmp/CM_2_p.rep".
+ARBITER >> "/tmp/CM_2_arbiter.rep".
+Remove_Plant >> "/tmp/CM_2_plant_remove.rep".
 REMOVE_ENV >> "/tmp/CM_2_env_remove.rep".
 REMOVE_ENV >>_m "/tmp/CM_2_env_remove.met".
+Mouse_0_Remove >> "/tmp/CM_2_mouse_remove.rep".
 
-|gr1| <{A_Ass}><{G_GOAL}>  REMOVE_NO_STRAT = REMOVE_ENV.
-
+STRAT >>_m "/tmp/CM_2_strat.met".
+STRAT >> "/tmp/CM_2_strat.rep".
+NO_STRAT >>_m "/tmp/CM_2_diag.met".
+NO_STRAT >> "/tmp/CM_2_diag.rep".
 REMOVE_NO_STRAT >>_m "/tmp/CM_2_remove_diag.met".
 REMOVE_NO_STRAT >> "/tmp/CM_2_remove_diag.rep".
 
 //*******************************************
 //TESTS
 
-ENV_P = S_0,
-S_0 = (mouse_move_0_1-> S_1),
-S_1 = (cat_move_0_0-> S_2|cat_move_0_1-> S_3|cat_move_0_2-> S_2),
-S_2 = (mouse_move_0_1-> S_1|mouse_move_0_0-> S_11),
-S_3 = (mouse_move_0_1-> S_4|mouse_move_0_0-> S_5),
-S_4 = (cat_move_0_0-> S_2|cat_move_0_1-> S_3),
-S_5 = (cat_move_0_0-> S_6|cat_move_0_1-> S_7),
-S_6 = (mouse_move_0_2-> S_8|rotting_0-> S_8),
-S_7 = (mouse_move_0_2-> S_5|mouse_move_0_0-> S_5|mouse_move_0_1-> S_4),
-S_8 = (cat_move_0_0-> S_6|cat_move_0_1-> S_9|cat_move_0_2-> S_6),
-S_9 = (mouse_move_0_2-> S_10|rotting_0-> S_10),
-S_10 = (cat_move_0_0-> S_6|cat_move_0_1-> S_9),
-S_11 = (cat_move_0_0-> S_6|cat_move_0_1-> S_7|cat_move_0_2-> S_12),
-S_12 = (mouse_move_0_2-> S_11|mouse_move_0_0-> S_11|mouse_move_0_1-> S_1).
+P_ENV = S_0,
+S_0 = (mouse_move_0_2-> S_1|mouse_move_0_1-> S_2),
+S_1 = (cat_move_0_0-> S_27|cat_move_0_1-> S_15),
+S_2 = (cat_move_0_0-> S_3|cat_move_0_1-> S_4),
+S_3 = (mouse_move_0_1-> S_29|mouse_move_0_2-> S_28|mouse_move_0_0-> S_30),
+S_4 = (mouse_move_0_1-> S_5|mouse_move_0_2-> S_6|mouse_move_0_0-> S_7),
+S_5 = (cat_move_0_0-> S_3|cat_move_0_1-> S_4|cat_move_0_2-> S_13),
+S_6 = (cat_move_0_0-> S_27|cat_move_0_1-> S_15|cat_move_0_2-> S_16),
+S_7 = (cat_move_0_0-> S_8|cat_move_0_1-> S_9|cat_move_0_2-> S_10),
+S_8 = (rotting_0-> S_22),
+S_9 = (mouse_move_0_0-> S_7|mouse_move_0_1-> S_5),
+S_10 = (mouse_move_0_0-> S_11|mouse_move_0_1-> S_12),
+S_11 = (cat_move_0_1-> S_9|cat_move_0_2-> S_10),
+S_12 = (cat_move_0_1-> S_4|cat_move_0_2-> S_13),
+S_13 = (mouse_move_0_1-> S_12|mouse_move_0_2-> S_14|mouse_move_0_0-> S_11),
+S_14 = (cat_move_0_1-> S_15|cat_move_0_2-> S_16),
+S_15 = (mouse_move_0_2-> S_6|mouse_move_0_1-> S_5),
+S_16 = (rotting_0-> S_17),
+S_17 = (cat_move_0_1-> S_18|cat_move_0_2-> S_16),
+S_18 = (rotting_0-> S_19),
+S_19 = (cat_move_0_0-> S_20|cat_move_0_1-> S_18|cat_move_0_2-> S_16),
+S_20 = (rotting_0-> S_21),
+S_21 = (cat_move_0_0-> S_20|cat_move_0_1-> S_18),
+S_22 = (cat_move_0_0-> S_8|cat_move_0_1-> S_23),
+S_23 = (rotting_0-> S_24),
+S_24 = (cat_move_0_0-> S_8|cat_move_0_1-> S_23|cat_move_0_2-> S_25),
+S_25 = (rotting_0-> S_26),
+S_26 = (cat_move_0_1-> S_23|cat_move_0_2-> S_25),
+S_27 = (mouse_move_0_2-> S_28|mouse_move_0_1-> S_29),
+S_28 = (cat_move_0_0-> S_27|cat_move_0_1-> S_15),
+S_29 = (cat_move_0_0-> S_3|cat_move_0_1-> S_4),
+S_30 = (cat_move_0_0-> S_8|cat_move_0_1-> S_9).
 
-STRAT_P = S_0,
-S_0 = (mouse_move_0_1-> S_1),
-S_1 = (cat_move_0_0-> S_2|cat_move_0_1-> S_3|cat_move_0_2-> S_2),
-S_2 = (mouse_move_0_1-> S_1),
-S_3 = (mouse_move_0_1-> S_4),
-S_4 = (cat_move_0_0-> S_2|cat_move_0_1-> S_3).
-
+P_STRAT = S_0,
+S_0 = (mouse_move_0_2-> S_1),
+S_1 = (cat_move_0_0-> S_2|cat_move_0_1-> S_3),
+S_2 = (mouse_move_0_2-> S_45),
+S_3 = (mouse_move_0_1-> S_9),
+S_5 = (mouse_move_0_1-> S_7),
+S_6 = (mouse_move_0_1-> S_9),
+S_7 = (cat_move_0_0-> S_5|cat_move_0_1-> S_6),
+S_9 = (cat_move_0_0-> S_5|cat_move_0_1-> S_6|cat_move_0_2-> S_12),
+S_12 = (mouse_move_0_1-> S_28),
+S_28 = (cat_move_0_1-> S_6|cat_move_0_2-> S_12),
+S_45 = (cat_move_0_0-> S_2|cat_move_0_1-> S_3).
+P_STRAT >> "/tmp/CM_2_strat_p.rep".
 
 // tests
-equals FATAL_CAT_MOUSE_ENV_TEST(ENV, ENV_P).
-equals FATAL_CAT_MOUSE_STRAT_TEST(STRAT, STRAT_P).
+equals FATAL_CAT_MOUSE_ENV_TEST(ENV, P_ENV).
+equals FATAL_CAT_MOUSE_STRAT_TEST(STRAT, P_STRAT).
 
 
 
