@@ -469,7 +469,7 @@ automaton_transition *automaton_automaton_load_transition(FILE *f, automaton_aut
 	return transition;
 }
 /*
- * <name,ctx,local_alphabet_count,[sig_1.idx,..,sig_N.idx],vstates_monitored_count,[vstates_mon1,..,vstates_monN]
+ * <name,source_type,ctx,local_alphabet_count,[sig_1.idx,..,sig_N.idx],vstates_monitored_count,[vstates_mon1,..,vstates_monN]
 ,trans_count,[trans_1,..,trans_M],init_count,[init_i,..,init_K],[[val_s_0_f_0,..,val_s_0_f_L],..,[val_s_T_f_0,..,val_s_T_f_L]]
 ,[[val_s_0_l_0,..,val_s_0_l_R],..,[val_s_T_l_0,..,val_s_T_l_R]]
 ,[[vstate_s_0_f_0,..,vstate_s_0_f_V],..,[vstate_s_T_f_0,..,vstate_s_T_f_R]]>
@@ -494,6 +494,7 @@ automaton_automaton *automaton_automaton_load_report(automaton_automata_context 
 	char sep_char = AUT_SER_SEP_CHAR;
 	char obj_end_char	= AUT_SER_OBJ_END_CHAR;
 	char* name = automaton_automaton_copy_string(f, &sep_char, 1, &buf, &buf_size, &last_finalizer);
+	uint32_t source_type		= automaton_automaton_load_int(f, &sep_char, 1, &buf, &buf_size, &last_finalizer);
 	automaton_automaton_check_load_context(f, ctx, &buf, &buf_size, &last_finalizer);
 	uint32_t local_alphabet_count	= 0;
 	uint32_t *local_alphabet	= NULL;
@@ -530,7 +531,8 @@ automaton_automaton *automaton_automaton_load_report(automaton_automata_context 
 			input_alphabet[i]	= ctx->global_alphabet->list[local_alphabet[i]].type == INPUT_SIG;
 		}
 	}
-	automaton_automaton *result = automaton_automaton_create(name, ctx, local_alphabet_count, local_alphabet, false, false);
+	automaton_automaton *result = automaton_automaton_create(name, ctx, local_alphabet_count, local_alphabet,
+			source_type & SOURCE_GAME, source_type & SOURCE_LTL, source_type & SOURCE_STRAT, source_type & SOURCE_DIAG);
 	free(name);
 	count		= automaton_automaton_load_int(f, &sep_char, 1, &buf, &buf_size, &last_finalizer);
 	uint32_t fluent_index;

@@ -175,7 +175,7 @@ void automaton_automaton_print(automaton_automaton* current_automaton, bool prin
 		}
 		printf("}\n");
 	}
-	if(print_valuations && current_automaton->is_game){
+	if(print_valuations && (current_automaton->source_type & SOURCE_GAME)){
 		uint32_t fluent_index;
 		bool satisfies_valuation;
 		printf("%sMonitored state valuations:{", prefix2);
@@ -566,7 +566,7 @@ void automaton_automaton_serialize_metrics(FILE *f, char* filename, automaton_au
 }
 
 /*
- * <name,ctx,local_alphabet_count,[sig_1.idx,..,sig_N.idx],vstates_monitored_count,[vstates_mon1,..,vstates_monN]
+ * <name,source_type,ctx,local_alphabet_count,[sig_1.idx,..,sig_N.idx],vstates_monitored_count,[vstates_mon1,..,vstates_monN]
 ,trans_count,[trans_1,..,trans_M],init_count,[init_i,..,init_K],[[val_s_0_f_0,..,val_s_0_f_L],..,[val_s_T_f_0,..,val_s_T_f_L]]
 ,[[val_s_0_l_0,..,val_s_0_l_R],..,[val_s_T_l_0,..,val_s_T_l_R]]
 ,[[vstate_s_0_f_0,..,vstate_s_0_f_V],..,[vstate_s_T_f_0,..,vstate_s_T_f_R]]>
@@ -577,7 +577,7 @@ void automaton_automaton_serialize_report(FILE *f, automaton_automaton *automato
 	uint32_t fluent_count	= automaton->context->global_fluents_count;
 	uint32_t liveness_count	= automaton->context->liveness_valuations_count;
 	uint32_t vstates_count	= automaton->context->state_valuations_count;
-	fprintf(f, "%s%s%s", AUT_SER_OBJ_START, automaton->name, AUT_SER_SEP);
+	fprintf(f, "%s%s%s%d%s", AUT_SER_OBJ_START, automaton->name, AUT_SER_SEP,(uint32_t)automaton->source_type,AUT_SER_SEP);
 	automaton_automata_context_serialize_report(f, automaton->context);
 	fprintf(f, "%s%d%s%s", AUT_SER_SEP, automaton->local_alphabet_count, AUT_SER_SEP, AUT_SER_ARRAY_START);
 	for(i = 0; i < automaton->local_alphabet_count; i++){
@@ -617,7 +617,7 @@ void automaton_automaton_serialize_report(FILE *f, automaton_automaton *automato
 	for(i = 0; i < automaton->transitions_count; i++){
 		fprintf(f, "%s", AUT_SER_ARRAY_START);
 		for(j = 0; j < fluent_count; j++){
-			if(automaton->is_game){
+			if((automaton->source_type & SOURCE_GAME)){
 				fluent_index	= GET_STATE_FLUENT_INDEX(fluent_count, i, j);
 				fprintf(f, "%s%s", TEST_FLUENT_BIT(automaton->valuations, fluent_index) ? "1" : "0", j == (fluent_count - 1)? "" :  AUT_SER_SEP);
 			}else{
@@ -630,7 +630,7 @@ void automaton_automaton_serialize_report(FILE *f, automaton_automaton *automato
 	for(i = 0; i < automaton->transitions_count; i++){
 		fprintf(f, "%s", AUT_SER_ARRAY_START);
 		for(j = 0; j < liveness_count; j++){
-			if(automaton->is_game){
+			if(automaton->source_type & SOURCE_GAME){
 				fluent_index	= GET_STATE_FLUENT_INDEX(liveness_count, i, j);
 				fprintf(f, "%s%s", TEST_FLUENT_BIT(automaton->liveness_valuations, fluent_index) ? "1" : "0", j == (liveness_count - 1)? "" :  AUT_SER_SEP);
 			}else{
@@ -644,7 +644,7 @@ void automaton_automaton_serialize_report(FILE *f, automaton_automaton *automato
 	for(i = 0; i < automaton->transitions_count; i++){
 		fprintf(f, "%s", AUT_SER_ARRAY_START);
 		for(j = 0; j < automaton->context->state_valuations_count; j++){
-			if(automaton->is_game && automaton->state_valuations_declared_size > 0){
+			if((automaton->source_type & SOURCE_GAME) && automaton->state_valuations_declared_size > 0){
 				fluent_index	= GET_STATE_FLUENT_INDEX(automaton->context->state_valuations_count, i, j);
 				fprintf(f, "%s%s", TEST_FLUENT_BIT(automaton->state_valuations, fluent_index) ? "1" : "0", j == (automaton->context->state_valuations_count - 1)? "" :  AUT_SER_SEP);
 			}else{
@@ -769,7 +769,7 @@ bool automaton_ranking_print_report(automaton_automaton *automaton,
 		for(i = 0; i < automaton->transitions_count; i++){
 			fprintf(f, "%s", AUT_SER_ARRAY_START);
 			for(j = 0; j < fluent_count; j++){
-				if(automaton->is_game){
+				if(automaton->source_type & SOURCE_GAME){
 					fluent_index	= GET_STATE_FLUENT_INDEX(fluent_count, i, j);
 					fprintf(f, "%s%s", TEST_FLUENT_BIT(automaton->valuations, fluent_index) ? "1" : "0", j == (fluent_count - 1)? "" :  AUT_SER_SEP);
 				}else{
@@ -782,7 +782,7 @@ bool automaton_ranking_print_report(automaton_automaton *automaton,
 		for(i = 0; i < automaton->transitions_count; i++){
 			fprintf(f, "%s", AUT_SER_ARRAY_START);
 			for(j = 0; j < liveness_count; j++){
-				if(automaton->is_game){
+				if(automaton->source_type & SOURCE_GAME){
 					fluent_index	= GET_STATE_FLUENT_INDEX(liveness_count, i, j);
 					fprintf(f, "%s%s", TEST_FLUENT_BIT(automaton->liveness_valuations, fluent_index) ? "1" : "0", j == (liveness_count - 1)? "" :  AUT_SER_SEP);
 				}else{
@@ -796,7 +796,7 @@ bool automaton_ranking_print_report(automaton_automaton *automaton,
 		for(i = 0; i < automaton->transitions_count; i++){
 			fprintf(f, "%s", AUT_SER_ARRAY_START);
 			for(j = 0; j < automaton->context->state_valuations_count; j++){
-				if(automaton->is_game && automaton->state_valuations_declared_size > 0){
+				if((automaton->source_type & SOURCE_GAME) && automaton->state_valuations_declared_size > 0){
 					fluent_index	= GET_STATE_FLUENT_INDEX(automaton->context->state_valuations_count, i, j);
 					fprintf(f, "%s%s", TEST_FLUENT_BIT(automaton->state_valuations, fluent_index) ? "1" : "0", j == (automaton->context->state_valuations_count - 1)? "" :  AUT_SER_SEP);
 				}else{

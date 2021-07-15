@@ -1011,7 +1011,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 		automaton_label_syntax* atom_label;
 
 		automaton_automaton* automaton	= automaton_automaton_create(composition_syntax->name, ctx,
-				local_alphabet_count, local_alphabet, false, false);
+				local_alphabet_count, local_alphabet, false, false, false, false);
 
 		free(local_alphabet);
 		//add transitions
@@ -1664,7 +1664,7 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 		//set state valuations
 		//initialize valuations structs
 		if(current_vstates_count > 0){
-			automaton->is_game	= true;
+			automaton->source_type	= (automaton->source_type | SOURCE_GAME);
 			uint32_t* vstates_ctx_indexes	= calloc(current_vstates_count, sizeof(uint32_t));
 			uint32_t fluent_index;
 			automaton->state_valuations_size	= GET_FLUENTS_ARR_SIZE(ctx->state_valuations_count, automaton->transitions_size);
@@ -1797,7 +1797,8 @@ bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, au
 automaton_automaton* automaton_automaton_sequentialize(automaton_automaton *automaton, char* copy_name,
 		bool sequential, bool has_ticks){
 	automaton_automaton *serialized_automaton	= automaton_automaton_create(copy_name, automaton->context, automaton->local_alphabet_count
-			, automaton->local_alphabet, automaton->is_game, automaton->built_from_ltl);
+			, automaton->local_alphabet, automaton->source_type & SOURCE_GAME, automaton->source_type & SOURCE_LTL
+			, automaton->source_type & SOURCE_STRAT, automaton->source_type & SOURCE_DIAG);
 	uint32_t i, j, k, l, m, n, env_index, sys_index, new_env_index, new_sys_index, new_local_alphabet_count = automaton->local_alphabet_count;
 	bool has_env = false, has_sys = false;
 	uint32_t env_local_count = 0, sys_local_count = 0;
@@ -3209,7 +3210,7 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 					free(winning_region_automaton->liveness_valuations); winning_region_automaton->liveness_valuations = NULL;
 					winning_region_automaton->liveness_valuations_size = 0;
 				}
-				winning_region_automaton->is_game = false;
+				winning_region_automaton->source_type = winning_region_automaton->source_type & ~SOURCE_GAME;
 			}
 
 			//restore old liveness valuations and old context

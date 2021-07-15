@@ -53,6 +53,18 @@ typedef enum automaton_import_type_enum{
 	IMPORT_BOOL = 1,
 	IMPORT_STRING = 2
 }automaton_import_type;
+
+typedef enum automaton_source_type_enum{
+	SOURCE_GAME	= 0x1,
+	SOURCE_LTL	= 0x2,
+	SOURCE_STRAT= 0x4,
+	SOURCE_DIAG	= 0x8,
+	SOURCE_GAME_STRAT	= SOURCE_GAME | SOURCE_STRAT,
+	SOURCE_GAME_DIAG	= SOURCE_GAME | SOURCE_DIAG,
+	SOURCE_LTL_STRAT	= SOURCE_LTL | SOURCE_STRAT,
+	SOURCE_LTL_DIAG		= SOURCE_LTL | SOURCE_DIAG
+}automaton_source_type;
+
 /****************
 ==== STRUCTS ====
 ****************/
@@ -140,7 +152,8 @@ typedef struct automaton_transitions_pool_str{
 	automaton_transition** entries_pool;
 }automaton_transitions_pool;
 typedef struct automaton_str{
-	bool 					built_from_ltl;
+	automaton_source_type	source_type;
+	bool					is_game;
 	char*					name;
 	automaton_automata_context*		context;
 	uint32_t				local_alphabet_count;
@@ -159,7 +172,6 @@ typedef struct automaton_str{
 	automaton_transition**	inverted_transitions;
 	uint32_t				initial_states_count;
 	uint32_t*				initial_states;
-	bool					is_game;
 	uint32_t				state_valuations_size;
 	uint32_t*				state_valuations;
 	uint32_t				state_valuations_declared_size;

@@ -270,9 +270,9 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 	char buff[255];
 	snprintf(buff, sizeof(buff), "%s_Game", composition_name);
 	if(is_game){
-		composition = automaton_automaton_create(buff, ctx, alphabet_count, alphabet, true, false);
+		composition = automaton_automaton_create(buff, ctx, alphabet_count, alphabet, true, false, false, false);
 	}else{
-		composition = automaton_automaton_create(composition_name, ctx, alphabet_count, alphabet, false, false);
+		composition = automaton_automaton_create(composition_name, ctx, alphabet_count, alphabet, false, false, false, false);
 	}
 
 	alphabet_count = ctx->global_alphabet->count;
@@ -902,7 +902,7 @@ automaton_automaton* automaton_automata_compose(automaton_automaton** automata, 
 						for(i = 0; i < liveness_valuations_count; i++){
 							bool current_valuation = true;
 							for(j = 0; j < automata_count; j++){
-								if(automata[j]->built_from_ltl){
+								if(automata[j]->source_type & SOURCE_LTL){
 									fluent_index	= GET_STATE_FLUENT_INDEX(liveness_valuations_count, current_to_state[j], i);
 									current_valuation = current_valuation && TEST_FLUENT_BIT(automata[j]->liveness_valuations, fluent_index);
 								}

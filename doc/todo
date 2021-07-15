@@ -1,6 +1,7 @@
 TODO:
 =====
 - poner a correr una versión de MTSA
+	- resolver problema de sufijo _diag para diagnóstico (meter algo de metadatos en el reporte guardado), mostrar en la lista de reportes por: platnas, strats, diags
 	- armar lista de casos de publicaciones del labo
 		- priorizando que vengan de otro mundo
 		- y que escalen

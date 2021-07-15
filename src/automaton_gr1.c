@@ -649,38 +649,8 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 #endif
 
 	//build strategy
-	strategy	= automaton_automaton_create(strategy_name, game_automaton->context, game_automaton->local_alphabet_count, game_automaton->local_alphabet, false, false);
+	strategy	= automaton_automaton_create(strategy_name, game_automaton->context, game_automaton->local_alphabet_count, game_automaton->local_alphabet, false, false, true, false);
 
-
-
-/*
-	bool is_winning = true;
-	bool one_option = false;
-	bool all_options	= true;
-	//check if all rankings have the initial state
-
-	for(i = 0; i < guarantees_count; i++){
-		one_option	= false;
-		all_options = true;
-		for(j = 0; j < game_automaton->out_degree[game_automaton->initial_states[0]]; j++){
-#if DEBUG_STRATEGY_BUILD
-			printf("[CHK] RANKING FOR %d: %d\n", game_automaton->transitions[game_automaton->initial_states[0]][j].state_to,
-					((automaton_ranking*)automaton_concrete_bucket_get_entry(ranking_list[i], game_automaton->transitions[game_automaton->initial_states[0]][j].state_to))->value);
-#endif
-			if(((automaton_ranking*)automaton_concrete_bucket_get_entry(ranking_list[i]
-																					 , game_automaton->transitions[game_automaton->initial_states[0]][j].state_to))->value != RANKING_INFINITY){
-
-				one_option = true;
-			}else{
-				all_options = false;
-			}
-		}
-		if(!one_option || (!(game_automaton->is_controllable[game_automaton->initial_states[0]]) && !all_options)){
-			is_winning = false;
-			//break;
-		}
-	}
-*/
 	bool is_winning	= true;
 	for(i = 0; i < guarantees_count; i++){
 		automaton_ranking *initial_ranking	= ((automaton_ranking*)automaton_concrete_bucket_get_entry(ranking_list[i],
@@ -731,7 +701,6 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 					//v satisfies current guarantee v in Q_j
 					may_increase	= automaton_bucket_has_entry(game_automaton->inverted_valuations[guarantees_indexes[i]], current_ranking->state);
 
-					//is_controllable	= game_automaton->is_controllable[current_ranking->state];
 					is_controllable = true;
 					//TODO: check, was this, but changed in order to ensure strategy swap
 					//succ_guarantee	= may_increase? ((i + 1) % guarantees_count) : i;

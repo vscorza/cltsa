@@ -137,7 +137,7 @@ automaton_valuation* automaton_valuation_create(uint32_t state);
 automaton_automata_context* automaton_automata_context_create(char* name, automaton_alphabet* alphabet, uint32_t fluents_count, automaton_fluent** fluents, uint32_t liveness_valuations_count, obdd** liveness_valuations
 		, char** liveness_valuations_names, uint32_t state_valuations_count, char** state_valuations_names);
 automaton_automaton* automaton_automaton_create(char* name, automaton_automata_context* ctx, uint32_t local_alphabet_count, uint32_t* local_alphabet
-		, bool is_game, bool built_from_ltl);
+		, bool is_game, bool built_from_ltl, bool is_strat, bool is_diag);
 automaton_range* automaton_range_create(char* name, uint32_t lower_value, uint32_t upper_value);
 automaton_indexes_valuation* automaton_indexes_valuation_create();
 /** INIT FUNCTIONS **/
@@ -149,7 +149,7 @@ void automaton_valuation_initialize(automaton_valuation* valuation, uint32_t sta
 void automaton_automata_context_initialize(automaton_automata_context* ctx, char* name, automaton_alphabet* alphabet, uint32_t fluents_count, automaton_fluent** fluents, uint32_t liveness_valuations_count, obdd** liveness_valuations
 		, char** liveness_valuations_names, uint32_t state_valuations_count, char** state_valuations_names);
 void automaton_automaton_initialize(automaton_automaton* automaton, char* name, automaton_automata_context* ctx, uint32_t local_alphabet_count, uint32_t* local_alphabet
-		, bool is_game, bool built_from_ltl);
+		, bool is_game, bool built_from_ltl, bool is_strat, bool is_diag);
 void automaton_range_initialize(automaton_range* range, char* name, uint32_t lower_value, uint32_t upper_value);
 /** DESTROY FUNCTIONS **/
 void automaton_signal_event_destroy(automaton_signal_event* signal_event, bool freeBase);

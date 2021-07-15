@@ -136,8 +136,7 @@ automaton_automaton* automaton_automaton_clone(automaton_automaton* source){
 void automaton_automaton_copy(automaton_automaton* source, automaton_automaton* target){
 	uint32_t i, j, in_degree, out_degree, in_size, out_size;
 	target->name					= malloc(sizeof(char) * (strlen(source->name) + 1));
-	target->is_game					= source->is_game;
-	target->built_from_ltl			= source->built_from_ltl;
+	target->source_type				= source->source_type;
 	strcpy(target->name, source->name);
 	target->context					= source->context;
 	target->local_alphabet_count	= source->local_alphabet_count;
@@ -183,8 +182,7 @@ void automaton_automaton_copy(automaton_automaton* source, automaton_automaton* 
 	for(i = 0; i < target->initial_states_count; i++){
 		target->initial_states[i]	= source->initial_states[i];
 	}
-	target->is_game					= source->is_game;
-	if(source->is_game){
+	if(source->source_type & SOURCE_GAME){
 		if(source->valuations_size > 0){
 			target->valuations_size			= source->valuations_size;
 			target->valuations				= malloc(FLUENT_ENTRY_SIZE * target->valuations_size);
@@ -334,10 +332,10 @@ automaton_automata_context* automaton_automata_context_create(char* name, automa
 	return ctx;
 }
 automaton_automaton* automaton_automaton_create(char* name, automaton_automata_context* ctx, uint32_t local_alphabet_count, uint32_t* local_alphabet
-		, bool is_game, bool built_from_ltl){
+		, bool is_game, bool built_from_ltl, bool is_strat, bool is_diag){
 	automaton_automaton* automaton		= malloc(sizeof(automaton_automaton));
 	automaton_automaton_initialize(automaton, name, ctx, local_alphabet_count, local_alphabet
-			, is_game, built_from_ltl);
+			, is_game, built_from_ltl, is_strat, is_diag);
 	return automaton;
 }
 automaton_range* automaton_range_create(char* name, uint32_t lower_value, uint32_t upper_value){
@@ -418,8 +416,9 @@ void automaton_automata_context_initialize(automaton_automata_context* ctx, char
 	}
 }
 void automaton_automaton_initialize(automaton_automaton* automaton, char* name, automaton_automata_context* ctx, uint32_t local_alphabet_count, uint32_t* local_alphabet
-		, bool is_game, bool built_from_ltl){
-	automaton->built_from_ltl			= built_from_ltl;
+		, bool is_game, bool built_from_ltl, bool is_strat, bool is_diag){
+	automaton->source_type				= (is_game? SOURCE_GAME : 0x0) | (built_from_ltl? SOURCE_LTL : 0x0) |
+			(is_strat? SOURCE_STRAT : 0x0) | (is_diag? SOURCE_DIAG : 0x0);
 	automaton->name						= malloc(sizeof(char) * (strlen(name) + 1));
 	strcpy(automaton->name, name);
 	automaton->context					= ctx;
@@ -484,7 +483,6 @@ void automaton_automaton_initialize(automaton_automaton* automaton, char* name, 
 	}
 	automaton->initial_states_count		= 0;
 	automaton->initial_states			= NULL;
-	automaton->is_game					= is_game;
 	automaton->liveness_valuations_size = 0;
 	if(is_game){
 		if(automaton->context->global_fluents_count > 0){
@@ -649,7 +647,7 @@ void automaton_automaton_destroy(automaton_automaton* automaton){
 	free(automaton->out_size);
 	if(automaton->initial_states_count > 0)
 		free(automaton->initial_states);
-	if(automaton->is_game){
+	if(automaton->source_type & SOURCE_GAME){
 		for(i = 0; i < automaton->context->global_fluents_count; i++)
 			automaton_bucket_destroy(automaton->inverted_valuations[i]);
 		if(automaton->valuations_size > 0){
@@ -1082,9 +1080,10 @@ void automaton_automaton_resize_to_state(automaton_automaton* current_automaton,
 	current_automaton->transitions_size		= next_size;
 
 	uint32_t old_valuations_size, new_valuations_size;
-	if(current_automaton->is_game){
+	if(current_automaton->source_type & SOURCE_GAME){
 		uint32_t* valuations_ptr	= NULL;
 		if(current_automaton->context->global_fluents_count > 0){
+			old_valuations_size	= current_automaton->valuations_size;
 			current_automaton->valuations_size	= GET_FLUENTS_ARR_SIZE(current_automaton->context->global_fluents_count, current_automaton->transitions_size);
 			valuations_ptr	= realloc(current_automaton->valuations,
 					current_automaton->valuations_size * FLUENT_ENTRY_SIZE);
@@ -1092,8 +1091,10 @@ void automaton_automaton_resize_to_state(automaton_automaton* current_automaton,
 				printf("Could not allocate memory for vstates_ptr\n");exit(-1);
 			}
 			current_automaton->valuations	= valuations_ptr;
+			for(i = old_valuations_size; i < current_automaton->valuations_size; i++)current_automaton->valuations[i] = 0x0;
 		}
 		if(current_automaton->context->liveness_valuations_count > 0){
+			old_valuations_size	= current_automaton->liveness_valuations_size;
 			current_automaton->liveness_valuations_size	= GET_FLUENTS_ARR_SIZE(current_automaton->context->liveness_valuations_count, current_automaton->transitions_size);
 			valuations_ptr	= realloc(current_automaton->liveness_valuations,
 					current_automaton->liveness_valuations_size * FLUENT_ENTRY_SIZE);
@@ -1101,8 +1102,10 @@ void automaton_automaton_resize_to_state(automaton_automaton* current_automaton,
 				printf("Could not allocate memory for vstates_ptr\n");exit(-1);
 			}
 			current_automaton->liveness_valuations	= valuations_ptr;
+			for(i = old_valuations_size; i < current_automaton->liveness_valuations_size; i++)current_automaton->liveness_valuations[i] = 0x0;
 		}
 		if(current_automaton->context->state_valuations_count > 0){
+			old_valuations_size	= current_automaton->state_valuations_size;
 			current_automaton->state_valuations_size	= GET_FLUENTS_ARR_SIZE(current_automaton->context->state_valuations_count, current_automaton->transitions_size);
 			valuations_ptr	= realloc(current_automaton->state_valuations,
 					current_automaton->state_valuations_size * FLUENT_ENTRY_SIZE);
@@ -1110,6 +1113,7 @@ void automaton_automaton_resize_to_state(automaton_automaton* current_automaton,
 				printf("Could not allocate memory for vstates_ptr\n");exit(-1);
 			}
 			current_automaton->state_valuations	= valuations_ptr;
+			for(i = old_valuations_size; i < current_automaton->state_valuations_size; i++)current_automaton->state_valuations[i] = 0x0;
 		}
 	}
 

@@ -1298,7 +1298,7 @@ void run_automaton_tests(){
 	uint32_t* local_alphabet_2		= malloc(sizeof(uint32_t) * 2);
 	local_alphabet_2[0]				= automaton_alphabet_get_signal_index(alphabet, tau);
 	local_alphabet_2[1]				= automaton_alphabet_get_signal_index(alphabet, out);
-	automaton_automaton* automaton_1= automaton_automaton_create("Automaton 1", ctx, 2, local_alphabet_1, false, false);
+	automaton_automaton* automaton_1= automaton_automaton_create("Automaton 1", ctx, 2, local_alphabet_1, false, false, false, false);
 	automaton_transition* t1_1_2	= automaton_transition_create(1, 2);
 	automaton_transition* t1_2_1	= automaton_transition_create(2, 1);
 	automaton_transition_add_signal_event(t1_1_2, ctx, in);
@@ -1306,7 +1306,7 @@ void run_automaton_tests(){
 	automaton_automaton_add_transition(automaton_1, t1_1_2);
 	automaton_automaton_add_transition(automaton_1, t1_2_1);
 	automaton_automaton_add_initial_state(automaton_1, 1);
-	automaton_automaton* automaton_2= automaton_automaton_create("Automaton 2", ctx, 2, local_alphabet_2, false, false);
+	automaton_automaton* automaton_2= automaton_automaton_create("Automaton 2", ctx, 2, local_alphabet_2, false, false, false, false);
 	automaton_transition* t2_1_2	= automaton_transition_create(1, 2);
 	automaton_transition* t2_2_1	= automaton_transition_create(2, 1);
 	automaton_transition_add_signal_event(t2_1_2, ctx, tau);
@@ -1373,7 +1373,7 @@ void run_report_tests(){
 	uint32_t i;
 	for(i = 0; i < 4; i++)local_alphabet[i]	= i;
 
-	automaton_automaton *automaton		= automaton_automaton_create("automaton", ctx, 4, local_alphabet, true, true);
+	automaton_automaton *automaton		= automaton_automaton_create("automaton", ctx, 4, local_alphabet, true, true, false, false);
 	automaton_automaton_add_initial_state(automaton, 0);
 	automaton_automaton_add_transition(automaton, t1);
 	automaton_automaton_update_valuation(automaton);
@@ -1471,7 +1471,7 @@ void build_automaton_and_ranking_for_tests(uint32_t* assumptions_count, uint32_t
 	local_alphabet[5]				= automaton_alphabet_get_signal_index(alphabet, out_3);
 	//create automaton
 	*game_automaton		= automaton_automaton_create("Gr1 test automaton", ctx,
-			local_alphabet_count, local_alphabet, true, false);
+			local_alphabet_count, local_alphabet, true, false, false, false);
 	//add transitions
 	automaton_transition* t_in	= automaton_transition_create(0, 1);
 	automaton_transition_add_signal_event(t_in, ctx, in);

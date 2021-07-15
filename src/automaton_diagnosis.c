@@ -596,6 +596,7 @@ automaton_automaton *automaton_get_gr1_unrealizable_prepare_structs(automaton_au
 
 	uint32_t new_size; uint32_t *ptr;
 	automaton_automaton *master	= automaton_automaton_clone(game_automaton);
+	master->source_type = (master->source_type & ~(SOURCE_STRAT)) | SOURCE_DIAG;
 	automaton_automaton_add_initial_state(master, game_automaton->initial_states[0]);
 	automaton_transition *current_transition	= NULL;
 
