@@ -1,0 +1,105 @@
+/******************************************************************************
+
+An engineering company evaluates projects in order to decide which ones to
+bid for. For this a document describing the project needs to be accepted by
+the company's engineering teams. If all the teams accept it, the document is
+approved. It is discarded if all teams reject it.
+
+There is a need for a workflow that can cope with the requests. We synthesize
+a controller that acts as an enforcer for an emerging workflow that guarantees:
+  a- A document can be reassigned to a team that has rejected it.
+  b- A document cannot be reassigned to a team that has already accepted it.
+  c- Only when a team rejects it after (all possible) re-evaluation can the
+     document be rejected without consensus.
+
+The case study can be scale in two directions:
+1- Teams: The number of engineering teams.
+2- Steps: The (maximum) number of evaluation steps a team can perform.
+
+******************************************************************************/
+const N = 1
+const K = 1
+const Teams  = N
+const Steps  = K
+range R_Team   = 0..(Teams-1)
+range R_Step   = 1..Steps
+
+set Global_Alphabet = {reject_0_0,reject[t:R_Team][s:R_Step], accept[t:R_Team],assign[r:R_Team], refuse, approve}
+set Controllable_Alphabet = {assign[r:R_Team], refuse, approve}
+/*****************************************************************************/
+Crew_0 = Pending,
+  Pending = (
+    assign[0] -> Assigned[1] ),
+  Assigned[s:R_Step] = (reject_0[s] -> Rejected[s] | accept_0  -> Accepted ),
+  Rejected[s:R_Step] = (refuse  -> Pending |  when(s < Steps) assign_0 -> Assigned[s+1]),
+  Accepted = ( {approve,refuse} -> Pending).
+Crew_0_Remove = Pending,
+  Pending = (
+    assign[0] -> Assigned[1] ),
+  Assigned[s:R_Step] = (reject_0[s] -> Rejected[s] | accept_0  -> Accepted ),
+  Rejected[s:R_Step] = (refuse  -> Pending |  when(s < Steps) assign_0 -> Assigned[s+1]),
+  Accepted = ( refuse-> Pending).
+Document = Count[0],
+  Count[c:R_Team] = (reject[Team][Steps] -> Rejected | accept[Team] -> Count[c+1] |
+    when(c==0) refuse -> Count[0] ),
+  Count[Teams] = ({accept[Team],reject[Team][Steps]} -> Count[Teams] | approve -> Count[0]),
+  Rejected = ({accept[Team],reject[Team][Steps]} -> Rejected | refuse  -> Count[0]).
+/*****************************************************************************/
+||Plant = (Document || Crew_0).
+||Remove_Plant = (Document || Crew_0_Remove).
+
+|F|ENV = (Plant).
+|F|ENV_Remove = (Remove_Plant).
+fluent A_0_Ass = <accept_0, {approve,refuse}>
+fluent A_1_Ass = <accept_1, {approve,refuse}>
+fluent G_Approve = <approve, assign_0>
+|gr1| <{A_0_Ass,A_1_Ass}><{G_Approve}>  STRAT = ENV.
+|gr1| <{A_0_Ass,A_1_Ass}><{G_Approve}>  NO_STRAT_REMOVE = ENV_Remove.
+
+Crew_0 >> "/tmp/BW_1_1_c_0.rep".
+Document >> "/tmp/BW_1_1_doc.rep".
+Plant >> "/tmp/BW_1_1_plant.rep".
+STRAT >> "/tmp/BW_1_1_strat.rep".
+NO_STRAT_REMOVE >> "/tmp/BW_1_1_diag_remove.rep".
+/*
+|F| ENV = (Plant).
+
+|gr1| <{A_No_Ass}><{G_CAT, G_MOUSE}>  NO_STRAT = ENV.
+
+ENV >> "/tmp/CM_2_env.rep".
+ENV >>_m "/tmp/CM_2_env.met".
+NO_STRAT >>_m "/tmp/CM_2_diag.met".
+NO_STRAT >> "/tmp/CM_2_diag.rep".
+ARBITER >> "/tmp/CM_2_arbiter.rep".
+
+Cat_0 >> "/tmp/CM_2_cat.rep".
+Mouse_0 >> "/tmp/CM_2_mouse.rep".
+Plant >> "/tmp/CM_2_p.rep".
+Plant_B >> "/tmp/CM_2_p_b.rep".
+
+
+||Remove_Plant = (Mouse_0_Remove || ARBITER || Cat_0).
+Mouse_0_Remove >> "/tmp/CM_2_mouse_remove.rep".
+fluent A_Ass = <cat_move_0_1, {cat_move_0_0,cat_move_0_2}>
+fluent A_No_Ass = <cat_move_0_0, cat_move_0_1>
+fluent G_CAT = <cat_move_0_1, {cat_move_0_0,cat_move_0_2}>
+fluent G_MOUSE = <mouse_move_0_1, {mouse_move_0_0,mouse_move_0_2,rotting_0}>
+
+|F| ENV = (Plant).
+|gr1| <{A_Ass}><{G_CAT, G_MOUSE}>  STRAT = ENV.
+STRAT >>_m "/tmp/CM_2_strat.met".
+STRAT >> "/tmp/CM_2_strat.rep".
+ENV >> "/tmp/CM_2_env.rep".
+ENV >>_m "/tmp/CM_2_env.met".
+
+
+|F| REMOVE_ENV = (Remove_Plant).
+Remove_Plant >> "/tmp/CM_2_plant_remove.rep".
+REMOVE_ENV >> "/tmp/CM_2_env_remove.rep".
+REMOVE_ENV >>_m "/tmp/CM_2_env_remove.met".
+
+|gr1| <{A_Ass}><{G_CAT, G_MOUSE}>  REMOVE_NO_STRAT = REMOVE_ENV.
+
+REMOVE_NO_STRAT >>_m "/tmp/CM_2_remove_diag.met".
+REMOVE_NO_STRAT >> "/tmp/CM_2_remove_diag.rep".
+*/

@@ -1,22 +1,17 @@
 TODO:
 =====
-- poner a correr una versión de MTSA
-	- resolver problema de sufijo _diag para diagnóstico (meter algo de metadatos en el reporte guardado), mostrar en la lista de reportes por: platnas, strats, diags
-	- armar lista de casos de publicaciones del labo
-		- priorizando que vengan de otro mundo
-		- y que escalen
-			X Compositional Supervisory Control via Reactive Synthesis and Automated Planning: 
-				- AT, BW, CM, DP, TA, TL
-				- https://github.com/dciolek/compositional-supervisory-control-benchmark/tree/master/fsp
-				- Revisar la tesis de Dani, hay combinaciones de parámetros no realizables
-			X Synthesis of Run-To-Completion Controllers for Discrete Event Systems, Updating
-				- surveillance drone, pero no viene de otro dominio
-			X Dynamic Reconfiguration of Business Processes
-				- BPM Academic Initiative
-	- traducir seleccionados
-	- probar tiempos
+-benchmark
+	- hay un problema con los fluents de BW A_0_Ass y A_1_Ass se están prendiendo a la vez con Accept_0 y no deberían
+	- https://github.com/dciolek/compositional-supervisory-control-benchmark/tree/master/fsp
+		- AT
+		- BW
+		X CM
+		X DP
+		- TA
+		X TL
 	- mutar para no realizabilidad
 	- generar reportes
+	- probar tiempos
 	- agregar Unrealizable Cores for Reactive Systems Specifications, notes on control of discrete-event systems, Compositional Supervisory Control via Reactive Synthesis and Automated Planning, Taming Composition with Heuristics al related work
 - plan de trabajo para diagnostico
 	X armar caso para lts
@@ -45,10 +40,14 @@ TODO:
 		- correr tests
 	- revisar patterns for property specification ...
 - post paper
+	- marcar línea del error en el editor por syntax error
 	- revisar construccion de alfabeto local
-	- indices para automatas y forall
-	- indices para ltl game structures
+	- indices y constantes para
+		- automatas y forall
+		- ltl game structures
+		- fluents
 	- renombrar/esconder
+	- estados por referencia
 - clts	
 	- revisar archivo de mati			
 	- add specific composition algorithm when all operators are asynch/synch

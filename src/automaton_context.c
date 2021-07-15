@@ -2362,8 +2362,10 @@ void automaton_indexes_syntax_eval_strings(automaton_parsing_tables* tables, aut
 					current_index[j]= automaton_expression_syntax_evaluate(tables, indexes->indexes[i]->expr, last_valuation);
 				}
 			}else{
+#if VERBOSE
 				printf("Valuation and indexes mismatch [automaton_indexes_syntax_eval_strings]");
-				exit(-1);
+#endif
+				//exit(-1);
 			}
 		}
 	}
