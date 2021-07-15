@@ -3187,7 +3187,7 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 
 			uint32_t namelen	= strlen(gr1_game->name) + 12;
 			char *name = calloc(namelen, sizeof(char));
-			snprintf(name, namelen, "%s_%s", gr1_game->name, nonreal? "diag" : "strat");
+			snprintf(name, namelen, "%s", gr1_game->name);
 			free(winning_region_automaton->name);
 			winning_region_automaton->name	= name;
 			tables->composition_entries[main_index]->solved	= true;
