@@ -717,7 +717,7 @@ bool automaton_ranking_print_report(automaton_automaton *automaton,
 			return false;
 		}
 
-		fprintf(f, "%s%s_ranking_%s%s", AUT_SER_OBJ_START, automaton->name, guarantees[r], AUT_SER_SEP);
+		fprintf(f, "%s%s_ranking_%s%s0%s", AUT_SER_OBJ_START, automaton->name, guarantees[r], AUT_SER_SEP, AUT_SER_SEP);
 		automaton_ranking_automata_context_serialize_report(f, automaton->context, max_delta[r]);
 		fprintf(f, "%s%d%s%s", AUT_SER_SEP, automaton->local_alphabet_count + max_delta[r], AUT_SER_SEP, AUT_SER_ARRAY_START);
 		uint32_t i, j;
