@@ -5,6 +5,7 @@ range R2 = 2..LIMIT
 range R3 = 2..(LIMIT*2)
 
 // alphabets def.
+
 set Global_Alphabet = {back, t, t[i:R], t[i:R][j:R], back[i:R3]}
 set Controllable_Alphabet = {back, back[j:R3]}
 
@@ -38,3 +39,7 @@ S_6 = (back_6->S_6).
 // tests
 equals FATAL_Seq_Sum_Range(TEST_1, TEST_1_P).
 equals FATAL_Multi_Index_Sum_Range(TEST_2, TEST_2_P).
+
+TEST_1_P >> "/tmp/ranges_3_test_p.rep".
+TEST_1 >> "/tmp/ranges_3_test.rep".
+

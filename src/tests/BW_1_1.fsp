@@ -24,27 +24,35 @@ const Steps  = K
 range R_Team   = 0..(Teams-1)
 range R_Step   = 1..Steps
 
-set Global_Alphabet = {reject_0_0,reject[t:R_Team][s:R_Step], accept[t:R_Team],assign[r:R_Team], refuse, approve}
+//set Global_Alphabet = {reject_0_0,reject[t:R_Team][s:R_Step], accept[t:R_Team],assign[r:R_Team], refuse, approve}
+set Global_Alphabet = {reject[t:R_Team][s:R_Step], accept[t:R_Team],assign[r:R_Team], refuse, approve}
 set Controllable_Alphabet = {assign[r:R_Team], refuse, approve}
 /*****************************************************************************/
+
+//Document = Count[0],  Count[s:R_Step] = (reject[Teams-1][Steps] -> Rejected | reject_0[s] -> Rejected).
+
+
 Crew_0 = Pending,
   Pending = (
     assign[0] -> Assigned[1] ),
   Assigned[s:R_Step] = (reject_0[s] -> Rejected[s] | accept_0  -> Accepted ),
   Rejected[s:R_Step] = (refuse  -> Pending |  when(s < Steps) assign_0 -> Assigned[s+1]),
   Accepted = ( {approve,refuse} -> Pending).
+
 Crew_0_Remove = Pending,
   Pending = (
     assign[0] -> Assigned[1] ),
   Assigned[s:R_Step] = (reject_0[s] -> Rejected[s] | accept_0  -> Accepted ),
   Rejected[s:R_Step] = (refuse  -> Pending |  when(s < Steps) assign_0 -> Assigned[s+1]),
   Accepted = ( refuse-> Pending).
+
 Document = Count[0],
-  Count[c:R_Team] = (reject[Team][Steps] -> Rejected | accept[Team] -> Count[c+1] |
+  Count[c:R_Team] = (reject[Teams-1][Steps] -> Rejected | when(c < Teams - 1)accept[Teams-1] -> Count[c+1] |
     when(c==0) refuse -> Count[0] ),
-  Count[Teams] = ({accept[Team],reject[Team][Steps]} -> Count[Teams] | approve -> Count[0]),
-  Rejected = ({accept[Team],reject[Team][Steps]} -> Rejected | refuse  -> Count[0]).
-/*****************************************************************************/
+  Count[c:R_Team] = ({accept[Teams-1],reject[c][Steps]} -> Count[Teams-1] | approve -> Count[0]),
+  Rejected = ({accept[Teams-1],reject[Teams-1][Steps]} -> Rejected | refuse  -> Count[0]).
+
+//****************************************************************************
 ||Plant = (Document || Crew_0).
 ||Remove_Plant = (Document || Crew_0_Remove).
 
@@ -61,6 +69,7 @@ Document >> "/tmp/BW_1_1_doc.rep".
 Plant >> "/tmp/BW_1_1_plant.rep".
 STRAT >> "/tmp/BW_1_1_strat.rep".
 NO_STRAT_REMOVE >> "/tmp/BW_1_1_diag_remove.rep".
+
 /*
 |F| ENV = (Plant).
 

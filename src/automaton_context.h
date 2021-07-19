@@ -92,7 +92,9 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 		char *test_name, diagnosis_search_method diagnosis_method, char *results_filename, char *steps_filename, bool append_result);
 void automaton_indexes_valuation_add_indexes(automaton_indexes_valuation* valuation, automaton_parsing_tables* tables, automaton_indexes_syntax* indexes);
 void automaton_indexes_valuation_fix_index(automaton_indexes_valuation* valuation, char* index_name, int32_t value);
-automaton_indexes_valuation* automaton_indexes_valuation_create_from_indexes(automaton_parsing_tables* tables, automaton_indexes_syntax* indexes);
+automaton_indexes_valuation *automaton_indexes_valuation_merge(automaton_indexes_valuation *first, automaton_indexes_valuation *second);
+automaton_indexes_valuation* automaton_indexes_valuation_create_from_indexes(automaton_parsing_tables* tables, automaton_indexes_syntax* indexes,
+		automaton_indexes_valuation* last_valuation);
 void automaton_indexes_valuation_increase(automaton_indexes_valuation* valuation);
 bool automaton_indexes_valuation_has_next(automaton_indexes_valuation* valuation);
 void automaton_indexes_valuation_set_label(automaton_indexes_valuation* valuation, char* label, char* target);
