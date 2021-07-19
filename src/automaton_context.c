@@ -691,16 +691,16 @@ automaton_indexes_valuation* automaton_indexes_valuation_create_from_indexes(aut
 		tmp_valuation->current_values	= calloc(range_count, sizeof(int32_t));
 		tmp_valuation->ranges			= malloc(sizeof(automaton_range*) * range_count);
 		tmp_valuation->total_combinations	= valuation->total_combinations;
-		if(last_valuation != NULL){
-			automaton_indexes_valuation *tmp2_valuation  = automaton_indexes_valuation_merge(tmp_valuation, last_valuation);
-			automaton_indexes_valuation_destroy(tmp_valuation);
-			tmp_valuation	= tmp2_valuation;
-		}
 		for(i = 0; i < valuation->count; i++){
 			if(values_set[i]){
 				tmp_valuation->ranges[current_range++]= automaton_range_create(valuation->ranges[i]->name,
 						valuation->ranges[i]->lower_value, valuation->ranges[i]->upper_value);
 			}
+		}
+		if(last_valuation != NULL){
+			automaton_indexes_valuation *tmp2_valuation  = automaton_indexes_valuation_merge(tmp_valuation, last_valuation);
+			automaton_indexes_valuation_destroy(tmp_valuation);
+			tmp_valuation	= tmp2_valuation;
 		}
 
 		for(i = 0; i < valuation->count; i++){
