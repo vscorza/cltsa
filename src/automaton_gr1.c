@@ -523,7 +523,7 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 
 
 	char strategy_name[255];
-	sprintf(strategy_name, "%s_strategy", game_automaton->name);
+	sprintf(strategy_name, "%s", game_automaton->name);
 	//stabilization
 	automaton_pending_state current_pending_state;
 	automaton_ranking* current_ranking;

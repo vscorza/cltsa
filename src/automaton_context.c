@@ -3398,6 +3398,8 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 				}
 			}
 			if(!name_found){
+				printf("Automaton %s not found.\n", program->statements[j]->import_def->name);
+				/*
 				for(i = 0; i < tables->composition_count; i++){
 					if(tables->composition_entries[i]->solved &&
 							strncmp(program->statements[j]->import_def->name,
@@ -3410,7 +3412,7 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 									fsp_name);
 							break;
 					}
-				}
+				}*/
 			}
 		}
 	}

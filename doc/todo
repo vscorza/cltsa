@@ -1,7 +1,6 @@
 TODO:
 =====
 -benchmark
-	- hay un problema con los fluents de BW A_0_Ass y A_1_Ass se están prendiendo a la vez con Accept_0 y no deberían
 	- https://github.com/dciolek/compositional-supervisory-control-benchmark/tree/master/fsp
 		- AT
 		- BW
@@ -41,6 +40,7 @@ TODO:
 	- revisar patterns for property specification ...
 - post paper
 	- marcar línea del error en el editor por syntax error
+	- habilitar line number en el editor
 	- revisar construccion de alfabeto local
 	- indices y constantes para
 		- automatas y forall

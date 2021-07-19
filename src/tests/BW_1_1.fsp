@@ -25,7 +25,7 @@ range R_Team   = 0..(Teams-1)
 range R_Step   = 1..Steps
 
 //set Global_Alphabet = {reject_0_0,reject[t:R_Team][s:R_Step], accept[t:R_Team],assign[r:R_Team], refuse, approve}
-set Global_Alphabet = {reject[t:R_Team][s:R_Step], accept[t:R_Team],assign[r:R_Team], refuse, approve}
+set Global_Alphabet = {reject[t:R_Team][s:R_Step], accept[t:R_Team],assign[r:R_Team], refuse, approve, broadcast_status, no_broadcast}
 set Controllable_Alphabet = {assign[r:R_Team], refuse, approve}
 /*****************************************************************************/
 
@@ -44,32 +44,42 @@ Crew_0_Remove = Pending,
     assign[0] -> Assigned[1] ),
   Assigned[s:R_Step] = (reject_0[s] -> Rejected[s] | accept_0  -> Accepted ),
   Rejected[s:R_Step] = (refuse  -> Pending |  when(s < Steps) assign_0 -> Assigned[s+1]),
-  Accepted = ( refuse-> Pending).
+  Accepted = ( refuse-> Pending),
+EXTENDED = (approve -> EXTENDED).
 
 Document = Count[0],
-  Count[c:R_Team] = (reject[Teams-1][Steps] -> Rejected | when(c < Teams - 1)accept[Teams-1] -> Count[c+1] |
+  Count[c:R_Team] = ({reject[Teams-1][Steps]} -> Rejected | when(c < Teams - 1)accept[Teams-1] -> Count[c+1] |
     when(c==0) refuse -> Count[0] ),
   Count[c:R_Team] = ({accept[Teams-1],reject[c][Steps]} -> Count[Teams-1] | approve -> Count[0]),
   Rejected = ({accept[Teams-1],reject[Teams-1][Steps]} -> Rejected | refuse  -> Count[0]).
 
+ACCEPTER = ({reject[t:R_Team][s:R_Step], accept[t:R_Team],assign[r:R_Team], refuse, approve}->{no_broadcast, broadcast_status} -> ACCEPTER).
+
+
 //****************************************************************************
-||Plant = (Document || Crew_0).
-||Remove_Plant = (Document || Crew_0_Remove).
+||Plant = (Document || Crew_0 || ACCEPTER).
+||Remove_Plant = (Document || Crew_0_Remove || ACCEPTER).
 
 |F|ENV = (Plant).
 |F|ENV_Remove = (Remove_Plant).
 fluent A_0_Ass = <accept_0, {approve,refuse}>
-fluent A_1_Ass = <accept_1, {approve,refuse}>
+fluent BROADCAST_WILDCARD = <broadcast_status, {approve,refuse}>
 fluent G_Approve = <approve, assign_0>
-|gr1| <{A_0_Ass,A_1_Ass}><{G_Approve}>  STRAT = ENV.
-|gr1| <{A_0_Ass,A_1_Ass}><{G_Approve}>  NO_STRAT_REMOVE = ENV_Remove.
+|gr1| <{A_0_Ass}><{G_Approve}>  STRAT = ENV.
+|gr1| <{A_0_Ass}><{G_Approve}>  NO_STRAT_REMOVE = ENV_Remove.
+|gr1| <{A_0_Ass}><{G_Approve,BROADCAST_WILDCARD}>  NO_STRAT = ENV.
+
 
 Crew_0 >> "/tmp/BW_1_1_c_0.rep".
 Document >> "/tmp/BW_1_1_doc.rep".
 Plant >> "/tmp/BW_1_1_plant.rep".
+
+ENV_Remove >> "/tmp/BW_1_1_remove_env.rep".
+ENV >> "/tmp/BW_1_1_env.rep".
 STRAT >> "/tmp/BW_1_1_strat.rep".
 NO_STRAT_REMOVE >> "/tmp/BW_1_1_diag_remove.rep".
-
+NO_STRAT >> "/tmp/BW_1_1_diag_no_strat.rep".
+ACCEPTER >> "/tmp/BW_1_1_diag_no_accept.rep".
 /*
 |F| ENV = (Plant).
 
