@@ -85,10 +85,79 @@ NO_STRAT >> "/tmp/BW_1_1_diag_no_strat.rep".
 NO_STRAT_WIN >> "/tmp/BW_1_1_diag_no_strat_win.rep".
 
 
-STRAT_P =.
+STRAT_P = S_0,
+S_0 = (assign_0-> S_1),
+S_1 = (broadcast_status-> S_2|no_broadcast-> S_3),
+S_2 = (accept_0-> S_6|reject_0_1-> S_7),
+S_3 = (accept_0-> S_4|reject_0_1-> S_5),
+S_4 = (broadcast_status-> S_9|no_broadcast-> S_19),
+S_5 = (broadcast_status-> S_8|no_broadcast-> S_18),
+S_6 = (broadcast_status-> S_9|no_broadcast-> S_9),
+S_7 = (broadcast_status-> S_8|no_broadcast-> S_8),
+S_8 = (refuse-> S_12),
+S_9 = (approve-> S_15),
+S_12 = (broadcast_status-> S_13|no_broadcast-> S_0),
+S_13 = (assign_0-> S_14),
+S_14 = (broadcast_status-> S_2|no_broadcast-> S_2),
+S_15 = (broadcast_status-> S_16|no_broadcast-> S_17),
+S_16 = (assign_0-> S_14),
+S_17 = (assign_0-> S_1),
+S_18 = (refuse-> S_12),
+S_19 = (approve-> S_15).
 
-NO_STRAT_REMOVE_P = .
+NO_STRAT_REMOVE_P = S_0,
+S_0 = (assign_0-> S_1),
+S_1 = (broadcast_status-> S_3),
+S_3 = (accept_0-> S_5),
+S_5 = (no_broadcast-> S_11),
+S_8 = (no_broadcast-> S_0),
+S_11 = (refuse-> S_8).
 
-NO_STRAT_P = .
+NO_STRAT_P = S_0,
+S_0 = (assign_0-> S_1),
+S_1 = (no_broadcast-> S_2),
+S_2 = (accept_0-> S_17),
+S_8 = (no_broadcast-> S_0),
+S_12 = (no_broadcast-> S_13),
+S_13 = (assign_0-> S_1),
+S_17 = (no_broadcast-> S_20),
+S_20 = (refuse-> S_8|approve-> S_12).
 
-NO_STRAT_WIN_P = .
+NO_STRAT_WIN_P = S_0,
+S_0 = (assign_0-> S_1),
+S_1 = (broadcast_status-> S_2|no_broadcast-> S_3),
+S_2 = (accept_0-> S_7|reject_0_1-> S_9),
+S_3 = (accept_0-> S_4|reject_0_1-> S_5),
+S_4 = (broadcast_status-> S_12|no_broadcast-> S_28),
+S_5 = (broadcast_status-> S_10|no_broadcast-> S_27),
+S_7 = (broadcast_status-> S_13|no_broadcast-> S_13),
+S_9 = (broadcast_status-> S_11|no_broadcast-> S_11),
+S_10 = (refuse-> S_18),
+S_11 = (refuse-> S_18),
+S_12 = (approve-> S_24),
+S_13 = (approve-> S_24),
+S_17 = (broadcast_status-> S_19|no_broadcast-> S_0),
+S_18 = (broadcast_status-> S_37|no_broadcast-> S_31),
+S_19 = (assign_0-> S_21),
+S_21 = (broadcast_status-> S_22|no_broadcast-> S_22),
+S_22 = (accept_0-> S_7|reject_0_1-> S_9),
+S_24 = (broadcast_status-> S_25|no_broadcast-> S_26),
+S_25 = (assign_0-> S_21),
+S_26 = (assign_0-> S_1),
+S_27 = (refuse-> S_17),
+S_28 = (refuse-> S_17),
+S_31 = (assign_0-> S_32),
+S_32 = (broadcast_status-> S_22|no_broadcast-> S_33),
+S_33 = (accept_0-> S_34|reject_0_1-> S_35),
+S_34 = (broadcast_status-> S_13|no_broadcast-> S_41),
+S_35 = (broadcast_status-> S_11|no_broadcast-> S_40),
+S_37 = (assign_0-> S_21),
+S_40 = (refuse-> S_18),
+S_41 = (approve-> S_24).
+
+// tests
+equals FATAL_BW_STRAT_TEST(STRAT, STRAT_P).
+equals FATAL_BW_NO_STRAT_REMOVE_TEST(NO_STRAT_REMOVE, NO_STRAT_REMOVE_P).
+equals FATAL_BW_NO_STRAT_TEST(NO_STRAT, NO_STRAT_P).
+equals FATAL_BW_NO_STRAT_WIN_TEST(NO_STRAT_WIN, NO_STRAT_WIN_P).
+

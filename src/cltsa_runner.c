@@ -1828,6 +1828,7 @@ void run_functional_tests(){
 	run_parse_test("tests/lts_serialization_composition_test.fsp", "lts serialization composition"); //this one has no checks
 	run_parse_test("tests/ltl_serialization_composition_test.fsp", "ltl serialization composition"); //this one has no checks
 	run_parse_test("tests/CM_2_test.fsp", "Cat and Mouse tests"); //this one has no checks
+	run_parse_test("tests/BW_1_1_test.fsp", "Bidding workflow test");
 }
 void run_load_tests(){
 	run_parse_test("tests/k_10_100_graph.fsp",  "k 10, 100 graph tests");
