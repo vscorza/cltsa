@@ -1,0 +1,107 @@
+/******************************************************************************
+
+An airport control tower receives requests from planes trying to land.
+The tower needs to signal them when it is safe to approach the ramps and at
+which height they must perform holding maneuvers. If two airplanes enter
+the same height space or ramp there is a chance a crash may occur.
+
+We want a controller that automatically responds to airplanes requests and
+ensures safe usage of the airport space.
+
+The case study can be scaled in the following dimensions:
+1- Planes: maximum number of simultaneous land requests.
+2- Height: number of spaces above the ground where a plane can hold safely.
+
+******************************************************************************/
+
+const N = 1
+const K = 1
+
+const Planes  = N
+const Heights = K
+
+range R_Plane  = 0..(Planes-1)
+range R_Height = 0..(Heights-1)
+
+/*****************************************************************************/
+set Global_Alphabet = {requestLand[p:R_Plane], extendFlight[p:R_Plane], land[p:R_Plane] , control_all, descend[p:R_Plane][h:R_Height], approach[p:R_Plane]}
+set Controllable_Alphabet = {descend[p:R_Plane][h:R_Height], approach[p:R_Plane]}
+
+Airplane_0 = (
+    requestLand_0 -> descend_0[h:R_Height] -> Holding[h] |
+    extendFlight_0 -> End),
+  Holding[h:R_Height] =
+    (when (h>0)  descend_0[h-1] -> Holding[h-1] |
+      when(h == 0)approach_0 -> land_0 -> End),
+  End = (control_all -> Airplane_0).
+
+HeightMonitor_0 = Empty[0],
+  Empty[h:R_Height] = (
+    descend[p:R_Plane][h] -> Occupied[h] |
+    when (h>0) descend[p:R_Plane][h-1] -> Empty[h] ),
+  Occupied[h:R_Height] = (
+      descend[p:R_Plane][h] -> ERROR |
+      when(h > 0)descend[p:R_Plane][h - 1] -> Empty[h] |
+      when(h == 0)land[p:R_Plane] -> Empty[h]).
+
+
+RampMonitor = Empty,
+  Empty = (
+    approach[p:R_Plane] -> Occupied ),
+  Occupied = (
+    approach[p:R_Plane] -> ERROR |
+    land[p:R_Plane]     -> Empty ).
+
+ResponseMonitor = (
+  requestLand[p:R_Plane] -> descend[p][h:R_Height] -> ResponseMonitor |
+  {extendFlight[p:R_Plane],descend[p:R_Plane][h:R_Height], approach[p:R_Plane]}  -> ResponseMonitor ).
+
+
+/*****************************************************************************/
+
+||Plant = (
+  ResponseMonitor || RampMonitor || HeightMonitor_0 || Airplane_0 ).
+
+Airplane_0 >> "/tmp/AT_1_1_plane.rep".
+HeightMonitor_0 >> "/tmp/AT_1_1_height.rep".
+RampMonitor >> "/tmp/AT_1_1_ramp.rep".
+ResponseMonitor >> "/tmp/AT_1_1_response.rep".
+Plant >> "/tmp/AT_1_1_plant.rep".
+
+//  controllable = {descend[Plane][Height], approach[Plane]}  marking = {control.all}
+
+
+//Document = Count[0],  Count[s:R_Step] = (reject[Teams-1][Steps] -> Rejected | reject_0[s] -> Rejected).
+
+/*
+|F|ENV = (Plant).
+|F|ENV_Remove = (Remove_Plant).
+fluent A_0_Ass = <accept_0, {approve,refuse}>
+fluent BROADCAST_WILDCARD = <broadcast_status, {approve,refuse}>
+fluent G_Approve = <approve, assign_0>
+|gr1| <{A_0_Ass}><{G_Approve}>  STRAT = ENV.
+|gr1| <{A_0_Ass}><{G_Approve}>  NO_STRAT_REMOVE = ENV_Remove.
+|gr1| <{A_0_Ass}><{G_Approve,BROADCAST_WILDCARD}>  NO_STRAT = ENV.
+|gr1| <{A_0_Ass, BROADCAST_WILDCARD}><{G_Approve,BROADCAST_WILDCARD}>  NO_STRAT_WIN = ENV.
+
+
+Crew_0 >> "/tmp/BW_1_1_c_0.rep".
+Document >> "/tmp/BW_1_1_doc.rep".
+Plant >> "/tmp/BW_1_1_plant.rep".
+
+ENV_Remove >> "/tmp/BW_1_1_remove_env.rep".
+ENV >> "/tmp/BW_1_1_env.rep".
+ACCEPTER >> "/tmp/BW_1_1_diag_no_accept.rep".
+
+STRAT >> "/tmp/BW_1_1_strat.rep".
+NO_STRAT_REMOVE >> "/tmp/BW_1_1_diag_remove.rep".
+NO_STRAT >> "/tmp/BW_1_1_diag_no_strat.rep".
+NO_STRAT_WIN >> "/tmp/BW_1_1_diag_no_strat_win.rep".
+
+// tests
+equals FATAL_BW_STRAT_TEST(STRAT, STRAT_P).
+equals FATAL_BW_NO_STRAT_REMOVE_TEST(NO_STRAT_REMOVE, NO_STRAT_REMOVE_P).
+equals FATAL_BW_NO_STRAT_TEST(NO_STRAT, NO_STRAT_P).
+equals FATAL_BW_NO_STRAT_WIN_TEST(NO_STRAT_WIN, NO_STRAT_WIN_P).
+*/
+

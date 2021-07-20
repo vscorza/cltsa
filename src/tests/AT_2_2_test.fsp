@@ -1,0 +1,44 @@
+/******************************************************************************
+
+An airport control tower receives requests from planes trying to land.
+The tower needs to signal them when it is safe to approach the ramps and at
+which height they must perform holding maneuvers. If two airplanes enter
+the same height space or ramp there is a chance a crash may occur.
+
+We want a controller that automatically responds to airplanes requests and
+ensures safe usage of the airport space.
+
+The case study can be scaled in the following dimensions:
+1- Planes: maximum number of simultaneous land requests.
+2- Height: number of spaces above the ground where a plane can hold safely.
+
+******************************************************************************/
+
+const N = 2
+const K = 2
+
+const Planes  = N
+const Heights = K
+
+range R_Plane  = 0..(Planes-1)
+range R_Height = 0..(Heights-1)
+
+/*****************************************************************************/
+set Global_Alphabet = {requestLand[p:R_Plane], extendFlight[p:R_Plane], land[p:R_Plane] , control_all, descend[p:R_Plane][h:R_Height], approach[p:R_Plane],air_crash,ramp_crash}
+set Controllable_Alphabet = {descend[p:R_Plane][h:R_Height], approach[p:R_Plane]}
+
+Airplane_D[p:R_Plane] = ( requestLand[p] -> descend[p][h:R_Height] -> Holding[h] |    extendFlight[p] -> End).
+
+Airplane_D_0 >> "/tmp/AT_2_2_plant_d_0.rep".
+Airplane_D_1 >> "/tmp/AT_2_2_plant_d_1.rep".
+
+Airplane_D_0_P = S_0,
+S_0 = (requestLand_0-> S_2|extendFlight_0-> S_6),
+S_2 = (descend_0_0-> S_4|descend_0_1-> S_5).
+Airplane_D_1_P = S_0,
+S_0 = (requestLand_1-> S_3|extendFlight_1-> S_6),
+S_3 = (descend_1_0-> S_4|descend_1_1-> S_5).
+
+equals FATAL_AT_AIRPLANE_0(Airplane_D_0, Airplane_D_0_P).
+equals FATAL_AT_AIRPLANE_1(Airplane_D_1, Airplane_D_1_P).
+

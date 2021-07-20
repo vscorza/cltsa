@@ -1,0 +1,159 @@
+/******************************************************************************
+
+An airport control tower receives requests from planes trying to land.
+The tower needs to signal them when it is safe to approach the ramps and at
+which height they must perform holding maneuvers. If two airplanes enter
+the same height space or ramp there is a chance a crash may occur.
+
+We want a controller that automatically responds to airplanes requests and
+ensures safe usage of the airport space.
+
+The case study can be scaled in the following dimensions:
+1- Planes: maximum number of simultaneous land requests.
+2- Height: number of spaces above the ground where a plane can hold safely.
+
+******************************************************************************/
+
+const N = 2
+const K = 2
+
+const Planes  = N
+const Heights = K
+
+range R_Plane  = 0..(Planes-1)
+range R_Height = 0..(Heights-1)
+
+/*****************************************************************************/
+set Global_Alphabet = {requestLand[p:R_Plane], extendFlight[p:R_Plane], land[p:R_Plane] , control_all, descend[p:R_Plane][h:R_Height], approach[p:R_Plane],air_crash,ramp_crash}
+set Controllable_Alphabet = {descend[p:R_Plane][h:R_Height], approach[p:R_Plane]}
+
+Airplane_0 = (
+    requestLand_0 -> descend_0[h:R_Height] -> Holding[h] |
+    extendFlight_0 -> End),
+  Holding[h:R_Height] =
+    (when (h>0)  descend_0[h-1] -> Holding[h-1] |
+      when(h == 0)approach_0 -> land_0 -> End),
+  End = (control_all -> Airplane_0).
+Airplane_1 = (
+    requestLand_1 -> descend_1[h:R_Height] -> Holding[h] |
+    extendFlight_1 -> End),
+  Holding[h:R_Height] =
+    (when (h>0)  descend_1[h-1] -> Holding[h-1] |
+      when(h == 0)approach_1 -> land_1 -> End),
+  End = (control_all -> Airplane_1).
+
+HeightMonitor_0 = Empty[0],
+  Empty[h:R_Height] = (
+    descend[p:R_Plane][h] -> Occupied[h] |
+    when (h>0) descend[p:R_Plane][h-1] -> Empty[h] ),
+  Occupied[h:R_Height] = (
+      descend[p:R_Plane][h] -> CRASH |
+      when(h > 0)descend[p:R_Plane][h - 1] -> Empty[h] |
+      when(h == 0)land[p:R_Plane] -> Empty[h]),
+CRASH= (air_crash->CRASH).
+
+HeightMonitor_1 = Empty[1],
+  Empty[h:R_Height] = (
+    descend[p:R_Plane][h] -> Occupied[h] |
+    when (h>0) descend[p:R_Plane][h-1] -> Empty[h] ),
+  Occupied[h:R_Height] = (
+      descend[p:R_Plane][h] -> CRASH |
+      when(h > 0)descend[p:R_Plane][h - 1] -> Empty[h] |
+      when(h == 0)land[p:R_Plane] -> Empty[h]),
+CRASH= (air_crash->CRASH).
+
+
+RampMonitor = Empty,
+  Empty = (
+    approach[p:R_Plane] -> Occupied ),
+  Occupied = (
+    approach[p:R_Plane] -> CRASH |
+    land[p:R_Plane]     -> Empty ),
+CRASH = (ramp_crash -> CRASH).
+
+ResponseMonitor = (
+  requestLand[p:R_Plane] -> descend[p][h:R_Height] -> ResponseMonitor |
+  {extendFlight[p:R_Plane],descend[p:R_Plane][h:R_Height], approach[p:R_Plane]}  -> ResponseMonitor ).
+
+
+//*****************************************************************************
+
+||Plant = ( ResponseMonitor || RampMonitor || HeightMonitor_0 || Airplane_0  || HeightMonitor_1 || Airplane_1 ).
+
+
+Airplane_D[p:R_Plane] = ( requestLand[p] -> descend[p][h:R_Height] -> Holding[h] |    extendFlight[p] -> End).
+
+Airplane_D_0 >> "/tmp/AT_2_2_plant_d_0.rep".
+Airplane_D_1 >> "/tmp/AT_2_2_plant_d_1.rep".
+
+Airplane_B = (
+    requestLand_0 -> descend_0_1 -> Holding).
+||Height_C = (HeightMonitor_0 || HeightMonitor_1).
+Height_B = (descend_0_1-> S_1|descend_1_1-> S_1|descend_0_0-> S_2|descend_1_0-> S_2),
+S_1 = (descend_0_1-> S_8|descend_1_1-> S_8|descend_0_0-> S_2|descend_1_0-> S_2),
+S_2 = (descend_0_1-> S_3|descend_1_1-> S_3|descend_0_0-> S_4|descend_1_0-> S_4),
+S_3 = (descend_0_1-> S_7|descend_1_1-> S_7|descend_0_0-> S_4|descend_1_0-> S_4),
+S_4 = (descend_0_1-> S_5|descend_1_1-> S_5),
+S_5 = (descend_0_1-> S_6|descend_1_1-> S_6),
+S_6 = (air_crash-> S_6).
+
+
+
+||Plant_B = (Height_B || Airplane_B). //(HeightMonitor_0 || HeightMonitor_1 || Airplane_B).//(Airplane_0 || Airplane_1 || HeightMonitor_0 || HeightMonitor_1).
+||Plant_C = (Height_C || Airplane_B). //(HeightMonitor_0 || HeightMonitor_1 || Airplane_B).//(Airplane_0 || Airplane_1 || HeightMonitor_0 || HeightMonitor_1).
+Height_B >> "/tmp/AT_2_2_height_b.rep".
+Height_C >> "/tmp/AT_2_2_height_c.rep".
+Plant_B >> "/tmp/AT_2_2_plant_b.rep".
+Plant_C >> "/tmp/AT_2_2_plant_c.rep".
+
+
+|F|ENV = (Plant).
+fluent CONTROL_WILDCARD = <control_all, requestLand[p:R_Plane]>
+|gr1| <{CONTROL_WILDCARD}><{CONTROL_WILDCARD}>  STRAT = ENV.
+
+Airplane_0 >> "/tmp/AT_2_2_plane.rep".
+HeightMonitor_0 >> "/tmp/AT_2_2_height.rep".
+Airplane_1 >> "/tmp/AT_2_2_plane_1.rep".
+HeightMonitor_1 >> "/tmp/AT_2_2_height_1.rep".
+RampMonitor >> "/tmp/AT_2_2_ramp.rep".
+ResponseMonitor >> "/tmp/AT_2_2_response.rep".
+Plant >> "/tmp/AT_2_2_plant.rep".
+ENV >> "/tmp/AT_2_2_env.rep".
+STRAT >> "/tmp/AT_2_2_strat.rep".
+//  controllable = {descend[Plane][Height], approach[Plane]}  marking = {control.all}
+
+
+//Document = Count[0],  Count[s:R_Step] = (reject[Teams-1][Steps] -> Rejected | reject_0[s] -> Rejected).
+
+/*
+|F|ENV = (Plant).
+|F|ENV_Remove = (Remove_Plant).
+fluent A_0_Ass = <accept_0, {approve,refuse}>
+fluent BROADCAST_WILDCARD = <broadcast_status, {approve,refuse}>
+fluent G_Approve = <approve, assign_0>
+|gr1| <{A_0_Ass}><{G_Approve}>  STRAT = ENV.
+|gr1| <{A_0_Ass}><{G_Approve}>  NO_STRAT_REMOVE = ENV_Remove.
+|gr1| <{A_0_Ass}><{G_Approve,BROADCAST_WILDCARD}>  NO_STRAT = ENV.
+|gr1| <{A_0_Ass, BROADCAST_WILDCARD}><{G_Approve,BROADCAST_WILDCARD}>  NO_STRAT_WIN = ENV.
+
+
+Crew_0 >> "/tmp/BW_1_1_c_0.rep".
+Document >> "/tmp/BW_1_1_doc.rep".
+Plant >> "/tmp/BW_1_1_plant.rep".
+
+ENV_Remove >> "/tmp/BW_1_1_remove_env.rep".
+ENV >> "/tmp/BW_1_1_env.rep".
+ACCEPTER >> "/tmp/BW_1_1_diag_no_accept.rep".
+
+STRAT >> "/tmp/BW_1_1_strat.rep".
+NO_STRAT_REMOVE >> "/tmp/BW_1_1_diag_remove.rep".
+NO_STRAT >> "/tmp/BW_1_1_diag_no_strat.rep".
+NO_STRAT_WIN >> "/tmp/BW_1_1_diag_no_strat_win.rep".
+
+// tests
+equals FATAL_BW_STRAT_TEST(STRAT, STRAT_P).
+equals FATAL_BW_NO_STRAT_REMOVE_TEST(NO_STRAT_REMOVE, NO_STRAT_REMOVE_P).
+equals FATAL_BW_NO_STRAT_TEST(NO_STRAT, NO_STRAT_P).
+equals FATAL_BW_NO_STRAT_WIN_TEST(NO_STRAT_WIN, NO_STRAT_WIN_P).
+*/
+

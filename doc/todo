@@ -3,7 +3,7 @@ TODO:
 -benchmark
 	- https://github.com/dciolek/compositional-supervisory-control-benchmark/tree/master/fsp
 		- AT
-		- BW
+		X BW
 		X CM
 		X DP
 		- TA
@@ -41,7 +41,6 @@ TODO:
 - post paper
 	- marcar línea del error en el editor por syntax error
 	- habilitar line number en el editor
-	- revisar construccion de alfabeto local
 	- indices y constantes para
 		- automatas y forall
 		- ltl game structures
@@ -73,7 +72,6 @@ TODO:
 			-https://en.wikipedia.org/wiki/Lempel%E2%80%93Ziv%E2%80%93Markov_chain_algorithm		
 	- exportar a vdhl
 		- versión básica
-	- corregir o sacar version dark al reporter
 	- agregar #include (archivos por clausura, evaluar no haya ciclos) y #define (con parámetros)
 - rankings
 	- mejorar legibilidad de pruebas
