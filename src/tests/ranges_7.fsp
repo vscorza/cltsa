@@ -1,0 +1,122 @@
+const N = 2
+const K = 2
+
+range R_N  = 0..(N-1)
+range R_K = 0..(N-1)
+
+/*****************************************************************************/
+set Global_Alphabet = {request[n:R_N][k:R_K],grant[n:R_N][k:R_K],idle[n:R_N]}
+set Controllable_Alphabet = {grant[n:R_N][k:R_K]}
+
+
+CLIENT[n:R_N] = (request[n][k:R_K]-> grant[n][k] ->CLIENT[n] | idle[n] -> CLIENT[n]).
+SERVER[n:R_N] = (request[n][k:R_K]-> grant[n][k] -> SERVER[n]).
+
+
+||CLIENTS = (CLIENT[n:R_N]).
+||SERVERS = (SERVER[n:R_N]).
+||Plant = (CLIENTS || SERVERS).
+|F|ENV = (Plant).
+
+fluent ASSUMPTION[n:R_N][k:R_K] = <request[n][k], idle[n]>
+fluent GOAL[n:R_N][k:R_K] = <grant[n][k], idle[n]>
+
+|gr1| <{ASSUMPTION[n:R_N][k:R_K]}><{GOAL[n:R_N][k:R_K]}>  STRAT = ENV.
+
+
+CLIENT_0 >> "/tmp/ranges_7_client_0.rep".
+SERVER_1 >> "/tmp/ranges_7_server_1.rep".
+CLIENTS >> "/tmp/ranges_7_clients.rep".
+SERVERS >> "/tmp/ranges_7_servers.rep".
+ENV >> "/tmp/ranges_7_env.rep".
+STRAT >> "/tmp/ranges_7_strat.rep".
+
+CLIENTS_P = S_0,
+S_0 = (request_1_0-> S_1|request_1_1-> S_2|idle_1-> S_0|request_0_0-> S_3|request_0_1-> S_4|idle_0-> S_0),
+S_1 = (grant_1_0-> S_0|request_0_0-> S_7|request_0_1-> S_5|idle_0-> S_1),S_2 = (grant_1_1-> S_0|request_0_0-> S_8|request_0_1-> S_6|idle_0-> S_2),
+S_3 = (request_1_0-> S_7|request_1_1-> S_8|idle_1-> S_3|grant_0_0-> S_0),S_4 = (request_1_0-> S_5|request_1_1-> S_6|idle_1-> S_4|grant_0_1-> S_0),
+S_5 = (grant_1_0-> S_4|grant_0_1-> S_1),S_6 = (grant_1_1-> S_4|grant_0_1-> S_2),S_7 = (grant_1_0-> S_3|grant_0_0-> S_1),
+S_8 = (grant_1_1-> S_3|grant_0_0-> S_2).
+
+STRAT_P = S_0,
+S_0 = (idle_0-> S_0|idle_1-> S_0|request_0_0-> S_1|request_0_1-> S_2|request_1_0-> S_3|request_1_1-> S_4),
+S_1 = (idle_1-> S_1|request_1_0-> S_5|request_1_1-> S_7),S_2 = (idle_1-> S_2|request_1_0-> S_6|request_1_1-> S_8),
+S_3 = (idle_0-> S_3|request_0_0-> S_5|request_0_1-> S_6),S_4 = (idle_0-> S_4|request_0_0-> S_7|request_0_1-> S_8),
+S_5 = (grant_0_0-> S_203),S_6 = (grant_1_0-> S_9),S_7 = (grant_0_0-> S_187),S_8 = (grant_1_1-> S_10),
+S_9 = (idle_1-> S_2|request_1_0-> S_148|request_1_1-> S_150),S_10 = (idle_1-> S_2|request_1_0-> S_35|request_1_1-> S_37),
+S_34 = (grant_0_0-> S_201),S_35 = (grant_1_0-> S_39),S_36 = (grant_0_0-> S_202),S_37 = (grant_1_1-> S_10),
+S_39 = (idle_1-> S_2|request_1_0-> S_40|request_1_1-> S_41),S_40 = (grant_1_0-> S_39),S_41 = (grant_1_1-> S_39),
+S_44 = (idle_0-> S_44|request_0_0-> S_53|request_0_1-> S_40),S_48 = (idle_0-> S_48|request_0_0-> S_54|request_0_1-> S_41),
+S_53 = (grant_0_0-> S_56),S_54 = (grant_0_0-> S_57),
+S_56 = (idle_0-> S_59|request_0_0-> S_61|request_0_1-> S_63),S_57 = (idle_0-> S_64|request_0_0-> S_66|request_0_1-> S_68),
+S_59 = (idle_0-> S_59|request_0_0-> S_275|request_0_1-> S_258),
+S_61 = (grant_1_0-> S_176),S_63 = (grant_0_1-> S_77),
+S_64 = (idle_0-> S_64|request_0_0-> S_276|request_0_1-> S_259),
+S_66 = (grant_1_1-> S_176),S_68 = (grant_0_1-> S_79),
+S_72 = (idle_1-> S_72|request_1_0-> S_178|request_1_1-> S_180),S_77 = (idle_0-> S_262|request_0_0-> S_284|request_0_1-> S_285),
+S_79 = (idle_0-> S_268|request_0_0-> S_286|request_0_1-> S_287),
+S_81 = (grant_0_1-> S_204),S_83 = (grant_0_1-> S_189),S_85 = (grant_1_0-> S_124),S_86 = (grant_1_0-> S_303),
+S_87 = (grant_1_0-> S_100),S_88 = (grant_1_0-> S_291),S_89 = (grant_1_1-> S_124),S_90 = (grant_1_1-> S_303),
+S_91 = (grant_1_1-> S_100),S_92 = (grant_1_1-> S_291),
+S_94 = (idle_1-> S_96|request_1_0-> S_86|request_1_1-> S_90),S_95 = (idle_1-> S_96|request_1_0-> S_126|request_1_1-> S_116),
+S_96 = (idle_1-> S_289|request_1_0-> S_304|request_1_1-> S_298),S_97 = (idle_1-> S_99|request_1_0-> S_88|request_1_1-> S_92),
+S_98 = (idle_1-> S_99|request_1_0-> S_102|request_1_1-> S_104),S_99 = (idle_1-> S_290|request_1_0-> S_292|request_1_1-> S_293),
+S_100 = (idle_1-> S_290|request_1_0-> S_285|request_1_1-> S_287),S_102 = (grant_1_0-> S_294),S_104 = (grant_1_1-> S_295),
+S_108 = (idle_1-> S_290|request_1_0-> S_296|request_1_1-> S_297),S_109 = (grant_1_0-> S_100),S_111 = (grant_1_1-> S_108),
+S_114 = (idle_0-> S_114|request_0_0-> S_210|request_0_1-> S_211),S_116 = (grant_1_1-> S_300),
+S_119 = (idle_1-> S_289|request_1_0-> S_301|request_1_1-> S_302),S_120 = (grant_1_0-> S_124),S_122 = (grant_1_1-> S_119),
+S_124 = (idle_1-> S_289|request_1_0-> S_284|request_1_1-> S_286),S_126 = (grant_1_0-> S_305),
+S_134 = (idle_0-> S_134|request_0_0-> S_208|request_0_1-> S_209),S_148 = (grant_1_0-> S_9),S_150 = (grant_1_1-> S_39),
+S_164 = (grant_1_0-> S_175),S_168 = (grant_1_1-> S_176),S_175 = (idle_1-> S_72|request_1_0-> S_164|request_1_1-> S_168),
+S_176 = (idle_1-> S_72|request_1_0-> S_61|request_1_1-> S_66),S_178 = (grant_1_0-> S_175),S_180 = (grant_1_1-> S_182),
+S_182 = (idle_1-> S_72|request_1_0-> S_184|request_1_1-> S_186),S_184 = (grant_1_0-> S_176),S_186 = (grant_1_1-> S_182),
+S_187 = (idle_0-> S_114|request_0_0-> S_180|request_0_1-> S_83),S_189 = (idle_0-> S_222|request_0_0-> S_298|request_0_1-> S_293),
+S_192 = (grant_0_1-> S_196),S_194 = (grant_0_1-> S_198),S_196 = (idle_0-> S_243|request_0_0-> S_301|request_0_1-> S_296),
+S_198 = (idle_0-> S_247|request_0_0-> S_302|request_0_1-> S_297),S_199 = (idle_0-> S_199|request_0_0-> S_254|request_0_1-> S_255),
+S_200 = (idle_0-> S_200|request_0_0-> S_252|request_0_1-> S_253),S_201 = (idle_0-> S_200|request_0_0-> S_184|request_0_1-> S_192),
+S_202 = (idle_0-> S_199|request_0_0-> S_186|request_0_1-> S_194),S_203 = (idle_0-> S_134|request_0_0-> S_178|request_0_1-> S_81),
+S_204 = (idle_0-> S_216|request_0_0-> S_304|request_0_1-> S_292),S_206 = (idle_1-> S_206|request_1_0-> S_208|request_1_1-> S_210),
+S_207 = (idle_1-> S_207|request_1_0-> S_209|request_1_1-> S_211),S_208 = (grant_1_0-> S_318),S_209 = (grant_1_0-> S_212),
+S_210 = (grant_1_1-> S_256),S_211 = (grant_1_1-> S_213),S_212 = (idle_1-> S_207|request_1_0-> S_315|request_1_1-> S_317),
+S_213 = (idle_1-> S_207|request_1_0-> S_253|request_1_1-> S_255),S_216 = (idle_0-> S_216|request_0_0-> S_347|request_0_1-> S_348),
+S_222 = (idle_0-> S_222|request_0_0-> S_349|request_0_1-> S_350),S_243 = (idle_0-> S_243|request_0_0-> S_360|request_0_1-> S_361),
+S_247 = (idle_0-> S_247|request_0_0-> S_362|request_0_1-> S_363),S_252 = (grant_1_0-> S_277),S_253 = (grant_1_0-> S_257),
+S_254 = (grant_1_1-> S_256),S_255 = (grant_1_1-> S_213),S_256 = (idle_1-> S_206|request_1_0-> S_252|request_1_1-> S_254),
+S_257 = (idle_1-> S_207|request_1_0-> S_258|request_1_1-> S_259),S_258 = (grant_1_0-> S_257),S_259 = (grant_1_1-> S_257),
+S_262 = (idle_0-> S_374|request_0_0-> S_385|request_0_1-> S_368),S_268 = (idle_0-> S_378|request_0_0-> S_387|request_0_1-> S_370),
+S_275 = (grant_1_0-> S_277),S_276 = (grant_1_1-> S_277),S_277 = (idle_1-> S_206|request_1_0-> S_275|request_1_1-> S_276),
+S_284 = (grant_1_0-> S_490),S_285 = (grant_1_0-> S_422),S_286 = (grant_1_1-> S_490),S_287 = (grant_1_1-> S_422),
+S_289 = (idle_1-> S_289|request_1_0-> S_304|request_1_1-> S_298),S_290 = (idle_1-> S_290|request_1_0-> S_292|request_1_1-> S_293),
+S_291 = (idle_1-> S_421|request_1_0-> S_415|request_1_1-> S_418),S_292 = (grant_1_0-> S_294),S_293 = (grant_1_1-> S_295),
+S_294 = (idle_1-> S_421|request_1_0-> S_431|request_1_1-> S_434),S_295 = (idle_1-> S_290|request_1_0-> S_296|request_1_1-> S_297),
+S_296 = (grant_1_0-> S_291),S_297 = (grant_1_1-> S_295),S_298 = (grant_1_1-> S_300),S_300 = (idle_1-> S_289|request_1_0-> S_301|request_1_1-> S_302),
+S_301 = (grant_1_0-> S_303),S_302 = (grant_1_1-> S_300),S_303 = (idle_1-> S_420|request_1_0-> S_414|request_1_1-> S_417),
+S_304 = (grant_1_0-> S_305),S_305 = (idle_1-> S_420|request_1_0-> S_425|request_1_1-> S_426),S_314 = (grant_1_0-> S_318),
+S_315 = (grant_1_0-> S_212),S_316 = (grant_1_1-> S_277),S_317 = (grant_1_1-> S_257),S_318 = (idle_1-> S_206|request_1_0-> S_314|request_1_1-> S_316),
+S_345 = (idle_1-> S_345|request_1_0-> S_347|request_1_1-> S_349),S_346 = (idle_1-> S_346|request_1_0-> S_348|request_1_1-> S_350),
+S_347 = (grant_1_0-> S_444),S_348 = (grant_1_0-> S_351),S_349 = (grant_1_1-> S_364),S_350 = (grant_1_1-> S_352),
+S_351 = (idle_1-> S_366|request_1_0-> S_439|request_1_1-> S_443),S_352 = (idle_1-> S_346|request_1_0-> S_361|request_1_1-> S_363),
+S_360 = (grant_1_0-> S_388),S_361 = (grant_1_0-> S_365),S_362 = (grant_1_1-> S_364),S_363 = (grant_1_1-> S_352),
+S_364 = (idle_1-> S_345|request_1_0-> S_360|request_1_1-> S_362),S_365 = (idle_1-> S_366|request_1_0-> S_368|request_1_1-> S_370),
+S_366 = (idle_1-> S_366|request_1_0-> S_496|request_1_1-> S_498),S_368 = (grant_1_0-> S_39),S_370 = (grant_1_1-> S_39),
+S_371 = (idle_1-> S_2|request_1_0-> S_40|request_1_1-> S_41),S_374 = (idle_0-> S_44|request_0_0-> S_53|request_0_1-> S_40),
+S_378 = (idle_0-> S_48|request_0_0-> S_54|request_0_1-> S_41),S_385 = (grant_0_0-> S_56),S_387 = (grant_0_0-> S_57),
+S_388 = (idle_1-> S_389|request_1_0-> S_385|request_1_1-> S_387),S_389 = (idle_1-> S_389|request_1_0-> S_495|request_1_1-> S_497),
+S_390 = (idle_1-> S_1|request_1_0-> S_53|request_1_1-> S_54),S_414 = (grant_1_0-> S_94),S_415 = (grant_1_0-> S_97),S_417 = (grant_1_1-> S_94),
+S_418 = (grant_1_1-> S_97),S_420 = (idle_1-> S_420|request_1_0-> S_549|request_1_1-> S_544),
+S_421 = (idle_1-> S_421|request_1_0-> S_538|request_1_1-> S_539),S_422 = (idle_1-> S_98|request_1_0-> S_87|request_1_1-> S_91),
+S_425 = (grant_1_0-> S_491),S_426 = (grant_1_1-> S_490),S_431 = (grant_1_0-> S_489),S_434 = (grant_1_1-> S_422),S_437 = (grant_1_0-> S_457),
+S_439 = (grant_1_0-> S_445),S_441 = (grant_1_1-> S_390),S_443 = (grant_1_1-> S_371),
+S_444 = (idle_1-> S_389|request_1_0-> S_437|request_1_1-> S_441),S_445 = (idle_1-> S_366|request_1_0-> S_439|request_1_1-> S_443),
+S_457 = (idle_1-> S_389|request_1_0-> S_437|request_1_1-> S_441),S_489 = (idle_1-> S_421|request_1_0-> S_431|request_1_1-> S_434),
+S_490 = (idle_1-> S_95|request_1_0-> S_85|request_1_1-> S_89),S_491 = (idle_1-> S_420|request_1_0-> S_425|request_1_1-> S_426),
+S_495 = (grant_1_0-> S_457),S_496 = (grant_1_0-> S_445),S_497 = (grant_1_1-> S_523),S_498 = (grant_1_1-> S_499),
+S_499 = (idle_1-> S_2|request_1_0-> S_35|request_1_1-> S_37),S_523 = (idle_1-> S_1|request_1_0-> S_34|request_1_1-> S_36),
+S_538 = (grant_1_0-> S_489),S_539 = (grant_1_1-> S_540),S_540 = (idle_1-> S_98|request_1_0-> S_109|request_1_1-> S_111),
+S_544 = (grant_1_1-> S_546),S_546 = (idle_1-> S_95|request_1_0-> S_120|request_1_1-> S_122),S_549 = (grant_1_0-> S_491).
+
+equals FATAL_RANGE_7_STRAT(STRAT, STRAT_P).
+equals FATAL_RANGE_7_CLIENTS(CLIENTS, CLIENTS_P).
+
+
+

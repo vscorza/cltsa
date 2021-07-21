@@ -1,6 +1,7 @@
 TODO:
 =====
 -benchmark
+	- add extend alphabet to local automata
 	- https://github.com/dciolek/compositional-supervisory-control-benchmark/tree/master/fsp
 		- AT
 		X BW

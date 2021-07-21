@@ -1737,7 +1737,37 @@ bool automaton_statement_syntax_to_single_automaton(automaton_automata_context* 
 		free(vstates_ctx_indexes);
 	}
 
-	if(!is_alphabet_phase)automaton_automaton_remove_unreachable_states(automaton);
+	if(!is_alphabet_phase){
+		automaton_automaton_remove_unreachable_states(automaton);
+		//adjust local alphabet
+		signal_bit_array_t accum_signals[FIXED_SIGNALS_COUNT];
+		for(i = 0; i < FIXED_SIGNALS_COUNT; i++)accum_signals[i]	= (signal_t)0x0;
+		for(i = 0; i < automaton->transitions_count; i++){
+			for(j= 0; j < automaton->out_degree[i]; j++){
+				for(k = 0; k < FIXED_SIGNALS_COUNT; k++){
+					accum_signals[k]	= accum_signals[k] | automaton->transitions[i][j].signals[k];
+				}
+			}
+		}
+
+		uint32_t adjusted_local_alphabet_count = 0;
+		uint32_t signals_intcount	= (uint32_t)ceil(automaton->context->global_alphabet->count*1.0f / (sizeof(int) * 8));
+		int current_value;
+		for(k = 0; k < signals_intcount; k++){
+			current_value = k == 0? ((int*)accum_signals)[k] & ((int)~0x1) :
+					((int*)accum_signals)[k];
+			adjusted_local_alphabet_count	+= __builtin_popcount(current_value);
+		}
+		uint32_t *adjusted_local_alphabet = calloc(adjusted_local_alphabet_count, sizeof(uint32_t));
+		k = 0;
+		for(i = 0; i < *local_alphabet_count; i++){
+			if(TEST_SIGNAL_ARRAY_BIT(accum_signals, (*local_alphabet)[i]))
+				adjusted_local_alphabet[k++]	= (*local_alphabet)[i];
+		}
+		free(automaton->local_alphabet);
+		automaton->local_alphabet	= adjusted_local_alphabet;
+		automaton->local_alphabet_count	= adjusted_local_alphabet_count;
+	}
 
 	///////////
 

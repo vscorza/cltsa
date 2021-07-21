@@ -105,13 +105,6 @@ S_17 = (assign_0-> S_1),
 S_18 = (refuse-> S_12),
 S_19 = (approve-> S_15).
 
-NO_STRAT_REMOVE_P = S_0,
-S_0 = (assign_0-> S_1),
-S_1 = (broadcast_status-> S_3),
-S_3 = (accept_0-> S_5),
-S_5 = (no_broadcast-> S_11),
-S_8 = (no_broadcast-> S_0),
-S_11 = (refuse-> S_8).
 
 NO_STRAT_P = S_0,
 S_0 = (assign_0-> S_1),
@@ -157,7 +150,6 @@ S_41 = (approve-> S_24).
 
 // tests
 equals FATAL_BW_STRAT_TEST(STRAT, STRAT_P).
-equals FATAL_BW_NO_STRAT_REMOVE_TEST(NO_STRAT_REMOVE, NO_STRAT_REMOVE_P).
 equals FATAL_BW_NO_STRAT_TEST(NO_STRAT, NO_STRAT_P).
 equals FATAL_BW_NO_STRAT_WIN_TEST(NO_STRAT_WIN, NO_STRAT_WIN_P).
 
