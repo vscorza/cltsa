@@ -1,7 +1,6 @@
 TODO:
 =====
 -benchmark
-	- AWS teme@amazon.com, benjamin jones
 	- https://github.com/dciolek/compositional-supervisory-control-benchmark/tree/master/fsp
 		- AT
 		X BW
@@ -46,10 +45,7 @@ TODO:
 - post paper
 	- marcar línea del error en el editor por syntax error
 	- habilitar line number en el editor
-	- indices y constantes para
-		- automatas y forall
-		- ltl game structures
-		- fluents
+	- indices y constantes para ltl game structures
 	- renombrar/esconder
 	- estados por referencia
 - clts	

@@ -305,7 +305,8 @@ automaton_composition_syntax* automaton_composition_syntax_create_from_ref(char*
 automaton_gr1_game_syntax* automaton_gr1_game_syntax_create(char* name, char* composition_name, automaton_set_syntax* assumptions, automaton_set_syntax* goals);
 automaton_components_syntax* automaton_components_syntax_create(automaton_component_syntax* component);
 automaton_components_syntax* automaton_components_syntax_add_component(automaton_components_syntax* components, automaton_component_syntax* component, automaton_synchronization_type_syntax type);
-automaton_component_syntax* automaton_component_syntax_create(char* ident, char* prefix, automaton_index_syntax* index, automaton_indexes_syntax* indexes);
+automaton_component_syntax* automaton_component_syntax_create(char* ident, char* prefix, automaton_index_syntax* index
+		, automaton_indexes_syntax* indexes,  automaton_synchronization_type_syntax type);
 automaton_program_syntax* automaton_program_syntax_create(automaton_statement_syntax* first_statement);
 automaton_program_syntax* automaton_program_syntax_add_statement(automaton_program_syntax* program, automaton_statement_syntax* statement);
 automaton_statement_syntax* automaton_statement_syntax_create(automaton_statement_type_syntax type, automaton_composition_syntax* composition_def,

@@ -356,13 +356,14 @@ automaton_equivalence_check_syntax* automaton_equality_check_syntax_create(char*
 	aut_dupstr(&(check->right), right);
 	return check;
 }
-automaton_component_syntax* automaton_component_syntax_create(char* ident, char* prefix, automaton_index_syntax* index, automaton_indexes_syntax* indexes){
+automaton_component_syntax* automaton_component_syntax_create(char* ident, char* prefix, automaton_index_syntax* index
+		, automaton_indexes_syntax* indexes,  automaton_synchronization_type_syntax type){
 	automaton_component_syntax* component	= malloc(sizeof(automaton_component_syntax));
 	aut_dupstr(&(component->ident), ident);
 	aut_dupstr(&(component->prefix), prefix);
 	component->index	= index;
 	component->indexes	= indexes;
-	component->synch_type		= ASYNCH_AUT;
+	component->synch_type		= type;
 	return component;
 }
 automaton_program_syntax* automaton_program_syntax_create(automaton_statement_syntax* first_statement){

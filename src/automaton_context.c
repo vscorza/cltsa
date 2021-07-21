@@ -731,33 +731,92 @@ automaton_indexes_valuation* automaton_indexes_valuation_create_from_indexes(aut
 
 bool automaton_statement_syntax_to_composition(automaton_automata_context* ctx, automaton_composition_syntax* composition_syntax
 		, automaton_parsing_tables* tables, uint32_t main_index){
-	int32_t i, index;
+	int32_t i, j, k, index;
 	aut_context_log("mult. components.%s\n", composition_syntax->name);
 	//if one component has not been solved then report pending automata
+	uint32_t automata_count = 0;
 	for(i = 0; i < (int32_t)composition_syntax->count; i++){
-		index						= automaton_parsing_tables_get_entry_index(tables, COMPOSITION_ENTRY_AUT, composition_syntax->components[i]->ident);
-		if(index < 0)
-			return true;
-		if(!tables->composition_entries[index]->solved)
-			return true;
+		if(composition_syntax->components[i]->indexes != NULL && composition_syntax->components[i]->index == NULL){
+			char label_indexes[255];
+			automaton_indexes_valuation **next_valuations = NULL;
+			uint32_t next_valuations_count = 0, next_valuations_size = 0, **next_valuations_values = NULL;
+			char** ret_value	= malloc(sizeof(char*));
+			aut_dupstr(&(ret_value[0]),  composition_syntax->components[i]->ident);
+			int32_t count 		= 1;
+			automaton_indexes_syntax_eval_strings(tables,NULL
+								,&next_valuations, &next_valuations_count, &next_valuations_size, &next_valuations_values
+								, &ret_value, &count, composition_syntax->components[i]->indexes);
+			for(j = 0; j < next_valuations_count; j++)automaton_indexes_valuation_destroy(next_valuations[j]);
+			if(next_valuations != NULL)free(next_valuations); next_valuations = NULL;
+			bool keep_evaluating	= false;
+			for(j = 0; j < count; j++){
+				index = automaton_parsing_tables_get_entry_index(tables, COMPOSITION_ENTRY_AUT, ret_value[j]);
+				if(index < 0)
+					keep_evaluating	 = true;
+				else if(!tables->composition_entries[index]->solved)
+					keep_evaluating	 = true;
+				free(ret_value[j]);free(next_valuations_values[j]);
+				automata_count++;
+			}
+			free(ret_value);free(next_valuations_values);
+			next_valuations_count	= 0;
+			if(keep_evaluating)return true;
+		}else{
+			index						= automaton_parsing_tables_get_entry_index(tables, COMPOSITION_ENTRY_AUT, composition_syntax->components[i]->ident);
+			if(index < 0)
+				return true;
+			if(!tables->composition_entries[index]->solved)
+				return true;
+			automata_count++;
+		}
+
+
 	}
 	//build composition and add to table
-	automaton_automaton** automata	= malloc(sizeof(automaton_automaton*) * composition_syntax->count);
-	automaton_synchronization_type* synch_type	= malloc(sizeof(automaton_synchronization_type) * composition_syntax->count);
+	automaton_automaton** automata	= malloc(sizeof(automaton_automaton*) * automata_count);
+	automaton_synchronization_type* synch_type	= malloc(sizeof(automaton_synchronization_type) * automata_count);
+	j = 0;
 	for(i = 0; i < (int32_t)composition_syntax->count; i++){
-		//TODO: update transitions with prefixes/indexes
-		index						= automaton_parsing_tables_get_entry_index(tables, COMPOSITION_ENTRY_AUT, composition_syntax->components[i]->ident);
-		automata[i]					= tables->composition_entries[index]->valuation.automaton_value;
-		switch(composition_syntax->components[i]->synch_type){
-			case CONCURRENT_AUT: synch_type[i]	= CONCURRENT;break;
-			case SYNCH_AUT: synch_type[i]		= SYNCHRONOUS;break;
-			default: synch_type[i]				= ASYNCHRONOUS;break;
+		if(composition_syntax->components[i]->indexes != NULL && composition_syntax->components[i]->index == NULL){
+			char label_indexes[255];
+			automaton_indexes_valuation **next_valuations = NULL;
+			uint32_t next_valuations_count = 0, next_valuations_size = 0, **next_valuations_values = NULL;
+			char** ret_value	= malloc(sizeof(char*));
+			aut_dupstr(&(ret_value[0]),  composition_syntax->components[i]->ident);
+			int32_t count 		= 1;
+			automaton_indexes_syntax_eval_strings(tables,NULL
+								,&next_valuations, &next_valuations_count, &next_valuations_size, &next_valuations_values
+								, &ret_value, &count, composition_syntax->components[i]->indexes);
+			for(k = 0; k < next_valuations_count; k++)automaton_indexes_valuation_destroy(next_valuations[k]);
+			if(next_valuations != NULL)free(next_valuations); next_valuations = NULL;
+			bool keep_evaluating	= false;
+			for(k = 0; k < count; k++){
+				index						= automaton_parsing_tables_get_entry_index(tables, COMPOSITION_ENTRY_AUT, ret_value[k]);
+				automata[j]					= tables->composition_entries[index]->valuation.automaton_value;
+				switch(composition_syntax->components[i]->synch_type){
+					case CONCURRENT_AUT: synch_type[j++]	= CONCURRENT;break;
+					case SYNCH_AUT: synch_type[j++]		= SYNCHRONOUS;break;
+					default: synch_type[j++]				= ASYNCHRONOUS;break;
+				}
+				free(ret_value[k]);free(next_valuations_values[k]);
+			}
+			free(ret_value);free(next_valuations_values);
+			next_valuations_count	= 0;
+			if(keep_evaluating)return true;
+		}else{
+			//TODO: update transitions with prefixes/indexes
+			index						= automaton_parsing_tables_get_entry_index(tables, COMPOSITION_ENTRY_AUT, composition_syntax->components[i]->ident);
+			automata[j]					= tables->composition_entries[index]->valuation.automaton_value;
+			switch(composition_syntax->components[i]->synch_type){
+				case CONCURRENT_AUT: synch_type[j++]	= CONCURRENT;break;
+				case SYNCH_AUT: synch_type[j++]		= SYNCHRONOUS;break;
+				default: synch_type[j++]				= ASYNCHRONOUS;break;
+			}
 		}
 	}
 	//if is game build fluents and add to automata
-	uint32_t composition_count	= composition_syntax->count;
 	aut_context_log("composing.\n");
-	automaton_automaton* automaton	= automaton_automata_compose(automata, synch_type, composition_count, composition_syntax->is_game, composition_syntax->no_mixed_states
+	automaton_automaton* automaton	= automaton_automata_compose(automata, synch_type, automata_count, composition_syntax->is_game, composition_syntax->no_mixed_states
 			, composition_syntax->name);//SYNCHRONOUS);
 	tables->composition_entries[main_index]->solved	= true;
 	tables->composition_entries[main_index]->valuation_count			= 1;
