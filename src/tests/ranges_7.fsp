@@ -15,6 +15,8 @@ SERVER[n:R_N] = (request[n][k:R_K]-> grant[n][k] -> SERVER[n]).
 
 ||CLIENTS = (CLIENT[n:R_N]).
 ||SERVERS = (SERVER[n:R_N]).
+
+||SERVERS_C = (SERVER[n:R_N]_c).
 ||Plant = (CLIENTS || SERVERS).
 |F|ENV = (Plant).
 
@@ -28,6 +30,7 @@ CLIENT_0 >> "/tmp/ranges_7_client_0.rep".
 SERVER_1 >> "/tmp/ranges_7_server_1.rep".
 CLIENTS >> "/tmp/ranges_7_clients.rep".
 SERVERS >> "/tmp/ranges_7_servers.rep".
+SERVERS_C >> "/tmp/ranges_7_servers_c.rep".
 ENV >> "/tmp/ranges_7_env.rep".
 STRAT >> "/tmp/ranges_7_strat.rep".
 
@@ -115,8 +118,18 @@ S_499 = (idle_1-> S_2|request_1_0-> S_35|request_1_1-> S_37),S_523 = (idle_1-> S
 S_538 = (grant_1_0-> S_489),S_539 = (grant_1_1-> S_540),S_540 = (idle_1-> S_98|request_1_0-> S_109|request_1_1-> S_111),
 S_544 = (grant_1_1-> S_546),S_546 = (idle_1-> S_95|request_1_0-> S_120|request_1_1-> S_122),S_549 = (grant_1_0-> S_491).
 
+SERVERS_C_P = S_0,
+S_0 = (request_1_0-> S_1|request_1_1-> S_2|request_0_0-> S_3|<request_0_0,request_1_0>-> S_4|<request_0_0,request_1_1>-> S_5|request_0_1-> S_6|<request_0_1,request_1_0>-> S_7|<request_0_1,request_1_1>-> S_8),
+S_1 = (grant_1_0-> S_0|request_0_0-> S_4|<grant_1_0,request_0_0>-> S_3|request_0_1-> S_7|<grant_1_0,request_0_1>-> S_6),
+S_2 = (grant_1_1-> S_0|request_0_0-> S_5|<grant_1_1,request_0_0>-> S_3|request_0_1-> S_8|<grant_1_1,request_0_1>-> S_6),
+S_3 = (request_1_0-> S_4|request_1_1-> S_5|grant_0_0-> S_0|<grant_0_0,request_1_0>-> S_1|<grant_0_0,request_1_1>-> S_2),
+S_4 = (grant_1_0-> S_3|grant_0_0-> S_1|<grant_0_0,grant_1_0>-> S_0),S_5 = (grant_1_1-> S_3|grant_0_0-> S_2|<grant_0_0,grant_1_1>-> S_0),
+S_6 = (request_1_0-> S_7|request_1_1-> S_8|grant_0_1-> S_0|<grant_0_1,request_1_0>-> S_1|<grant_0_1,request_1_1>-> S_2),
+S_7 = (grant_1_0-> S_6|grant_0_1-> S_1|<grant_0_1,grant_1_0>-> S_0),S_8 = (grant_1_1-> S_6|grant_0_1-> S_2|<grant_0_1,grant_1_1>-> S_0).
+
 equals FATAL_RANGE_7_STRAT(STRAT, STRAT_P).
 equals FATAL_RANGE_7_CLIENTS(CLIENTS, CLIENTS_P).
+equals FATAL_RANGE_7_SERVERS_C(SERVERS_C, SERVERS_C_P).
 
 
 
