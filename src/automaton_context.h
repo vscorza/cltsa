@@ -109,8 +109,9 @@ char** automaton_set_syntax_evaluate(automaton_parsing_tables* tables, automaton
 automaton_alphabet* automaton_parsing_tables_get_global_alphabet(automaton_parsing_tables* tables);
 bool automaton_statement_syntax_to_composition(automaton_automata_context* ctx, automaton_composition_syntax* composition_syntax
 		, automaton_parsing_tables* tables, uint32_t main_index);
-void automaton_statement_syntax_build_local_alphabet(automaton_automata_context* ctx, automaton_composition_syntax* composition_syntax
-		, automaton_parsing_tables* tables, uint32_t *local_alphabet_count, uint32_t** local_alphabet);
+bool automaton_statement_syntax_to_single_automaton(automaton_automata_context* ctx, automaton_composition_syntax* composition_syntax
+		, automaton_parsing_tables* tables, uint32_t current_vstates_count, char** current_vstates_names, automaton_vstates_syntax** current_vstates_syntaxes
+		, automaton_indexes_valuation* current_automaton_valuation, bool is_alphabet_phase, uint32_t*	local_alphabet_count, uint32_t**	local_alphabet);
 bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, automaton_composition_syntax* composition_syntax
 		, automaton_parsing_tables* tables, uint32_t current_vstates_count, char** current_vstates_names, automaton_vstates_syntax** current_vstates_syntaxes);
 automaton_range* automaton_range_syntax_evaluate(automaton_parsing_tables *tables, char* name, automaton_expression_syntax *range_def_syntax);
@@ -122,7 +123,8 @@ bool automaton_statement_syntax_to_range(automaton_automata_context* ctx, automa
 		, automaton_parsing_tables* tables);
 bool automaton_statement_syntax_to_fluent(automaton_automata_context* ctx, automaton_fluent_syntax* fluent_def_syntax
 		, automaton_parsing_tables* tables, automaton_alphabet* global_alphabet);
-automaton_fluent* automaton_fluent_create_from_syntax(automaton_parsing_tables* tables, automaton_fluent_syntax* fluent_def_syntax, automaton_alphabet* global_alphabet);
+automaton_fluent* automaton_fluent_create_from_syntax(automaton_parsing_tables* tables, automaton_fluent_syntax* fluent_def_syntax, automaton_alphabet* global_alphabet,
+		automaton_indexes_valuation *current_valuations);
 void automaton_index_syntax_get_range(automaton_parsing_tables* tables, automaton_index_syntax* index, int32_t *lower_index, int32_t *upper_index);
 void automaton_indexes_syntax_eval_strings(automaton_parsing_tables* tables, automaton_indexes_valuation* last_valuation, automaton_indexes_valuation*** valuations, uint32_t *valuations_count, uint32_t *valuations_size
 		, uint32_t*** values, char*** a, int32_t* a_count, automaton_indexes_syntax* indexes);

@@ -171,7 +171,7 @@ set:
 	;
 	*/
 fluentDef:
-	t_FLUENT t_UPPER_IDENT '=' '<' fluentSet ',' fluentSet '>' fluentInitialCondition	{$$ = automaton_fluent_syntax_create($2, $5, $7, $9);free($1); free($2);}
+	t_FLUENT t_UPPER_IDENT indexes '=' '<' fluentSet ',' fluentSet '>' fluentInitialCondition	{$$ = automaton_fluent_syntax_create($2, $6, $8, $10, $3);free($1); free($2);}
 	;
 fluentInitialCondition:
 	t_INITIALLY t_INTEGER					{$$ = $2; free($1);}

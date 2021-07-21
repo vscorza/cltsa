@@ -1,6 +1,7 @@
 TODO:
 =====
 -benchmark
+	- AWS teme@amazon.com, benjamin jones
 	- https://github.com/dciolek/compositional-supervisory-control-benchmark/tree/master/fsp
 		- AT
 		X BW
@@ -37,7 +38,11 @@ TODO:
 			- ahb_1_n	
 				- completo			
 		- correr tests
-	- revisar patterns for property specification ...
+	- revisar 
+		- patterns for property specification ...
+		- Assume, Guarantee or Repair (grumberg)
+		- Must Fault Localization for Program Repair
+		- Compositional Model Checking for Multi-properties
 - post paper
 	- marcar línea del error en el editor por syntax error
 	- habilitar line number en el editor

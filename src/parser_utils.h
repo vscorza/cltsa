@@ -109,12 +109,6 @@ typedef struct automaton_set_def_syntax_str{
 	struct automaton_set_syntax_str* set;
 	char* name;
 }automaton_set_def_syntax;
-typedef struct automaton_fluent_syntax_str{
-	struct automaton_set_syntax_str* initiating_set;
-	struct automaton_set_syntax_str* finishing_set;
-	uint32_t initial_value;
-	char* name;
-}automaton_fluent_syntax;
 typedef struct automaton_index_syntax_str{
 	bool is_expr;
 	bool is_range;
@@ -126,6 +120,13 @@ typedef struct automaton_indexes_syntax_str{
 	uint32_t count;
 	struct automaton_index_syntax_str** indexes;
 }automaton_indexes_syntax;
+typedef struct automaton_fluent_syntax_str{
+	struct automaton_set_syntax_str* initiating_set;
+	struct automaton_set_syntax_str* finishing_set;
+	uint32_t initial_value;
+	struct automaton_indexes_syntax_str* indexes;
+	char* name;
+}automaton_fluent_syntax;
 typedef struct automaton_state_label_syntax_str{
 	char* name;
 	struct automaton_indexes_syntax_str* indexes;
@@ -278,7 +279,7 @@ automaton_set_syntax* automaton_set_syntax_concat_labels(automaton_set_syntax* s
 automaton_label_syntax* automaton_label_syntax_create(bool is_set, bool is_concurrent, automaton_set_syntax* set, char* string_terminal, automaton_indexes_syntax* indexes);
 automaton_label_syntax* automaton_label_syntax_create_empty();
 automaton_set_def_syntax* automaton_set_def_syntax_create(automaton_set_syntax* set, char* name);
-automaton_fluent_syntax* automaton_fluent_syntax_create(char* name, automaton_set_syntax* initiating_set, automaton_set_syntax* finishing_set, uint32_t initial_value);
+automaton_fluent_syntax* automaton_fluent_syntax_create(char* name, automaton_set_syntax* initiating_set, automaton_set_syntax* finishing_set, uint32_t initial_value, automaton_indexes_syntax* indexes);
 automaton_index_syntax* automaton_index_syntax_create(bool is_expr, bool is_range, automaton_expression_syntax* expr, char* lower_ident
 		, char* upper_ident);
 automaton_indexes_syntax* automaton_indexes_syntax_create(automaton_index_syntax* first_index);
