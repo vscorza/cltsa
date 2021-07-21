@@ -1788,7 +1788,7 @@ bool automaton_statement_syntax_to_single_automaton(automaton_automata_context* 
 					}
 				}
 			}
-			int32_t min_value	= -1, min_index = -1;
+			int32_t min_value	= -1, min_index = -1, added_elements = 0;
 			k = 0;
 			for(j = 0; j < extended_count;j++){
 				for(i = 0; i < extended_count;i++){
@@ -1796,25 +1796,32 @@ bool automaton_statement_syntax_to_single_automaton(automaton_automata_context* 
 					if(min_value == -1){ min_value = labels_ids[i]; min_index = i;}
 					else if(labels_ids[i] < min_value){ min_value = labels_ids[i]; min_index = i; }
 				}
-				labels_ids_tmp[k++]	= min_index;
+				labels_ids_tmp[k++]	= min_value;
 				labels_ids[min_index]	= -1;
 			}
 			free(labels_ids); labels_ids	= labels_ids_tmp;
-			for(j = 0; j < extended_count; j++)free(labels[j]);
-			free(labels);
-			k = 0;
-			for(i = 0; i < automaton->local_alphabet_count; i++){
-				for(j = 0; j < extended_count; j++){
+			bool label_found	= false;
+			for(j = 0; j < extended_count; j++){
+				label_found	= false;
+				for(i = 0; i < automaton->local_alphabet_count; i++){
 					if(strcmp(labels[j], ctx->global_alphabet->list[automaton->local_alphabet[i]].name)== 0){
-						k++; break;
+						label_found	= true; break;
 					}
 				}
+				if(!label_found)added_elements++;
 			}
-			adjusted_local_alphabet_count	= automaton->local_alphabet_count + k;
+			for(j = 0; j < extended_count; j++)free(labels[j]);
+			free(labels);
+			adjusted_local_alphabet_count	= automaton->local_alphabet_count + added_elements;
 			adjusted_local_alphabet	= calloc(adjusted_local_alphabet_count, sizeof(uint32_t));
 			j = 0; k = 0;
 			for(i = 0; i < adjusted_local_alphabet_count; i++){
-				adjusted_local_alphabet = automaton->local_alphabet[j] < labels_ids[k] ? automaton->local_alphabet[j++] : labels_ids[k++];
+				if(k >= added_elements)
+					adjusted_local_alphabet[i] = automaton->local_alphabet[j++];
+				else if(j >= automaton->local_alphabet_count)
+					adjusted_local_alphabet[i] = labels_ids[k];
+				else
+					adjusted_local_alphabet[i] = automaton->local_alphabet[j] < labels_ids[k] ? automaton->local_alphabet[j++] : labels_ids[k++];
 			}
 			free(automaton->local_alphabet);
 			automaton->local_alphabet	= adjusted_local_alphabet;
