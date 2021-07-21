@@ -280,7 +280,8 @@ compositionDef:
 	composition '.'							{$$ = $1;}
 	;
 composition:
-	ltsStates								{$$ = automaton_composition_syntax_create_from_states($1); free($1);}
+	ltsStates								{$$ = automaton_composition_syntax_create_from_states($1,NULL); free($1);}
+	| ltsStates '+' '{' labels '}'			{$$ = automaton_composition_syntax_create_from_states($1, $4); free($1);}
 	| t_PARALLEL t_UPPER_IDENT '=' '(' compositionExp ')'	{$$ = automaton_composition_syntax_create_from_ref($2, $5, false, false); free($1);free($2);free($5);}
 	| t_GAME_COMPOSE t_UPPER_IDENT '=' '(' compositionExp ')'	{$$ = automaton_composition_syntax_create_from_ref($2, $5, true, false); free($1);free($2);free($5);}
 	| t_GAME_COMPOSE_NO_MIXED_STATES t_UPPER_IDENT '=' '(' compositionExp ')'	{$$ = automaton_composition_syntax_create_from_ref($2, $5, true, true); free($1);free($2);free($5);}		

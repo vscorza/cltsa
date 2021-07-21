@@ -355,9 +355,11 @@ int32_t automaton_expression_syntax_evaluate(automaton_parsing_tables* tables, a
  * @param set set syntax's definition
  * @param count placeholder for the resulting set length
  * @param set_def_key set reference name within the parsing structure
+ * @param state_valuation if provided defines the valuation of the indexed automaton
  * @return a list of string representing the values of the required set
  */
-char** automaton_set_syntax_evaluate(automaton_parsing_tables* tables, automaton_set_syntax* set, int32_t *count, char* set_def_key){
+char** automaton_set_syntax_evaluate(automaton_parsing_tables* tables, automaton_set_syntax* set, int32_t *count, char* set_def_key,
+		automaton_indexes_valuation *state_valuation){
 	int32_t index = -1;
 	uint32_t i, j,k;
 	char* current_entry;
@@ -381,7 +383,10 @@ char** automaton_set_syntax_evaluate(automaton_parsing_tables* tables, automaton
 	}
 	automaton_string_list *ret_value			= automaton_string_list_create(true, false);
 	//if proper set was not solved try to solve it
-	index						= automaton_parsing_tables_get_entry_index(tables, SET_ENTRY_AUT, set_def_key);
+	if(set_def_key != NULL)
+		index						= automaton_parsing_tables_get_entry_index(tables, SET_ENTRY_AUT, set_def_key);
+	else
+		index						= -1;
 	automaton_indexes_valuation **valuations	= NULL;
 	uint32_t valuations_count					= 0;
 	uint32_t valuations_size					= 0;
@@ -396,20 +401,23 @@ char** automaton_set_syntax_evaluate(automaton_parsing_tables* tables, automaton
 		}else{
 			while(set->is_ident){
 				index	= automaton_parsing_tables_get_entry_index(tables, SET_ENTRY_AUT, set->string_terminal);
+				if(index == -1)break;
 				set		= ((automaton_set_def_syntax*)tables->set_entries[index]->value)->set;
 			}
-			if(!tables->set_entries[index]->solved){
-				inner_value	= automaton_set_syntax_evaluate(tables, set, &inner_count, ((automaton_set_def_syntax*)tables->set_entries[index]->value)->name);
-			}else{
-				inner_count	= tables->set_entries[index]->valuation_count;
-				inner_value	= tables->set_entries[index]->valuation.labels_value;
+			if(index >= 0){
+				if(!tables->set_entries[index]->solved){
+					inner_value	= automaton_set_syntax_evaluate(tables, set, &inner_count, ((automaton_set_def_syntax*)tables->set_entries[index]->value)->name, state_valuation);
+				}else{
+					inner_count	= tables->set_entries[index]->valuation_count;
+					inner_value	= tables->set_entries[index]->valuation.labels_value;
+				}
 			}
 		}
 		if(indexes != NULL){
 			char** tmp_value	= malloc(sizeof(char*) * inner_count);
 			for(k = 0; k < (uint32_t)inner_count;k++)aut_dupstr(&(tmp_value[k]), inner_value[k]);
 			uint32_t **values = NULL;
-			automaton_indexes_syntax_eval_strings(tables, NULL, &valuations, &valuations_count, &valuations_size, &values, &tmp_value, &inner_count, indexes);
+			automaton_indexes_syntax_eval_strings(tables, state_valuation, &valuations, &valuations_count, &valuations_size, &values, &tmp_value, &inner_count, indexes);
 			for(k = 0; k < valuations_count; k++)automaton_indexes_valuation_destroy(valuations[k]); free(valuations); valuations = NULL; valuations_count = 0;
 			aut_merge_string_lists(ret_value, tmp_value, inner_count);
 			for(k = 0; k < (uint32_t)inner_count;k++)free(tmp_value[k]);
@@ -456,9 +464,9 @@ automaton_alphabet* automaton_parsing_tables_get_global_alphabet(automaton_parsi
 	int32_t global_count = 0;
 	int32_t controllable_count = 0;
 	char** global_values		= automaton_set_syntax_evaluate(tables, ((automaton_set_def_syntax*)tables->set_entries[global_index]->value)->set
-			, &global_count, ((automaton_set_def_syntax*)tables->set_entries[global_index]->value)->name);
+			, &global_count, ((automaton_set_def_syntax*)tables->set_entries[global_index]->value)->name, NULL);
 	char** controllable_values	= automaton_set_syntax_evaluate(tables, ((automaton_set_def_syntax*)tables->set_entries[controllable_index]->value)->set
-			, &controllable_count, ((automaton_set_def_syntax*)tables->set_entries[controllable_index]->value)->name);
+			, &controllable_count, ((automaton_set_def_syntax*)tables->set_entries[controllable_index]->value)->name, NULL);
 
 	bool is_controllable;
 	automaton_signal_event* sig_event;
@@ -479,10 +487,10 @@ automaton_alphabet* automaton_parsing_tables_get_global_alphabet(automaton_parsi
 		global_count = 0;
 		controllable_count = 0;
 		global_values		= automaton_set_syntax_evaluate(tables, ((automaton_set_def_syntax*)tables->set_entries[global_signals_index]->value)->set
-					, &global_count, ((automaton_set_def_syntax*)tables->set_entries[global_signals_index]->value)->name);
+					, &global_count, ((automaton_set_def_syntax*)tables->set_entries[global_signals_index]->value)->name, NULL);
 		if(output_signals_index >= 0){
 			controllable_values	= automaton_set_syntax_evaluate(tables, ((automaton_set_def_syntax*)tables->set_entries[output_signals_index]->value)->set
-					, &controllable_count, ((automaton_set_def_syntax*)tables->set_entries[output_signals_index]->value)->name);
+					, &controllable_count, ((automaton_set_def_syntax*)tables->set_entries[output_signals_index]->value)->name, NULL);
 		}
 
 		for(i = 0; i < global_count; i++){
@@ -1767,6 +1775,54 @@ bool automaton_statement_syntax_to_single_automaton(automaton_automata_context* 
 		free(automaton->local_alphabet);
 		automaton->local_alphabet	= adjusted_local_alphabet;
 		automaton->local_alphabet_count	= adjusted_local_alphabet_count;
+
+		if(composition_syntax->extended_set != NULL){
+			int32_t extended_count = 0;
+			char **labels	= automaton_set_syntax_evaluate(tables, composition_syntax->extended_set, &extended_count, NULL, current_automaton_valuation);
+			int32_t *labels_ids	= calloc(extended_count, sizeof(int32_t)),  *labels_ids_tmp	= calloc(extended_count, sizeof(int32_t));
+			k = 0;
+			for(i = 0; i < ctx->global_alphabet->count; i++){
+				for(j = 0; j < extended_count; j++){
+					if(strcmp(labels[j], ctx->global_alphabet->list[i].name)== 0){
+						labels_ids[k++]	= i; break;
+					}
+				}
+			}
+			int32_t min_value	= -1, min_index = -1;
+			k = 0;
+			for(j = 0; j < extended_count;j++){
+				for(i = 0; i < extended_count;i++){
+					if(labels_ids[i] == -1)continue;
+					if(min_value == -1){ min_value = labels_ids[i]; min_index = i;}
+					else if(labels_ids[i] < min_value){ min_value = labels_ids[i]; min_index = i; }
+				}
+				labels_ids_tmp[k++]	= min_index;
+				labels_ids[min_index]	= -1;
+			}
+			free(labels_ids); labels_ids	= labels_ids_tmp;
+			for(j = 0; j < extended_count; j++)free(labels[j]);
+			free(labels);
+			k = 0;
+			for(i = 0; i < automaton->local_alphabet_count; i++){
+				for(j = 0; j < extended_count; j++){
+					if(strcmp(labels[j], ctx->global_alphabet->list[automaton->local_alphabet[i]].name)== 0){
+						k++; break;
+					}
+				}
+			}
+			adjusted_local_alphabet_count	= automaton->local_alphabet_count + k;
+			adjusted_local_alphabet	= calloc(adjusted_local_alphabet_count, sizeof(uint32_t));
+			j = 0; k = 0;
+			for(i = 0; i < adjusted_local_alphabet_count; i++){
+				adjusted_local_alphabet = automaton->local_alphabet[j] < labels_ids[k] ? automaton->local_alphabet[j++] : labels_ids[k++];
+			}
+			free(automaton->local_alphabet);
+			automaton->local_alphabet	= adjusted_local_alphabet;
+			automaton->local_alphabet_count	= adjusted_local_alphabet_count;
+			free(labels_ids);
+		}
+
+
 	}
 
 	///////////
@@ -3439,9 +3495,9 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 				game_automaton->state_valuations_declared = NULL;
 			}
 			sprintf(set_name, "Assumption %s", gr1_game->name);
-			assumptions		= automaton_set_syntax_evaluate(tables, gr1_game->assumptions, &assumptions_count, set_name);
+			assumptions		= automaton_set_syntax_evaluate(tables, gr1_game->assumptions, &assumptions_count, set_name, NULL);
 			sprintf(set_name, "Guarantees %s", gr1_game->name);
-			guarantees		= automaton_set_syntax_evaluate(tables, gr1_game->guarantees, &guarantees_count, set_name);
+			guarantees		= automaton_set_syntax_evaluate(tables, gr1_game->guarantees, &guarantees_count, set_name, NULL);
 #if VERBOSE
 			printf("[Synthesizing] %s over %s\n", gr1_game->name, game_automaton->name);
 #endif

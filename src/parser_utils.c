@@ -301,13 +301,15 @@ automaton_states_syntax* automaton_states_syntax_add_state(automaton_states_synt
 	states->states = new_states;
 	return states;
 }
-automaton_composition_syntax* automaton_composition_syntax_create_from_states(automaton_states_syntax* states){
+automaton_composition_syntax* automaton_composition_syntax_create_from_states(automaton_states_syntax* states,
+		automaton_set_syntax* set_syntax){
 	automaton_composition_syntax* composition	= malloc(sizeof(automaton_composition_syntax));
 	aut_dupstr(&(composition->name), states->states[0]->label->name);
 	composition->components	= NULL;
 	composition->count	= states->count;
 	composition->states	= states->states;
 	composition->is_game	= false;
+	composition->extended_set	= set_syntax;
 	return composition;
 }
 automaton_composition_syntax* automaton_composition_syntax_create_from_ref(char* name, automaton_components_syntax* components, bool is_game, bool no_mixed_states){
@@ -318,6 +320,7 @@ automaton_composition_syntax* automaton_composition_syntax_create_from_ref(char*
 	composition->states	= NULL;
 	composition->is_game= is_game;
 	composition->no_mixed_states	= no_mixed_states;
+	composition->extended_set	= NULL;
 
 	return composition;
 }
@@ -540,6 +543,9 @@ void automaton_composition_syntax_destroy(automaton_composition_syntax* composit
 	}else if(composition->states != NULL){
 		for(i = 0; i < composition->count; i++)	automaton_state_syntax_destroy(composition->states[i]);
 		free(composition->states);
+	}
+	if(composition->extended_set != NULL){
+		automaton_set_syntax_destroy(composition->extended_set);
 	}
 	free(composition);
 }
