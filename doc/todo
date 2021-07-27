@@ -1,7 +1,7 @@
 TODO:
 =====
+- yoshiki takashima, nadia polikarpova
 -benchmark
-	- add extend alphabet to local automata
 	- https://github.com/dciolek/compositional-supervisory-control-benchmark/tree/master/fsp
 		X AT
 		X BW
@@ -44,6 +44,7 @@ TODO:
 		- Must Fault Localization for Program Repair
 		- Compositional Model Checking for Multi-properties
 - post paper
+	- revisar gcov
 	- marcar línea del error en el editor por syntax error
 	- habilitar line number en el editor
 	- indices y constantes para ltl game structures

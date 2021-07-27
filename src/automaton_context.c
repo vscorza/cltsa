@@ -98,8 +98,9 @@ void automaton_parsing_table_entry_destroy(automaton_parsing_table_entry* entry)
 	}
 	free(entry);
 }
-int32_t automaton_parsing_tables_get_entry_index(automaton_parsing_tables* tables, automaton_parsing_table_entry_type type, char* key){
+int32_t automaton_parsing_tables_get_entry_index(automaton_parsing_tables* tables, automaton_parsing_table_entry_type type, char* key, bool exit_if_failed){
 	int32_t current_index = -1;
+	char message_type[255];
 	int32_t i;
 	automaton_parsing_table_entry* entry;
 	switch(type){
@@ -108,56 +109,67 @@ int32_t automaton_parsing_tables_get_entry_index(automaton_parsing_tables* table
 			if(strcmp(tables->label_entries[i]->key, key) == 0)
 				return i;
 		}
+		sprintf(message_type, "%s", "LABEL_ENTRY");
 		break;
 	case SET_ENTRY_AUT:
 		for(i = 0; i < (int32_t)tables->set_count; i++){
 			if(strcmp(tables->set_entries[i]->key, key) == 0)
 				return i;
 		}
+		sprintf(message_type, "%s", "SET_ENTRY");
 		break;
 	case FLUENT_ENTRY_AUT:
 		for(i = 0; i < (int32_t)tables->fluent_count; i++){
 			if(strcmp(tables->fluent_entries[i]->key, key) == 0)
 				return i;
 		}
+		sprintf(message_type, "%s", "FLUENT_ENTRY");
 		break;
 	case RANGE_ENTRY_AUT:
 		for(i = 0; i < (int32_t)tables->range_count; i++){
 			if(strcmp(tables->range_entries[i]->key, key) == 0)
 				return i;
 		}
+		sprintf(message_type, "%s", "RANGE_ENTRY");
 		break;
 	case CONST_ENTRY_AUT:
 		for(i = 0; i < (int32_t)tables->const_count; i++){
 			if(strcmp(tables->const_entries[i]->key, key) == 0)
 				return i;
 		}
+		sprintf(message_type, "%s", "CONST_ENTRY");
 		break;
 	case AUTOMATON_ENTRY_AUT:
 		for(i = 0; i < (int32_t)tables->automaton_count; i++){
 			if(strcmp(tables->automaton_entries[i]->key, key) == 0)
 				return i;
 		}
+		sprintf(message_type, "%s", "AUTOMATON_ENTRY");
 		break;
 	case COMPOSITION_ENTRY_AUT:
 		for(i = 0; i < (int32_t)tables->composition_count; i++){
 			if(strcmp(tables->composition_entries[i]->key, key) == 0)
 				return i;
 		}
+		sprintf(message_type, "%s", "COMPOSITION_ENTRY");
 		break;
 	case EQUIVALENCE_CHECK_ENTRY_AUT:
 		for(i = 0; i < (int32_t)tables->equivalence_count; i++){
 			if(strcmp(tables->equivalence_entries[i]->key, key) == 0)
 				return i;
 		}
+		sprintf(message_type, "%s", "EQUIVALENCE_ENTRY");
 		break;
+	}
+	if(exit_if_failed){
+		printf("No value found in parsing tables for key [%s] of type %s\n", key, message_type);exit(-1);
 	}
 	return current_index;
 }
 
 int32_t automaton_parsing_tables_add_entry(automaton_parsing_tables* tables, automaton_parsing_table_entry_type type, char* key, void* value){
 	int32_t current_index;
-	current_index	= automaton_parsing_tables_get_entry_index(tables, type, key);
+	current_index	= automaton_parsing_tables_get_entry_index(tables, type, key, false);
 	if(current_index >= 0)
 		return current_index;
 	automaton_parsing_table_entry* entry;
@@ -269,7 +281,7 @@ int32_t automaton_expression_syntax_evaluate(automaton_parsing_tables* tables, a
 	automaton_parsing_table_entry* ref_entry;
 	if(expr->type == CONST_TYPE_AUT){
 		if(expr->string_terminal != NULL){
-			index = automaton_parsing_tables_get_entry_index(tables, CONST_ENTRY_AUT, expr->string_terminal);
+			index = automaton_parsing_tables_get_entry_index(tables, CONST_ENTRY_AUT, expr->string_terminal, true);
 			if(tables->const_entries[index]->solved)
 				return tables->const_entries[index]->valuation.int_value;
 		}
@@ -325,7 +337,7 @@ int32_t automaton_expression_syntax_evaluate(automaton_parsing_tables* tables, a
 			}
 		}
 		if(!found){
-			ref_index 	= automaton_parsing_tables_get_entry_index(tables, CONST_ENTRY_AUT, expr->string_terminal);
+			ref_index 	= automaton_parsing_tables_get_entry_index(tables, CONST_ENTRY_AUT, expr->string_terminal, true);
 			ref_entry	= tables->const_entries[ref_index];
 			if(!ref_entry->solved){
 				automaton_expression_syntax_evaluate(tables, (automaton_expression_syntax*)ref_entry->value, indexes_valuation);
@@ -369,13 +381,13 @@ char** automaton_set_syntax_evaluate(automaton_parsing_tables* tables, automaton
 	automaton_indexes_syntax* indexes	= NULL;
 	if(set == NULL)return NULL;
 	if(set->is_ident){
-		index						= automaton_parsing_tables_get_entry_index(tables, SET_ENTRY_AUT, set->string_terminal);
+		index						= automaton_parsing_tables_get_entry_index(tables, SET_ENTRY_AUT, set->string_terminal, false);
 		if(index >= 0)if(tables->set_entries[index]->solved)	return tables->set_entries[index]->valuation.labels_value;
 	}
 	//search until proper set def is found
 	if(set->is_ident){
 		while(set->is_ident){
-			index	= automaton_parsing_tables_get_entry_index(tables, SET_ENTRY_AUT, set->string_terminal);
+			index	= automaton_parsing_tables_get_entry_index(tables, SET_ENTRY_AUT, set->string_terminal, true);
 			set		= ((automaton_set_def_syntax*)tables->set_entries[index]->value)->set;
 		}
 		if(tables->set_entries[index]->solved)
@@ -384,7 +396,7 @@ char** automaton_set_syntax_evaluate(automaton_parsing_tables* tables, automaton
 	automaton_string_list *ret_value			= automaton_string_list_create(true, false);
 	//if proper set was not solved try to solve it
 	if(set_def_key != NULL)
-		index						= automaton_parsing_tables_get_entry_index(tables, SET_ENTRY_AUT, set_def_key);
+		index						= automaton_parsing_tables_get_entry_index(tables, SET_ENTRY_AUT, set_def_key, false);
 	else
 		index						= -1;
 	automaton_indexes_valuation **valuations	= NULL;
@@ -400,7 +412,7 @@ char** automaton_set_syntax_evaluate(automaton_parsing_tables* tables, automaton
 			inner_count		= 1;
 		}else{
 			while(set->is_ident){
-				index	= automaton_parsing_tables_get_entry_index(tables, SET_ENTRY_AUT, set->string_terminal);
+				index	= automaton_parsing_tables_get_entry_index(tables, SET_ENTRY_AUT, set->string_terminal, false);
 				if(index == -1)break;
 				set		= ((automaton_set_def_syntax*)tables->set_entries[index]->value)->set;
 			}
@@ -452,10 +464,10 @@ char** automaton_set_syntax_evaluate(automaton_parsing_tables* tables, automaton
  */
 automaton_alphabet* automaton_parsing_tables_get_global_alphabet(automaton_parsing_tables* tables){
 	automaton_alphabet* global_alphabet	= automaton_alphabet_create();
-	int32_t global_index		= automaton_parsing_tables_get_entry_index(tables, SET_ENTRY_AUT, GLOBAL_ALPHABET_NAME_AUT);
-	int32_t controllable_index	= automaton_parsing_tables_get_entry_index(tables, SET_ENTRY_AUT, CONTROLLABLE_ALPHABET_NAME_AUT);
-	int32_t global_signals_index	= automaton_parsing_tables_get_entry_index(tables, SET_ENTRY_AUT, GLOBAL_SIGNALS_NAME_AUT);
-	int32_t output_signals_index	= automaton_parsing_tables_get_entry_index(tables, SET_ENTRY_AUT, OUTPUT_SIGNALS_NAME_AUT);
+	int32_t global_index		= automaton_parsing_tables_get_entry_index(tables, SET_ENTRY_AUT, GLOBAL_ALPHABET_NAME_AUT, true);
+	int32_t controllable_index	= automaton_parsing_tables_get_entry_index(tables, SET_ENTRY_AUT, CONTROLLABLE_ALPHABET_NAME_AUT, true);
+	int32_t global_signals_index	= automaton_parsing_tables_get_entry_index(tables, SET_ENTRY_AUT, GLOBAL_SIGNALS_NAME_AUT, false);
+	int32_t output_signals_index	= automaton_parsing_tables_get_entry_index(tables, SET_ENTRY_AUT, OUTPUT_SIGNALS_NAME_AUT, false);
 	if(global_index < 0)
 		return NULL;
 	if(controllable_index < 0)
@@ -662,7 +674,7 @@ automaton_indexes_valuation* automaton_indexes_valuation_create_from_indexes(aut
 					sprintf(name, "");
 			}else{
 				int32_t index			 	=
-						automaton_parsing_tables_get_entry_index(tables, CONST_ENTRY_AUT,indexes->indexes[i]->expr->string_terminal);
+						automaton_parsing_tables_get_entry_index(tables, CONST_ENTRY_AUT,indexes->indexes[i]->expr->string_terminal, false);
 				if(index != -1){
 					sprintf(name, "%s", indexes->indexes[i]->expr->string_terminal);
 					lower_index	= upper_index	= tables->const_entries[index]->valuation.int_value;
@@ -758,7 +770,7 @@ bool automaton_statement_syntax_to_composition(automaton_automata_context* ctx, 
 			if(next_valuations != NULL)free(next_valuations); next_valuations = NULL;
 			bool keep_evaluating	= false;
 			for(j = 0; j < count; j++){
-				index = automaton_parsing_tables_get_entry_index(tables, COMPOSITION_ENTRY_AUT, ret_value[j]);
+				index = automaton_parsing_tables_get_entry_index(tables, COMPOSITION_ENTRY_AUT, ret_value[j], false);
 				if(index < 0)
 					keep_evaluating	 = true;
 				else if(!tables->composition_entries[index]->solved)
@@ -770,7 +782,7 @@ bool automaton_statement_syntax_to_composition(automaton_automata_context* ctx, 
 			next_valuations_count	= 0;
 			if(keep_evaluating)return true;
 		}else{
-			index						= automaton_parsing_tables_get_entry_index(tables, COMPOSITION_ENTRY_AUT, composition_syntax->components[i]->ident);
+			index						= automaton_parsing_tables_get_entry_index(tables, COMPOSITION_ENTRY_AUT, composition_syntax->components[i]->ident, false);
 			if(index < 0)
 				return true;
 			if(!tables->composition_entries[index]->solved)
@@ -799,7 +811,7 @@ bool automaton_statement_syntax_to_composition(automaton_automata_context* ctx, 
 			if(next_valuations != NULL)free(next_valuations); next_valuations = NULL;
 			bool keep_evaluating	= false;
 			for(k = 0; k < count; k++){
-				index						= automaton_parsing_tables_get_entry_index(tables, COMPOSITION_ENTRY_AUT, ret_value[k]);
+				index						= automaton_parsing_tables_get_entry_index(tables, COMPOSITION_ENTRY_AUT, ret_value[k], true);
 				automata[j]					= tables->composition_entries[index]->valuation.automaton_value;
 				switch(composition_syntax->components[i]->synch_type){
 					case CONCURRENT_AUT: synch_type[j++]	= CONCURRENT;break;
@@ -813,7 +825,7 @@ bool automaton_statement_syntax_to_composition(automaton_automata_context* ctx, 
 			if(keep_evaluating)return true;
 		}else{
 			//TODO: update transitions with prefixes/indexes
-			index						= automaton_parsing_tables_get_entry_index(tables, COMPOSITION_ENTRY_AUT, composition_syntax->components[i]->ident);
+			index						= automaton_parsing_tables_get_entry_index(tables, COMPOSITION_ENTRY_AUT, composition_syntax->components[i]->ident, true);
 			automata[j]					= tables->composition_entries[index]->valuation.automaton_value;
 			switch(composition_syntax->components[i]->synch_type){
 				case CONCURRENT_AUT: synch_type[j++]	= CONCURRENT;break;
@@ -947,7 +959,7 @@ bool automaton_statement_syntax_to_single_automaton(automaton_automata_context* 
 			for(i =0 ; i < current_automaton_valuation->count; i++)
 				sprintf(name, "%s_%d", name, current_automaton_valuation->current_values[i]);
 		}
-		main_index						= automaton_parsing_tables_get_entry_index(tables, COMPOSITION_ENTRY_AUT, name);
+		main_index						= automaton_parsing_tables_get_entry_index(tables, COMPOSITION_ENTRY_AUT, name, false);
 		if(main_index >= 0){if(tables->composition_entries[main_index]->solved)	return false;}
 	}
 
@@ -1203,9 +1215,21 @@ bool automaton_statement_syntax_to_single_automaton(automaton_automata_context* 
 #endif
 					if(transition->condition != NULL && k == 0){
 						//if(!automaton_expression_syntax_evaluate(tables, transition->condition, current_valuations_count > 0 ? current_valuations[current_valuations_count - 1]: NULL)){
-						if(!automaton_expression_syntax_evaluate(tables, transition->condition, current_valuations_count > 0 ? current_valuations[current_valuations_count -current_from_state_count + r]: NULL)){
+						automaton_indexes_valuation *current_valuation = NULL, *tmp_valuation = NULL;bool valuation_was_created = false;
+						current_valuation	= current_valuations_count > 0 ? current_valuations[current_valuations_count -current_from_state_count + r]: NULL;
+						if(current_automaton_valuation != NULL){
+							if(current_valuation == NULL){
+								current_valuation	= current_automaton_valuation;
+							}else{
+								current_valuation	= automaton_indexes_valuation_merge(current_valuation, current_automaton_valuation);
+								valuation_was_created	= true;
+							}
+						}
+						if(!automaton_expression_syntax_evaluate(tables, transition->condition, current_valuation)){
+							if(valuation_was_created)automaton_indexes_valuation_destroy(current_valuation);
 							continue;
 						}
+						if(valuation_was_created)automaton_indexes_valuation_destroy(current_valuation);
 					}
 					trace_label	= transition->labels[k];
 					//SET ITERATION ( s_i = ({a,b,c} -> S_j).
@@ -1879,7 +1903,7 @@ bool automaton_statement_syntax_to_single_automaton(automaton_automata_context* 
 bool automaton_statement_syntax_to_automaton(automaton_automata_context* ctx, automaton_composition_syntax* composition_syntax
 		, automaton_parsing_tables* tables, uint32_t current_vstates_count, char** current_vstates_names, automaton_vstates_syntax** current_vstates_syntaxes){
 	int32_t main_index, index, i, j, k, l, m, n, o, p, r, s;
-	main_index						= automaton_parsing_tables_get_entry_index(tables, COMPOSITION_ENTRY_AUT, composition_syntax->name);
+	main_index						= automaton_parsing_tables_get_entry_index(tables, COMPOSITION_ENTRY_AUT, composition_syntax->name, false);
 	if(main_index >= 0)if(tables->composition_entries[main_index]->solved)	return false;
 	//check whether composition syntax is a composition or a single automaton description
 	if(composition_syntax->components != NULL){//MULTIPLE COMPONENTS (AUTOMATA)
@@ -2309,7 +2333,7 @@ automaton_automaton* automaton_automaton_sequentialize(automaton_automaton *auto
 
 bool automaton_statement_syntax_to_constant(automaton_expression_syntax* const_def_syntax
 		, automaton_parsing_tables* tables){
-	uint32_t main_index	= automaton_parsing_tables_get_entry_index(tables, CONST_ENTRY_AUT, const_def_syntax->string_terminal);
+	uint32_t main_index	= automaton_parsing_tables_get_entry_index(tables, CONST_ENTRY_AUT, const_def_syntax->string_terminal, true);
 	tables->const_entries[main_index]->valuation.int_value	= automaton_expression_syntax_evaluate(tables, const_def_syntax, NULL);
 	tables->const_entries[main_index]->solved				= true;
 	tables->const_entries[main_index]->valuation_count		= 1;
@@ -2420,7 +2444,7 @@ void automaton_indexes_valuation_set_to_label(automaton_parsing_tables* tables, 
 	for(j = 0; j < to_indexes->count; j++){
 		if(to_indexes->indexes[j]->is_expr && (to_indexes->indexes[j]->expr->type == UPPER_IDENT_TERMINAL_TYPE_AUT ||
 				to_indexes->indexes[j]->expr->type == IDENT_TERMINAL_TYPE_AUT)){
-			int32_t index			 	= automaton_parsing_tables_get_entry_index(tables, CONST_ENTRY_AUT, to_indexes->indexes[j]->expr->string_terminal);
+			int32_t index			 	= automaton_parsing_tables_get_entry_index(tables, CONST_ENTRY_AUT, to_indexes->indexes[j]->expr->string_terminal, false);
 			if(index != -1){
 				snprintf(target + strlen(target), sizeof(target), "_%d", tables->const_entries[index]->valuation.int_value);
 			}else{
@@ -2670,13 +2694,13 @@ void automaton_index_syntax_get_range(automaton_parsing_tables* tables, automato
 	int32_t i;
 	if(!index->is_expr){
 		if(index->is_range){
-			i			 	= automaton_parsing_tables_get_entry_index(tables, CONST_ENTRY_AUT, index->lower_ident);
+			i			 	= automaton_parsing_tables_get_entry_index(tables, CONST_ENTRY_AUT, index->lower_ident, true);
 			*lower_index	=tables->const_entries[i]->valuation.int_value;
-			i	 			= automaton_parsing_tables_get_entry_index(tables, CONST_ENTRY_AUT, index->upper_ident);
+			i	 			= automaton_parsing_tables_get_entry_index(tables, CONST_ENTRY_AUT, index->upper_ident, true);
 			*upper_index	=tables->const_entries[i]->valuation.int_value;
 		}else{
 			//TODO: no está guardando el valuation del range en el range_def
-			i	 			= automaton_parsing_tables_get_entry_index(tables, RANGE_ENTRY_AUT, index->upper_ident);
+			i	 			= automaton_parsing_tables_get_entry_index(tables, RANGE_ENTRY_AUT, index->upper_ident, true);
 			*lower_index	=tables->range_entries[i]->valuation.range_value->lower_value;
 			*upper_index	=tables->range_entries[i]->valuation.range_value->upper_value;
 		}
@@ -2696,7 +2720,7 @@ automaton_range* automaton_range_syntax_evaluate(automaton_parsing_tables *table
 
 bool automaton_statement_syntax_to_range(automaton_automata_context* ctx, automaton_expression_syntax* range_def_syntax
 		, automaton_parsing_tables* tables){
-	uint32_t main_index	= automaton_parsing_tables_get_entry_index(tables, RANGE_ENTRY_AUT, range_def_syntax->string_terminal);
+	uint32_t main_index	= automaton_parsing_tables_get_entry_index(tables, RANGE_ENTRY_AUT, range_def_syntax->string_terminal, true);
 	tables->range_entries[main_index]->solved					= true;
 	tables->range_entries[main_index]->valuation_count		= 1;
 	tables->range_entries[main_index]->valuation.range_value	= automaton_range_syntax_evaluate(tables,range_def_syntax->string_terminal,  range_def_syntax->first);
@@ -2758,7 +2782,7 @@ bool automaton_statement_syntax_to_fluent(automaton_automata_context* ctx, autom
 		}
 		if(explicit_start_valuation != NULL)automaton_indexes_valuation_destroy(explicit_start_valuation);
 	}else{
-		uint32_t main_index	= automaton_parsing_tables_get_entry_index(tables, FLUENT_ENTRY_AUT, fluent_def_syntax->name);
+		uint32_t main_index	= automaton_parsing_tables_get_entry_index(tables, FLUENT_ENTRY_AUT, fluent_def_syntax->name, true);
 		tables->fluent_entries[main_index]->solved					= true;
 		tables->fluent_entries[main_index]->valuation_count			= 1;
 		tables->fluent_entries[main_index]->valuation.fluent_value	= automaton_fluent_create_from_syntax(tables, fluent_def_syntax, global_alphabet, NULL);
@@ -3407,7 +3431,7 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 		minimization_steps = 0;
 		if(program->statements[i]->type == GR_1_AUT){
 			gr1_game		= program->statements[i]->gr1_game_def;
-			main_index		= automaton_parsing_tables_get_entry_index(tables, COMPOSITION_ENTRY_AUT, gr1_game->composition_name);
+			main_index		= automaton_parsing_tables_get_entry_index(tables, COMPOSITION_ENTRY_AUT, gr1_game->composition_name, true);
 			game_automaton	= tables->composition_entries[main_index]->valuation.automaton_value;
 			//here we will merge fluent and liveness ltl valuations and restore them after synthesis
 			bool was_merged	= false;
@@ -3663,7 +3687,7 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 	for(i = 0; i < program->count; i++)
 		if(program->statements[i]->type == LTS_SEQ_AUT){
 			automaton_serialization_syntax *serialization	= program->statements[i]->serialization_syntax;
-			uint32_t index			= automaton_parsing_tables_get_entry_index(tables, COMPOSITION_ENTRY_AUT, serialization->automaton_name);
+			uint32_t index			= automaton_parsing_tables_get_entry_index(tables, COMPOSITION_ENTRY_AUT, serialization->automaton_name, false);
 			if(index == -1){
 				printf("No automaton with name %s found when trying to serialize in %s\n", serialization->automaton_name, serialization->name);
 				exit(-1);
@@ -3723,15 +3747,15 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 	for(i = 0; i < program->count; i++){
 		if(program->statements[i]->type == EQUIV_CHECK_AUT){
 			equiv_check		= program->statements[i]->equivalence_check;
-			left_index		= automaton_parsing_tables_get_entry_index(tables, COMPOSITION_ENTRY_AUT, equiv_check->left);
-			right_index		= automaton_parsing_tables_get_entry_index(tables, COMPOSITION_ENTRY_AUT, equiv_check->right);
+			left_index		= automaton_parsing_tables_get_entry_index(tables, COMPOSITION_ENTRY_AUT, equiv_check->left, false);
+			right_index		= automaton_parsing_tables_get_entry_index(tables, COMPOSITION_ENTRY_AUT, equiv_check->right, false);
 			if(left_index < 0 || right_index < 0){
 				printf("Incorrect components for check %s (%s == %s)\n", equiv_check->name, equiv_check->left, equiv_check->right);
 				continue;
 			}
 			left_automaton	= tables->composition_entries[left_index]->valuation.automaton_value;
 			right_automaton	= tables->composition_entries[right_index]->valuation.automaton_value;
-			main_index		= automaton_parsing_tables_get_entry_index(tables, EQUIVALENCE_CHECK_ENTRY_AUT, equiv_check->name);
+			main_index		= automaton_parsing_tables_get_entry_index(tables, EQUIVALENCE_CHECK_ENTRY_AUT, equiv_check->name, false);
 			if(main_index < 0){
 				printf("Incorrect name for check %s (%s == %s)\n", equiv_check->name, equiv_check->left, equiv_check->right);
 				continue;
