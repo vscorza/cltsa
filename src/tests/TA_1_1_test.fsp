@@ -34,7 +34,7 @@ range R_Step  = 0..(Steps-1)
 range R_Bool = 0..1
 
 /*****************************************************************************/
-set Global_Alphabet = {select[r:R_Amenity],query[r:R_Amenity],available[r:R_Amenity],unavailable[r:R_Amenity], steps[r:R_Amenity][s:R_Step],
+set Global_Alphabet = {idle,select[r:R_Amenity],query[r:R_Amenity],available[r:R_Amenity],unavailable[r:R_Amenity], steps[r:R_Amenity][s:R_Step],
 	query_succ[r:R_Amenity],query_fail[r:R_Amenity],commited[r:R_Amenity],uncommited[r:R_Amenity],
 	cancel[r:R_Amenity],purchase[r:R_Amenity],purchase_succ[r:R_Amenity],purchase_fail[r:R_Amenity], agency_request, agency_succ, agency_fail}
 set Controllable_Alphabet = {cancel[r:R_Amenity],purchase[r:R_Amenity], agency_succ, agency_fail}
@@ -60,8 +60,7 @@ Reserve  = ({agency_succ,agency_fail} -> Service[s_id]
 	|purchase[s_id] -> purchase_succ[s_id] -> Service[s_id] ),
 Direct  = (	{agency_succ,agency_fail} -> Service[s_id]
 	|cancel[s_id]   -> Service[s_id]
-	|purchase[s_id] -> purchase_succ[s_id] -> Service[s_id]
-	|purchase[s_id] -> purchase_fail[s_id] -> Service[s_id] ).
+	|purchase[s_id] -> {purchase_succ[s_id],purchase_fail[s_id]} -> Service[s_id]).
 
 
 ServiceMonitor[s_id:R_Amenity] = (query[s_id]  -> InQuery        
@@ -76,19 +75,71 @@ QuerySucces = (purchase_succ[s_id] -> Success
 QueryFail = (agency_fail -> ServiceMonitor[s_id]   ),
 Success = (agency_succ -> ServiceMonitor[s_id]   |    agency_fail -> ServiceMonitor[s_id]   ).
     
+AgencyMonitor = Disallow[0],
+Disallow[n:R_Bool] = (agency_succ -> Disallow[0]
+	|query_fail[r:R_Amenity] -> Allow
+	|when(n==0)uncommited[r:R_Amenity] -> Disallow[1] 
+	|when(n==1)uncommited[r:R_Amenity] -> Allow
+	|when(n==1) purchase_fail[r:R_Amenity] -> Allow ),
+Allow = (	{agency_fail,agency_succ} -> Disallow[0]
+	|{query_fail[r:R_Amenity],uncommited[r:R_Amenity],purchase_fail[r:R_Amenity]} -> Allow ).
+
+IDLE = (idle->IDLE | query[r:R_Amenity]-> QUERYING),
+QUERYING = (query[r:R_Amenity]->QUERYING | {agency_fail, agency_succ} ->IDLE).
+
 /*****************************************************************************/
 
-||Plant = (Agency || Service[a:R_Amenity] || ServiceMonitor[b:R_Amenity]).
+||Plant = (IDLE || Agency || Service[a:R_Amenity] || ServiceMonitor[b:R_Amenity]).
 
-ServiceMonitor_0_P = S_0,
-S_0 = (query_0-> S_1|agency_fail-> S_0),
-S_1 = (query_succ_0-> S_2|query_fail_0-> S_3|agency_fail-> S_0),
-S_2 = (purchase_succ_0-> S_4|purchase_fail_0-> S_3|cancel_0-> S_3|agency_fail-> S_0),
-S_3 = (agency_fail-> S_0),
-S_4 = (agency_succ-> S_0|agency_fail-> S_0).
+fluent F_GOAL = <{agency_fail, agency_succ}, query[r:R_Amenity]>
+fluent F_Ass = <query[r:R_Amenity], {idle,query_succ[r:R_Amenity],query_fail[r:R_Amenity]}> initially 1
+fluent F_Ass2 = <query[r:R_Amenity], {query_succ[r:R_Amenity],query_fail[r:R_Amenity]}> initially 1
+
+|F| ENV = (Plant).
+
+|gr1| <{F_Ass}><{F_GOAL}>  STRAT = ENV.
+|gr1| <{F_Ass2}><{F_GOAL}>  NO_STRAT = ENV.
+
+STRAT >> "/tmp/t_a_1_1_strat.rep".
+STRAT >>_m "/tmp/t_a_1_1_strat.met".
+NO_STRAT >> "/tmp/t_a_1_1_no_strat.rep".
+NO_STRAT >>_m "/tmp/t_a_1_1_no_strat.met".
+
+ENV >>_m "/tmp/t_a_1_1_env.met".
+ENV >> "/tmp/t_a_1_1_env.rep".
 
 
-equals FATAL_TA_SERVICE_MONITOR_0(ServiceMonitor_0, ServiceMonitor_0_P).
+Agency >> "/tmp/t_a_1_1_agency.rep".
+Service_0 >> "/tmp/t_a_1_1_service_0.rep".
+ServiceMonitor_0 >> "/tmp/t_a_1_1_service_monitor_0.rep".
+AgencyMonitor >> "/tmp/t_a_1_1_agency_monitor.rep".
+Plant >> "/tmp/t_a_1_1_plant.rep".
+
+STRAT_P  = S_0,
+S_0 = (agency_request-> S_1|idle-> S_2),S_1 = (idle-> S_3|query_0-> S_4),S_2 = (agency_request-> S_3|idle-> S_2),
+S_3 = (idle-> S_3|query_0-> S_5),S_4 = (available_0-> S_21|unavailable_0-> S_22),S_5 = (available_0-> S_6|unavailable_0-> S_7),
+S_6 = (steps_0_0-> S_9),S_7 = (query_fail_0-> S_8),S_8 = (agency_fail-> S_14),S_9 = (query_succ_0-> S_10),S_10 = (select_0-> S_11),
+S_11 = (uncommited_0-> S_12|commited_0-> S_13),S_12 = (cancel_0-> S_8),S_13 = (cancel_0-> S_8),S_14 = (agency_request-> S_18|idle-> S_19),
+S_18 = (idle-> S_20|query_0-> S_4),S_19 = (agency_request-> S_20|idle-> S_19),S_20 = (idle-> S_20|query_0-> S_5),S_21 = (steps_0_0-> S_23),
+S_22 = (query_fail_0-> S_8),S_23 = (query_succ_0-> S_10).
+
+ENV_P = S_0,
+S_0 = (agency_request-> S_1|idle-> S_2),S_1 = (idle-> S_3|query_0-> S_18),S_2 = (agency_request-> S_3|idle-> S_2),S_3 = (idle-> S_3|query_0-> S_4),
+S_4 = (available_0-> S_6|unavailable_0-> S_5),S_5 = (query_fail_0-> S_12),S_6 = (steps_0_0-> S_7),S_7 = (query_succ_0-> S_8),S_8 = (select_0-> S_9),
+S_9 = (uncommited_0-> S_11|commited_0-> S_10),S_10 = (cancel_0-> S_12|purchase_0-> S_29|agency_fail-> S_14),S_11 = (cancel_0-> S_12|purchase_0-> S_13|agency_fail-> S_14),
+S_12 = (agency_fail-> S_14),S_13 = (purchase_fail_0-> S_12|purchase_succ_0-> S_22),S_14 = (agency_request-> S_15|idle-> S_16),S_15 = (idle-> S_17|query_0-> S_18),
+S_16 = (agency_request-> S_17|idle-> S_16),S_17 = (idle-> S_17|query_0-> S_4),S_18 = (available_0-> S_20|unavailable_0-> S_19),S_19 = (query_fail_0-> S_12),
+S_20 = (steps_0_0-> S_21),S_21 = (query_succ_0-> S_8),S_22 = (agency_fail-> S_14|agency_succ-> S_23),S_23 = (agency_request-> S_24|idle-> S_23),
+S_24 = (idle-> S_24|query_0-> S_25),S_25 = (available_0-> S_27|unavailable_0-> S_26),S_26 = (query_fail_0-> S_12),S_27 = (steps_0_0-> S_28),
+S_28 = (query_succ_0-> S_8),S_29 = (purchase_succ_0-> S_22).
 
 
+ENV_P >> "/tmp/t_a_1_1_env_p.rep".
+/*
+SERVICE_P
 
+SERVICE_MON_P
+
+equals FATAL_RANGE_7_SERVERS_C(SERVERS_C, SERVERS_C_P).*/
+equals FATAL_TA_STRAT(STRAT, STRAT_P).
+equals FATAL_TA_ENV(ENV, ENV_P).

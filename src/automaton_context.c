@@ -2836,7 +2836,7 @@ automaton_fluent* automaton_fluent_create_from_syntax(automaton_parsing_tables* 
 		, automaton_alphabet* global_alphabet, automaton_indexes_valuation *current_valuation){
 	//TODO:implement fluents initial value
 	automaton_fluent* fluent	= automaton_fluent_create(fluent_def_syntax->name, false);
-	uint32_t i, j, k, l;
+	uint32_t i, j, k, l, m;
 	if(fluent_def_syntax->initiating_set->is_ident || fluent_def_syntax->finishing_set->is_ident){
 		//TODO: implement set by ref in fluents
 		printf("[FATAL ERROR] fluent set by ref not implemented\n");
@@ -2972,6 +2972,7 @@ automaton_fluent* automaton_fluent_create_from_syntax(automaton_parsing_tables* 
 					sig_events	= calloc(signals_size, sizeof(automaton_signal_event*));
 					automaton_signal_event **signals_ptr;
 					for(l = 0; l < current_set->labels[k][j]->set->labels_count[0]; l++){
+						//THIS PART IS NOT CLEAR, REVIEW REUSE IF J VAR AFTERWARDS
 						if(current_set->labels[k][j]->set->labels[0][l]->indexes != NULL ){
 							char** ret_value	= malloc(sizeof(char*));
 							aut_dupstr(&(ret_value[0]),  current_set->labels[k][j]->set->labels[0][l]->string_terminal);
@@ -2980,22 +2981,22 @@ automaton_fluent* automaton_fluent_create_from_syntax(automaton_parsing_tables* 
 								automaton_indexes_valuation_set_label(current_valuation, current_set->labels[k][j]->set->labels[0][l]->string_terminal, label_indexes);
 							automaton_indexes_syntax_eval_strings(tables,current_valuation
 												,&next_valuations, &next_valuations_count, &next_valuations_size, &next_valuations_values, &ret_value, &count, current_set->labels[k][j]->set->labels[0][l]->indexes);
-							for(j = 0; j < next_valuations_count; j++)automaton_indexes_valuation_destroy(next_valuations[j]);
-							if(next_valuations != NULL)free(next_valuations); next_valuations = NULL;
-							for(j = 0; j < count; j++){free(ret_value[j]);free(next_valuations_values[j]);}
-							next_valuations_count	= 0;
-							free(ret_value); ret_value = NULL;
-							free(next_valuations_values); next_valuations_values = NULL;
-							for(j = 0; j < count; j++){
+							for(m = 0; m < count; m++){
 								if(signals_count == (signals_size -1)){
 									signals_size *= LIST_INCREASE_FACTOR;
 									signals_ptr	= realloc(sig_events, sizeof(automaton_signal_event*) * signals_size);
 									if(signals_ptr == NULL){printf("Could not allocate memory for initial signals array [automaton_fluent_create_from_syntax:1]\n");exit(-1);}
 									sig_events	= signals_ptr;
 								}
-								automaton_indexes_valuation_set_from_label(tables, current_valuation, current_set->labels[k][j]->set->labels[0][l]->indexes, current_set->labels[k][j]->set->labels[0][l]->string_terminal, label_indexes);
+								automaton_indexes_valuation_set_from_label(tables, current_valuation, current_set->labels[k][j]->set->labels[0][l]->indexes, ret_value[m], label_indexes);
 								sig_events[signals_count++] = automaton_signal_event_create(label_indexes, INPUT_SIG);
 							}
+							for(m = 0; m < next_valuations_count; m++)automaton_indexes_valuation_destroy(next_valuations[m]);
+							if(next_valuations != NULL)free(next_valuations); next_valuations = NULL;
+							for(m = 0; m < count; m++){free(ret_value[m]);free(next_valuations_values[m]);}
+							next_valuations_count	= 0;
+							free(ret_value); ret_value = NULL;
+							free(next_valuations_values); next_valuations_values = NULL;
 						}else{
 							if(signals_count == (signals_size -1)){
 								signals_size *= LIST_INCREASE_FACTOR;
@@ -3018,22 +3019,23 @@ automaton_fluent* automaton_fluent_create_from_syntax(automaton_parsing_tables* 
 							automaton_indexes_valuation_set_label(current_valuation, current_set->labels[k][j]->string_terminal, label_indexes);
 						automaton_indexes_syntax_eval_strings(tables,current_valuation
 											,&next_valuations, &next_valuations_count, &next_valuations_size, &next_valuations_values, &ret_value, &count, current_set->labels[k][j]->indexes);
-						for(j = 0; j < next_valuations_count; j++)automaton_indexes_valuation_destroy(next_valuations[j]);
-						if(next_valuations != NULL)free(next_valuations); next_valuations = NULL;
-						for(j = 0; j < count; j++){free(ret_value[j]);free(next_valuations_values[j]);}
-						next_valuations_count	= 0;
-						free(ret_value); ret_value = NULL;
-						free(next_valuations_values); next_valuations_values = NULL;
-						for(j = 0; j < count; j++){
+						for(m = 0; m < count; m++){
 							if(signals_count == (signals_size -1)){
 								signals_size *= LIST_INCREASE_FACTOR;
 								signals_ptr	= realloc(sig_events, sizeof(automaton_signal_event*) * signals_size);
 								if(signals_ptr == NULL){printf("Could not allocate memory for initial signals array [automaton_fluent_create_from_syntax:1]\n");exit(-1);}
 								sig_events	= signals_ptr;
 							}
-							automaton_indexes_valuation_set_from_label(tables, current_valuation, current_set->labels[k][j]->indexes, current_set->labels[k][j]->string_terminal, label_indexes);
+							automaton_indexes_valuation_set_from_label(tables, current_valuation, current_set->labels[k][j]->indexes, ret_value[m], label_indexes);
 							sig_events[signals_count++] = automaton_signal_event_create(label_indexes, INPUT_SIG);
 						}
+						for(m = 0; m < next_valuations_count; m++)automaton_indexes_valuation_destroy(next_valuations[m]);
+						if(next_valuations != NULL)free(next_valuations); next_valuations = NULL;
+						for(m = 0; m < count; m++){free(ret_value[m]);free(next_valuations_values[m]);}
+						next_valuations_count	= 0;
+						free(ret_value); ret_value = NULL;
+						free(next_valuations_values); next_valuations_values = NULL;
+
 					}else{
 						if(signals_count == (signals_size -1)){
 							signals_size *= LIST_INCREASE_FACTOR;

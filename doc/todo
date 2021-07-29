@@ -1,6 +1,5 @@
 TODO:
 =====
-- yoshiki takashima, nadia polikarpova
 -benchmark
 	- https://github.com/dciolek/compositional-supervisory-control-benchmark/tree/master/fsp
 		X AT
@@ -44,9 +43,11 @@ TODO:
 		- Must Fault Localization for Program Repair
 		- Compositional Model Checking for Multi-properties
 - post paper
+	- yoshiki takashima, nadia polikarpova
 	- revisar gcov
 	- marcar línea del error en el editor por syntax error, agregar linenumber y pos a los syntax def de paser_utils, automaton_context
 	- habilitar line number en el editor
+	- check nondeterministic automata for equivalence, gr1
 	- indices y constantes para ltl game structures
 	- renombrar/esconder
 	- estados por referencia

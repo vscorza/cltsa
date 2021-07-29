@@ -34,7 +34,7 @@ range R_Step  = 0..(Steps-1)
 range R_Bool = 0..1
 
 /*****************************************************************************/
-set Global_Alphabet = {select[r:R_Amenity],query[r:R_Amenity],available[r:R_Amenity],unavailable[r:R_Amenity], steps[r:R_Amenity][s:R_Step],
+set Global_Alphabet = {idle,select[r:R_Amenity],query[r:R_Amenity],available[r:R_Amenity],unavailable[r:R_Amenity], steps[r:R_Amenity][s:R_Step],
 	query_succ[r:R_Amenity],query_fail[r:R_Amenity],commited[r:R_Amenity],uncommited[r:R_Amenity],
 	cancel[r:R_Amenity],purchase[r:R_Amenity],purchase_succ[r:R_Amenity],purchase_fail[r:R_Amenity], agency_request, agency_succ, agency_fail}
 set Controllable_Alphabet = {cancel[r:R_Amenity],purchase[r:R_Amenity], agency_succ, agency_fail}
@@ -85,20 +85,50 @@ Disallow[n:R_Bool] = (agency_succ -> Disallow[0]
 Allow = (	{agency_fail,agency_succ} -> Disallow[0]
 	|{query_fail[r:R_Amenity],uncommited[r:R_Amenity],purchase_fail[r:R_Amenity]} -> Allow ).
 
+IDLE = (idle->IDLE | query[r:R_Amenity]-> QUERYING),
+QUERYING = (query[r:R_Amenity]->QUERYING | {agency_fail, agency_succ} ->IDLE).
+
 /*****************************************************************************/
 
-||Plant = (Agency || Service[a:R_Amenity] || ServiceMonitor[b:R_Amenity]).
+||Plant = (IDLE || Agency || Service[a:R_Amenity] || ServiceMonitor[b:R_Amenity]).
+
+fluent F_GOAL = <{agency_fail, agency_succ}, query[r:R_Amenity]>
+fluent F_Ass = <query[r:R_Amenity], {idle,query_succ[r:R_Amenity],query_fail[r:R_Amenity]}> initially 1
+fluent F_Ass2 = <query[r:R_Amenity], {query_succ[r:R_Amenity],query_fail[r:R_Amenity]}> initially 1
 
 //||Plant_B = (Service[a:R_Amenity] || ServiceMonitor[b:R_Amenity]).
 //||Plant_C = (ServiceMonitor_0 || AgencyMonitor || Service_0).
 //Plant_C >> "/tmp/t_a_1_1_plant_c.rep".
 //Plant_B >> "/tmp/t_a_1_1_plant_b.rep".
+|F| ENV = (Plant).
+//|f| ENV_remove = (Plant_T_remove).
+
+|gr1| <{F_Ass}><{F_GOAL}>  STRAT = ENV.
+|gr1| <{F_Ass2}><{F_GOAL}>  NO_STRAT = ENV.
+//|gr1| <{F_Ass}><{F_GOAL}>  NO_STRAT = ENV.
+//|gr1| <{F_Get_0}><{F_GOAL}>  REMOVE_NO_STRAT = ENV_remove.
+
+STRAT >> "/tmp/t_a_1_1_strat.rep".
+STRAT >>_m "/tmp/t_a_1_1_strat.met".
+NO_STRAT >> "/tmp/t_a_1_1_no_strat.rep".
+NO_STRAT >>_m "/tmp/t_a_1_1_no_strat.met".
+//REMOVE_NO_STRAT >> "/tmp/TL_4_2_diag_remove.rep".
+//REMOVE_NO_STRAT >>_m "/tmp/TL_4_2_diag_remove.met".
+
+ENV >>_m "/tmp/t_a_1_1_env.met".
+ENV >> "/tmp/t_a_1_1_env.rep".
+
 
 Agency >> "/tmp/t_a_1_1_agency.rep".
 Service_0 >> "/tmp/t_a_1_1_service_0.rep".
 ServiceMonitor_0 >> "/tmp/t_a_1_1_service_monitor_0.rep".
 AgencyMonitor >> "/tmp/t_a_1_1_agency_monitor.rep".
 Plant >> "/tmp/t_a_1_1_plant.rep".
+/*
+ENV_P 
 
+SERVICE_P
 
-//marking = {agency.succ, agency.fail}
+SERVICE_MON_P
+
+equals FATAL_RANGE_7_SERVERS_C(SERVERS_C, SERVERS_C_P).*/
