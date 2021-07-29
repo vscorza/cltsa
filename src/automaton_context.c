@@ -971,7 +971,8 @@ bool automaton_statement_syntax_to_single_automaton(automaton_automata_context* 
 	automaton_indexes_valuation** current_valuations	= calloc(current_valuations_size, sizeof(automaton_indexes_valuation*));
 	uint32_t next_valuations_size = LIST_INITIAL_SIZE, next_valuations_count = 0;
 	automaton_indexes_valuation** next_valuations	= calloc(next_valuations_size, sizeof(automaton_indexes_valuation*));
-
+	automaton_indexes_valuation *current_valuation = NULL, *next_valuation = NULL, *tmp_valuation = NULL;
+	bool valuation_was_created = false;bool next_valuation_was_created = false;
 	/** CREATE AUTOMATON **/
 	char** ret_value				= NULL;
 	uint32_t **indexes_values		= NULL;
@@ -1215,7 +1216,7 @@ bool automaton_statement_syntax_to_single_automaton(automaton_automata_context* 
 #endif
 					if(transition->condition != NULL && k == 0){
 						//if(!automaton_expression_syntax_evaluate(tables, transition->condition, current_valuations_count > 0 ? current_valuations[current_valuations_count - 1]: NULL)){
-						automaton_indexes_valuation *current_valuation = NULL, *tmp_valuation = NULL;bool valuation_was_created = false;
+						valuation_was_created	= false;
 						current_valuation	= current_valuations_count > 0 ? current_valuations[current_valuations_count -current_from_state_count + r]: NULL;
 						if(current_automaton_valuation != NULL){
 							if(current_valuation == NULL){
@@ -1316,8 +1317,22 @@ bool automaton_statement_syntax_to_single_automaton(automaton_automata_context* 
 #endif
 
 										if(explicit_to_state){
-											automaton_indexes_valuation_set_to_label(tables, current_valuations_count > 0 ? current_valuations[current_valuations_count -current_from_state_count + r]: NULL, next_valuations_count > 0 ? next_valuations[next_valuations_count - count + n]: NULL
-													, transition->to_state->indexes,transition->to_state->name, label_indexes);
+											valuation_was_created = false;
+											next_valuation_was_created	= false;
+											current_valuation	= current_valuations_count > 0 ? current_valuations[current_valuations_count -current_from_state_count + r]: NULL;
+											if(current_automaton_valuation != NULL){
+												valuation_was_created	= current_valuation != NULL;
+												current_valuation		= current_valuation == NULL? current_automaton_valuation : automaton_indexes_valuation_merge(current_valuation, current_automaton_valuation);
+											}
+											next_valuation	= next_valuations_count > 0 ? next_valuations[next_valuations_count - count + n]: NULL;
+											if(current_automaton_valuation != NULL){
+												next_valuation_was_created = next_valuation != NULL;
+												next_valuation			= next_valuation == NULL? current_automaton_valuation : automaton_indexes_valuation_merge(next_valuation, current_automaton_valuation);
+											}
+											automaton_indexes_valuation_set_to_label(tables, current_valuation, next_valuation, transition->to_state->indexes,transition->to_state->name, label_indexes);
+											if(valuation_was_created)automaton_indexes_valuation_destroy(current_valuation);
+											if(next_valuation_was_created)automaton_indexes_valuation_destroy(next_valuation);
+
 											aut_push_string_to_list(labels_list, label_indexes, &label_position);
 
 											to_state	= (uint32_t)label_position;
@@ -1428,8 +1443,21 @@ bool automaton_statement_syntax_to_single_automaton(automaton_automata_context* 
 										printf("\t\t[<] to state reassigned as: %s(%d)\n", labels_list->list[label_position], to_state);
 #endif
 									}else{
-										automaton_indexes_valuation_set_to_label(tables, current_valuations_count > 0 ? current_valuations[current_valuations_count -current_from_state_count + r]: NULL, next_valuations_count > 0 ? next_valuations[next_valuations_count - 1]: NULL
-												, transition->to_state->indexes,transition->to_state->name, label_indexes);
+										valuation_was_created = false;
+										next_valuation_was_created	= false;
+										current_valuation	= current_valuations_count > 0 ? current_valuations[current_valuations_count -current_from_state_count + r]: NULL;
+										if(current_automaton_valuation != NULL){
+											valuation_was_created	= current_valuation != NULL;
+											current_valuation		= current_valuation == NULL? current_automaton_valuation : automaton_indexes_valuation_merge(current_valuation, current_automaton_valuation);
+										}
+										next_valuation	= next_valuations_count > 0 ? next_valuations[next_valuations_count - 1]: NULL;
+										if(current_automaton_valuation != NULL){
+											next_valuation_was_created = next_valuation != NULL;
+											next_valuation			= next_valuation == NULL? current_automaton_valuation : automaton_indexes_valuation_merge(next_valuation, current_automaton_valuation);
+										}
+										automaton_indexes_valuation_set_to_label(tables, current_valuation, next_valuation, transition->to_state->indexes,transition->to_state->name, label_indexes);
+										if(valuation_was_created)automaton_indexes_valuation_destroy(current_valuation);
+										if(next_valuation_was_created)automaton_indexes_valuation_destroy(next_valuation);
 										aut_push_string_to_list(labels_list, label_indexes, &label_position);
 										to_state	= (uint32_t)label_position;
 #if DEBUG_PARSE_STATES
@@ -1494,8 +1522,21 @@ bool automaton_statement_syntax_to_single_automaton(automaton_automata_context* 
 
 #endif
 								if(explicit_to_state){
-									automaton_indexes_valuation_set_to_label(tables, current_valuations_count > 0 ? current_valuations[current_valuations_count -current_from_state_count + r]: NULL, next_valuations_count > 0 ? next_valuations[next_valuations_count - count + n]: NULL
-											, transition->to_state->indexes,transition->to_state->name, label_indexes);
+									valuation_was_created = false;
+									next_valuation_was_created	= false;
+									current_valuation	= current_valuations_count > 0 ? current_valuations[current_valuations_count -current_from_state_count + r]: NULL;
+									if(current_automaton_valuation != NULL){
+										valuation_was_created	= current_valuation != NULL;
+										current_valuation		= current_valuation == NULL? current_automaton_valuation : automaton_indexes_valuation_merge(current_valuation, current_automaton_valuation);
+									}
+									next_valuation	= next_valuations_count > 0 ? next_valuations[next_valuations_count - count + n]: NULL;
+									if(current_automaton_valuation != NULL){
+										next_valuation_was_created = next_valuation != NULL;
+										next_valuation			= next_valuation == NULL? current_automaton_valuation : automaton_indexes_valuation_merge(next_valuation, current_automaton_valuation);
+									}
+									automaton_indexes_valuation_set_to_label(tables, current_valuation, next_valuation, transition->to_state->indexes,transition->to_state->name, label_indexes);
+									if(valuation_was_created)automaton_indexes_valuation_destroy(current_valuation);
+									if(next_valuation_was_created)automaton_indexes_valuation_destroy(next_valuation);
 									aut_push_string_to_list(labels_list, label_indexes, &label_position);
 
 									to_state	= (uint32_t)label_position;

@@ -45,7 +45,7 @@ TODO:
 		- Compositional Model Checking for Multi-properties
 - post paper
 	- revisar gcov
-	- marcar línea del error en el editor por syntax error
+	- marcar línea del error en el editor por syntax error, agregar linenumber y pos a los syntax def de paser_utils, automaton_context
 	- habilitar line number en el editor
 	- indices y constantes para ltl game structures
 	- renombrar/esconder

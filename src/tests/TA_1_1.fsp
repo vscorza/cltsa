@@ -46,9 +46,9 @@ Agency = (agency_request -> Processing),
 
 
 Service[s_id:R_Amenity] = (
-	{agency_succ,agency_fail} -> Service 
+	{agency_succ,agency_fail} -> Service[s_id]
 	|  query[s_id] -> Queried),
-Queried = (unavailable[s_id] -> query_fail[s_id] -> Service 
+Queried = (unavailable[s_id] -> query_fail[s_id] -> Service[s_id]
 	| available[s_id] -> steps[s_id][s:R_Step] -> query_succ[s_id] -> Selection[s]),
 Selection[s:R_Step] =
 	(when(s > 0)select[s_id] -> Selection[s-1]
@@ -59,30 +59,30 @@ Booking  = (
 	|when(s_id==(Amenities-1)) uncommited[s_id] -> Direct
 	|when(s_id !=(Amenities-1)) query[s_id+1] -> Direct),
 Reserve  = (
-	{agency_succ,agency_fail} -> Service
-	|cancel[s_id]   -> Service
-	|purchase[s_id] -> purchase_succ[s_id] -> Service ),
+	{agency_succ,agency_fail} -> Service[s_id]
+	|cancel[s_id]   -> Service[s_id]
+	|purchase[s_id] -> purchase_succ[s_id] -> Service[s_id] ),
 Direct  = (
-	{agency_succ,agency_fail} -> Service
-	|cancel[s_id]   -> Service
-	|purchase[s_id] -> purchase_succ[s_id] -> Service
-	|purchase[s_id] -> purchase_fail[s_id] -> Service ).
+	{agency_succ,agency_fail} -> Service[s_id]
+	|cancel[s_id]   -> Service[s_id]
+	|purchase[s_id] -> purchase_succ[s_id] -> Service[s_id]
+	|purchase[s_id] -> purchase_fail[s_id] -> Service[s_id] ).
 
 
 ServiceMonitor[s_id:R_Amenity] = (
 	query[s_id]  -> InQuery        
-	|agency_fail -> ServiceMonitor   ),
+	|agency_fail -> ServiceMonitor[s_id]   ),
 InQuery = (
 	query_succ[s_id] -> QuerySucces
 	|query_fail[s_id] -> QueryFail    
-	|agency_fail -> ServiceMonitor   ),
+	|agency_fail -> ServiceMonitor[s_id]   ),
 QuerySucces = (
 	purchase_succ[s_id] -> Success 
 	|purchase_fail[s_id] -> QueryFail
 	|cancel[s_id]        -> QueryFail
-	|agency_fail -> ServiceMonitor   ),
-QueryFail = (agency_fail -> ServiceMonitor   ),
-Success = (agency_succ -> ServiceMonitor   |    agency_fail -> ServiceMonitor   ).
+	|agency_fail -> ServiceMonitor[s_id]  ),
+QueryFail = (agency_fail -> ServiceMonitor[s_id]   ),
+Success = (agency_succ -> ServiceMonitor[s_id]   |    agency_fail -> ServiceMonitor[s_id]   ).
     
 AgencyMonitor = Disallow[0],
 Disallow[n:R_Bool] = (
@@ -100,9 +100,14 @@ Allow = (
 
 ||Plant = (Agency || AgencyMonitor || Service[a:R_Amenity] || ServiceMonitor[b:R_Amenity]).
 
+||Plant_A = (Agency || AgencyMonitor).
+||Plant_B = (Service[a:R_Amenity] || ServiceMonitor[b:R_Amenity]).
+
 Agency >> "/tmp/t_a_1_1_agency.rep".
 Service_0 >> "/tmp/t_a_1_1_service_0.rep".
 ServiceMonitor_0 >> "/tmp/t_a_1_1_service_monitor_0.rep".
 AgencyMonitor >> "/tmp/t_a_1_1_agency_monitor.rep".
 Plant >> "/tmp/t_a_1_1_plant.rep".
+Plant_A >> "/tmp/t_a_1_1_plant_a.rep".
+Plant_B >> "/tmp/t_a_1_1_plant_b.rep".
 //marking = {agency.succ, agency.fail}
