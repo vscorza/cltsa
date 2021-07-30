@@ -1835,6 +1835,7 @@ void run_functional_tests(){
 	run_parse_test("tests/AT_2_2_test.fsp", "Air tower test");
 	run_parse_test("tests/TA_1_1_test.fsp", "Travel Agency test");
 	run_parse_test("tests/TA_2_2_test.fsp", "Travel Agency test (multiple automata)");
+	run_parse_test("tests/DP_2_2_test.fsp", "Dining philosophers test (multiple automata)");
 }
 void run_load_tests(){
 	run_parse_test("tests/k_10_100_graph.fsp",  "k 10, 100 graph tests");

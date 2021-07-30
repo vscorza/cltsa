@@ -689,8 +689,10 @@ automaton_indexes_valuation* automaton_indexes_valuation_create_from_indexes(aut
 								break;
 							}
 						}
-					if(!last_valuation_found)
+					if(!last_valuation_found){
 						sprintf(name, "%s", indexes->indexes[i]->expr->string_terminal);
+						lower_index	= upper_index = atoi(	indexes->indexes[i]->expr->string_terminal);
+					}
 				}
 			}
 		}else{
@@ -2424,15 +2426,15 @@ automaton_indexes_valuation *automaton_indexes_valuation_merge(automaton_indexes
 	uint32_t i, j, k, count = second->count;
 	bool found = false;
 	//find range diff amount
-	for(i = 0; i < first->count; i++){
+	for(j = 0; j < second->count; j++){
 		found = false;
-		for(j = 0; j < second->count; j++){
+		for(i = 0; i < first->count; i++){
 			if(strcmp(first->ranges[i]->name, second->ranges[j]->name) == 0){
 				found = true;
 				break;
 			}
 		}
-		if(found)count--;
+		if(found && count > 0)count--;
 	}
 	automaton_indexes_valuation *valuation = automaton_indexes_valuation_create();
 	valuation->count	= first->count + count;
@@ -2463,7 +2465,7 @@ automaton_indexes_valuation *automaton_indexes_valuation_merge(automaton_indexes
 		}
 	valuation->count = first->count + k;
 	valuation->total_combinations = 1;
-	for(i = 0; i < second->count; i++)valuation->total_combinations *=
+	for(i = 0; i < valuation->count; i++)valuation->total_combinations *=
 			valuation->ranges[i]->lower_value < valuation->ranges[i]->upper_value?
 					valuation->ranges[i]->upper_value - valuation->ranges[i]->lower_value : 1;
 	//}

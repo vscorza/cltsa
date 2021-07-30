@@ -12,42 +12,27 @@ set Controllable_Alphabet = {take[r:R_Phil][c:R_Phil]}
 
 /*****************************************************************************/
 
-Philosopher_0 = Idle,
-  Idle = (think_0 -> Hungry),
-  Hungry = (take_0_0 -> Etiquete[Steps]),
-  Etiquete[s:R_Steps] = (step_0 -> Etiquete[s-1]),
-  Etiquete_0 =  (take_0_1 -> eat_0 -> release_0_0 -> release_0_1 -> Idle).
-Philosopher_1 = Idle,
-  Idle = (think_1 -> Hungry),
-  Hungry = (take_1_1 -> Etiquete[Steps]),
-  Etiquete[s:R_Steps] = (step_1 -> Etiquete[s-1]),
-  Etiquete_0 = (take_1_0 -> eat_1 -> release_1_1 -> release_1_0 -> Idle).
+Philosopher[id:R_Phil] = Idle,
+  Idle = (think[id] -> Hungry),
+  Hungry = (take[id][id] -> Etiquete[Steps]),
+  Etiquete[s:R_Steps] = (step[id] -> Etiquete[s-1]),
+  Etiquete[0] =  (take[id][(id+1)% Philosophers] -> eat[id] -> release[id][id] -> release[id][(id+1)% Philosophers] -> Idle).
 
-Fork_0 = OnTable,
-  OnTable = (take_1_0     -> OnHand  |  take_0_0    -> OnHand  ),
-  OnHand  = (release_1_0  -> OnTable |  release_0_0 -> OnTable ).
-Fork_1 = OnTable,
-  OnTable = (take_0_1     -> OnHand  |  take_1_1    -> OnHand  ),
-  OnHand  = (release_0_1  -> OnTable |  release_1_1 -> OnTable ).
+Fork[id:R_Phil] = OnTable,
+  OnTable = (take[(id+1)% Philosophers][id]     -> OnHand  |  take[id][id]    -> OnHand  ),
+  OnHand  = (release[(id+1)% Philosophers][id]  -> OnTable |  release[id][id] -> OnTable ).
 
-Monitor_0 = (eat_0 -> Done),
-  Done = (eat_0 -> Done | eat_all -> Monitor_0).
-Monitor_1 = (eat_1 -> Done),
-  Done = (eat_1 -> Done | eat_all -> Monitor_1).
-Monitor_0_remove = (eat_0 -> Done),
-  Done = (eat_0 -> Done).
-Monitor_1_remove = (eat_1 -> Done),
-  Done = (eat_1 -> Done).
+Monitor[id:R_Phil] = (eat[id] -> Done),
+  Done = (eat[id] -> Done | eat_all -> Monitor_0).
+Monitor_Remove[id:R_Phil] = (eat[id] -> Done),
+  Done = (eat[id] -> Done).
 
-/*****************************************************************************/
+//*****************************************************************************
 
-||Plant = (Philosopher_0 || Philosopher_1 || Fork_0 ||  Fork_1 || Monitor_0 || Monitor_1).
-||Plant_1 = (Philosopher_0 || Philosopher_1 || Fork_0 ||  Fork_1).
-||Plant_0 = (Philosopher_0 || Fork_0).
+||Plant = (Philosopher[p:R_Phil] || Fork[f:R_Phil] || Monitor[m:R_Phil]).
 
-||Plant_remove = (Philosopher_0 || Philosopher_1 || Fork_0 ||  Fork_1 || Monitor_0_remove || Monitor_1_remove).
-/*****************************************************************************/
-
+||Plant_remove = (Philosopher[p:R_Phil] || Fork[f:R_Phil] || Monitor_Remove[m:R_Phil]).
+//*****************************************************************************	
 
 fluent F_Ass = <eat_all, eat[r:R_Phil]> initially 1
 fluent F_GOAL = <eat_all, eat[r:R_Phil]>

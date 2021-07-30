@@ -190,7 +190,8 @@ bool automaton_state_is_stable(automaton_automaton* game_automaton, uint32_t sta
 	automaton_ranking* sr		= automaton_state_best_successor_ranking(game_automaton, state, ranking, j
 			, guarantee_count, guarantees_indexes);
 
-	fluent_index				= GET_STATE_FLUENT_INDEX(fluent_count, state, assumptions_indexes[current_ranking->assumption_to_satisfy]);
+	if(assumptions_count > 0)
+		fluent_index				= GET_STATE_FLUENT_INDEX(fluent_count, state, assumptions_indexes[current_ranking->assumption_to_satisfy]);
 	bool satisfies_assumption	= assumptions_count == 0 || TEST_FLUENT_BIT(game_automaton->valuations, fluent_index);
 	j = satisfies_guarantee? (current_guarantee + 1) % guarantee_count : current_guarantee;
 	if(sr == NULL){
@@ -289,7 +290,8 @@ void automaton_ranking_increment(automaton_automaton* game_automaton, automaton_
 		return;
 	}
 	//assumption being satisfied increments ranking
-	fluent_index				= GET_STATE_FLUENT_INDEX(fluent_count, ref_state, assumptions_indexes[current_ranking->assumption_to_satisfy]);
+	if(assumptions_count > 0)
+		fluent_index				= GET_STATE_FLUENT_INDEX(fluent_count, ref_state, assumptions_indexes[current_ranking->assumption_to_satisfy]);
 	satisfies_assumption		= assumptions_count == 0 || TEST_FLUENT_BIT(game_automaton->valuations, fluent_index);
 	if(satisfies_assumption){
 		if(current_ranking->assumption_to_satisfy < (int32_t)(assumptions_count - 1)){
@@ -393,8 +395,8 @@ uint32_t* automaton_compute_infinity(automaton_automaton* game_automaton, uint32
 void automaton_get_gr1_liveness_indexes(automaton_automaton* game_automaton, char** assumptions, uint32_t assumptions_count,
 		 char** guarantees, uint32_t guarantees_count, uint32_t** assumptions_indexes, uint32_t** guarantees_indexes){
 	//these are the indexes from the global fluents list, should not be used in ranking_list
-	*assumptions_indexes				= malloc(sizeof(uint32_t) * assumptions_count);
-	*guarantees_indexes				= malloc(sizeof(uint32_t) * guarantees_count);
+	*assumptions_indexes				= assumptions_count > 0? malloc(sizeof(uint32_t) * assumptions_count) : NULL;
+	*guarantees_indexes				= guarantees_count > 0? malloc(sizeof(uint32_t) * guarantees_count) : NULL;
 	int32_t first_assumption_index				= 0;
 	uint32_t i,j;
 	automaton_automata_context* ctx	= game_automaton->context;
@@ -492,7 +494,8 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 				concrete_ranking.value	= 0;
 				automaton_concrete_bucket_add_entry(ranking_list[j], &concrete_ranking);
 				//g falsifies one guarantee and satisfies ass_1 then add to pending
-				fluent_index	= GET_STATE_FLUENT_INDEX(fluent_count, i, assumptions_indexes[first_assumption_index]);
+				if(assumptions_count > 0)
+					fluent_index	= GET_STATE_FLUENT_INDEX(fluent_count, i, assumptions_indexes[first_assumption_index]);
 				if(assumptions_count == 0 ||  (TEST_FLUENT_BIT(game_automaton->valuations, fluent_index))){
 					for(l = 0; l < guarantees_count; l++){
 						fluent_index	= GET_STATE_FLUENT_INDEX(fluent_count, i, guarantees_indexes[l]);
@@ -523,7 +526,7 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 		printf("[Deadlock] Adding unstable pred for %d\n", i);
 #endif
 				automaton_add_unstable_predecessors(game_automaton, pending_list, key_lists[j], i, ranking_list, /*guarantees_indexes[j] <- WAS*/ j, guarantees_count
-						, assumptions_count, guarantees_indexes, assumptions_indexes, assumptions_indexes[first_assumption_index], pending_processed);
+						, assumptions_count, guarantees_indexes, assumptions_indexes, assumptions_count > 0 ? assumptions_indexes[first_assumption_index] : NULL, pending_processed);
 			}
 		}
 	}
@@ -813,8 +816,10 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 	for(i = 0; i < guarantees_count; i++)
 		automaton_concrete_bucket_destroy(key_lists[i], true);
 	free(key_lists);
-	free(assumptions_indexes);
-	free(guarantees_indexes);
+	if(assumptions_indexes != NULL)
+		free(assumptions_indexes);
+	if(guarantees_indexes != NULL)
+		free(guarantees_indexes);
 	automaton_automaton_remove_unreachable_states(strategy);
 #if DEBUG_STRATEGY_BUILD
 	printf("<a id='game'>Game</a>[<a href='#synthesis'>Synthesis start</a>|<a href='#synthesis_completed'>Synthesis end</a>|<a href='#game'>Game</a>|<a href='#strategy'>Strategy</a>]\n=====\n");
