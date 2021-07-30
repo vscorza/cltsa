@@ -23,8 +23,8 @@ The example scales in the following dimensions:
 
 ******************************************************************************/
 
-const N = 1
-const K = 1
+const N = 2
+const K = 2
 
 const Amenities = N
 const Steps = K
@@ -108,22 +108,22 @@ fluent F_Ass2 = <query[r:R_Amenity], {query_succ[r:R_Amenity],query_fail[r:R_Ame
 //|gr1| <{F_Ass}><{F_GOAL}>  NO_STRAT = ENV.
 //|gr1| <{F_Get_0}><{F_GOAL}>  REMOVE_NO_STRAT = ENV_remove.
 
-STRAT >> "/tmp/t_a_1_1_strat.rep".
-STRAT >>_m "/tmp/t_a_1_1_strat.met".
-NO_STRAT >> "/tmp/t_a_1_1_no_strat.rep".
-NO_STRAT >>_m "/tmp/t_a_1_1_no_strat.met".
+STRAT >> "/tmp/t_a_2_2_strat.rep".
+STRAT >>_m "/tmp/t_a_2_2_strat.met".
+NO_STRAT >> "/tmp/t_a_2_2_no_strat.rep".
+NO_STRAT >>_m "/tmp/t_a_2_2_no_strat.met".
 //REMOVE_NO_STRAT >> "/tmp/TL_4_2_diag_remove.rep".
 //REMOVE_NO_STRAT >>_m "/tmp/TL_4_2_diag_remove.met".
 
-ENV >>_m "/tmp/t_a_1_1_env.met".
-ENV >> "/tmp/t_a_1_1_env.rep".
+ENV >>_m "/tmp/t_a_2_2_env.met".
+ENV >> "/tmp/t_a_2_2_env.rep".
 
 
-Agency >> "/tmp/t_a_1_1_agency.rep".
-Service_0 >> "/tmp/t_a_1_1_service_0.rep".
-ServiceMonitor_0 >> "/tmp/t_a_1_1_service_monitor_0.rep".
-AgencyMonitor >> "/tmp/t_a_1_1_agency_monitor.rep".
-Plant >> "/tmp/t_a_1_1_plant.rep".
+Agency >> "/tmp/t_a_2_2_agency.rep".
+Service_0 >> "/tmp/t_a_2_2_service_0.rep".
+ServiceMonitor_0 >> "/tmp/t_a_2_2_service_monitor_0.rep".
+AgencyMonitor >> "/tmp/t_a_2_2_agency_monitor.rep".
+Plant >> "/tmp/t_a_2_2_plant.rep".
 /*
 ENV_P 
 

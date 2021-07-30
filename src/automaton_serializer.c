@@ -470,7 +470,7 @@ void automaton_automaton_serialize_metrics(FILE *f, char* filename, automaton_au
 	variance_delta_s	/= ((automaton->transitions_count - 1) * 1.0f);
 	uint32_t signal_count = 0,_p_ = 0;
 	uint64_t total_signals	= 0;
-	uint32_t signals_intcount	= (uint32_t)ceil(automaton->context->global_alphabet->count*1.0f / (sizeof(int) * 8));
+	uint32_t signals_intcount	= (uint32_t)ceil((automaton->context->global_alphabet->count+1)*1.0f / (sizeof(int) * 8));
 	//compute total signals
 	int current_value;
 	for(i = 0; i < automaton->transitions_count; i++)

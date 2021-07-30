@@ -1258,8 +1258,20 @@ bool automaton_statement_syntax_to_single_automaton(automaton_automata_context* 
 									}
 								}
 #endif
-								automaton_indexes_valuation *implicit_valuation = automaton_statement_syntax_create_implicit_transition_valuation(tables,current_valuations_count > 0 ? current_valuations[current_valuations_count -current_from_state_count + r] : NULL
-										, atom_label->indexes);
+
+								valuation_was_created	= false;
+								current_valuation	= current_valuations_count > 0 ? current_valuations[current_valuations_count -current_from_state_count + r] : NULL;
+								if(current_automaton_valuation != NULL){
+									if(current_valuation == NULL){
+										current_valuation	= current_automaton_valuation;
+									}else{
+										current_valuation	= automaton_indexes_valuation_merge(current_valuation, current_automaton_valuation);
+										valuation_was_created	= true;
+									}
+								}
+
+								automaton_indexes_valuation *implicit_valuation = automaton_statement_syntax_create_implicit_transition_valuation(tables,current_valuation, atom_label->indexes);
+								if(valuation_was_created)automaton_indexes_valuation_destroy(current_valuation);
 								if(!first_index_set){
 									//remove explicit transition
 									first_index_set	= true;
@@ -1824,7 +1836,7 @@ bool automaton_statement_syntax_to_single_automaton(automaton_automata_context* 
 		}
 
 		uint32_t adjusted_local_alphabet_count = 0;
-		uint32_t signals_intcount	= (uint32_t)ceil(automaton->context->global_alphabet->count*1.0f / (sizeof(int) * 8));
+		uint32_t signals_intcount	= (uint32_t)ceil((automaton->context->global_alphabet->count+1)*1.0f / (sizeof(int) * 8));
 		int current_value;
 		for(k = 0; k < signals_intcount; k++){
 			current_value = k == 0? ((int*)accum_signals)[k] & ((int)~0x1) :
@@ -2877,22 +2889,22 @@ automaton_fluent* automaton_fluent_create_from_syntax(automaton_parsing_tables* 
 								automaton_indexes_valuation_set_label(current_valuation, current_set->labels[k][j]->set->labels[0][l]->string_terminal, label_indexes);
 							automaton_indexes_syntax_eval_strings(tables,current_valuation
 												,&next_valuations, &next_valuations_count, &next_valuations_size, &next_valuations_values, &ret_value, &count, current_set->labels[k][j]->set->labels[0][l]->indexes);
-							for(j = 0; j < next_valuations_count; j++)automaton_indexes_valuation_destroy(next_valuations[j]);
-							if(next_valuations != NULL)free(next_valuations); next_valuations = NULL;
-							for(j = 0; j < count; j++){free(ret_value[j]);free(next_valuations_values[j]);}
-							next_valuations_count	= 0;
-							free(ret_value); ret_value = NULL;
-							free(next_valuations_values); next_valuations_values = NULL;
-							for(j = 0; j < count; j++){
+							for(m = 0; m < count; m++){
 								if(signals_count == (signals_size -1)){
 									signals_size *= LIST_INCREASE_FACTOR;
 									signals_ptr	= realloc(sig_events, sizeof(automaton_signal_event*) * signals_size);
 									if(signals_ptr == NULL){printf("Could not allocate memory for initial signals array [automaton_fluent_create_from_syntax:1]\n");exit(-1);}
 									sig_events	= signals_ptr;
 								}
-								automaton_indexes_valuation_set_from_label(tables, current_valuation, current_set->labels[k][j]->set->labels[0][l]->indexes, current_set->labels[k][j]->set->labels[0][l]->string_terminal, label_indexes);
+								automaton_indexes_valuation_set_from_label(tables, current_valuation, current_set->labels[k][j]->set->labels[0][l]->indexes, ret_value[m], label_indexes);
 								sig_events[signals_count++] = automaton_signal_event_create(label_indexes, INPUT_SIG);
 							}
+							for(m = 0; m < next_valuations_count; m++)automaton_indexes_valuation_destroy(next_valuations[m]);
+							if(next_valuations != NULL)free(next_valuations); next_valuations = NULL;
+							for(m = 0; m < count; m++){free(ret_value[m]);free(next_valuations_values[m]);}
+							next_valuations_count	= 0;
+							free(ret_value); ret_value = NULL;
+							free(next_valuations_values); next_valuations_values = NULL;
 						}else{
 							if(signals_count == (signals_size -1)){
 								signals_size *= LIST_INCREASE_FACTOR;
@@ -2915,22 +2927,22 @@ automaton_fluent* automaton_fluent_create_from_syntax(automaton_parsing_tables* 
 							automaton_indexes_valuation_set_label(current_valuation, current_set->labels[k][j]->string_terminal, label_indexes);
 						automaton_indexes_syntax_eval_strings(tables,current_valuation
 											,&next_valuations, &next_valuations_count, &next_valuations_size, &next_valuations_values, &ret_value, &count, current_set->labels[k][j]->indexes);
-						for(j = 0; j < next_valuations_count; j++)automaton_indexes_valuation_destroy(next_valuations[j]);
-						if(next_valuations != NULL)free(next_valuations); next_valuations = NULL;
-						for(j = 0; j < count; j++){free(ret_value[j]);free(next_valuations_values[j]);}
-						next_valuations_count	= 0;
-						free(ret_value); ret_value = NULL;
-						free(next_valuations_values); next_valuations_values = NULL;
-						for(j = 0; j < count; j++){
+						for(m = 0; m < count; m++){
 							if(signals_count == (signals_size -1)){
 								signals_size *= LIST_INCREASE_FACTOR;
 								signals_ptr	= realloc(sig_events, sizeof(automaton_signal_event*) * signals_size);
 								if(signals_ptr == NULL){printf("Could not allocate memory for initial signals array [automaton_fluent_create_from_syntax:1]\n");exit(-1);}
 								sig_events	= signals_ptr;
 							}
-							automaton_indexes_valuation_set_from_label(tables, current_valuation, current_set->labels[k][j]->indexes, current_set->labels[k][j]->string_terminal, label_indexes);
+							automaton_indexes_valuation_set_from_label(tables, current_valuation, current_set->labels[k][j]->indexes, ret_value[m], label_indexes);
 							sig_events[signals_count++] = automaton_signal_event_create(label_indexes, INPUT_SIG);
 						}
+						for(m = 0; m < next_valuations_count; m++)automaton_indexes_valuation_destroy(next_valuations[m]);
+						if(next_valuations != NULL)free(next_valuations); next_valuations = NULL;
+						for(m = 0; m < count; m++){free(ret_value[m]);free(next_valuations_values[m]);}
+						next_valuations_count	= 0;
+						free(ret_value); ret_value = NULL;
+						free(next_valuations_values); next_valuations_values = NULL;
 					}else{
 						if(signals_count == (signals_size -1)){
 							signals_size *= LIST_INCREASE_FACTOR;

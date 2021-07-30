@@ -23,8 +23,8 @@ The example scales in the following dimensions:
 
 ******************************************************************************/
 
-const N = 1
-const K = 1
+const N = 2
+const K = 2
 
 const Amenities = N
 const Steps = K
@@ -60,8 +60,7 @@ Reserve  = ({agency_succ,agency_fail} -> Service[s_id]
 	|purchase[s_id] -> purchase_succ[s_id] -> Service[s_id] ),
 Direct  = (	{agency_succ,agency_fail} -> Service[s_id]
 	|cancel[s_id]   -> Service[s_id]
-	|purchase[s_id] -> purchase_succ[s_id] -> Service[s_id]
-	|purchase[s_id] -> purchase_fail[s_id] -> Service[s_id] ).
+	|purchase[s_id] -> {purchase_succ[s_id],purchase_fail[s_id]} -> Service[s_id]).
 
 
 ServiceMonitor[s_id:R_Amenity] = (query[s_id]  -> InQuery        
@@ -94,41 +93,111 @@ QUERYING = (query[r:R_Amenity]->QUERYING | {agency_fail, agency_succ} ->IDLE).
 
 fluent F_GOAL = <{agency_fail, agency_succ}, query[r:R_Amenity]>
 fluent F_Ass = <query[r:R_Amenity], {idle,query_succ[r:R_Amenity],query_fail[r:R_Amenity]}> initially 1
-fluent F_Ass2 = <query[r:R_Amenity], {query_succ[r:R_Amenity],query_fail[r:R_Amenity]}> initially 1
 
-//||Plant_B = (Service[a:R_Amenity] || ServiceMonitor[b:R_Amenity]).
-//||Plant_C = (ServiceMonitor_0 || AgencyMonitor || Service_0).
-//Plant_C >> "/tmp/t_a_1_1_plant_c.rep".
-//Plant_B >> "/tmp/t_a_1_1_plant_b.rep".
 |F| ENV = (Plant).
-//|f| ENV_remove = (Plant_T_remove).
 
 |gr1| <{F_Ass}><{F_GOAL}>  STRAT = ENV.
-|gr1| <{F_Ass2}><{F_GOAL}>  NO_STRAT = ENV.
-//|gr1| <{F_Ass}><{F_GOAL}>  NO_STRAT = ENV.
-//|gr1| <{F_Get_0}><{F_GOAL}>  REMOVE_NO_STRAT = ENV_remove.
 
-STRAT >> "/tmp/t_a_1_1_strat.rep".
-STRAT >>_m "/tmp/t_a_1_1_strat.met".
-NO_STRAT >> "/tmp/t_a_1_1_no_strat.rep".
-NO_STRAT >>_m "/tmp/t_a_1_1_no_strat.met".
-//REMOVE_NO_STRAT >> "/tmp/TL_4_2_diag_remove.rep".
-//REMOVE_NO_STRAT >>_m "/tmp/TL_4_2_diag_remove.met".
+STRAT >> "/tmp/t_a_2_2_strat.rep".
+STRAT >>_m "/tmp/t_a_2_2_strat.met".
 
-ENV >>_m "/tmp/t_a_1_1_env.met".
-ENV >> "/tmp/t_a_1_1_env.rep".
+ENV >>_m "/tmp/t_a_2_2_env.met".
+ENV >> "/tmp/t_a_2_2_env.rep".
 
 
-Agency >> "/tmp/t_a_1_1_agency.rep".
-Service_0 >> "/tmp/t_a_1_1_service_0.rep".
-ServiceMonitor_0 >> "/tmp/t_a_1_1_service_monitor_0.rep".
-AgencyMonitor >> "/tmp/t_a_1_1_agency_monitor.rep".
-Plant >> "/tmp/t_a_1_1_plant.rep".
-/*
-ENV_P 
+STRAT_P  = S_0,
+S_0 = (agency_request-> S_1|idle-> S_2),
+S_1 = (query_0-> S_3|idle-> S_4),
+S_2 = (agency_request-> S_4|idle-> S_2),
+S_3 = (available_0-> S_193|unavailable_0-> S_194),
+S_4 = (query_0-> S_5|idle-> S_4),
+S_5 = (available_0-> S_6|unavailable_0-> S_7),
+S_6 = (steps_0_0-> S_9|steps_0_1-> S_10),
+S_7 = (query_fail_0-> S_8),
+S_8 = (agency_fail-> S_38),
+S_9 = (query_succ_0-> S_11),
+S_10 = (query_succ_0-> S_12),
+S_11 = (select_0-> S_13),
+S_12 = (select_0-> S_11),
+S_13 = (query_1-> S_14),
+S_14 = (available_1-> S_15|unavailable_1-> S_16),
+S_15 = (steps_1_0-> S_169|steps_1_1-> S_170),
+S_16 = (query_fail_1-> S_168),
+S_38 = (agency_request-> S_41|idle-> S_38),
+S_41 = (query_0-> S_42|idle-> S_41),
+S_42 = (available_0-> S_43|unavailable_0-> S_44),
+S_43 = (steps_0_0-> S_46|steps_0_1-> S_47),
+S_44 = (query_fail_0-> S_45),
+S_45 = (agency_fail-> S_38),
+S_46 = (query_succ_0-> S_48),
+S_47 = (query_succ_0-> S_49),
+S_48 = (select_0-> S_50),
+S_49 = (select_0-> S_48),
+S_50 = (query_1-> S_51),
+S_51 = (available_1-> S_52|unavailable_1-> S_53),
+S_52 = (steps_1_0-> S_111|steps_1_1-> S_112),
+S_53 = (query_fail_1-> S_110),
+S_87 = (agency_fail-> S_38),
+S_110 = (cancel_0-> S_87),
+S_111 = (query_succ_1-> S_127),
+S_112 = (query_succ_1-> S_128),
+S_127 = (select_1-> S_129),
+S_128 = (select_1-> S_127),
+S_129 = (uncommited_1-> S_130|commited_1-> S_131),
+S_130 = (cancel_1-> S_110),
+S_131 = (cancel_1-> S_110),
+S_145 = (agency_fail-> S_38),
+S_168 = (cancel_0-> S_145),
+S_169 = (query_succ_1-> S_185),
+S_170 = (query_succ_1-> S_186),
+S_185 = (select_1-> S_187),
+S_186 = (select_1-> S_185),
+S_187 = (uncommited_1-> S_188|commited_1-> S_189),
+S_188 = (cancel_1-> S_168),
+S_189 = (cancel_1-> S_168),
+S_193 = (steps_0_0-> S_196|steps_0_1-> S_197),
+S_194 = (query_fail_0-> S_195),
+S_195 = (agency_fail-> S_223),
+S_196 = (query_succ_0-> S_198),
+S_197 = (query_succ_0-> S_199),
+S_198 = (select_0-> S_200),
+S_199 = (select_0-> S_198),
+S_200 = (query_1-> S_201),
+S_201 = (available_1-> S_202|unavailable_1-> S_203),
+S_202 = (steps_1_0-> S_356|steps_1_1-> S_357),
+S_203 = (query_fail_1-> S_355),
+S_223 = (agency_request-> S_228|idle-> S_38),
+S_228 = (query_0-> S_229|idle-> S_41),
+S_229 = (available_0-> S_230|unavailable_0-> S_231),
+S_230 = (steps_0_0-> S_233|steps_0_1-> S_234),
+S_231 = (query_fail_0-> S_232),
+S_232 = (agency_fail-> S_223),
+S_233 = (query_succ_0-> S_235),
+S_234 = (query_succ_0-> S_236),
+S_235 = (select_0-> S_237),
+S_236 = (select_0-> S_235),
+S_237 = (query_1-> S_238),
+S_238 = (available_1-> S_239|unavailable_1-> S_240),
+S_239 = (steps_1_0-> S_298|steps_1_1-> S_299),
+S_240 = (query_fail_1-> S_297),
+S_274 = (agency_fail-> S_223),
+S_297 = (cancel_0-> S_274),
+S_298 = (query_succ_1-> S_314),
+S_299 = (query_succ_1-> S_315),
+S_314 = (select_1-> S_316),
+S_315 = (select_1-> S_314),
+S_316 = (uncommited_1-> S_317|commited_1-> S_318),
+S_317 = (cancel_1-> S_297),
+S_318 = (cancel_1-> S_297),
+S_355 = (agency_fail-> S_223),
+S_356 = (query_succ_1-> S_372),
+S_357 = (query_succ_1-> S_373),
+S_372 = (select_1-> S_374),
+S_373 = (select_1-> S_372),
+S_374 = (uncommited_1-> S_375|commited_1-> S_376),
+S_375 = (agency_fail-> S_223),
+S_376 = (agency_fail-> S_223).
 
-SERVICE_P
 
-SERVICE_MON_P
 
-equals FATAL_RANGE_7_SERVERS_C(SERVERS_C, SERVERS_C_P).*/
+equals FATAL_TA_2_2_STRAT(STRAT, STRAT_P).
