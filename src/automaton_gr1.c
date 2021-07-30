@@ -446,23 +446,31 @@ automaton_automaton* automaton_get_gr1_strategy(automaton_automaton* game_automa
 			 guarantees, guarantees_count, &assumptions_indexes, &guarantees_indexes);
 
 	//get assumptions and guarantees indexes
+	bool fluent_found = false;
 	for(i = 0; i < assumptions_count; i++){
+		bool fluent_found = false;
 		for(j = 0; j < ctx->global_fluents_count; j++){
 			if(strcmp(assumptions[i], ctx->global_fluents[j].name) == 0){
 				assumptions_indexes[i]	= j;
+				fluent_found = true;
 				/*if (i == 0)
 					first_assumption_index	= (int32_t)j;*/
 				break;
 			}
 		}
+		if(!fluent_found){printf("Fluent definition for %s not found.\n", assumptions[i]); exit(-1);}
 	}
+
 	for(i = 0; i < guarantees_count; i++){
+		bool fluent_found = false;
 		for(j = 0; j < ctx->global_fluents_count; j++){
 			if(strcmp(guarantees[i], ctx->global_fluents[j].name) == 0){
 				guarantees_indexes[i]	= j;
+				fluent_found	= true;
 				break;
 			}
 		}
+		if(!fluent_found){printf("Fluent definition for %s not found.\n",guarantees[i]); exit(-1);}
 	}
 	uint32_t * max_delta = automaton_compute_infinity(game_automaton, assumptions_count,
 			guarantees_count, assumptions_indexes, guarantees_indexes);

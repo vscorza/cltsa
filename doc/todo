@@ -50,7 +50,22 @@ TODO:
 	- check nondeterministic automata for equivalence, gr1
 	- indices y constantes para ltl game structures
 	- renombrar/esconder
-	- estados por referencia
+	- improve report loading from java client (automatically load exports)
+	- allow several specs to be loaded concurrently (tabs)
+	- syntax highlight strings
+	- undo/redo 
+	- signals view as complement to automaton
+	- estados por referencia (si se complica ni bola)
+	- serializacion
+		- serializar valuaciones
+		- reimplementar volcando el contenido binario de arreglos
+			- trans
+			- valuaciones
+		- evaluar agregar utilidades de compresión
+			-https://en.wikipedia.org/wiki/Lempel%E2%80%93Ziv%E2%80%93Markov_chain_algorithm		
+	- exportar a vdhl
+		- versión básica
+	
 - clts	
 	- revisar archivo de mati			
 	- add specific composition algorithm when all operators are asynch/synch
@@ -66,16 +81,6 @@ TODO:
 			- quitar todas las no controlables que se pueda
 				- ver si se puede probar complejidad del problema
 			- correr minimización de hopcroft sobre el resultado
-- cltsa
-	- serializacion
-		- serializar valuaciones
-		- reimplementar volcando el contenido binario de arreglos
-			- trans
-			- valuaciones
-		- evaluar agregar utilidades de compresión
-			-https://en.wikipedia.org/wiki/Lempel%E2%80%93Ziv%E2%80%93Markov_chain_algorithm		
-	- exportar a vdhl
-		- versión básica
 	- agregar #include (archivos por clausura, evaluar no haya ciclos) y #define (con parámetros)
 - rankings
 	- mejorar legibilidad de pruebas
@@ -145,11 +150,6 @@ TODO:
 	- for non-realizability reduce diagnosis to single liveness goal not being satisfied
 	- run tests with dd, linear, dd wo last_partition optimization, goal minimization
 	- java client
-		- improve report loading from java client (automatically load exports)
-		- allow several specs to be loaded concurrently (tabs)
-		- syntax highlight strings
-		- undo/redo 
-		- signals view as complement to automaton
 	- review literature and tools
 		- review Interpolation-Based Semantic Gate Extraction and its Applications to QBF Preprocessing (https://www.ac.tuwien.ac.at/people/fslivovsky/)	
 		- review papers gr_1_star, performance_heuristics for gr1, minimal assumption refinement gr1 and synthesizing adaptive test stategies papers
