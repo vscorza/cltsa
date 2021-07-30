@@ -3454,7 +3454,7 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 	uint32_t current_vstates_count	= 0;
 	automaton_vstates_syntax** current_vstates_syntaxes	= NULL;
 	char** current_vstates_names	= NULL;
-	while(pending_statements && current_count < program->count){
+	while(pending_statements && (current_count < (program->count * 2))){
 		pending_statements	= false;
 		for(i = 0; i < program->count; i++){
 			if(program->statements[i]->type == COMPOSITION_AUT){
@@ -3474,9 +3474,9 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 				printf(".");
 				fflush(stdout);
 #endif
+				current_count++;
 			}
 		}
-		current_count++;
 	}
 	gettimeofday(&tval_after, NULL);
 	timersub(&tval_after, &tval_before, &tval_model_build_result);
@@ -3505,6 +3505,10 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 			gr1_game		= program->statements[i]->gr1_game_def;
 			main_index		= automaton_parsing_tables_get_entry_index(tables, COMPOSITION_ENTRY_AUT, gr1_game->composition_name, true);
 			game_automaton	= tables->composition_entries[main_index]->valuation.automaton_value;
+			if(game_automaton == NULL){
+				printf("Could not find game automaton %s.\n", program->statements[i]->gr1_game_def->name);
+				exit(-1);
+			}
 			//here we will merge fluent and liveness ltl valuations and restore them after synthesis
 			bool was_merged	= false;
 
