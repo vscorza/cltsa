@@ -76,6 +76,7 @@ automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd(automaton_au
 void automaton_minimization_adjust_steps_report(uint32_t *steps, uint32_t **steps_sizes,
 		struct timeval **steps_times, uint32_t *steps_size){
 	if(*steps < (*steps_size) - 1)return;
+	uint32_t i, old_size	= *steps_size;
 	*steps_size	*= 2;
 	uint32_t *int_ptr	= realloc(*steps_sizes, sizeof(uint32_t) * *steps_size);
 	if(int_ptr == NULL){
@@ -87,6 +88,10 @@ void automaton_minimization_adjust_steps_report(uint32_t *steps, uint32_t **step
 		printf("Could not allocate memory[automaton_minimization_adjust_steps_report:2]\n"); exit(-1);
 	}
 	*steps_times	= time_ptr;
+	for(i = old_size; i < *steps_size; i++){
+		(*steps_times)[i].tv_sec	= (*steps_times)[i].tv_sec	= 0;
+		(*steps_sizes)[i]	= 0;
+	}
 }
 
 automaton_automaton* automaton_get_gr1_unrealizable_minimization_dd2_c_i_complement(automaton_automaton* master, automaton_automaton* minimized, automaton_automaton *inner_automaton

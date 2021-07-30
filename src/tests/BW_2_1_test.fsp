@@ -1,0 +1,148 @@
+/******************************************************************************
+
+An engineering company evaluates projects in order to decide which ones to
+bid for. For this a document describing the project needs to be accepted by
+the company's engineering teams. If all the teams accept it, the document is
+approved. It is discarded if all teams reject it.
+
+There is a need for a workflow that can cope with the requests. We synthesize
+a controller that acts as an enforcer for an emerging workflow that guarantees:
+  a- A document can be reassigned to a team that has rejected it.
+  b- A document cannot be reassigned to a team that has already accepted it.
+  c- Only when a team rejects it after (all possible) re-evaluation can the
+     document be rejected without consensus.
+
+The case study can be scale in two directions:
+1- Teams: The number of engineering teams.
+2- Steps: The (maximum) number of evaluation steps a team can perform.
+
+******************************************************************************/
+const N = 2
+const K = 1
+const Teams  = N
+const Steps  = K
+range R_Team   = 0..(Teams-1)
+range R_Step   = 1..Steps
+
+//set Global_Alphabet = {reject_0_0,reject[t:R_Team][s:R_Step], accept[t:R_Team],assign[r:R_Team], refuse, approve}
+set Global_Alphabet = {reject[t:R_Team][s:R_Step], accept[t:R_Team],assign[r:R_Team], refuse, approve, broadcast_status, no_broadcast}
+set Controllable_Alphabet = {assign[r:R_Team], refuse, approve}
+/*****************************************************************************/
+
+//Document = Count[0],  Count[s:R_Step] = (reject[Teams-1][Steps] -> Rejected | reject_0[s] -> Rejected).
+
+
+Crew[id:R_Team] = Pending,
+  Pending = (
+    assign[id] -> Assigned[1] ),
+  Assigned[s:R_Step] = (reject[id][s] -> Rejected[s] | accept[id]  -> Accepted ),
+  Rejected[s:R_Step] = (refuse  -> Pending |  when(s < Steps) assign[id] -> Assigned[s+1]),
+  Accepted = ( {approve,refuse} -> Pending).
+
+
+Document = Count[0],
+  Count[c:R_Team] = (reject[Teams-1][Steps] -> Rejected 
+	|when(c < (Teams - 1))accept[Teams-1] -> Count[c+1] 
+	|when(c==0) refuse -> Count[0] 
+	|when(c == (Teams - 1))accept[Teams-1]-> Count[Teams-1]
+	|when(c < (Teams -1))reject[c][Steps] -> Count[Teams-1] 
+	| approve -> Count[0]),
+  Rejected = ({accept[Teams-1],reject[Teams-1][Steps]} -> Rejected | refuse  -> Count[0]).
+
+ACCEPTER = ({reject[t:R_Team][s:R_Step], accept[t:R_Team],assign[r:R_Team], refuse, approve}->{no_broadcast, broadcast_status} -> ACCEPTER).
+
+//****************************************************************************
+||Plant = (Document || Crew[id:R_Team] || ACCEPTER).
+
+|F|ENV = (Plant).
+|F|ENV_Remove = (Remove_Plant).
+fluent A_Ass[id:R_Team] = <accept[id], {approve,refuse}>
+fluent G_Approve = <approve, assign[id:R_Team]>
+|gr1| <{A_Ass[id:R_Team]}><{G_Approve}>  STRAT = ENV.
+
+Crew_1 >> "/tmp/BW_2_1_crew_1.rep".
+Document >> "/tmp/BW_2_1_doc.rep".
+
+ENV >> "/tmp/BW_2_1_env.rep".
+STRAT >> "/tmp/BW_2_1_strat.rep".
+
+STRAT_P = S_0,
+S_0 = (assign_1-> S_1),S_1 = (broadcast_status-> S_2|no_broadcast-> S_2),S_2 = (accept_1-> S_76|reject_1_1-> S_77),S_18 = (broadcast_status-> S_0|no_broadcast-> S_0),
+S_23 = (refuse-> S_18),S_24 = (approve-> S_25),S_25 = (broadcast_status-> S_26|no_broadcast-> S_26),S_26 = (assign_1-> S_27),
+S_27 = (broadcast_status-> S_28|no_broadcast-> S_28),S_28 = (accept_1-> S_60|reject_1_1-> S_61),S_44 = (broadcast_status-> S_26|no_broadcast-> S_26),
+S_49 = (refuse-> S_44),S_50 = (approve-> S_25),S_56 = (accept_0-> S_57),S_57 = (broadcast_status-> S_50|no_broadcast-> S_50),S_58 = (accept_0-> S_59),
+S_59 = (broadcast_status-> S_49|no_broadcast-> S_49),S_60 = (broadcast_status-> S_64|no_broadcast-> S_64),S_61 = (broadcast_status-> S_63|no_broadcast-> S_63),
+S_63 = (assign_0-> S_66),S_64 = (assign_0-> S_65),S_65 = (broadcast_status-> S_56|no_broadcast-> S_56),S_66 = (broadcast_status-> S_58|no_broadcast-> S_58),
+S_72 = (accept_0-> S_73),S_73 = (broadcast_status-> S_24|no_broadcast-> S_24),S_74 = (accept_0-> S_75),S_75 = (broadcast_status-> S_23|no_broadcast-> S_23),
+S_76 = (broadcast_status-> S_80|no_broadcast-> S_80),S_77 = (broadcast_status-> S_79|no_broadcast-> S_79),S_79 = (assign_0-> S_82),S_80 = (assign_0-> S_81),
+S_81 = (broadcast_status-> S_72|no_broadcast-> S_72),S_82 = (broadcast_status-> S_74|no_broadcast-> S_74).
+
+ENV_P = S_0,
+S_0 = (assign_1-> S_1|assign_0-> S_2),
+S_1 = (broadcast_status-> S_71|no_broadcast-> S_71),
+S_2 = (broadcast_status-> S_3|no_broadcast-> S_3),
+S_3 = (accept_0-> S_5|reject_0_1-> S_6),
+S_5 = (broadcast_status-> S_15|no_broadcast-> S_15),
+S_6 = (broadcast_status-> S_7|no_broadcast-> S_7),
+S_7 = (assign_1-> S_8),
+S_8 = (broadcast_status-> S_9|no_broadcast-> S_9),
+S_9 = (accept_1-> S_11|reject_1_1-> S_10),
+S_10 = (broadcast_status-> S_13|no_broadcast-> S_13),
+S_11 = (broadcast_status-> S_12|no_broadcast-> S_12),
+S_13 = (refuse-> S_14),
+S_14 = (broadcast_status-> S_0|no_broadcast-> S_0),
+S_15 = (assign_1-> S_16),
+S_16 = (broadcast_status-> S_17|no_broadcast-> S_17),
+S_17 = (accept_1-> S_19|reject_1_1-> S_18),
+S_18 = (broadcast_status-> S_61|no_broadcast-> S_61),
+S_19 = (broadcast_status-> S_20|no_broadcast-> S_20),
+S_20 = (approve-> S_21),
+S_21 = (broadcast_status-> S_22|no_broadcast-> S_22),
+S_22 = (assign_1-> S_23|assign_0-> S_24),
+S_23 = (broadcast_status-> S_53|no_broadcast-> S_53),
+S_24 = (broadcast_status-> S_25|no_broadcast-> S_25),
+S_25 = (accept_0-> S_27|reject_0_1-> S_28),
+S_27 = (broadcast_status-> S_37|no_broadcast-> S_37),
+S_28 = (broadcast_status-> S_29|no_broadcast-> S_29),
+S_29 = (assign_1-> S_30),
+S_30 = (broadcast_status-> S_31|no_broadcast-> S_31),
+S_31 = (accept_1-> S_33|reject_1_1-> S_32),
+S_32 = (broadcast_status-> S_35|no_broadcast-> S_35),
+S_33 = (broadcast_status-> S_34|no_broadcast-> S_34),
+S_35 = (refuse-> S_36),
+S_36 = (broadcast_status-> S_22|no_broadcast-> S_22),
+S_37 = (assign_1-> S_38),
+S_38 = (broadcast_status-> S_39|no_broadcast-> S_39),
+S_39 = (accept_1-> S_41|reject_1_1-> S_40),
+S_40 = (broadcast_status-> S_43|no_broadcast-> S_43),
+S_41 = (broadcast_status-> S_42|no_broadcast-> S_42),
+S_42 = (approve-> S_21),
+S_43 = (refuse-> S_36),
+S_49 = (accept_0-> S_50),
+S_50 = (broadcast_status-> S_42|no_broadcast-> S_42),
+S_51 = (accept_0-> S_52),
+S_52 = (broadcast_status-> S_43|no_broadcast-> S_43),
+S_53 = (accept_1-> S_56|reject_1_1-> S_55),
+S_55 = (broadcast_status-> S_59|no_broadcast-> S_59),
+S_56 = (broadcast_status-> S_57|no_broadcast-> S_57),
+S_57 = (assign_0-> S_58),
+S_58 = (broadcast_status-> S_49|no_broadcast-> S_49),
+S_59 = (assign_0-> S_60),
+S_60 = (broadcast_status-> S_51|no_broadcast-> S_51),
+S_61 = (refuse-> S_14),
+S_67 = (accept_0-> S_68),
+S_68 = (broadcast_status-> S_20|no_broadcast-> S_20),
+S_69 = (accept_0-> S_70),
+S_70 = (broadcast_status-> S_61|no_broadcast-> S_61),
+S_71 = (accept_1-> S_74|reject_1_1-> S_73),
+S_73 = (broadcast_status-> S_77|no_broadcast-> S_77),
+S_74 = (broadcast_status-> S_75|no_broadcast-> S_75),
+S_75 = (assign_0-> S_76),
+S_76 = (broadcast_status-> S_67|no_broadcast-> S_67),
+S_77 = (assign_0-> S_78),
+S_78 = (broadcast_status-> S_69|no_broadcast-> S_69).
+
+equals FATAL_BW_2_1_STRAT(STRAT, STRAT_P).
+equals FATAL_BW_2_1_ENV(ENV, ENV_P).
+
+

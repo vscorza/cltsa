@@ -73,7 +73,9 @@ int main (int argc, char** argv){
 			                if(strcmp(last,"rep")==0 || strcmp(last,"fsp") == 0)
 			                {
 			                    remove(curr_file);
+#if VERBOSE
 			                    printf("Removing %s\n", curr_file);
+#endif
 			                }
 			            }
 			        }
@@ -174,7 +176,8 @@ int main (int argc, char** argv){
 		//run_parse_test("tests/AT_2_2_test.fsp", "Serialization composition test");
 		//run_parse_test("tests/alphabet_extend_test.fsp", "Serialization composition test");
 		//run_parse_test("tests/TA_1_1_test.fsp", "Serialization composition test");
-		run_parse_test("tests/TA_2_2.fsp", "Serialization composition test");
+		//run_parse_test("tests/TA_2_2.fsp", "Serialization composition test");
+		run_parse_test("tests/BW_1_1.fsp", "Serialization composition test");
 		//run_parse_test("tests/lift_controller_2.fsp", "Lift controller 2");
 		//run_parse_test("tests/lift_controller_8.fsp", "Lift controller 2");
 		//run_parse_test("tests/ltl_serialization_composition_test.fsp", "Serialization composition test");
