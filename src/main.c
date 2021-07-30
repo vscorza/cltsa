@@ -168,7 +168,7 @@ int main (int argc, char** argv){
 		//run_parse_test("tests/TL-5-3.fsp", "Serialization composition test");
 		//run_parse_test("tests/TL-6-6.fsp", "Serialization composition test");
 		//run_parse_test("tests/DP_2_2.fsp", "Serialization composition test");
-		//run_parse_test("tests/CM_2.fsp", "Serialization composition test");
+		run_parse_test("tests/CM_2.fsp", "Serialization composition test");
 		//run_parse_test("tests/CM_2_test.fsp", "Serialization composition test");
 		//run_parse_test("tests/ranges_3.fsp", "Serialization composition test");
 		//run_parse_test("tests/BW_1_1_test.fsp", "Serialization composition test");
@@ -178,7 +178,7 @@ int main (int argc, char** argv){
 		//run_parse_test("tests/TA_1_1_test.fsp", "Serialization composition test");
 		//run_parse_test("tests/TA_2_2.fsp", "Serialization composition test");
 		//run_parse_test("tests/BW_1_1.fsp", "Serialization composition test");
-		run_parse_test("tests/AT_2_2.fsp", "Serialization composition test");
+		//run_parse_test("tests/AT_2_2.fsp", "Serialization composition test");
 		//run_parse_test("tests/lift_controller_2.fsp", "Lift controller 2");
 		//run_parse_test("tests/lift_controller_8.fsp", "Lift controller 2");
 		//run_parse_test("tests/ltl_serialization_composition_test.fsp", "Serialization composition test");

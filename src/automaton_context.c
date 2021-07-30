@@ -1858,8 +1858,8 @@ bool automaton_statement_syntax_to_single_automaton(automaton_automata_context* 
 			char **labels	= automaton_set_syntax_evaluate(tables, composition_syntax->extended_set, &extended_count, NULL, current_automaton_valuation);
 			int32_t *labels_ids	= calloc(extended_count, sizeof(int32_t)),  *labels_ids_tmp	= calloc(extended_count, sizeof(int32_t));
 			k = 0;
-			for(i = 0; i < ctx->global_alphabet->count; i++){
-				for(j = 0; j < extended_count; j++){
+			for(j = 0; j < extended_count; j++){
+				for(i = 0; i < ctx->global_alphabet->count; i++){
 					if(strcmp(labels[j], ctx->global_alphabet->list[i].name)== 0){
 						labels_ids[k++]	= i; break;
 					}
@@ -1875,6 +1875,7 @@ bool automaton_statement_syntax_to_single_automaton(automaton_automata_context* 
 				}
 				labels_ids_tmp[k++]	= min_value;
 				labels_ids[min_index]	= -1;
+				min_value = -1;
 			}
 			free(labels_ids); labels_ids	= labels_ids_tmp;
 			bool label_found	= false;

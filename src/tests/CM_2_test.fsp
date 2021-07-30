@@ -14,38 +14,34 @@ set Controllable_Alphabet = {mouse_move[k:R_K][r:R_Area],rotting[k:R_K]}
 
 /*****************************************************************************/
 
-Mouse_0 = Act[Areas -1][0],
+Mouse[id:R_K] = Act[Areas -1][0],
+Act[a:R_Area][eaten:R_Bool] = (
+	when(eaten == 0) cat_move[r:R_K][c:R_Area] ->Act[a][((a == c) * (c != Center))] |
+	when(eaten == 1) cat_move[r:R_K][c:R_Area] ->Act[a][1] |
+	when (eaten == 0) mouse_move[id][a] -> Act[a][eaten] |
+	when ((eaten == 0)* ((a+1)  <= Last)) mouse_move[id][a+1]  -> Act[a+1][eaten] |
+	when ((eaten == 0)* ((a-1)  >= Init)) mouse_move[id][a-1]  -> Act[a-1][eaten] |
+	when(eaten == 1) rotting[id] -> Act[a][eaten])+{mouse_move[id][a:R_Area]}.
+
+
+Mouse_Remove[id:R_K] = Act[Areas -1][0],
 Act[a:R_Area][eaten:R_Bool] = (
 	when(eaten == 0) cat_move[r:R_K][c:R_Area] ->Act[a][((a == c) * (a != Center))] |
 	when(eaten == 1) cat_move[r:R_K][c:R_Area] ->Act[a][1] |
-	when (eaten == 0) mouse_move_0[a] -> Act[a][eaten] |
-	when ((eaten == 0)* ((a+1)  <= Last)) mouse_move_0[a+1]  -> Act[a+1][eaten] |
-	when ((eaten == 0)* ((a-1)  >= Init)) mouse_move_0[a-1]  -> Act[a-1][eaten] |
-	when(eaten == 1) rotting_0 -> Act[a][eaten]),
-EXTEND = (mouse_move_0[a:R_Area]->EXTEND).
+	when (eaten == 0) mouse_move[id][a] -> Act[a][eaten] |
+	when ((eaten == 0)* ((a+1)  < Center)) mouse_move[id][a+1]  -> Act[a+1][eaten] |
+	when ((eaten == 0)* ((a-1)  > Center)) mouse_move[id][a-1]  -> Act[a-1][eaten] |
+	when(eaten == 1) rotting[id] -> Act[a][eaten])+{mouse_move[id][s:R_Area]}.
 
+Cat[id:R_K] = Act[0],
+Act[a:R_Area] = (cat_move[id][a] -> Act[a] |
+	when ((a+1)  <= Last) cat_move[id][a+1]  -> Act[a+1] |
+	when ((a-1) >= Init) cat_move[id][a-1]  -> Act[a-1] )+{cat_move[id][a:R_Area]}.
 
-Mouse_0_Remove = Act[Areas -1][0],
-Act[a:R_Area][eaten:R_Bool] = (
-	when(eaten == 0) cat_move[r:R_K][c:R_Area] ->Act[a][((a == c) * (a != Center))] |
-	when(eaten == 1) cat_move[r:R_K][c:R_Area] ->Act[a][1] |
-	when (eaten == 0) mouse_move_0[a] -> Act[a][eaten] |
-	when ((eaten == 0)* ((a+1)  <= Last)) mouse_move_0[a+1]  -> Act[a+1][eaten] |
-	when ((eaten == 0)* ((a-1)  > Center)) mouse_move_0[a-1]  -> Act[a-1][eaten] |
-	when(eaten == 1) rotting_0 -> Act[a][eaten]),
-EXTEND = (mouse_move_0[a:R_Area]->EXTEND).
-
-Cat_0 = Act[0],
-Act[a:R_Area] = (cat_move_0[a] -> Act[a] |
-	when ((a+1)  <= Last) cat_move_0[a+1]  -> Act[a+1] |
-	when ((a-1) >= Init) cat_move_0[a-1]  -> Act[a-1] ),
-EXTEND = (cat_move_0[a:R_Area]->EXTEND).
-
-Cat_0_Remove = Act[0],
-Act[a:R_Area] = (cat_move_0[a] -> Act[a] |
-	when ((a+1)  < Center) cat_move_0[a+1]  -> Act[a+1] |
-	when ((a-1) >= Init) cat_move_0[a-1]  -> Act[a-1] ),
-EXTEND = (cat_move_0[a:R_Area]->EXTEND).
+Cat_Remove[id:R_K] = Act[0],
+Act[a:R_Area] = (cat_move[id][a] -> Act[a] |
+	when ((a+1)  < Center) cat_move[id][a+1]  -> Act[a+1] |
+	when ((a-1) >= Init) cat_move[id][a-1]  -> Act[a-1] )+{cat_move[id][a:R_Area]}.
 
 ARBITER = MOUSE_TURN[0],
 MOUSE_TURN[k:R_K] = (when (k < (K-1)){mouse_move[k][r:R_Area],rotting[k]} -> MOUSE_TURN[k+1] | when(k == (K-1)) {mouse_move[k][r:R_Area],rotting[k]} -> CAT_TURN[0]),
@@ -53,39 +49,21 @@ CAT_TURN[k:R_K] = ( when (k < (K-1))cat_move[k][r:R_Area] -> CAT_TURN[k+1] | whe
 
 //*****************************************************************************
 
-||Plant = (Mouse_0 || Cat_0  || ARBITER).
+||Plant = (Mouse[m:R_K] || Cat[c:R_K]  || ARBITER).
+||Remove_Plant  =(Mouse_Remove[m:R_K] || Cat[c:R_K]  || ARBITER).
+
 |F| ENV = (Plant).
-||Remove_Plant = (Mouse_0_Remove || ARBITER || Cat_0).
 |F| REMOVE_ENV = (Remove_Plant).
 
-fluent A_Ass = <cat_move_0_1, {cat_move_0_0,cat_move_0_2}>
-fluent A_No_Ass = <cat_move_0_0, cat_move_0_1>
-fluent G_CAT = <cat_move_0_1, {cat_move_0_0,cat_move_0_2}>
-fluent G_MOUSE = <mouse_move_0_1, {mouse_move_0_0,mouse_move_0_2,rotting_0}>
+fluent A_Ass[id:R_K] = <cat_move[id][Center], {cat_move[id][Center-1],cat_move[id][Center+1]}>
+fluent A_No_Ass[id:R_K] = <cat_move[id][0], cat_move[id][1]>
+fluent G_CAT[id:R_K] = <cat_move[id][Center], {cat_move[id][Center-1],cat_move[id][Center+1]}>
+fluent G_MOUSE[id:R_K] = <mouse_move[id][Center], {mouse_move[id][Center-1],mouse_move[id][Center+1],rotting[id]}>
 
-|gr1| <{A_Ass}><{G_CAT, G_MOUSE}>  STRAT = ENV.
-|gr1| <{A_No_Ass}><{G_CAT, G_MOUSE}>  NO_STRAT = ENV.
-|gr1| <{A_Ass}><{G_CAT, G_MOUSE}>  REMOVE_NO_STRAT = REMOVE_ENV.
 
-//EXPORTS
-
-ENV >> "/tmp/CM_2_env.rep".
-ENV >>_m "/tmp/CM_2_env.met".
-Cat_0 >> "/tmp/CM_2_cat.rep".
-Mouse_0 >> "/tmp/CM_2_mouse.rep".
-Plant >> "/tmp/CM_2_p.rep".
-ARBITER >> "/tmp/CM_2_arbiter.rep".
-Remove_Plant >> "/tmp/CM_2_plant_remove.rep".
-REMOVE_ENV >> "/tmp/CM_2_env_remove.rep".
-REMOVE_ENV >>_m "/tmp/CM_2_env_remove.met".
-Mouse_0_Remove >> "/tmp/CM_2_mouse_remove.rep".
-
-STRAT >>_m "/tmp/CM_2_strat.met".
-STRAT >> "/tmp/CM_2_strat.rep".
-NO_STRAT >>_m "/tmp/CM_2_diag.met".
-NO_STRAT >> "/tmp/CM_2_diag.rep".
-REMOVE_NO_STRAT >>_m "/tmp/CM_2_remove_diag.met".
-REMOVE_NO_STRAT >> "/tmp/CM_2_remove_diag.rep".
+|gr1| <{A_Ass[id:R_K]}><{G_CAT[c:R_K], G_MOUSE[m:R_K]}>  STRAT = ENV.
+|gr1| <{A_No_Ass[id:R_K]}><{G_CAT[c:R_K], G_MOUSE[m:R_K]}>  NO_STRAT = ENV.
+|gr1| <{A_Ass[id:R_K]}><{G_CAT[c:R_K], G_MOUSE[m:R_K]}>  REMOVE_NO_STRAT = REMOVE_ENV.
 
 //*******************************************
 //TESTS
@@ -137,9 +115,18 @@ S_28 = (cat_move_0_1-> S_6|cat_move_0_2-> S_12),
 S_45 = (cat_move_0_0-> S_2|cat_move_0_1-> S_3).
 P_STRAT >> "/tmp/CM_2_strat_p.rep".
 
+P_REMOVE_NO_STRAT  = S_0,
+S_0 = (mouse_move_0_2-> S_1),
+S_1 = (cat_move_0_0-> S_2),
+S_2 = (mouse_move_0_2-> S_11),
+S_3 = (mouse_move_0_2-> S_4),
+S_4 = (cat_move_0_0-> S_2),
+S_11 = (cat_move_0_1-> S_3).
+
 // tests
 equals FATAL_CAT_MOUSE_ENV_TEST(ENV, P_ENV).
 equals FATAL_CAT_MOUSE_STRAT_TEST(STRAT, P_STRAT).
+equals FATAL_CAT_MOUSE_REMOVE_NO_STRAT_TEST(REMOVE_NO_STRAT, P_REMOVE_NO_STRAT).
 
 
 
