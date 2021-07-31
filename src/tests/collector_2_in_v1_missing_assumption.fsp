@@ -45,4 +45,4 @@ ltl fluent G			= (allFinished).
 |f| ENV =(COLLECTOR).
 |gr1| <{A_in_1}><{G}> STRAT = ENV.
 
-//STRAT >> "/tmp/collector_2_strat_missing_assumption.rep".
+STRAT >> "/tmp/collector_2_strat_missing_assumption.rep".

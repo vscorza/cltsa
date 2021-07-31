@@ -44,3 +44,5 @@ ltl fluent G			= (allFinished).
 ***********/
 |f| ENV =(COLLECTOR).
 |gr1| <{A_in_0,A_in_1}><{G}> STRAT = ENV.
+
+STRAT >> "/tmp/collector_2_removed_env_safety.rep".

@@ -1,4 +1,4 @@
-const K = 1
+const K = 2
 const  Areas = 2*K + 1
 const  Init = 0
 const  Last = Areas  - 1

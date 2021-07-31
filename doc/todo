@@ -2,15 +2,13 @@ TODO:
 =====
 -benchmark
 	- https://github.com/dciolek/compositional-supervisory-control-benchmark/tree/master/fsp
-		X AT
-		X BW
-		X CM
-		X DP
-		- TA
-		X TL
-	- mutar para no realizabilidad
 	- generar reportes
-	- probar tiempos
+		-BW Aut:1,2,3,4 steps:1,2
+		- AT Aut:2,3,4,5 steps:1,2
+		- CM Aut: 1,2 areas: 1,2
+		- DP Aut: 2, 3 steps: 1,2
+		- TA Aut: 2, 3, 4 steps: 1, 2
+		- TL Aut: 2, 3, 4 steps 1, 2	
 	- agregar Unrealizable Cores for Reactive Systems Specifications, notes on control of discrete-event systems, Compositional Supervisory Control via Reactive Synthesis and Automated Planning, Taming Composition with Heuristics al related work
 - plan de trabajo para diagnostico
 	X armar caso para lts
@@ -65,6 +63,8 @@ TODO:
 			-https://en.wikipedia.org/wiki/Lempel%E2%80%93Ziv%E2%80%93Markov_chain_algorithm		
 	- exportar a vdhl
 		- versión básica
+	- agregar una salida que reporte el avance del proceso de síntesis diagnóstico
+		- puede ser un proceso aparte, revisar forma de implementar
 	
 - clts	
 	- revisar archivo de mati			

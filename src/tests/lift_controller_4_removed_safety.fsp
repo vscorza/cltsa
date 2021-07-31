@@ -25,5 +25,5 @@ ltl fluent Goal_Serve_Request_4			= ((b4->f4)).
 |f| ENV =(GAME_LTL).
 |gr1| <{Ass_True}><{Goal_Serve_Request_1,Goal_Serve_Request_2,Goal_Serve_Request_3,Goal_Serve_Request_4,Goal_Back_To_Ground}> STRAT = ENV.
 
-//STRAT >> "/tmp/lift_controller_4.rep".
+STRAT >> "/tmp/lift_controller_4.rep".
 

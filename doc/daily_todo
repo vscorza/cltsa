@@ -1,14 +1,50 @@
-- readaptar ejemplos dani
-	X safety ta
-	- indices
-		X BW
-		X AT
-		X CM
-		X DP
-		- TL
-	- revisar realizability/unrealizability 
-		- genbuf
-		- amba
-		- collector
-		- lift controller
-		- exploration robot
+- probar tamaños (5 puntos si se puede)
+	X BW Aut:1,2,3,4 steps:1,2
+		X real
+		X live
+		X safety
+	X AT Aut:2,3,4,5 steps:1,2
+		X real
+		X live
+		X safety
+	X CM Aut: 1,2 areas: 1,2
+		X real
+		X live
+		X safety
+	X DP Aut: 2, 3 steps: 1,2
+		X real
+		X live
+		X safety
+	X TA Aut: 2, 3, 4 steps: 1, 2
+		X real
+		X live
+		X safety		
+	X TL Aut: 2, 3, 4 steps 1, 2
+		X real
+		X live
+		X safety
+	- genbuf
+		- real
+		- live
+		- safety
+	- amba
+		- real
+		- live
+		- safety
+
+	- collector
+		- real
+		- live
+		- safety
+	- BW
+		- real
+		- live
+		- safety
+	- lift controller
+		- real
+		- live
+		- safety
+	- exploration robot
+		- real
+		- live
+		- safety				 

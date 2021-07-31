@@ -1,6 +1,6 @@
-const Machines = 2
-const Workload = 1
-const Capacity = 1
+const Machines = 4
+const Workload = 2
+const Capacity = 2
 range R_Machines = 0..Machines-1
 range R_Ops = 0..Machines
 range R_Capacity = 0..Capacity
@@ -31,19 +31,19 @@ TU_Remove = Idle,
 /*****************************************************************************/
 
 ||Plant = (Machine[p:R_Machines] || Buffer[b:R_Machines] || TU).
-||Plant_Remove = (Machine[p:R_Machines] || Buffer[b:R_Machines] || TU_Remove).
-
 
 fluent F_GOAL = <get_[Machines], {reject,accept}>
 fluent F_Ass[m:R_Machines] = <accept, get[m]> initially 1
 fluent F_Get_0 = <get_0, put_1>
 |f| ENV = (Plant).
-|f| ENV_Remove = (Plant_Remove).
 
+//|gr1| <{F_Ass[m:R_Machines],F_Get_0}><{F_GOAL}>  STRAT = ENV.
 
-|gr1| <{F_Ass[m:R_Machines],F_Get_0}><{F_GOAL}>  STRAT = ENV.
-|gr1| <{F_Ass[m:R_Machines]}><{F_GOAL}>  REMOVE_NO_STRAT = ENV_Remove.
 |gr1| <{F_Get_0}><{F_GOAL}>  NO_STRAT = ENV.
+/*
+||Plant_Remove = (Machine[p:R_Machines] || Buffer[b:R_Machines] || TU_Remove).
+|f| ENV_Remove = (Plant_Remove).
+|gr1| <{F_Ass[m:R_Machines]}><{F_GOAL}>  REMOVE_NO_STRAT = ENV_Remove.
 STRAT >> "/tmp/TL_2_2_strat.rep".
 STRAT >>_m "/tmp/TL_2_2_strat.met".
 NO_STRAT >> "/tmp/TL_2_2_no_strat.rep".
@@ -55,3 +55,4 @@ TU >> "/tmp/tl_2_2_tu.rep".
 Plant_1 >> "/tmp/tl_2_2_p_1.rep".
 Plant_T >> "/tmp/tl_2_2_m_t.rep".
 ENV >> "/tmp/tl_2_2_env.rep".
+*/

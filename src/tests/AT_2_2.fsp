@@ -69,17 +69,19 @@ ResponseMonitor = (
 //*****************************************************************************
 
 ||Plant = ( ResponseMonitor || RampMonitor || HeightMonitor[h:R_Height] || Airplane[p:R_Plane]).
-||Plant_Remove = ( ResponseMonitor || RampMonitor || HeightMonitor[h:R_Height] || Airplane_Remove[p:R_Plane]).
 
 
 |F|ENV = (Plant).
-|F|ENV_Remove = (Plant_Remove).
 
 fluent EXTEND_FLIGHT[p:R_Plane] = <extendFlight[p], requestLand[p]> initially 1
 fluent ARRIVE[p:R_Plane] = <{extendFlight[p],requestLand[p]}, control_all>
 fluent CONTROL_WILDCARD = <control_all, requestLand[p:R_Plane]>
+
 |gr1| <{ARRIVE[p:R_Plane]}><{CONTROL_WILDCARD}>  STRAT = ENV.
 |gr1| <{EXTEND_FLIGHT[p:R_Plane]}><{CONTROL_WILDCARD}>  NO_STRAT = ENV.
+
+||Plant_Remove = ( ResponseMonitor || RampMonitor || HeightMonitor[h:R_Height] || Airplane_Remove[p:R_Plane]).
+|F|ENV_Remove = (Plant_Remove).
 |gr1| <{CONTROL_WILDCARD}><{CONTROL_WILDCARD}>  NO_STRAT_REMOVE = ENV_Remove.
 
 Airplane_0 >> "/tmp/AT_2_2_plane.rep".
@@ -93,6 +95,8 @@ ENV >> "/tmp/AT_2_2_env.rep".
 STRAT >> "/tmp/AT_2_2_strat.rep".
 NO_STRAT >> "/tmp/AT_2_2_no_strat.rep".
 NO_STRAT_REMOVE >> "/tmp/AT_2_2_no_strat_remove.rep".
+
+
 
 //  controllable = {descend[Plane][Height], approach[Plane]}  marking = {control.all}
 
