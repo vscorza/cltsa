@@ -9,12 +9,10 @@ TODO:
 		- DP Aut: 2, 3 steps: 1,2
 		- TA Aut: 2, 3, 4 steps: 1, 2
 		- TL Aut: 2, 3, 4 steps 1, 2	
+	- build scripts for reports
+	- run scripts
 	- agregar Unrealizable Cores for Reactive Systems Specifications, notes on control of discrete-event systems, Compositional Supervisory Control via Reactive Synthesis and Automated Planning, Taming Composition with Heuristics al related work
 - plan de trabajo para diagnostico
-	X armar caso para lts
-	X tablas comparativas
-	- agregar posibilidad de eliminar transiciones mixtas en un juego
-	- revisar casos de MTSA para pasar a clts
 	- presentar reportes por caso de estudio
 		- proporción de reducción
 		- tiempos
