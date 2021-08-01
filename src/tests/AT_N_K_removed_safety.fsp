@@ -1,0 +1,130 @@
+/******************************************************************************
+
+An airport control tower receives requests from planes trying to land.
+The tower needs to signal them when it is safe to approach the ramps and at
+which height they must perform holding maneuvers. If two airplanes enter
+the same height space or ramp there is a chance a crash may occur.
+
+We want a controller that automatically responds to airplanes requests and
+ensures safe usage of the airport space.
+
+The case study can be scaled in the following dimensions:
+1- Planes: maximum number of simultaneous land requests.
+2- Height: number of spaces above the ground where a plane can hold safely.
+
+******************************************************************************/
+
+const N = ${N}
+const K = ${K}
+
+const Planes  = N
+const Heights = K
+
+range R_Plane  = 0..(Planes-1)
+range R_Height = 0..(Heights-1)
+
+/*****************************************************************************/
+set Global_Alphabet = {requestLand[p:R_Plane], extendFlight[p:R_Plane], land[p:R_Plane] , control_all, descend[p:R_Plane][h:R_Height], approach[p:R_Plane],air_crash,ramp_crash, on_route[p:R_Plane]}
+set Controllable_Alphabet = {descend[p:R_Plane][h:R_Height], approach[p:R_Plane]}
+/*
+Airplane[id:R_Plane] = (on_route[id] ->Airplane[id] |
+    requestLand[id]-> descend[id][h:R_Height] -> Holding[h] |
+    extendFlight[id]-> End),
+  Holding[h:R_Height] =
+    (when (h>0)  descend[id][h-1] -> Holding[h-1] |
+      when(h == 0)approach[id] -> land[id] -> End),
+  End = (control_all -> Airplane[id]).
+*/
+Airplane_Remove[id:R_Plane] = (on_route[id] ->Airplane[id] |
+    requestLand[id]-> descend[id][h:R_Height] -> Holding[h] |
+    extendFlight[id]-> Airplane[id]),
+  Holding[h:R_Height] =
+    (when (h>0)  descend[id][h-1] -> Holding[h-1] |
+      when(h == 0)approach[id] -> land[id] -> Airplane[id]).
+
+HeightMonitor[id:R_Height] = Empty[id],
+  Empty[h:R_Height] = (
+    descend[p:R_Plane][h] -> Occupied[h] |
+    when (h>0) descend[p:R_Plane][h-1] -> Empty[h] ),
+  Occupied[h:R_Height] = (
+      descend[p:R_Plane][h] -> CRASH |
+      when(h > 0)descend[p:R_Plane][h - 1] -> Empty[h] |
+      when(h == 0)land[p:R_Plane] -> Empty[h]),
+CRASH= (air_crash->CRASH).
+
+
+RampMonitor = Empty,
+  Empty = (
+    approach[p:R_Plane] -> Occupied ),
+  Occupied = (
+    approach[p:R_Plane] -> CRASH |
+    land[p:R_Plane]     -> Empty ),
+CRASH = (ramp_crash -> CRASH).
+
+ResponseMonitor = (
+  requestLand[p:R_Plane] -> descend[p][h:R_Height] -> ResponseMonitor |
+  {extendFlight[p:R_Plane],descend[p:R_Plane][h:R_Height], approach[p:R_Plane]}  -> ResponseMonitor ).
+
+
+//*****************************************************************************
+/*
+||Plant = ( ResponseMonitor || RampMonitor || HeightMonitor[h:R_Height] || Airplane[p:R_Plane]).
+
+
+|F|ENV = (Plant).
+*/
+//fluent EXTEND_FLIGHT[p:R_Plane] = <extendFlight[p], requestLand[p]> initially 1
+//fluent ARRIVE[p:R_Plane] = <{extendFlight[p],requestLand[p]}, control_all>
+fluent CONTROL_WILDCARD = <control_all, requestLand[p:R_Plane]>
+
+//|gr1| <{ARRIVE[p:R_Plane]}><{CONTROL_WILDCARD}>  STRAT = ENV.
+
+//|gr1| <{EXTEND_FLIGHT[p:R_Plane]}><{CONTROL_WILDCARD}>  NO_STRAT = ENV.
+
+||Plant_Remove = ( ResponseMonitor || RampMonitor || HeightMonitor[h:R_Height] || Airplane_Remove[p:R_Plane]).
+|F|ENV_Remove = (Plant_Remove).
+|gr1| <{CONTROL_WILDCARD}><{CONTROL_WILDCARD}>  NO_STRAT_REMOVE = ENV_Remove.
+/*
+Airplane_0 >> "/tmp/AT_2_2_plane.rep".
+HeightMonitor_0 >> "/tmp/AT_2_2_height.rep".
+Airplane_1 >> "/tmp/AT_2_2_plane_1.rep".
+HeightMonitor_1 >> "/tmp/AT_2_2_height_1.rep".
+RampMonitor >> "/tmp/AT_2_2_ramp.rep".
+ResponseMonitor >> "/tmp/AT_2_2_response.rep".
+Plant >> "/tmp/AT_2_2_plant.rep".
+ENV >> "/tmp/AT_2_2_env.rep".
+STRAT >> "/tmp/AT_2_2_strat.rep".
+NO_STRAT >> "/tmp/AT_2_2_no_strat.rep".
+NO_STRAT_REMOVE >> "/tmp/AT_2_2_no_strat_remove.rep".
+
+*/
+
+//  controllable = {descend[Plane][Height], approach[Plane]}  marking = {control.all}
+
+
+//Document = Count[0],  Count[s:R_Step] = (reject[Teams-1][Steps] -> Rejected | reject_0[s] -> Rejected).
+
+/*
+|F|ENV = (Plant).
+
+
+Crew_0 >> "/tmp/BW_1_1_c_0.rep".
+Document >> "/tmp/BW_1_1_doc.rep".
+Plant >> "/tmp/BW_1_1_plant.rep".
+
+ENV_Remove >> "/tmp/BW_1_1_remove_env.rep".
+ENV >> "/tmp/BW_1_1_env.rep".
+ACCEPTER >> "/tmp/BW_1_1_diag_no_accept.rep".
+
+STRAT >> "/tmp/BW_1_1_strat.rep".
+NO_STRAT_REMOVE >> "/tmp/BW_1_1_diag_remove.rep".
+NO_STRAT >> "/tmp/BW_1_1_diag_no_strat.rep".
+NO_STRAT_WIN >> "/tmp/BW_1_1_diag_no_strat_win.rep".
+
+// tests
+equals FATAL_BW_STRAT_TEST(STRAT, STRAT_P).
+equals FATAL_BW_NO_STRAT_REMOVE_TEST(NO_STRAT_REMOVE, NO_STRAT_REMOVE_P).
+equals FATAL_BW_NO_STRAT_TEST(NO_STRAT, NO_STRAT_P).
+equals FATAL_BW_NO_STRAT_WIN_TEST(NO_STRAT_WIN, NO_STRAT_WIN_P).
+*/
+

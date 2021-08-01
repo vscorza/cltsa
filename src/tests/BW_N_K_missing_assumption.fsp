@@ -17,8 +17,8 @@ The case study can be scale in two directions:
 2- Steps: The (maximum) number of evaluation steps a team can perform.
 
 ******************************************************************************/
-const N = 2
-const K = 2
+const N = ${N}
+const K = ${K}
 const Teams  = N
 const Steps  = K
 range R_Team   = 0..(Teams-1)
@@ -63,13 +63,14 @@ fluent BROADCAST_WILDCARD = <broadcast_status, {approve,refuse}>
 fluent G_Approve = <approve, assign[id:R_Team]>
 fluent A_Ass[id:R_Team] = <accept[id], {approve,refuse}>
 
-|gr1| <{A_Ass[id:R_Team]}><{G_Approve}>  STRAT = ENV.
+//|gr1| <{A_Ass[id:R_Team]}><{G_Approve}>  STRAT = ENV.
+|gr1| <{A_Ass[id:R_Team]}><{G_Approve,BROADCAST_WILDCARD}>  NO_STRAT = ENV.
 /*
 |gr1| <{A_Ass[id:R_Team], BROADCAST_WILDCARD}><{G_Approve,BROADCAST_WILDCARD}>  NO_STRAT_WIN = ENV.
 ||Remove_Plant = (Document || Crew_Remove[id:R_Team] || ACCEPTER).
 |F|ENV_Remove = (Remove_Plant).
 |gr1| <{A_Ass[id:R_Team]}><{G_Approve}>  NO_STRAT_REMOVE = ENV_Remove.
-|gr1| <{A_Ass[id:R_Team]}><{G_Approve,BROADCAST_WILDCARD}>  NO_STRAT = ENV.
+
 
 
 Crew_0 >> "/tmp/BW_1_1_c_0.rep".

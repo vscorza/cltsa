@@ -1,0 +1,130 @@
+/******************************************************************************
+
+A travel agency sells vacation packages on-line by orchestrating existing
+third-party web-services for different amenities (e.g. car rental, flight
+purchase, hotel booking, etc). We want to synthesize an orchestrator based on
+the requirements for the provision of vacation packages and the protocol
+specification of the web-services.
+
+The protocols for the services may vary, one variant is the number of steps
+required for querying availability; in some cases the process requires a
+multiple steps (e.g. querying for flight destination and dates, and if
+successful following with a selection for class). Another variant is that some
+services may require a reservation step which guarantees a purchase order for
+a short period, while others do not, and hence the purchase may fail (e.g. on
+low availability reservation may be disabled in order to maximize concurrency
+between clients. As a result a race condition between two purchase orders may
+arise, and therefore one order will fail).
+
+The example scales in the following dimensions:
+
+1- Amenities: The number of amenities included in the package.
+2- Steps: The maximum number of steps requierd to query a service.
+
+******************************************************************************/
+
+const N = ${N}
+const K = ${K}
+
+const Amenities = N
+const Steps = K
+
+range R_Amenity   = 0..(Amenities-1)
+range R_Step  = 0..(Steps-1)
+range R_Bool = 0..1
+
+/*****************************************************************************/
+set Global_Alphabet = {idle,select[r:R_Amenity],query[r:R_Amenity],available[r:R_Amenity],unavailable[r:R_Amenity], steps[r:R_Amenity][s:R_Step],
+	query_succ[r:R_Amenity],query_fail[r:R_Amenity],commited[r:R_Amenity],uncommited[r:R_Amenity],
+	cancel[r:R_Amenity],purchase[r:R_Amenity],purchase_succ[r:R_Amenity],purchase_fail[r:R_Amenity], agency_request, agency_succ, agency_fail}
+set Controllable_Alphabet = {cancel[r:R_Amenity],purchase[r:R_Amenity], agency_succ, agency_fail}
+
+Agency = (agency_request -> Processing),
+  Processing = (
+    {agency_fail,agency_succ} -> Agency |
+    query[r:R_Amenity] -> Processing ).
+
+
+Service[s_id:R_Amenity] = ({agency_succ,agency_fail} -> Service[s_id]
+	|  query[s_id] -> Queried),
+Queried = (unavailable[s_id] -> query_fail[s_id] -> Service[s_id]
+	| available[s_id] -> steps[s_id][s:R_Step] -> query_succ[s_id] -> Selection[s]),
+Selection[s:R_Step] =(when(s > 0)select[s_id] -> Selection[s-1]
+	|when(s == 0)select[s_id] -> Booking),
+Booking  = (when(s_id==(Amenities-1))     commited[s_id]   -> Reserve
+	|when(s_id!=(Amenities-1)) query[s_id+1] -> Reserve
+	|when(s_id==(Amenities-1)) uncommited[s_id] -> Direct
+	|when(s_id !=(Amenities-1)) query[s_id+1] -> Direct),
+Reserve  = ({agency_succ,agency_fail} -> Service[s_id]
+	|cancel[s_id]   -> Service[s_id]
+	|purchase[s_id] -> purchase_succ[s_id] -> Service[s_id] ),
+Direct  = (	{agency_succ,agency_fail} -> Service[s_id]
+	|cancel[s_id]   -> Service[s_id]
+	|purchase[s_id] -> purchase_succ[s_id] -> Service[s_id]
+	|purchase[s_id] -> purchase_fail[s_id] -> Service[s_id] ).
+
+
+ServiceMonitor[s_id:R_Amenity] = (query[s_id]  -> InQuery        
+	|agency_fail -> ServiceMonitor[s_id]   ),
+InQuery = (query_succ[s_id] -> QuerySucces
+	|query_fail[s_id] -> QueryFail    
+	|agency_fail -> ServiceMonitor[s_id]   ),
+QuerySucces = (purchase_succ[s_id] -> Success 
+	|purchase_fail[s_id] -> QueryFail
+	|cancel[s_id]        -> QueryFail
+	|agency_fail -> ServiceMonitor[s_id]  ),
+QueryFail = (agency_fail -> ServiceMonitor[s_id]   ),
+Success = (agency_succ -> ServiceMonitor[s_id]   |    agency_fail -> ServiceMonitor[s_id]   ).
+    
+AgencyMonitor = Disallow[0],
+Disallow[n:R_Bool] = (agency_succ -> Disallow[0]
+	|query_fail[r:R_Amenity] -> Allow
+	|when(n==0)uncommited[r:R_Amenity] -> Disallow[1] 
+	|when(n==1)uncommited[r:R_Amenity] -> Allow
+	|when(n==1) purchase_fail[r:R_Amenity] -> Allow ),
+Allow = (	{agency_fail,agency_succ} -> Disallow[0]
+	|{query_fail[r:R_Amenity],uncommited[r:R_Amenity],purchase_fail[r:R_Amenity]} -> Allow ).
+
+IDLE = (idle->IDLE | query[r:R_Amenity]-> QUERYING),
+QUERYING = (query[r:R_Amenity]->QUERYING | {agency_fail, agency_succ} ->IDLE).
+
+/*
+IDLE_REMOVE = (idle->IDLE | query[r:R_Amenity]-> QUERYING),
+QUERYING = (query[r:R_Amenity]->QUERYING | {agency_fail, agency_succ} ->FAIL),
+FAIL = (query[r:R_Amenity]->FAIL).
+*/
+/*****************************************************************************/
+
+||Plant = (IDLE || Agency || Service[a:R_Amenity] || ServiceMonitor[b:R_Amenity]).
+
+fluent F_GOAL = <{agency_fail,agency_succ}, query[r:R_Amenity]>
+//fluent F_Ass = <query[r:R_Amenity], {idle,query_succ[r:R_Amenity],query_fail[r:R_Amenity]}> initially 1
+fluent F_Ass2 = <query[r:R_Amenity], {query_succ[r:R_Amenity],query_fail[r:R_Amenity]}> initially 1
+
+|F| ENV = (Plant).
+//|gr1| <{F_Ass}><{F_GOAL}>  STRAT = ENV.
+
+
+|gr1| <{F_Ass2}><{F_GOAL}>  NO_STRAT = ENV.
+/*
+||Plant_REMOVE = (IDLE_REMOVE || Agency || Service[a:R_Amenity] || ServiceMonitor[b:R_Amenity]).
+|F| ENV_REMOVE = (Plant_REMOVE).
+|gr1| <{F_Ass}><{F_GOAL}>  REMOVE_NO_STRAT = ENV_REMOVE.
+
+STRAT >> "/tmp/t_a_2_2_strat.rep".
+STRAT >>_m "/tmp/t_a_2_2_strat.met".
+NO_STRAT >> "/tmp/t_a_2_2_no_strat.rep".
+NO_STRAT >>_m "/tmp/t_a_2_2_no_strat.met".
+REMOVE_NO_STRAT >> "/tmp/TL_4_2_diag_remove.rep".
+REMOVE_NO_STRAT >>_m "/tmp/TL_4_2_diag_remove.met".
+
+ENV >>_m "/tmp/t_a_2_2_env.met".
+ENV >> "/tmp/t_a_2_2_env.rep".
+
+
+Agency >> "/tmp/t_a_2_2_agency.rep".
+Service_0 >> "/tmp/t_a_2_2_service_0.rep".
+ServiceMonitor_0 >> "/tmp/t_a_2_2_service_monitor_0.rep".
+AgencyMonitor >> "/tmp/t_a_2_2_agency_monitor.rep".
+Plant >> "/tmp/t_a_2_2_plant.rep".
+*/
