@@ -14,8 +14,8 @@ The case study can be scaled in the following dimensions:
 
 ******************************************************************************/
 
-const N = 2
-const K = 2
+const N = 5
+const K = 1
 
 const Planes  = N
 const Heights = K

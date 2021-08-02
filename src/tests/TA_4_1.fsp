@@ -23,8 +23,8 @@ The example scales in the following dimensions:
 
 ******************************************************************************/
 
-const N = 2
-const K = 2
+const N = 4
+const K = 1
 
 const Amenities = N
 const Steps = K

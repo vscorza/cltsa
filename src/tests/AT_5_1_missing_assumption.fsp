@@ -14,8 +14,8 @@ The case study can be scaled in the following dimensions:
 
 ******************************************************************************/
 
-const N = 2
-const K = 2
+const N = 5
+const K = 1
 
 const Planes  = N
 const Heights = K
@@ -73,14 +73,14 @@ ResponseMonitor = (
 
 |F|ENV = (Plant).
 
-//fluent EXTEND_FLIGHT[p:R_Plane] = <extendFlight[p], requestLand[p]> initially 1
-fluent ARRIVE[p:R_Plane] = <{extendFlight[p],requestLand[p]}, control_all>
+fluent EXTEND_FLIGHT[p:R_Plane] = <extendFlight[p], requestLand[p]> initially 1
+//fluent ARRIVE[p:R_Plane] = <{extendFlight[p],requestLand[p]}, control_all>
 fluent CONTROL_WILDCARD = <control_all, requestLand[p:R_Plane]>
 
-|gr1| <{ARRIVE[p:R_Plane]}><{CONTROL_WILDCARD}>  STRAT = ENV.
-/*
-|gr1| <{EXTEND_FLIGHT[p:R_Plane]}><{CONTROL_WILDCARD}>  NO_STRAT = ENV.
+//|gr1| <{ARRIVE[p:R_Plane]}><{CONTROL_WILDCARD}>  STRAT = ENV.
 
+|gr1| <{EXTEND_FLIGHT[p:R_Plane]}><{CONTROL_WILDCARD}>  NO_STRAT = ENV.
+/*
 ||Plant_Remove = ( ResponseMonitor || RampMonitor || HeightMonitor[h:R_Height] || Airplane_Remove[p:R_Plane]).
 |F|ENV_Remove = (Plant_Remove).
 |gr1| <{CONTROL_WILDCARD}><{CONTROL_WILDCARD}>  NO_STRAT_REMOVE = ENV_Remove.

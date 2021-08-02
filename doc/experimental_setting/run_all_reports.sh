@@ -8,6 +8,7 @@ OUTPUT_DIR=$2
 CLTSA_DIR=$3
 MAX_ITERATIONS=$4
 TABLE_TYPE=$5
+./run_create_dcs_benchmark.sh $DST_DIR $OUTPUT_DIR $CLTSA_DIR
 ./run_realizable_full.sh $DST_DIR $OUTPUT_DIR $CLTSA_DIR $MAX_ITERATIONS
 ./run_unrealizable_full.sh $DST_DIR $OUTPUT_DIR $CLTSA_DIR $MAX_ITERATIONS
 ./run_seq_tests.sh $OUTPUT_DIR $CLTSA_DIR

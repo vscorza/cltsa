@@ -17,7 +17,7 @@ The case study can be scale in two directions:
 2- Steps: The (maximum) number of evaluation steps a team can perform.
 
 ******************************************************************************/
-const N = 1
+const N = 2
 const K = 1
 const Teams  = N
 const Steps  = K

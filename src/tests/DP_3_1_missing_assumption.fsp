@@ -1,5 +1,5 @@
-const N = 2
-const K = 2
+const N = 3
+const K = 1
 
 const Philosophers = N
 const Steps = K
@@ -39,9 +39,9 @@ fluent F_GOAL = <eat_all, eat[r:R_Phil]>
 
 |F| ENV = (Plant).
 
-|gr1| <{F_Ass}><{F_GOAL}>  STRAT = ENV.
+//|gr1| <{F_Ass}><{F_GOAL}>  STRAT = ENV.
 
-//|gr1| <{}><{F_GOAL}>  NO_STRAT = ENV.
+|gr1| <{}><{F_GOAL}>  NO_STRAT = ENV.
 /*
 ||Plant_remove = (Philosopher[p:R_Phil] || Fork[f:R_Phil] || Monitor_Remove[m:R_Phil]).
 |F| REMOVE_ENV = (Plant_remove).

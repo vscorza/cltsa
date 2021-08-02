@@ -1,4 +1,4 @@
-const N = 2
+const N = 3
 const K = 2
 
 const Philosophers = N

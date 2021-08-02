@@ -1,4 +1,4 @@
-const N = 2
+const N = 4
 const K = 2
 
 const Philosophers = N
@@ -21,33 +21,34 @@ Philosopher[id:R_Phil] = Idle,
 Fork[id:R_Phil] = OnTable,
   OnTable = (take[(id+1)% Philosophers][id]     -> OnHand  |  take[id][id]    -> OnHand  ),
   OnHand  = (release[(id+1)% Philosophers][id]  -> OnTable |  release[id][id] -> OnTable ).
-
+/*
 Monitor[id:R_Phil] = (eat[id] -> Done),
   Done = (eat[id] -> Done | eat_all -> Monitor_0).
-/*
+*/
 Monitor_Remove[id:R_Phil] = (eat[id] -> Done),
   Done = (eat[id] -> Done).
-*/
+
 //*****************************************************************************
 
-||Plant = (Philosopher[p:R_Phil] || Fork[f:R_Phil] || Monitor[m:R_Phil]).
+//||Plant = (Philosopher[p:R_Phil] || Fork[f:R_Phil] || Monitor[m:R_Phil]).
+//|F| ENV = (Plant).
 
 //*****************************************************************************	
 
 fluent F_Ass = <eat_all, eat[r:R_Phil]> initially 1
 fluent F_GOAL = <eat_all, eat[r:R_Phil]>
 
-|F| ENV = (Plant).
 
-|gr1| <{F_Ass}><{F_GOAL}>  STRAT = ENV.
+
+//|gr1| <{F_Ass}><{F_GOAL}>  STRAT = ENV.
 
 //|gr1| <{}><{F_GOAL}>  NO_STRAT = ENV.
-/*
+
 ||Plant_remove = (Philosopher[p:R_Phil] || Fork[f:R_Phil] || Monitor_Remove[m:R_Phil]).
 |F| REMOVE_ENV = (Plant_remove).
 
 |gr1| <{}><{F_GOAL}>  REMOVE_NO_STRAT = REMOVE_ENV.
-
+/*
 Philosopher_0 >> "/tmp/DP_2_2_ph_0.rep".
 Fork_0 >> "/tmp/DP_2_2_f_0.rep".
 Plant_1 >> "/tmp/DP_2_2_plant_1.rep".

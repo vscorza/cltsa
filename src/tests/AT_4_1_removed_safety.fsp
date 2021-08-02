@@ -14,8 +14,8 @@ The case study can be scaled in the following dimensions:
 
 ******************************************************************************/
 
-const N = 2
-const K = 2
+const N = 4
+const K = 1
 
 const Planes  = N
 const Heights = K
@@ -26,7 +26,7 @@ range R_Height = 0..(Heights-1)
 /*****************************************************************************/
 set Global_Alphabet = {requestLand[p:R_Plane], extendFlight[p:R_Plane], land[p:R_Plane] , control_all, descend[p:R_Plane][h:R_Height], approach[p:R_Plane],air_crash,ramp_crash, on_route[p:R_Plane]}
 set Controllable_Alphabet = {descend[p:R_Plane][h:R_Height], approach[p:R_Plane]}
-
+/*
 Airplane[id:R_Plane] = (on_route[id] ->Airplane[id] |
     requestLand[id]-> descend[id][h:R_Height] -> Holding[h] |
     extendFlight[id]-> End),
@@ -34,14 +34,14 @@ Airplane[id:R_Plane] = (on_route[id] ->Airplane[id] |
     (when (h>0)  descend[id][h-1] -> Holding[h-1] |
       when(h == 0)approach[id] -> land[id] -> End),
   End = (control_all -> Airplane[id]).
-/*
+*/
 Airplane_Remove[id:R_Plane] = (on_route[id] ->Airplane[id] |
     requestLand[id]-> descend[id][h:R_Height] -> Holding[h] |
     extendFlight[id]-> Airplane[id]),
   Holding[h:R_Height] =
     (when (h>0)  descend[id][h-1] -> Holding[h-1] |
       when(h == 0)approach[id] -> land[id] -> Airplane[id]).
-*/
+
 HeightMonitor[id:R_Height] = Empty[id],
   Empty[h:R_Height] = (
     descend[p:R_Plane][h] -> Occupied[h] |
@@ -67,24 +67,24 @@ ResponseMonitor = (
 
 
 //*****************************************************************************
-
+/*
 ||Plant = ( ResponseMonitor || RampMonitor || HeightMonitor[h:R_Height] || Airplane[p:R_Plane]).
 
 
 |F|ENV = (Plant).
-
+*/
 //fluent EXTEND_FLIGHT[p:R_Plane] = <extendFlight[p], requestLand[p]> initially 1
-fluent ARRIVE[p:R_Plane] = <{extendFlight[p],requestLand[p]}, control_all>
+//fluent ARRIVE[p:R_Plane] = <{extendFlight[p],requestLand[p]}, control_all>
 fluent CONTROL_WILDCARD = <control_all, requestLand[p:R_Plane]>
 
-|gr1| <{ARRIVE[p:R_Plane]}><{CONTROL_WILDCARD}>  STRAT = ENV.
-/*
-|gr1| <{EXTEND_FLIGHT[p:R_Plane]}><{CONTROL_WILDCARD}>  NO_STRAT = ENV.
+//|gr1| <{ARRIVE[p:R_Plane]}><{CONTROL_WILDCARD}>  STRAT = ENV.
+
+//|gr1| <{EXTEND_FLIGHT[p:R_Plane]}><{CONTROL_WILDCARD}>  NO_STRAT = ENV.
 
 ||Plant_Remove = ( ResponseMonitor || RampMonitor || HeightMonitor[h:R_Height] || Airplane_Remove[p:R_Plane]).
 |F|ENV_Remove = (Plant_Remove).
 |gr1| <{CONTROL_WILDCARD}><{CONTROL_WILDCARD}>  NO_STRAT_REMOVE = ENV_Remove.
-
+/*
 Airplane_0 >> "/tmp/AT_2_2_plane.rep".
 HeightMonitor_0 >> "/tmp/AT_2_2_height.rep".
 Airplane_1 >> "/tmp/AT_2_2_plane_1.rep".

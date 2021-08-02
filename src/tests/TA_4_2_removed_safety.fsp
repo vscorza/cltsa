@@ -23,7 +23,7 @@ The example scales in the following dimensions:
 
 ******************************************************************************/
 
-const N = 2
+const N = 4
 const K = 2
 
 const Amenities = N
@@ -84,33 +84,32 @@ Disallow[n:R_Bool] = (agency_succ -> Disallow[0]
 	|when(n==1) purchase_fail[r:R_Amenity] -> Allow ),
 Allow = (	{agency_fail,agency_succ} -> Disallow[0]
 	|{query_fail[r:R_Amenity],uncommited[r:R_Amenity],purchase_fail[r:R_Amenity]} -> Allow ).
-
+/*
 IDLE = (idle->IDLE | query[r:R_Amenity]-> QUERYING),
 QUERYING = (query[r:R_Amenity]->QUERYING | {agency_fail, agency_succ} ->IDLE).
+*/
 
-/*
 IDLE_REMOVE = (idle->IDLE | query[r:R_Amenity]-> QUERYING),
 QUERYING = (query[r:R_Amenity]->QUERYING | {agency_fail, agency_succ} ->FAIL),
 FAIL = (query[r:R_Amenity]->FAIL).
-*/
+
 /*****************************************************************************/
 
-||Plant = (IDLE || Agency || Service[a:R_Amenity] || ServiceMonitor[b:R_Amenity]).
+
 
 fluent F_GOAL = <{agency_fail,agency_succ}, query[r:R_Amenity]>
 fluent F_Ass = <query[r:R_Amenity], {idle,query_succ[r:R_Amenity],query_fail[r:R_Amenity]}> initially 1
 //fluent F_Ass2 = <query[r:R_Amenity], {query_succ[r:R_Amenity],query_fail[r:R_Amenity]}> initially 1
-
+||Plant = (IDLE || Agency || Service[a:R_Amenity] || ServiceMonitor[b:R_Amenity]).
 |F| ENV = (Plant).
-|gr1| <{F_Ass}><{F_GOAL}>  STRAT = ENV.
-
+//|gr1| <{F_Ass}><{F_GOAL}>  STRAT = ENV.
 
 //|gr1| <{F_Ass2}><{F_GOAL}>  NO_STRAT = ENV.
-/*
+
 ||Plant_REMOVE = (IDLE_REMOVE || Agency || Service[a:R_Amenity] || ServiceMonitor[b:R_Amenity]).
 |F| ENV_REMOVE = (Plant_REMOVE).
 |gr1| <{F_Ass}><{F_GOAL}>  REMOVE_NO_STRAT = ENV_REMOVE.
-
+/*
 STRAT >> "/tmp/t_a_2_2_strat.rep".
 STRAT >>_m "/tmp/t_a_2_2_strat.met".
 NO_STRAT >> "/tmp/t_a_2_2_no_strat.rep".

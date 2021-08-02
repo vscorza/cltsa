@@ -23,8 +23,8 @@ The example scales in the following dimensions:
 
 ******************************************************************************/
 
-const N = 2
-const K = 2
+const N = 4
+const K = 1
 
 const Amenities = N
 const Steps = K
@@ -98,14 +98,14 @@ FAIL = (query[r:R_Amenity]->FAIL).
 ||Plant = (IDLE || Agency || Service[a:R_Amenity] || ServiceMonitor[b:R_Amenity]).
 
 fluent F_GOAL = <{agency_fail,agency_succ}, query[r:R_Amenity]>
-fluent F_Ass = <query[r:R_Amenity], {idle,query_succ[r:R_Amenity],query_fail[r:R_Amenity]}> initially 1
-//fluent F_Ass2 = <query[r:R_Amenity], {query_succ[r:R_Amenity],query_fail[r:R_Amenity]}> initially 1
+//fluent F_Ass = <query[r:R_Amenity], {idle,query_succ[r:R_Amenity],query_fail[r:R_Amenity]}> initially 1
+fluent F_Ass2 = <query[r:R_Amenity], {query_succ[r:R_Amenity],query_fail[r:R_Amenity]}> initially 1
 
 |F| ENV = (Plant).
-|gr1| <{F_Ass}><{F_GOAL}>  STRAT = ENV.
+//|gr1| <{F_Ass}><{F_GOAL}>  STRAT = ENV.
 
 
-//|gr1| <{F_Ass2}><{F_GOAL}>  NO_STRAT = ENV.
+|gr1| <{F_Ass2}><{F_GOAL}>  NO_STRAT = ENV.
 /*
 ||Plant_REMOVE = (IDLE_REMOVE || Agency || Service[a:R_Amenity] || ServiceMonitor[b:R_Amenity]).
 |F| ENV_REMOVE = (Plant_REMOVE).

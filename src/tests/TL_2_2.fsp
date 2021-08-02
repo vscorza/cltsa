@@ -1,0 +1,58 @@
+const Machines = 2
+const Workload = 2
+const Capacity = 2
+range R_Machines = 0..Machines-1
+range R_Ops = 0..Machines
+range R_Capacity = 0..Capacity
+range R_Workload = 0..Workload
+set Global_Alphabet = {idle, get[r:R_Ops], put[r:R_Ops],return[r:R_Ops], reject,accept}
+set Controllable_Alphabet = {get[r:R_Ops]}
+
+Machine[id:R_Machines] = Working[0], Working[wl:R_Workload] =
+    (	when(wl == 0) idle -> Working[wl] |
+	when (wl < Workload) get[id]   -> Working[wl+1] |
+     when (wl > 0)        put[id+1] -> Working[wl-1] ).
+
+Buffer[id:R_Machines] = Operative[0],
+Operative[c:R_Capacity] = (
+    when (c > 0)         get[id+1]    -> Operative[c-1] |
+    when (c < Capacity)  {put[id+1],return[id+1]}    -> Operative[c+1] ).
+
+TU = Idle,
+  Idle    = (get[Machines] -> Testing),
+  Testing = (return_1 -> reject -> Idle |
+             accept -> Idle).
+/*
+TU_Remove = Idle,
+  Idle    = (get[Machines] -> Testing),
+  Testing = (return_1 -> reject -> Testing |
+             accept -> Testing).
+*/
+/*****************************************************************************/
+
+||Plant = (Machine[p:R_Machines] || Buffer[b:R_Machines] || TU).
+
+fluent F_GOAL = <get_[Machines], {reject,accept}>
+fluent F_Ass[m:R_Machines] = <accept, get[m]> initially 1
+//fluent F_Get_0 = <get_0, put_1>
+|f| ENV = (Plant).
+
+|gr1| <{F_Ass[m:R_Machines],F_Get_0}><{F_GOAL}>  STRAT = ENV.
+
+//|gr1| <{F_Get_0}><{F_GOAL}>  NO_STRAT = ENV.
+/*
+||Plant_Remove = (Machine[p:R_Machines] || Buffer[b:R_Machines] || TU_Remove).
+|f| ENV_Remove = (Plant_Remove).
+|gr1| <{F_Ass[m:R_Machines]}><{F_GOAL}>  REMOVE_NO_STRAT = ENV_Remove.
+STRAT >> "/tmp/TL_2_2_strat.rep".
+STRAT >>_m "/tmp/TL_2_2_strat.met".
+NO_STRAT >> "/tmp/TL_2_2_no_strat.rep".
+REMOVE_NO_STRAT >> "/tmp/TL_2_2_remove_no_strat.rep".
+
+Machine_0 >> "/tmp/tl_2_2_m_0.rep".
+Buffer_1 >> "/tmp/tl_2_2_b_1.rep".
+TU >> "/tmp/tl_2_2_tu.rep".
+Plant_1 >> "/tmp/tl_2_2_p_1.rep".
+Plant_T >> "/tmp/tl_2_2_m_t.rep".
+ENV >> "/tmp/tl_2_2_env.rep".
+*/
