@@ -96,24 +96,12 @@ fluent F_GOAL = <{agency_fail, agency_succ}, query[r:R_Amenity]>
 fluent F_Ass = <query[r:R_Amenity], {idle,query_succ[r:R_Amenity],query_fail[r:R_Amenity]}> initially 1
 fluent F_Ass2 = <query[r:R_Amenity], {query_succ[r:R_Amenity],query_fail[r:R_Amenity]}> initially 1
 
-//||Plant_B = (Service[a:R_Amenity] || ServiceMonitor[b:R_Amenity]).
-//||Plant_C = (ServiceMonitor_0 || AgencyMonitor || Service_0).
-//Plant_C >> "/tmp/t_a_1_1_plant_c.rep".
-//Plant_B >> "/tmp/t_a_1_1_plant_b.rep".
 |F| ENV = (Plant).
-//|f| ENV_remove = (Plant_T_remove).
 
 |gr1| <{F_Ass}><{F_GOAL}>  STRAT = ENV.
-|gr1| <{F_Ass2}><{F_GOAL}>  NO_STRAT = ENV.
-//|gr1| <{F_Ass}><{F_GOAL}>  NO_STRAT = ENV.
-//|gr1| <{F_Get_0}><{F_GOAL}>  REMOVE_NO_STRAT = ENV_remove.
 
 STRAT >> "/tmp/t_a_1_1_strat.rep".
 STRAT >>_m "/tmp/t_a_1_1_strat.met".
-NO_STRAT >> "/tmp/t_a_1_1_no_strat.rep".
-NO_STRAT >>_m "/tmp/t_a_1_1_no_strat.met".
-//REMOVE_NO_STRAT >> "/tmp/TL_4_2_diag_remove.rep".
-//REMOVE_NO_STRAT >>_m "/tmp/TL_4_2_diag_remove.met".
 
 ENV >>_m "/tmp/t_a_1_1_env.met".
 ENV >> "/tmp/t_a_1_1_env.rep".
@@ -124,11 +112,4 @@ Service_0 >> "/tmp/t_a_1_1_service_0.rep".
 ServiceMonitor_0 >> "/tmp/t_a_1_1_service_monitor_0.rep".
 AgencyMonitor >> "/tmp/t_a_1_1_agency_monitor.rep".
 Plant >> "/tmp/t_a_1_1_plant.rep".
-/*
-ENV_P 
 
-SERVICE_P
-
-SERVICE_MON_P
-
-equals FATAL_RANGE_7_SERVERS_C(SERVERS_C, SERVERS_C_P).*/

@@ -31,14 +31,6 @@ set Controllable_Alphabet = {assign[r:R_Team], refuse, approve}
 
 //Document = Count[0],  Count[s:R_Step] = (reject[Teams-1][Steps] -> Rejected | reject_0[s] -> Rejected).
 
-/*
-Crew[id:R_Team] = Pending,
-  Pending = (
-    assign[id] -> Assigned[1] ),
-  Assigned[s:R_Step] = (reject[id][s] -> Rejected[s] | accept[id]  -> Accepted ),
-  Rejected[s:R_Step] = (refuse  -> Pending |  when(s < Steps) assign[id] -> Assigned[s+1]),
-  Accepted = ( {approve,refuse} -> Pending).
-*/
 Crew_Remove[id:R_Team] = Pending,
   Pending = (
     assign[id] -> Assigned[1] ),
@@ -56,31 +48,10 @@ ACCEPTER = ({reject[t:R_Team][s:R_Step], accept[t:R_Team],assign[r:R_Team], refu
 
 
 //****************************************************************************
-//||Plant = (Document || Crew[id:R_Team] || ACCEPTER).
-//|F|ENV = (Plant).
-
-//fluent BROADCAST_WILDCARD = <broadcast_status, {approve,refuse}>
 fluent G_Approve = <approve, assign[id:R_Team]>
 fluent A_Ass[id:R_Team] = <accept[id], {approve,refuse}>
 
-//|gr1| <{A_Ass[id:R_Team]}><{G_Approve}>  STRAT = ENV.
-//|gr1| <{A_Ass[id:R_Team], BROADCAST_WILDCARD}><{G_Approve,BROADCAST_WILDCARD}>  NO_STRAT_WIN = ENV.
 ||Remove_Plant = (Document || Crew_Remove[id:R_Team] || ACCEPTER).
 |F|ENV_Remove = (Remove_Plant).
 |gr1| <{A_Ass[id:R_Team]}><{G_Approve}>  NO_STRAT_REMOVE = ENV_Remove.
 
-/*
-
-Crew_0 >> "/tmp/BW_1_1_c_0.rep".
-Document >> "/tmp/BW_1_1_doc.rep".
-Plant >> "/tmp/BW_1_1_plant.rep".
-
-ENV_Remove >> "/tmp/BW_1_1_remove_env.rep".
-ENV >> "/tmp/BW_1_1_env.rep".
-ACCEPTER >> "/tmp/BW_1_1_diag_no_accept.rep".
-
-STRAT >> "/tmp/BW_1_1_strat.rep".
-NO_STRAT_REMOVE >> "/tmp/BW_1_1_diag_remove.rep".
-NO_STRAT >> "/tmp/BW_1_1_diag_no_strat.rep".
-NO_STRAT_WIN >> "/tmp/BW_1_1_diag_no_strat_win.rep".
-*/

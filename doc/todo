@@ -6,9 +6,8 @@ TODO:
 		-build script that creates variants over realizable, missing liveness and remove safety cases
 			- BW_$_$ -> BW_1_1 ... BW_4_2 .. BW_$_$_REMOVE_SAFE -> BW_1_1_REMOVE_SAFE ... BW_4_2_REMOVE_SAFE
 		X BW Aut:1,2,3,4 steps:1,2 > 8
-			- BW_1_1 - BW_1_1_MISS_LIVE - BW_1_1_REMOVE_SAFE 
 		X AT Aut:2,3,4,5 steps:1,2 > 8
-		X CM Aut: 1,2 areas: 1,2,3 > 6
+		X CM Aut: 1,2 areas: 1 > 6
 		X DP Aut: 2, 3 steps: 1,2,3 > 6
 		X TA Aut: 2, 3, 4 steps: 1, 2 > 6
 		X TL Aut: 2, 3, 4 steps 1, 2	> 6

@@ -34,14 +34,6 @@ Airplane[id:R_Plane] = (on_route[id] ->Airplane[id] |
     (when (h>0)  descend[id][h-1] -> Holding[h-1] |
       when(h == 0)approach[id] -> land[id] -> End),
   End = (control_all -> Airplane[id]).
-/*
-Airplane_Remove[id:R_Plane] = (on_route[id] ->Airplane[id] |
-    requestLand[id]-> descend[id][h:R_Height] -> Holding[h] |
-    extendFlight[id]-> Airplane[id]),
-  Holding[h:R_Height] =
-    (when (h>0)  descend[id][h-1] -> Holding[h-1] |
-      when(h == 0)approach[id] -> land[id] -> Airplane[id]).
-*/
 HeightMonitor[id:R_Height] = Empty[id],
   Empty[h:R_Height] = (
     descend[p:R_Plane][h] -> Occupied[h] |
@@ -74,57 +66,7 @@ ResponseMonitor = (
 |F|ENV = (Plant).
 
 fluent EXTEND_FLIGHT[p:R_Plane] = <extendFlight[p], requestLand[p]> initially 1
-//fluent ARRIVE[p:R_Plane] = <{extendFlight[p],requestLand[p]}, control_all>
 fluent CONTROL_WILDCARD = <control_all, requestLand[p:R_Plane]>
 
-//|gr1| <{ARRIVE[p:R_Plane]}><{CONTROL_WILDCARD}>  STRAT = ENV.
-
 |gr1| <{EXTEND_FLIGHT[p:R_Plane]}><{CONTROL_WILDCARD}>  NO_STRAT = ENV.
-/*
-||Plant_Remove = ( ResponseMonitor || RampMonitor || HeightMonitor[h:R_Height] || Airplane_Remove[p:R_Plane]).
-|F|ENV_Remove = (Plant_Remove).
-|gr1| <{CONTROL_WILDCARD}><{CONTROL_WILDCARD}>  NO_STRAT_REMOVE = ENV_Remove.
-
-Airplane_0 >> "/tmp/AT_2_2_plane.rep".
-HeightMonitor_0 >> "/tmp/AT_2_2_height.rep".
-Airplane_1 >> "/tmp/AT_2_2_plane_1.rep".
-HeightMonitor_1 >> "/tmp/AT_2_2_height_1.rep".
-RampMonitor >> "/tmp/AT_2_2_ramp.rep".
-ResponseMonitor >> "/tmp/AT_2_2_response.rep".
-Plant >> "/tmp/AT_2_2_plant.rep".
-ENV >> "/tmp/AT_2_2_env.rep".
-STRAT >> "/tmp/AT_2_2_strat.rep".
-NO_STRAT >> "/tmp/AT_2_2_no_strat.rep".
-NO_STRAT_REMOVE >> "/tmp/AT_2_2_no_strat_remove.rep".
-
-*/
-
-//  controllable = {descend[Plane][Height], approach[Plane]}  marking = {control.all}
-
-
-//Document = Count[0],  Count[s:R_Step] = (reject[Teams-1][Steps] -> Rejected | reject_0[s] -> Rejected).
-
-/*
-|F|ENV = (Plant).
-
-
-Crew_0 >> "/tmp/BW_1_1_c_0.rep".
-Document >> "/tmp/BW_1_1_doc.rep".
-Plant >> "/tmp/BW_1_1_plant.rep".
-
-ENV_Remove >> "/tmp/BW_1_1_remove_env.rep".
-ENV >> "/tmp/BW_1_1_env.rep".
-ACCEPTER >> "/tmp/BW_1_1_diag_no_accept.rep".
-
-STRAT >> "/tmp/BW_1_1_strat.rep".
-NO_STRAT_REMOVE >> "/tmp/BW_1_1_diag_remove.rep".
-NO_STRAT >> "/tmp/BW_1_1_diag_no_strat.rep".
-NO_STRAT_WIN >> "/tmp/BW_1_1_diag_no_strat_win.rep".
-
-// tests
-equals FATAL_BW_STRAT_TEST(STRAT, STRAT_P).
-equals FATAL_BW_NO_STRAT_REMOVE_TEST(NO_STRAT_REMOVE, NO_STRAT_REMOVE_P).
-equals FATAL_BW_NO_STRAT_TEST(NO_STRAT, NO_STRAT_P).
-equals FATAL_BW_NO_STRAT_WIN_TEST(NO_STRAT_WIN, NO_STRAT_WIN_P).
-*/
 

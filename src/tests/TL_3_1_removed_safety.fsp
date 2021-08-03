@@ -17,12 +17,6 @@ Buffer[id:R_Machines] = Operative[0],
 Operative[c:R_Capacity] = (
     when (c > 0)         get[id+1]    -> Operative[c-1] |
     when (c < Capacity)  {put[id+1],return[id+1]}    -> Operative[c+1] ).
-/*
-TU = Idle,
-  Idle    = (get[Machines] -> Testing),
-  Testing = (return_1 -> reject -> Idle |
-             accept -> Idle).
-
 TU_Remove = Idle,
   Idle    = (get[Machines] -> Testing),
   Testing = (return_1 -> reject -> Testing |
@@ -30,30 +24,10 @@ TU_Remove = Idle,
 
 /*****************************************************************************/
 
-//||Plant = (Machine[p:R_Machines] || Buffer[b:R_Machines] || TU).
-//|f| ENV = (Plant).
 fluent F_GOAL = <get_[Machines], {reject,accept}>
 fluent F_Ass[m:R_Machines] = <accept, get[m]> initially 1
-//fluent F_Get_0 = <get_0, put_1>
-
-
-//|gr1| <{F_Ass[m:R_Machines],F_Get_0}><{F_GOAL}>  STRAT = ENV.
-
-//|gr1| <{F_Get_0}><{F_GOAL}>  NO_STRAT = ENV.
 
 ||Plant_Remove = (Machine[p:R_Machines] || Buffer[b:R_Machines] || TU_Remove).
 |f| ENV_Remove = (Plant_Remove).
 |gr1| <{F_Ass[m:R_Machines]}><{F_GOAL}>  REMOVE_NO_STRAT = ENV_Remove.
-/*
-STRAT >> "/tmp/TL_2_2_strat.rep".
-STRAT >>_m "/tmp/TL_2_2_strat.met".
-NO_STRAT >> "/tmp/TL_2_2_no_strat.rep".
-REMOVE_NO_STRAT >> "/tmp/TL_2_2_remove_no_strat.rep".
 
-Machine_0 >> "/tmp/tl_2_2_m_0.rep".
-Buffer_1 >> "/tmp/tl_2_2_b_1.rep".
-TU >> "/tmp/tl_2_2_tu.rep".
-Plant_1 >> "/tmp/tl_2_2_p_1.rep".
-Plant_T >> "/tmp/tl_2_2_m_t.rep".
-ENV >> "/tmp/tl_2_2_env.rep".
-*/
