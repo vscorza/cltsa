@@ -2,12 +2,7 @@ TODO:
 =====
 -benchmark
 	- revisar casos > 100 de robot explorer realizables (parece que no lo son)
-	- presentar reportes por caso de estudio
-		- proporción de reducción
-		- tiempos
-	- armar comparación de tiempos sintesis/diagnóstico
 	- agregar Unrealizable Cores for Reactive Systems Specifications, notes on control of discrete-event systems, Compositional Supervisory Control via Reactive Synthesis and Automated Planning, Taming Composition with Heuristics al related work
-- plan de trabajo para diagnostico
 	- tomar un ejemplo de reactive y mostar como sería un diagnóstico que usa konighoefer, jvts y behavior
 	- boceto de
 		- escribir presentación 

@@ -105,26 +105,10 @@ pre{display:none;}
 Specification sizes go from `r min(compared_data$plant_transitions)` transitions up to `r max(compared_data$plant_transitions)`.
 Minimization reduction goes from `r max_reduction` up to `r min_reduction`.
 
-## Reduction vs diagnosis time
-```{r echo=FALSE}
-#sive vs diagnosis time
-general_data <- read.csv(file='/home/mariano/code/henos-automata/doc/experimental_setting/tmp_results/unrealizable_data_composite.csv')
-c_coeff = general_data$minimization_controllable_transitions / general_data$plant_transitions	
-m_coeff = general_data$minimization_transitions / general_data$plant_transitions	
-ggplot(general_data, aes(x=diagnosis_time, y=1/m_coeff)) +
-	labs(title="Size vs diagnosis time") +
-	xlab("Diagnosis time (s)") +
-  ylab(expression(paste("Reduction^-1"))) +  
-	scale_y_log10() +
-	scale_x_log10() +	
-	geom_point(color='red') +	
-	geom_smooth(method='lm')
-
-
-```
 ## Plant transitions size vs diagnosis time
 ```{r echo=FALSE}
 #sive vs diagnosis time
+general_data <- read.csv(file='/home/mariano/code/henos-automata/doc/experimental_setting/tmp_results/unrealizable_data_composite.csv')
 ggplot(general_data, aes(x=diagnosis_time, y=plant_transitions)) +
 	labs(title="Size vs diagnosis time") +
 	xlab("Diagnosis time (s)") +
@@ -157,9 +141,9 @@ ggplot(general_data, aes(x=no_robot_c_coeff, y=no_robot_m_coeff)) +
 
 ```{r echo=FALSE}
 #dividing compared data by case
-cases <- c("Genbuf", "Ahb", "Collector", "Lift", "Exploration","Cat","Airport","Bidding","Transfer","Travel")
+cases <- c("Collector", "Exploration","Airport","Bidding","Transfer","Travel")
 
-cases_names <- c("Genbuf", "Ahb", "Collector", "Lift Controller", "Exploration Robot","Cat and Mouse","Airport Tower","Bidding Workflow","Transfer Line","Travel Agency" )
+cases_names <- c("Collector", "Exploration Robot","Airport Tower","Bidding Workflow","Transfer Line","Travel Agency" )
 for (i in 1:length(cases)){
   current_data <- subset(compared_data, grepl(cases[i], name))  
   print(ggplot(current_data, aes(x=synthesis_time, y=diagnosis_time_liveness)) +
