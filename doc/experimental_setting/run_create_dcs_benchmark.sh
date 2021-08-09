@@ -15,9 +15,9 @@ caseNames=("cat.mouse.K" "airport.tower.N.K" "bidding.workflow.N.K" "transfer.li
 
 
 fileNLow=("1" "2" "1" "2" "2" "2")
-fileNHi=("1" "5" "4" "4" "4" "3")
+fileNHi=("1" "6" "5" "4" "5" "3")
 fileKLow=("1" "1" "1" "1" "1" "1")
-fileKHi=("2" "2" "2" "2" "2" "3")
+fileKHi=("2" "3" "1" "2" "3" "4")
 fileSuffixes=(".fsp" "_missing_assumption.fsp" "_removed_safety.fsp")
 caseSuffixes=(".realizable" ".missing.assumption" ".removed.safety")
 	
@@ -45,7 +45,7 @@ for i in "${!fileNames[@]}"; do
 done	
 
 for j in "${!fileSuffixes[@]}"; do
-	#echo "Running ${fileSuffixes[j]} suffixed cases ${INSTANCES[j]}"			
+	echo "Running ${fileSuffixes[j]} DCS suffixed cases "			
 	nice -20 ./cltsa -r -o $OUTPUT_DIR ${INSTANCES[j]}
 done
 #nice -20 ./cltsa -r -o $OUTPUT_DIR $INSTANCES

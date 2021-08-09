@@ -1,23 +1,12 @@
 TODO:
 =====
 -benchmark
-	- https://github.com/dciolek/compositional-supervisory-control-benchmark/tree/master/fsp
-	- generar reportes
-		-build script that creates variants over realizable, missing liveness and remove safety cases
-			- BW_$_$ -> BW_1_1 ... BW_4_2 .. BW_$_$_REMOVE_SAFE -> BW_1_1_REMOVE_SAFE ... BW_4_2_REMOVE_SAFE
-		X BW Aut:1,2,3,4 steps:1,2 > 8
-		X AT Aut:2,3,4,5 steps:1,2 > 8
-		X CM Aut: 1,2 areas: 1 > 6
-		X DP Aut: 2, 3 steps: 1,2,3 > 6
-		X TA Aut: 2, 3, 4 steps: 1, 2 > 6
-		X TL Aut: 2, 3, 4 steps 1, 2	> 6
-	- build scripts for reports
-	- run scripts
-	- agregar Unrealizable Cores for Reactive Systems Specifications, notes on control of discrete-event systems, Compositional Supervisory Control via Reactive Synthesis and Automated Planning, Taming Composition with Heuristics al related work
-- plan de trabajo para diagnostico
 	- presentar reportes por caso de estudio
 		- proporción de reducción
 		- tiempos
+	- armar comparación de tiempos sintesis/diagnóstico
+	- agregar Unrealizable Cores for Reactive Systems Specifications, notes on control of discrete-event systems, Compositional Supervisory Control via Reactive Synthesis and Automated Planning, Taming Composition with Heuristics al related work
+- plan de trabajo para diagnostico
 	- tomar un ejemplo de reactive y mostar como sería un diagnóstico que usa konighoefer, jvts y behavior
 	- boceto de
 		- escribir presentación 
@@ -30,6 +19,7 @@ TODO:
 			- copiar refs de definitions nuevo
 			- ref. a un arxiv
 			- re escribir problema y solución
+	- escribir minimización de goals (agarrar uno que sea no realizable reportar cuál en el diagnóstico)
 	- re-escribir versión ahb genbuf, revisar realizabilidad-no realizabilidad
 		- testear y comparar con valuaciones por estados
 			- ahb_1_n	
