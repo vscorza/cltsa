@@ -29,21 +29,58 @@ library(plot3D)
 library(stringr)
 suppressMessages(library(dplyr))
 suppressMessages(library(ggplot2))
-realizable_data <- read.csv(file='/home/mariano/code/henos-automata/doc/experimental_setting/tmp_results/realizable_data_composite.csv')
+#creating general data frame
 experimental_composite <- read.csv(file='/home/mariano/code/henos-automata/doc/experimental_setting/tmp_results/unrealizable_data_composite.csv')
-experimental_composite$name  <- str_replace_all(experimental_composite$name, "\\.missing\\.assumption", "\\.(missing\\.assumption)")
+experimental_composite$name  <- str_replace_all(experimental_composite$name, "Scheduler", "Arbiter")
+experimental_composite$name  <- str_replace_all(experimental_composite$name, "\\.\\(missing\\.assumption\\)", "\\.(missing\\.liveness)")
+experimental_composite$name  <- str_replace_all(experimental_composite$name, "\\.missing\\.assumption", "\\.(missing\\.liveness)")
 experimental_composite$name  <- str_replace_all(experimental_composite$name, "\\.removed\\.safety", "\\.(removed\\.safety)")
 experimental_composite$name  <- str_replace_all(experimental_composite$name, "\\.", " ")
+experimental_composite$liveness_count <- experimental_composite$assumptions_count + experimental_composite$guarantees_count
+experimental_composite <- subset(experimental_composite, select = -c(realizable, ltl_model_build_time, model_build_time, composition_time,synthesis_time,alphabet_size,assumptions_count,guarantees_count,plant_states,plant_transitions,plant_controllable_transitions,plant_controllable_options,search_method))
+#creating realizable data frame
+realizable_data <- read.csv(file='/home/mariano/code/henos-automata/doc/experimental_setting/tmp_results/realizable_data_composite.csv')
 realizable_data$name  <- str_replace_all(realizable_data$name, "\\.", " ")
 experimental_composite$name  <- str_to_title(experimental_composite$name)
 realizable_data$name  <- str_to_title(realizable_data$name)
+realizable_data$name  <- str_replace_all(realizable_data$name, " Realizable", "")
+realizable_data <- subset(realizable_data, select = -c(diagnosis_time,minimization_states,minimization_transitions,minimization_controllable_transitions,minimization_controllable_options,search_method,diagnosis_steps,realizable))
+#merging data frames (realizable + liveness + safety)
+realizable_data$liveness_count <- realizable_data$assumptions_count + realizable_data$guarantees_count
+missing_assumptions <- subset(experimental_composite, grepl("Missing Liveness", name, fixed=TRUE))
+missing_assumptions$name <- str_replace_all(missing_assumptions$name, " \\(Missing Liveness\\)", "")
+missing_assumptions$diagnosis_time_liveness <- missing_assumptions$diagnosis_time
+missing_assumptions$minimization_states_liveness <- missing_assumptions$minimization_states
+missing_assumptions$minimization_transitions_liveness <- missing_assumptions$minimization_transitions
+missing_assumptions$minimization_controllable_transitions_liveness <- missing_assumptions$minimization_controllable_transitions
+missing_assumptions$minimization_controllable_options_liveness <- missing_assumptions$minimization_controllable_options
+missing_assumptions$diagnosis_steps_liveness <- missing_assumptions$diagnosis_steps
+missing_assumptions$liveness_count_liveness <- missing_assumptions$liveness_count
+missing_assumptions <- subset(missing_assumptions, select = -c(diagnosis_time, minimization_states, minimization_transitions, minimization_controllable_transitions, minimization_controllable_options, diagnosis_steps, liveness_count))
 
+removed_safety <- subset(experimental_composite, grepl("Removed Safety", name, fixed=TRUE))
+removed_safety$name <- str_replace_all(removed_safety$name, " \\(Removed Safety\\)", "")
+removed_safety$name <- str_replace_all(removed_safety$name, " \\(Missing Liveness\\)", "")
+removed_safety$diagnosis_time_safety <- removed_safety$diagnosis_time
+removed_safety$minimization_states_safety <- removed_safety$minimization_states
+removed_safety$minimization_transitions_safety <- removed_safety$minimization_transitions
+removed_safety$minimization_controllable_transitions_safety <- removed_safety$minimization_controllable_transitions
+removed_safety$minimization_controllable_options_safety <- removed_safety$minimization_controllable_options
+removed_safety$diagnosis_steps_safety <- removed_safety$diagnosis_steps
+removed_safety$liveness_count_safety <- removed_safety$liveness_count
+removed_safety <- subset(removed_safety, select = -c(diagnosis_time, minimization_states, minimization_transitions, minimization_controllable_transitions, minimization_controllable_options, diagnosis_steps,liveness_count))
 
-genbuf_missing <- subset(experimental_composite, grepl("automaton_missing_assumption", name, fixed=TRUE))
-genbuf_removed <- subset(experimental_composite, grepl("automaton_removed_env_safety", name, fixed=TRUE))
-collector_missing <- subset(experimental_composite, grepl("v1_missing_assumption", name, fixed=TRUE))
-robot_samples <- subset(experimental_composite, grepl("Robot", name, fixed=TRUE))
-has_control_samples <- experimental_composite[experimental_composite$plant_controllable_options > experimental_composite$plant_states,]
+compared_data <- merge(realizable_data, removed_safety, by.x ="name", by.y ="name", sort = FALSE)
+compared_data <- merge(compared_data, missing_assumptions, by.x ="name", by.y ="name", sort = FALSE)
+
+#compute general values
+max_liveness_reduction <- max(compared_data$minimization_transitions_liveness / compared_data$plant_transitions)
+max_safety_reduction <- max(compared_data$minimization_transitions_safety / compared_data$plant_transitions)
+max_reduction <- max(c(max_liveness_reduction, max_safety_reduction))
+
+min_liveness_reduction <- min(compared_data$minimization_transitions_liveness / compared_data$plant_transitions)
+min_safety_reduction <- min(compared_data$minimization_transitions_safety / compared_data$plant_transitions)
+min_reduction <- min(c(min_liveness_reduction, min_safety_reduction))
 
 ```
 <style type="text/css">
@@ -66,54 +103,16 @@ pre{display:none;}
 
 ## General Table
 
-Specification sizes go from `r min(experimental_composite$plant_transitions)` transitions up to `r max(experimental_composite$plant_transitions)`.
-Minimization reduction goes from `r max(experimental_composite$minimization_transitions / experimental_composite$plant_transitions)` up to `r min(experimental_composite$minimization_transitions / experimental_composite$plant_transitions)` with an mean of `r mean(experimental_composite$minimization_transitions / experimental_composite$plant_transitions)` and a standard deviation of `r sd(experimental_composite$minimization_transitions / experimental_composite$plant_transitions)`.
+Specification sizes go from `r min(compared_data$plant_transitions)` transitions up to `r max(compared_data$plant_transitions)`.
+Minimization reduction goes from `r max_reduction` up to `r min_reduction`.
 
-```{r echo=FALSE}
-times_table <- experimental_composite[c(1,7)]
-times_table$liveness_count <- experimental_composite$guarantees_count + experimental_composite$assumptions_count
-times_table$plant_transitions <- experimental_composite$plant_transitions
-times_table$minimization_transitions <- experimental_composite$minimization_transitions
-times_table$reduction <- experimental_composite$minimization_transitions / experimental_composite$plant_transitions
-times_table$steps <- experimental_composite$diagnosis_steps
-times_table <- times_table %>%
-  group_by(name) %>%
-  summarize(diag <- mean(diagnosis_time), liveness <- max(liveness_count), plant_trans <- max(plant_transitions),
-            min_trans <- max(minimization_transitions), red <- (mean(reduction)*100), steps <- max(steps))
-kable(times_table, caption = "Times table", col.names=c("Specification","Diagnosis(s)","Liveness fluents", "Plant transitions", "Min. transitions","Minimization pct.(%)","Min. steps"))
-
-
-```
-
-## Minimization distribution (overall)
-
-```{r echo=FALSE}
-
-```
-
-
-## Minimization distribution vs size
-
-```{r echo=FALSE}
-c_coeff = experimental_composite$minimization_controllable_transitions / experimental_composite$plant_transitions	
-m_coeff = experimental_composite$minimization_transitions / experimental_composite$plant_transitions	
-ggplot(experimental_composite, aes(x=plant_transitions, y=1/m_coeff)) +
-	labs(title="Size vs size") +
-	xlab(expression(paste("|",Delta["E"],"|"))) +
-  ylab("Reduction^-1") +
-	scale_y_log10() +
-  scale_x_log10() +	
-	geom_point(color='red') +	
-	geom_smooth(method='lm')
-
-
-
-```
-
-## Minimization and diagnosis time
+## Reduction vs diagnosis time
 ```{r echo=FALSE}
 #sive vs diagnosis time
-ggplot(experimental_composite, aes(x=diagnosis_time, y=1/m_coeff)) +
+general_data <- read.csv(file='/home/mariano/code/henos-automata/doc/experimental_setting/tmp_results/unrealizable_data_composite.csv')
+c_coeff = general_data$minimization_controllable_transitions / general_data$plant_transitions	
+m_coeff = general_data$minimization_transitions / general_data$plant_transitions	
+ggplot(general_data, aes(x=diagnosis_time, y=1/m_coeff)) +
 	labs(title="Size vs diagnosis time") +
 	xlab("Diagnosis time (s)") +
   ylab(expression(paste("Reduction^-1"))) +  
@@ -124,11 +123,10 @@ ggplot(experimental_composite, aes(x=diagnosis_time, y=1/m_coeff)) +
 
 
 ```
-
-## Size and diagnosis time
+## Plant transitions size vs diagnosis time
 ```{r echo=FALSE}
 #sive vs diagnosis time
-ggplot(experimental_composite, aes(x=diagnosis_time, y=plant_transitions)) +
+ggplot(general_data, aes(x=diagnosis_time, y=plant_transitions)) +
 	labs(title="Size vs diagnosis time") +
 	xlab("Diagnosis time (s)") +
   ylab(expression(paste("|",Delta["E"],"|"))) +
@@ -141,12 +139,11 @@ ggplot(experimental_composite, aes(x=diagnosis_time, y=plant_transitions)) +
 ```
 
 ## Minimization and minimization controllability
-
 ```{r echo=FALSE}
 #plant controllability vs minimization amount
-no_robot_c_coeff = has_control_samples$minimization_controllable_options / has_control_samples$plant_states
-no_robot_m_coeff = has_control_samples$minimization_transitions / has_control_samples$plant_transitions	
-ggplot(has_control_samples, aes(x=no_robot_c_coeff, y=no_robot_m_coeff)) +
+no_robot_c_coeff = general_data$minimization_controllable_options / general_data$plant_states
+no_robot_m_coeff = general_data$minimization_transitions / general_data$plant_transitions	
+ggplot(general_data, aes(x=no_robot_c_coeff, y=no_robot_m_coeff)) +
 	labs(title="Minimization controllability vs minimization amount") +
 	xlab("Minimization controllability") +
 	ylab("Reduction") +
@@ -157,199 +154,91 @@ ggplot(has_control_samples, aes(x=no_robot_c_coeff, y=no_robot_m_coeff)) +
 
 
 ```
-
-
-# Compared graphs
+## Compared times between synthesis and diagnosis
 
 ```{r echo=FALSE}
-#rows, cols
-sizediag_g_ass <- ggplot(genbuf_missing, aes(x=plant_transitions, y=diagnosis_time)) +
-	labs(title="Genbuf.ass.") +
-	xlab(expression(paste("|",Delta["E"],"|"))) +
-	ylab("Diagnosis time (s)") +
-	scale_y_log10() +
-	scale_x_log10() +	
-	geom_point(color='red') +	
-	geom_smooth(method='lm')
-sizediag_safety <- ggplot(genbuf_removed, aes(x=plant_transitions, y=diagnosis_time)) +
-	labs(title="Genbuf.safety") +
-	xlab(expression(paste("|",Delta["E"],"|"))) +
-	ylab("Diagnosis time (s)") +
-	scale_y_log10() +
-	scale_x_log10() +	
-	geom_point(color='red') +	
-	geom_smooth(method='lm')
-sizediag_collector <- ggplot(collector_missing, aes(x=plant_transitions, y=diagnosis_time)) +
-	labs(title="Collector") +
-	xlab(expression(paste("|",Delta["E"],"|"))) +
-	ylab("Diagnosis time (s)") +
-	scale_y_log10() +
-	scale_x_log10() +	
-	geom_point(color='red') +	
-	geom_smooth(method='lm')	
-sizediag_exploration <- ggplot(robot_samples, aes(x=plant_transitions, y=diagnosis_time)) +
-	labs(title="Robot") +
-	xlab(expression(paste("|",Delta["E"],"|"))) +
-	ylab("Diagnosis time (s)") +
-	scale_y_log10() +
-	scale_x_log10() +	
-	geom_point(color='red') +	
-	geom_smooth(method='lm')
-plantminsize_g_ass <- ggplot(genbuf_missing, aes(x=plant_transitions, y=minimization_transitions)) +
-	labs(title="Genbuf.ass.") +
-	xlab(expression(paste("|",Delta[E],"|"))) +
-	ylab(expression(paste("|",Delta[paste("E","'")],"|"))) +
-	scale_y_log10() +
-	scale_x_log10() +	
-	geom_point(color='red') +	
-	geom_smooth(method='lm')	
-plantminsize_safety <- ggplot(genbuf_removed, aes(x=plant_transitions, y=minimization_transitions)) +
-	labs(title="Genbuf.safety") +
-	xlab(expression(paste("|",Delta[E],"|"))) +
-	ylab(expression(paste("|",Delta[paste("E","'")],"|"))) +
-	scale_y_log10() +
-	scale_x_log10() +	
-	geom_point(color='red') +	
-	geom_smooth(method='lm')		
-plantminsize_collector <- ggplot(collector_missing, aes(x=plant_transitions, y=minimization_transitions)) +
-	labs(title="Collector") +
-	xlab(expression(paste("|",Delta[E],"|"))) +
-	ylab(expression(paste("|",Delta[paste("E","'")],"|"))) +
-	scale_y_log10() +
-	scale_x_log10() +	
-	geom_point(color='red') 
-#+	geom_smooth(method='lm')	
-plantminsize_exploration <- ggplot(robot_samples, aes(x=plant_transitions, y=minimization_transitions)) +
-	labs(title="Robot") +
-	xlab(expression(paste("|",Delta[E],"|"))) +
-	ylab(expression(paste("|",Delta[paste("E","'")],"|"))) +
-	scale_y_log10() +
-	scale_x_log10() +	
-	geom_point(color='red') +	
-	geom_smooth(method='lm')	
-c_coeff_ga = genbuf_missing$plant_controllable_transitions / genbuf_missing$plant_transitions	
-m_coeff_ga = genbuf_missing$minimization_transitions / genbuf_missing$plant_transitions	
-control_g_ass <- ggplot(genbuf_missing, aes(x=c_coeff_ga, y=m_coeff_ga)) +
-	labs(title="Genbuf.ass") +
-	xlab("Controllability") +
-	ylab("Reduction") +
-	scale_y_log10() +
-	scale_x_log10() +	
-	geom_point(color='red') +
-	geom_smooth(method='lm')	
-c_coeff_gs = genbuf_removed$plant_controllable_transitions / genbuf_removed$plant_transitions	
-m_coeff_gs = genbuf_removed$minimization_transitions / genbuf_removed$plant_transitions	
-control_safety <- ggplot(genbuf_removed, aes(x=c_coeff_gs, y=m_coeff_gs)) +
-	labs(title="Genbuf.safety") +
-	xlab("Controllability") +
-	ylab("Reduction") +
-	scale_y_log10() +
-	scale_x_log10() +	
-	geom_point(color='red') +
-	geom_smooth(method='lm')
-c_coeff_c = collector_missing$plant_controllable_transitions / collector_missing$plant_transitions	
-m_coeff_c = collector_missing$minimization_transitions / collector_missing$plant_transitions	
-control_collector <- ggplot(collector_missing, aes(x=c_coeff_c, y=m_coeff_c)) +
-	labs(title="Collector") +
-	xlab("Controllability") +
-	ylab("Reduction") +
-	scale_y_log10() +
-	scale_x_log10() +	
-	geom_point(color='red') 
-# +	geom_smooth(method='lm')
-c_coeff_r = robot_samples$plant_controllable_transitions / robot_samples$plant_transitions	
-m_coeff_r = robot_samples$minimization_transitions / robot_samples$plant_transitions	
-control_robot <- ggplot(robot_samples, aes(x=c_coeff_r, y=m_coeff_r)) +
-	labs(title="Robot") +
-	xlab("Controllability") +
-	ylab("Reduction") +
-	scale_y_log10() +
-	scale_x_log10() +	
-	geom_point(color='red') +
-	geom_smooth(method='lm')	
-m_c_coeff_ga = genbuf_missing$minimization_controllable_transitions / genbuf_missing$plant_transitions	
-m_m_coeff_ga = genbuf_missing$minimization_transitions / genbuf_missing$plant_transitions	
-m_control_g_ass <- ggplot(genbuf_missing, aes(x=m_c_coeff_ga, y=m_m_coeff_ga)) +
-	labs(title="Genbuf.ass") +
-	xlab("Min. Cont.") +
-	ylab("Reduction") +
-	scale_y_log10() +
-	scale_x_log10() +	
-	geom_point(color='red') +
-	geom_smooth(method='lm')	
-m_c_coeff_gs = genbuf_removed$minimization_controllable_transitions / genbuf_removed$plant_transitions	
-m_m_coeff_gs = genbuf_removed$minimization_transitions / genbuf_removed$plant_transitions	
-m_control_safety <- ggplot(genbuf_removed, aes(x=m_c_coeff_gs, y=m_m_coeff_gs)) +
-	labs(title="Genbuf.safety") +
-	xlab("Min. Cont.") +
-	ylab("Reduction") +
-	scale_y_log10() +
-	scale_x_log10() +	
-	geom_point(color='red') +
-	geom_smooth(method='lm')
-m_c_coeff_c = collector_missing$minimization_controllable_transitions / collector_missing$plant_transitions	
-m_m_coeff_c = collector_missing$minimization_transitions / collector_missing$plant_transitions	
-m_control_collector <- ggplot(collector_missing, aes(x=m_c_coeff_c, y=m_m_coeff_c)) +
-	labs(title="Collector") +
-	xlab("Min. Cont.") +
-	ylab("Reduction") +
-	scale_y_log10() +
-	scale_x_log10() +	
-	geom_point(color='red') +
-  geom_smooth(method='lm')
-m_c_coeff_r = robot_samples$minimization_controllable_transitions / robot_samples$plant_transitions	
-m_m_coeff_r = robot_samples$minimization_transitions / robot_samples$plant_transitions	
-m_control_robot <- ggplot(robot_samples, aes(x=m_c_coeff_r, y=m_m_coeff_r)) +
-	labs(title="Robot") +
-	xlab("Min. Cont.") +
-	ylab("Reduction") +
-	scale_y_log10() +
-	scale_x_log10() +	
-	geom_point(color='red') +
-	geom_smooth(method='lm')	
-```
+#dividing compared data by case
+cases <- c("Genbuf", "Ahb", "Collector", "Lift", "Exploration","Cat","Airport","Bidding","Transfer","Travel")
 
-```{r echo=FALSE}
-grid.arrange(sizediag_g_ass, sizediag_safety, sizediag_collector, sizediag_exploration, plantminsize_g_ass, plantminsize_safety, plantminsize_collector, plantminsize_exploration, control_g_ass, control_safety, control_collector, control_robot, m_control_g_ass, m_control_safety, m_control_collector, m_control_robot, ncol=4)
-```
-
-## Minimization progression
-<div class="twoC">
-```{r echo=FALSE}
-steps_path = "/home/mariano/code/henos-automata/doc/experimental_setting/tmp_results/steps/"
-steps_files = list.files(path=steps_path, pattern="*.csv")
-#for (i in 1:length(steps_files)) steps_df[i] <- read.csv(steps_files[i])
-
-effective_plots <- 0
-for (i in 1:length(steps_files)){
-  df <- read.csv(file=paste(steps_path, steps_files[i], sep=''))
-  if(length(df$step) < 2){
-    next
-  }
-  effective_plots <- effective_plots + 1
-}
-#layout(matrix(1:effective_plots*2,nc=2, nr= effective_plots,byr=T))
-for (i in 1:length(steps_files)){
-  df <- read.csv(file=paste(steps_path, steps_files[i], sep=''))
-  if(length(df$step) < 2){
-    next
-  }
-  time_plot <- ggplot(df, aes(x=step, y=time, group=i)) +
-  geom_line(linetype="dashed", color="blue", size=1.2)+
-  geom_point(color="red", size=3) + 
-  labs(title=steps_files[i]) +
-	xlab("Steps") +
-	ylab("Time (s)") 
-  print(time_plot)
-  size_plot <- ggplot(df, aes(x=step, y=size, group=i)) +
-  geom_line(linetype="dashed", color="blue", size=1.2)+
-  geom_point(color="red", size=3) + 
-  labs(title=steps_files[i]) +
-	xlab("Steps") +
-	ylab(expression(paste("|",Delta[paste("E","'")],"|")))
-  print(size_plot)  
+cases_names <- c("Genbuf", "Ahb", "Collector", "Lift Controller", "Exploration Robot","Cat and Mouse","Airport Tower","Bidding Workflow","Transfer Line","Travel Agency" )
+for (i in 1:length(cases)){
+  current_data <- subset(compared_data, grepl(cases[i], name))  
+  print(ggplot(current_data, aes(x=synthesis_time, y=diagnosis_time_liveness)) +
+  	labs(title=paste("Synthesis vs diagnosis time (liveness)", cases_names[i])) +
+  	xlab(expression(paste("Synthesis time (s)"))) +
+    ylab("Diagnosis time liveness (s)") +
+  	scale_y_log10() +
+    scale_x_log10() +	
+  	geom_point(color='red') +	
+  	geom_smooth(method='lm'))
+  
+  print(ggplot(current_data, aes(x=synthesis_time, y=diagnosis_time_safety)) +
+  	labs(title=paste("Synthesis vs diagnosis time (safety)", cases_names[i])) +
+  	xlab(expression(paste("Synthesis time (s)"))) +
+    ylab("Diagnosis time safety (s)") +
+  	scale_y_log10() +
+    scale_x_log10() +	
+  	geom_point(color='red') +	
+  	geom_smooth(method='lm'))
+  
 }
 
+
+#kable(times_table, caption = "Times table", col.names=c("Specification","Diagnosis(s)","Liveness fluents", "Plant transitions", "Min. transitions","Minimization pct.(%)","Min. steps"))
+
+```
+
+## Compared time against time and formula size
+
+```{r echo=FALSE}
+compared_data_no_zero <- compared_data[compared_data$plant_transitions > 0,]
+x <- compared_data_no_zero$liveness_count_liveness
+y <- log(compared_data_no_zero$plant_transitions)
+z <- log(compared_data_no_zero$diagnosis_time_liveness)
+# Compute the linear regression 
+fit <- lm(z ~ x + y)
+# create a grid from the x and y values (min to max) and predict values for every point
+# this will become the regression plane
+grid.lines = 20
+x.pred <- seq(min(x), max(x), length.out = grid.lines)
+y.pred <- seq(min(y), max(y), length.out = grid.lines)
+xy <- expand.grid( x = x.pred, y = y.pred)
+z.pred <- matrix(predict(fit, newdata = xy), 
+                 nrow = grid.lines, ncol = grid.lines)
+# create the fitted points for droplines to the surface
+fitpoints <- predict(fit)
+# scatter plot with regression plane
+scatter3D(x, y, z, pch = 19, cex = 1,colvar = NULL, col="red", theta = -70, phi = 0, bty="b",
+          xlab = "|A|+|G|", ylab = "log|Delta|", zlab = "log(Diagnosis (s))", surf = list(x = x.pred, y = y.pred, z = z.pred,  
+                      facets = FALSE, fit = fitpoints, col=ramp.col (col = c("dodgerblue3","seagreen2"), n = 300, alpha=0.5), border="blue"), main = "Diagnosis time vs size and formula size(liveness)")
+
+scatter3D(x, y, z, pch = 19, cex = 1,colvar = NULL, col="red", theta = 70, phi = 0, bty="b",
+          xlab = "|A|+|G|", ylab = "log|Delta|", zlab = "log(Diagnosis) (s)", surf = list(x = x.pred, y = y.pred, z = z.pred,  
+                      facets = FALSE, fit = fitpoints, col=ramp.col (col = c("dodgerblue3","seagreen2"), n = 300, alpha=0.5), border="blue"), main = "Diagnosis time vs size and formula size(liveness, rotated)")
+
+x <- compared_data_no_zero$liveness_count_safety
+y <- log(compared_data_no_zero$plant_transitions)
+z <- log(compared_data_no_zero$diagnosis_time_safety)
+# Compute the linear regression 
+fit <- lm(z ~ x + y)
+# create a grid from the x and y values (min to max) and predict values for every point
+# this will become the regression plane
+grid.lines = 20
+x.pred <- seq(min(x), max(x), length.out = grid.lines)
+y.pred <- seq(min(y), max(y), length.out = grid.lines)
+xy <- expand.grid( x = x.pred, y = y.pred)
+z.pred <- matrix(predict(fit, newdata = xy), 
+                 nrow = grid.lines, ncol = grid.lines)
+# create the fitted points for droplines to the surface
+fitpoints <- predict(fit)
+# scatter plot with regression plane
+scatter3D(x, y, z, pch = 19, cex = 1,colvar = NULL, col="red", theta = -70, phi = 0, bty="b",
+          xlab = "|A|+|G|", ylab = "log|Delta|", zlab = "log(Diagnosis (s))", surf = list(x = x.pred, y = y.pred, z = z.pred,  
+                      facets = FALSE, fit = fitpoints, col=ramp.col (col = c("dodgerblue3","seagreen2"), n = 300, alpha=0.5), border="blue"), main = "Diagnosis time vs size and formula size(safety)")
+
+scatter3D(x, y, z, pch = 19, cex = 1,colvar = NULL, col="red", theta = 70, phi = 0, bty="b",
+          xlab = "|A|+|G|", ylab = "log|Delta|", zlab = "log(Diagnosis) (s)", surf = list(x = x.pred, y = y.pred, z = z.pred,  
+                      facets = FALSE, fit = fitpoints, col=ramp.col (col = c("dodgerblue3","seagreen2"), n = 300, alpha=0.5), border="blue"), main = "Diagnosis time vs size and formula size(safety)")
 
 ```
 </div>

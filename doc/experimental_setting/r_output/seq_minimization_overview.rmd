@@ -1,0 +1,616 @@
+---
+title: "Behavior Minimization"
+author: "Mariano Cerrutti"
+date: "5/26/2020"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE,
+                      results= "asis")
+#install.packages("dplyr")
+#install.packages("magrittr")
+#install.packages("ggplot2")
+#install.packages("jsonlite")
+#install.packages("plot3D")
+library(dplyr)
+library(magrittr)
+library(ggplot2)
+library(jsonlite)
+library(gridExtra)
+library(grid)
+library(lattice)
+library(knitr)
+library(scales)
+library(plot3D)
+library(stringr)
+suppressMessages(library(dplyr))
+suppressMessages(library(ggplot2))
+#experimental_composite <- read.csv(file='/home/mariano/code/henos-automata/doc/experimental_setting/tmp_results/general_data_composite.csv')
+experimental_composite <- read.csv(file='/home/mariano/code/henos-automata/doc/experimental_setting/tmp_results/unrealizable_data_composite.csv')
+genbuf_missing <- subset(experimental_composite, grepl("automaton_missing_assumption", name, fixed=TRUE))
+genbuf_removed <- subset(experimental_composite, grepl("automaton_removed_env_safety", name, fixed=TRUE))
+collector_missing <- subset(experimental_composite, grepl("v1_missing_assumption", name, fixed=TRUE))
+robot_samples <- subset(experimental_composite, grepl("Robot", name, fixed=TRUE))
+has_control_samples <- experimental_composite[experimental_composite$plant_controllable_options > experimental_composite$plant_states,]
+
+```
+<style type="text/css">
+.twoC {width: 100%}
+.clearer {clear: both}
+.twoC .table {max-width: 50%; float: right}
+.twoC img {max-width: 50%; float: left}
+table {
+  margin: auto;
+  border-top: 1px solid #666;
+  border-bottom: 1px solid #666;
+}
+table thead th { border-bottom: 1px solid #ddd; }
+th, td { padding: 5px; }
+thead, tfoot, tr:nth-child(even) { background: #eee; }
+pre{display:none;}
+</style>
+
+# Selected Graphs
+
+## General Table
+
+Specification sizes go from `r min(experimental_composite$plant_transitions)` transitions up to `r max(experimental_composite$plant_transitions)`.
+Minimization reduction goes from `r max(experimental_composite$minimization_transitions / experimental_composite$plant_transitions)` up to `r min(experimental_composite$minimization_transitions / experimental_composite$plant_transitions)` with an mean of `r mean(experimental_composite$minimization_transitions / experimental_composite$plant_transitions)` and a standard deviation of `r sd(experimental_composite$minimization_transitions / experimental_composite$plant_transitions)`.
+
+```{r echo=FALSE}
+times_table <- experimental_composite[c(1,7)]
+times_table$liveness_count <- experimental_composite$guarantees_count + experimental_composite$assumptions_count
+times_table$plant_transitions <- experimental_composite$plant_transitions
+times_table$minimization_transitions <- experimental_composite$minimization_transitions
+times_table$reduction <- experimental_composite$minimization_transitions / experimental_composite$plant_transitions
+times_table$steps <- experimental_composite$diagnosis_steps
+times_table <- times_table %>%
+  group_by(name) %>%
+  summarize(diag <- mean(diagnosis_time), liveness <- max(liveness_count), plant_trans <- max(plant_transitions),
+            min_trans <- max(minimization_transitions), red <- (mean(reduction)*100), steps <- max(steps))
+kable(times_table, caption = "Times table", col.names=c("Specification","Diagnosis(s)","Liveness fluents", "Plant transitions", "Min. transitions","Minimization pct.(%)","Min. steps"))
+
+#over_10000 <- times_table[times_table$plant_transitions >= 10000,]
+#mean(over_10000$reduction * 100)
+#mean(over_10000$minimization_transitions)
+#over_1000 <- times_table[times_table$plant_transitions >= 1000,]
+#mean(over_1000$reduction * 100)
+#mean(over_1000$minimization_transitions)
+#over_100 <- times_table[times_table$plant_transitions >= 100,]
+#mean(over_100$reduction * 100)
+#over_200 <- times_table[times_table$plant_transitions >= 200,]
+#mean(over_200$reduction * 100)
+
+```
+
+## Minimization distribution (overall)
+
+```{r echo=FALSE}
+
+```
+
+
+## Minimization distribution vs size
+
+```{r echo=FALSE}
+c_coeff = experimental_composite$minimization_controllable_transitions / experimental_composite$plant_transitions	
+m_coeff = experimental_composite$minimization_transitions / experimental_composite$plant_transitions	
+ggplot(experimental_composite, aes(x=plant_transitions, y=1/m_coeff)) +
+	labs(title="Size vs size") +
+	xlab(expression(paste("|",Delta["E"],"|"))) +
+  ylab("Reduction^-1") +
+	scale_y_log10() +
+  scale_x_log10() +	
+	geom_point(color='red') +	
+	geom_smooth(method='lm')
+
+
+
+```
+
+## Minimization and diagnosis time
+```{r echo=FALSE}
+#sive vs diagnosis time
+ggplot(experimental_composite, aes(x=diagnosis_time, y=1/m_coeff)) +
+	labs(title="Size vs diagnosis time") +
+	xlab("Diagnosis time (s)") +
+  ylab(expression(paste("Reduction^-1"))) +  
+	scale_y_log10() +
+	scale_x_log10() +	
+	geom_point(color='red') +	
+	geom_smooth(method='lm')
+
+
+```
+
+## Size and diagnosis time
+```{r echo=FALSE}
+#sive vs diagnosis time
+ggplot(experimental_composite, aes(x=diagnosis_time, y=plant_transitions)) +
+	labs(title="Size vs diagnosis time") +
+	xlab("Diagnosis time (s)") +
+  ylab(expression(paste("|",Delta["E"],"|"))) +
+	scale_y_log10() +
+	scale_x_log10() +	
+	geom_point(color='red') +	
+	geom_smooth(method='lm')
+
+
+```
+
+## Minimization and minimization controllability
+
+```{r echo=FALSE}
+#plant controllability vs minimization amount
+no_robot_c_coeff = has_control_samples$minimization_controllable_options / has_control_samples$plant_states
+no_robot_m_coeff = has_control_samples$minimization_transitions / has_control_samples$plant_transitions	
+ggplot(has_control_samples, aes(x=no_robot_c_coeff, y=no_robot_m_coeff)) +
+	labs(title="Minimization controllability vs minimization amount") +
+	xlab("Minimization controllability") +
+	ylab("Reduction") +
+	scale_y_log10() +
+	scale_x_log10() +	
+	geom_point(color='red') +
+	geom_smooth(method='lm')	
+
+
+```
+
+# Sequentialization of CLTS structures
+
+```{r echo=FALSE}
+seq_composite <- read.csv(file='/home/mariano/code/henos-automata/doc/experimental_setting/tmp_results/seq_data_composite.csv')
+
+seq_composite_genbuf_4 <- dplyr::filter(seq_composite, grepl("genbuf_4",filename))
+seq_composite_arbiter_3 <- dplyr::filter(seq_composite, grepl("arbiter_3",filename))
+
+seq_composite_game <- dplyr::filter(seq_composite, !grepl("intrlvd",filename) & !grepl("seq",filename))
+seq_composite_intrlvd <- dplyr::filter(seq_composite, grepl("intrlvd",filename))
+seq_composite_seq <- dplyr::filter(seq_composite, grepl("seq",filename))
+seq_composite_game_intrlvd_conform <- seq_composite_game[-c(21,22,23,27),]
+
+seq_composite_game$seq_states <- seq_composite_seq$states_count
+seq_composite_game$seq_transitions <- seq_composite_seq$transitions_count
+seq_composite_game$states_ratio <- seq_composite_game$states_count / seq_composite_seq$states_count
+seq_composite_game$transitions_ratio <- seq_composite_game$transitions_count / seq_composite_seq$transitions_count;
+seq_composite_game$states_ratio_vs_mean_signals <- seq_composite_game$mean_signals_t / (seq_composite_game$states_count / seq_composite_seq$states_count);
+seq_composite_game$trans_times_mean_signals <- (seq_composite_game$mean_signals_t+2) * seq_composite_game$transitions_count;
+seq_composite_game$trans_times_mean_signals_vs_seq_states <- (seq_composite_game$seq_states - seq_composite_game$states_count) / seq_composite_game$trans_times_mean_signals;
+seq_composite_game$trans_vs_states <- seq_composite_game$transitions_count / seq_composite_game$states_count;
+
+seq_composite_game_intrlvd_conform$intrlvd_states <- seq_composite_intrlvd$states_count
+seq_composite_game_intrlvd_conform$intrlvd_transitions <- seq_composite_intrlvd$transitions_count
+seq_composite_game_intrlvd_conform$states_ratio <- seq_composite_game_intrlvd_conform$states_count / seq_composite_intrlvd$states_count
+seq_composite_game_intrlvd_conform$transitions_ratio <- seq_composite_game_intrlvd_conform$transitions_count / seq_composite_intrlvd$transitions_count;
+seq_composite_game_intrlvd_conform$states_ratio_vs_mean_signals <- seq_composite_game_intrlvd_conform$mean_signals_t / (seq_composite_game_intrlvd_conform$states_count / seq_composite_intrlvd$states_count);
+seq_composite_game_intrlvd_conform$trans_times_mean_signals <- (seq_composite_game_intrlvd_conform$mean_signals_t+2) * seq_composite_game_intrlvd_conform$transitions_count;
+seq_composite_game_intrlvd_conform$trans_times_mean_signals_vs_intrlvd_states <- (seq_composite_game_intrlvd_conform$intrlvd_states - seq_composite_game_intrlvd_conform$states_count) / seq_composite_game_intrlvd_conform$trans_times_mean_signals;
+seq_composite_game_intrlvd_conform$trans_vs_states <- seq_composite_game_intrlvd_conform$transitions_count / seq_composite_game_intrlvd_conform$states_count;
+
+seq_composite_game_no_robot <- dplyr::filter(seq_composite_game, !grepl("robot",filename))
+seq_composite_game_robot <- dplyr::filter(seq_composite_game, grepl("robot",filename))
+seq_composite_game_intrlvd_conform_no_robot <- dplyr::filter(seq_composite_game_intrlvd_conform, !grepl("robot",filename))
+seq_composite_game_intrlvd_conform_robot <- dplyr::filter(seq_composite_game_intrlvd_conform, !grepl("robot",filename))
+```
+
+## Reduction table (concurrent vs sequential)
+
+```{r echo=FALSE}
+#, col.names=c("Specification","Diagnosis(s)","Liveness fluents", "Plant transitions", "Min. transitions","Minimization pct.(%)","Min. steps")
+table_seq_composite_game_no_robot <- subset(seq_composite_game_no_robot, select = c(filename, states_count, seq_states, states_ratio, transitions_count, seq_transitions, transitions_ratio, mean_delta_s, mean_signals_t, trans_times_mean_signals, trans_times_mean_signals_vs_seq_states, trans_vs_states))
+table_seq_composite_game_no_robot$filename <- str_replace_all(table_seq_composite_game_no_robot$filename, "/tmp/", "")
+table_seq_composite_game_no_robot$filename <- str_replace_all(table_seq_composite_game_no_robot$filename, ".diag", "")
+table_seq_composite_game_no_robot$filename <- str_replace_all(table_seq_composite_game_no_robot$filename, ".game", "")
+table_seq_composite_game_no_robot$filename <- str_replace_all(table_seq_composite_game_no_robot$filename, ".fsp", "")
+table_seq_composite_game_no_robot$filename <- str_replace_all(table_seq_composite_game_no_robot$filename, "_", " ")
+kable(table_seq_composite_game_no_robot, caption = "Concurrent vs seq", col.names=c("Specification","#States","#Seq. states","#States/#Seq. states", "#Transitions", "#Seq. trans", "#Trans/#Seq, Trans","Mean out(s)","Mean signals per trans.", "#Trans x mean signals", "#Seq. states/#Trans x mean signals", "#Trans./#States"))
+```
+
+
+## Explaining sequential size correlation (event based)
+
+```{r echo=FALSE}
+ggplot(table_seq_composite_game_no_robot, aes(x=trans_times_mean_signals_vs_seq_states, y=trans_vs_states)) +
+  labs(title="Seq. size explanation 1") +
+  xlab("#Seq. states/#Trans x mean signals") +
+  ylab("#Trans./#States") +	
+  geom_point(color='red') +	
+	geom_smooth(method='lm')
+
+ggplot(table_seq_composite_game_no_robot, aes(x=1/states_ratio, y=trans_vs_states)) +
+  labs(title="Seq. size explanation 2") +
+  xlab("#Seq. #States/States") +
+  ylab("#Trans./#States") +	
+  geom_point(color='red') +	
+    scale_y_log10() +
+    scale_x_log10() +
+	geom_smooth(method='lm')
+
+
+ggplot(table_seq_composite_game_no_robot, aes(x=trans_times_mean_signals_vs_seq_states, y=trans_vs_states, label=filename)) +
+  geom_point() +geom_text(aes(label=filename),hjust=0, vjust=0)+
+  labs(title="Seq. size explanation 1") +
+  xlab("#Seq. states/#Trans x mean signals") +
+  ylab("#Trans./#States") +	
+  geom_point(color='red')
+
+ggplot(table_seq_composite_game_no_robot, aes(x=1/states_ratio, y=trans_vs_states, label=filename)) +
+  geom_point() +geom_text(aes(label=filename),hjust=0, vjust=0)+
+  labs(title="Seq. size explanation 2") +
+  xlab("#Seq. #States/States") +
+  ylab("#Trans./#States") +	
+  geom_point(color='red') +	
+    scale_y_log10() +
+    scale_x_log10()
+```
+
+## Reduction table (concurrent vs interleaved)
+
+```{r echo=FALSE}
+#, col.names=c("Specification","Diagnosis(s)","Liveness fluents", "Plant transitions", "Min. transitions","Minimization pct.(%)","Min. steps")
+table_intrlvd_composite_game_no_robot <- subset(seq_composite_game_intrlvd_conform_no_robot, select = c(filename, states_count, intrlvd_states, states_ratio, transitions_count, intrlvd_transitions, transitions_ratio, mean_delta_s, mean_signals_t, trans_times_mean_signals, trans_times_mean_signals_vs_intrlvd_states, trans_vs_states))
+table_intrlvd_composite_game_no_robot$filename <- str_replace_all(table_intrlvd_composite_game_no_robot$filename, "/tmp/", "")
+table_intrlvd_composite_game_no_robot$filename <- str_replace_all(table_intrlvd_composite_game_no_robot$filename, ".diag", "")
+table_intrlvd_composite_game_no_robot$filename <- str_replace_all(table_intrlvd_composite_game_no_robot$filename, ".game", "")
+table_intrlvd_composite_game_no_robot$filename <- str_replace_all(table_intrlvd_composite_game_no_robot$filename, ".fsp", "")
+table_intrlvd_composite_game_no_robot$filename <- str_replace_all(table_intrlvd_composite_game_no_robot$filename, "_", " ")
+kable(table_intrlvd_composite_game_no_robot, caption = "Concurrent vs interleaved", col.names=c("Specification","#States","#Intrlvd. States","#States/#Intrlvd. States", "#Transitions","#Intrlvd. Trans", "#Trans/#Intrlvd. Trans","Mean out(s)","Mean signals per trans.", "#Trans x mean signals", "#Intrlvd. states/#Trans x mean signals", "#Trans./#States"))
+```
+
+## Mean signal count vs space reduction (seq, signal based)
+
+```{r echo=FALSE}
+x <- seq_composite_game_no_robot$states_count
+y <- seq_composite_game_no_robot$states_ratio
+z <- seq_composite_game_no_robot$mean_signals_t
+# Compute the linear regression 
+fit <- lm(z ~ x + y)
+# create a grid from the x and y values (min to max) and predict values for every point
+# this will become the regression plane
+grid.lines = 20
+x.pred <- seq(min(x), max(x), length.out = grid.lines)
+y.pred <- seq(min(y), max(y), length.out = grid.lines)
+xy <- expand.grid( x = x.pred, y = y.pred)
+z.pred <- matrix(predict(fit, newdata = xy), 
+                 nrow = grid.lines, ncol = grid.lines)
+# create the fitted points for droplines to the surface
+fitpoints <- predict(fit)
+# scatter plot with regression plane
+scatter3D(x, y, z, pch = 19, cex = 1,colvar = NULL, col="red", theta = -30, phi = 0, bty="b",
+          xlab = "|S|", ylab = "|S|/|S'|", zlab = "mean sig. x trans.", surf = list(x = x.pred, y = y.pred, z = z.pred,  
+                      facets = TRUE, fit = fitpoints, col=ramp.col (col = c("dodgerblue3","seagreen2"), n = 300, alpha=0.5), border="black"), main = "Mean signal count vs space reduction (seq, signal based)")
+ 
+```
+
+## Mean signal count vs space reduction (seq, signal based)
+
+```{r echo=FALSE}
+x <- seq_composite_game_no_robot$transitions_count
+y <- seq_composite_game_no_robot$transitions_ratio
+z <- seq_composite_game_no_robot$mean_signals_t
+# Compute the linear regression 
+fit <- lm(z ~ x + y)
+# create a grid from the x and y values (min to max) and predict values for every point
+# this will become the regression plane
+grid.lines = 20
+x.pred <- seq(min(x), max(x), length.out = grid.lines)
+y.pred <- seq(min(y), max(y), length.out = grid.lines)
+xy <- expand.grid( x = x.pred, y = y.pred)
+z.pred <- matrix(predict(fit, newdata = xy), 
+                 nrow = grid.lines, ncol = grid.lines)
+# create the fitted points for droplines to the surface
+fitpoints <- predict(fit)
+# scatter plot with regression plane
+scatter3D(x, y, z, pch = 19, cex = 1,colvar = NULL, col="red", theta = -30, phi = 0, bty="b",
+          xlab = "|Delta|", ylab = "|Delta|/|Delta'|", zlab = "mean sig. x trans.", surf = list(x = x.pred, y = y.pred, z = z.pred,  
+                      facets = TRUE, fit = fitpoints, col=ramp.col (col = c("dodgerblue3","seagreen2"), n = 300, alpha=0.5), border="black"), main = "Mean signal count vs trans. reduction (seq, signal based)")
+ 
+```
+
+## Sequential translation (signal based)
+
+```{r echo=FALSE}
+
+
+ggplot(seq_composite_game_no_robot, aes(x=states_count, y=states_ratio)) +
+  labs(title="Seq. states reduction ratio (signal based)") +
+  xlab("|S_E|") +
+  ylab("Reduction") +
+  scale_y_log10() +
+  scale_x_log10() +	
+  geom_point(color='red') +	
+	geom_smooth(method='lm')
+
+ggplot(seq_composite_game_no_robot, aes(x=transitions_count, y=transitions_ratio)) +
+  labs(title="Seq. transition reduction ratio (signal based)") +
+  xlab("|Delta_E|") +
+  ylab("Reduction") +
+  scale_y_log10() +
+  scale_x_log10() +	
+  geom_point(color='red')  +	
+	geom_smooth(method='lm')
+
+ggplot(seq_composite_game_no_robot, aes(x=mean_signals_t, y=states_ratio)) +
+  labs(title="Seq. states reduction ratio vs mean signals") +
+  xlab("mean(signals per trans.)") +
+  ylab("Reduction") +
+  scale_y_log10() +
+  scale_x_log10() +	
+  geom_point(color='red')  +	
+	geom_smooth(method='lm')
+
+ggplot(seq_composite_game_no_robot, aes(x=mean_signals_t, y=transitions_ratio)) +
+  labs(title="Seq. transition reduction ratio vs mean signals") +
+  xlab("mean(signals per trans.)") +
+  ylab("Reduction") +
+  scale_y_log10() +
+  scale_x_log10() +	
+  geom_point(color='red')  +	
+	geom_smooth(method='lm')
+```
+
+## Sequential translation (event based)
+
+```{r echo=FALSE}
+ggplot(seq_composite_game_robot, aes(x=states_count, y=states_ratio)) +
+  labs(title="Seq. states reduction ratio (event based)") +
+  xlab("|S_E|") +
+  ylab("Reduction") +
+  scale_y_log10() +
+  scale_x_log10() +	
+  geom_point(color='red') +	
+	geom_smooth(method='lm')
+
+ggplot(seq_composite_game_robot, aes(x=transitions_count, y=transitions_ratio)) +
+  labs(title="Seq. transition reduction ratio (event based)") +
+  xlab("|Delta_E|") +
+  ylab("Reduction") +
+  scale_y_log10() +
+  scale_x_log10() +	
+  geom_point(color='red') +	
+	geom_smooth(method='lm')
+```
+
+## Interleaved translation(signal based)
+
+```{r echo=FALSE}
+ggplot(seq_composite_game_intrlvd_conform_no_robot, aes(x=states_count, y=states_ratio)) +
+  labs(title="Seq. states reduction ratio (signal based)") +
+  xlab("|S_E|") +
+  ylab("Reduction") +
+  scale_y_log10() +
+  scale_x_log10() +	
+  geom_point(color='red') +	
+	geom_smooth(method='lm')
+
+ggplot(seq_composite_game_intrlvd_conform_no_robot, aes(x=transitions_count, y=transitions_ratio)) +
+  labs(title="Seq. transition reduction ratio (signal based)") +
+  xlab("|Delta_E|") +
+  ylab("Reduction") +
+  scale_y_log10() +
+  scale_x_log10() +	
+  geom_point(color='red') +	
+	geom_smooth(method='lm')
+```
+
+## Interleaved translation (event based)
+```{r echo=FALSE}
+
+ggplot(seq_composite_game_intrlvd_conform_robot, aes(x=states_count, y=states_ratio)) +
+  labs(title="Seq. states reduction ratio (event based)") +
+  xlab("|S_E|") +
+  ylab("Reduction") +
+  scale_y_log10() +
+  scale_x_log10() +	
+  geom_point(color='red') +	
+	geom_smooth(method='lm')
+
+ggplot(seq_composite_game_intrlvd_conform_robot, aes(x=transitions_count, y=transitions_ratio)) +
+  labs(title="Seq. transition reduction ratio (event based)") +
+  xlab("|Delta_E|") +
+  ylab("Reduction") +
+  scale_y_log10() +
+  scale_x_log10() +	
+  geom_point(color='red') +	
+	geom_smooth(method='lm')
+```
+
+# Compared graphs
+
+```{r echo=FALSE}
+#rows, cols
+sizediag_g_ass <- ggplot(genbuf_missing, aes(x=plant_transitions, y=diagnosis_time)) +
+	labs(title="Genbuf.ass.") +
+	xlab(expression(paste("|",Delta["E"],"|"))) +
+	ylab("Diagnosis time (s)") +
+	scale_y_log10() +
+	scale_x_log10() +	
+	geom_point(color='red') +	
+	geom_smooth(method='lm')
+sizediag_safety <- ggplot(genbuf_removed, aes(x=plant_transitions, y=diagnosis_time)) +
+	labs(title="Genbuf.safety") +
+	xlab(expression(paste("|",Delta["E"],"|"))) +
+	ylab("Diagnosis time (s)") +
+	scale_y_log10() +
+	scale_x_log10() +	
+	geom_point(color='red') +	
+	geom_smooth(method='lm')
+sizediag_collector <- ggplot(collector_missing, aes(x=plant_transitions, y=diagnosis_time)) +
+	labs(title="Collector") +
+	xlab(expression(paste("|",Delta["E"],"|"))) +
+	ylab("Diagnosis time (s)") +
+	scale_y_log10() +
+	scale_x_log10() +	
+	geom_point(color='red') +	
+	geom_smooth(method='lm')	
+sizediag_exploration <- ggplot(robot_samples, aes(x=plant_transitions, y=diagnosis_time)) +
+	labs(title="Robot") +
+	xlab(expression(paste("|",Delta["E"],"|"))) +
+	ylab("Diagnosis time (s)") +
+	scale_y_log10() +
+	scale_x_log10() +	
+	geom_point(color='red') +	
+	geom_smooth(method='lm')
+plantminsize_g_ass <- ggplot(genbuf_missing, aes(x=plant_transitions, y=minimization_transitions)) +
+	labs(title="Genbuf.ass.") +
+	xlab(expression(paste("|",Delta[E],"|"))) +
+	ylab(expression(paste("|",Delta[paste("E","'")],"|"))) +
+	scale_y_log10() +
+	scale_x_log10() +	
+	geom_point(color='red') +	
+	geom_smooth(method='lm')	
+plantminsize_safety <- ggplot(genbuf_removed, aes(x=plant_transitions, y=minimization_transitions)) +
+	labs(title="Genbuf.safety") +
+	xlab(expression(paste("|",Delta[E],"|"))) +
+	ylab(expression(paste("|",Delta[paste("E","'")],"|"))) +
+	scale_y_log10() +
+	scale_x_log10() +	
+	geom_point(color='red') +	
+	geom_smooth(method='lm')		
+plantminsize_collector <- ggplot(collector_missing, aes(x=plant_transitions, y=minimization_transitions)) +
+	labs(title="Collector") +
+	xlab(expression(paste("|",Delta[E],"|"))) +
+	ylab(expression(paste("|",Delta[paste("E","'")],"|"))) +
+	scale_y_log10() +
+	scale_x_log10() +	
+	geom_point(color='red') 
+#+	geom_smooth(method='lm')	
+plantminsize_exploration <- ggplot(robot_samples, aes(x=plant_transitions, y=minimization_transitions)) +
+	labs(title="Robot") +
+	xlab(expression(paste("|",Delta[E],"|"))) +
+	ylab(expression(paste("|",Delta[paste("E","'")],"|"))) +
+	scale_y_log10() +
+	scale_x_log10() +	
+	geom_point(color='red') +	
+	geom_smooth(method='lm')	
+c_coeff_ga = genbuf_missing$plant_controllable_transitions / genbuf_missing$plant_transitions	
+m_coeff_ga = genbuf_missing$minimization_transitions / genbuf_missing$plant_transitions	
+control_g_ass <- ggplot(genbuf_missing, aes(x=c_coeff_ga, y=m_coeff_ga)) +
+	labs(title="Genbuf.ass") +
+	xlab("Controllability") +
+	ylab("Reduction") +
+	scale_y_log10() +
+	scale_x_log10() +	
+	geom_point(color='red') +
+	geom_smooth(method='lm')	
+c_coeff_gs = genbuf_removed$plant_controllable_transitions / genbuf_removed$plant_transitions	
+m_coeff_gs = genbuf_removed$minimization_transitions / genbuf_removed$plant_transitions	
+control_safety <- ggplot(genbuf_removed, aes(x=c_coeff_gs, y=m_coeff_gs)) +
+	labs(title="Genbuf.safety") +
+	xlab("Controllability") +
+	ylab("Reduction") +
+	scale_y_log10() +
+	scale_x_log10() +	
+	geom_point(color='red') +
+	geom_smooth(method='lm')
+c_coeff_c = collector_missing$plant_controllable_transitions / collector_missing$plant_transitions	
+m_coeff_c = collector_missing$minimization_transitions / collector_missing$plant_transitions	
+control_collector <- ggplot(collector_missing, aes(x=c_coeff_c, y=m_coeff_c)) +
+	labs(title="Collector") +
+	xlab("Controllability") +
+	ylab("Reduction") +
+	scale_y_log10() +
+	scale_x_log10() +	
+	geom_point(color='red') 
+# +	geom_smooth(method='lm')
+c_coeff_r = robot_samples$plant_controllable_transitions / robot_samples$plant_transitions	
+m_coeff_r = robot_samples$minimization_transitions / robot_samples$plant_transitions	
+control_robot <- ggplot(robot_samples, aes(x=c_coeff_r, y=m_coeff_r)) +
+	labs(title="Robot") +
+	xlab("Controllability") +
+	ylab("Reduction") +
+	scale_y_log10() +
+	scale_x_log10() +	
+	geom_point(color='red') +
+	geom_smooth(method='lm')	
+m_c_coeff_ga = genbuf_missing$minimization_controllable_transitions / genbuf_missing$plant_transitions	
+m_m_coeff_ga = genbuf_missing$minimization_transitions / genbuf_missing$plant_transitions	
+m_control_g_ass <- ggplot(genbuf_missing, aes(x=m_c_coeff_ga, y=m_m_coeff_ga)) +
+	labs(title="Genbuf.ass") +
+	xlab("Min. Cont.") +
+	ylab("Reduction") +
+	scale_y_log10() +
+	scale_x_log10() +	
+	geom_point(color='red') +
+	geom_smooth(method='lm')	
+m_c_coeff_gs = genbuf_removed$minimization_controllable_transitions / genbuf_removed$plant_transitions	
+m_m_coeff_gs = genbuf_removed$minimization_transitions / genbuf_removed$plant_transitions	
+m_control_safety <- ggplot(genbuf_removed, aes(x=m_c_coeff_gs, y=m_m_coeff_gs)) +
+	labs(title="Genbuf.safety") +
+	xlab("Min. Cont.") +
+	ylab("Reduction") +
+	scale_y_log10() +
+	scale_x_log10() +	
+	geom_point(color='red') +
+	geom_smooth(method='lm')
+m_c_coeff_c = collector_missing$minimization_controllable_transitions / collector_missing$plant_transitions	
+m_m_coeff_c = collector_missing$minimization_transitions / collector_missing$plant_transitions	
+m_control_collector <- ggplot(collector_missing, aes(x=m_c_coeff_c, y=m_m_coeff_c)) +
+	labs(title="Collector") +
+	xlab("Min. Cont.") +
+	ylab("Reduction") +
+	scale_y_log10() +
+	scale_x_log10() +	
+	geom_point(color='red') +
+  geom_smooth(method='lm')
+m_c_coeff_r = robot_samples$minimization_controllable_transitions / robot_samples$plant_transitions	
+m_m_coeff_r = robot_samples$minimization_transitions / robot_samples$plant_transitions	
+m_control_robot <- ggplot(robot_samples, aes(x=m_c_coeff_r, y=m_m_coeff_r)) +
+	labs(title="Robot") +
+	xlab("Min. Cont.") +
+	ylab("Reduction") +
+	scale_y_log10() +
+	scale_x_log10() +	
+	geom_point(color='red') +
+	geom_smooth(method='lm')	
+```
+
+```{r echo=FALSE}
+grid.arrange(sizediag_g_ass, sizediag_safety, sizediag_collector, sizediag_exploration, plantminsize_g_ass, plantminsize_safety, plantminsize_collector, plantminsize_exploration, control_g_ass, control_safety, control_collector, control_robot, m_control_g_ass, m_control_safety, m_control_collector, m_control_robot, ncol=4)
+```
+
+## Minimization progression
+<div class="twoC">
+```{r echo=FALSE}
+steps_path = "/home/mariano/code/henos-automata/doc/experimental_setting/tmp_results/steps/"
+steps_files = list.files(path=steps_path, pattern="*.csv")
+#for (i in 1:length(steps_files)) steps_df[i] <- read.csv(steps_files[i])
+
+effective_plots <- 0
+for (i in 1:length(steps_files)){
+  df <- read.csv(file=paste(steps_path, steps_files[i], sep=''))
+  if(length(df$step) < 2){
+    next
+  }
+  effective_plots <- effective_plots + 1
+}
+#layout(matrix(1:effective_plots*2,nc=2, nr= effective_plots,byr=T))
+for (i in 1:length(steps_files)){
+  df <- read.csv(file=paste(steps_path, steps_files[i], sep=''))
+  if(length(df$step) < 2){
+    next
+  }
+  time_plot <- ggplot(df, aes(x=step, y=time, group=i)) +
+  geom_line(linetype="dashed", color="blue", size=1.2)+
+  geom_point(color="red", size=3) + 
+  labs(title=steps_files[i]) +
+	xlab("Steps") +
+	ylab("Time (s)") 
+  print(time_plot)
+  size_plot <- ggplot(df, aes(x=step, y=size, group=i)) +
+  geom_line(linetype="dashed", color="blue", size=1.2)+
+  geom_point(color="red", size=3) + 
+  labs(title=steps_files[i]) +
+	xlab("Steps") +
+	ylab(expression(paste("|",Delta[paste("E","'")],"|")))
+  print(size_plot)  
+}
+
+
+```
+</div>
+<div class="clearer"></div>

@@ -1,6 +1,7 @@
 TODO:
 =====
 -benchmark
+	- revisar casos > 100 de robot explorer realizables (parece que no lo son)
 	- presentar reportes por caso de estudio
 		- proporción de reducción
 		- tiempos
