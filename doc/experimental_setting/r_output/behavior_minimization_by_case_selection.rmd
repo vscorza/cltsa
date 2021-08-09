@@ -106,6 +106,7 @@ Specification sizes go from `r min(compared_data$plant_transitions)` transitions
 Minimization reduction goes from `r max_reduction` up to `r min_reduction`.
 
 ## Plant transitions size vs diagnosis time
+
 ```{r echo=FALSE}
 #sive vs diagnosis time
 general_data <- read.csv(file='/home/mariano/code/henos-automata/doc/experimental_setting/tmp_results/unrealizable_data_composite.csv')
@@ -122,6 +123,7 @@ ggplot(general_data, aes(x=diagnosis_time, y=plant_transitions)) +
 ```
 
 ## Minimization and minimization controllability
+
 ```{r echo=FALSE}
 #plant controllability vs minimization amount
 no_robot_c_coeff = general_data$minimization_controllable_options / general_data$plant_states
@@ -137,13 +139,14 @@ ggplot(general_data, aes(x=no_robot_c_coeff, y=no_robot_m_coeff)) +
 
 
 ```
+
 ## Compared times between synthesis and diagnosis
 
 ```{r echo=FALSE}
 #dividing compared data by case
 cases <- c("Collector", "Exploration","Airport","Bidding","Transfer","Travel")
-
 cases_names <- c("Collector", "Exploration Robot","Airport Tower","Bidding Workflow","Transfer Line","Travel Agency" )
+
 for (i in 1:length(cases)){
   current_data <- subset(compared_data, grepl(cases[i], name))  
   print(ggplot(current_data, aes(x=synthesis_time, y=diagnosis_time_liveness)) +
@@ -163,6 +166,42 @@ for (i in 1:length(cases)){
     scale_x_log10() +	
   	geom_point(color='red') +	
   	geom_smooth(method='lm'))
+  
+}
+
+
+#kable(times_table, caption = "Times table", col.names=c("Specification","Diagnosis(s)","Liveness fluents", "Plant transitions", "Min. transitions","Minimization pct.(%)","Min. steps"))
+
+```
+
+
+## Compared times between plant vs minimization size
+
+```{r echo=FALSE}
+#dividing compared data by case
+cases <- c("Ahb","Genbuf","Lift","Collector", "Exploration","Airport","Bidding","Transfer","Travel")
+cases_names <- c("AHB Arbiter","GenBuf","Lift Controller","Collector", "Exploration Robot","Airport Tower","Bidding Workflow","Transfer Line","Travel Agency" )
+
+for (i in 1:length(cases)){
+  current_data <- subset(compared_data, grepl(cases[i], name))  
+
+  print(ggplot(current_data, aes(x=plant_transitions, y=minimization_transitions_liveness)) +
+  	labs(title=paste("Plant vs minimization size (liveness)", cases_names[i])) +
+  	xlab(expression(paste("|",Delta["E"],"|"))) +
+    ylab(expression(paste("|",Delta["E'"],"|"))) +
+  	scale_y_log10() +
+    scale_x_log10() +	
+  	geom_point(color='red') +	
+  	geom_smooth(method='lm'))  
+  
+  print(ggplot(current_data, aes(x=plant_transitions, y=minimization_transitions_safety)) +
+  	labs(title=paste("Plant vs minimization size (safety)", cases_names[i])) +
+  	xlab(expression(paste("|",Delta["E"],"|"))) +
+    ylab(expression(paste("|",Delta["E'"],"|"))) +
+  	scale_y_log10() +
+    scale_x_log10() +	
+  	geom_point(color='red') +	
+  	geom_smooth(method='lm'))  
   
 }
 
