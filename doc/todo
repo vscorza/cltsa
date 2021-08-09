@@ -2,6 +2,7 @@ TODO:
 =====
 -benchmark
 	- revisar casos > 100 de robot explorer realizables (parece que no lo son)
+	- updating todo file
 	- agregar Unrealizable Cores for Reactive Systems Specifications, notes on control of discrete-event systems, Compositional Supervisory Control via Reactive Synthesis and Automated Planning, Taming Composition with Heuristics al related work
 	- tomar un ejemplo de reactive y mostar como sería un diagnóstico que usa konighoefer, jvts y behavior
 	- boceto de
