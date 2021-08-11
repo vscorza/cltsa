@@ -1,9 +1,7 @@
 TODO:
 =====
 -benchmark
-	- lift controller 8 hay que bajar b8, 10 hay que bajar de b7 a b10
-	- revisar casos > 100 de robot explorer realizables (parece que no lo son)
-	- updating todo file
+	- actualizar func-tests
 	- leer
 		- Unrealizable Cores for Reactive Systems Specifications
 		- MUST: minimal unsatisfiable subsets enumeration tool
