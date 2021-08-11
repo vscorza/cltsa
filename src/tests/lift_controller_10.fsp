@@ -26,6 +26,7 @@ ltl sys rho Sys_Adj_Floors in GAME_LTL	= []((f1 -> X(f1 || f2)) && (f2 -> X(f1 |
 ltl sys rho Sys_Move_Iff_B in GAME_LTL	= [](((f1 && X(f2)) || (f2 && X(f3)) || (f3 && X(f4)) || (f4 && X(f5)) || (f5 && X(f6))
 	 || (f6 && X(f7))  || (f7 && X(f8)) || (f8 && X(f9)) || (f9 && X(f10)))->(b1 || b2 || b3 || b4 || b5 || b6 || b7 || b8 || b9 || b10)).
 
+ltl env rho Fix_b8 in GAME_LTL = [](!b7 && !b8 && !b9).
 
 ltl fluent Ass_True = (b2||!b2).
 ltl fluent Goal_Back_To_Ground			= (f1 || (b1 || b2 || b3 || b4 || b5 || b6 || b7 || b8 || b9 || b10)).

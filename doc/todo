@@ -1,8 +1,18 @@
 TODO:
 =====
 -benchmark
+	- lift controller 8 hay que bajar b8, 10 hay que bajar de b7 a b10
 	- revisar casos > 100 de robot explorer realizables (parece que no lo son)
 	- updating todo file
+	- leer
+		- Unrealizable Cores for Reactive Systems Specifications
+		- MUST: minimal unsatisfiable subsets enumeration tool
+		- Interpolation-based GR(1) assumptions refinement
+		- A weakness measure for GR(1) formulae
+		- Minimal assumptions refinement for realizable specifications.
+		- Performance heuristics for GR(1) synthesis and related algorithm
+		- Symbolic repairs for GR(1) specifications
+		- Inherent vacuity for GR(1) specification
 	- agregar Unrealizable Cores for Reactive Systems Specifications, notes on control of discrete-event systems, Compositional Supervisory Control via Reactive Synthesis and Automated Planning, Taming Composition with Heuristics al related work
 	- tomar un ejemplo de reactive y mostar como sería un diagnóstico que usa konighoefer, jvts y behavior
 	- boceto de

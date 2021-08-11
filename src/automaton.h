@@ -165,7 +165,8 @@ void automaton_indexes_valuation_destroy(automaton_indexes_valuation* valuation)
 void automaton_signal_type_print(automaton_signal_type type, char* prefix, char* suffix);
 void automaton_signal_event_print(automaton_signal_event* signal_event, char* prefix, char* suffix);
 void automaton_alphabet_print(automaton_alphabet* alphabet, char* prefix, char* suffix);
-void automaton_transition_print(automaton_transition* transition, automaton_automata_context* ctx, char* prefix, char* suffix, int link_id);
+void automaton_transition_print(automaton_transition* transition, automaton_automata_context* ctx, bool print_monitored_indexes,
+		char* prefix, char* suffix, int link_id);
 void automaton_fluent_print(automaton_fluent* fluent, automaton_automata_context* ctx, char* prefix, char* suffix);
 void automaton_valuation_print(automaton_valuation* valuation, automaton_automata_context* ctx, char* prefix, char* suffix);
 void automaton_automata_context_print(automaton_automata_context* ctx, char* prefix, char* suffix);
@@ -259,7 +260,7 @@ uint32_t automaton_automaton_get_in_degree(automaton_automaton* current_automato
 uint32_t automaton_automaton_get_out_degree(automaton_automaton* current_automaton, uint32_t state);
 void automaton_automaton_resize_to_state(automaton_automaton* current_automaton, uint32_t state);
 automaton_transition* automaton_automaton_get_transitions(automaton_automaton* current_automaton, uint32_t state);
-bool automaton_automaton_transition_monitored_lt(automaton_automaton* current_automaton, automaton_transition* left, automaton_transition* right);
+bool automaton_automaton_transition_monitored_leq(automaton_automaton* current_automaton, automaton_transition* left, automaton_transition* right);
 bool automaton_automaton_transition_monitored_eq(automaton_automaton* current_automaton, automaton_transition* left, automaton_transition* right);
 bool automaton_automaton_transition_lt(automaton_automaton* current_automaton, automaton_transition* left, automaton_transition* right);
 bool automaton_automaton_transition_eq(automaton_automaton* current_automaton, automaton_transition* left, automaton_transition* right);

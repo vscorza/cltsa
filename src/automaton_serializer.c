@@ -51,29 +51,35 @@ void automaton_alphabet_print(automaton_alphabet* alphabet, char* prefix, char* 
 		printf("%s", suffix);
 }
 
-void automaton_transition_print(automaton_transition* transition, automaton_automata_context* ctx, char* prefix, char* suffix, int link_id){
+void automaton_transition_print(automaton_transition* transition, automaton_automata_context* ctx, bool print_monitored_indexes, char* prefix, char* suffix, int link_id){
 	if(prefix != NULL)
 		printf("%s", prefix);
 	uint32_t i,j;
 
 	if(TRANSITION_IS_INPUT(transition))printf("!");
-	printf("(%d {", transition->state_from);
+	if(!print_monitored_indexes)
+		printf("(%d {", transition->state_from);
 	bool first_print = true;
 	for(i = 0; i < (TRANSITION_ENTRY_SIZE * FIXED_SIGNALS_COUNT) - 1; i++){
-		if(TEST_TRANSITION_BIT(transition, i)){
-			if(first_print)first_print = false;
-			else printf(",");
-			printf("%s", ctx->global_alphabet->list[i].name);
+		if(!print_monitored_indexes || ctx->global_alphabet->list[i].type == INPUT_SIG){
+			if(TEST_TRANSITION_BIT(transition, i)){
+				if(first_print)first_print = false;
+				else printf(",");
+				if(!print_monitored_indexes)printf("%s", ctx->global_alphabet->list[i].name);
+				else printf("%d", i);
+			}
 		}
 	}
+	if(!print_monitored_indexes){
 	if(link_id >= 0)
 #if PRINT_HTML
-		printf("}-> <a href='#to_%d_%d'>%d</a>)", link_id, transition->state_to, transition->state_to);
+			printf("}-> <a href='#to_%d_%d'>%d</a>)", link_id, transition->state_to, transition->state_to);
 #else
-		printf("}-> %d)", transition->state_to);
+	printf("}-> %d)", transition->state_to);
 #endif
-	else
-		printf("}-> %d)", transition->state_to);
+		else
+			printf("}-> %d)", transition->state_to);
+	}
 	if(suffix != NULL)
 		printf("%s", suffix);
 }
@@ -236,7 +242,7 @@ void automaton_automaton_print(automaton_automaton* current_automaton, bool prin
 #endif
 
 		for(j = 0; j < current_automaton->out_degree[i]; j++)
-		automaton_transition_print(&(current_automaton->transitions[i][j]), ctx, prefix2, "\n", __automaton_global_print_id);
+		automaton_transition_print(&(current_automaton->transitions[i][j]), ctx, false, prefix2, "\n", __automaton_global_print_id);
 	}
 	printf("%sInitial States:{", prefix2);
 	for(i = 0; i < current_automaton->initial_states_count; i++){

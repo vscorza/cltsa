@@ -1118,15 +1118,15 @@ void automaton_automaton_resize_to_state(automaton_automaton* current_automaton,
 	}
 
 }
-bool automaton_automaton_transition_monitored_lt(automaton_automaton* current_automaton, automaton_transition* left,
+bool automaton_automaton_transition_monitored_leq(automaton_automaton* current_automaton, automaton_transition* left,
 		automaton_transition* right){
-	uint32_t i;
-	for(i = 0; i < FIXED_SIGNALS_COUNT; i++){
-		if((left->signals[i] & current_automaton->monitored_mask[i]) <
+	int32_t i;
+	for(i =  0 ; i < FIXED_SIGNALS_COUNT; i++){
+		if((left->signals[i] & current_automaton->monitored_mask[i]) >
 				(right->signals[i] & current_automaton->monitored_mask[i]))
-			return true;
+			return false;
 	}
-	return false;
+	return true;
 }
 bool automaton_automaton_transition_monitored_eq(automaton_automaton* current_automaton, automaton_transition* left,
 		automaton_transition* right){
@@ -1170,12 +1170,15 @@ void automaton_automaton_monitored_order_transitions(automaton_automaton* curren
 				checked_transitions[j]	= false;
 			min_transition	= NULL;
 			//selection sort
+
+			bool new_monitored = false;
+
 			for(j = 0; j < current_automaton->out_degree[i]; j++){
 				for(k = 0; k < current_automaton->out_degree[i]; k++){
 					//if already picked skip
 					if(checked_transitions[k])continue;
 					//if min is NULL or current transition < min update
-					if(min_transition == NULL || (automaton_automaton_transition_monitored_lt(current_automaton,
+					if(min_transition == NULL || (automaton_automaton_transition_monitored_leq(current_automaton,
 							&(current_automaton->transitions[i][k]), min_transition))){
 						min_transition	= &(current_automaton->transitions[i][k]);
 						min_index	= k;
@@ -1197,7 +1200,7 @@ void automaton_automaton_monitored_order_transitions(automaton_automaton* curren
 			for(j = 0; j < current_automaton->in_degree[i]; j++){
 				for(k = 0; k < current_automaton->in_degree[i]; k++){
 					if(checked_transitions[k])continue;
-					if(min_transition == NULL || (automaton_automaton_transition_monitored_lt(current_automaton,
+					if(min_transition == NULL || (automaton_automaton_transition_monitored_leq(current_automaton,
 							&(current_automaton->inverted_transitions[i][k]), min_transition))){
 						min_transition	= &(current_automaton->inverted_transitions[i][k]);
 						min_index	= k;

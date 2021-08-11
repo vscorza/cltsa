@@ -89,7 +89,7 @@ void automaton_minimization_adjust_steps_report(uint32_t *steps, uint32_t **step
 	}
 	*steps_times	= time_ptr;
 	for(i = old_size; i < *steps_size; i++){
-		(*steps_times)[i].tv_sec	= (*steps_times)[i].tv_sec	= 0;
+		(*steps_times)[i].tv_sec	= (*steps_times)[i].tv_usec	= 0;
 		(*steps_sizes)[i]	= 0;
 	}
 }

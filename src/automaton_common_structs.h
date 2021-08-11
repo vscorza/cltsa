@@ -25,13 +25,13 @@
 typedef uint8_t signal_t;
 typedef uint8_t fluent_count_t;
 typedef uint16_t signal_bit_array_t;
-
+#define TRANSITION_ENTRY_SIZE (sizeof(signal_bit_array_t)*8)
+#define FIXED_SIGNALS_COUNT	6//4
 
 #define SYS_TICK	"■■■■sys■"
 #define ENV_TICK	"■■■■env■"
 
-#define TRANSITION_ENTRY_SIZE 16
-#define FIXED_SIGNALS_COUNT	6//4
+
 /****************
 ==== ENUMS ====
 ****************/

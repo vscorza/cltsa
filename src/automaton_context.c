@@ -522,6 +522,7 @@ automaton_alphabet* automaton_parsing_tables_get_global_alphabet(automaton_parsi
 				//add on, off and primed elements to alphabet
 				strcpy(signal_name, global_values[i]);
 				strcat(signal_name, SIGNAL_ON_SUFFIX);
+
 				sig_event = automaton_signal_event_create(signal_name, is_controllable? OUTPUT_SIG : INPUT_SIG);
 				automaton_alphabet_add_signal_event(global_alphabet, sig_event);
 				automaton_signal_event_destroy(sig_event, true);
@@ -3667,6 +3668,7 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 #if VERBOSE
 				printf("[Diagnosing] %s over %s\n", gr1_game->name, game_automaton->name);
 #endif
+				printf("[Unreal.] %s over %s is NOT REALIZABLE\n", gr1_game->name, game_automaton->name);
 				nonreal	= true;
 				automaton_automaton_destroy(winning_region_automaton);
 				if(is_diagnosis & DD_SEARCH)
@@ -3677,6 +3679,8 @@ automaton_automata_context* automaton_automata_context_create_from_syntax(automa
 							&steps, &steps_sizes, &steps_times, &steps_size);
 
 				automaton_automaton_remove_unreachable_states(winning_region_automaton);
+			}else{
+				printf("[Real.] %s over %s is REALIZABLE\n", gr1_game->name, game_automaton->name);
 			}
 			results_minimization_states = winning_region_automaton->transitions_count;
 			results_minimization_transitions	= winning_region_automaton->transitions_composite_count;

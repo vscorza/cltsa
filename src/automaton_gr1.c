@@ -100,6 +100,7 @@ automaton_ranking* automaton_state_best_successor_ranking(automaton_automaton* g
 	 */
 	//TODO: apply SIMD
 	bool new_monitored	= false;
+
 	for(i = 0; i < game_automaton->out_degree[state]; i++){
 		if(i > 0)
 			new_monitored = !(automaton_automaton_transition_monitored_eq(game_automaton,
