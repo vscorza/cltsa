@@ -504,6 +504,12 @@ automaton_alphabet* automaton_parsing_tables_get_global_alphabet(automaton_parsi
 			controllable_values	= automaton_set_syntax_evaluate(tables, ((automaton_set_def_syntax*)tables->set_entries[output_signals_index]->value)->set
 					, &controllable_count, ((automaton_set_def_syntax*)tables->set_entries[output_signals_index]->value)->name, NULL);
 		}
+		if(global_count > (TRANSITION_ENTRY_SIZE *  FIXED_SIGNALS_COUNT)){
+			printf("[BUILD ERROR] Current build supports an alphabet of up to %d elements.\nAdjust TRANSITION_ENTRY_SIZE or FIXED_SIGNALS_COUNT and rebuild.\n",
+					(TRANSITION_ENTRY_SIZE *  FIXED_SIGNALS_COUNT));
+			printf("Provided alphabet has %d elements.\n", global_count);
+			exit(-1);
+		}
 
 		for(i = 0; i < global_count; i++){
 				is_controllable	= false;

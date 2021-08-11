@@ -107,6 +107,7 @@ int main (int argc, char** argv){
 		//run_parse_test("tests/genbuf_8_sndrs_no_automaton.fsp", "GenBuf 8 sndrs(no automaton)");//GENBUF 8 sndrs
 		//run_parse_test("tests/genbuf_4_sndrs.fsp", "GenBuf 4 sndrs");//GENBUF 4 sndrs
 		//run_parse_test("tests/automata_load_test_1.fsp",  "automata load test");
+		run_parse_test("tests/lift_controller_8.fsp",  "automata load test");
 		//run_parse_test("tests/automata_load_test_2.fsp",  "automata load test");
 		//run_parse_test("diagnoses/ahb/ahb_2_masters/ahb_2_masters_v1.fsp", "AHB 2 Masters");//AHB 2 Masters
 		//run_parse_test("diagnoses/ahb/ahb_2_masters/ahb_2_masters_simplified_v1.fsp", "AHB 2 Masters");//AHB 2 Masters
@@ -168,7 +169,7 @@ int main (int argc, char** argv){
 		//run_parse_test("tests/TL-5-3.fsp", "Serialization composition test");
 		//run_parse_test("tests/TL-6-6.fsp", "Serialization composition test");
 		//run_parse_test("tests/DP_2_2.fsp", "Serialization composition test");
-		run_parse_test("tests/DP_2_2_test.fsp", "Serialization composition test");
+		//run_parse_test("tests/DP_2_2_test.fsp", "Serialization composition test");
 		//run_parse_test("tests/CM_2.fsp", "Serialization composition test");
 		//run_parse_test("tests/CM_2_test.fsp", "Serialization composition test");
 		//run_parse_test("tests/ranges_3.fsp", "Serialization composition test");
