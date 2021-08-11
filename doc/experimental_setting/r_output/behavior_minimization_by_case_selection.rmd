@@ -39,6 +39,7 @@ experimental_composite$liveness_count <- experimental_composite$assumptions_coun
 experimental_composite <- subset(experimental_composite, select = -c(realizable, ltl_model_build_time, model_build_time, composition_time,synthesis_time,alphabet_size,assumptions_count,guarantees_count,plant_states,plant_transitions,plant_controllable_transitions,plant_controllable_options,search_method))
 #creating realizable data frame
 realizable_data <- read.csv(file='/home/mariano/code/henos-automata/doc/experimental_setting/tmp_results/realizable_data_composite.csv')
+realizable_data$name  <- str_replace_all(realizable_data$name, "Scheduler", "Arbiter")
 realizable_data$name  <- str_replace_all(realizable_data$name, "\\.", " ")
 experimental_composite$name  <- str_to_title(experimental_composite$name)
 realizable_data$name  <- str_to_title(realizable_data$name)
