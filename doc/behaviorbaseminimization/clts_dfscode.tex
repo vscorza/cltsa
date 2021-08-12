@@ -1,0 +1,25 @@
+\renewcommand{\ttdefault}{pcr}
+\begin{lstlisting}[escapeinside={[*}{*]},basicstyle=\scriptsize\ttfamily,columns=flexible,frame=lines,mathescape=true,keywordstyle=\textbf,morekeywords={if,while,do,else,fork,int,null, algorithm, is, input, output, return},numbers=left,numberstyle=\scriptsize,numbers=none]
+algorithm dfs\_min is
+	input: [*$E$*] an CLTS representing the original plant
+	output: [*$E'$*] an CLTS that satisfies the problem statement
+	[*$E_{new}$*] = [*$E'$*] = [*$E$*] [*$\fbox{A}$*]
+	[*$\mathcal{T}_u$*] = [*$E$*].non_controllable_transitions()
+	to_remove = [] [*$\fbox{B}$*]
+	while(|[*$\mathcal{T}_u$*]| > 0) [*$\fbox{C}$*]
+		[*$t$*] = [*$\mathcal{T}_u$*].pop()
+		while([*$\neg E'$*].contains([*$t$*]) or [*$d_{out}$*]([*$E'$*],t.from) == 1)
+			if (|[*$\mathcal{T}_u$*]| == 0)
+				return [*$E$*]
+			[*$t$*] = [*$\mathcal{T}_u$*].pop() [*$\fbox{D}$*]
+		to_remove.add([*$t$*])[*$\fbox{E}$*]
+		[*$E_{new}$*] = [*$E$*].remove(to_remove) [*$\fbox{F}$*]
+		
+		is_realizable = [*$E_{new}$*].realizable() [*$\fbox{G}$*]
+		
+		if ([*$\neg$*] is_realizable):
+			[*$E'$*] = [*$E_{new}$*]
+		else
+			to_remove.remove([*$t$*]) [*$\fbox{H}$*]
+	return [*$E'$*]   [*$\fbox{I}$*]
+\end{lstlisting}

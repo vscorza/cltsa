@@ -1,58 +1,92 @@
-This is BibTeX, Version 0.99d (TeX Live 2017/Debian)
-Capacity: max_strings=100000, hash_size=100000, hash_prime=85009
+This is BibTeX, Version 0.99d (TeX Live 2019/Debian)
+Capacity: max_strings=4000, hash_size=5000, hash_prime=4253
 The top-level auxiliary file: behaviourminimization.aux
-The style file: IEEEtran.bst
-I found no \citation commands---while reading file behaviourminimization.aux
-Reallocated singl_function (elt_size=4) to 100 items from 50.
+The style file: /home/mariano/git_repo/henos/henos-automata/doc/behaviorbaseminimization/ACM-Reference-Format.bst
 Reallocated singl_function (elt_size=4) to 100 items from 50.
 Reallocated singl_function (elt_size=4) to 100 items from 50.
 Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
+Database file #1: /home/mariano/git_repo/henos/henos-automata/doc/behaviorbaseminimization/bibliography.bib
 Reallocated singl_function (elt_size=4) to 100 items from 50.
-Database file #1: bibliography.bib
--- IEEEtran.bst version 1.14 (2015/08/26) by Michael Shell.
--- http://www.michaelshell.org/tex/ieeetran/bibtex/
--- See the "IEEEtran_bst_HOWTO.pdf" manual for usage information.
-
-Done.
-You've used 0 entries,
-            4087 wiz_defined-function locations,
-            821 strings with 7323 characters,
-and the built_in function-call counts, 104 in all, are:
-= -- 0
-> -- 0
+Warning--no key, author in SYNTCOMP
+Warning--no author, editor, organization, or key in SYNTCOMP
+Warning--to sort, need author or key in SYNTCOMP
+Reallocated glb_str_ptr (elt_size=4) to 20 items from 10.
+Reallocated global_strs (elt_size=1001) to 20 items from 10.
+Reallocated glb_str_end (elt_size=4) to 20 items from 10.
+Warning--no key, author in SYNTCOMP
+Warning--no key, author in SYNTCOMP
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Warning--no key, author in SYNTCOMP
+Warning--no author, editor, organization, or key in SYNTCOMP
+Warning--empty organization in SYNTCOMP
+Warning--empty organization in SYNTCOMP
+Warning--empty address in DBLP:conf/fmcad/AlurMT13
+Warning--empty publisher in DBLP:conf/tacas/CavezzaA17
+Warning--empty address in DBLP:conf/tacas/CavezzaA17
+Warning--empty address in DBLP:conf/emsoft/CernyGHRT12
+Warning--empty publisher in chockler2001practical
+Warning--empty address in chockler2001practical
+Warning--empty publisher in chockler2001coverage
+Warning--empty address in chockler2001coverage
+Warning--empty address in DBLP:conf/vmcai/CimattiRST08
+Warning--no number and no volume in daniele:2000
+Warning--page numbers missing in both pages and numpages fields in daniele:2000
+Warning--empty address in DBLP:conf/sigsoft/AlfaroH01
+Warning--empty address in DBLP:conf/kbse/DegiovanniRACA16
+Warning--empty address in DBLP:conf/kbse/HagiharaESY14
+Warning--empty address in DBLP:conf/icra/KimF13
+Warning--empty address in DBLP:conf/icra/KimFS12
+Warning--empty address in DBLP:conf/fmcad/KonighoferHB09
+Warning--empty address in DBLP:conf/sigsoft/KuventMR17
+Warning--empty address in Letier:2013:RMS
+Warning--page numbers missing in both pages and numpages fields in Letier:2013:RMS
+Warning--empty address in DBLP:conf/memocode/LiDS11
+Warning--empty address in DBLP:conf/sigsoft/MaozR16
+Warning--empty address in Maoz:2014
+Warning--empty publisher in maoz2019symbolic
+Warning--empty address in maoz2019symbolic
+Warning--empty address in DBLP:conf/vmcai/PitermanPS06
+Warning--empty address in DBLP:conf/popl/PnueliR89
+Warning--page numbers missing in both pages and numpages fields in DBLP:journals/corr/abs-2001-07678
+You've used 43 entries,
+            5959 wiz_defined-function locations,
+            1901 strings with 32045 characters,
+and the built_in function-call counts, 53948 in all, are:
+= -- 6567
+> -- 1829
 < -- 0
-+ -- 0
-- -- 0
-* -- 19
-:= -- 27
-add.period$ -- 0
-call.type$ -- 0
-change.case$ -- 0
-chr.to.int$ -- 0
-cite$ -- 0
-duplicate$ -- 0
-empty$ -- 1
-format.name$ -- 0
-if$ -- 3
-int.to.chr$ -- 0
-int.to.str$ -- 0
-missing$ -- 0
-newline$ -- 23
-num.names$ -- 0
-pop$ -- 0
++ -- 597
+- -- 657
+* -- 3909
+:= -- 5343
+add.period$ -- 213
+call.type$ -- 43
+change.case$ -- 288
+chr.to.int$ -- 41
+cite$ -- 84
+duplicate$ -- 4857
+empty$ -- 3392
+format.name$ -- 756
+if$ -- 12795
+int.to.chr$ -- 4
+int.to.str$ -- 1
+missing$ -- 182
+newline$ -- 492
+num.names$ -- 359
+pop$ -- 1698
 preamble$ -- 1
-purify$ -- 0
-quote$ -- 2
-skip$ -- 1
+purify$ -- 670
+quote$ -- 0
+skip$ -- 1792
 stack$ -- 0
-substring$ -- 0
-swap$ -- 0
-text.length$ -- 0
+substring$ -- 4353
+swap$ -- 544
+text.length$ -- 78
 text.prefix$ -- 0
-top$ -- 5
-type$ -- 0
-warning$ -- 0
-while$ -- 0
+top$ -- 0
+type$ -- 1079
+warning$ -- 37
+while$ -- 367
 width$ -- 0
-write$ -- 22
-(There was 1 error message)
+write$ -- 920
+(There were 37 warnings)

@@ -1,6 +1,6 @@
 %\documentclass[sigconf,review, anonymous]{acmart}
-\documentclass[conference]{IEEEtran}
-\IEEEoverridecommandlockouts
+\documentclass[sigconf,review,anonymous]{acmart}
+\acmConference[ICSE 2022]{The 44th International Conference on Software Engineering}{May 21–29, 2022}{Pittsburgh, PA, USA}
 \usepackage{etex}
 \usepackage{booktabs} % For formal tables
 \usepackage[utf8]{inputenc}
@@ -19,7 +19,7 @@
 \usepackage{placeins}
 \usepackage{graphicx} % Required for including images
 \usepackage{lipsum} % Used for inserting dummy 'Lorem ipsum' text into the template
-\usepackage{amssymb}
+%\usepackage{amssymb}
 \usepackage{rotating}
 \usepackage{tikz}
 \usetikzlibrary{automata,positioning}
@@ -37,9 +37,9 @@
 \setlength\mylength{(\widthof{long long long long long}-\widthof{short})/2}
 \setlength\arraycolsep{2pt}
 
-\theoremstyle{definition}
-\newtheorem{definition}{Definition}[section]
-\newtheorem{lemma}{Lemma}[section]
+%\theoremstyle{definition}
+%\newtheorem{definition}{Definition}[section]
+%\newtheorem{lemma}{Lemma}[section]
 % Copyright
 %\setcopyright{none}
 %\setcopyright{acmcopyright}
@@ -108,29 +108,28 @@
 %\renewcommand{\shortauthors}{M. Cerrutti et. al.}
 
 \input{macros}
-\maketitle
+
 
 \begin{abstract}
-At their early stages system specifications are usually unrealizable, in
-other words, there is no system that can be built to satisfy its goals under
+At their early stages system specifications are usually unrealizable, which means that there is no system that can be built to satisfy its goals under
 the assumed environment conditions. The cause for unrealizability can be
 boiled down to the fact that stated goals are too strong, the assumptions are
-too weak, or (commonly) a subtle combination of both.  Providing engineers
+too weak, or (commonly) a subtle combination of both.  Providing engineers meaningful
 feedback that allows to understand the cause for unrealizability is
 necessary if specifications are to be evolved into realizable ones.
 
 In this paper, we propose a technique that minimizes the behavior of an
-unrealizable \gr specification while preserving non-realizability, thus allowing
-engineers to focus on core behavior that causes unrealizability. The technique assumes an automata-based description of the environment
+unrealizable \gr specification while preserving unrealizability, thus allowing
+engineers to focus on core behavior that causes unrealizability. The technique assumes an automata-based representation of the environment
 %and 
 %This is the first technique that is designed to be used to provide feedback for \gr synthesis problems in which the environment is described as an automaton and the goals as liveness LTL formulas. 
 %differs from existing feedback techniques as it reduces (rather than augmenting) allowable behavior while preserving unrealizability. 
-and returns a model that preserves the cause for unrealizability in the sense that the environment's strategy for beating the system in the minimized model is also a winning strategy in the original model. 
+and returns a model that preserves at least one cause for unrealizability in the sense that the environment's strategy for beating the system in the minimized model is also a winning strategy in the original model. 
 
 %The technique has also the potential to complement existing techniques that assume a specification only in LTL form and that work by syntactic, rather than semantic, minimization.
 \end{abstract}
 
-
+\maketitle
 %\IEEEpeerreviewmaketitle
 % We no longer use \terms command
 %\terms{Theory}
@@ -142,19 +141,24 @@ and returns a model that preserves the cause for unrealizability in the sense th
 
 \input{introduction}
 \input{motivatingExample}
-\input{background}
-\input{extension}
-\input{problemStatement}
-\input{solution}
+
+%\input{background}
+%\input{problemStatement}
+%\input{solution}
+
+%\input{background_clts}
+%\input{problemStatement_clts}
+%\input{solution_clts}
 \input{validation}
 \input{discussion}
 \input{conclusion}
-%\bibliographystyle{ACM-Reference-Format}
+
+\bibliographystyle{/home/mariano/git_repo/henos/henos-automata/doc/behaviorbaseminimization/ACM-Reference-Format}
 %\bibliographystyle{ACM-Reference-Format}
 %\bibliography{sigproc} 
 %\bibliographystyle{IEEEtran}
 %\newpage
-%\bibliography{bibliography}
+\bibliography{/home/mariano/git_repo/henos/henos-automata/doc/behaviorbaseminimization/bibliography}
 %\input{Appendix}
 %\input{appendixes}
 \end{document}

@@ -1,0 +1,84 @@
+\section{Behavior Minimization Feedback}\label{sec:problemStatement}
+
+In this section we formalize the problem of minimizing behavior while preserving unrealizability. In the next section we define a minimization procedure.
+
+Assume an unrealizable specification of the form $\mathcal{I} = <E, \mathcal{C}, \varphi>$. Our aim is to automatically produce an unrealizable specification $\mathcal{I'} = <E', \mathcal{C}, \varphi>$ where $E'$ has less behavior than $E$ and the witnesses for the unrealizablity of $\mathcal{I'}$ (i.e., the counter strategies) are also witnesses for the unrealizability of $\mathcal{I}$.  Furthermore, we aim for $E'$ to be minimal in the sense that it cannot be further reduced while having its associated counter strategies preserved in  $\mathcal{I}$.
+Thus, an engineer trying to understand why $\mathcal{I}$ is unrealizable can gain insight by studying the simpler $\mathcal{I'}$ instead. 
+
+
+\begin{definition}\label{}\emph{(CLTS Unrealizability Preservation)}
+	Given an unrealizable CLTS control problem $\mathcal{I} = <E, \mathcal{C}, \varphi>$ we say
+	that $\mathcal{I'} = <E', \mathcal{C}, \varphi>$ preserves unrealizability
+	if for all counter-solutions \advCtrl in $\mathcal{I'}$, \advCtrl is a counter-solution to \controlProblem.
+\end{definition}
+
+
+In this section we formally state the problem of minimizing a specification that preserves unrealizability. We do this by defining a notion of alternating sub-CLTS that preserves counter strategies and forms a semi-lattice that can be used to incrementally minimize a unrealizable specification. 
+
+To define alternating sub-CLTSs we first define a sub-CLTS relation.  A sub-CLTS is simply derived from a source CLTS by removing states and transitions while keeping its initial state.
+%~\ref{XXX}
+
+\begin{definition}\label{def:clts-inclusion}\emph{(Sub-CLTS)}
+	Given \cltsDefIdx{M} and
+	\cltsDefIdx{P} CLTSs, 
+	we say that $P$ is a sub-LTS of $M$ (noted $P \subseteq M$) if $S_P \subseteq S_M$,
+	$s_{M_0} = s_{P_0}$, $\Sigma_P \subseteq \Sigma_M$, $\propositions_P \subseteq \propositions_M$ , $\valuations_P \subseteq \valuations_M$ and $\Delta_P \subseteq \Delta_M$.
+\end{definition}
+
+
+To preserve unrealizability, the alternating sub-CLTS definition refines that of sub-CLTS by restricting some of the original CLTS transitions. 
+These restrictions consider controllability. 
+\newpage
+\begin{definition}\label{def:alternating_sub_clts}\emph{(Alternating Sub-CLTS)}
+	Given \cltsDefIdx{M} and
+	\cltsDefIdx{P} CLTSs, 
+	where $\Sigma =\mathcal{C}\cup \mathcal{U}$ and $\mathcal{C}\cap
+	\mathcal{U}=\emptyset$. We say that $P$ is an alternating
+	sub-CLTS of $M$, noted as $P \sublts_{\mathcal{C},\mathcal{U}} M$, if  $P \subseteq M$  and $\forall s \in S_{P}$ the following holds:
+	\footnotesize
+		\begin{align}
+\begin{aligned}
+\forall s_{M} \in S_{M}\cap S_{P}:(\exists (s_M,\actionLabel,s'_M) \in \Delta_M \implies (\exists (s_M,\actionLabel',s'_P) \in \Delta_P)
+\end{aligned}
+\end{align}	
+\begin{align}
+\begin{aligned}
+\forall (s_M,\actionLabel,s'_M) \in \Delta_M:\\ 
+(s_M \in S_P \implies\exists (s_M,\actionLabel',s'_P) \in \Delta_P:(\actionLabel|_{\controlSet} = \actionLabel'|_{\controlSet}))
+\end{aligned}
+\end{align}	
+%\begin{align}
+%\begin{aligned}
+%\forall (s_P, \actionLabel, s'_P) \in \Delta_C:( \exists (s_M, \actionLabel, s'_M) \in \Delta_M)
+%\end{aligned}
+%\end{align}	
+	\normalsize
+	The properties will be referred to as \emph{deadlock preservation}, and \emph{alternating openness} respectively. We shall omit $\mathcal{C}$ and $\mathcal{U}$ in $\sublts_{\mathcal{C},\mathcal{U}}$ when the context is clear. 
+\end{definition}
+ 
+In the following section \emph{alternating inclusion} refers to the fact that by definition of sub-CLTS all transitions of $P$ are present in $M$.
+The property of \emph{deadlock preservation} states that no new deadlock can be introduced by the alternating sub-CLTS relation, since otherwise a new unrealizability could be potentially introduced, while \emph{alternating opennes} ensures that at each state all controllable options are kept as in the original structure, since we expect to show that the strategy still holds regardless of what the system does.
+An informal justification for the definition of Alternating sub-CLTSs can be given by showing that for two unrealizable control problems $\mathcal{I} = <E, \mathcal{C}, \varphi>$ and $\mathcal{I'} = <E', \mathcal{C}, \varphi>$ with $E' \sublts E$ then any counter strategy for the game $G(\mathcal{I'})$ is also a counter strategy for $G(\mathcal{I})$. 
+
+\begin{definition}\label{}\emph{(CLTS Unrealizability Preservation)}
+	Given an unrealizable CLTS control problem $\mathcal{I} = <E, \mathcal{C}, \varphi>$ we say
+	that $\mathcal{I'} = <E', \mathcal{C}, \varphi>$ preserves unrealizability
+	if for all counter-solutions \advCtrl in $\mathcal{I'}$, \advCtrl is a counter-solution to \controlProblem.
+\end{definition}
+
+The following lemma states that removing transitions in the environment description of an unrealizable control problem, while preserving an alternating sub-CLTS relation, yields a new unrealizable control problem in which all its counter strategies are also counter strategies of the original control problem. Thus inspecting the behavior of the smaller environment description provides insights on the causes for unrealizability of the starting automaton.  
+
+\begin{lemma}\emph{(Alternating Sub-CLTS preserves counter solution)}\label{theorem:sub_clts_preserves-non-realizability}
+	Let $P$ and $M$ be two CLTS structures s.t. $P \sublts M$, 
+	$\mathcal{I}_P = \lbrace P, \mathcal{C}, \varphi \rbrace$,
+	$\mathcal{I}_M = \lbrace M, \mathcal{C}, \varphi \rbrace$
+	two CLTS control problems, if
+	\advCtrl is a counter-solution for $\mathcal{I}_P$ then it is also a counter solution for $\mathcal{I}_M$.
+\end{lemma}
+
+
+We formally define the problem as follows.
+
+\begin{definition}\label{def:clts_ProblemStatement}\emph{(CLTS minimization problem Statement)}
+	Given a non realizable control problem $\mathcal{I} = <E, \mathcal{C}, \varphi>$, find an non realizable CLTS control problem $\mathcal{I'} = <E', \mathcal{C}, \varphi>$ such that $E' \sublts E$, $\mathcal{I'}$ is non realizable, and there is no $\mathcal{I''} = <E'', \mathcal{C}, \varphi>$ such that $E' \sublts E''$ while $\mathcal{I''}$ is non realizable. We refer to $\mathcal{I'}$ as a minimal non realizable CLTS control problem.
+\end{definition}

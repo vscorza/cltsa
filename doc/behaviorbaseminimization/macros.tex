@@ -1,39 +1,29 @@
 %\newcommand{\implies}{\Rightarrow}
-\newcommand{\traces}{\emph{Tr} }
-\newcommand{\true}{\emph{true} }
-\newcommand{\false}{\emph{false} }
-\newcommand{\assume}{\phi}
-\newcommand{\guarantee}{\gamma}
-\newcommand{\invariant}{\rho}
-\newcommand{\fluentp}[1]{\dot{#1}}
-\newcommand{\fluent}{\emph{fl}\xspace}
-\newcommand{\set}[1]{\{#1\}}
-\newcommand{\gr}{{GR(1)}\xspace}
-\newcommand{\sgr}{{SGR(1)}\xspace}
-\newcommand{\sublts}{\sqsubseteq}
-\newcommand{\subgame}{\subseteq\xspace}
-\newcommand{\altsubgame}{\sqsubseteq\xspace}
-
-\newcommand{\act}{a}
-
-%MTS
-\newcommand{\transition}[1]{\stackrel{#1}{\longrightarrow}}
-\newcommand{\nottransition}[1]{\stackrel{#1}{\not\longrightarrow}}
-
-%CASE STUDY
-\newcommand{\drill}{Drill}
-\newcommand{\arm}{Arm}
+%\newcommand{\true}{\emph{true} }
+%\newcommand{\false}{\emph{false} }
+%\newcommand{\assume}{\phi}
+%\newcommand{\guarantee}{\gamma}
+%\newcommand{\invariant}{\rho}
+%\newcommand{\fluentp}[1]{\dot{#1}}
+%\newcommand{\fluent}{\emph{fl}\xspace}
+%\newcommand{\set}[1]{\{#1\}}
+%\newcommand{\gr}{{GR(1)}\xspace}
+%\newcommand{\sgr}{{SGR(1)}\xspace}
+%\newcommand{\sublts}{\sqsubseteq}
+%\newcommand{\subgame}{\subseteq\xspace}
+%\newcommand{\altsubgame}{\sqsubseteq\xspace}
+%
+%\newcommand{\act}{a}
 
 %UTIL
-\newcommand{\fix}[1]{\fxfatal{#1}}
-\newcommand{\comments}[1]{}
-%\newcommand{\todo}[1]{ {\bf TODO: #1 }}
+%\newcommand{\fix}[1]{\fxfatal{#1}}
+%\newcommand{\comments}[1]{}
 
 %\newcommand{\G}{{\bf G}}
-\newcommand{\F}{{\bf F}}
-\newcommand{\X}{{\bf X}}
-\newcommand{\Uu}{{\bf U}}
-\newcommand{\Gg}{{\bf G}}
+%\newcommand{\F}{{\bf F}}
+%\newcommand{\X}{{\bf X}}
+%\newcommand{\Uu}{{\bf U}}
+%\newcommand{\Gg}{{\bf G}}
 
 \newcommand{\exception}{\epsilon}
 \newcommand{\extension}{\uparrow}
@@ -45,8 +35,6 @@
 \newcommand{\states}[1]{\emph{states}( #1 )}
 \newcommand{\executes}[1]{\triangleright #1 }
 
-\newcommand*\circleRef[1]{\tikz[baseline=(char.base)]{\node[shape=circle,draw,inner sep=1.5pt] (char) {#1};}}
-\newcommand{\listRef}[1]{\circleRef{\scriptsize{#1}}}
 
 %\newtheorem{theorem}{Theorem}[section]
 \newtheorem{property}{Property}[section]
@@ -57,20 +45,122 @@
 \newenvironment{proofsketch}{%
   \renewcommand{\proofname}{Proof sketch}\proof}{\endproof}
 
-%game defs
+
+%valuations
+\newcommand{\valuations}{\ensuremath{\mathbb{V}}\xspace}
+\newcommand{\propositions}{\ensuremath{\mathbb{P}}\xspace}
+\newcommand{\cltsProposition}{\ensuremath{p}\xspace}
+\newcommand{\executionDef}{\ensuremath{\varepsilon=s_0, \actionLabel_0, s_1, \ldots}\xspace}
+\newcommand{\execution}{\ensuremath{\varepsilon}\xspace}
+
+%clts
+\newcommand{\enumStateSet}[1]{\#_s(#1)}
+\newcommand{\enumStateSetDef}{$\#_s:\Sigma_{\gsV}\mapsto [0\ldots2^{|\gsV|}-1]$\xspace}
+\newcommand{\cltsDefIdx}[1]{\ensuremath{#1 = \lparen S_{#1},} \ensuremath{\Sigma_{#1}, \Delta_{#1},} \ensuremath{s_{0}^{#1}, \propositions_{#1}, \valuations_{#1}\rparen}\xspace}
+\newcommand{\cltsDefShareSigmaIdx}[1]{\ensuremath{#1 = \lparen S_{#1},} \ensuremath{\Sigma, \Delta_{#1},} \ensuremath{s_{0}^{#1}, \propositions_{#1},} \ensuremath{\valuations_{#1}\rparen}\xspace}
+\newcommand{\cltsDef}{\ensuremath{E = (S, \Sigma, \Delta, s_{0}, \propositions, \valuations)}\xspace}
+\newcommand{\cltsEmbeddingDef}[1]{\ensuremath{clts(#1) = (S, \Sigma, \Delta, s_{0}, \propositions, \valuations)}\xspace}
+\newcommand{\ctrlEmbeddingDef}[1]{\ensuremath{ctrl(#1) = (S, \Sigma, \Delta, s_{0}, \propositions, \valuations)}\xspace}
+\newcommand{\automaton}[1]{\ensuremath{#1 = (S_{#1}, \Sigma_{#1}, \Delta_{#1}, s_{0}^{#1})}\xspace}
+\newcommand{\labelSet}{\ensuremath{\mathcal{L}}\xspace}
+\newcommand{\actionLabel}{\ensuremath{L}\xspace}
+\newcommand{\action}{\ensuremath{l}\xspace}
+\newcommand{\traces}{\ensuremath{\emph{Tr}}}
+
+%composition
+\newcommand{\cltsComposition}[3]{{\ensuremath{#1 \parallel_{#3} #2 = \lparen S,$ $\Sigma_{#1} \cup \Sigma_{#2},$ $\Delta,$ $(s_{0}^{#1},s_{0}^{#2}),$ $\propositions_{#1} \cup \propositions_{#2}$ $\valuations\rparen}}\xspace}
+\newcommand{\ltsAdjustment}[2]{{\ensuremath{#1 \pm #2 = \lparen S_{#1}\times S_{#2},$ $\Sigma_{#1} \cup \Sigma_{#2},$ $\Delta,$ $(s_{0}^{#1},$ $s_{0}^{#2})\rparen}}\xspace}
+
+%control problem
+\newcommand{\controlSet}{\ensuremath{\mathcal{C}}\xspace}
+\newcommand{\nonControlSet}{\ensuremath{\mathcal{U}}\xspace}
+\newcommand{\controlProblemDef}{\ensuremath{\controlProblem =\langle E,$ $\controlSet,$ $\varphi \rangle}\xspace}
+\newcommand{\controlProblem}{\ensuremath{\mathcal{I}}\xspace}
+\newcommand{\advCtrl}{\ensuremath{\bar{C}}\xspace}
+\newcommand{\advControlProblemDef}{\ensuremath{\advControlProblem =\langle E,$ $\controlSet,$ $\neg\varphi \rangle}\xspace}
+\newcommand{\advControlProblem}{\ensuremath{\bar\mathcal{I}}\xspace}
+
+%minimization diagnosis
+\newcommand{\sublts}{\sqsubseteq}
+\newcommand{\subgame}{\subseteq\xspace}
+\newcommand{\altsubgame}{\sqsubseteq\xspace}
+
+
 \newcommand{\counterS}{{$f_1^{\neg\varphi}$}\xspace}
 \newcommand{\winS}{{$f_0^{\varphi}$}\xspace}
 \newcommand{\ltsind}{{$\overline{S_{\neg\varphi}}$}\xspace}
 \newcommand{\strategy}{\ensuremath{\sigma}\xspace}
 \newcommand{\tran}{t}
 \newcommand{\upd}{u}
+\newcommand*\circleRef[1]{\tikz[baseline=(char.base)]{\node[shape=circle,draw,inner sep=1.5pt] (char) {#1};}}
+\newcommand{\listRef}[1]{\circleRef{\scriptsize{#1}}}
 
-\newcommand{\automaton}[1]{$#1 = (S_{#1}, \Sigma_{#1}, \Delta_{#1}, s_{0}^{#1})$}
-\newcommand{\ltsComposition}[3]{$#1 \parallel_{#3} #2 = (S_{#1}\times S_{#2}, \Sigma_{#1} \cup \Sigma_{#2}, \Delta, (s_{0}^{#1},s_{0}^{#2}))$}
-\newcommand{\gsV}{{\mathcal{V}}}
-\newcommand{\gsX}{{\mathcal{X}}}
-\newcommand{\gsY}{{\mathcal{Y}}}
-\newcommand{\gsTheE}{{\theta_e}}
-\newcommand{\gsTheS}{{\theta_s}}
-\newcommand{\gsRhoE}{{\rho_e}}
-\newcommand{\gsRhoS}{{\rho_s}}
+%GS
+\newcommand{\gsV}{{\ensuremath{\mathcal{V}}}\xspace}
+\newcommand{\gsX}{{\ensuremath{\mathcal{X}}}\xspace}
+\newcommand{\gsY}{{\ensuremath{\mathcal{Y}}}\xspace}
+\newcommand{\gsTheE}{\ensuremath{{\theta_e}}\xspace}
+\newcommand{\gsTheS}{\ensuremath{{\theta_s}}\xspace}
+\newcommand{\gsRhoE}{\ensuremath{{\rho_e}}\xspace}
+\newcommand{\gsRhoS}{\ensuremath{{\rho_s}}\xspace}
+
+%FDS
+\newcommand{\enumSet}[1]{\#(#1)}
+\newcommand{\enumSetDef}{$\#:\Sigma_{\mathcal{M}}\mapsto [0\ldots2^{|\mathcal{M}|}-1]$\xspace}
+\newcommand{\fdsDefIdx}[1]{$#1= \langle \gsV_{#1},$ $\theta_{#1},$ $\rho_{#1},$ $\mathcal{J}_{#1},$ $\mathcal{C}_{#1}\rangle$\xspace}
+\newcommand{\fdsD}{\ensuremath{\mathcal{D}}\xspace}
+\newcommand{\fdsDef}{$\fdsD = \langle \gsV_d,$ $\theta_d,$ $\rho_d,$ $\mathcal{J}_d,$ $\mathcal{C}_d\rangle$\xspace}
+\newcommand{\fdsControlProblemDef}{\ensuremath{\fdsControlProblem =\langle \gsX,} \ensuremath{\gsY,$ $\varphi \rangle}\xspace}
+\newcommand{\fdsControlProblem}{\ensuremath{\mathcal{K}}\xspace}
+%realizability theorems
+\newcommand{\varState}[1]{\ensuremath{\hat{s}_{#1}}\xspace}
+\newcommand{\varLabel}[1]{\ensuremath{\hat{l}_{#1}}\xspace}
+\newcommand{\varphiLTL}{\ensuremath{\varphi_{FDS}}\xspace}
+\newcommand{\varphiLTLDef}{\ensuremath{\varphiLTL = (\theta_e \implies \theta_s) \wedge (\theta_e \implies \square((\boxdot \rho_e) \implies \rho_s)) \wedge (\theta_e \wedge \rho_e \implies val(\varphi))}\xspace}
+\newcommand{\varphiCLTS}{\ensuremath{\varphi_{CLTS}}}
+\newcommand{\varphiCLTSDef}{\ensuremath{\varphiCLTS = ()}\xspace}
+\newcommand{\varphiLtlFormula}{\ensuremath{(\theta_e \implies \theta_s) \wedge (\theta_e \implies \square((\boxdot \rho_e) \implies \rho_s)) \wedge (\theta_e \wedge \rho_e \implies val(\varphi))}}
+\newcommand{\fdsEmbeddingDef}{\ensuremath{ltl(\controlProblem) = \langle \gsX,$ $\gsY,$ $\varphiLTL \rangle}\xspace}
+\newcommand{\fdsEmbedding}{\ensuremath{ltl(\controlProblem)}\xspace}
+\newcommand{\cltsCPEmbeddingDef}{\ensuremath{clts(\fdsControlProblem) =\langle E,$ $\controlSet,$ $\varphiCLTS \rangle}\xspace}
+\newcommand{\cltsCPEmbedding}{\ensuremath{clts(\fdsControlProblem)}\xspace}
+
+%mu calculus for clts
+\newcommand{\valuateSet}[3]{\ensuremath{\llbracket #3 \rrbracket^{#1}_{#2}}\xspace}
+\newcommand{\valuateSetE}[1]{\ensuremath{\llbracket #1 \rrbracket^{\varepsilon}_{E}}\xspace}
+\newcommand\osquare{\stackMath\mathbin{\stackinset{c}{0ex}{c}{0ex}{\Box}{\bigcirc}}}
+\newcommand\odiamond{\stackMath\mathbin{\stackinset{c}{0ex}{c}{0ex}{\diamond}{\bigcirc}}}
+%formulae
+\newcommand{\true}{\emph{true} }
+\newcommand{\false}{\emph{false} }
+\newcommand{\assume}{\phi}
+\newcommand{\guarantee}{\gamma}
+\newcommand{\invariant}{\rho}
+\newcommand{\fluentp}[1]{\dot{#1}}
+\newcommand{\fluent}{\emph{fl}}
+\newcommand{\set}[1]{\{#1\}}
+\newcommand{\gr}{{GR(1)}\xspace}
+\newcommand{\sgr}{{SGR(1)}\xspace}
+\newcommand{\G}{{\bf G}}
+\newcommand{\F}{{\bf F}}
+\newcommand{\X}{{\bf X}}
+\newcommand{\U}{{\bf U}}
+
+
+%game defs
+%\newcommand{\counterS}{{$f_1^{\neg\varphi}$}\xspace}
+%\newcommand{\winS}{{$f_0^{\varphi}$}\xspace}
+%\newcommand{\ltsind}{{$\overline{S_{\neg\varphi}}$}\xspace}
+%\newcommand{\strategy}{\ensuremath{\sigma}\xspace}
+%\newcommand{\tran}{t}
+%\newcommand{\upd}{u}
+%
+%\newcommand{\automaton}[1]{$#1 = (S_{#1}, \Sigma_{#1}, \Delta_{#1}, s_{0}^{#1})$}
+%\newcommand{\ltsComposition}[3]{$#1 \parallel_{#3} #2 = (S_{#1}\times S_{#2}, \Sigma_{#1} \cup \Sigma_{#2}, \Delta, (s_{0}^{#1},s_{0}^{#2}))$}
+%\newcommand{\gsV}{{\mathcal{V}}}
+%\newcommand{\gsX}{{\mathcal{X}}}
+%\newcommand{\gsY}{{\mathcal{Y}}}
+%\newcommand{\gsTheE}{{\theta_e}}
+%\newcommand{\gsTheS}{{\theta_s}}
+%\newcommand{\gsRhoE}{{\rho_e}}
+%\newcommand{\gsRhoS}{{\rho_s}}

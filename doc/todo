@@ -1,6 +1,7 @@
 TODO:
 =====
 -benchmark
+	- revisar synthesis algorithm refs for GR(1) in background
 	- actualizar func-tests
 	- leer
 		- Unrealizable Cores for Reactive Systems Specifications

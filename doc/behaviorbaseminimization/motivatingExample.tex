@@ -1,6 +1,6 @@
 \section{Motivation}\label{sec:motivation}
-We motivate and informally introduce relevant concepts by discussing a small example while also illustrating what we consider to be the complementary nature 
-of both the presented approach and that of ~\cite{DBLP:conf/hvc/KonighoferHB10}. Suppose that the engineer is working on a specification consisting of two environmental boolean variables $x_1$ and $x_2$ and one system variable $y$. Variable $x_2$ (initially false) is required to swap its value at each step of the execution, while $x_1$ remains free. The value of $y$ is set at the start and kept fixed throughout the execution.
+We motivate and informally introduce relevant concepts by discussing a small example that also illustrates what we consider to be the complementary nature 
+of both the current approach and that of ~\cite{DBLP:conf/hvc/KonighoferHB10}. Suppose that the engineer is working on a specification consisting of two environmental binary variables $x_1$ and $x_2$ and one system variable $y$. Variable $x_2$ (initially false) is required to swap its value at each step of the execution, while $x_1$ remains free. The value of $y$ is set at the start and kept fixed throughout the execution.
 It is assumed that $x_1$ will hold true infinitely often while $x_1 \wedge x_2 \wedge y$ is also required to be satisfied infinitely often. This is the set of LTL formulae of the specification, with $\theta$ being the initial condition, $\rho_e$ the environmental safety restriction, $\varphi_e$ the liveness assumption and $\varphi_s$ the liveness guarantee:
 \begin{center}
 	\begin{tabular}{ r c l }
@@ -12,9 +12,9 @@ It is assumed that $x_1$ will hold true infinitely often while $x_1 \wedge x_2 \
 	\end{tabular}
 \end{center}
 
-The automaton induced from this set of formulae is depicted in Fig. ~\ref{fig:konig_original_plant_2_clts}. At this point, the specification is not realizable since the environment can set $x_1$ to true only when $x_2$ is down, thus honoring the environmental assumption while avoiding the system to reach the winning valuation $x_1 \wedge x_2 \wedge y$. The minimization presented in ~\cite{DBLP:conf/hvc/KonighoferHB10} removes $\rho_e$ since it is unnecessary for the environment to swap $x_2$ regularly in order to win the (non) realizability game. This approach can be characterized as a syntactic minimization, whose purpose is to help the engineer when viewing the specification, and in particular the safety part describing the behavior of the plant, as a set of LTL formulae. This approach, nonetheless, yields the automaton depicted in Fig. ~\ref{fig:konig_original_plant_k_2} which is, in fact, more complex in terms of its explicit behavior. Our approach is designed to simplify the semantic view of the specification, producing the automaton depicted in Fig. ~\ref{fig:konig_original_plant_c_2}. 
+The automaton induced from this set of formulae is depicted in Fig. ~\ref{fig:konig_original_plant_2_clts}. At this point, the specification is not realizable since the environment can set $x_1$ to true only when $x_2$ is down, thus honoring the environmental assumption while avoiding the system to reach the winning valuation $x_1 \wedge x_2 \wedge y$. The minimization presented in ~\cite{DBLP:conf/hvc/KonighoferHB10} removes $\rho_e$ since it is unnecessary for the environment to swap $x_2$ regularly in order to falsify the goal. This approach can be characterized as a syntactic minimization, where the purpose is to help the engineer understand the cause of unrealizability by looking at the specification text. In particular a partion of the safety LTL formulae describing the behavior of the plant is removed. This approach yields the automaton depicted in Fig. ~\ref{fig:konig_original_plant_k_2} which is, in fact, more complex in terms of its explicit behavior. Our approach is designed to simplify the semantic view of the specification, producing the automaton depicted in Fig. ~\ref{fig:konig_original_plant_c_2}. 
 
-The syntactic minimization should help the engineer to focus on a smaller set of formulae by getting rid of the irrelevant element $\rho_e$ while diagnosing the non realizability cause, in this example being that assumption $\varphi_e$ is too weak. Our approach simplifies the specification semantically instead, reducing the relevant behavior and showing that it is possible for the environment to avoid state 2 by never allowing $x_1$ and $x_2$ to happen simultaneously, while at the same time not restricting the system below its original capabilities. Notice that if we were allowed to add the assumption that both environmental variables occur simultaneously infinitely often ($\rho'_s = \square \Diamond x_1 \wedge x_2$) the specification would be realizable and choosing to raise $y$ at the beginning would be sufficient in order to guarantee our goal, as shown in Fig. ~\ref{fig:konig_strategy_2}. After fixing $y$ to true the environment can move freely as long as it visits state 2 infinitely often. If the engineer has this behavior in mind as her design intent, it should be easy to see that in the semantic minimization the desired state is unreachable, hopefully guiding her to the strengthening of the assumption.  In Fig. ~\ref{fig:konig_composition_2} we show the synchronous composition of the aforementioned strategy with our minimization. Note that after letting the system raise $y$ state 1 is visited only once and then the execution keeps moving between states 2 and 3 in order to keep the value of $x_2$ oscillating.
+The syntactic minimization should help the engineer to focus on a smaller set of formulae by getting rid of the irrelevant element $\rho_e$ while diagnosing the unrealizability cause, in this example being that assumption $\varphi_e$ is too weak. Our approach simplifies the specification semantically instead, reducing the relevant behavior and showing that it is possible for the environment to avoid state 2 by never allowing $x_1$ and $x_2$ to happen simultaneously, while at the same time not restricting the system below its original capabilities. Notice that if we were allowed to add the assumption that both environmental variables occur simultaneously infinitely often ($\rho'_s = \square \Diamond x_1 \wedge x_2$) the specification would be realizable and choosing to raise $y$ at the beginning would be sufficient in order to guarantee our goal, as shown in Fig. ~\ref{fig:konig_strategy_2}. After fixing $y$ to true the environment can move freely as long as it visits state 2 infinitely often. If the engineer has this behavior in mind as their design intent, it should be easy to see that in the semantic minimization the desired state is unreachable, hopefully guiding them to the strengthening of the assumption.  In Fig. ~\ref{fig:konig_composition_2} we show the synchronous composition of the aforementioned strategy with our minimization. Note that after letting the system raise $y$ state 1 is visited only once and then the execution keeps moving between states 2 and 3 in order to keep the value of $x_2$ oscillating.
 
 %\begin{figure}[bt]
 %	\centering
@@ -60,42 +60,40 @@ The syntactic minimization should help the engineer to focus on a smaller set of
 \centering
 \SmallPicture
 %\ShowFrame
-
-	\VCDraw{
-
-	\begin{VCPicture}{(-4,-2.5)(4,9.5)}
-		\SetEdgeLabelScale{1.4}
-		\State[0]{(-5,3)}{init}
-		\State[1]{(-2.5,3)}{init_e}		
-		\State[2]{(-1.5,6)}{0}
-		\State[3]{(1.5,8)}{1}
-		\State[4]{(4.5,6)}{2}
-		\State[5]{(1.5,4)}{3} 
-		\State[6]{(-1.5,0)}{4}			
-		\State[7]{(1.5,2)}{5}
-		\State[8]{(4.5,0)}{6}
-		\State[9]{(1.5,-2)}{7} 			  
-		\Initial[w]{init}
-		\EdgeL{init}{init_e}{\overline{x_1 x_2}}
-		\ArcL{init_e}{0}{y}
-		\ArcR{init_e}{4}{\overline{y}}	
-		\ArcR{0}{1}{}\LabelL[.5]{x_1 x_2}
-		\LArcR[.6]{1}{0}{\overline{x_1 x_2}}
-		\ArcR{1}{2}{}\LabelL[.5]{\overline{x_2}}
-		\LArcR[.6]{2}{1}{x_2}
-		\ArcR{2}{3}{}\LabelL[.5]{\overline{x_1}x_2}
-		\LArcR[.6]{3}{2}{x_1\overline{x_2}}
-		\ArcR{3}{0}{}\LabelL[.5]{\overline{x_2}}
-		\LArcR[.6]{0}{3}{x_2}
-		\ArcR{4}{5}{}\LabelL[.5]{x_1 x_2}
-		\LArcR[.6]{5}{4}{\overline{x_1 x_2}}
-		\ArcR{5}{6}{}\LabelL[.5]{\overline{x_2}}
-		\LArcR[.6]{6}{5}{x_2}
-		\ArcR{6}{7}{}\LabelL[.5]{\overline{x_1}x_2}
-		\LArcR[.6]{7}{6}{x_1\overline{x_2}}
-		\ArcR{7}{4}{}\LabelL[.5]{\overline{x_2}}
-		\LArcR[.6]{4}{7}{x_2}	
-	\end{VCPicture}
+\VCDraw{
+\begin{VCPicture}{(-4,-2.5)(4,9.5)}
+	\SetEdgeLabelScale{1.4}
+	\State[0]{(-5,3)}{init}
+	\State[1]{(-2.5,3)}{init_e}		
+	\State[2]{(-1.5,6)}{0}
+	\State[3]{(1.5,8)}{1}
+	\State[4]{(4.5,6)}{2}
+	\State[5]{(1.5,4)}{3} 
+	\State[6]{(-1.5,0)}{4}			
+	\State[7]{(1.5,2)}{5}
+	\State[8]{(4.5,0)}{6}
+	\State[9]{(1.5,-2)}{7} 			  
+	\Initial[w]{init}
+	\EdgeL{init}{init_e}{\overline{x_1 x_2}}
+	\ArcL{init_e}{0}{y}
+	\ArcR{init_e}{4}{\overline{y}}	
+	\ArcR{0}{1}{}\LabelL[.5]{x_1 x_2}
+	\LArcR[.6]{1}{0}{\overline{x_1 x_2}}
+	\ArcR{1}{2}{}\LabelL[.5]{\overline{x_2}}
+	\LArcR[.6]{2}{1}{x_2}
+	\ArcR{2}{3}{}\LabelL[.5]{\overline{x_1}x_2}
+	\LArcR[.6]{3}{2}{x_1\overline{x_2}}
+	\ArcR{3}{0}{}\LabelL[.5]{\overline{x_2}}
+	\LArcR[.6]{0}{3}{x_2}
+	\ArcR{4}{5}{}\LabelL[.5]{x_1 x_2}
+	\LArcR[.6]{5}{4}{\overline{x_1 x_2}}
+	\ArcR{5}{6}{}\LabelL[.5]{\overline{x_2}}
+	\LArcR[.6]{6}{5}{x_2}
+	\ArcR{6}{7}{}\LabelL[.5]{\overline{x_1}x_2}
+	\LArcR[.6]{7}{6}{x_1\overline{x_2}}
+	\ArcR{7}{4}{}\LabelL[.5]{\overline{x_2}}
+	\LArcR[.6]{4}{7}{x_2}	
+\end{VCPicture}
 }
 	\caption{Original Plant}
 	\label{fig:konig_original_plant_2_clts}

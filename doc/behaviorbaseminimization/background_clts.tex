@@ -1,0 +1,127 @@
+\section{Preliminaries}
+%In this section we present background on realisability, which is linked to the problem of controller synthesis~\cite{DBLP:conf/popl/PnueliR89,DBLP:journals/jcss/BloemJPPS12} which, in turn, requires a formal specification that, in this paper, is assumed to be, as in~\cite{DBLP:conf/sigsoft/DIppolitoBPU10} provided as a labelled transition system and a subset of linear temporal logic formula called Generalised Reactivity 1~\cite{DBLP:journals/jcss/BloemJPPS12}.
+
+We model the interaction of safety assumptions on the environment and goals for the system with Concurrent Labelled Transition Systems (CLTS), either monolithically or as the composition of its constituents. 
+
+
+\begin{definition}
+	\label{def:CLTS} \emph{(Concurrent Labelled Transition Systems)} 
+	A \emph{Concurrent Labelled Transition System} (CLTS) is defined as 
+	\cltsDef, 
+	where $S$ is a finite set of states, $\Sigma$ is its {\em set of actions}, $\Delta \subseteq (S \times 2^{|\Sigma|} \times S)$ is a transition relation, $s_0 \in S$ is the initial state,
+	$\propositions : \{\cltsProposition_0,\ldots,\cltsProposition_k\}$ is a finite set of atomic 
+	propositions and $\valuations : S \mapsto  2^{|\propositions|}$ is the function that defines the set of propositions that hold at a given state $s \in S$.  
+	%We denote $\Delta(s)=\{\actionLabel~|~(s,\actionLabel,s') \in \Delta\}$. 
+	A CLTS is deterministic if $(s,\actionLabel,s')$ and $(s,\actionLabel,s'')$ are in $\Delta$ then $s'=s''$ should hold.
+	An execution of $E$ is a word \executionDef where $(s_i, \actionLabel_i, s_{i+1}) \in \Delta$. 
+	%A word $\pi$ is a trace (induced by $\varepsilon$) of $E$ if its the result of removing every $s_i$ from an execution $\varepsilon$ of $E$. 	We denote the set of infinite traces of $E$ by $\traces(E)$. 
+	Given a transition $(s_i, \actionLabel, s_j) \in \Delta$, we will call $\actionLabel$ its label, and each element $\action \in \actionLabel$ an action.
+\end{definition}
+
+
+
+\begin{definition} 
+	\label{def:concurrent_composition}(\emph{Concurrent Composition})	Let \automaton{M},\automaton{N}, with $\Delta_M : S_M \times \mathcal{P}(\Sigma_M) \times S_M$, be two CLTS instances, then CLTS concurrent parallel composition is defined as \cltsComposition{M}{N}{c} where $\Delta$ is the smallest relation s.t:
+	\footnotesize
+	\begin{center}
+		\begin{equation}
+		\AxiomC{$(s, l_M, s') \in \Sigma_M,(t, l_N, t') \in \Sigma_N  $}\RightLabel{$l_M \cap \Sigma_N = l_N \cap \Sigma_M$}
+		\UnaryInfC{$((s,t),l_M \cup l_N,(s',t')) \in \Delta$}
+		\DisplayProof
+		\end{equation}	
+		\begin{equation}
+		\AxiomC{$(s, l_M, s') \in \Sigma_M $}\RightLabel{$l_M \cap \Sigma_N = \emptyset$}
+		\UnaryInfC{$((s,t),l_M,(s',t))$}
+		\DisplayProof \;
+		\AxiomC{$(t, l_N, t') \in \Sigma_N $}\RightLabel{$l_N \cap \Sigma_M = \emptyset$}
+		\UnaryInfC{$((s,t),l_N,(s,t'))$}
+		\DisplayProof
+		\end{equation}
+	\end{center}
+	\normalsize
+\end{definition}
+
+The distinction between what a CLTS can control and what it can monitor is enforced through the notion of 
+{\em legal environment} taken from~\cite{DIppolito:2013}, and inspired in that of Interface Automata~\cite{DBLP:conf/sigsoft/AlfaroH01}.
+Intuitively, a controller does not block the actions that it does not control, and dually, the environment does not restrict controllable actions. 
+
+\begin{definition}
+	\label{def:legal_clts} \emph{(Legality w.r.t. $E$ and $\controlSet$)} 
+	Given two CLTS instances \cltsDefShareSigmaIdx{C} and \cltsDefShareSigmaIdx{E}, where $\Sigma$ is partitioned into actions controlled and monitored, i.e.: $\Sigma=\controlSet \; \uplus \;\nonControlSet$, we say that $C$ is a legal CLTS for $E$ w.r.t. \controlSet if the following holds for all $(s_E,s_C) \in E \parallel C$:
+	\footnotesize
+		\begin{align}\begin{aligned}
+\forall \actionLabel_{\nonControlSet}\text{ s.t. }  (s_E, \actionLabel, s'_E) \in \Delta_E \wedge \actionLabel|_{\nonControlSet} = \actionLabel_{\nonControlSet}:( \exists (s_C, \actionLabel', s'_C) \in \Delta_C \wedge\\ \actionLabel'|_{\nonControlSet} = \actionLabel_{\nonControlSet})
+\end{aligned}\end{align}	
+\begin{align}
+\forall (s_C, \actionLabel, s'_C) \in \Delta_C:( \exists (s_E, \actionLabel, s'_E) \in \Delta_E)
+\end{align}	
+	\normalsize
+	In the previous and following definitions $\actionLabel|_{\nonControlSet}$ stands for the restriction of the elements of $\actionLabel$, it can be read as the intersection $\actionLabel \cap \nonControlSet$.
+	The first property will be referred to as \emph{legality openness} and the second as \emph{legality inclusion}.
+\end{definition}
+
+A LTL formula is defined inductively using the standard Boolean connectives and temporal operators $X$~(next), $U$ (strong until) as follows: 
+$\varphi ::= \cltsProposition \mid \neg \varphi \mid \varphi \vee \psi \mid \X \varphi \mid \varphi U \psi,$
+where $\cltsProposition$ is an atomic proposition from $\propositions$. 
+As usual we introduce $\wedge$, $\F$ (eventually), and $\G$ (always) as syntactic sugar. 
+Let $\epsilon$ be the set of infinite executions over $\Delta$.
+The execution \executionDef satisfies $\cltsProposition$ at position $i$ (we are only considering states, not labels, when defining the position), denoted $\execution,i \models \cltsProposition$, if and only if the state $s_j$ at position $i$ in $\execution$ (i.e. $\execution_i = s_j$)  satisfies $\cltsProposition \in \valuations(s_i)$.
+
+
+Given an infinite execution $\execution$, the satisfaction of a formula $\varphi$ at position $i$, denoted $\execution,i\models\varphi$, is defined as follows:
+
+\begin{tabular}{ l c l }
+$\execution, i \models_d \cltsProposition$ & $\triangleq$ & $\cltsProposition \in \valuations(\execution_i)$\\
+$\execution, i \models_d \neg \varphi$ & $\triangleq$ & $\execution, i \not\models_d \varphi$\\
+$\execution, i \models_d \varphi \vee \psi$ & $\triangleq$ & $(\execution, i \models_d \varphi) \vee (\execution, i \models_d \psi)$\\
+$\execution, i \models_d \X \varphi$ & $\triangleq$ & $\execution, i +1 \models_d \varphi$\\
+$\execution, i \models_d \varphi \U \psi$ & $\triangleq$ & $\exists j \geq i . \execution,j \models_d \psi \wedge$\\
+&& $\forall i \leq k \le k. \execution, k \models_d \varphi$\\
+\end{tabular}
+
+We say that $\varphi$ holds in $\execution$, denoted $\execution\models\varphi$, if $\execution,0\models\varphi$. 
+A formula $\varphi \in \mbox{LTL}$ holds in an CLTS $E$ (denoted $E \models \varphi$) if it holds on every infinite execution produced by $E$.
+
+
+As usual we introduce $\wedge$, $\Diamond$ (eventually), and $\square$ (always) as syntactic sugar. 
+
+In this paper we restrict attention to \gr~\cite{DBLP:journals/jcss/BloemJPPS12} formulas as there are effective synthesis algorithms for this sub-logic~\cite{DBLP:journals/jcss/BloemJPPS12}. \gr formulae are of the form $\varphi = \bigwedge_{i=1}^n \square\Diamond \assume_i \implies \bigwedge_{j=1}^m \square\Diamond \guarantee_j$, where $\{\assume_1 \ldots \assume_n\}$ and $\{\guarantee_1 \ldots \guarantee_m\}$ are propositional FLTL formulae.
+
+
+\begin{definition}
+	\label{def:clts_control_problem} \emph{(CLTS Control Problem)} 
+	Let \cltsDefShareSigmaIdx{E} be a deterministic CLTS then \controlProblemDef constitutes a CLTS control problem. If a solution to $\controlProblem$ exists, such a solution will be a CLTS $M$, deadlock-free, legal w.r.t. $E$ and $\controlSet$, such that, $E \parallel M \models \varphi$. If such a solution exists, we will say that \controlProblem is \emph{realizable}, otherwise we say it is \emph{unrealizable}.
+\end{definition}
+
+
+\begin{definition}\label{def:twoplayer-game}\emph{(Two-player Game)}
+	A two player game $G$ is defined as the tuple $G=(S_g,\Gamma^{-},\Gamma^{+},s_{g0}, \varphi)$ where $S_{g}$ is a finite set of states, $\Gamma^{-}$,$\Gamma^{+}$ $\subseteq S\times S$ are transition relations defined for the uncontrollable and controllable transtiions respectively, $s_{g0}\in S_{g}$ is the initial condition and $\varphi \subseteq S_{g}^{\omega}$ is the winning condition.  We denote $\Gamma^{-}(s) =$ $\{s'|(s,s')$ $\in \Gamma^{-}\}$ and in a similar fashion for $\Gamma^{+}(s)$. A state $s$ is uncontrollable if $\Gamma^{-}(s)\neq \emptyset$ and controllable otherwise.  A play on $G$ is a sequence $p=s_0,s_1,\ldots$ an a play $p$ ending in $s_{g_{n}}$ is extended by the controller choosing a subset $\gamma \subseteq \Gamma^{+}(s_{g_{n}})$.  Then the environment chooses a state $s_{g_{n+1}}$ $\in \gamma \cup \Gamma^{-}(s_{g_{n}})$ and adds $s_{g_{n+1}}$ to $p$.
+\end{definition}
+
+\begin{definition}\label{def:strategy}\emph{((Counter)Strategy with memory)}
+	A strategy with memory $\Omega$ for the controller is a pair of functions $(\delta, u)$ where $\Omega$ is some memory domain, $\delta:\Omega\times S \rightarrow 2^{S}$ such that $\delta(\omega, s) \subseteq \Gamma^{+}(s)$ and $u:\Omega \times S \rightarrow \Omega$.
+	A counter strategy with memory $\nabla$ for the environment is a pair of functions $(\kappa, v)$ where $\nabla$ is some memory domain, $\kappa:\nabla\times S \rightarrow 2^{S}$ such that $\kappa(\nabla, s) \subseteq \Gamma^{-}(s)$ and $v:\nabla \times S \rightarrow \nabla$.
+\end{definition}
+
+
+\begin{definition}\label{def:consistency}\emph{(Consistency under (Non)Controllability and Winning (Counter)Strategy)}
+	A finite or infinite play $p= s_0,s_1,\ldots$ is consistent under controllability if for every $n$ we have $s_{n+1} \in \delta(\omega_n,s_n)$, where $\omega_{i+1}=u(\omega_i,s_{i+1})$ for all
+	$i \geq 0$. A strategy $(\delta, u)$ for controller from state $s$ is 
+	winning if every maximal play starting in $s$ and consistent under controllability with $(\delta, u)$ is infinite and remains within $\varphi$.  We say that the controller wins the game $G$ if it has a winning strategy from the initial state. For the non controllable case,
+	a finite or infinite play $p= s_0,s_1,\ldots$ is consistent under non-controllability if for every $n$ we have $s_{n+1} \in \kappa(\nabla_n,s_n)$, where $\nabla_{i+1}=v(\nabla_i,s_{i+1})$ for all
+	$i \geq 0$. A strategy $(\kappa, v)$ for environment from state $s$ is 
+	winning if every maximal play starting in $s$ and consistent under non-controllability with $(\kappa, v)$ is infinite and exits $\varphi$ at some point.  We say that the environment wins the game $G$ if it has a winning strategy from the initial state.
+\end{definition}
+
+\begin{definition}\label{def:generalized-reactivity}\emph{(Generalized Reactivity(1))}
+	Given an infinite sequence of states $p$, let $inf(p)$ denote the states that occur infinitely often in $p$, let $\phi_1,\ldots,\phi_n$ and $\gamma_1,\ldots,\gamma_m$ be subsets of $S$.  Let $gr((\phi_1,\ldots,\phi_n),(\gamma_1,\ldots,\gamma_m))$ denote the set of infinite sequences $p$ such that either for some $i$ we have $inf(p) \cap \phi_i = \emptyset$ or for all $j$ we have $inf(p)\cap \gamma_j \neq \emptyset$. A GR(1) game is a game where the winning condition $\varphi$ is $gr((\phi_1,\ldots,\phi_n),(\gamma_1,\ldots,\gamma_m))$.
+\end{definition}
+
+\begin{definition}
+	\label{def:clts_counter_solution} \emph{(CLTS Control Problem Counter-Solution)} 
+	Let \cltsDefShareSigmaIdx{E} be a deterministic CLTS and \controlProblemDef a CLTS control problem. If there is no solution to 
+	\controlProblem, 
+	any CLTS $\advCtrl$, deadlock-free, legal w.r.t. $E$ and $\controlSet$, such that, $E \parallel \advCtrl \models \neg\varphi$ is called a counter-solution to \controlProblem.
+\end{definition}
+
+
