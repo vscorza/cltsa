@@ -11,7 +11,7 @@ The two main questions are:
 
 The measure of information our technique provides must be related to the impact it can have on the overall specification process, in particular in how clear it is for the engineer  to interpret the diagnosis. The aim is to minimize the amount of data presented while keeping it relevant to the unrealizability cause. The unavailability of skilled professionals and the amount of time and effort required to prepare a considerable set of external subjects up to the point where they would be able to write non trivial formal specifications, renders the perspective of a controlled experiment with external engineers writing specifications from scratch unfeasible. On the other hand, it is also impossible to propose a direct comparison with similar techniques, since, for instance, in ~\cite{DBLP:conf/hvc/KonighoferHB10} the minimization is applied on the set of environmental safety formulas, which in fact increments the volume of the plant when presented as an automaton, and in ~\cite{DBLP:conf/sigsoft/KuventMR17} a simplification of the symbolic counter strategy is presented as a LTS composed of attractors and trap states. We think that our technique adds a complimentary view to the non realizability diagnosis problem.
 
-Research question \textbf{RQ1} is addressed by comparing the reduction volume of our technique with respect to the closest approach (~\cite{DBLP:conf/hvc/KonighoferHB10}) while \text{RQ2} is answered by the relation between synthesis and diagnosis time of similar specifications.
+Research question \textbf{RQ1} is addressed by comparing the reduction volume of our technique with respect to the closest approach (~\cite{DBLP:conf/hvc/KonighoferHB10}) while \textbf{RQ2} is answered by the relation between synthesis and diagnosis time of similar specifications.
 
 We now explain three of the metrics used to quantitatively evaluate our technique. The first metric is relative minimization volume ($v_{\mathcal{U}}$), defined as the size of the minimized plant against the original instance ($|\Delta_{E'}|/|\Delta_{E}|$). 
 The number of transitions is used as the representation of absolute volume for two reasons, first, because it is a measure of how many options the user has when exploring the minimized plant, and the  second, because it is a dominant parameter in the complexity of the synthesis algorithms. 
@@ -27,39 +27,81 @@ These modifications are of two different kinds, the first removes a required liv
 Our benchmark is divided in two groups.The first group comes from the reactive synthesis domain, where behavior is described as a conjunction of safety formulae. These specifications usually describe hardware model and their symbolic nature allows for a concise and efficient representation and transformation of the model.  Our tool allows for such a specification to be properly written and it uses an intermediate ROBDD representation that is then translated into an explicit automaton before the synthesis/diagnosis steps are applied. The second goup comes from automata-based or process-based specifications, where a automaton representation of its behavior is almost straight-forward.
 
 We will now briefly explain each case, show how they were parameterized and modified in order to achieve non realizability. 
-The Generalized Buffer (GenBuf) and AMBA AHB case studies were taken from~\cite{DBLP:conf/hvc/KonighoferHB10}, the Lift Controller comes from ~\cite{DBLP:conf/fmcad/AlurMT13}, Collector is part of the SYNTCOMP competition ~\cite{SYNTCOMP} benchmark and the exploration robot case was adapted from ~\cite{DBLP:journals/corr/abs-2001-07678}. 
-%lift controller
-The \textbf{Lift Controller} case specifies the behavior of a system that should eventually serve every request to take the elevator to a required floor when the corresponding button was pressed, and also to take it back to the ground floor if no request is pending. The parameter on these instances indicates how many floors are present in the specification. The \texttt{missing liveness} modification changes one of the liveness guarantees from $\square \Diamond (b_i \rightarrow f_i)$ to $\square \Diamond (f_i)$. The original form asks the system to serve a floor only when requested, the modification makes it serve a floor even when it was not requested. Due to other safety restrictions this renders the specification unrealizable. The \texttt{removed safety} modification allows an input signal to keep the elevator at a particular floor indefinitely.
-
-%collector
-The \textbf{Collector} case outputs a barrier signal once all inputs $in_1\ldots in_n$ have occurred at least once. The parameter indicates how many inputs the specification could receive. The \texttt{missing liveness} modification removes one of the assumptions that forces the environment to always eventually produce input $i$ ($\square\Diamond(in_i)$). The \texttt{removed safety} modification removes the relation between an input and an internal memory signal that is needed in order to keep track of the inputs read after the last barrier raise.
-
-%exploration robot
-The \textbf{Exploration Robot} case models the behavior of a robot that can move through a sqare grid of size $n$, which also serves as the parameter for this specification. The robot must load cargo at the initial position and then unload it at the opposite corner of the grid. At the loading site the operation can either be successful or fail. The \texttt{missing liveness} modification removes the assumption that a load will always eventually occur. The \texttt{removed safety} modification allows the environment to neglect the load event indefinitely once a certain point in the grid is reached.
-
-%genbuf
-The \textbf{Generalized Buffer (GenBuf)} case has a FIFO for storing data incoming from senders, and a
+The Generalized Buffer (GenBuf) and AMBA AHB case studies were taken from~\cite{DBLP:conf/hvc/KonighoferHB10}, the Lift Controller comes from ~\cite{DBLP:conf/fmcad/AlurMT13}, Collector is part of the SYNTCOMP competition ~\cite{SYNTCOMP} benchmark, Air Tower Control, Bidding Workflow, Cat and Mouse, Dining Philosophers, Travel Agency and Transfer Line are taken from ~\cite{ciolek2019compositional} where the authors collected several problems from the supervisory control domain, the exploration robot case was adapted from ~\cite{DBLP:journals/corr/abs-2001-07678}.
+\begin{description}[align=left,leftmargin=0.7cm,font=\normalfont,style=nextline,itemsep=0pt]
+\item[LC] The \textbf{Lift Controller} case specifies the behavior of a system that should eventually serve every request to take the elevator to a required floor when the corresponding button was pressed, and also to take it back to the ground floor if no request is pending. The parameter on these instances indicates how many floors are present in the specification. The \texttt{missing liveness} modification changes one of the liveness guarantees from $\square \Diamond (b_i \rightarrow f_i)$ to $\square \Diamond (f_i)$. The original form asks the system to serve a floor only when requested, the modification makes it serve a floor even when it was not requested. Due to other safety restrictions this renders the specification unrealizable. The \texttt{removed safety} modification allows an input signal to keep the elevator at a particular floor indefinitely.
+\item[CO] The \textbf{Collector} case outputs a barrier signal once all inputs $in_1\ldots in_n$ have occurred at least once. The parameter indicates how many inputs the specification could receive. The \texttt{missing liveness} modification removes one of the assumptions that forces the environment to always eventually produce input $i$ ($\square\Diamond(in_i)$). The \texttt{removed safety} modification removes the relation between an input and an internal memory signal that is needed in order to keep track of the inputs read after the last barrier raise.
+\item[GB] The \textbf{Generalized Buffer (GenBuf)} case has a FIFO for storing data incoming from senders, and a
 controller to communicate with the senders, receivers, and the
 FIFO. On the sender side, GenBuf receives a request input from each sender, and replies
 with an acknowledge output. On the receiver side, GenBuf outputs a request and inputs an
 acknowledge for each receiver. The GenBuf controller gets the \texttt{FULL} and \texttt{EMPTY} signals from the FIFO and
 provides the \texttt{ENQ,DEQ}, and \texttt{SLC} signals for writing (reading) appropriate data to (from) the FIFO.
 The parameter on each instance indicates how many senders the specification has. The \texttt{missing liveness} modification removes the assumption that the first receiver will eventually acknowledge a request, and in \texttt{removed safety} we removed original assumption \texttt{A5}, relaxing the behavior of the \texttt{FULL} and \texttt{EMPTY} signals.
-
-%ahb
-The \textbf{AMBA AHB} defines a standard for on-chip communication between several devices operating in master-slave fashion. We split the arbiter in two modules, the \texttt{scheduler}, that is in charge of granting access to the masters and handling communication with the slaves, and the \texttt{burst manager}, that is in charge of handling signal burst operation. In this section we show the results for the \texttt{scheduler} since it is the only parameterized module of the two. 
+\item[AB] The \textbf{AMBA AHB} defines a standard for on-chip communication between several devices operating in master-slave fashion. We split the arbiter in two modules, the \texttt{scheduler}, that is in charge of granting access to the masters and handling communication with the slaves, and the \texttt{burst manager}, that is in charge of handling signal burst operation. In this section we show the results for the \texttt{scheduler} since it is the only parameterized module of the two. 
 The \texttt{missing liveness} modification removes the assumption that the \texttt{DECIDE} signal will always eventually be raised, which in turn does not assures that the scheduler will pick the next master to be served, and in \texttt{removed safety} the occurrence of \texttt{sel$_0$} fixes \texttt{hReq$_1$} to a low value, preventing the second master to be acknowledged. 
-
+\item[ER] The \textbf{Exploration Robot} case models the behavior of a robot that can move through a sqare grid of size $n$, which also serves as the parameter for this specification. The robot must load cargo at the initial position and then unload it at the opposite corner of the grid. At the loading site the operation can either be successful or fail. The \texttt{missing liveness} modification removes the assumption that a load will always eventually occur. The \texttt{removed safety} modification allows the environment to neglect the load event indefinitely once a certain point in the grid is reached.
+\item[TL] \textbf{Transfer Line} consists of $n$ machines
+sequentially connected by $n$ buffers with finite capacity $k$, and an ending ma-
+chine which may accept or reject a
+finished product. The goal of the system is to process
+elements avoiding buffer overflows and underflows. The
+system controls when to input an element from buffer
+$B_{i -1}$ into machine $M_i$ assuming infinite supply from
+the outside world for $M_0$.
+\item[DP] \textbf{Dinning Philosophers} is the classic concurrency
+problem where $n$ philosophers are sitting around a table sharing
+one fork with the adjacent philosopher. The goal of
+the system is to control the access to the forks allowing
+each philosopher to alternate between eating and thinking.
+After grabbing a fork a philosopher needs to take $k$ intermediate
+etiquette steps before eating. 
+\item[CM] The \textbf{Cat and Mouse} case has $n$ cats
+and $n$ mice placed in opposite ends of a corridor
+divided in $2k +1$ cells. They take turns to move to one
+adjacent area at a time, with mice moving first. The goal
+of the system is to control the movement of mice in order
+to avoid sharing an area with a cat (the movements of cats
+are uncontrollable). In the center of the corridor there is a
+mouse hole, allowing the mice to share the area with the
+cats safely. Thus, a winning strategy for the mice requires
+all of them to be always closer to the mouse hole than any
+cat, in order to be able to evade them.
+\item[BW] In the \textbf{Bidding Workflow} a company evaluates projects to
+decide whether to bid for them or not. Here a
+document describing a project needs to be accepted by $n$
+teams with different specializations. By approving the
+document when all teams accept it, and discarding it when
+all teams reject it the system should try to reach consensus. The document can be reassigned to a
+team that has rejected it up to $k$ times for revision, but it
+must not be reassigned to a team that has already accepted
+it. When a team rejects the document $k$ times it can be
+discarded even with no consensus.
+\item[AT] In \textbf{Air-Traffic management} a control tower receives up to $n$ simultaneous requests for landing. The tower
+needs to signal planes whether it is safe to approach the
+landing ramp or at which of $k$ air-spaces they must perform
+holding maneuvers. If two planes enter the same ramp or
+air-space, a crash may occur. The goal is to control the airtraffic to guarantee that all the planes land safely. 
+\item[TA] A \textbf{Travel Agency} receives requests for
+vacation packages, and to fulfill them, it interacts with $n$
+web-services for the provision of individual amenities. The goal
+of the system is to orchestrate the web-services in order to
+provide a complete vacation package when possible, while
+avoiding to pay for incomplete packages. The protocols for
+the services may vary (uncontrollably). 
+\end{description}
+\vspace{-1em}
 %tool support - tool/translation/diagnosis
-The diagnosis technique was implemented in a new tool that accepts specifications expressed as both LTL formulas or FSP constructs and operates internally on LTS structures. Each case study was written in its original syntax, for signal based specifications we used LTL formulas (as presented in ~\cite{Bloem:2012}), and for those initially described using process-like syntax we used CFSP. This tool was written from scratch with the intention to model, verify and synthesize reactive systems over explicit models in an effective fashion. Bear in mind that for each specification the diagnosis runs a number of synthesis checks (each one having its particular time complexity) linear in time in relation to the number of transitions of the original plant.
+The diagnosis technique was implemented in a new tool that accepts specifications expressed as both LTL formulas or FSP constructs and operates internally on LTS structures. Each case study was written in its original syntax, for signal based specifications we used LTL formulas (as presented in ~\cite{Bloem:2012}), and for those initially described using process-like syntax we used CFSP (a syntax specific to CLTS specifications). This tool was written from scratch with the intention to model, verify and synthesize reactive systems over explicit models in an effective fashion. 
+The diagnosis runs a number of synthesis checks (each one having its particular time complexity) linear in time w.r.t. to the number of transitions of the original plant.
 Prior to this work the only feedback given to the user  when specifying an non realizable problem over an explicit model was binary, either the problem was realizable or it was not.
-he extension builds a minimized non realizable version of the environment that can then be exported to different formats and inspected through various methods including animations and visualization of the state space.
+The extension builds a minimized unrealizable version of the environment that can then be exported to different formats and inspected through various methods including animations and visualization of the state space.
 
 In the following we report quantitatively on all case studies to show the degree to which the initial control problem is reduced and the computational cost involved. We also briefly explain the case studies and provide an interpretation of what we think are the hints extracted from the diagnosis. 
 
 %technical text
-The quantitative results of our experiments are shown in table 
-\ref{table:quantitative-results} and were run on an 
+The quantitative results of our experiments are shown in tables 
+\ref{table:quantitative-results_missing_assumptions},\ref{table:quantitative-results_removed_safety}  and were run on an 
 \texttt{Intel\textsuperscript{\textregistered} Core\textsuperscript{\texttrademark}
  i7-8565U} CPU with 8 processors running at 1.80GHz frequency
 with 32 Gb of RAM memory over \texttt{Ubuntu 20.04 (Linux 5.4 kernel release)}.
@@ -70,11 +112,18 @@ labeled as \emph{Diag. time(s)}, \emph{Diag. steps} shows the number of steps th
 We defined a timeout for each case study of 45 minutes and reported all instances below that limit.
 \begin{table*}
 	\resizebox{\textwidth}{!} {
-\input{../experimental_setting/tmp_results/experimental_data.tex}
+\input{../experimental_setting/tmp_results/experimental_compared_data_liveness.tex}
 }
-  \caption{Quantitative results for minimized plants}
-  \label{table:quantitative-results}
+  \caption{Quantitative results for minimized plants (missing assumption)}
+  \label{table:quantitative-results_missing_assumptions}
  \end{table*}
+\begin{table*}
+	\resizebox{\textwidth}{!} {
+		\input{../experimental_setting/tmp_results/experimental_compared_data_safety.tex}
+	}
+	\caption{Quantitative results for minimized plants (removed safety restriction)}
+	\label{table:quantitative-results_removed_safety}
+\end{table*}
 \begin{figure}[bt]
 	\centering
 	\SmallPicture

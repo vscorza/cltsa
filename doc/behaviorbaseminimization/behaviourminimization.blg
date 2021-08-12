@@ -48,45 +48,45 @@ Warning--empty address in maoz2019symbolic
 Warning--empty address in DBLP:conf/vmcai/PitermanPS06
 Warning--empty address in DBLP:conf/popl/PnueliR89
 Warning--page numbers missing in both pages and numpages fields in DBLP:journals/corr/abs-2001-07678
-You've used 43 entries,
+You've used 44 entries,
             5959 wiz_defined-function locations,
-            1901 strings with 32045 characters,
-and the built_in function-call counts, 53948 in all, are:
-= -- 6567
-> -- 1829
+            1906 strings with 32291 characters,
+and the built_in function-call counts, 55299 in all, are:
+= -- 6726
+> -- 1892
 < -- 0
-+ -- 597
-- -- 657
-* -- 3909
-:= -- 5343
-add.period$ -- 213
-call.type$ -- 43
-change.case$ -- 288
-chr.to.int$ -- 41
-cite$ -- 84
-duplicate$ -- 4857
-empty$ -- 3392
-format.name$ -- 756
-if$ -- 12795
++ -- 618
+- -- 677
+* -- 4022
+:= -- 5489
+add.period$ -- 218
+call.type$ -- 44
+change.case$ -- 297
+chr.to.int$ -- 42
+cite$ -- 85
+duplicate$ -- 4968
+empty$ -- 3470
+format.name$ -- 780
+if$ -- 13110
 int.to.chr$ -- 4
 int.to.str$ -- 1
-missing$ -- 182
-newline$ -- 492
-num.names$ -- 359
-pop$ -- 1698
+missing$ -- 186
+newline$ -- 500
+num.names$ -- 367
+pop$ -- 1734
 preamble$ -- 1
-purify$ -- 670
+purify$ -- 688
 quote$ -- 0
-skip$ -- 1792
+skip$ -- 1830
 stack$ -- 0
-substring$ -- 4353
-swap$ -- 544
+substring$ -- 4470
+swap$ -- 559
 text.length$ -- 78
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 1079
+type$ -- 1095
 warning$ -- 37
-while$ -- 367
+while$ -- 374
 width$ -- 0
-write$ -- 920
+write$ -- 937
 (There were 37 warnings)

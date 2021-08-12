@@ -2,7 +2,7 @@
 %%% Do NOT edit. File created by BibTeX with style
 %%% ACM-Reference-Format-Journals [18-Jan-2012].
 
-\begin{thebibliography}{43}
+\begin{thebibliography}{44}
 
 %%% ====================================================================
 %%% NOTE TO THE USER: you can override these defaults by providing
@@ -199,6 +199,21 @@
 \urldef\tempurl%
 \url{https://doi.org/10.1007/978-3-540-78163-9\_9}
 \showDOI{\tempurl}
+
+
+\bibitem[\protect\citeauthoryear{Ciolek, Braberman, D’Ippolito, Sardi{\~n}a,
+  and Uchitel}{Ciolek et~al\mbox{.}}{2019}]%
+        {ciolek2019compositional}
+\bibfield{author}{\bibinfo{person}{Daniel~Alfredo Ciolek},
+  \bibinfo{person}{Victor Braberman}, \bibinfo{person}{Nicol{\'a}s
+  D’Ippolito}, \bibinfo{person}{Sebasti{\'a}n Sardi{\~n}a}, {and}
+  \bibinfo{person}{Sebasti{\'a}n Uchitel}.} \bibinfo{year}{2019}\natexlab{}.
+\newblock \showarticletitle{Compositional supervisory control via reactive
+  synthesis and automated planning}.
+\newblock \bibinfo{journal}{\emph{IEEE Trans. Automat. Control}}
+  \bibinfo{volume}{65}, \bibinfo{number}{8} (\bibinfo{year}{2019}),
+  \bibinfo{pages}{3502--3516}.
+\newblock
 
 
 \bibitem[\protect\citeauthoryear{Daniele, Traverso, and Vardi}{Daniele
