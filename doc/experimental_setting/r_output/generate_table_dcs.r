@@ -135,8 +135,8 @@ summ_safety <- compared_data_safety[compared_data_safety$plant_transitions >= 10
             minimization_transitions_safety=max(minimization_transitions_safety), 
             ctrl_transitions = max(ctrl_transitions), reduction_ratio=max(reduction_ratio),ctrl_ratio=max(ctrl_ratio))
 
-table_contents <- xtable(summ_safety, type = "latex", align = "r|l|r|rrr|rrr|rr|",caption="Quantitative results for minimization plants"
-                         ,digits=c(0,0,2,2,2,0,0,0,2,2,0))
+table_contents <- xtable(summ_safety, type = "latex", align = "l|r|rrr|rrr|rr|",caption="Quantitative results for minimization plants"
+                         ,digits=c(0,0,2,2,2,0,0,0,2,2))
 table_contents$synthesis_time <- with(table_contents, ifelse(synthesis_time < 1, '$<$1', round(synthesis_time)))
 table_contents$diag_time <- with(table_contents, ifelse(diag_time < 1, '$<$1', round(diag_time)))
 table_contents$reduction_ratio <- ifelse(table_contents$reduction_ratio < 0.00001, "$<1e^{-5}$ \\%",paste(format(round((table_contents$reduction_ratio * 100), 4), nsmall = 2), "\\%"))
