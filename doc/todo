@@ -1,6 +1,11 @@
 TODO:
 =====
 -benchmark
+	- validation
+		X actualizar descr. cols.
+		- hablar de los casos
+		- hablar de tablas corr.
+		- revisar RQ1, RQ2
 	- revisar synthesis algorithm refs for GR(1) in background
 	- actualizar func-tests
 	- leer

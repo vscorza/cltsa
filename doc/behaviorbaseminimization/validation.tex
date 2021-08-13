@@ -95,35 +95,25 @@ the services may vary (uncontrollably).
 The diagnosis technique was implemented in a new tool that accepts specifications expressed as both LTL formulas or FSP constructs and operates internally on LTS structures. Each case study was written in its original syntax, for signal based specifications we used LTL formulas (as presented in ~\cite{Bloem:2012}), and for those initially described using process-like syntax we used CFSP (a syntax specific to CLTS specifications). This tool was written from scratch with the intention to model, verify and synthesize reactive systems over explicit models in an effective fashion. 
 The diagnosis runs a number of synthesis checks (each one having its particular time complexity) linear in time w.r.t. to the number of transitions of the original plant.
 Prior to this work the only feedback given to the user  when specifying an non realizable problem over an explicit model was binary, either the problem was realizable or it was not.
-The extension builds a minimized unrealizable version of the environment that can then be exported to different formats and inspected through various methods including animations and visualization of the state space.
+The diagnosis extension builds a minimized unrealizable version of the environment that can then be exported to different formats and inspected through various methods including animations and visualization of the state space.
 
-In the following we report quantitatively on all case studies to show the degree to which the initial control problem is reduced and the computational cost involved. We also briefly explain the case studies and provide an interpretation of what we think are the hints extracted from the diagnosis. 
+In the following we report quantitatively on all case studies to show the degree to which the initial control problem is reduced and the computational cost involved. 
 
 %technical text
-The quantitative results of our experiments are shown in tables 
-\ref{table:quantitative-results_missing_assumptions},\ref{table:quantitative-results_removed_safety}  and were run on an 
+The quantitative results of our experiments are shown in table 
+\ref{table:quantitative-results} and were run on an 
 \texttt{Intel\textsuperscript{\textregistered} Core\textsuperscript{\texttrademark}
  i7-8565U} CPU with 8 processors running at 1.80GHz frequency
 with 32 Gb of RAM memory over \texttt{Ubuntu 20.04 (Linux 5.4 kernel release)}.
-Total time taken by the diagnosis algorithm is measured in seconds and
-labeled as \emph{Diag. time(s)}, \emph{Diag. steps} shows the number of steps the diagnosis algorithm had to take to yield a minimal plant, this can be thought as de maximum depth of recursion reached while exploring the semi-lattice of alternating Sub-LTS structures.  The values in column $|\varphi_e + \varphi_s|$ are the sum of environmental and system liveness formulae, $|\Delta_{E}|$ the number of transitions in the original plant, $|\Delta_{E'}|$ the number of transitions in the minimization,
-, $|\Delta_{E'}|/|\Delta_{E}|$ is the relation of the minimization volume against the original plant, , $|\Delta_{C}|$ the number of transitions in the controller for the realizable specification,
-, $|\Delta_{E'}|/|\Delta_{C}|$ is the relation of the minimization volume against the controller.
-We defined a timeout for each case study of 45 minutes and reported all instances below that limit.
+ The values in column $t_{s}$(s) shows the time taken for the synthesis of the realizable version, $|\Delta_E|$ is the size of the original automaton measured in number of transitions, $|\Delta_C|$ is the size of the controller of the realizable version measured in number of transitions, $t_{d}(s)$ is the time taken for the diagnosis of each unrealizable case, the relation $t_{d}/t_{s}$ expresses how much more takes to diagnose an unrealizable case versus synthesizing the realizable version, $|\Delta_{E'}|$ shows the size of the  minimization measured in number of transitions. Relations $v_{\mathcal{U}}$$=$$|\Delta_{E'}|$$/$$|\Delta_{E}|$ and $v_{\mathcal{C}}$$=$$|\Delta_{E'}|$$/$$|\Delta_{E}|$ express how much much smaller or bigger the minimized automaton is w.r.t. the original plant and the controller for the realizable version respectively. Two set of values are presented on each row, one for the specification where we removed a liveness assumption and one for the specification where we removed a safety restriction.
+We defined a timeout for each case study of 30 minutes and reported at most two instances below that limit for each use case.
 \begin{table*}
 	\resizebox{\textwidth}{!} {
-\input{../experimental_setting/tmp_results/experimental_compared_data_liveness.tex}
+\input{../experimental_setting/tmp_results/experimental_compared_data_composed.tex}
 }
-  \caption{Quantitative results for minimized plants (missing assumption)}
-  \label{table:quantitative-results_missing_assumptions}
+  \caption{Quantitative results for minimized plants}
+  \label{table:quantitative-results}
  \end{table*}
-\begin{table*}
-	\resizebox{\textwidth}{!} {
-		\input{../experimental_setting/tmp_results/experimental_compared_data_safety.tex}
-	}
-	\caption{Quantitative results for minimized plants (removed safety restriction)}
-	\label{table:quantitative-results_removed_safety}
-\end{table*}
 \begin{figure}[bt]
 	\centering
 	\SmallPicture
@@ -134,26 +124,16 @@ We defined a timeout for each case study of 45 minutes and reported all instance
 	\vspace*{-4mm}
 	\MediumPicture
 \end{figure}
-%\begin{figure}[bt]
-%	\centering
-%	\SmallPicture
-%	\includegraphics[width=0.3\textwidth, angle=-90]{../experimental_setting/tmp_results/genbuf_2_time_plot.ps}
-%	\vspace*{-2mm}
-%	\caption{Generic buffer (2 senders) time progression.}
-%	\label{fig:genbuf_2_time_plot}
-%	\vspace*{-4mm}
-%	\MediumPicture
-%\end{figure}
-%\begin{figure}[bt]
-%	\centering
-%	\SmallPicture
-%	\includegraphics[width=0.3\textwidth, angle=-90]{../experimental_setting/tmp_results/genbuf_2_size_plot.ps}
-%	\vspace*{-2mm}
-%	\caption{Generic buffer (2 senders) size progression.}
-%	\label{fig:genbuf_2_size_plot}
-%	\vspace*{-4mm}
-%	\MediumPicture
-%\end{figure}
+\begin{figure}[bt]
+	\centering
+	\SmallPicture
+	\includegraphics[width=0.3\textwidth, angle=-90]{../experimental_setting/tmp_results/reduction_vs_diag_time.ps}
+	\vspace*{-2mm}
+	\caption{Minimization size vs. diagnosis time.}
+	\label{fig:size_vs_diag_time}
+	\vspace*{-4mm}
+	\MediumPicture
+\end{figure}
 \begin{figure}[bt]
 	\centering
 	\SmallPicture
@@ -164,13 +144,44 @@ We defined a timeout for each case study of 45 minutes and reported all instance
 	\vspace*{-4mm}
 	\MediumPicture
 \end{figure}
+\begin{figure}[bt]
+	\centering
+	\SmallPicture
+	\includegraphics[width=0.3\textwidth, angle=-90]{../experimental_setting/tmp_results/plant_ctrl_vs_min_pct.ps}
+	\vspace*{-2mm}
+	\caption{Plant controllability vs. minimization percentage.}
+	\label{fig:plant_ctr_vs_min_pct}
+	\vspace*{-4mm}
+	\MediumPicture
+\end{figure}
+\begin{figure}[bt]
+	\centering
+	\SmallPicture
+	\includegraphics[width=0.3\textwidth, angle=-90]{../experimental_setting/tmp_results/reduction_vs_plant_size.ps}
+	\vspace*{-2mm}
+	\caption{Minimization percentage vs. plant size.}
+	\label{fig:plant_size_vs_min_pct}
+	\vspace*{-4mm}
+	\MediumPicture
+\end{figure}
+\begin{figure}[bt]
+	\centering
+	\SmallPicture
+	\includegraphics[width=0.3\textwidth, angle=-90]{../experimental_setting/tmp_results/reduction_vs_ctrl_reduction.ps}
+	\vspace*{-2mm}
+	\caption{Minimization percentage vs. Controller percentage.}
+	\label{fig:min_reduction_vs_controller_reduction}
+	\vspace*{-4mm}
+	\MediumPicture
+\end{figure}
+
 %update quantitative analysis and explain graphs
 %table
 %size
 
 %replace this paragraph with something related to the time it takes to finish the diagnosis w.r.t. the time of synthesis in the realizable case
-The results we observe after applying the technique on this initial set of case studies show the proposed approach is feasible even for a significant number of signal based specifications. 
-As expected with any algorithm working with explicit models, the minimization technique still under performs against symbolic approaches on both size and time. 
+The proposed approach is feasible even for a significant number of signal based specifications. 
+As expected with any algorithm working with explicit models, the minimization technique still under performs against symbolic approaches on both size and time, but can still handle and diagnose specifications comprised of almost 5 million transitions.  
 
 %time
 In figure ~\ref{fig:size_vs_diag_time} we expose the relation between diagnosis time and plant size (measured in number of initial transitions). We argue that the performance of the algorithm is linearly consistent (yielding a $\tau$ value of .76 using Kendall correlation) across the range of sizes present in the test set (going from tens to hundred of thousands of transitions). This is relevant because the synthesis procedure has a polynomial cost in terms of its input, so a polynomial increase in the cost of diagnosis in relation to its input size could be expected. 

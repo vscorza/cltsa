@@ -29,7 +29,9 @@ library(stringr)
 suppressMessages(library(dplyr))
 suppressMessages(library(ggplot2))
 #creating general data frame
-experimental_composite <- read.csv(file='/home/mariano/code/henos-automata/doc/experimental_setting/tmp_results/unrealizable_data_composite.csv')
+#file_dir <- '/home/mariano/code'
+file_dir <- '/home/mariano/git_repo/henos'
+experimental_composite <- read.csv(file=paste(file_dir, '/henos-automata/doc/experimental_setting/tmp_results/unrealizable_data_composite.csv',sep=''))
 experimental_composite$name  <- str_replace_all(experimental_composite$name, "Scheduler", "Arbiter")
 experimental_composite$name  <- str_replace_all(experimental_composite$name, "\\.\\(missing\\.assumption\\)", "\\.(missing\\.liveness)")
 experimental_composite$name  <- str_replace_all(experimental_composite$name, "\\.missing\\.assumption", "\\.(missing\\.liveness)")
@@ -38,7 +40,7 @@ experimental_composite$name  <- str_replace_all(experimental_composite$name, "\\
 experimental_composite$liveness_count <- experimental_composite$assumptions_count + experimental_composite$guarantees_count
 experimental_composite <- subset(experimental_composite, select = -c(realizable, ltl_model_build_time, model_build_time, composition_time,synthesis_time,alphabet_size,assumptions_count,guarantees_count,plant_states,plant_transitions,plant_controllable_transitions,plant_controllable_options,search_method))
 #creating realizable data frame
-realizable_data <- read.csv(file='/home/mariano/code/henos-automata/doc/experimental_setting/tmp_results/realizable_data_composite.csv')
+realizable_data <- read.csv(file=paste(file_dir, '/henos-automata/doc/experimental_setting/tmp_results/realizable_data_composite.csv',sep=''))
 realizable_data$name  <- str_replace_all(realizable_data$name, "\\.", " ")
 experimental_composite$name  <- str_to_title(experimental_composite$name)
 realizable_data$name  <- str_to_title(realizable_data$name)
@@ -108,43 +110,54 @@ Minimization reduction goes from `r max_reduction` up to `r min_reduction`.
 ## Reduction vs diagnosis time
 ```{r echo=FALSE}
 #sive vs diagnosis time
-general_data <- read.csv(file='/home/mariano/code/henos-automata/doc/experimental_setting/tmp_results/unrealizable_data_composite.csv')
+general_data <- read.csv(file=paste(file_dir, '/henos-automata/doc/experimental_setting/tmp_results/unrealizable_data_composite.csv',sep=''))
 c_coeff = general_data$minimization_controllable_transitions / general_data$plant_transitions	
 m_coeff = general_data$minimization_transitions / general_data$plant_transitions	
-ggplot(general_data, aes(x=diagnosis_time, y=1/m_coeff)) +
-	labs(title="Size vs diagnosis time") +
-	xlab("Diagnosis time (s)") +
-  ylab(expression(paste("Reduction^-1"))) +  
+kendall_reduction_time<-cor.test(general_data$diagnosis_time,1/m_coeff, method="kendall")
+current_tau<- round(as.numeric(kendall_size_time$estimate[1]),5)
+ggplot(general_data, aes(x=diagnosis_time, y=m_coeff)) +
+	labs(title="Reduction vs diagnosis time") +
+  xlab(bquote('Diagnosis time (s)' ( tau == .(current_tau) ))) + 
+  ylab("Reduction") +  
 	scale_y_log10() +
 	scale_x_log10() +	
 	geom_point(color='red') +	
 	geom_smooth(method='lm')
 
 
+
 ```
+
+Kendall coefficient: `r kendall_reduction_time$estimate`
+
 ## Plant transitions size vs diagnosis time
 ```{r echo=FALSE}
 #sive vs diagnosis time
+kendall_size_time<-cor.test(general_data$diagnosis_time,general_data$plant_transitions, method="kendall")
+current_tau<- round(as.numeric(kendall_size_time$estimate[1]),5)
 ggplot(general_data, aes(x=diagnosis_time, y=plant_transitions)) +
 	labs(title="Size vs diagnosis time") +
-	xlab("Diagnosis time (s)") +
+	xlab(bquote('Diagnosis time (s)' ( tau == .(current_tau) ))) +  
   ylab(expression(paste("|",Delta["E"],"|"))) +
 	scale_y_log10() +
 	scale_x_log10() +	
 	geom_point(color='red') +	
 	geom_smooth(method='lm')
 
-
 ```
+
+Kendall coefficient: `r kendall_size_time$estimate`
 
 ## Minimization and minimization controllability
 ```{r echo=FALSE}
 #plant controllability vs minimization amount
 no_robot_c_coeff = general_data$minimization_controllable_options / general_data$plant_states
 no_robot_m_coeff = general_data$minimization_transitions / general_data$plant_transitions	
+kendall_reduction_ctrl<-cor.test(no_robot_c_coeff,no_robot_m_coeff, method="kendall")
+current_tau<- round(as.numeric(kendall_reduction_ctrl$estimate[1]),5)
 ggplot(general_data, aes(x=no_robot_c_coeff, y=no_robot_m_coeff)) +
-	labs(title="Minimization controllability vs minimization amount") +
-	xlab("Minimization controllability") +
+	labs(title='Minimization controllability vs minimization amount ') +
+	xlab(bquote('Minimization controllability' ( tau == .(current_tau) ))) +
 	ylab("Reduction") +
 	scale_y_log10() +
 	scale_x_log10() +	
@@ -152,7 +165,11 @@ ggplot(general_data, aes(x=no_robot_c_coeff, y=no_robot_m_coeff)) +
 	geom_smooth(method='lm')	
 
 
+
 ```
+
+Kendall coefficient: `r kendall_reduction_ctrl$estimate`
+
 ## Compared times between synthesis and diagnosis
 
 ```{r echo=FALSE}
