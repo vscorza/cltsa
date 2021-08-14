@@ -160,7 +160,7 @@ postscript(file=paste(file_dir, "/henos-automata/doc/experimental_setting/tmp_re
 c_coeff = general_data$minimization_controllable_transitions / general_data$plant_transitions	
 m_coeff = general_data$minimization_transitions / general_data$plant_transitions	
 kendall_reduction_time<-cor.test(general_data$diagnosis_time,1/m_coeff, method="kendall")
-current_tau<- round(as.numeric(kendall_size_time$estimate[1]),5)
+current_tau<- round(as.numeric(kendall_reduction_time$estimate[1]),5)
 ggplot(general_data, aes(x=diagnosis_time, y=m_coeff)) +
   labs(title="Plant Reduction vs Diagnosis Time") +
   theme(text = element_text(size=20))+
@@ -202,6 +202,21 @@ ggplot(general_data, aes(x=no_robot_c_coeff, y=no_robot_m_coeff)) +
   geom_smooth(method='lm')	
 dev.off()
 
+postscript(file=paste(file_dir, "/henos-automata/doc/experimental_setting/tmp_results/min_ctrl_vs_ctrl_pct.ps",sep=''))
+controllability_reduction = compared_data_general$minimization_controllable_options / compared_data_general$plant_controllable_options
+ctrl_reduction = compared_data_general$ctrl_transitions / compared_data_general$plant_transitions	
+kendall_reduction_ctrl<-cor.test(controllability_reduction, ctrl_reduction, method="kendall")
+current_tau<- round(as.numeric(kendall_reduction_ctrl$estimate[1]),5)
+ggplot(compared_data_general, aes(x=controllability_reduction, y=ctrl_reduction)) +
+  labs(title='Controllability Reduction vs Plant Reduction') +
+  theme(text = element_text(size=20))+
+  xlab(bquote('Controllability Reduction' ( tau == .(current_tau) ))) +
+  ylab("Controller Reduction") +
+  scale_y_log10() +
+  scale_x_log10() +	
+  geom_point(color='red') +
+  geom_smooth(method='lm')	
+dev.off()
 
 postscript(file=paste(file_dir, "/henos-automata/doc/experimental_setting/tmp_results/plant_ctrl_vs_min_pct.ps",sep=''))
 no_robot_c_coeff = general_data$plant_controllable_options / general_data$plant_transitions
@@ -242,10 +257,10 @@ compared_data_general <- merge(experimental_composite, realizable_data, by.x ="n
 
 postscript(file=paste(file_dir, "/henos-automata/doc/experimental_setting/tmp_results/reduction_vs_ctrl_reduction.ps",sep=''))
 plant_reduction = compared_data_general$minimization_transitions / compared_data_general$plant_transitions	
-ctrl_reduction = compared_data_general$minimization_transitions / general_data$ctrl_transitions
+ctrl_reduction = compared_data_general$minimization_transitions / compared_data_general$ctrl_transitions
 kendall_plant_ctrl<-cor.test(plant_reduction,ctrl_reduction, method="kendall")
 current_tau<- round(as.numeric(kendall_plant_ctrl$estimate[1]),5)
-ggplot(size_evaluation, aes(x=plant_reduction, y=ctrl_reduction)) +
+ggplot(compared_data_general, aes(x=plant_reduction, y=ctrl_reduction)) +
   labs(title='Plant Reduction vs Controller Reduction') +
   theme(text = element_text(size=20))+
   xlab(bquote( paste("Controller Reduction") ( tau == .(current_tau) ))) +
@@ -258,3 +273,64 @@ ggplot(size_evaluation, aes(x=plant_reduction, y=ctrl_reduction)) +
 
 dev.off()
 
+
+postscript(file=paste(file_dir, "/henos-automata/doc/experimental_setting/tmp_results/plant_vs_ctrl_size.ps",sep=''))
+kendall_plant_ctrl<-cor.test(compared_data_general$plant_transitions,compared_data_general$ctrl_transitions, method="kendall")
+current_tau<- round(as.numeric(kendall_plant_ctrl$estimate[1]),5)
+ggplot(compared_data_general, aes(x=plant_transitions, y=ctrl_transitions)) +
+  labs(title='Plant Size vs Controller Size') +
+  theme(text = element_text(size=20))+
+  xlab(bquote( paste("|",Delta["E"],"|") ( tau == .(current_tau) ))) +
+  ylab(bquote( paste("|",Delta["C"],"|"))) +
+  scale_y_log10() +
+  scale_x_log10() +	
+  geom_point(color='red')+
+  geom_smooth(method='lm')	
+
+dev.off()
+
+
+postscript(file=paste(file_dir, "/henos-automata/doc/experimental_setting/tmp_results/plant_vs_diag_size.ps",sep=''))
+kendall_plant_ctrl<-cor.test(compared_data_general$plant_transitions,compared_data_general$minimization_transitions, method="kendall")
+current_tau<- round(as.numeric(kendall_plant_ctrl$estimate[1]),5)
+ggplot(compared_data_general, aes(x=plant_transitions, y=minimization_transitions)) +
+  labs(title='Plant Size vs Controller Size') +
+  theme(text = element_text(size=20))+
+  xlab(bquote( paste("|",Delta["E"],"|") ( tau == .(current_tau) ))) +
+  ylab(bquote( paste("|",Delta["E'"],"|"))) +
+  scale_y_log10() +
+  scale_x_log10() +	
+  geom_point(color='red')+
+  geom_smooth(method='lm')	
+
+dev.off()
+
+postscript(file=paste(file_dir, "/henos-automata/doc/experimental_setting/tmp_results/plant_vs_diag_size_liveness.ps",sep=''))
+kendall_plant_ctrl<-cor.test(compared_data_assumptions$plant_transitions,compared_data_assumptions$minimization_transitions_liveness, method="kendall")
+current_tau<- round(as.numeric(kendall_plant_ctrl$estimate[1]),5)
+ggplot(compared_data_assumptions, aes(x=plant_transitions, y=minimization_transitions_liveness)) +
+  labs(title='Plant Size vs Controller Size (Missing Assumption)') +
+  theme(text = element_text(size=20))+
+  xlab(bquote( paste("|",Delta["E"],"|") ( tau == .(current_tau) ))) +
+  ylab(bquote( paste("|",Delta["E'"],"|"))) +
+  scale_y_log10() +
+  scale_x_log10() +	
+  geom_point(color='red')+
+  geom_smooth(method='lm')	
+
+dev.off()
+
+postscript(file=paste(file_dir, "/henos-automata/doc/experimental_setting/tmp_results/plant_vs_diag_size_safety.ps",sep=''))
+kendall_plant_ctrl<-cor.test(compared_data_safety$plant_transitions,compared_data_safety$minimization_transitions_safety, method="kendall")
+current_tau<- round(as.numeric(kendall_plant_ctrl$estimate[1]),5)
+ggplot(compared_data_safety, aes(x=plant_transitions, y=minimization_transitions_safety)) +
+  labs(title='Plant Size vs Controller Size (Removed Safety Restriction)') +
+  theme(text = element_text(size=20))+
+  xlab(bquote( paste("|",Delta["E"],"|") ( tau == .(current_tau) ))) +
+  ylab(bquote( paste("|",Delta["E'"],"|"))) +
+  scale_y_log10() +
+  scale_x_log10() +	
+  geom_point(color='red')+
+  geom_smooth(method='lm')	
+
+dev.off()

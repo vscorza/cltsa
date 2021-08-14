@@ -2,47 +2,55 @@ TODO:
 =====
 -benchmark
 	- validation
-		X actualizar descr. cols.
+		- agregar RQ3, comprender qué cosas permiten una mayor reducción
 		- hablar de los casos
+			- explicar casos característicos
 		- hablar de tablas corr.
-		- revisar RQ1, RQ2
+			- cambiar nombres de medidas en gráficos para que sean las mismas de la tabla
+			- explicar medidas
+			- E ~ td, corr. bien
+			- E'/E ~ td, corr. medianamente, no es tan buena medida de qué tanto va a reducir
+			- corr ente E'/E ~ C/E,  E'/E ~ ctrl.E'/ctrl.E, C/E !~ ctrl.E'/ctrl.E
+				- E'/E ~ C/E E comportamientos que no tenía sentido evaluar, ni para satisfacer varphi ni para violarlo
+				- E'/E ~ ctrl.E'/ctrl.E, se lo puede reducir más si se puden quitar estados muy controlables
+				- C/E !~ ctrl.E'/ctrl.E no correlaciona positivamente, que el controlador recorte controlables no guarda relación con el tamaño de la reducción
+				- E ~ E'/E corr negativa, no hay relación entre el tamaño y qué tánto reduce
+					- se mantiene tanto para safety como para liveness
+		- revisar RQ1, RQ2, RQ3, se responden o no?
+		- revisar validation
+		- revisar todo para lts
+			- se habla de plant y controller?
+		- unificar scripts
 	- revisar synthesis algorithm refs for GR(1) in background
-	- actualizar func-tests
-	- leer
-		- Unrealizable Cores for Reactive Systems Specifications
-		- MUST: minimal unsatisfiable subsets enumeration tool
-		- Interpolation-based GR(1) assumptions refinement
-		- A weakness measure for GR(1) formulae
-		- Minimal assumptions refinement for realizable specifications.
-		- Performance heuristics for GR(1) synthesis and related algorithm
-		- Symbolic repairs for GR(1) specifications
-		- Inherent vacuity for GR(1) specification
-	- agregar Unrealizable Cores for Reactive Systems Specifications, notes on control of discrete-event systems, Compositional Supervisory Control via Reactive Synthesis and Automated Planning, Taming Composition with Heuristics al related work
-	- tomar un ejemplo de reactive y mostar como sería un diagnóstico que usa konighoefer, jvts y behavior
-	- boceto de
-		- escribir presentación 
-			- motivación clts
-			- tablas nuevas
-				- comparación con tablas anteriores
-	- reunion con sebas y vic
-		- nueva versión del paper
-			- introducir clts como necesidad para ejecutar los casos 
-			- copiar refs de definitions nuevo
-			- ref. a un arxiv
-			- re escribir problema y solución
-	- escribir minimización de goals (agarrar uno que sea no realizable reportar cuál en el diagnóstico)
+	- introducir clts como necesidad para ejecutar los casos 
+	- ref. a un arxiv
+	- actualizar refs en definitions
+	- next sprint
+		- tomar un ejemplo de reactive y mostar como sería un diagnóstico que usa konighoefer, jvts y behavior
+		- leer
+			- Unrealizable Cores for Reactive Systems Specifications
+			- MUST: minimal unsatisfiable subsets enumeration tool
+			- Interpolation-based GR(1) assumptions refinement
+			- A weakness measure for GR(1) formulae
+			- Minimal assumptions refinement for realizable specifications.
+			- Performance heuristics for GR(1) synthesis and related algorithm
+			- Symbolic repairs for GR(1) specifications
+			- Inherent vacuity for GR(1) specification
+			- Assume, Guarantee or Repair (grumberg)
+			- Must Fault Localization for Program Repair
+		- agregar Unrealizable Cores for Reactive Systems Specifications, notes on control of discrete-event systems, Compositional Supervisory Control via Reactive Synthesis and Automated Planning, Taming Composition with Heuristics al related work
+		- actualizar func-tests
+		- escribir minimización de goals (agarrar uno que sea no realizable reportar cuál en el diagnóstico)
+- post paper
 	- re-escribir versión ahb genbuf, revisar realizabilidad-no realizabilidad
 		- testear y comparar con valuaciones por estados
 			- ahb_1_n	
 				- completo			
 		- correr tests
+	- yoshiki takashima, nadia polikarpova
 	- revisar 
 		- patterns for property specification ...
-		- Assume, Guarantee or Repair (grumberg)
-		- Must Fault Localization for Program Repair
 		- Compositional Model Checking for Multi-properties
-- post paper
-	- yoshiki takashima, nadia polikarpova
 	- revisar gcov
 	- marcar línea del error en el editor por syntax error, agregar linenumber y pos a los syntax def de paser_utils, automaton_context
 	- habilitar line number en el editor

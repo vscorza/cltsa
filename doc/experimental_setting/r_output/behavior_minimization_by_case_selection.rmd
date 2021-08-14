@@ -10,9 +10,9 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE,
                       results= "asis")
-#install.packages("dplyr")
-#install.packages("magrittr")
-#install.packages("ggplot2")
+install.packages("dplyr")
+install.packages("magrittr")
+install.packages("ggplot2")
 #install.packages("jsonlite")
 #install.packages("plot3D")
 library(dplyr)
@@ -29,7 +29,11 @@ library(stringr)
 suppressMessages(library(dplyr))
 suppressMessages(library(ggplot2))
 #creating general data frame
-experimental_composite <- read.csv(file='/home/mariano/code/henos-automata/doc/experimental_setting/tmp_results/unrealizable_data_composite.csv')
+
+#file_dir <- '/home/mariano/code'
+file_dir <- '/home/mariano/git_repo/henos'
+
+experimental_composite <- read.csv(file=paste(file_dir, '/henos-automata/doc/experimental_setting/tmp_results/unrealizable_data_composite.csv',sep=''))
 experimental_composite$name  <- str_replace_all(experimental_composite$name, "Scheduler", "Arbiter")
 experimental_composite$name  <- str_replace_all(experimental_composite$name, "\\.\\(missing\\.assumption\\)", "\\.(missing\\.liveness)")
 experimental_composite$name  <- str_replace_all(experimental_composite$name, "\\.missing\\.assumption", "\\.(missing\\.liveness)")
@@ -38,7 +42,7 @@ experimental_composite$name  <- str_replace_all(experimental_composite$name, "\\
 experimental_composite$liveness_count <- experimental_composite$assumptions_count + experimental_composite$guarantees_count
 experimental_composite <- subset(experimental_composite, select = -c(realizable, ltl_model_build_time, model_build_time, composition_time,synthesis_time,alphabet_size,assumptions_count,guarantees_count,plant_states,plant_transitions,plant_controllable_transitions,plant_controllable_options,search_method))
 #creating realizable data frame
-realizable_data <- read.csv(file='/home/mariano/code/henos-automata/doc/experimental_setting/tmp_results/realizable_data_composite.csv')
+realizable_data <- read.csv(file=paste(file_dir,'/henos-automata/doc/experimental_setting/tmp_results/realizable_data_composite.csv',sep=''))
 realizable_data$name  <- str_replace_all(realizable_data$name, "Scheduler", "Arbiter")
 realizable_data$name  <- str_replace_all(realizable_data$name, "\\.", " ")
 experimental_composite$name  <- str_to_title(experimental_composite$name)
@@ -110,7 +114,7 @@ Minimization reduction goes from `r max_reduction` up to `r min_reduction`.
 
 ```{r echo=FALSE}
 #sive vs diagnosis time
-general_data <- read.csv(file='/home/mariano/code/henos-automata/doc/experimental_setting/tmp_results/unrealizable_data_composite.csv')
+general_data <- read.csv(file=paste(file_dir,'/henos-automata/doc/experimental_setting/tmp_results/unrealizable_data_composite.csv', sep=''))
 ggplot(general_data, aes(x=diagnosis_time, y=plant_transitions)) +
 	labs(title="Size vs diagnosis time") +
 	xlab("Diagnosis time (s)") +
@@ -208,6 +212,223 @@ for (i in 1:length(cases)){
 
 
 #kable(times_table, caption = "Times table", col.names=c("Specification","Diagnosis(s)","Liveness fluents", "Plant transitions", "Min. transitions","Minimization pct.(%)","Min. steps"))
+
+```
+
+## Presented measures for publication
+
+```{r echo=FALSE}
+
+
+
+experimental_composite <- read.csv(file=paste(file_dir,'/henos-automata/doc/experimental_setting/tmp_results/unrealizable_data_composite.csv',sep=''))
+experimental_composite$name  <- str_replace_all(experimental_composite$name, "Scheduler", "Arbiter")
+experimental_composite$name  <- str_replace_all(experimental_composite$name, "\\.\\(missing\\.assumption\\)", "\\.(missing\\.liveness)")
+experimental_composite$name  <- str_replace_all(experimental_composite$name, "\\.missing\\.assumption", "\\.(missing\\.liveness)")
+experimental_composite$name  <- str_replace_all(experimental_composite$name, "\\.removed\\.safety", "\\.(removed\\.safety)")
+experimental_composite$name  <- str_replace_all(experimental_composite$name, "\\.", " ")
+experimental_composite$liveness_count <- experimental_composite$assumptions_count + experimental_composite$guarantees_count
+experimental_composite$ctrl_options_ratio <- experimental_composite$plant_controllable_options / experimental_composite$plant_transitions
+experimental_composite <- subset(experimental_composite, select = -c(realizable, ltl_model_build_time, model_build_time, composition_time,synthesis_time,alphabet_size,assumptions_count,guarantees_count,plant_states,plant_transitions,plant_controllable_transitions,plant_controllable_options,search_method))
+#creating realizable data frame
+realizable_data <- read.csv(file=paste(file_dir,'/henos-automata/doc/experimental_setting/tmp_results/realizable_data_composite.csv',sep=''))
+realizable_data$name  <- str_replace_all(realizable_data$name, "Scheduler", "Arbiter")
+realizable_data$name  <- str_replace_all(realizable_data$name, "\\.", " ")
+experimental_composite$name  <- str_to_title(experimental_composite$name)
+realizable_data$name  <- str_to_title(realizable_data$name)
+realizable_data$name  <- str_replace_all(realizable_data$name, " Realizable", "")
+realizable_data$ctrl_transitions <- realizable_data$minimization_transitions
+realizable_data <- subset(realizable_data, select = -c(diagnosis_time,minimization_states,minimization_transitions,minimization_controllable_transitions,minimization_controllable_options,search_method,diagnosis_steps,realizable))
+#merging data frames (realizable + liveness + safety)
+realizable_data$liveness_count <- realizable_data$assumptions_count + realizable_data$guarantees_count
+missing_assumptions <- subset(experimental_composite, grepl("Missing Liveness", name, fixed=TRUE))
+missing_assumptions$name <- str_replace_all(missing_assumptions$name, " \\(Missing Liveness\\)", "")
+missing_assumptions$diagnosis_time_liveness <- missing_assumptions$diagnosis_time
+missing_assumptions$minimization_states_liveness <- missing_assumptions$minimization_states
+missing_assumptions$minimization_transitions_liveness <- missing_assumptions$minimization_transitions
+missing_assumptions$minimization_controllable_transitions_liveness <- missing_assumptions$minimization_controllable_transitions
+missing_assumptions$minimization_controllable_options_liveness <- missing_assumptions$minimization_controllable_options
+missing_assumptions$diagnosis_steps_liveness <- missing_assumptions$diagnosis_steps
+missing_assumptions$liveness_count_liveness <- missing_assumptions$liveness_count
+missing_assumptions <- subset(missing_assumptions, select = -c(diagnosis_time, minimization_states, minimization_transitions, minimization_controllable_transitions, minimization_controllable_options, diagnosis_steps, liveness_count))
+
+removed_safety <- subset(experimental_composite, grepl("Removed Safety", name, fixed=TRUE))
+removed_safety$name <- str_replace_all(removed_safety$name, " \\(Removed Safety\\)", "")
+removed_safety$name <- str_replace_all(removed_safety$name, " \\(Missing Liveness\\)", "")
+removed_safety$diagnosis_time_safety <- removed_safety$diagnosis_time
+removed_safety$minimization_states_safety <- removed_safety$minimization_states
+removed_safety$minimization_transitions_safety <- removed_safety$minimization_transitions
+removed_safety$minimization_controllable_transitions_safety <- removed_safety$minimization_controllable_transitions
+removed_safety$minimization_controllable_options_safety <- removed_safety$minimization_controllable_options
+removed_safety$diagnosis_steps_safety <- removed_safety$diagnosis_steps
+removed_safety$liveness_count_safety <- removed_safety$liveness_count
+removed_safety <- subset(removed_safety, select = -c(diagnosis_time, minimization_states, minimization_transitions, minimization_controllable_transitions, minimization_controllable_options, diagnosis_steps,liveness_count))
+
+
+compared_data_assumptions <- merge(realizable_data, missing_assumptions, by.x ="name", by.y ="name", sort = FALSE)
+compared_data_assumptions$reduction_ratio <- compared_data_assumptions$minimization_transitions_liveness / compared_data_assumptions$plant_transitions
+compared_data_assumptions$ctrl_ratio <- compared_data_assumptions$minimization_transitions_liveness / compared_data_assumptions$ctrl_transitions
+compared_data_assumptions$time_ratio <- compared_data_assumptions$diagnosis_time_liveness / compared_data_assumptions$synthesis_time
+summ_liveness <- compared_data_assumptions[compared_data_assumptions$plant_transitions >= 1000, ] %>%
+  group_by(name) %>%
+  summarize(liveness_count = max(liveness_count_liveness), synthesis_time=max(synthesis_time),diag_time = max(diagnosis_time_liveness),
+            time_ratio = max(time_ratio), plant_transitions=max(plant_transitions), 
+            minimization_transitions_liveness=max(minimization_transitions_liveness), 
+            ctrl_transitions = max(ctrl_transitions), reduction_ratio=max(reduction_ratio),ctrl_ratio=max(ctrl_ratio))
+
+
+compared_data_safety <- merge(realizable_data, removed_safety, by.x ="name", by.y ="name", sort = FALSE)
+compared_data_safety$reduction_ratio <- compared_data_safety$minimization_transitions_safety / compared_data_safety$plant_transitions
+compared_data_safety$ctrl_ratio <- compared_data_safety$minimization_transitions_safety / compared_data_safety$ctrl_transitions
+compared_data_safety$time_ratio <- compared_data_safety$diagnosis_time_safety / compared_data_safety$synthesis_time
+summ_safety <- compared_data_safety[compared_data_safety$plant_transitions >= 1000, ] %>%
+  group_by(name) %>%
+  summarize(liveness_count = max(liveness_count_safety), synthesis_time=max(synthesis_time), diag_time = max(diagnosis_time_safety),
+            time_ratio = max(time_ratio), plant_transitions=max(plant_transitions), 
+            minimization_transitions_safety=max(minimization_transitions_safety), 
+            ctrl_transitions = max(ctrl_transitions), reduction_ratio=max(reduction_ratio),ctrl_ratio=max(ctrl_ratio))
+
+general_data <- read.csv(file=paste(file_dir, '/henos-automata/doc/experimental_setting/tmp_results/unrealizable_data_composite.csv',sep=''))
+
+c_coeff = general_data$minimization_controllable_transitions / general_data$plant_transitions	
+m_coeff = general_data$minimization_transitions / general_data$plant_transitions	
+kendall_reduction_time<-cor.test(general_data$diagnosis_time,1/m_coeff, method="kendall")
+current_tau<- round(as.numeric(kendall_reduction_time$estimate[1]),5)
+ggplot(general_data, aes(x=diagnosis_time, y=m_coeff)) +
+  labs(title="Plant Reduction vs Diagnosis Time") +
+  theme(text = element_text(size=20))+
+  xlab(bquote('Diagnosis time (s)' ( tau == .(current_tau) ))) + 
+  ylab("Reduction") +  
+  scale_y_log10() +
+  scale_x_log10() +	
+  geom_point(color='red') +	
+  geom_smooth(method='lm')
+
+kendall_size_time<-cor.test(general_data$diagnosis_time,general_data$plant_transitions, method="kendall")
+current_tau<- round(as.numeric(kendall_size_time$estimate[1]),5)
+ggplot(general_data, aes(x=diagnosis_time, y=plant_transitions)) +
+  labs(title="Plant Size vs Diagnosis Time") +
+  theme(text = element_text(size=20))+
+  xlab(bquote('Diagnosis time (s)' ( tau == .(current_tau) ))) +  
+  ylab(expression(paste("|",Delta["E"],"|"))) +
+  scale_y_log10() +
+  scale_x_log10() +	
+  geom_point(color='red') +	
+  geom_smooth(method='lm')
+
+no_robot_c_coeff = general_data$minimization_controllable_options / general_data$plant_controllable_options
+no_robot_m_coeff = general_data$minimization_transitions / general_data$plant_transitions	
+kendall_reduction_ctrl<-cor.test(no_robot_c_coeff,no_robot_m_coeff, method="kendall")
+current_tau<- round(as.numeric(kendall_reduction_ctrl$estimate[1]),5)
+ggplot(general_data, aes(x=no_robot_c_coeff, y=no_robot_m_coeff)) +
+  labs(title='Controllability Reduction vs Plant Reduction') +
+  theme(text = element_text(size=20))+
+  xlab(bquote('Controllability Reduction' ( tau == .(current_tau) ))) +
+  ylab("Plant Reduction") +
+  scale_y_log10() +
+  scale_x_log10() +	
+  geom_point(color='red') +
+  geom_smooth(method='lm')	
+
+postscript(file=paste(file_dir, "/henos-automata/doc/experimental_setting/tmp_results/plant_ctrl_vs_min_pct.ps",sep=''))
+no_robot_c_coeff = general_data$plant_controllable_options / general_data$plant_transitions
+no_robot_m_coeff = general_data$minimization_transitions / general_data$plant_transitions	
+kendall_plant_ctrl<-cor.test(no_robot_c_coeff,no_robot_m_coeff, method="kendall")
+current_tau<- round(as.numeric(kendall_plant_ctrl$estimate[1]),5)
+ggplot(general_data, aes(x=no_robot_c_coeff, y=no_robot_m_coeff)) +
+  labs(title='Plant Controllability vs Plant Reduction') +
+  theme(text = element_text(size=20))+
+  xlab(bquote('Plant controllability' ( tau == .(current_tau) ))) +
+  ylab("Plant Reduction") +
+  scale_y_log10() +
+  scale_x_log10() +	
+  geom_point(color='red') 
+
+plant_reduction = general_data$minimization_transitions / general_data$plant_transitions	
+kendall_plant_ctrl<-cor.test(plant_reduction,general_data$plant_transitions, method="kendall")
+current_tau<- round(as.numeric(kendall_plant_ctrl$estimate[1]),5)
+ggplot(general_data, aes(x=plant_transitions, y=plant_reduction)) +
+  labs(title='Plant Reduction vs Plant Size') +
+  theme(text = element_text(size=20))+
+  xlab(bquote( paste("|",Delta["E"],"|") ( tau == .(current_tau) ))) +
+  #xlab(bquote( paste("|",Delta["E"],"|"))) +
+  ylab("Plant Reduction") +
+  scale_y_log10() +
+  scale_x_log10() +	
+  geom_point(color='red')+
+  geom_smooth(method='lm')	
+  
+
+experimental_composite$name <- str_replace_all(experimental_composite$name, " \\(Removed Safety\\)", "")
+experimental_composite$name <- str_replace_all(experimental_composite$name, " \\(Missing Liveness\\)", "")
+compared_data_general <- merge(experimental_composite, realizable_data, by.x ="name", by.y ="name", sort = FALSE)
+
+
+postscript(file=paste(file_dir, "/henos-automata/doc/experimental_setting/tmp_results/reduction_vs_ctrl_reduction.ps",sep=''))
+plant_reduction = compared_data_general$minimization_transitions / compared_data_general$plant_transitions	
+ctrl_reduction = compared_data_general$minimization_transitions / compared_data_general$ctrl_transitions
+kendall_plant_ctrl<-cor.test(plant_reduction,ctrl_reduction, method="kendall")
+current_tau<- round(as.numeric(kendall_plant_ctrl$estimate[1]),5)
+ggplot(compared_data_general, aes(x=plant_reduction, y=ctrl_reduction)) +
+  labs(title='Plant Reduction vs Controller Reduction') +
+  theme(text = element_text(size=20))+
+  xlab(bquote( paste("Controller Reduction") ( tau == .(current_tau) ))) +
+  #xlab(bquote( paste("|",Delta["E"],"|"))) +
+  ylab("Plant Reduction") +
+  scale_y_log10() +
+  scale_x_log10() +	
+  geom_point(color='red')+
+  geom_smooth(method='lm')	
+
+kendall_plant_ctrl<-cor.test(compared_data_general$plant_transitions,compared_data_general$ctrl_transitions, method="kendall")
+current_tau<- round(as.numeric(kendall_plant_ctrl$estimate[1]),5)
+ggplot(compared_data_general, aes(x=plant_transitions, y=ctrl_transitions)) +
+  labs(title='Plant Size vs Controller Size') +
+  theme(text = element_text(size=20))+
+  xlab(bquote( paste("|",Delta["E"],"|") ( tau == .(current_tau) ))) +
+  ylab(bquote( paste("|",Delta["C"],"|"))) +
+  scale_y_log10() +
+  scale_x_log10() +	
+  geom_point(color='red')+
+  geom_smooth(method='lm')	
+
+
+kendall_plant_ctrl<-cor.test(compared_data_general$plant_transitions,compared_data_general$minimization_transitions, method="kendall")
+current_tau<- round(as.numeric(kendall_plant_ctrl$estimate[1]),5)
+ggplot(compared_data_general, aes(x=plant_transitions, y=minimization_transitions)) +
+  labs(title='Plant Size vs Controller Size') +
+  theme(text = element_text(size=20))+
+  xlab(bquote( paste("|",Delta["E"],"|") ( tau == .(current_tau) ))) +
+  ylab(bquote( paste("|",Delta["E'"],"|"))) +
+  scale_y_log10() +
+  scale_x_log10() +	
+  geom_point(color='red')+
+  geom_smooth(method='lm')	
+
+kendall_plant_ctrl<-cor.test(compared_data_assumptions$plant_transitions,compared_data_assumptions$minimization_transitions_liveness, method="kendall")
+current_tau<- round(as.numeric(kendall_plant_ctrl$estimate[1]),5)
+ggplot(compared_data_assumptions, aes(x=plant_transitions, y=minimization_transitions_liveness)) +
+  labs(title='Plant Size vs Controller Size (Missing Assumption)') +
+  theme(text = element_text(size=20))+
+  xlab(bquote( paste("|",Delta["E"],"|") ( tau == .(current_tau) ))) +
+  ylab(bquote( paste("|",Delta["E'"],"|"))) +
+  scale_y_log10() +
+  scale_x_log10() +	
+  geom_point(color='red')+
+  geom_smooth(method='lm')	
+
+
+kendall_plant_ctrl<-cor.test(compared_data_safety$plant_transitions,compared_data_safety$minimization_transitions_safety, method="kendall")
+current_tau<- round(as.numeric(kendall_plant_ctrl$estimate[1]),5)
+ggplot(compared_data_safety, aes(x=plant_transitions, y=minimization_transitions_safety)) +
+  labs(title='Plant Size vs Controller Size (Removed Safety Restriction)') +
+  theme(text = element_text(size=20))+
+  xlab(bquote( paste("|",Delta["E"],"|") ( tau == .(current_tau) ))) +
+  ylab(bquote( paste("|",Delta["E'"],"|"))) +
+  scale_y_log10() +
+  scale_x_log10() +	
+  geom_point(color='red')+
+  geom_smooth(method='lm')	
 
 ```
 
