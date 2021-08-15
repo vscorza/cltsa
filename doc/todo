@@ -2,9 +2,9 @@ TODO:
 =====
 -benchmark
 	- validation
-		- agregar RQ3, comprender qué cosas permiten una mayor reducción
-		- hablar de los casos
-			- explicar casos característicos
+		X decidir agregar referencias y discusión asociada a figuras para RQ1 y RQ2 discriminando de aquellas que van en RQ3 (asignar primero)
+		X hablar de los casos
+			X explicar casos característicos
 		- hablar de tablas corr.
 			- cambiar nombres de medidas en gráficos para que sean las mismas de la tabla
 			- explicar medidas
@@ -20,6 +20,7 @@ TODO:
 		- revisar validation
 		- revisar todo para lts
 			- se habla de plant y controller?
+		- revisar genbuf safety
 		- unificar scripts
 	- revisar synthesis algorithm refs for GR(1) in background
 	- introducir clts como necesidad para ejecutar los casos 

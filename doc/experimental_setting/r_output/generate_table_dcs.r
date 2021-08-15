@@ -164,8 +164,8 @@ current_tau<- round(as.numeric(kendall_reduction_time$estimate[1]),5)
 ggplot(general_data, aes(x=diagnosis_time, y=m_coeff)) +
   labs(title="Plant Reduction vs Diagnosis Time") +
   theme(text = element_text(size=20))+
-  xlab(bquote('Diagnosis time (s)' ( tau == .(current_tau) ))) + 
-  ylab("Reduction") +  
+  xlab(bquote(paste(t[d],"(s)",( tau == .(current_tau)),sep=''))) +  
+  ylab(expression(paste("|",Delta["E'"],"|/|",Delta["E"],"|"))) +
   scale_y_log10() +
   scale_x_log10() +	
   geom_point(color='red') +	
@@ -178,7 +178,7 @@ current_tau<- round(as.numeric(kendall_size_time$estimate[1]),5)
 ggplot(general_data, aes(x=diagnosis_time, y=plant_transitions)) +
   labs(title="Plant Size vs Diagnosis Time") +
   theme(text = element_text(size=20))+
-  xlab(bquote('Diagnosis time (s)' ( tau == .(current_tau) ))) +  
+  xlab(bquote(paste(t[d],"(s)",( tau == .(current_tau)),sep=''))) +  
   ylab(expression(paste("|",Delta["E"],"|"))) +
   scale_y_log10() +
   scale_x_log10() +	
@@ -195,7 +195,7 @@ ggplot(general_data, aes(x=no_robot_c_coeff, y=no_robot_m_coeff)) +
   labs(title='Controllability Reduction vs Plant Reduction') +
   theme(text = element_text(size=20))+
   xlab(bquote('Controllability Reduction' ( tau == .(current_tau) ))) +
-  ylab("Plant Reduction") +
+  ylab(expression(paste("|",Delta["E'"],"|/|",Delta["E"],"|"))) +
   scale_y_log10() +
   scale_x_log10() +	
   geom_point(color='red') +
@@ -211,7 +211,7 @@ ggplot(compared_data_general, aes(x=controllability_reduction, y=ctrl_reduction)
   labs(title='Controllability Reduction vs Plant Reduction') +
   theme(text = element_text(size=20))+
   xlab(bquote('Controllability Reduction' ( tau == .(current_tau) ))) +
-  ylab("Controller Reduction") +
+  ylab(expression(paste("|",Delta["C"],"|/|",Delta["E"],"|"))) +
   scale_y_log10() +
   scale_x_log10() +	
   geom_point(color='red') +
@@ -227,7 +227,7 @@ ggplot(general_data, aes(x=no_robot_c_coeff, y=no_robot_m_coeff)) +
   labs(title='Plant Controllability vs Plant Reduction') +
   theme(text = element_text(size=20))+
   xlab(bquote('Plant controllability' ( tau == .(current_tau) ))) +
-  ylab("Plant Reduction") +
+  ylab(expression(paste("|",Delta["E'"],"|/|",Delta["E"],"|"))) +
   scale_y_log10() +
   scale_x_log10() +	
   geom_point(color='red') 
@@ -242,7 +242,7 @@ ggplot(general_data, aes(x=plant_transitions, y=plant_reduction)) +
   theme(text = element_text(size=20))+
   xlab(bquote( paste("|",Delta["E"],"|") ( tau == .(current_tau) ))) +
   #xlab(bquote( paste("|",Delta["E"],"|"))) +
-  ylab("Plant Reduction") +
+  ylab(expression(paste("|",Delta["E'"],"|/|",Delta["E"],"|"))) +
   scale_y_log10() +
   scale_x_log10() +	
   geom_point(color='red')+
@@ -263,9 +263,10 @@ current_tau<- round(as.numeric(kendall_plant_ctrl$estimate[1]),5)
 ggplot(compared_data_general, aes(x=plant_reduction, y=ctrl_reduction)) +
   labs(title='Plant Reduction vs Controller Reduction') +
   theme(text = element_text(size=20))+
-  xlab(bquote( paste("Controller Reduction") ( tau == .(current_tau) ))) +
+  xlab(bquote(paste("|",Delta["C"],"|/|",Delta["E"],"|",sep='') (tau == .(current_tau)) , ")")) +
+  #xlab(bquote( paste("Controller Reduction") ( tau == .(current_tau) ))) +
   #xlab(bquote( paste("|",Delta["E"],"|"))) +
-  ylab("Plant Reduction") +
+  ylab(expression(paste("|",Delta["E'"],"|/|",Delta["E"],"|"))) +
   scale_y_log10() +
   scale_x_log10() +	
   geom_point(color='red')+
@@ -334,3 +335,22 @@ ggplot(compared_data_safety, aes(x=plant_transitions, y=minimization_transitions
   geom_smooth(method='lm')	
 
 dev.off()
+
+postscript(file=paste(file_dir, "/henos-automata/doc/experimental_setting/tmp_results/time_relation_vs_plant_size.ps",sep=''))
+time_relation <- compared_data_general$diagnosis_time / compared_data_general$synthesis_time
+kendall_plant_ctrl<-cor.test(compared_data_general$plant_transitions,time_relation, method="kendall")
+current_tau<- round(as.numeric(kendall_plant_ctrl$estimate[1]),5)
+ggplot(compared_data_general, aes(y=plant_transitions, x=time_relation)) +
+  labs(title='Plant Size vs Time Relation') +
+  theme(text = element_text(size=20))+
+  xlab(bquote( t_d / t_s ( tau == .(current_tau) ))) +
+  ylab(bquote( paste("|",Delta["E"],"|"))) +
+  scale_y_log10() +
+  scale_x_log10() +	
+  geom_point(color='red')+
+  geom_smooth(method='lm')	
+
+dev.off()
+
+filtered_data <- compared_data_general[compared_data_general$minimization_transitions > 0 & compared_data_general$plant_transitions > 0,]
+mean(filtered_data$minimization_transitions/filtered_data$plant_transitions)
