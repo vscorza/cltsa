@@ -2,7 +2,7 @@
 %%% Do NOT edit. File created by BibTeX with style
 %%% ACM-Reference-Format-Journals [18-Jan-2012].
 
-\begin{thebibliography}{44}
+\begin{thebibliography}{46}
 
 %%% ====================================================================
 %%% NOTE TO THE USER: you can override these defaults by providing
@@ -300,6 +300,24 @@
 \showDOI{\tempurl}
 
 
+\bibitem[\protect\citeauthoryear{Giannakopoulou and Magee}{Giannakopoulou and
+  Magee}{2003}]%
+        {DBLP:conf/sigsoft/GiannakopoulouM03}
+\bibfield{author}{\bibinfo{person}{Dimitra Giannakopoulou} {and}
+  \bibinfo{person}{Jeff Magee}.} \bibinfo{year}{2003}\natexlab{}.
+\newblock \showarticletitle{Fluent model checking for event-based systems}. In
+  \bibinfo{booktitle}{\emph{Proceedings of the 11th {ACM} {SIGSOFT} Symposium
+  on Foundations of Software Engineering 2003 held jointly with 9th European
+  Software Engineering Conference, {ESEC/FSE} 2003, Helsinki, Finland,
+  September 1-5, 2003}}, \bibfield{editor}{\bibinfo{person}{Jukka Paakki} {and}
+  \bibinfo{person}{Paola Inverardi}} (Eds.). \bibinfo{publisher}{{ACM}},
+  \bibinfo{pages}{257--266}.
+\newblock
+\urldef\tempurl%
+\url{https://doi.org/10.1145/940071.940106}
+\showDOI{\tempurl}
+
+
 \bibitem[\protect\citeauthoryear{Hagihara, Egawa, Shimakawa, and
   Yonezaki}{Hagihara et~al\mbox{.}}{2014}]%
         {DBLP:conf/kbse/HagiharaESY14}
@@ -331,6 +349,19 @@
 \newblock
 \urldef\tempurl%
 \url{https://doi.org/10.1016/0167-6423(87)90035-9}
+\showDOI{\tempurl}
+
+
+\bibitem[\protect\citeauthoryear{Hoare}{Hoare}{1978}]%
+        {DBLP:journals/cacm/Hoare78}
+\bibfield{author}{\bibinfo{person}{C.~A.~R. Hoare}.}
+  \bibinfo{year}{1978}\natexlab{}.
+\newblock \showarticletitle{Communicating Sequential Processes}.
+\newblock \bibinfo{journal}{\emph{Commun. {ACM}}} \bibinfo{volume}{21},
+  \bibinfo{number}{8} (\bibinfo{year}{1978}), \bibinfo{pages}{666--677}.
+\newblock
+\urldef\tempurl%
+\url{https://doi.org/10.1145/359576.359585}
 \showDOI{\tempurl}
 
 

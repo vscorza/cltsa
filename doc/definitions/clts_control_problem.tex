@@ -14,8 +14,15 @@ In this section we present the background required to define a CLTS control prob
 \begin{definition}
 	\label{def:legal_clts} \emph{(Legality w.r.t. $E$ and $\controlSet$)} 
 	Given two CLTS instances \cltsDefShareSigmaIdx{C} and \cltsDefShareSigmaIdx{E}, where $\Sigma$ is partitioned into actions controlled and monitored, i.e.: $\Sigma=\controlSet \; \uplus \;\nonControlSet$, we say that $C$ is a legal CLTS for $E$ w.r.t. \controlSet if the following holds for all $(s_E,s_C) \in E \parallel C$:
-	\[\forall \actionLabel_{\nonControlSet}\text{ s.t. }  (s_E, \actionLabel, s'_E) \in \Delta_E \wedge \actionLabel|_{\nonControlSet} = \actionLabel_{\nonControlSet}:( \exists (s_C, \actionLabel', s'_C) \in \Delta_C \wedge \actionLabel'|_{\nonControlSet} = \actionLabel_{\nonControlSet})\]
-	\[\forall (s_C, \actionLabel, s'_C) \in \Delta_C:( \exists (s_E, \actionLabel, s'_E) \in \Delta_E)\]
+	\footnotesize
+	\begin{align}\begin{aligned}
+	\forall \actionLabel_{\nonControlSet}\text{ s.t. }  (s_E, \actionLabel, s'_E) \in \Delta_E \wedge \actionLabel|_{\nonControlSet} = \actionLabel_{\nonControlSet}:( \exists (s_C, \actionLabel', s'_C) \in \Delta_C \wedge\\ \actionLabel'|_{\nonControlSet} = \actionLabel_{\nonControlSet})
+	\end{aligned}\end{align}	
+	\begin{align}
+	\forall (s_C, \actionLabel, s'_C) \in \Delta_C:( \exists (s_E, \actionLabel, s'_E) \in \Delta_E)
+	\end{align}	
+	\normalsize
+	In the previous and following definitions $\actionLabel|_{\nonControlSet}$ stands for the restriction of the elements of $\actionLabel$, it can be read as the intersection $\actionLabel \cap \nonControlSet$.
 	The first property will be referred to as \emph{legality openness} and the second as \emph{legality inclusion}.
 \end{definition}
 
