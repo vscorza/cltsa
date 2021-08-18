@@ -1,26 +1,20 @@
 TODO:
 =====
+	- validación
+		- Pasar Research questions a RQ1: podemos dar feedback de casos de la literatura? Qué tanto podemos compactar y para cuáles?
+		- Sacar (comentar) todo lo de correlación.
+	- Motivation La parte que compara con konighoefer pasa a discussion.
+	- Solution
+		- Mover "The procedure is complete w.r.t to the problem statement because if a... every closest alternating sub-LTS is realizable at the ﬁnal iteration in conjunction with lemma 5.1" a después de 4.7 (Alternating Sub-LTS preserves counter strateg)
+	- Problem statement y solution
+		- El problema actual está definido para el contexto asociado en términos de la planta. Explicar cómo resolver el problema y presentar el lema antes del pseudocódigo, porque la solución se centra en el problem statement, luego por satisfacción de la propiedades del lemma de contra-estrategias cobra sentido práctico.	
+	- Background, Revisar definiciones necesarias.
+	
 -benchmark
 	- validation
-		X decidir agregar referencias y discusión asociada a figuras para RQ1 y RQ2 discriminando de aquellas que van en RQ3 (asignar primero)
-		X hablar de los casos
-			X explicar casos característicos
-		- hablar de tablas corr.
-			- cambiar nombres de medidas en gráficos para que sean las mismas de la tabla
-			- explicar medidas
-			- E ~ td, corr. bien
-			- E'/E ~ td, corr. medianamente, no es tan buena medida de qué tanto va a reducir
-			- corr ente E'/E ~ C/E,  E'/E ~ ctrl.E'/ctrl.E, C/E !~ ctrl.E'/ctrl.E
-				- E'/E ~ C/E E comportamientos que no tenía sentido evaluar, ni para satisfacer varphi ni para violarlo
-				- E'/E ~ ctrl.E'/ctrl.E, se lo puede reducir más si se puden quitar estados muy controlables
-				- C/E !~ ctrl.E'/ctrl.E no correlaciona positivamente, que el controlador recorte controlables no guarda relación con el tamaño de la reducción
-				- E ~ E'/E corr negativa, no hay relación entre el tamaño y qué tánto reduce
-					- se mantiene tanto para safety como para liveness
-		- revisar RQ1, RQ2, RQ3, se responden o no?
-		- revisar validation
-		- revisar todo para lts
-			- se habla de plant y controller?
-		- revisar genbuf safety
+		- revisar casos
+			- genbuf safety
+			- exploration robot
 		- unificar scripts
 	- revisar synthesis algorithm refs for GR(1) in background
 	- introducir clts como necesidad para ejecutar los casos 
@@ -43,6 +37,7 @@ TODO:
 		- actualizar func-tests
 		- escribir minimización de goals (agarrar uno que sea no realizable reportar cuál en el diagnóstico)
 - post paper
+	- agregar .h a dependencias del makefile
 	- re-escribir versión ahb genbuf, revisar realizabilidad-no realizabilidad
 		- testear y comparar con valuaciones por estados
 			- ahb_1_n	

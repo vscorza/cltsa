@@ -203,8 +203,8 @@ typedef struct automata_str{
 /** AUX **/
 typedef struct automaton_ranking_str{
 	uint32_t state;
-	int64_t value;
 	int32_t assumption_to_satisfy;
+	int64_t value;
 } automaton_ranking;
 typedef struct automaton_pending_state_str{
 	uint32_t state;
