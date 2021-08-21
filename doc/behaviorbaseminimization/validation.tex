@@ -1,10 +1,8 @@
 \section{Validation}\label{sec:validation}
 The extent to which the minimization technique serves its diagnostic purpose is defined by its soundness, efficiency and, more importantly, information. 
-The two main questions are:
+Our guiding research question is:
 \begin{description}
-	\item[RQ1] Can it be applied efficiently in conjunction with other tools?	
-	\item[RQ2] Does it help the engineer understand the cause of unrealizabity of their specification?
-	\item[RQ3] How does the minimization structurally relates to the original automaton?		
+	\item[RQ1] Can the technique give feedback for specifications found in the literature and how much does it reduces the original automaton?
 \end{description}
 
 
@@ -12,7 +10,8 @@ The two main questions are:
 
 The measure of information our technique provides must be related to the impact it can have on the overall specification process, in particular in how clear it is for the engineer  to interpret the diagnosis. The aim is to minimize the amount of data presented while keeping it relevant to the unrealizability cause. The unavailability of skilled professionals and the amount of time and effort required to prepare a considerable set of external subjects up to the point where they would be able to write non trivial formal specifications, renders the perspective of a controlled experiment with external engineers writing specifications from scratch unfeasible. On the other hand, it is also impossible to propose a direct comparison with similar techniques, since, for instance, in ~\cite{DBLP:conf/hvc/KonighoferHB10} the minimization is applied on the set of environmental safety formulas, which in fact increments the volume of the plant when presented as an automaton, and in ~\cite{DBLP:conf/sigsoft/KuventMR17} a simplification of the symbolic counter strategy is presented as a LTS composed of attractors and trap states. We think that our technique adds a complimentary view to the non realizability diagnosis problem.
 
-Research question \textbf{RQ1} is answered by the relation between synthesis and diagnosis time of similar specifications while \textbf{RQ2} is addressed by comparing the reduction volume of our technique with respect to the closest approach (~\cite{DBLP:conf/hvc/KonighoferHB10}). For \textbf{RQ3} we will study the correlation of the minimization amount against some structural properties of the original automaton.
+Research question \textbf{RQ1} is answered by the relation between synthesis and diagnosis time of similar specifications and by comparing the reduction volume of our technique with respect to the closest approach (~\cite{DBLP:conf/hvc/KonighoferHB10}). 
+%For \textbf{RQ3} we will study the correlation of the minimization amount against some structural properties of the original automaton.
 
 We now explain the metrics used to quantitatively evaluate our technique. 
 The first metric we compute is diagnosis time relative to the controller synthesis time ($t_{\mathcal{C}}=t_{E'}/t_{C}|$). The second metric is relative minimization volume ($v_{\mathcal{U}}$), defined as the size of the minimized plant against the original instance ($|\Delta_{E'}|/|\Delta_{E}|$). 
@@ -94,7 +93,7 @@ the services may vary (uncontrollably).
 \end{description}
 \vspace{-1em}
 %tool support - tool/translation/diagnosis
-The diagnosis technique was implemented in a new tool that accepts specifications expressed as both LTL formulas or FSP constructs and operates internally on LTS structures. Each case study was written in its original syntax, for signal based specifications we used LTL formulas (as presented in ~\cite{Bloem:2012}), and for those initially described using process-like syntax we used CFSP (a syntax specific to LTS specifications). This tool was written from scratch with the intention to model, verify and synthesize reactive systems over explicit models in an effective fashion. 
+The diagnosis technique was implemented in a new tool that accepts specifications expressed as both LTL formulas or FSP constructs and operates internally on LTS structures. Each case study was written in its original syntax, for signal based specifications we used LTL formulas (as presented in ~\cite{Bloem:2012}), and for those initially described using process-like syntax we used FSP. This tool was written from scratch with the intention to model, verify and synthesize reactive systems over explicit models in an effective fashion. 
 The diagnosis runs a number of realizability queries which is linear in time w.r.t. to the number of transitions of the original plant.
 Prior to this work the only feedback given to the user  when specifying an non realizable problem over an explicit model was binary, either the problem was realizable or it was not.
 The diagnosis extension builds a minimized unrealizable version of the environment that can then be exported to different formats and inspected through various methods including animations and visualization of the state space.
@@ -147,26 +146,28 @@ For the table we show the two biggest instances of each case study.
 %	\vspace*{-4mm}
 %	\MediumPicture
 %\end{figure}
-\begin{figure}[bt]
-	\centering
-	\SmallPicture
-	\includegraphics[width=0.3\textwidth, angle=-90]{../experimental_setting/tmp_results/reduction_vs_ctrl_reduction.ps}
-	\vspace*{-2mm}
-	\caption{Minimization percentage vs. controller percentage.}
-	\label{fig:min_reduction_vs_controller_reduction}
-	\vspace*{-4mm}
-	\MediumPicture
-\end{figure}
-\begin{figure}[bt]
-	\centering
-	\SmallPicture
-	\includegraphics[width=0.3\textwidth, angle=-90]{../experimental_setting/tmp_results/min_ctrl_vs_min_pct.ps}
-	\vspace*{-2mm}
-	\caption{Minimization controllability vs. minimization percentage.}
-	\label{fig:min_ctr_vs_min_pct}
-	\vspace*{-4mm}
-	\MediumPicture
-\end{figure}
+
+%\begin{figure}[bt]
+%	\centering
+%	\SmallPicture
+%	\includegraphics[width=0.3\textwidth, angle=-90]{../experimental_setting/tmp_results/reduction_vs_ctrl_reduction.ps}
+%	\vspace*{-2mm}
+%	\caption{Minimization percentage vs. controller percentage.}
+%	\label{fig:min_reduction_vs_controller_reduction}
+%	\vspace*{-4mm}
+%	\MediumPicture
+%\end{figure}
+%\begin{figure}[bt]
+%	\centering
+%	\SmallPicture
+%	\includegraphics[width=0.3\textwidth, angle=-90]{../experimental_setting/tmp_results/min_ctrl_vs_min_pct.ps}
+%	\vspace*{-2mm}
+%	\caption{Minimization controllability vs. minimization percentage.}
+%	\label{fig:min_ctr_vs_min_pct}
+%	\vspace*{-4mm}
+%	\MediumPicture
+%\end{figure}
+
 %
 %\begin{figure}[bt]
 %	\centering
@@ -253,9 +254,10 @@ In terms of time, the relation between how much it takes for the diagnosis step 
 Even though the time spent diagnosing seems to be clearly above the time spent synthesizing, in figure ~\ref{fig:size_vs_diag_time} we observe diagnosis temporal cost is at least strongly correlated to the size of the original automaton while both values stay linearly related. 
 The diagnosis pipeline seems to keep the whole process far below the hypothetical worst-case scenario, which is linear w.r.t. the number of uncontrollable transitions in the original automaton.  
 
-We propose that this answer \textbf{RQ1} affirmatively, since for most cases the time taken while diagnosing is somewhat comparable to what it takes to synthesize the realizable case. For the bigger cases, the price payed for the generality of the technique (being agnostic w.r.t. to the formula) may present a problem. We can either try to analyze simpler cases for the parametric specifications and then diagnose a cause that will scale up with the parameter or use a technique that is specific to the type of realizability query (e.g. counter strategy guided minimization). 
+Next we analyze volume reduction. Going back to the problem of comparing our technique to the symbolic approaches, ~\cite{DBLP:conf/hvc/KonighoferHB10} reports an average reduction of the presented formulae of a 90\% and our approach has a marginally better value in $v_{\mathcal{U}}$ of 92\%. Figure ~\ref{fig:reduction_vs_diag_time} shows a strong correlation between the time spent diagnosing and the amount of minimization achieved. As we stated before we will take the minimization amount as a proxy for understandability of the diagnosis. This being the case having a reduction comparable to that of our closest reference, and showing that it maintains some measure of consistency under scaling we assume that the technique should be helpful for the engineer.
 
-Next we analyze volume reduction. Going back to the problem of comparing our technique to the symbolic approaches, ~\cite{DBLP:conf/hvc/KonighoferHB10} reports an average reduction of the presented formulae of a 90\% and our approach has a marginally better value in $v_{\mathcal{U}}$ of 92\%. Figure ~\ref{fig:reduction_vs_diag_time} shows a strong correlation between the time spent diagnosing and the amount of minimization achieved. As we stated before we will take the minimization amount as a proxy for understandability of the diagnosis. This being the case having a reduction comparable to that of our closest reference, and showing that it maintains some measure of consistency under scaling we assume that the technique should be helpful for the engineer, answering \textbf{RQ2}.
+At this point we propose that \textbf{RQ1} is answered affirmatively, since the reduction proportion is comparable to the closest related work in terms of specification reduction and by the fact that for most cases the time taken while diagnosing is somewhat comparable to what it takes to synthesize the realizable case. For the bigger cases, the price payed for the generality of the technique (being agnostic w.r.t. to the formula) may present a problem. We can either try to analyze simpler cases for the parametric specifications and then diagnose a cause that will scale up with the parameter or use a technique that is specific to the type of realizability query (e.g. counter strategy guided minimization).  
+
 We suppose that a novice user can directly benefit from the diagnosis in the most of the cases but will require an additional step involving label hiding or signal quantification to be able to promptly identify the problem in bigger models.
 
-We tried several structural properties in order to relate to the amount of minimization achieved in the diagnosis process with the original automaton, but we did not find a significant correlation against size or controllability amount. The reduction in space expressed by the relation $|\Delta_{C}|/|\Delta_{E}|$ did show a strong correlation ($\tau=0.81722$, see figure ~\ref{fig:min_reduction_vs_controller_reduction}) as well as the controllability reduction, measured as the ratio between the amount of controllable options in the controller over the amount of controllable options in the original plant ($\tau=0.96102$, see figure ~\ref{fig:min_ctr_vs_min_pct}). We can assume that this has to do with the fact that specification are usually more expressive (under specified) in terms of behavior than it is needed in order to satisfy a given property. Because of this it is usually the case that a controller can achieve its goal by exploring a small region of the plant as is the case with the diagnosis, that only needs a relatively small sub-automaton to show its winning strategy. We do not have a proper answer for \textbf{RQ3} in terms of the original automaton $E$ but did show that the minimization amount is indirectly related to $E$ through the controller $C$. This strengthens the idea that understandability (measured in size) of the diagnosis is related to the understandability of the controller.
+%We tried several structural properties in order to relate to the amount of minimization achieved in the diagnosis process with the original automaton, but we did not find a significant correlation against size or controllability amount. The reduction in space expressed by the relation $|\Delta_{C}|/|\Delta_{E}|$ did show a strong correlation ($\tau=0.81722$, see figure ~\ref{fig:min_reduction_vs_controller_reduction}) as well as the controllability reduction, measured as the ratio between the amount of controllable options in the controller over the amount of controllable options in the original plant ($\tau=0.96102$, see figure ~\ref{fig:min_ctr_vs_min_pct}). We can assume that this has to do with the fact that specification are usually more expressive (under specified) in terms of behavior than it is needed in order to satisfy a given property. Because of this it is usually the case that a controller can achieve its goal by exploring a small region of the plant as is the case with the diagnosis, that only needs a relatively small sub-automaton to show its winning strategy. We do not have a proper answer for \textbf{RQ3} in terms of the original automaton $E$ but did show that the minimization amount is indirectly related to $E$ through the controller $C$. This strengthens the idea that understandability (measured in size) of the diagnosis is related to the understandability of the controller.
