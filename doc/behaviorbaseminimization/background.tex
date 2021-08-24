@@ -16,7 +16,6 @@ We model safety assumptions on the environment and goals for the system as compo
 	\normalsize
 \end{definition}
 
-
 The distinction between what an LTS can control and what it can monitor is enforced through the notion of 
 {\em legal environment} taken from~\cite{DIppolito:2013}, and inspired in that of Interface Automata ~\cite{DBLP:conf/sigsoft/AlfaroH01}.
 Intuitively, a controller does not block the actions that it does not control, and dually, the environment does not restrict controllable actions. 
@@ -26,7 +25,6 @@ Intuitively, a controller does not block the actions that it does not control, a
 	$\Delta_{E}(s_E)\cap \mathcal{C} \supseteq \Delta_{C}(s_C)\cap \mathcal{C}$ and also that  $\Delta_{E}(s_E)\cap \mathcal{U} \subseteq \Delta_{C}(s_C)\cap \mathcal{U}$.
 	
 \end{definition}
-
 
 %We use $\Delta(s)$ to denote the set $\{\ell~|~(s,\ell,s') \in 
 %\Delta \}$ and $\Delta(s,\ell)=\set{s'~|~(s,\ell,s')\in\ \Delta_E}$.
@@ -72,23 +70,21 @@ The trace $\pi=\ell_0,\ell_1,\ldots$ satisfies a fluent $\emph{Fl}$ at position 
 	%\end{list}
 \end{itemize}
 
-
 We will assume that FLTL formulae are equipped with the corresponding
 fluent definition triples.
 Formula satisfaction for FLTL is defined as follows: 
 given an infinite trace $\pi$, the satisfaction of a formula $\varphi$ at position $i$, denoted $\pi,i\models\varphi$, is defined as shown in Figure~\ref{fig:back:satisfactionop}.  
 \begin{figure}[bt]
-	$$
-	\begin{array}{lcl}
+	$$\begin{array}{lcl}
 	\pi,i \models \fluent &\triangleq & \pi,i \models \fluent  \\
 	\pi,i \models \neg \varphi & \triangleq & \neg(\pi,i \models \varphi) \\
 	\pi,i \models \varphi \vee \psi &\triangleq& (\pi,i\models \varphi) \vee (\pi,i models \psi) \\
 	\pi,i \models \bigcirc \varphi &\triangleq & \pi,1 \models \varphi \\
 	\pi,i \models \varphi \bf U \psi &\triangleq&\exists j \geq i \cdot \pi,j \models \psi \wedge \forall \mbox{ }i \leq k < j \cdot \pi,k \models \varphi\\
-	\end{array}
-	$$
+	\end{array}$$
 	\caption{Semantics for the satisfaction operator}
 	\label{fig:back:satisfactionop}
+	\vspace{-1em}
 \end{figure}
 
 

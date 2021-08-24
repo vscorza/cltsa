@@ -4,7 +4,72 @@ As stated in the in section ~\ref{sec:introduction}, various approaches to provi
  
 The approach presented in this paper differs feedback for specifications described using automata with an asynchronous execution semantics while in \cite{DBLP:conf/fmcad/KonighoferHB09} the environment and system execute synchronously (i.e., in lockstep). It is possible to model the same problem in one setting or the other, or translate specifications from one to another, however problems in different domains can  be more naturally described into one or the other setting.
 
-However, a more fundamental difference between this work and that of \cite{DBLP:conf/fmcad/KonighoferHB09} is that here we minimize behavior rather than specification. Reducing an LTL specification by removing transition means that there are more behaviors that the environment can exhibit. Indeed, an engineer inspecting a winning environment strategy for a reduced specification as in \cite{DBLP:conf/fmcad/KonighoferHB09} may be reasoning about behavior that is not allowed in the original specification.  
+However, a more fundamental difference between this work and that of \cite{DBLP:conf/fmcad/KonighoferHB09} is that here we minimize behavior rather than specification. Reducing an LTL specification by removing transition means that there are more behaviors that the environment can exhibit. Indeed, an engineer inspecting a winning environment strategy for a reduced specification as in \cite{DBLP:conf/fmcad/KonighoferHB09} may be reasoning about behavior that is not allowed in the original specification.  It can be characterized as a syntactic minimization, where the purpose is to help the engineer understand the cause of unrealizability by looking at the specification text. In particular a portion of the safety LTL formulae describing the behavior of the plant is removed. For instance, going back to the motivanting example, this approach removes $\rho_e$, since it is unnecessary for the environment to swap $x_2$ regularly in order to falsify the goal.  The syntactic minimization yields the automaton depicted in Fig. ~\ref{fig:konig_original_plant_k_2} which is, in fact, more complex in terms of its explicit behavior. 
+It should help the engineer to focus on a smaller set of formulae by getting rid of the irrelevant element $\rho_e$ while diagnosing the unrealizability cause, in this example being that assumption $\varphi_e$ is too weak. 
+Our approach is designed to simplify the semantic view of the specification, producing the automaton depicted in Fig. ~\ref{fig:konig_original_plant_c_2}.
+Our approach simplifies the specification semantically instead, reducing the relevant behavior and showing that it is possible for the environment to avoid state 2 by never allowing $x_1$ and $x_2$ to happen simultaneously, while at the same time not restricting the system below its original capabilities.
+\begin{figure}[bt]
+	\centering
+	\SmallPicture
+	%\ShowFrame
+	\VCDraw{
+		\begin{VCPicture}{(-4,-2.8)(4,9.3)}
+			\SetEdgeLabelScale{1.4}
+			\State[0]{(-5,3)}{init}
+			\State[1]{(-2.5,3)}{init_e}		
+			\State[2]{(-1.5,6.3)}{0}
+			\State[3]{(1.5,7.8)}{1}
+			\State[4]{(4.5,6.3)}{2}
+			\State[5]{(1.5,4.8)}{3} 
+			\State[6]{(-1.5,-.3)}{4}			
+			\State[7]{(1.5,1.2)}{5}
+			\State[8]{(4.5,-.3)}{6}
+			\State[9]{(1.5,-1.8)}{7} 			  
+			\Initial[w]{init}
+			\LoopW{0}{}
+			\LoopN{1}{}
+			\LoopE{2}{}
+			\LoopS{3}{}				
+			\LoopW{4}{}
+			\LoopN{5}{}
+			\LoopE{6}{}
+			\LoopS{7}{}			
+			\EdgeL{init}{init_e}{\overline{x_1 x_2}}
+			\ArcL{init_e}{0}{y}
+			\ArcR{init_e}{4}{\overline{y}}	
+			\VArcR{arcangle=10,ncurv=.9}{0}{1}{}\LabelL[.5]{x_1 x_2}
+			\VArcR{arcangle=-55,ncurv=.9}{1}{0}{\overline{x_1 x_2}}
+			\VArcR{arcangle=10,ncurv=.9}{1}{2}{}\LabelL[.5]{\overline{x_2}}
+			\VArcR{arcangle=-55,ncurv=.9}{2}{1}{x_2}
+			\VArcR{arcangle=10,ncurv=.9}{2}{3}{}\LabelL[.5]{\overline{x_1}x_2}
+			\VArcR{arcangle=-55,ncurv=.9}{3}{2}{x_1\overline{x_2}}
+			\VArcR{arcangle=10,ncurv=.9}{3}{0}{}\LabelL[.5]{\overline{x_2}}
+			\VArcR{arcangle=-55,ncurv=.9}{0}{3}{x_2}
+			\VArcR{arcangle=10,ncurv=.9}{4}{5}{}\LabelL[.5]{x_1 x_2}
+			\VArcR{arcangle=-55,ncurv=.9}{5}{4}{\overline{x_1 x_2}}
+			\VArcR{arcangle=10,ncurv=.9}{5}{6}{}\LabelL[.5]{\overline{x_2}}
+			\VArcR{arcangle=-55,ncurv=.9}{6}{5}{x_2}
+			\VArcR{arcangle=10,ncurv=.9}{6}{7}{}\LabelL[.5]{\overline{x_1}x_2}
+			\VArcR{arcangle=-55,ncurv=.9}{7}{6}{x_1\overline{x_2}}
+			\VArcR{arcangle=10,ncurv=.9}{7}{4}{}\LabelL[.5]{\overline{x_2}}
+			\VArcR{arcangle=-50,ncurv=.9}{4}{7}{x_2}	
+			\VArcL[.7]{arcangle=15,ncurv=.4}{0}{2}{x_1}
+			\VArcL[.7]{arcangle=15,ncurv=.4}{2}{0}{\overline{x_1}}
+			\VArcL[.7]{arcangle=15,ncurv=.4}{1}{3}{x_1}
+			\VArcL[.7]{arcangle=15,ncurv=.4}{3}{1}{\overline{x_1}}
+			\VArcL[.7]{arcangle=15,ncurv=.4}{4}{6}{x_1}
+			\VArcL[.7]{arcangle=15,ncurv=.4}{6}{4}{\overline{x_1}}
+			\VArcL[.7]{arcangle=15,ncurv=.4}{5}{7}{x_1}
+			\VArcL[.7]{arcangle=15,ncurv=.4}{7}{5}{\overline{x_1}}		
+		\end{VCPicture}
+	}	
+	\caption{Minimization according to Könighoefer}
+	\label{fig:konig_original_plant_k_2}
+	\MediumPicture
+	\vspace{-1em}
+\end{figure}
+
+
 
 An alternative approach to providing unrealizability is to allow inspecting counter strategies. 
  In \cite{DBLP:conf/emsoft/CernyGHRT12} an interactive play-out for scenario-based specifications is presented.  If the specifications is unrealizable an interactive game is presented to the user in order to expose the cause of non realizability.  It is built following \cite{DBLP:conf/hvc/KonighoferHB10} counter-strategy and it is restricted to scenario-based specifications that essentially encode LTL formulas.

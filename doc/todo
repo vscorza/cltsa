@@ -1,15 +1,18 @@
 TODO:
 =====
-	- validación
-		- Pasar Research questions a RQ1: podemos dar feedback de casos de la literatura? Qué tanto podemos compactar y para cuáles?
-		- Sacar (comentar) todo lo de correlación.
-	- Motivation La parte que compara con konighoefer pasa a discussion.
-	- Solution
-		- Mover "The procedure is complete w.r.t to the problem statement because if a... every closest alternating sub-LTS is realizable at the ﬁnal iteration in conjunction with lemma 5.1" a después de 4.7 (Alternating Sub-LTS preserves counter strateg)
-	- Problem statement y solution
-		- El problema actual está definido para el contexto asociado en términos de la planta. Explicar cómo resolver el problema y presentar el lema antes del pseudocódigo, porque la solución se centra en el problem statement, luego por satisfacción de la propiedades del lemma de contra-estrategias cobra sentido práctico.	
+	- leer
+		- Unrealizable Cores for Reactive Systems Specifications
+		- MUST: minimal unsatisfiable subsets enumeration tool
+		- Interpolation-based GR(1) assumptions refinement
+		- A weakness measure for GR(1) formulae
+		- Minimal assumptions refinement for realizable specifications.
+		- Performance heuristics for GR(1) synthesis and related algorithm
+		- Symbolic repairs for GR(1) specifications
+		- Inherent vacuity for GR(1) specification
+		- Assume, Guarantee or Repair (grumberg)
+		- Must Fault Localization for Program Repair
+	- agregar Unrealizable Cores for Reactive Systems Specifications, notes on control of discrete-event systems, 
 	- Background, Revisar definiciones necesarias.
-	
 -benchmark
 	- validation
 		- revisar casos
@@ -22,18 +25,7 @@ TODO:
 	- actualizar refs en definitions
 	- next sprint
 		- tomar un ejemplo de reactive y mostar como sería un diagnóstico que usa konighoefer, jvts y behavior
-		- leer
-			- Unrealizable Cores for Reactive Systems Specifications
-			- MUST: minimal unsatisfiable subsets enumeration tool
-			- Interpolation-based GR(1) assumptions refinement
-			- A weakness measure for GR(1) formulae
-			- Minimal assumptions refinement for realizable specifications.
-			- Performance heuristics for GR(1) synthesis and related algorithm
-			- Symbolic repairs for GR(1) specifications
-			- Inherent vacuity for GR(1) specification
-			- Assume, Guarantee or Repair (grumberg)
-			- Must Fault Localization for Program Repair
-		- agregar Unrealizable Cores for Reactive Systems Specifications, notes on control of discrete-event systems, Compositional Supervisory Control via Reactive Synthesis and Automated Planning, Taming Composition with Heuristics al related work
+Compositional Supervisory Control via Reactive Synthesis and Automated Planning, Taming Composition with Heuristics al related work
 		- actualizar func-tests
 		- escribir minimización de goals (agarrar uno que sea no realizable reportar cuál en el diagnóstico)
 - post paper

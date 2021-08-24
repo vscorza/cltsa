@@ -8,16 +8,16 @@ The first procedure explores the semi-lattice defined by Alternating Sub-LTS rel
 \SmallPicture
 %\ShowFrame
 \VCDraw{
-    \begin{VCPicture}{(-4,-2.2)(4,4)}
+    \begin{VCPicture}{(-4,-1.5)(4,4)}
         \SetEdgeLabelScale{1.4}
         \State[1]{(-3,0)}{1}
-        \State[2]{(0,2)}{2}        
-        \State[3]{(3,4)}{3}
-        \State[4]{(3,2)}{4}        
+        \State[2]{(0,1.5)}{2}        
+        \State[3]{(3,3)}{3}
+        \State[4]{(3,1.5)}{4}        
         \State[5]{(0,0)}{5}                
         \State[6]{(3,0)}{6}                        
-        \State[7]{(0,-2)}{7}                                
-        \State[8]{(3,-2)}{8}                                        
+        \State[7]{(0,-1.5)}{7}                                
+        \State[8]{(3,-1.5)}{8}                                        
 		\Initial[w]{1}
 		\EdgeL{1}{2}{u_1}
 		\EdgeL{1}{5}{u_2}						
@@ -40,11 +40,11 @@ The first procedure explores the semi-lattice defined by Alternating Sub-LTS rel
 \SmallPicture
 %\ShowFrame
 \VCDraw{
-    \begin{VCPicture}{(-4,-1.2)(4,2)}
+    \begin{VCPicture}{(-4,0)(4,1.5)}
         \SetEdgeLabelScale{1.4}
         \State[1]{(-3,0)}{1}
         \State[2]{(0,0)}{2}        
-        \State[3]{(3,2)}{3}
+        \State[3]{(3,1.5)}{3}
         \State[4]{(3,0)}{4}        
 		\Initial[w]{1}
 		\EdgeL{1}{2}{u_1}
@@ -56,6 +56,7 @@ The first procedure explores the semi-lattice defined by Alternating Sub-LTS rel
 \caption{Several conflicts example minimization($E_1$).}
 \label{fig:fig.several-conflicts-min1}
 \MediumPicture
+\vspace{-1em}
 \end{figure}
 
 \begin{figure}[bt]
@@ -63,7 +64,7 @@ The first procedure explores the semi-lattice defined by Alternating Sub-LTS rel
 \SmallPicture
 %\ShowFrame
 \VCDraw{
-    \begin{VCPicture}{(-4,-.6)(4,1)}
+    \begin{VCPicture}{(-4,0)(4,1)}
         \SetEdgeLabelScale{1.4}
         \State[1]{(-3,0)}{1}
         \State[7]{(0,0)}{7}        
@@ -77,6 +78,7 @@ The first procedure explores the semi-lattice defined by Alternating Sub-LTS rel
 \caption{Several conflicts example minimization($E_2$).}
 \label{fig:fig.several-conflicts-min2}
 \MediumPicture
+\vspace{-1em}
 \end{figure}
 
 Consider the example of Figure~\ref{fig:fig.several-conflicts} where the system has to satisfy the liveness goal of
@@ -131,6 +133,7 @@ since it is realizable.
     \caption{Minimization Algorithm}
     \label{fig:dfs-code}
   \end{center}
+\vspace{-1em}
 \end{figure}
 
 
@@ -203,19 +206,7 @@ realizable.  We showed this way that if we are looking for just one
 conflict we can immediately remove the transition that yielded realizability 
 from the candidate set without jeopardizing minimality.
 %\input{optimizations}
-The procedure is complete w.r.t to the problem statement because
-if a solution for the problem exists (for the sake of simplicity
-suppose that there is only one possible minimal alternating sub-LTS $E'$
-satisfying unrealizability), then the algorithm will effectively, and progressively,
-reduce it to $E'$, if the problem has multiple solutions the
-algorithm will yield one of those.
 
-The procedure is sound w.r.t to the problem statement since 
-at every step it holds that $E' \sublts E$ so the alternating condition
-is met.  The realizability check ensures that the output keeps the
-control problem unrealizable, and the minimality is satisfied by
-checking that every closest alternating sub-LTS is realizable at the
-final iteration in conjunction with lemma  ~\ref{def:induction-preserves}.\\
 
 We introduced two modifications to the algorithm
 to improve the time taken to compute the minimization.
@@ -231,24 +222,6 @@ added to $\mathcal{T}_u$ since, if removed from $E'$
 when looking for a minimal sub LTS all the others have to be removed
 as well to preserve alternation.
 
-Lemma ~\ref{def:induction-preserves} shows that we can keep removing
-elements from a set $\mathcal{T}_u$ of candidate non controllable
-transitions, reducing $E$ to its closest Alternating Sub-LTS.
- Once we can not,
-while preserving non-realizability, remove
-anything else we have reached an Alternating Sub-LTS that is also minimal.
-This follows from the fact that
-no closest Alternating Sub-LTS exists bellow it that preserves non realizability.
-If all the closest Alternating Sub-LTSs in its neighborhood 
-are realizable the current LTS is minimal.
-
-
-\begin{lemma}\label{def:induction-preserves}(\emph{Alternating Sub-LTSs preserve realizability})
-Let $E$ be the LTS for the non realizable control problem
-$\mathcal{I}=<E,\mathcal{C}, \varphi>$, and $E_1$, $E_2$ two LTSs s.t. 
-$E_2 \sublts E_1 \sublts E$ and
-$\mathcal{I}_1=<E_1, \mathcal{C}, \varphi>$, $\mathcal{I}_2=<E_2, \mathcal{C}, \varphi>$, if $\mathcal{I}_1$ is realizable then $\mathcal{I}_2$ is also realizable.
-\end{lemma}
 
 
 The second procedure uses the Delta Debugging technique presented in ~\cite{DBLP:journals/tse/ZellerH02} to accelerate the search space exploration. Instead of reducing the automaton by applying an atomic reduction at a time Delta Debugging tries to achieve a minimal diagnosis by partitioning the problem $\Delta$ into $n$ uniform subsets ($\Delta = \bigcup_{i=1}^n \Delta_i $) and then it first checks its elements $\Delta_i$ for a non realizable smaller case, if none is found it proceeds by looking at the complement $\Delta \setminus \Delta_i$ of each element in the partition. If no smaller candidate was found it increases the granularity by updating $n$ as $max(2n,|\Delta|)$. This cycle is repeated until $n$ can not be further increased ($n \geq |\Delta|$). 
