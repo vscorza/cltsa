@@ -1,17 +1,6 @@
 TODO:
 =====
-	- leer
-		- Unrealizable Cores for Reactive Systems Specifications
-		- MUST: minimal unsatisfiable subsets enumeration tool
-		- Interpolation-based GR(1) assumptions refinement
-		- A weakness measure for GR(1) formulae
-		- Minimal assumptions refinement for realizable specifications.
-		- Performance heuristics for GR(1) synthesis and related algorithm
-		- Symbolic repairs for GR(1) specifications
-		- Inherent vacuity for GR(1) specification
-		- Assume, Guarantee or Repair (grumberg)
-		- Must Fault Localization for Program Repair
-	- agregar Unrealizable Cores for Reactive Systems Specifications, notes on control of discrete-event systems, 
+	- agregar Unrealizable Cores for Reactive Systems Specifications, notes on control of discrete-event systems, MUST: minimal unsatisfiable subsets enumeration tool
 	- Background, Revisar definiciones necesarias.
 -benchmark
 	- validation

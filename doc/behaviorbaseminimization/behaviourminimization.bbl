@@ -216,18 +216,6 @@
 \newblock
 
 
-\bibitem[\protect\citeauthoryear{Daniele, Traverso, and Vardi}{Daniele
-  et~al\mbox{.}}{2000}]%
-        {daniele:2000}
-\bibfield{author}{\bibinfo{person}{M. Daniele}, \bibinfo{person}{P. Traverso},
-  {and} \bibinfo{person}{M.Y. Vardi}.} \bibinfo{year}{2000}\natexlab{}.
-\newblock \showarticletitle{{Strong Cyclic Planning Revisited}}.
-\newblock \bibinfo{journal}{\emph{Recent Advances in Ai Planning: 5th European
-  Conference on Planning, Ecp'99, Durham, Uk, September 8-10, 1999:
-  Proceedings}} (\bibinfo{year}{2000}).
-\newblock
-
-
 \bibitem[\protect\citeauthoryear{de~Alfaro and Henzinger}{de~Alfaro and
   Henzinger}{2001}]%
         {DBLP:conf/sigsoft/AlfaroH01}
@@ -617,6 +605,17 @@ Issue 7.
 \newblock \showarticletitle{Symbolic repairs for GR (1) specifications}. In
   \bibinfo{booktitle}{\emph{2019 IEEE/ACM 41st International Conference on
   Software Engineering (ICSE)}}. IEEE, \bibinfo{pages}{1016--1026}.
+\newblock
+
+
+\bibitem[\protect\citeauthoryear{Maoz and Shalom}{Maoz and Shalom}{2021}]%
+        {maoz2021unrealizable}
+\bibfield{author}{\bibinfo{person}{Shahar Maoz} {and} \bibinfo{person}{Rafi
+  Shalom}.} \bibinfo{year}{2021}\natexlab{}.
+\newblock \showarticletitle{Unrealizable cores for reactive systems
+  specifications}. In \bibinfo{booktitle}{\emph{2021 IEEE/ACM 43rd
+  International Conference on Software Engineering (ICSE)}}. IEEE,
+  \bibinfo{pages}{25--36}.
 \newblock
 
 
