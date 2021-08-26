@@ -69,12 +69,12 @@ There are, however, no techniques for providing feedback on unrealizability for
 event-based control problems. \emph{In this paper, we propose an approach for  
 providing  feedback on unrealizabilty of control problems specified with a combination of 
 automata and asynchronous temporal logic}.
-
-- EXPLICAR PLANTA
-
-- Explicar minimización
-
-- Explicar ideas claves del cómo. Delta debugging, etc.
+%
+%- EXPLICAR PLANTA
+%
+%- Explicar minimización
+%
+%- Explicar ideas claves del cómo. Delta debugging, etc.
 
 In the context of this work we refer to the monolithic automaton-representation of all possible execution involving the environment and the system as the plant. Our technique reduces the plant to a minimal representation such that we do not restrict the system below its initial capabilities but allow the environment ot enact a strategy that both violates the desired property and can be applied in the original plant. We define a relation between automata that encapsulates the notion of only weakening the environment options while preserving those of the system. This relation is used to induce a semi-lattice, our search space, that in conjunction with the monotonicity of unrealizability is used to incrementally reduce the plant until a local minimum is reached. We present one algorithm that performs a linear exploration of the space and another that used Delta-Debugging ~\cite{DBLP:journals/tse/ZellerH02} to try improve time spent while diagnosing.
 
