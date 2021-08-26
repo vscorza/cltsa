@@ -20,6 +20,8 @@
 \usepackage{graphicx} % Required for including images
 \usepackage{lipsum} % Used for inserting dummy 'Lorem ipsum' text into the template
 %\usepackage{amssymb}
+\usepackage[normalem]{ulem}  % For striking out text.
+\usepackage{xcolor}
 \usepackage{rotating}
 \usepackage{tikz}
 \usetikzlibrary{automata,positioning}
@@ -86,7 +88,8 @@
 % use a multiple column layout for up to three different
 % affiliations
 
-\title{Behavior Minimization Feedback for Unrealizable Specifications }
+\title{Behavior Minimization Feedback for Unrealizable  
+Specifications }
 
 
 \author{\IEEEauthorblockN{1\textsuperscript{st} Given Name Surname}
@@ -119,13 +122,16 @@ feedback that allows to understand the cause for unrealizability is
 necessary if specifications are to be evolved into realizable ones.
 
 In this paper, we propose a technique that minimizes the behavior of an
-unrealizable \gr specification while preserving unrealizability, thus allowing
+unrealizable event-based \gr specification while preserving 
+unrealizability, thus allowing
 engineers to focus on core behavior that causes unrealizability. The technique assumes an automata-based representation of the environment
 %and 
 %This is the first technique that is designed to be used to provide feedback for \gr synthesis problems in which the environment is described as an automaton and the goals as liveness LTL formulas. 
 %differs from existing feedback techniques as it reduces (rather than augmenting) allowable behavior while preserving unrealizability. 
-and returns a model that preserves at least one cause for unrealizability in the sense 
-that the environment's strategy for beating the system in the minimized model is also a 
+and returns a model that preserves at least one cause for 
+unrealizability in the sense 
+that the environment's strategy for beating the system in 
+the minimized model is also a 
 winning strategy for environment in the original model. 
 
 %The technique has also the potential to complement existing techniques that assume a specification only in LTL form and that work by syntactic, rather than semantic, minimization.

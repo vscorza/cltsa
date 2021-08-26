@@ -1,5 +1,10 @@
 \section{Motivation}\label{sec:motivation}
-We motivate and informally introduce relevant concepts by discussing a small example. Suppose that the engineer is working on a specification consisting of two environmental binary variables $x_1$ and $x_2$ and one system variable $y$. Variable $x_2$ (initially false) is required to swap its value at each step of the execution, while $x_1$ remains free. The value of $y$ is set at the start and kept fixed throughout the execution.
+We motivate and informally introduce relevant concepts by discussing a small example. 
+Suppose that an engineer is working on a specification consisting of two environmental 
+binary variables $x_1$ and $x_2$ and one system variable $y$. Variable $x_2$ 
+(initially false) is required to swap its value at each step of the execution, while $x_1$ 
+remains free. The value of $y$ is set at the start and kept fixed throughout the 
+execution.
 It is assumed that $x_1$ will hold true infinitely often while $x_1 \wedge x_2 \wedge y$ is also required to be satisfied infinitely often. This is the set of LTL formulae of the specification, with $\theta$ being the initial condition, $\rho_e$ the environmental safety restriction, $\varphi_e$ the liveness assumption and $\varphi_s$ the liveness guarantee:
 \begin{center}
 	\begin{tabular}{ r c l }
