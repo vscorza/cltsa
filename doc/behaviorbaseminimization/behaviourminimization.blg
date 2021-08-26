@@ -1,21 +1,11 @@
 This is BibTeX, Version 0.99d (TeX Live 2019/Debian)
 Capacity: max_strings=4000, hash_size=5000, hash_prime=4253
 The top-level auxiliary file: behaviourminimization.aux
-White space in argument---line 22 of file behaviourminimization.aux
- : \citation{CITA
- :                MAS ANTIGUA NO DE FOND PLANNING daniele:2000}
-I'm skipping whatever remains of this command
-White space in argument---line 27 of file behaviourminimization.aux
- : \citation{incluir
- :                   supervisory control aca}
-I'm skipping whatever remains of this command
 The style file: /home/mariano/git_repo/henos/henos-automata/doc/behaviorbaseminimization/ACM-Reference-Format.bst
 Reallocated singl_function (elt_size=4) to 100 items from 50.
 Reallocated singl_function (elt_size=4) to 100 items from 50.
 Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
 Database file #1: /home/mariano/git_repo/henos/henos-automata/doc/behaviorbaseminimization/bibliography.bib
-Warning--I didn't find a database entry for "CITAFUNDACIONAL"
-Warning--I didn't find a database entry for ""
 Warning--I didn't find a database entry for "Hoare"
 Warning--I didn't find a database entry for "Milner"
 Reallocated singl_function (elt_size=4) to 100 items from 50.
@@ -45,6 +35,7 @@ Warning--empty address in DBLP:conf/sigsoft/AlfaroH01
 Warning--empty address in DBLP:conf/kbse/DegiovanniRACA16
 Warning--empty address in DBLP:conf/sigsoft/GiannakopoulouM03
 Warning--empty address in DBLP:conf/kbse/HagiharaESY14
+Warning--empty address in harel1985development
 Warning--empty address in DBLP:conf/icra/KimF13
 Warning--empty address in DBLP:conf/icra/KimFS12
 Warning--empty address in DBLP:conf/fmcad/KonighoferHB09
@@ -53,53 +44,53 @@ Warning--empty address in Letier:2013:RMS
 Warning--page numbers missing in both pages and numpages fields in Letier:2013:RMS
 Warning--empty address in DBLP:conf/memocode/LiDS11
 Warning--empty address in DBLP:conf/sigsoft/MaozR16
-Warning--empty address in Maoz:2014
 Warning--empty publisher in maoz2019symbolic
 Warning--empty address in maoz2019symbolic
 Warning--empty publisher in maoz2021unrealizable
 Warning--empty address in maoz2021unrealizable
 Warning--empty address in DBLP:conf/vmcai/PitermanPS06
+Warning--empty address in pnueli1985transition
 Warning--empty address in DBLP:conf/popl/PnueliR89
 Warning--page numbers missing in both pages and numpages fields in DBLP:journals/corr/abs-2001-07678
-You've used 46 entries,
+You've used 50 entries,
             5959 wiz_defined-function locations,
-            1933 strings with 32967 characters,
-and the built_in function-call counts, 57995 in all, are:
-= -- 7041
-> -- 1955
+            1949 strings with 33269 characters,
+and the built_in function-call counts, 62826 in all, are:
+= -- 7797
+> -- 2081
 < -- 0
-+ -- 638
-- -- 707
-* -- 4179
-:= -- 5749
-add.period$ -- 228
-call.type$ -- 46
-change.case$ -- 307
-chr.to.int$ -- 44
-cite$ -- 88
-duplicate$ -- 5240
-empty$ -- 3656
-format.name$ -- 814
-if$ -- 13743
++ -- 682
+- -- 761
+* -- 4461
+:= -- 6219
+add.period$ -- 250
+call.type$ -- 50
+change.case$ -- 329
+chr.to.int$ -- 48
+cite$ -- 93
+duplicate$ -- 5648
+empty$ -- 3940
+format.name$ -- 880
+if$ -- 14975
 int.to.chr$ -- 4
 int.to.str$ -- 1
-missing$ -- 196
-newline$ -- 520
-num.names$ -- 385
-pop$ -- 1824
+missing$ -- 205
+newline$ -- 548
+num.names$ -- 415
+pop$ -- 1943
 preamble$ -- 1
-purify$ -- 716
+purify$ -- 774
 quote$ -- 0
-skip$ -- 1942
+skip$ -- 2094
 stack$ -- 0
-substring$ -- 4723
-swap$ -- 594
+substring$ -- 5140
+swap$ -- 648
 text.length$ -- 78
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 1155
-warning$ -- 38
-while$ -- 404
+type$ -- 1233
+warning$ -- 39
+while$ -- 447
 width$ -- 0
-write$ -- 979
-(There were 2 error messages)
+write$ -- 1042
+(There were 41 warnings)

@@ -2,7 +2,7 @@
 %%% Do NOT edit. File created by BibTeX with style
 %%% ACM-Reference-Format-Journals [18-Jan-2012].
 
-\begin{thebibliography}{46}
+\begin{thebibliography}{50}
 
 %%% ====================================================================
 %%% NOTE TO THE USER: you can override these defaults by providing
@@ -85,7 +85,7 @@
 
 \bibitem[\protect\citeauthoryear{Bloem, Jobstmann, Piterman, Pnueli, and
   Sa'ar}{Bloem et~al\mbox{.}}{2012a}]%
-        {Bloem:2012}
+        {DBLP:journals/jcss/BloemJPPS12}
 \bibfield{author}{\bibinfo{person}{Roderick Bloem}, \bibinfo{person}{Barbara
   Jobstmann}, \bibinfo{person}{Nir Piterman}, \bibinfo{person}{Amir Pnueli},
   {and} \bibinfo{person}{Yaniv Sa'ar}.} \bibinfo{year}{2012}\natexlab{a}.
@@ -100,7 +100,7 @@
 
 \bibitem[\protect\citeauthoryear{Bloem, Jobstmann, Piterman, Pnueli, and
   Sa'ar}{Bloem et~al\mbox{.}}{2012b}]%
-        {DBLP:journals/jcss/BloemJPPS12}
+        {Bloem:2012}
 \bibfield{author}{\bibinfo{person}{Roderick Bloem}, \bibinfo{person}{Barbara
   Jobstmann}, \bibinfo{person}{Nir Piterman}, \bibinfo{person}{Amir Pnueli},
   {and} \bibinfo{person}{Yaniv Sa'ar}.} \bibinfo{year}{2012}\natexlab{b}.
@@ -288,6 +288,18 @@
 \showDOI{\tempurl}
 
 
+\bibitem[\protect\citeauthoryear{Fikes and Nilsson}{Fikes and Nilsson}{1971}]%
+        {fikes1971strips}
+\bibfield{author}{\bibinfo{person}{Richard~E Fikes} {and}
+  \bibinfo{person}{Nils~J Nilsson}.} \bibinfo{year}{1971}\natexlab{}.
+\newblock \showarticletitle{STRIPS: A new approach to the application of
+  theorem proving to problem solving}.
+\newblock \bibinfo{journal}{\emph{Artificial intelligence}}
+  \bibinfo{volume}{2}, \bibinfo{number}{3-4} (\bibinfo{year}{1971}),
+  \bibinfo{pages}{189--208}.
+\newblock
+
+
 \bibitem[\protect\citeauthoryear{Giannakopoulou and Magee}{Giannakopoulou and
   Magee}{2003}]%
         {DBLP:conf/sigsoft/GiannakopoulouM03}
@@ -338,6 +350,16 @@
 \urldef\tempurl%
 \url{https://doi.org/10.1016/0167-6423(87)90035-9}
 \showDOI{\tempurl}
+
+
+\bibitem[\protect\citeauthoryear{Harel and Pnueli}{Harel and Pnueli}{1985}]%
+        {harel1985development}
+\bibfield{author}{\bibinfo{person}{David Harel} {and} \bibinfo{person}{Amir
+  Pnueli}.} \bibinfo{year}{1985}\natexlab{}.
+\newblock \showarticletitle{On the development of reactive systems}.
+\newblock In \bibinfo{booktitle}{\emph{Logics and models of concurrent
+  systems}}. \bibinfo{publisher}{Springer}, \bibinfo{pages}{477--498}.
+\newblock
 
 
 \bibitem[\protect\citeauthoryear{Hoare}{Hoare}{1978}]%
@@ -557,6 +579,18 @@ Issue 7.
 \showDOI{\tempurl}
 
 
+\bibitem[\protect\citeauthoryear{Manna and Waldinger}{Manna and
+  Waldinger}{1980}]%
+        {manna1980deductive}
+\bibfield{author}{\bibinfo{person}{Zohar Manna} {and} \bibinfo{person}{Richard
+  Waldinger}.} \bibinfo{year}{1980}\natexlab{}.
+\newblock \showarticletitle{A deductive approach to program synthesis}.
+\newblock \bibinfo{journal}{\emph{ACM Transactions on Programming Languages and
+  Systems (TOPLAS)}} \bibinfo{volume}{2}, \bibinfo{number}{1}
+  (\bibinfo{year}{1980}), \bibinfo{pages}{90--121}.
+\newblock
+
+
 \bibitem[\protect\citeauthoryear{Maoz and Ringert}{Maoz and Ringert}{2016}]%
         {DBLP:conf/sigsoft/MaozR16}
 \bibfield{author}{\bibinfo{person}{Shahar Maoz} {and}
@@ -573,27 +607,6 @@ Issue 7.
 \urldef\tempurl%
 \url{https://doi.org/10.1145/2950290.2950300}
 \showDOI{\tempurl}
-
-
-\bibitem[\protect\citeauthoryear{Maoz, Ringert, and Rumpe}{Maoz
-  et~al\mbox{.}}{2014}]%
-        {Maoz:2014}
-\bibfield{author}{\bibinfo{person}{Shahar Maoz}, \bibinfo{person}{Jan~Oliver
-  Ringert}, {and} \bibinfo{person}{Bernhard Rumpe}.}
-  \bibinfo{year}{2014}\natexlab{}.
-\newblock \showarticletitle{Synthesis of Component and Connector Models from
-  Crosscutting Structural Views}. In \bibinfo{booktitle}{\emph{Software
-  Engineering 2014, Fachtagung des GI-Fachbereichs Softwaretechnik, 25. Februar
-  - 28. Februar 2014, Kiel, Deutschland}} \emph{(\bibinfo{series}{{LNI}},
-  Vol.~\bibinfo{volume}{227})}, \bibfield{editor}{\bibinfo{person}{Wilhelm
-  Hasselbring} {and} \bibinfo{person}{Nils~Christian Ehmke}} (Eds.).
-  \bibinfo{publisher}{{GI}}, \bibinfo{pages}{63--64}.
-\newblock
-\showISBNx{978-388579-621-3}
-\urldef\tempurl%
-\url{http://eprints.uni-kiel.de/23752/}
-\showURL{%
-\tempurl}
 
 
 \bibitem[\protect\citeauthoryear{Maoz, Ringert, and Shalom}{Maoz
@@ -628,6 +641,19 @@ Issue 7.
   \bibinfo{address}{Secaucus, NJ, USA}.
 \newblock
 \showISBNx{0387102353}
+
+
+\bibitem[\protect\citeauthoryear{Penberthy, Weld, et~al\mbox{.}}{Penberthy
+  et~al\mbox{.}}{1992}]%
+        {penberthy1992ucpop}
+\bibfield{author}{\bibinfo{person}{J~Scott Penberthy},
+  \bibinfo{person}{Daniel~S Weld}, {et~al\mbox{.}}}
+  \bibinfo{year}{1992}\natexlab{}.
+\newblock \showarticletitle{UCPOP: A Sound, Complete, Partial Order Planner for
+  ADL.}
+\newblock \bibinfo{journal}{\emph{Kr}}  \bibinfo{volume}{92}
+  (\bibinfo{year}{1992}), \bibinfo{pages}{103--114}.
+\newblock
 
 
 \bibitem[\protect\citeauthoryear{Pistore, Barbon, Bertoli, Shaparau, and
@@ -665,6 +691,17 @@ Issue 7.
 \urldef\tempurl%
 \url{https://doi.org/10.1007/11609773\_24}
 \showDOI{\tempurl}
+
+
+\bibitem[\protect\citeauthoryear{Pnueli}{Pnueli}{1985}]%
+        {pnueli1985transition}
+\bibfield{author}{\bibinfo{person}{Amir Pnueli}.}
+  \bibinfo{year}{1985}\natexlab{}.
+\newblock \showarticletitle{In transition from global to modular temporal
+  reasoning about programs}.
+\newblock In \bibinfo{booktitle}{\emph{Logics and models of concurrent
+  systems}}. \bibinfo{publisher}{Springer}, \bibinfo{pages}{123--144}.
+\newblock
 
 
 \bibitem[\protect\citeauthoryear{Pnueli and Rosner}{Pnueli and Rosner}{1989}]%

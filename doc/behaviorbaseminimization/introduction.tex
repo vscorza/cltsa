@@ -3,7 +3,7 @@
 
 
 Requirements are naturally split between goals the system-to-be is expected to achieve and
-assumptions that the system-to-be can rely on to fulfill its goals ~\cite{Jackson:1995,Letier:2002}. The question to be asked then is one of realizability: Is it possible to build a system that can monitor its environment and react through its capabilities in order to guarantee its goals as long as the environment fulfils the assumptions?
+assumptions that the system-to-be can rely on to fulfill its goals ~\cite{Jackson:1995,Letier:2002}. The question to be asked then is one of realizability: Is it possible to build a system that can monitor its environment and react through its capabilities in order to guarantee its goals as long as the environment fulfills the assumptions?
 
 At early stages specifications are usually unrealizable ~\cite{Letier:2002}. There can be 
 multiple causes for unrealizability including lack of monitorability and controllability, 
@@ -14,12 +14,12 @@ rule out exceptional circumstances that the system cannot deal with
 
 Unfortunately, the cause for unrealizability tends to be the result of a combination of issues and is not easy to detect or understand. Providing engineers feedback that allows them to understand the cause for unrealizability is highly desired if specifications are to be evolved into realizable ones that can then be implemented. 
 
-The process of checking realizability is a associated with producing a controller that can 
+The process of checking realizability is associated with producing a controller that can 
 enact a strategy that correctly implements the specification. If such a controller exists, 
 the specification is realizable and, in some contexts, the controller can be used as part of 
 the system-to-be. If no such controller exists, the specification is unrealizable. 
 
-Checking realizability is a manual and laborious task. However, in some settings this 
+Manually checking realizability is a laborious task. However, in some settings this 
 process can be done automatically, ensuring as a by-product a controller  that correctly 
 implements the specification.  Controller synthesis algorithms only produce a system 
 strategy if the original specification is realizable. When the specification is unrealizable, 
@@ -27,28 +27,24 @@ the engineer is left with the onerous task of understanding why this is the case
 after that, with the task of changing the specification.
 
 Synthesis has been studied in three different fields: supervisory control 
-~\cite{ramadge:1989}, automated planning ~\cite{CITA MAS ANTIGUA NO DE FOND 
-PLANNING daniele:2000} and reactive synthesis ~\cite{Maoz:2014,Bloem:2012, 
-CITAFUNDACIONAL}.  Each one has different ways of defining the synthesis problem 
+~\cite{ramadge:1989}, automated planning ~\cite{fikes1971strips,penberthy1992ucpop} and reactive synthesis ~\cite{harel1985development,pnueli1985transition}.  Each one has different ways of defining the synthesis problem 
 which impacts profoundly not only in the algorithms and data structures used to solve 
-them but also the suitability for modelling different domains. 
+them but also the suitability for modeling different domains. 
 
-Reactive 
-synthesis assumes   a memory sharing  communication model (where each party reads 
+Reactive synthesis assumes both a memory sharing communication model (where each party reads 
 or writes a set of propositions that the other party can write or read) and 
 \textit{synchronous execution} (where the environment and system-to-be advance 
 take turns to change all the propositions the control). This approach 
-originates from its applications to hardware verification and synthesis~\cite{} but has 
-been applied to software too~\cite{}. Temporal logics 
+originates from its applications to hardware verification and synthesis~\cite{DBLP:conf/popl/PnueliR89} but has 
+been applied to software too~\cite{manna1980deductive}. Temporal logics 
 are commonly used to describe goals and assumptions. 
 
-Supervisory control adopts an event-based communication model (where only one 
-instantaneous event can occur at any instant, and parties synchronise on shared 
-events) and an \textit{asynchronous execution} (where parties can execute at 
-different relative speeds) that is well suited for modelling message-based 
-comminication~\cite{Hoare, Milner} at the software architecture level, for instance. 
+Supervisory control adopts both an event-based communication model (where only one 
+instantaneous event can occur at any instant  and \textit{asynchronous execution} (where parties can execute at 
+different relative speeds) which is well suited for modeling message-based 
+communication~\cite{DBLP:journals/cacm/Hoare78, Milner:1982} at the software architecture level, for instance. 
 Communicating automata  and (asynchronous) time temporal logics are commonly used 
-to model such synthesis problems~\cite{incluir supervisory control aca}. 
+to model such synthesis problems~\cite{ramadge:1989}. 
 
 Various techniques for providing feedback on unrealizability for reactive synthesis 
 approaches have been proposed. \cite{DBLP:conf/fmcad/KonighoferHB09, 
@@ -59,8 +55,8 @@ unrealizable. In other words, and in the spirit of unsatisfiable cores~\cite{Tor
 the technique produces a minimal subset of the original environmental formulae that is 
 still unrealizable. The intention is to allow engineers to focus on a portion of the original 
 specification to identify the causes for unrealizability. 
-~\cite{DBLP:conf/fmcad/KonighoferHB09} also provides a counterstrategy over which 
-either a countertrace can be produced as a witness for unrealizability or a game can be 
+~\cite{DBLP:conf/fmcad/KonighoferHB09} also provides a counter-strategy over which 
+either a counter-trace can be produced as a witness for unrealizability or a game can be 
 interactively played with the user in order to aid in understanding the cause of the 
 problem. In ~\cite{DBLP:conf/sigsoft/KuventMR17} a simplification of the 
 counterstrategy in terms of attractors and cycles is provided, going further in the 
@@ -69,61 +65,63 @@ changes, this is also the starting point of other techniques, such as
 ~\cite{maoz2019symbolic}, where ~\cite{DBLP:conf/sigsoft/KuventMR17} output is 
 used to repair the initial GR(1) specification.
 
-
 There are, however, no techniques for providing feedback on unrealizability for 
 event-based control problems. \emph{In this paper, we propose an approach for  
 providing  feedback on unrealizabilty of control problems specified with a combination of 
 automata and asynchronous temporal logic}.
+
 - EXPLICAR PLANTA
 
 - Explicar minimización
 
 - Explicar ideas claves del cómo. Delta debugging, etc.
 
+In the context of this work we refer to the monolithic automaton-representation of all possible execution involving the environment and the system as the plant. Our technique reduces the plant to a minimal representation such that we do not restrict the system below its initial capabilities but allow the environment ot enact a strategy that both violates the desired property and can be applied in the original plant. We define a relation between automata that encapsulates the notion of only weakening the environment options while preserving those of the system. This relation is used to induce a semi-lattice, our search space, that in conjunction with the monotonicity of unrealizability is used to incrementally reduce the plant until a local minimum is reached. We present one algorithm that performs a linear exploration of the space and another that used Delta-Debugging ~\cite{DBLP:journals/tse/ZellerH02} to try improve time spent while diagnosing.
 
-
-
-
-TAL VEZ ALGO DE ESTO SE PUEDE REUTILIZAR  ARRIBA
-. In \textit{differs} from existing techniques in two ways. First and foremost, it works 
-with automata-based (explicit) models. To the best of our knowledge, no previous work 
-approached the problem of diagnosing unrealizability over explicit models.  When 
-working with symbolic definitions our tool creates an automaton representation of the 
-plant by translating an OBDD to a LTS. Automata-based specifications of the 
-environment (e.g., labeled transition systems~\cite{Keller:1976}, 
-statecharts~\cite{Harel:1987}, and process 
-algebra~\cite{Milner:1982,Hoare:1983})satisfy are common approaches to 
-environment description in software engineering literature. There are a variety of 
-software engineering tasks that have been approached using synthesis and 
-automata-based descriptions 
-(e.g,~\cite{Letier:2013:RMS,DIppolito:2013,Pistore:2004:PMW}. The explicit nature 
-of our output enables the use of the minimization when building a test suite or test 
-bench. The second difference is that the approach minimizes the initial plant, resulting 
-in an explicit model that exhibits a minimal representation of the original behavior,  
-Existing approaches either allow more behavior than originally specified when reducing 
-the number of formulae ~\cite{DBLP:conf/fmcad/KonighoferHB09} or require a 
-symbolic description of the plant in order to provide a automata-based representation of 
-the abstracted counter strategy ~\ref{DBLP:conf/sigsoft/KuventMR17}. 
-
-
-
-
-\textit{What does it mean to minimize behavior while preserving unrealizability?} A 
-specification determines a game in which one player, the environment, tries to  the 
-assumptions while preventing the other player, the system-to-be, from achieving its 
-goals. If the specification is unrealizable the environment has a playing strategy that 
-always beats its opponent. In other words, no matter what the system does, it cannot 
-achieve its goals. When talking about a minimization that preserves unrealizability we 
-refer to a process that produces a new model that has less behavior and for which the 
-winning strategy of the environment also works in the original specification. This allows 
-engineers to focus on the behavior of the original specification that causes 
-unrealizability. The importance of the technique lies not in how much of the general 
-plant is removed but on the benefits it presents during diagnosis, because a smaller plant 
-will in turn produce smaller, simpler traces for the user to explore, analyze and use as 
-guide towards the understanding of the underlying unrealizability cause.
-
-
-
-%The technique has also the potential to complement existing techniques that assume a specification only in LTL form and that work by performing a declarative, rather than a behavior-based, minimization.
 
 The paper is structured as follows. We first provide a motivating example as an informal overview of the proposed technique, we then present some preliminary definitions, namely to define formally a control problem and the notion of realizability, and then go on to define minimization and unrealizability preservation. In Section~\ref{sect:solution} we present the minimization algorithm and then discuss our way of validating the technique. We finally proceed with a discussion on related work and conclusions.
+%
+%
+%TAL VEZ ALGO DE ESTO SE PUEDE REUTILIZAR  ARRIBA
+%. In \textit{differs} from existing techniques in two ways. First and foremost, it works 
+%with automata-based (explicit) models. To the best of our knowledge, no previous work 
+%approached the problem of diagnosing unrealizability over explicit models.  When 
+%working with symbolic definitions our tool creates an automaton representation of the 
+%plant by translating an OBDD to a LTS. Automata-based specifications of the 
+%environment (e.g., labeled transition systems~\cite{Keller:1976}, 
+%statecharts~\cite{Harel:1987}, and process 
+%algebra~\cite{Milner:1982,Hoare:1983})satisfy are common approaches to 
+%environment description in software engineering literature. There are a variety of 
+%software engineering tasks that have been approached using synthesis and 
+%automata-based descriptions 
+%(e.g,~\cite{Letier:2013:RMS,DIppolito:2013,Pistore:2004:PMW}. The explicit nature 
+%of our output enables the use of the minimization when building a test suite or test 
+%bench. The second difference is that the approach minimizes the initial plant, resulting 
+%in an explicit model that exhibits a minimal representation of the original behavior,  
+%Existing approaches either allow more behavior than originally specified when reducing 
+%the number of formulae ~\cite{DBLP:conf/fmcad/KonighoferHB09} or require a 
+%symbolic description of the plant in order to provide a automata-based representation of 
+%the abstracted counter strategy ~\ref{DBLP:conf/sigsoft/KuventMR17}. 
+%
+%
+%
+%
+%\textit{What does it mean to minimize behavior while preserving unrealizability?} A 
+%specification determines a game in which one player, the environment, tries to  the 
+%assumptions while preventing the other player, the system-to-be, from achieving its 
+%goals. If the specification is unrealizable the environment has a playing strategy that 
+%always beats its opponent. In other words, no matter what the system does, it cannot 
+%achieve its goals. When talking about a minimization that preserves unrealizability we 
+%refer to a process that produces a new model that has less behavior and for which the 
+%winning strategy of the environment also works in the original specification. This allows 
+%engineers to focus on the behavior of the original specification that causes 
+%unrealizability. The importance of the technique lies not in how much of the general 
+%plant is removed but on the benefits it presents during diagnosis, because a smaller plant 
+%will in turn produce smaller, simpler traces for the user to explore, analyze and use as 
+%guide towards the understanding of the underlying unrealizability cause.
+%
+%
+%
+%%The technique has also the potential to complement existing techniques that assume a specification only in LTL form and that work by performing a declarative, rather than a behavior-based, minimization.
+%
+%The paper is structured as follows. We first provide a motivating example as an informal overview of the proposed technique, we then present some preliminary definitions, namely to define formally a control problem and the notion of realizability, and then go on to define minimization and unrealizability preservation. In Section~\ref{sect:solution} we present the minimization algorithm and then discuss our way of validating the technique. We finally proceed with a discussion on related work and conclusions.
