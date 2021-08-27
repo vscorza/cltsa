@@ -64,52 +64,55 @@ Our approach simplifies the specification semantically, reducing the relevant be
 \SmallPicture
 %\ShowFrame
 \VCDraw{
-\begin{VCPicture}{(-4,-1.5)(4,6.5)}
+\begin{VCPicture}{(-5,-2)(4,7.5)}
 	\SetEdgeLabelScale{1.4}
 %	\State[0]{(-5,2.5)}{init}
-	\State[0]{(-5,2.5)}{0}		
-	\State[1]{(-3.5,4.5)}{1}
-	\State[2]{(-1.5,5.75)}{2}	
-	\State[3]{(0.5,6)}{3}
-	\State[4]{(4.5,4.5)}{4}
-	\State[5]{(2.5,3.25)}{5} 
-	\State[6]{(0.5,3)}{6} 
-	\State[7]{(-3.5,0)}{7}			
-	\State[8]{(-1.5,0.75)}{8}				
-	\State[9]{(0.5,1.5)}{9}
-	\State[10]{(4.5,0)}{10}
-	\State[11]{(2.5,-0.75)}{11}						
-	\State[12]{(0.5,-1.5)}{12} 			  
-	\Initial[w]{init_e}
+	\State[0]{(-5,1.75)}{0}		
+	\State[1]{(-3.5,6.5)}{1}
+	\State[2]{(-0.5,7)}{2}	
+	\State[3]{(2.5,6.5)}{3}
+	\State[4]{(-0.5,6)}{4}
+	\State[5]{(-3.5,4)}{5} 
+	\State[6]{(-0.5,4.5)}{6} 
+	\State[7]{(2.5,4)}{7}			
+	\State[8]{(-0.5,3.5)}{8}	
+	\State[9]{(-3.5,1)}{9}
+	\State[10]{(-0.5,1.5)}{10}	
+	\State[11]{(2.5,1)}{11}
+	\State[12]{(-0.5,0.5)}{12}
+	\State[13]{(-3.5,-1.5)}{13} 
+	\State[14]{(-0.5,-1)}{14} 
+	\State[15]{(2.5,-1.5)}{15}			
+	\State[16]{(-0.5,-2)}{16}		
+				
+	\Initial[w]{0}
 	%\EdgeL{init}{init_e}{\overline{x_1 x_2}}
-	\ArcL{0}{1}{y}
-	\ArcR{0}{7}{\overline{y}}	
-	\ArcL{1}{2}{}\LabelL[.5]{x_2}
-	\ArcL{2}{3}{}\LabelL[.5]{x_1}	
-	\ArcL{2}{1}{}\LabelL[.5]{\overline{x_2}}
-	\ArcL{3}{2}{}\LabelL[.5]{\overline{x_1}}	
-	\ArcL{3}{4}{}\LabelL[.5]{\overline{x_2}}
-	\ArcL{4}{5}{}\LabelL[.5]{x_2}
-	\ArcL{5}{6}{}\LabelL[.5]{x_1}	
-	\ArcL{5}{4}{}\LabelL[.5]{\overline{x_2}}
-	\ArcL{6}{5}{}\LabelL[.5]{\overline{x_1}}			
-	\ArcL{6}{1}{}\LabelL[.5]{\overline{x_2}}	
-	\ArcL{1}{6}{}\LabelL[.5]{x_2}		
-%	\LArcR[.6]{1}{0}{\overline{x_1 x_2}}
-%	\ArcR{1}{2}{}\LabelL[.5]{\overline{x_2}}
-%	\LArcR[.6]{2}{1}{x_2}
-%	\ArcR{2}{3}{}\LabelL[.5]{\overline{x_1}x_2}
-%	\LArcR[.6]{3}{2}{x_1\overline{x_2}}
-%	\ArcR{3}{0}{}\LabelL[.5]{\overline{x_2}}
-%	\LArcR[.6]{0}{3}{x_2}
-%	\ArcR{4}{5}{}\LabelL[.5]{x_1 x_2}
-%	\LArcR[.6]{5}{4}{\overline{x_1 x_2}}
-%	\ArcR{5}{6}{}\LabelL[.5]{\overline{x_2}}
-%	\LArcR[.6]{6}{5}{x_2}
-%	\ArcR{6}{7}{}\LabelL[.5]{\overline{x_1}x_2}
-%	\LArcR[.6]{7}{6}{x_1\overline{x_2}}
-%	\ArcR{7}{4}{}\LabelL[.5]{\overline{x_2}}
-%	\LArcR[.6]{4}{7}{x_2}	
+	\ArcL{0}{5}{y}
+	\ArcL{5}{1}{b}	
+	\ArcL{1}{5}{\overline{b}}
+	\ArcL{1}{2}{a}		
+	\ArcL{2}{3}{\overline{b}}
+	\ArcL{3}{4}{\overline{a}}
+	\ArcL{4}{1}{b}		
+	\ArcL{3}{7}{b}	
+	\ArcL{7}{3}{\overline{b}}		
+	\ArcL{7}{8}{\overline{a}}
+	\ArcL{8}{5}{\overline{b}}
+	\ArcL{5}{6}{a}
+	\ArcL{6}{7}{b}	
+	\ArcR{0}{13}{\overline{y}}
+	\ArcL{13}{9}{b}	
+	\ArcL{9}{13}{\overline{b}}
+	\ArcL{9}{10}{a}		
+	\ArcL{10}{11}{\overline{b}}
+	\ArcL{11}{12}{\overline{a}}
+	\ArcL{12}{9}{b}		
+	\ArcL{11}{15}{b}	
+	\ArcL{15}{11}{\overline{b}}		
+	\ArcL{15}{16}{\overline{a}}
+	\ArcL{16}{13}{\overline{b}}
+	\ArcL{13}{14}{a}
+	\ArcL{14}{15}{b}		
 \end{VCPicture}
 }
 	\caption{Original Plant}
@@ -123,28 +126,35 @@ Our approach simplifies the specification semantically, reducing the relevant be
 	\SmallPicture
 	%\ShowFrame
 	\VCDraw{
-	\begin{VCPicture}{(-4,.5)(4,6.5)}
+	\begin{VCPicture}{(-5,.5)(4,6.5)}
 		\SetEdgeLabelScale{1.4}
-		\State[0]{(-5,3)}{init}
-		\State[1]{(-2.5,3)}{init_e}		
-		\State[2]{(-1.5,4.5)}{0}
-		\State[3]{(1.5,6)}{1}
-		\State[4]{(4.5,4.5)}{2}
-		\State[5]{(1.5,3)}{3} 
-		\State[6]{(-1.5,1.5)}{4}			
-		\State[7]{(1.5,1)}{5}
-		\State[8]{(4.5,1)}{6}			  
-		\Initial[w]{init}
-		\EdgeL{init}{init_e}{\overline{x_1 x_2}}
-		\ArcL{init_e}{0}{y}
-		\ArcR{init_e}{4}{\overline{y}}	
-		\ArcL{0}{1}{}\LabelL[.5]{x_1 x_2}
-		\ArcL{1}{2}{}\LabelL[.5]{\overline{x_2}}
-		\LArcR[.5]{2}{3}{\overline{x_1}x_2}
-		\LArcR[.6]{3}{2}{x_1\overline{x_2}}
-		\ArcR{4}{5}{}\LabelL[.5]{x_1 x_2}
-		\LArcR[.6]{6}{5}{x_2}
-		\LArcR[.6]{5}{6}{\overline{x_2}}
+	\State[0]{(-5,2.5)}{0}		
+\State[1]{(-3.5,5.5)}{1}
+\State[3]{(2.5,5.5)}{3}
+\State[4]{(-0.5,6)}{4}
+\State[5]{(-3.5,4)}{5} 
+\State[6]{(-0.5,3.5)}{6} 
+\State[7]{(2.5,4)}{7}			
+\State[9]{(-2,1)}{9}
+\State[10]{(0.25,1.5)}{10}	
+\State[11]{(2.5,1)}{11}
+\State[12]{(0.25,0.5)}{12}
+\State[13]{(-3.5,1)}{13} 
+\Initial[w]{0}
+%\EdgeL{init}{init_e}{\overline{x_1 x_2}}
+\ArcL{0}{5}{y}
+\ArcR{1}{5}{\overline{b}}
+\ArcR{5}{6}{a}
+\ArcR{6}{7}{b}
+\ArcR{7}{3}{\overline{b}}		
+\ArcR{3}{4}{\overline{a}}
+\ArcR{4}{1}{b}		
+\ArcR{0}{13}{\overline{y}}
+\ArcR{13}{9}{b}	
+\ArcL{9}{10}{a}		
+\ArcL{10}{11}{\overline{b}}
+\ArcL{11}{12}{\overline{a}}
+\ArcL{12}{9}{b}		
 	\end{VCPicture}
 }
 	\caption{Behavior minimization}
@@ -156,25 +166,31 @@ Our approach simplifies the specification semantically, reducing the relevant be
 	\SmallPicture
 	%\ShowFrame
 	\VCDraw{
-		\begin{VCPicture}{(-4,4)(4,8)}
-			\SetEdgeLabelScale{1.4}
-			\State[0]{(-5,6)}{init}
-			\State[1]{(-3,6)}{init_e}		
-			\State[2]{(-1,6)}{0}
-			\State[3]{(2,8)}{1}
-			\State[4]{(5,6)}{2}
-			\State[5]{(2,4)}{3} 		  
-			\Initial[w]{init}
-			\EdgeL{init}{init_e}{\overline{x_1 x_2}}
-			\EdgeL{init_e}{0}{y}
-			\ArcR{0}{1}{}\LabelL[.5]{x_1 x_2}
-			\LArcR[.6]{1}{0}{\overline{x_1 x_2}}
-			\ArcR{1}{2}{}\LabelL[.5]{\overline{x_2}}
-			\LArcR[.6]{2}{1}{x_2}
-			\ArcR{2}{3}{}\LabelL[.5]{\overline{x_1}x_2}
-			\LArcR[.6]{3}{2}{x_1\overline{x_2}}
-			\ArcR{3}{0}{}\LabelL[.5]{\overline{x_2}}
-			\LArcR[.6]{0}{3}{x_2}	
+		\begin{VCPicture}{(-5,2.5)(4,7.5)}
+	\State[0]{(-5,4)}{0}		
+\State[1]{(-3.5,6.5)}{1}
+\State[2]{(-0.5,7)}{2}	
+\State[3]{(2.5,6.5)}{3}
+\State[4]{(-0.5,6)}{4}
+\State[5]{(-3.5,4)}{5} 
+\State[6]{(-0.5,4.5)}{6} 
+\State[7]{(2.5,4)}{7}			
+\State[8]{(-0.5,3.5)}{8}	
+\Initial[w]{0}
+%\EdgeL{init}{init_e}{\overline{x_1 x_2}}
+\EdgeL{0}{5}{y}
+\ArcL{5}{1}{b}	
+\ArcL{1}{5}{\overline{b}}
+\ArcL{1}{2}{a}		
+\ArcL{2}{3}{\overline{b}}
+\ArcL{3}{4}{\overline{a}}
+\ArcL{4}{1}{b}		
+\ArcL{3}{7}{b}	
+\ArcL{7}{3}{\overline{b}}		
+\ArcL{7}{8}{\overline{a}}
+\ArcL{8}{5}{\overline{b}}
+\ArcL{5}{6}{a}
+\ArcL{6}{7}{b}	
 		\end{VCPicture}
 	}
 	\caption{Realizable version strategy}
@@ -186,21 +202,23 @@ Our approach simplifies the specification semantically, reducing the relevant be
 	\SmallPicture
 	%\ShowFrame
 	\VCDraw{
-	\begin{VCPicture}{(-4,4)(4,8)}
-		\SetEdgeLabelScale{1.4}
-		\State[0]{(-5,6)}{init}
-		\State[1]{(-3,6)}{init_e}		
-		\State[2]{(-1,6)}{0}
-		\State[3]{(2,8)}{1}
-		\State[4]{(5,6)}{2}
-		\State[5]{(2,4)}{3} 		  
-		\Initial[w]{init}
-		\EdgeL{init}{init_e}{\overline{x_1 x_2}}
-		\EdgeL{init_e}{0}{y}
-		\ArcL{0}{1}{x_1 x_2}
-		\ArcL{1}{2}{\overline{x_2}}
-		\ArcR{2}{3}{}\LabelL[.5]{\overline{x_1}x_2}
-		\LArcR[.6]{3}{2}{x_1\overline{x_2}}
+	\begin{VCPicture}{(-5,2.5)(4,6)}
+		\State[0]{(-5,4)}{0}		
+		\State[1]{(-3.5,5.5)}{1}
+		\State[3]{(2.5,5.5)}{3}
+		\State[4]{(-0.5,6)}{4}
+		\State[5]{(-3.5,4)}{5} 
+		\State[6]{(-0.5,3.5)}{6} 
+		\State[7]{(2.5,4)}{7}			
+		\Initial[w]{0}
+		%\EdgeL{init}{init_e}{\overline{x_1 x_2}}
+		\EdgeL{0}{5}{y}
+		\ArcR{1}{5}{\overline{b}}
+		\ArcR{5}{6}{a}
+		\ArcR{6}{7}{b}
+		\ArcR{7}{3}{\overline{b}}		
+		\ArcR{3}{4}{\overline{a}}
+		\ArcR{4}{1}{b}		
 	\end{VCPicture}
 }
 	\caption{Composition of the strategy with the minimization}

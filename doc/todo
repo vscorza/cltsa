@@ -18,6 +18,22 @@ Compositional Supervisory Control via Reactive Synthesis and Automated Planning,
 		- actualizar func-tests
 		- escribir minimización de goals (agarrar uno que sea no realizable reportar cuál en el diagnóstico)
 - post paper
+	- revisar extensión de alfabeto
+		set Global_Alphabet = {a.on, a.off, b.on, b.off, y.on, y.off}
+		set Controllable_Alphabet = {y.on, y.off}
+		Y_BEH = ( {y.on, y.off} -> DONE).
+		A_BEH = (a.on -> a.off -> A_BEH)+{y.on, y.off}.
+		B_BEH = ( b.on -> B_ON_BEH),
+		B_ON_BEH = (b.off -> B_BEH | {a.on, a.off} -> b.off -> B_BEH)+{y.on, y.off}.
+		||ENV = (A_BEH || B_BEH || Y_BEH).
+		A_BEH >> "/tmp/motivating_example_a.rep".
+		B_BEH >> "/tmp/motivating_example_b.rep".
+		Y_BEH >> "/tmp/motivating_example_y.rep".
+		ENV >> "/tmp/motivating_example_env.rep".
+	- agregar estados numéricos a vstate
+		fluent F_A_ON = <a.on, a.off>
+		vstate fluent F_GOAL in ENV = {7}.
+		|f|GAME = (ENV).
 	- agregar .h a dependencias del makefile
 	- re-escribir versión ahb genbuf, revisar realizabilidad-no realizabilidad
 		- testear y comparar con valuaciones por estados
