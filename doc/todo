@@ -1,6 +1,6 @@
 TODO:
 =====
-	- agregar Unrealizable Cores for Reactive Systems Specifications, notes on control of discrete-event systems, MUST: minimal unsatisfiable subsets enumeration tool
+	- Lo que yo entendí, y la intro la armé así, es que nos diferenciamos primariamente en el input (event based). Entonces arrancar con un ejemplo que no es event-based no tiene sentido.  Qué decís?
 	- Background, Revisar definiciones necesarias.
 -benchmark
 	- validation

@@ -119,26 +119,26 @@ For the table we show the two biggest instances of each case study.
   \label{table:quantitative-results}
   \vspace{-1em}
  \end{table*}
-\begin{figure}[bt]
-	\centering
-	\SmallPicture
-	\includegraphics[width=0.3\textwidth, angle=-90]{../experimental_setting/tmp_results/size_vs_diag_time.ps}
-	\vspace*{-2mm}
-	\caption{Minimization size vs. diagnosis time.}
-	\label{fig:size_vs_diag_time}
-	\vspace*{-4mm}
-	\MediumPicture
-\end{figure}
-\begin{figure}[bt]
-	\centering
-	\SmallPicture
-	\includegraphics[width=0.3\textwidth, angle=-90]{../experimental_setting/tmp_results/reduction_vs_diag_time.ps}
-	\vspace*{-2mm}
-	\caption{Minimization size vs. diagnosis time.}
-	\label{fig:reduction_vs_diag_time}
-	\vspace*{-4mm}
-	\MediumPicture
-\end{figure}
+%\begin{figure}[bt]
+%	\centering
+%	\SmallPicture
+%	\includegraphics[width=0.3\textwidth, angle=-90]{../experimental_setting/tmp_results/size_vs_diag_time.ps}
+%	\vspace*{-2mm}
+%	\caption{Minimization size vs. diagnosis time.}
+%	\label{fig:size_vs_diag_time}
+%	\vspace*{-4mm}
+%	\MediumPicture
+%\end{figure}
+%\begin{figure}[bt]
+%	\centering
+%	\SmallPicture
+%	\includegraphics[width=0.3\textwidth, angle=-90]{../experimental_setting/tmp_results/reduction_vs_diag_time.ps}
+%	\vspace*{-2mm}
+%	\caption{Minimization size vs. diagnosis time.}
+%	\label{fig:reduction_vs_diag_time}
+%	\vspace*{-4mm}
+%	\MediumPicture
+%\end{figure}
 %\begin{figure}[bt]
 %	\centering
 %	\SmallPicture
@@ -251,13 +251,15 @@ For the table we show the two biggest instances of each case study.
 %replace this paragraph with something related to the time it takes to finish the diagnosis w.r.t. the time of synthesis in the realizable case
 In general terms the proposed approach is feasible even for a significant number of signal based specifications. 
 As expected with any algorithm working with an explicit approach, the minimization technique still under performs against symbolic approaches on both size and time, but can nonetheless diagnose specifications comprised of almost 5 million transitions, which is a considerable volume for explicit models.  
-
-In the following analyses when referring to correlation estimates the Kendall rank correlation coefficient will be used. 
-In terms of time, the relation between how much it takes for the diagnosis step to finish  w.r.t. how much it would be spent in synthesis versus the size of the original plant shows no statistically significant correlation ($\tau=-0.11436$). Our implementation allowed us to handle typical specifications from the process-oriented and supervisory control domain within our time budget while some diagnoses took close to 500 times longer than the related synthesis step when removing a liveness assumption and \texttt{Genbuf 2} in particular took almost 11500 times longer than the realizable case when removing a safety restriction. This has to do in part with the fact that the ranking-based technique used to solve GR(1) takes its longest to stabilize when faced with an unrealizable specifications. For the second case, where a safety restriction was removed, the original plant is also five times bigger, since removing a safety formula in the reactive synthesis scenario allows for more behavior, another point to consider is that the GR(1) formula is almost double in length than most of the other cases. 
-Even though the time spent diagnosing seems to be clearly above the time spent synthesizing, in figure ~\ref{fig:size_vs_diag_time} we observe diagnosis temporal cost is at least strongly correlated to the size of the original automaton while both values stay linearly related. 
+%In the following analyses when referring to correlation estimates the Kendall rank correlation coefficient will be used. 
+%In terms of time, the relation between how much it takes for the diagnosis step to finish  w.r.t. how much it would be spent in synthesis versus the size of the original plant shows no statistically significant correlation ($\tau=-0.11436$). 
+Our implementation allowed us to handle typical specifications from the process-oriented and supervisory control domain within our time budget while some diagnoses took close to 500 times longer than the related synthesis step when removing a liveness assumption and \texttt{Genbuf 2} in particular took almost 11500 times longer than the realizable case when removing a safety restriction. This has to do in part with the fact that the ranking-based technique used to solve GR(1) takes its longest to stabilize when faced with an unrealizable specifications. For the second case, where a safety restriction was removed, the original plant is also five times bigger, since removing a safety formula in the reactive synthesis scenario allows for more behavior, another point to consider is that the GR(1) formula is almost double in length than most of the other cases. 
+%Even though the time spent diagnosing seems to be clearly above the time spent synthesizing, in figure ~\ref{fig:size_vs_diag_time} we observe diagnosis temporal cost is at least strongly correlated to the size of the original automaton while both values stay linearly related. 
 The diagnosis pipeline seems to keep the whole process far below the hypothetical worst-case scenario, which is linear w.r.t. the number of uncontrollable transitions in the original automaton.  
 
-Next we analyze volume reduction. Going back to the problem of comparing our technique to the symbolic approaches, ~\cite{DBLP:conf/hvc/KonighoferHB10} reports an average reduction of the presented formulae of a 90\% and our approach has a marginally better value in $v_{\mathcal{U}}$ of 92\%. Figure ~\ref{fig:reduction_vs_diag_time} shows a strong correlation between the time spent diagnosing and the amount of minimization achieved. As we stated before we will take the minimization amount as a proxy for understandability of the diagnosis. This being the case having a reduction comparable to that of our closest reference, and showing that it maintains some measure of consistency under scaling we assume that the technique should be helpful for the engineer.
+Next we analyze volume reduction. Going back to the problem of comparing our technique to the symbolic approaches, ~\cite{DBLP:conf/hvc/KonighoferHB10} reports an average reduction of the presented formulae of a 90\% and our approach has a marginally better value in $v_{\mathcal{U}}$ of 92\%.
+%Figure ~\ref{fig:reduction_vs_diag_time} shows a strong correlation between the time spent diagnosing and the amount of minimization achieved. 
+As we stated before we will take the minimization amount as a proxy for understandability of the diagnosis. This being the case having a reduction comparable to that of our closest reference, and showing that it maintains some measure of consistency under scaling we assume that the technique should be helpful for the engineer.
 
 At this point we propose that \textbf{RQ1} is answered affirmatively, since the reduction proportion is comparable to the closest related work in terms of specification reduction and by the fact that for most cases the time taken while diagnosing is somewhat comparable to what it takes to synthesize the realizable case. For the bigger cases, the price payed for the generality of the technique (being agnostic w.r.t. to the formula) may present a problem. We can either try to analyze simpler cases for the parametric specifications and then diagnose a cause that will scale up with the parameter or use a technique that is specific to the type of realizability query (e.g. counter strategy guided minimization).  
 
