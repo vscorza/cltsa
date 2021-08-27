@@ -27,9 +27,9 @@ Our approach simplifies the specification semantically, reducing the relevant be
 %			\StateVar[2:x_1 \overline{x_2} y]{(3,6)}{2}
 %			\StateVar[3:\overline{x_1} x_2 y]{(0,4)}{3} 
 %			\StateVar[4:\overline{x_1 x_2 y}]{(-3,0)}{4}			
-%			\StateVar[5:x_1 x_2 \overline{y}]{(0,2)}{5}
+%			\StateVar[5:x_1 x_2 y.off]{(0,2)}{5}
 %			\StateVar[6:x_1 \overline{x_2 y}]{(3,0)}{6}
-%			\StateVar[7:\overline{x_1} x_2 \overline{y}]{(0,-2)}{7}   			  
+%			\StateVar[7:\overline{x_1} x_2 y.off]{(0,-2)}{7}   			  
 %			\Initial[w]{0}
 %			\Initial[w]{4}	
 %			\ArcR{0}{1}{}
@@ -83,32 +83,33 @@ Our approach simplifies the specification semantically, reducing the relevant be
 				
 	\Initial[w]{0}
 	%\EdgeL{init}{init_e}{\overline{x_1 x_2}}
-	\ArcL{0}{5}{y}
-	\ArcL{5}{1}{b}	
-	\ArcL{1}{5}{\overline{b}}
-	\ArcL{1}{2}{a}		
-	\ArcL{2}{3}{\overline{b}}
-	\ArcL{3}{4}{\overline{a}}
-	\ArcL{4}{1}{b}		
-	\ArcL{3}{7}{b}	
-	\ArcL{7}{3}{\overline{b}}		
-	\ArcL{7}{8}{\overline{a}}
-	\ArcL{8}{5}{\overline{b}}
-	\ArcL{5}{6}{a}
-	\ArcL{6}{7}{b}	
-	\ArcR{0}{13}{\overline{y}}
-	\ArcL{13}{9}{b}	
-	\ArcL{9}{13}{\overline{b}}
-	\ArcL{9}{10}{a}		
-	\ArcL{10}{11}{\overline{b}}
-	\ArcL{11}{12}{\overline{a}}
-	\ArcL{12}{9}{b}		
-	\ArcL{11}{15}{b}	
-	\ArcL{15}{11}{\overline{b}}		
-	\ArcL{15}{16}{\overline{a}}
-	\ArcL{16}{13}{\overline{b}}
-	\ArcL{13}{14}{a}
-	\ArcL{14}{15}{b}		
+	\ArcL{0}{5}{y.on}
+	\LArcR{0}{13}{y.off}
+	\ForthBackOffset
+	\EdgeL{5}{1}{b.on}	
+	\EdgeL[.55]{1}{5}{b.off}
+	\EdgeL{1}{2}{a.on}		
+	\EdgeL{2}{3}{b.off}
+	\EdgeL{3}{4}{a.off}
+	\EdgeL{4}{1}{b.on}		
+	\EdgeL{3}{7}{b.on}	
+	\EdgeL{7}{3}{b.off}		
+	\EdgeL{7}{8}{a.off}
+	\EdgeL{8}{5}{b.off}
+	\EdgeL{5}{6}{a.on}
+	\EdgeL{6}{7}{b.on}	
+	\EdgeL[.8]{13}{9}{b.on}	
+	\EdgeL[.55]{9}{13}{b.off}
+	\EdgeL{9}{10}{a.on}		
+	\EdgeL{10}{11}{b.off}
+	\EdgeL{11}{12}{a.off}
+	\EdgeL{12}{9}{b.on}		
+	\EdgeL{11}{15}{b.on}	
+	\EdgeL{15}{11}{b.off}		
+	\EdgeL{15}{16}{a.off}
+	\EdgeL{16}{13}{b.off}
+	\EdgeL{13}{14}{a.on}
+	\EdgeL{14}{15}{b.on}		
 \end{VCPicture}
 }
 	\caption{Original Plant}
@@ -135,22 +136,23 @@ Our approach simplifies the specification semantically, reducing the relevant be
 \State[10]{(0.25,1.5)}{10}	
 \State[11]{(2.5,1)}{11}
 \State[12]{(0.25,0.5)}{12}
-\State[13]{(-3.5,1)}{13} 
+\State[13]{(-4,1.2)}{13} 
 \Initial[w]{0}
 %\EdgeL{init}{init_e}{\overline{x_1 x_2}}
-\ArcL{0}{5}{y}
-\ArcR{1}{5}{\overline{b}}
-\ArcR{5}{6}{a}
-\ArcR{6}{7}{b}
-\ArcR{7}{3}{\overline{b}}		
-\ArcR{3}{4}{\overline{a}}
-\ArcR{4}{1}{b}		
-\ArcR{0}{13}{\overline{y}}
-\ArcR{13}{9}{b}	
-\ArcL{9}{10}{a}		
-\ArcL{10}{11}{\overline{b}}
-\ArcL{11}{12}{\overline{a}}
-\ArcL{12}{9}{b}		
+\ArcL{0}{5}{y.on}
+\ArcR{0}{13}{y.off}
+\ArcR{13}{9}{b.on}	
+\ForthBackOffset
+\EdgeR{1}{5}{b.off}
+\EdgeR{5}{6}{a.on}
+\EdgeR{6}{7}{b.on}
+\EdgeR{7}{3}{b.off}		
+\EdgeR{3}{4}{a.off}
+\EdgeR{4}{1}{b.on}		
+\EdgeL{9}{10}{a.on}		
+\EdgeL{10}{11}{b.off}
+\EdgeL{11}{12}{a.off}
+\EdgeL{12}{9}{b.on}		
 	\end{VCPicture}
 }
 	\caption{Behavior minimization}
@@ -162,31 +164,32 @@ Our approach simplifies the specification semantically, reducing the relevant be
 	\SmallPicture
 	%\ShowFrame
 	\VCDraw{
-		\begin{VCPicture}{(-5,2.5)(4,7.5)}
-	\State[0]{(-5,4)}{0}		
+		\begin{VCPicture}{(-5,3)(4,7)}
+	\State[0]{(-5.5,3.5)}{0}		
 \State[1]{(-3.5,6.5)}{1}
 \State[2]{(-0.5,7)}{2}	
 \State[3]{(2.5,6.5)}{3}
 \State[4]{(-0.5,6)}{4}
-\State[5]{(-3.5,4)}{5} 
-\State[6]{(-0.5,4.5)}{6} 
-\State[7]{(2.5,4)}{7}			
-\State[8]{(-0.5,3.5)}{8}	
+\State[5]{(-3.5,3.5)}{5} 
+\State[6]{(-0.5,4)}{6} 
+\State[7]{(2.5,3.5)}{7}			
+\State[8]{(-0.5,3)}{8}	
 \Initial[w]{0}
 %\EdgeL{init}{init_e}{\overline{x_1 x_2}}
-\EdgeL{0}{5}{y}
-\ArcL{5}{1}{b}	
-\ArcL{1}{5}{\overline{b}}
-\ArcL{1}{2}{a}		
-\ArcL{2}{3}{\overline{b}}
-\ArcL{3}{4}{\overline{a}}
-\ArcL{4}{1}{b}		
-\ArcL{3}{7}{b}	
-\ArcL{7}{3}{\overline{b}}		
-\ArcL{7}{8}{\overline{a}}
-\ArcL{8}{5}{\overline{b}}
-\ArcL{5}{6}{a}
-\ArcL{6}{7}{b}	
+\EdgeL{0}{5}{y.on}
+\ForthBackOffset
+\EdgeL{5}{1}{b.on}	
+\EdgeL[.55]{1}{5}{b.off}
+\EdgeL{1}{2}{a.on}		
+\EdgeL{2}{3}{b.off}
+\EdgeL{3}{4}{a.off}
+\EdgeL{4}{1}{b.on}		
+\EdgeL{3}{7}{b.on}	
+\EdgeL{7}{3}{b.off}		
+\EdgeL{7}{8}{a.off}
+\EdgeL{8}{5}{b.off}
+\EdgeL{5}{6}{a.on}
+\EdgeL{6}{7}{b.on}	
 		\end{VCPicture}
 	}
 	\caption{Realizable version strategy}
@@ -198,23 +201,23 @@ Our approach simplifies the specification semantically, reducing the relevant be
 	\SmallPicture
 	%\ShowFrame
 	\VCDraw{
-	\begin{VCPicture}{(-5,2.5)(4,6)}
-		\State[0]{(-5,4)}{0}		
+	\begin{VCPicture}{(-5,3)(4,6)}
+		\State[0]{(-5.5,3.5)}{0}		
 		\State[1]{(-3.5,5.5)}{1}
 		\State[3]{(2.5,5.5)}{3}
 		\State[4]{(-0.5,6)}{4}
-		\State[5]{(-3.5,4)}{5} 
-		\State[6]{(-0.5,3.5)}{6} 
-		\State[7]{(2.5,4)}{7}			
+		\State[5]{(-3.5,3.5)}{5} 
+		\State[6]{(-0.5,3)}{6} 
+		\State[7]{(2.5,3.5)}{7}			
 		\Initial[w]{0}
 		%\EdgeL{init}{init_e}{\overline{x_1 x_2}}
-		\EdgeL{0}{5}{y}
-		\ArcR{1}{5}{\overline{b}}
-		\ArcR{5}{6}{a}
-		\ArcR{6}{7}{b}
-		\ArcR{7}{3}{\overline{b}}		
-		\ArcR{3}{4}{\overline{a}}
-		\ArcR{4}{1}{b}		
+		\EdgeL{0}{5}{y.on}
+		\EdgeR{1}{5}{b.off}
+		\EdgeR{5}{6}{a.on}
+		\EdgeR{6}{7}{b.on}
+		\EdgeR{7}{3}{b.off}		
+		\EdgeR{3}{4}{a.off}
+		\EdgeR{4}{1}{b.on}		
 	\end{VCPicture}
 }
 	\caption{Composition of the strategy with the minimization}
