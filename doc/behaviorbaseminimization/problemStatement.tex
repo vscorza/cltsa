@@ -15,7 +15,7 @@ $G(\mathcal{I}_M)$.
 \end{definition}
 
 
-Now define the Alternating Sub-LTS relation to capture a notion of minimization that preserves unrealizability. Such a relation preserves counter strategies and forms a semi-lattice that can be used to incrementally minimize a unrealizable specification. 
+Now we define the Alternating Sub-LTS relation to capture a notion of minimization that preserves unrealizability. Such a relation preserves counter strategies and forms a semi-lattice that can be used to incrementally minimize an unrealizable specification. 
 
 %\textbf{
 %CREO QUE HAY QUE BORRAR ESTE PARRAFO
@@ -69,7 +69,7 @@ These restrictions consider controllability.
 Given $M = (S_M, \Sigma, \Delta_M, s_{M_0})$ and
  $P =$ $(S_P,\Sigma,\Delta_P,s_{P_0})$ LTSs, 
 where $\Sigma =\mathcal{C}\cup \mathcal{U}$ and $\mathcal{C}\cap
-\mathcal{U}=\emptyset$. We say that $P$ is a Alternating
+\mathcal{U}=\emptyset$. We say that $P$ is an Alternating
  Sub-LTS of $M$, noted as $P \sublts_{\mathcal{C},\mathcal{U}} M$, if  $P \subseteq M$  and $\forall s \in S_{P}$ the following holds:
  \begin{itemize}
 \item If $s$ is a pure controllable state then $\Delta_{P}(s) \cap \mathcal{C} = \Delta_{M}(s) \cap \mathcal{C} $
@@ -86,9 +86,9 @@ We shall omit $\mathcal{C}$ and $\mathcal{U}$ in $\sublts_{\mathcal{C},\mathcal{
 The definition above introduces  restrictions on transitions of Alternating Sub-LTSs. 
 First, in states where all outgoing transitions are controllable, all transitions must be preserved. 
 If this were not the case, then a counter strategy in $P$ with $P \sublts M$ may not work in $M$ because the controller in $M$ has more controllable actions that the counter strategy in $P$ does not account for. 
-The second restriction states that in all states where at least one uncontrollable action exists, at least one uncontrollable action must be preserved. This restriction ensures that in pure uncontrollable states, not new deadlock in $P$ is introduced. Otherwise an environment strategy could win by forcing that deadlock in $P$, even when the same strategy would not win in $M$ at that state. In mixed states, removing all uncontrolled transitions would allow a counter strategy in $P$ to force the controller to move (as not doing so would result in a deadlock). However a strategy in $P$ exploiting this would not work in $M$ because reaching the same state, now a mixed state, the controller may defeat the same environment strategy by not picking any controlled action since the environment is forced to progress in this case. 
+The second restriction states that in all states where at least one uncontrollable action exists, at least one uncontrollable action must be preserved. This restriction ensures that in pure uncontrollable states, no new deadlock in $P$ is introduced. Otherwise an environment strategy could win by forcing that deadlock in $P$, even when the same strategy would not win in $M$ at that state. In mixed states, removing all uncontrolled transitions would allow a counter strategy in $P$ to force the controller to move (as not doing so would result in a deadlock). However a strategy in $P$ exploiting this would not work in $M$ because reaching the same state, now a mixed state, the controller may defeat the same environment strategy by not picking any controlled action since the environment is forced to progress in this case. 
 
-The justification behind the definition of Alternating Sub-LTSs is that for two unrealizable control problems $\mathcal{I} = <E, \mathcal{C}, \varphi>$ and $\mathcal{I'} = <E', \mathcal{C}, \varphi>$ with $E' \sublts E$ any counter strategy for the game $G(\mathcal{I'})$ is also a counter strategy for $G(\mathcal{I})$. We first introduce a corresponding notion of Alternating Sub-Game and then use it to show that the Alternating Sub-LTS relation preserves counter strategies.  
+The justification behind the definition of Alternating Sub-LTSs is that, for two unrealizable control problems $\mathcal{I} = <E, \mathcal{C}, \varphi>$ and $\mathcal{I'} = <E', \mathcal{C}, \varphi>$ with $E' \sublts E$, any counter strategy for the game $G(\mathcal{I'})$ is also a counter strategy for $G(\mathcal{I})$. We first introduce a corresponding notion of Alternating Sub-Game and then use it to state that the Alternating Sub-LTS relation preserves counter strategies.  
 
 \begin{definition}\label{def:sub-game}\emph{(Sub-Game)}
 Given $G = (S_g, \Gamma^{-},$ $\Gamma^{+},$ $s_{g_{0}}$$,$ $\varphi)$ and
@@ -153,7 +153,7 @@ Given a unrealizable control problem $\mathcal{I} = <E, \mathcal{C}, \varphi>$, 
 
 Suppose that a procedure reaches a minimal Sub-LTS by looking for candidates that satisfy the Alternating Sub-LTS property starting with $E$ and stopping once all its closest neighbors (w.r.t. to the Alternating Sub-LTS property) render the problem realizable (\emph{stopping criteria}). Such a procedure is 
 complete w.r.t to the problem statement because
-if a solution for the problem exists it can progressively,
+if a solution for the problem exists it can progressively
 reduce it to a minimal $E'$, lemma ~\ref{def:induction-preserves} proves that the \emph{stopping criteria}
 implies minimality. If the problem has multiple solutions the procedure
 will yield one of those.

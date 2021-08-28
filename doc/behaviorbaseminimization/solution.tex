@@ -1,6 +1,6 @@
 \section{Behavior Minimization Procedures}\label{sect:solution}
 
-The strategy to find a minimal non realizable control problem is to incrementally remove transitions preserving an alternating Sub-LTS relation until a local minimum is reached.  A minimal non realizable control problem is reached when any further reduction of the current Sub-LTS renders the problem realizable.
+The strategy to find a minimal unrealizable control problem is to incrementally remove transitions preserving an alternating Sub-LTS relation until a local minimum is reached.  A minimal unrealizable control problem is reached when any further reduction of the current Sub-LTS renders the problem realizable.
 The first procedure explores the semi-lattice defined by Alternating Sub-LTS relation starting with the original automaton and moving downwards by performing minimal reductions. 
   
 \begin{figure}[bt]
@@ -157,8 +157,8 @@ presented in figure \ref{fig:dfs-code}. The algorithm first removes all controll
 mixed states \listRef{A}, this step can be performed since it
 can be interpreted as the successive removals of controllable 
 transitions with each satisfying the Alternating Sub-LTS definition 
-and preserving non realizability because if it was non realizable
-for the mixed state it will remain non realizable when the controllable transitions are removed since int the game built from
+and preserving unrealizability because if it was unrealizable
+for the mixed state it will remain unrealizable when the controllable transitions are removed since in the game built from
 the automaton at each mixed state the environment
 wins the race condition, always picking the next move when allowed.
 The next step initializes the set of 
@@ -169,7 +169,7 @@ to be removed at each iteration \texttt{to\_remove} at
 removed along our search down the space of
 Alternating Sub-LTSs for $E$.  The exploration
 will continue until the candidate set is empty.
-At each cycle starting at \listRef{D} the set is updated \listRef{E} by 
+At each cycle starting at \listRef{D} the set is updated (\listRef{E}) by 
 removing those transitions that were already removed by the reduction
 at \listRef{F} or because they would induce a deadlock 
 ($d_{out}(E', t.from) == 1$ checks if there is only one
@@ -178,7 +178,7 @@ The
 reduction, at \listRef{F}, looks for the closest
 Alternating Sub-LTS obtained after removing 
 transitions in \texttt{to\_remove} from $E$.
-Then it checks for realizability \listRef{G}.  If the control problem is non
+Then it checks for realizability at \listRef{G}.  If the control problem is non
 realizable the candidate set and the last 
 Alternating Sub-LTS $E'$ are updated (since further minimization is 
 possible), otherwise a one step backtrack
@@ -187,7 +187,7 @@ the effective set \texttt{to\_remove} \listRef{H}.
 This is actually the backtracking point where the algorithm
 shifts the search sideways in the semi-lattice instead of downwards.
 Once the candidate set has been completely explored
-the last non realizability preserving LTS $E'$ is
+the last unrealizability preserving LTS $E'$ is
 returned as a minimal Alternating Sub-LTS
 for $E$ and $\mathcal{C}$ \listRef{I}.
 Notice that
@@ -197,7 +197,7 @@ the transition could have been removed further down the semi lattice?  Removing 
 $E_{new}$ accordingly would render the control problem realizable.  Suppose that
 the search continued preserving $t$ and removing other candidates
 $t_1, \ldots, t_n$ from $E'$ getting the Alternating Sub-LTS
-$E_{1,\ldots,n}$ that still contains $t$ while preserving non realizability.
+$E_{1,\ldots,n}$ that still contains $t$ while preserving unrealizability.
 If we were to remove $t$ from $E_{1,\ldots,n}$ after reducing it
 to the closest Alternating Sub-LTS we would get a new LTS
 $E'_{new}$ that can be Alternating Sub-LTS for $E_{new}$, and from lemma
@@ -214,7 +214,7 @@ The first optimization transforms the candidate set $\mathcal{T}_u$
 into a list and orders it according to the distance of its elements 
 with respect to the initial state.  The idea is to try and cut
 as aggressively as possible first and see if a big cut still
-preserves the non realizability cause.  The second optimization
+preserves the unrealizability cause.  The second optimization
 looks for non controllable strips within the  input automaton
 $E$, that is, sequences of non controllable actions without branches.
 For each of these sequences only one action is
@@ -222,7 +222,5 @@ added to $\mathcal{T}_u$ since, if removed from $E'$
 when looking for a minimal sub LTS all the others have to be removed
 as well to preserve alternation.
 
-
-
-The second procedure uses the Delta Debugging technique presented in ~\cite{DBLP:journals/tse/ZellerH02} to accelerate the search space exploration. Instead of reducing the automaton by applying an atomic reduction at a time Delta Debugging tries to achieve a minimal diagnosis by partitioning the problem $\Delta$ into $n$ uniform subsets ($\Delta = \bigcup_{i=1}^n \Delta_i $) and then it first checks its elements $\Delta_i$ for a non realizable smaller case, if none is found it proceeds by looking at the complement $\Delta \setminus \Delta_i$ of each element in the partition. If no smaller candidate was found it increases the granularity by updating $n$ as $max(2n,|\Delta|)$. This cycle is repeated until $n$ can not be further increased ($n \geq |\Delta|$). 
-In our application of Delta Debugging the set $\Delta$ is the set of non controllable transitions in the original plant. Instead of descending regularly down the semi lattice, Delta Debugging tries to jump further down by removing a subset of transitions from the current candidate. We can briefly prove that the application of the technique is sound since Delta Debugging ensures 1-minimality, i.e. that removing any single element from the resulting minmization breaks non realizability which in conjunction with lemma ~\ref{def:induction-preserves} implies minimality.
+The second procedure follows a similar approach but uses the Delta Debugging technique presented in ~\cite{DBLP:journals/tse/ZellerH02} to accelerate the search space exploration. Instead of reducing the automaton by applying an atomic reduction at a time Delta Debugging tries to achieve a minimal diagnosis by partitioning the problem $\Delta$ into $n$ uniform subsets ($\Delta = \bigcup_{i=1}^n \Delta_i $) and then it first checks its elements $\Delta_i$ for a unrealizable smaller case, if none is found it proceeds by looking at the complement $\Delta \setminus \Delta_i$ of each element in the partition. If no smaller candidate was found it increases the granularity by updating $n$ as $max(2n,|\Delta|)$. This cycle is repeated until $n$ can not be further increased ($n \geq |\Delta|$). 
+In our application of Delta Debugging the set $\Delta$ is the set of non controllable transitions in the original plant. Instead of descending regularly down the semi lattice, Delta Debugging tries to jump further down by removing a subset of transitions from the current candidate. We can briefly prove that the application of the technique is sound since Delta Debugging ensures 1-minimality, i.e. that removing any single element from the resulting minimization breaks unrealizability which in conjunction with lemma ~\ref{def:induction-preserves} implies minimality.

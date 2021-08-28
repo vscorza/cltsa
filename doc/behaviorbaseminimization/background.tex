@@ -2,7 +2,16 @@
 
 
 We model safety assumptions on the environment and goals for the system as composition of Labelled Transition Systems (LTS). 
-%
+\begin{definition}
+	\label{def:LTS} \emph{(Labelled Transition Systems)} 
+	A \emph{Labelled Transition System} (LTS) is $E =  (S, \Sigma, \Delta, s_0)$, where $S$ is a finite set of states, $\Sigma \subseteq Act$ is its {\em communicating alphabet}, $\Delta \subseteq (S \times \Sigma \times S)$ is a transition relation, and $s_0 \in S$ is the initial state.  We denote $\Delta(s)=\set{\act~|~(s,\act,s') \in \Delta}$. 
+	An LTS is deterministic if $(s,\act,s')$ and $(s,\act,s'')$ are in $\Delta$ implies $s'=s''$.
+	An execution of $E$ is a word $\varepsilon=s_0, \act_0, s_1, \ldots$ where $(s_i, \act_i, s_{i+1}) \in \Delta$. 
+	A word $\pi$ is a trace (induced by $\varepsilon$) of $E$ if its the result of removing every $s_i$ from an execution $\varepsilon$ of $E$. 
+	We denote the set of infinite traces of $E$ by $\traces(E)$. 
+\end{definition}
+
+
 \begin{definition}\label{def:parallelComposition}\emph{(Parallel Composition)}
 	Let $P=(S_P,\Sigma_P,\Delta_P,s_{0_P})$ y $Q=(S_Q,\Sigma_Q,\Delta_Q,s_{0_Q})$ be two LTSs, then 
 	the parallel composition $P\|Q$ is defined as $P \| Q = (S_P \times S_Q, \Sigma_P \cup \Sigma_Q, \Delta_{P\|Q}, (s_{0_P}, s_{0_Q}))$
@@ -10,7 +19,7 @@ We model safety assumptions on the environment and goals for the system as compo
 	\small
 	\begin{gather*}
 	(s,\ell,t) \in \Delta_{P} \wedge a \not\in \Sigma_Q \Rightarrow ((s,s'),\ell,(t,s')) \in \Delta_{P\|Q}\\
-	(s',\ell,t') \in \Delta_{Q} \wedge \ell \not\in \Sigma_P \Rightarrow ((s,s'),\ell,(s,t')) \in Delta_{P\|Q}\\
+	(s',\ell,t') \in \Delta_{Q} \wedge \ell \not\in \Sigma_P \Rightarrow ((s,s'),\ell,(s,t')) \in \Delta_{P\|Q}\\
 	(s,\ell,t) \in \Delta_{P} \wedge (s',\ell,t') \in \Delta_{Q} \Rightarrow ((s,s'),\ell,(t,t')) \in \Delta_{P\|Q} 
 	\end{gather*}
 	\normalsize
@@ -21,7 +30,7 @@ The distinction between what an LTS can control and what it can monitor is enfor
 Intuitively, a controller does not block the actions that it does not control, and dually, the environment does not restrict controllable actions. 
 
 \begin{definition} \label{def:IALTS} \emph{(Legal LTS)}
-	Given LTSs $C = (S_C, \Sigma$, $\Delta_C$, $s_{C_0})$ and $E = (S_E,\Sigma,\Delta_E,s_{E_0})$, where $\Sigma$ is partitioned into actions controlled and monitored (non controllable) by $C$ ($\Sigma=\mathcal{C} \; \cup \;\mathcal{U}$), we say that $C$ is a legal LTS for $E$ if for all $(s_E,s_C) \in E\|C$ it holds that
+	Given LTSs $C = (S_C, \Sigma_C$, $\Delta_C$, $s_{0_C})$ and $E = (S_E,\Sigma_E,\Delta_E,s_{0_E})$, where $\Sigma$ is partitioned into actions controlled and monitored (non controllable) by $C$ ($\Sigma=\mathcal{C} \; \cup \;\mathcal{U}$), we say that $C$ is a legal LTS for $E$ if for all $(s_E,s_C) \in E\|C$ it holds that
 	$\Delta_{E}(s_E)\cap \mathcal{C} \supseteq \Delta_{C}(s_C)\cap \mathcal{C}$ and also that  $\Delta_{E}(s_E)\cap \mathcal{U} \subseteq \Delta_{C}(s_C)\cap \mathcal{U}$.
 	
 \end{definition}
@@ -146,14 +155,14 @@ We now formally define the control problem for \gr formulas.
 \end{definition}
 
 
-\begin{definition}\label{def:consistency}\emph{(Consistency under (Non)Controllability and Winning (Counter)Strategy)}
-	A finite or infinite play $p= s_0,s_1,\ldots$ is consistent under controllability if for every $n$ we have $s_{n+1} \in \delta(\omega_n,s_n)$, where $\omega_{i+1}=u(\omega_i,s_{i+1})$ for all
-	$i \geq 0$. A strategy $(\delta, u)$ for controller from state $s$ is 
-	winning if every maximal play starting in $s$ and consistent under controllability with $(\delta, u)$ is infinite and remains within $\varphi$.  We say that the controller wins the game $G$ if it has a winning strategy from the initial state. For the non controllable case,
-	a finite or infinite play $p= s_0,s_1,\ldots$ is consistent under non-controllability if for every $n$ we have $s_{n+1} \in \kappa(\nabla_n,s_n)$, where $\nabla_{i+1}=v(\nabla_i,s_{i+1})$ for all
-	$i \geq 0$. A strategy $(\kappa, v)$ for environment from state $s$ is 
-	winning if every maximal play starting in $s$ and consistent under non-controllability with $(\kappa, v)$ is infinite and exits $\varphi$ at some point.  We say that the environment wins the game $G$ if it has a winning strategy from the initial state.
-\end{definition}
+%\begin{definition}\label{def:consistency}\emph{(Consistency under (Non)Controllability and Winning (Counter)Strategy)}
+%	A finite or infinite play $p= s_0,s_1,\ldots$ is consistent under controllability if for every $n$ we have $s_{n+1} \in \delta(\omega_n,s_n)$, where $\omega_{i+1}=u(\omega_i,s_{i+1})$ for all
+%	$i \geq 0$. A strategy $(\delta, u)$ for controller from state $s$ is 
+%	winning if every maximal play starting in $s$ and consistent under controllability with $(\delta, u)$ is infinite and remains within $\varphi$.  We say that the controller wins the game $G$ if it has a winning strategy from the initial state. For the non controllable case,
+%	a finite or infinite play $p= s_0,s_1,\ldots$ is consistent under non-controllability if for every $n$ we have $s_{n+1} \in \kappa(\nabla_n,s_n)$, where $\nabla_{i+1}=v(\nabla_i,s_{i+1})$ for all
+%	$i \geq 0$. A strategy $(\kappa, v)$ for environment from state $s$ is 
+%	winning if every maximal play starting in $s$ and consistent under non-controllability with $(\kappa, v)$ is infinite and exits $\varphi$ at some point.  We say that the environment wins the game $G$ if it has a winning strategy from the initial state.
+%\end{definition}
 
 \begin{definition}\label{def:generalized-reactivity}\emph{(Generalized Reactivity(1))}
 	Given an infinite sequence of states $p$, let $inf(p)$ denote the states that occur infinitely often in $p$, let $\phi_1,\ldots,\phi_n$ and $\gamma_1,\ldots,\gamma_m$ be subsets of $S$.  Let $gr((\phi_1,\ldots,\phi_n),(\gamma_1,\ldots,\gamma_m))$ denote the set of infinite sequences $p$ such that either for some $i$ we have $inf(p) \cap \phi_i = \emptyset$ or for all $j$ we have $inf(p)\cap \gamma_j \neq \emptyset$. A GR(1) game is a game where the winning condition $\varphi$ is $gr((\phi_1,\ldots,\phi_n),(\gamma_1,\ldots,\gamma_m))$.
