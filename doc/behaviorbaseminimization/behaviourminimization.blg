@@ -6,8 +6,6 @@ Reallocated singl_function (elt_size=4) to 100 items from 50.
 Reallocated singl_function (elt_size=4) to 100 items from 50.
 Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
 Database file #1: /home/mariano/git_repo/henos/henos-automata/doc/behaviorbaseminimization/bibliography.bib
-Warning--I didn't find a database entry for "Hoare"
-Warning--I didn't find a database entry for "Milner"
 Reallocated singl_function (elt_size=4) to 100 items from 50.
 Warning--no key, author in SYNTCOMP
 Warning--no author, editor, organization, or key in SYNTCOMP
@@ -23,6 +21,8 @@ Warning--no author, editor, organization, or key in SYNTCOMP
 Warning--empty organization in SYNTCOMP
 Warning--empty organization in SYNTCOMP
 Warning--empty address in DBLP:conf/fmcad/AlurMT13
+Warning--empty publisher in brace1990efficient
+Warning--empty address in brace1990efficient
 Warning--empty publisher in DBLP:conf/tacas/CavezzaA17
 Warning--empty address in DBLP:conf/tacas/CavezzaA17
 Warning--empty address in DBLP:conf/emsoft/CernyGHRT12
@@ -40,8 +40,6 @@ Warning--empty address in DBLP:conf/icra/KimF13
 Warning--empty address in DBLP:conf/icra/KimFS12
 Warning--empty address in DBLP:conf/fmcad/KonighoferHB09
 Warning--empty address in DBLP:conf/sigsoft/KuventMR17
-Warning--empty address in Letier:2013:RMS
-Warning--page numbers missing in both pages and numpages fields in Letier:2013:RMS
 Warning--empty address in DBLP:conf/memocode/LiDS11
 Warning--empty address in DBLP:conf/sigsoft/MaozR16
 Warning--empty publisher in maoz2019symbolic
@@ -52,45 +50,45 @@ Warning--empty address in DBLP:conf/vmcai/PitermanPS06
 Warning--empty address in pnueli1985transition
 Warning--empty address in DBLP:conf/popl/PnueliR89
 Warning--page numbers missing in both pages and numpages fields in DBLP:journals/corr/abs-2001-07678
-You've used 50 entries,
+You've used 46 entries,
             5959 wiz_defined-function locations,
-            1949 strings with 33269 characters,
-and the built_in function-call counts, 62826 in all, are:
-= -- 7797
-> -- 2081
+            1910 strings with 32486 characters,
+and the built_in function-call counts, 57964 in all, are:
+= -- 7119
+> -- 1953
 < -- 0
-+ -- 682
-- -- 761
-* -- 4461
-:= -- 6219
-add.period$ -- 250
-call.type$ -- 50
-change.case$ -- 329
-chr.to.int$ -- 48
-cite$ -- 93
-duplicate$ -- 5648
-empty$ -- 3940
-format.name$ -- 880
-if$ -- 14975
++ -- 644
+- -- 698
+* -- 4143
+:= -- 5744
+add.period$ -- 230
+call.type$ -- 46
+change.case$ -- 306
+chr.to.int$ -- 44
+cite$ -- 89
+duplicate$ -- 5221
+empty$ -- 3639
+format.name$ -- 826
+if$ -- 13794
 int.to.chr$ -- 4
 int.to.str$ -- 1
-missing$ -- 205
-newline$ -- 548
-num.names$ -- 415
-pop$ -- 1943
+missing$ -- 188
+newline$ -- 504
+num.names$ -- 381
+pop$ -- 1816
 preamble$ -- 1
-purify$ -- 774
+purify$ -- 715
 quote$ -- 0
-skip$ -- 2094
+skip$ -- 1946
 stack$ -- 0
-substring$ -- 5140
-swap$ -- 648
-text.length$ -- 78
+substring$ -- 4705
+swap$ -- 598
+text.length$ -- 52
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 1233
+type$ -- 1155
 warning$ -- 39
-while$ -- 447
+while$ -- 404
 width$ -- 0
-write$ -- 1042
-(There were 41 warnings)
+write$ -- 959
+(There were 39 warnings)

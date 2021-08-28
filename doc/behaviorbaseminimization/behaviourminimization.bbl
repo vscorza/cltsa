@@ -2,7 +2,7 @@
 %%% Do NOT edit. File created by BibTeX with style
 %%% ACM-Reference-Format-Journals [18-Jan-2012].
 
-\begin{thebibliography}{50}
+\begin{thebibliography}{46}
 
 %%% ====================================================================
 %%% NOTE TO THE USER: you can override these defaults by providing
@@ -111,6 +111,18 @@
 \urldef\tempurl%
 \url{https://doi.org/10.1016/j.jcss.2011.08.007}
 \showDOI{\tempurl}
+
+
+\bibitem[\protect\citeauthoryear{Brace, Rudell, and Bryant}{Brace
+  et~al\mbox{.}}{1990}]%
+        {brace1990efficient}
+\bibfield{author}{\bibinfo{person}{Karl~S Brace}, \bibinfo{person}{Richard~L
+  Rudell}, {and} \bibinfo{person}{Randal~E Bryant}.}
+  \bibinfo{year}{1990}\natexlab{}.
+\newblock \showarticletitle{Efficient implementation of a BDD package}. In
+  \bibinfo{booktitle}{\emph{27th ACM/IEEE design automation conference}}. IEEE,
+  \bibinfo{pages}{40--45}.
+\newblock
 
 
 \bibitem[\protect\citeauthoryear{Cavezza and Alrajeh}{Cavezza and
@@ -338,20 +350,6 @@
 \showDOI{\tempurl}
 
 
-\bibitem[\protect\citeauthoryear{Harel}{Harel}{1987}]%
-        {Harel:1987}
-\bibfield{author}{\bibinfo{person}{David Harel}.}
-  \bibinfo{year}{1987}\natexlab{}.
-\newblock \showarticletitle{Statecharts: {A} Visual Formalism for Complex
-  Systems}.
-\newblock \bibinfo{journal}{\emph{Sci. Comput. Program.}} \bibinfo{volume}{8},
-  \bibinfo{number}{3} (\bibinfo{year}{1987}), \bibinfo{pages}{231--274}.
-\newblock
-\urldef\tempurl%
-\url{https://doi.org/10.1016/0167-6423(87)90035-9}
-\showDOI{\tempurl}
-
-
 \bibitem[\protect\citeauthoryear{Harel and Pnueli}{Harel and Pnueli}{1985}]%
         {harel1985development}
 \bibfield{author}{\bibinfo{person}{David Harel} {and} \bibinfo{person}{Amir
@@ -375,21 +373,6 @@
 \showDOI{\tempurl}
 
 
-\bibitem[\protect\citeauthoryear{Hoare}{Hoare}{1983}]%
-        {Hoare:1983}
-\bibfield{author}{\bibinfo{person}{C.~A.~R. Hoare}.}
-  \bibinfo{year}{1983}\natexlab{}.
-\newblock \showarticletitle{Communicating Sequential Processes}.
-\newblock \bibinfo{journal}{\emph{Commun. ACM}} \bibinfo{volume}{26},
-  \bibinfo{number}{1} (\bibinfo{date}{Jan.} \bibinfo{year}{1983}),
-  \bibinfo{pages}{100--106}.
-\newblock
-\showISSN{0001-0782}
-\urldef\tempurl%
-\url{https://doi.org/10.1145/357980.358021}
-\showDOI{\tempurl}
-
-
 \bibitem[\protect\citeauthoryear{Jackson}{Jackson}{1995}]%
         {Jackson:1995}
 \bibfield{author}{\bibinfo{person}{Michael Jackson}.}
@@ -403,21 +386,6 @@
 \showISBNx{0-89791-708-1}
 \urldef\tempurl%
 \url{https://doi.org/10.1145/225014.225041}
-\showDOI{\tempurl}
-
-
-\bibitem[\protect\citeauthoryear{Keller}{Keller}{1976}]%
-        {Keller:1976}
-\bibfield{author}{\bibinfo{person}{Robert~M. Keller}.}
-  \bibinfo{year}{1976}\natexlab{}.
-\newblock \showarticletitle{Formal verification of parallel programs}.
-\newblock \bibinfo{journal}{\emph{Commun. ACM}}  \bibinfo{volume}{19}
-  (\bibinfo{date}{July} \bibinfo{year}{1976}), \bibinfo{pages}{371--384}.
-\newblock
-Issue 7.
-\showISSN{0001-0782}
-\urldef\tempurl%
-\url{https://doi.org/10.1145/360248.360251}
 \showDOI{\tempurl}
 
 
@@ -532,17 +500,6 @@ Issue 7.
 \showDOI{\tempurl}
 
 
-\bibitem[\protect\citeauthoryear{Letier and Heaven}{Letier and Heaven}{2013}]%
-        {Letier:2013:RMS}
-\bibfield{author}{\bibinfo{person}{Emmanuel Letier} {and}
-  \bibinfo{person}{William Heaven}.} \bibinfo{year}{2013}\natexlab{}.
-\newblock \showarticletitle{{Requirements Modelling by Synthesis of Deontic
-  Input-output Automata}}. In \bibinfo{booktitle}{\emph{Proc. of the 2013 Int.
-  Conf. on Software Engineering}} \emph{(\bibinfo{series}{ICSE '13})}.
-  \bibinfo{publisher}{IEEE Press}.
-\newblock
-
-
 \bibitem[\protect\citeauthoryear{Letier and van Lamsweerde}{Letier and van
   Lamsweerde}{2002}]%
         {Letier:2002}
@@ -654,22 +611,6 @@ Issue 7.
 \newblock \bibinfo{journal}{\emph{Kr}}  \bibinfo{volume}{92}
   (\bibinfo{year}{1992}), \bibinfo{pages}{103--114}.
 \newblock
-
-
-\bibitem[\protect\citeauthoryear{Pistore, Barbon, Bertoli, Shaparau, and
-  Traverso}{Pistore et~al\mbox{.}}{2004}]%
-        {Pistore:2004:PMW}
-\bibfield{author}{\bibinfo{person}{M. Pistore}, \bibinfo{person}{F. Barbon},
-  \bibinfo{person}{P. Bertoli}, \bibinfo{person}{D. Shaparau}, {and}
-  \bibinfo{person}{P. Traverso}.} \bibinfo{year}{2004}\natexlab{}.
-\newblock \showarticletitle{Planning and Monitoring Web Service Composition}.
-  In \bibinfo{booktitle}{\emph{Artificial Intelligence: Methodology, Systems,
-  and Applications}}, \bibfield{editor}{\bibinfo{person}{Christoph Bussler}
-  {and} \bibinfo{person}{Dieter Fensel}} (Eds.). \bibinfo{publisher}{Springer
-  Berlin Heidelberg}, \bibinfo{address}{Berlin, Heidelberg},
-  \bibinfo{pages}{106--115}.
-\newblock
-\showISBNx{978-3-540-30106-6}
 
 
 \bibitem[\protect\citeauthoryear{Piterman, Pnueli, and Sa'ar}{Piterman
