@@ -4,72 +4,11 @@ As stated in the in section ~\ref{sec:introduction}, various approaches to provi
  
 The approach presented in this paper differs feedback for specifications described using automata with an asynchronous execution semantics while in \cite{DBLP:conf/fmcad/KonighoferHB09} the environment and system execute synchronously (i.e., in lockstep). It is possible to model the same problem in one setting or the other, or translate specifications from one to another, however problems in different domains can  be more naturally described into one or the other setting.
 
-However, a more fundamental difference between this work and that of \cite{DBLP:conf/fmcad/KonighoferHB09} is that here we minimize behavior rather than specification. Reducing an LTL specification by removing transition means that there are more behaviors that the environment can exhibit. Indeed, an engineer inspecting a winning environment strategy for a reduced specification as in \cite{DBLP:conf/fmcad/KonighoferHB09} may be reasoning about behavior that is not allowed in the original specification.  It can be characterized as a syntactic minimization, where the purpose is to help the engineer understand the cause of unrealizability by looking at the specification text. In particular a portion of the safety LTL formulae describing the behavior of the plant is removed. For instance, going back to the motivanting example, this approach removes $\rho_e$, since it is unnecessary for the environment to swap $x_2$ regularly in order to falsify the goal.  The syntactic minimization yields the automaton depicted in Fig. ~\ref{fig:konig_original_plant_k_2} which is, in fact, more complex in terms of its explicit behavior. 
-It should help the engineer to focus on a smaller set of formulae by getting rid of the irrelevant element $\rho_e$ while diagnosing the unrealizability cause, in this example being that assumption $\varphi_e$ is too weak. 
-Our approach is designed to simplify the semantic view of the specification, producing the automaton depicted in Fig. ~\ref{fig:konig_original_plant_c_2}.
-Our approach simplifies the specification semantically instead, reducing the relevant behavior and showing that it is possible for the environment to avoid state 2 by never allowing $x_1$ and $x_2$ to happen simultaneously, while at the same time not restricting the system below its original capabilities.
-\begin{figure}[bt]
-	\centering
-	\SmallPicture
-	%\ShowFrame
-	\VCDraw{
-		\begin{VCPicture}{(-4,-2.8)(4,9.3)}
-			\SetEdgeLabelScale{1.4}
-			\State[0]{(-5,3)}{init}
-			\State[1]{(-2.5,3)}{init_e}		
-			\State[2]{(-1.5,6.3)}{0}
-			\State[3]{(1.5,7.8)}{1}
-			\State[4]{(4.5,6.3)}{2}
-			\State[5]{(1.5,4.8)}{3} 
-			\State[6]{(-1.5,-.3)}{4}			
-			\State[7]{(1.5,1.2)}{5}
-			\State[8]{(4.5,-.3)}{6}
-			\State[9]{(1.5,-1.8)}{7} 			  
-			\Initial[w]{init}
-			\LoopW{0}{}
-			\LoopN{1}{}
-			\LoopE{2}{}
-			\LoopS{3}{}				
-			\LoopW{4}{}
-			\LoopN{5}{}
-			\LoopE{6}{}
-			\LoopS{7}{}			
-			\EdgeL{init}{init_e}{\overline{x_1 x_2}}
-			\ArcL{init_e}{0}{y}
-			\ArcR{init_e}{4}{\overline{y}}	
-			\VArcR{arcangle=10,ncurv=.9}{0}{1}{}\LabelL[.5]{x_1 x_2}
-			\VArcR{arcangle=-55,ncurv=.9}{1}{0}{\overline{x_1 x_2}}
-			\VArcR{arcangle=10,ncurv=.9}{1}{2}{}\LabelL[.5]{\overline{x_2}}
-			\VArcR{arcangle=-55,ncurv=.9}{2}{1}{x_2}
-			\VArcR{arcangle=10,ncurv=.9}{2}{3}{}\LabelL[.5]{\overline{x_1}x_2}
-			\VArcR{arcangle=-55,ncurv=.9}{3}{2}{x_1\overline{x_2}}
-			\VArcR{arcangle=10,ncurv=.9}{3}{0}{}\LabelL[.5]{\overline{x_2}}
-			\VArcR{arcangle=-55,ncurv=.9}{0}{3}{x_2}
-			\VArcR{arcangle=10,ncurv=.9}{4}{5}{}\LabelL[.5]{x_1 x_2}
-			\VArcR{arcangle=-55,ncurv=.9}{5}{4}{\overline{x_1 x_2}}
-			\VArcR{arcangle=10,ncurv=.9}{5}{6}{}\LabelL[.5]{\overline{x_2}}
-			\VArcR{arcangle=-55,ncurv=.9}{6}{5}{x_2}
-			\VArcR{arcangle=10,ncurv=.9}{6}{7}{}\LabelL[.5]{\overline{x_1}x_2}
-			\VArcR{arcangle=-55,ncurv=.9}{7}{6}{x_1\overline{x_2}}
-			\VArcR{arcangle=10,ncurv=.9}{7}{4}{}\LabelL[.5]{\overline{x_2}}
-			\VArcR{arcangle=-50,ncurv=.9}{4}{7}{x_2}	
-			\VArcL[.7]{arcangle=15,ncurv=.4}{0}{2}{x_1}
-			\VArcL[.7]{arcangle=15,ncurv=.4}{2}{0}{\overline{x_1}}
-			\VArcL[.7]{arcangle=15,ncurv=.4}{1}{3}{x_1}
-			\VArcL[.7]{arcangle=15,ncurv=.4}{3}{1}{\overline{x_1}}
-			\VArcL[.7]{arcangle=15,ncurv=.4}{4}{6}{x_1}
-			\VArcL[.7]{arcangle=15,ncurv=.4}{6}{4}{\overline{x_1}}
-			\VArcL[.7]{arcangle=15,ncurv=.4}{5}{7}{x_1}
-			\VArcL[.7]{arcangle=15,ncurv=.4}{7}{5}{\overline{x_1}}		
-		\end{VCPicture}
-	}	
-	\caption{Minimization according to Könighoefer}
-	\label{fig:konig_original_plant_k_2}
-	\MediumPicture
-	\vspace{-1em}
-\end{figure}
-
-
+However, a more fundamental difference between this work and that of \cite{DBLP:conf/fmcad/KonighoferHB09} is that here we minimize behavior rather than the specification text. Indeed, an engineer inspecting a winning environment strategy for a reduced specification as in \cite{DBLP:conf/fmcad/KonighoferHB09} may be reasoning about behavior that is not allowed in the original specification.  It can be characterized as a syntactic minimization, where the purpose is to help the engineer understand the cause of unrealizability by looking at the specification text. In particular a portion of the safety LTL formulae describing the behavior of the plant is removed. 
+%For instance, going back to the motivanting example, this approach removes $\rho_e$, since it is unnecessary for the environment to swap $x_2$ regularly in order to falsify the goal.  
+When expressing the behavior the syntactic minimization as an automaton we get an object that is more complex in terms of its volume (number of transitions). 
+It should help the engineer to focus on a smaller set of formulae by getting rid of the irrelevant elements in $\rho_e$ while diagnosing the unrealizability cause, while
+our approach is designed to simplify the semantic view of the specification in terms of its feasible explicit executions.
 
 An alternative approach to providing unrealizability is to allow inspecting counter strategies. 
  In \cite{DBLP:conf/emsoft/CernyGHRT12} an interactive play-out for scenario-based specifications is presented.  If the specifications is unrealizable an interactive game is presented to the user in order to expose the cause of non realizability.  It is built following \cite{DBLP:conf/hvc/KonighoferHB10} counter-strategy and it is restricted to scenario-based specifications that essentially encode LTL formulas.
@@ -79,9 +18,9 @@ An alternative approach to providing unrealizability is to allow inspecting coun
  States in the JVTSs are labeled with invariants, since
  they  collapse states of the counter strategy
  in order to expose relevant environmental decisions.
-Inspection of counter strategies that build on minimization of LTL specifications~\cite{DBLP:conf/emsoft/CernyGHRT12,DBLP:conf/sigsoft/KuventMR17} the fact that the behavior of the specification being analyzed has increased. Thus, the inspection of the counter strategy may lead an engineer to reasoning about behavior that is not allowed in the original specification.   
+Inspection of counter strategies that were built on minimization of LTL specifications~\cite{DBLP:conf/emsoft/CernyGHRT12,DBLP:conf/sigsoft/KuventMR17} abstract the fact that the behavior of the specification being analyzed has increased. 
 
- Note that our approach also differs from depicting as an LTS the winning strategy for the environment. The LTS modeling the counter strategy is not a sub-LTS of $E$ as the strategy must remember which assumption was the last to be satisfied. In general, the worst case is that the strategy of the environment will have $n$ times more states than the minimal sub-LTS that can be used to generate it, where $n$ is the number of liveness assumptions that the environment must satisfy. Furthermore, the sub-LTS we produce can allow for more than one counter strategy and hence provide insight to more than one problem with the original specification. 
+ Note that our approach also differs from depicting the winning strategy for the environment as an LTS, since this would not be a Sub-LTS of $E$ as the strategy must remember which assumption was the last to be satisfied. In general, the worst case is that the strategy of the environment will have $n$ times more states than the minimal Sub-LTS that can be used to generate it, where $n$ is the number of liveness assumptions that the environment must satisfy. Furthermore, the Sub-LTS we produce can allow for more than one counter strategy and hence provide insight to more than one problem with the original specification. 
  %Our setting (and our search space characterization) allows us
  %to provide conflicts in an enumerative fashion by exhaustively exploring the induced semi-lattice.  This differs considerably to the single conflict diagnosis provided by executing a counter-strategy bounded by its implementation to a particular conflict.
  
@@ -114,9 +53,6 @@ Inspection of counter strategies that build on minimization of LTL specification
 
 The idea of \cite{DBLP:conf/icra/KimFS12} is to look for the closest \textit{satisfiable} specification with respect to the initial specification, which is known as the minimal revision problem (\texttt{MRP}).  The search space induced by the relation of closest specification is quite similar, in structural terms, to ours. Besides looking for the closest satisfiable approximation (as opposed to a minimal non realizability preserving representation in our case) the relaxation in this work is performed over the labels consisting each in a conjunction of literals and their relaxation being weaker sub formulas of these.  This concept was revisited later in \cite{DBLP:conf/icra/KimF13} for weighted transition systems.
 % It is clear that MRP is not a non realizability diagnosis but instead tackles the problem of finding one the closest satisfiable representations.\\
-
-
-
 The problems an engineer can face when writing the specification
 of an open system can be characterized in other ways, for instance, 
 when dealing with a design by contract type of specification, a set of assumptions is defined that has to be met
@@ -131,20 +67,19 @@ The problem of completeness (where the idea is to find sets of formulas
 irrelevant to the realization of the goals) has been
 developed in \cite{chockler2001practical} and \cite{chockler2001coverage},
 among others.
-There are two different although related problems when it comes to 
-the non satisfaction of the expected properties, namely
- realizability and satisfiability.
- These are directly related to the difference
-between open systems and closed systems.  
-Since 
-we are working with open system specifications we will reason about in terms of
-realizability.  Here we try to obtain the 
-satisfaction of a certain set of goals against a
-potentially antagonistic environment (presented as the Skolem paradigm in 
-\cite{DBLP:conf/popl/PnueliR89}), as opposed to satisfiability, where
-the question to be answered is if it exists a cooperation between 
-the environment and the system that satisfies the goals.
-
+%There are two different although related problems when it comes to 
+%the non satisfaction of the expected properties, namely
+% realizability and satisfiability.
+% These are directly related to the difference
+%between open systems and closed systems.  
+%Since 
+%we are working with open system specifications we will reason about in terms of
+%realizability.  Here we try to obtain the 
+%satisfaction of a certain set of goals against a
+%potentially antagonistic environment (presented as the Skolem paradigm in 
+%\cite{DBLP:conf/popl/PnueliR89}), as opposed to satisfiability, where
+%the question to be answered is if it exists a cooperation between 
+%the environment and the system that satisfies the goals.
 
 In \cite{DBLP:conf/kbse/DegiovanniRACA16} the authors compute boundary conditions over LTL for specifications that can be initially satisfied but will eventually diverge.  A boundary condition is such that, while consistent, when added to a conjunction with the set of domain assumptions and system guarantees can not be satisfied.
 In \cite{DBLP:conf/kbse/HagiharaESY14} strongly
