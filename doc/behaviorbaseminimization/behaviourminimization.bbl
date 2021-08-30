@@ -2,7 +2,7 @@
 %%% Do NOT edit. File created by BibTeX with style
 %%% ACM-Reference-Format-Journals [18-Jan-2012].
 
-\begin{thebibliography}{46}
+\begin{thebibliography}{49}
 
 %%% ====================================================================
 %%% NOTE TO THE USER: you can override these defaults by providing
@@ -46,6 +46,17 @@
 \url{http://www.syntcomp.org/}
 \showURL{%
 \tempurl}
+
+
+\bibitem[\protect\citeauthoryear{Allen and Garlan}{Allen and Garlan}{1997}]%
+        {allen1997formal}
+\bibfield{author}{\bibinfo{person}{Robert Allen} {and} \bibinfo{person}{David
+  Garlan}.} \bibinfo{year}{1997}\natexlab{}.
+\newblock \showarticletitle{A formal basis for architectural connection}.
+\newblock \bibinfo{journal}{\emph{ACM Transactions on Software Engineering and
+  Methodology (TOSEM)}} \bibinfo{volume}{6}, \bibinfo{number}{3}
+  (\bibinfo{year}{1997}), \bibinfo{pages}{213--249}.
+\newblock
 
 
 \bibitem[\protect\citeauthoryear{Alur, Moarref, and Topcu}{Alur
@@ -536,6 +547,15 @@
 \showDOI{\tempurl}
 
 
+\bibitem[\protect\citeauthoryear{Maggee and Kramer}{Maggee and Kramer}{1999}]%
+        {maggee1999concurrency}
+\bibfield{author}{\bibinfo{person}{J Maggee} {and} \bibinfo{person}{Jeff
+  Kramer}.} \bibinfo{year}{1999}\natexlab{}.
+\newblock \bibinfo{title}{Concurrency-State Models and Java Program}.
+\newblock
+\newblock
+
+
 \bibitem[\protect\citeauthoryear{Manna and Waldinger}{Manna and
   Waldinger}{1980}]%
         {manna1980deductive}
@@ -673,6 +693,17 @@
 \urldef\tempurl%
 \url{https://doi.org/10.1109/5.21072}
 \showDOI{\tempurl}
+
+
+\bibitem[\protect\citeauthoryear{Roscoe}{Roscoe}{1994}]%
+        {ClassicalMindBook}
+\bibfield{editor}{\bibinfo{person}{A.~W. Roscoe}} (Ed.).
+  \bibinfo{year}{1994}\natexlab{}.
+\newblock \bibinfo{booktitle}{\emph{{A Classical Mind: essays in Honour of
+  C.A.R. Hoare}}}.
+\newblock \bibinfo{publisher}{{Prentice-Hall}}.
+\newblock
+\showISBNx{0132948443}
 
 
 \bibitem[\protect\citeauthoryear{Schuppan}{Schuppan}{2012}]%

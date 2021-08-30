@@ -26,8 +26,8 @@ strategy if the original specification is realizable. When the specification is 
 the engineer is left with the onerous task of understanding why this is the case and, only 
 after that, with the task of changing the specification.
 
-Synthesis has been studied in three different fields: supervisory control 
-~\cite{ramadge:1989}, automated planning ~\cite{fikes1971strips,penberthy1992ucpop} and reactive synthesis ~\cite{harel1985development,pnueli1985transition}.  Each one has different ways of defining the synthesis problem 
+Synthesis has been studied in three different fields: automata-based 
+~\cite{allen1997formal, maggee1999concurrency, DBLP:journals/cacm/Hoare78, ramadge:1989, ClassicalMindBook}, automated planning ~\cite{fikes1971strips,penberthy1992ucpop} and reactive synthesis ~\cite{harel1985development,pnueli1985transition}.  Each one has different ways of defining the synthesis problem 
 which impacts profoundly not only in the algorithms and data structures used to solve 
 them but also the suitability for modeling different domains. 
 
@@ -39,8 +39,8 @@ originates from its applications to hardware verification and synthesis~\cite{DB
 been applied to software too~\cite{manna1980deductive}. Temporal logics 
 are commonly used to describe goals and assumptions. 
 
-Supervisory control adopts both an event-based communication model (where only one 
-instantaneous event can occur at any instant) and \textit{asynchronous execution} (where parties can execute at 
+Automata-based approaches adopt define a communication model based on events (where only one 
+instantaneous event can occur at any instant) and suppose \textit{asynchronous execution} (where parties can execute at 
 different relative speeds) which is well suited for modeling message-based 
 communication~\cite{DBLP:journals/cacm/Hoare78, Milner:1982} at the software architecture level, for instance. 
 Communicating automata  and (asynchronous) time temporal logics are commonly used 
@@ -61,7 +61,7 @@ counterstrategy in terms of attractors and cycles is provided, going further in 
 simplification of the cause by providing only relevant information in terms of valuation 
 changes, this is also the starting point of other techniques, such as 
 ~\cite{maoz2019symbolic}, where ~\cite{DBLP:conf/sigsoft/KuventMR17} output is 
-used to repair the initial GR(1) specification.
+used to repair the initial GR(1) specification. In ~\cite{maoz2021unrealizable} the authors introduce a conceptual framework for incremental core computation that lays the foundation for writing more effective minimization algorithms (e.g. \texttt{QuickCore}) while also providing a procedure that can compute all existing unrealizable cores (\texttt{Punch}).
 
 There are, however, no techniques for providing feedback on unrealizability for 
 event-based control problems. \emph{In this paper, we propose an approach for  

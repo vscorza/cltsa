@@ -1,7 +1,13 @@
 TODO:
 =====
-	- Lo que yo entendí, y la intro la armé así, es que nos diferenciamos primariamente en el input (event based). Entonces arrancar con un ejemplo que no es event-based no tiene sentido.  Qué decís?
-	- Background, Revisar definiciones necesarias.
+- intro
+	- El foco para mi no es supervisory control vs reactive synthesis sino "event-based asynchronous execution” modelling of concurrent systems versus "state based synchronous execution of concurrent systems”. Para plantear que son  perspectivas distintas y apropiadas que requieren tradicionalmente algoritmos y estructuras de datos diferentes. Tal vez hay que cambiar lo anterior arrancando con modelado y verificación para luego enfocar en síntesis y no mencionar supervisory control sino enumerar técncias que usan event-based asynchronous execution
+		- A formal basis for architectural connection, Allen & Garlan, TOSEM
+		- A classical mind, Roscoe
+		- CSP
+		- wonham
+		- LTSA.
+	- 35] Shahar Maoz and Rafi Shalom. 2021. Unrealizable cores for reactive systems specifications. In 2021 IEEE/ACM 43rd International Conference on Software Engineering (ICSE).	Se cita pero en una lista de paper pero no se lo desarrolla como los otros de esa lista
 -benchmark
 	- validation
 		- revisar casos
