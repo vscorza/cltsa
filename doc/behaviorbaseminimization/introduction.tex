@@ -39,7 +39,7 @@ originates from its applications to hardware verification and synthesis~\cite{DB
 been applied to software too~\cite{manna1980deductive}. Temporal logics 
 are commonly used to describe goals and assumptions. 
 
-Automata-based approaches adopt define a communication model based on events (where only one 
+Automata-based approaches adopt a communication model based on events (where only one 
 instantaneous event can occur at any instant) and suppose \textit{asynchronous execution} (where parties can execute at 
 different relative speeds) which is well suited for modeling message-based 
 communication~\cite{DBLP:journals/cacm/Hoare78, Milner:1982} at the software architecture level, for instance. 
@@ -61,7 +61,8 @@ counterstrategy in terms of attractors and cycles is provided, going further in 
 simplification of the cause by providing only relevant information in terms of valuation 
 changes, this is also the starting point of other techniques, such as 
 ~\cite{maoz2019symbolic}, where ~\cite{DBLP:conf/sigsoft/KuventMR17} output is 
-used to repair the initial GR(1) specification. In ~\cite{maoz2021unrealizable} the authors introduce a conceptual framework for incremental core computation that lays the foundation for writing more effective minimization algorithms (e.g. \texttt{QuickCore}) while also providing a procedure that can compute all existing unrealizable cores (\texttt{Punch}).
+used to repair the initial GR(1) specification. In ~\cite{maoz2021unrealizable} the authors introduce a conceptual framework for incremental unrealizability core computation that lays the foundation for writing more effective minimization algorithms (e.g. \texttt{QuickCore}) while also providing a procedure that can compute all existing unrealizable cores (\texttt{Punch}), as in ~\cite{Torlak:2008} the output of these techniques is a minimal subset of formulae that preserve
+unrealizability.
 
 There are, however, no techniques for providing feedback on unrealizability for 
 event-based control problems. \emph{In this paper, we propose an approach for  
