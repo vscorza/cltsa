@@ -39,11 +39,11 @@ originates from its applications to hardware verification and synthesis~\cite{DB
 been applied to software too~\cite{manna1980deductive}. Temporal logics 
 are commonly used to describe goals and assumptions. 
 
-Automata-based approaches adopt a communication model based on events (where only one 
+Event-based approaches adopt a communication model based on events (where only one 
 instantaneous event can occur at any instant) and suppose \textit{asynchronous execution} (where parties can execute at 
 different relative speeds) which is well suited for modeling message-based 
 communication~\cite{DBLP:journals/cacm/Hoare78, Milner:1982} at the software architecture level, for instance. 
-Communicating automata  and (asynchronous) time temporal logics are commonly used 
+Communicating automata  and (asynchronous time or event-based) temporal logics are commonly used 
 to model such synthesis problems~\cite{ramadge:1989}. 
 
 Various techniques for providing feedback on unrealizability for reactive synthesis 
@@ -66,8 +66,8 @@ unrealizability.
 
 There are, however, no techniques for providing feedback on unrealizability for 
 event-based control problems. \emph{In this paper, we propose an approach for  
-providing  feedback on unrealizabilty of control problems specified with a combination of 
-automata and asynchronous temporal logic}.
+providing  feedback on unrealizabilty of event-based control problems specified with a combination of 
+automata and temporal logic}.
 %
 %- EXPLICAR PLANTA
 %
@@ -75,7 +75,7 @@ automata and asynchronous temporal logic}.
 %
 %- Explicar ideas claves del cómo. Delta debugging, etc.
 
-In the context of this work we refer to the monolithic automaton-representation of all 
+In the context of this work we refer to the automaton-representation of all 
 possible execution involving the environment and the system as the plant. Our 
 technique reduces the plant to a minimal representation such that we do not restrict the 
 controller capabilities but allow the 
@@ -92,8 +92,7 @@ space and another that uses Delta-Debugging ~\cite{DBLP:journals/tse/ZellerH02} 
 
 The paper is structured as follows. We first provide a motivating example as an informal 
 overview of the proposed technique, then present some preliminary definitions, 
-namely to define formally a control problem and the notion of realizability, and also define minimization and unrealizability preservation. In 
-Section~\ref{sect:solution} we present the minimization algorithm. We finalize with a discussion on 
+namely to define formally a control problem and the notion of realizability, and also define minimization and unrealizability preservation. We then present the minimization algorithm. We finalize with a discussion on 
 related work and conclusions.
 %
 %
