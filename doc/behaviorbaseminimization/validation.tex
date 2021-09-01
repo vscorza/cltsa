@@ -10,23 +10,20 @@ Our guiding research questions are:
 
 %The measure of information our technique provides must be related to the impact it can have on the overall specification process, in particular in how clear it is for the engineer  to interpret the diagnosis. The aim is to minimize the amount of data presented while keeping it relevant to the unrealizability cause. The unavailability of skilled professionals and the amount of time and effort required to prepare a considerable set of external subjects up to the point where they would be able to write non trivial formal specifications renders the perspective of a controlled experiment with external engineers writing specifications from scratch unfeasible to us. 
 
-Since to the best of our knowledge previous work was presented for reactive systems
-is somewhat impossible to propose a direct comparison with existing techniques that are similar in spirit, since, for instance, in ~\cite{DBLP:conf/hvc/KonighoferHB10} the minimization is applied on the set of environmental safety formulas, which if evaluated under the behavioral perspective increments the volume of the plant represented as an automaton, and in ~\cite{DBLP:conf/sigsoft/KuventMR17} a simplification of the symbolic counter strategy is presented as a LTS composed of attractors and trap states, which describe a symbolic behavior and require that the initial specification is presented in formulaic form. Our technique adds a complimentary view to the unrealizability diagnosis problem.
-
-Research question \textbf{RQ1} is answered by observing the relation between synthesis and diagnosis time of existing specifications. Research question \textbf{RQ2} is answered by comparing the reduction volume of our technique with respect to the closest approach (~\cite{DBLP:conf/hvc/KonighoferHB10}). 
+Since, to the best of our knowledge, previous work was presented solely for reactive systems
+is somewhat impossible to propose a direct comparison with existing techniques that are similar in spirit. For instance, in ~\cite{DBLP:conf/hvc/KonighoferHB10} the minimization is applied on the set of environmental safety formulas, which if evaluated under the behavioral perspective increments the volume of the plant represented as an automaton, and in ~\cite{DBLP:conf/sigsoft/KuventMR17} a simplification of the symbolic counter strategy is given as a LTS composed of attractors and trap states, which describe a symbolic behavior and require that the initial specification is presented as a set of formulae too. Our technique adds a complimentary view to the unrealizability diagnosis problem. Research question \textbf{RQ1} is answered by observing the relation between synthesis and diagnosis time of existing specifications. Research question \textbf{RQ2} is answered by observing the reduction volume of our technique. 
 %For \textbf{RQ3} we will study the correlation of the minimization amount against some structural properties of the original automaton.
 
-In order to avoid bias, we used specifications taken from existing benchmarks and literature, prioritizing those where an unrealizable version was already present and mutating those where none were available in order to achieve unrealizability. 
-
+In order to avoid bias, we included specifications from existing benchmarks in the literature, prioritizing those where an unrealizable version was already present and mutating those where none were available in order to achieve unrealizability. 
 %refs 
 For each specification we first wrote and synthesized the realizable version, and then modified it
 to violate at least one of the original guarantees. 
-These modifications are of two kinds, the first removes a required liveness assumptions from the original specification, the second relaxes a part of the environment by removing a safety environmental constraint. 
+We applied two modifications, the first removes a required liveness assumption from the original specification while the second relaxes a part of the environment by removing a safety environmental constraint. 
 %We assume that these modifications capture the way in which a model naturally evolves, the liveness omission stands for those situations where the environment is being mined for assumptions, which is both a partial and progressive process. The safety modification stands for those scenarios where the engineer is trying to figure out the explicit behavior of the plant, either by logically restricting the formula that describes it, or by defining and removing explicit transitions in a process-oriented syntax. 
-In both cases unrealizability is introduced by constraining the system or relaxing the environment beyond its intended capabilities. We restricted ourselves to removing only liveness assumptions under the premise that it is usually the case that the user has a clear intent of what the system should achieve (liveness guarantees) but needs to gain knowledge of the environment in which it will operate.  Because of this we are not considering the cases where unrealizability is caused by the fact that the guarantees are too strong. One variation per case is presented, in the parameterized examples, most of the liveness modifications produce symmetrical diagnosis. Our approach follows Cimatti's ~\cite{DBLP:conf/vmcai/CimattiRST08} in creating minimaly unfulfillable conflict by removing the smaller set of liveness assumptions to achieve non realizability.
+In both cases unrealizability is introduced by constraining the system or relaxing the environment beyond its intended capabilities. We restricted ourselves to removing only liveness assumptions under the premise that it is usually the case that the user has a clear intent of what the system should achieve (liveness guarantees) but needs to gain knowledge of the environment in which it will operate.  Because of this we are not considering the cases where unrealizability is caused by the fact that the guarantees are too strong. One variation per case is presented. In the parameterized examples, most of the liveness modifications produce symmetrical diagnosis with respect to the size of the parameter. Our approach follows Cimatti's ~\cite{DBLP:conf/vmcai/CimattiRST08} in creating minimaly unfulfillable conflict by removing the smaller set of liveness assumptions to achieve non realizability.
  
-Our benchmark is divided in two groups.The first group comes from the reactive synthesis domain, where behavior is described as a conjunction of safety formulae. Even though our technique assumes an event-based specification in which the behavior is represented as an automaton we decided to evaluate existing cases from reactive systems. The motivation for this is twofold, first we wanted to avoid bias when building a new benchmark by selecting only those cases that are more beneficial to the technique, and second unrealizable specifications have been already published and studied for this domain.
-These specifications usually describe hardware models and their symbolic nature allows for a concise and efficient representation and transformation of the model.  Our tool allows for such a specification to be properly written and it uses an intermediate ROBDD representation ~\cite{brace1990efficient} that is then translated into an explicit automaton before the synthesis/diagnosis steps are applied. The second group comes from automata-based or process-based specifications, where a automaton representation of its behavior is almost straight-forward.
+Our benchmark is divided in two groups.The first group comes from the reactive synthesis domain, where behavior is described as a conjunction of safety formulae. Even though our technique assumes an event-based specification in which the behavior is represented as an automaton, we decided to evaluate existing cases from reactive systems. The motivation for this is twofold, first because we wanted to avoid selecting only new cases that are more beneficial to the technique, and second because unrealizable specifications have been already published and studied for this domain.
+These specifications usually describe hardware models and their symbolic nature allows for a concise and efficient representation and transformation of the model.  Our tool allows for such a specification to be written as a set of formulae that is then transformed into an intermediate ROBDD representation~\cite{brace1990efficient}, which in turn is converted into an explicit automaton before the synthesis/diagnosis steps are applied. The second group of specifications comes from the automata-based or process-based domain, where an automaton representation of its behavior is almost straight-forward.
 
 We will now briefly explain each case, show how they were parameterized and modified in order to achieve non realizability. 
 The Generalized Buffer (GenBuf) and AMBA AHB case studies were taken from~\cite{DBLP:conf/hvc/KonighoferHB10}, the Lift Controller comes from ~\cite{DBLP:conf/fmcad/AlurMT13}, Collector is part of the SYNTCOMP competition ~\cite{SYNTCOMP} benchmark, Air Tower Control, Bidding Workflow, Cat and Mouse, Dining Philosophers, Travel Agency and Transfer Line are taken from ~\cite{ciolek2019compositional} where the authors collected several problems from the supervisory control domain, the exploration robot case was adapted from ~\cite{DBLP:journals/corr/abs-2001-07678}.
@@ -44,20 +41,19 @@ The parameter on each instance indicates how many senders the specification has.
 The \texttt{missing liveness} modification removes the assumption that the \texttt{DECIDE} signal will always eventually be raised, which in turn does not assures that the scheduler will pick the next master to be served, and in \texttt{removed safety} the occurrence of \texttt{sel$_0$} fixes \texttt{hReq$_1$} to a low value, preventing the second master to be acknowledged. 
 \item[ER] The \textbf{Exploration Robot} case models the behavior of a robot that can move through a sqare grid of size $n$, which also serves as the parameter for this specification. The robot must load cargo at the initial position and then unload it at the opposite corner of the grid. At the loading site the operation can either be successful or fail. The \texttt{missing liveness} modification removes the assumption that a load will always eventually occur. The \texttt{removed safety} modification allows the environment to neglect the load event indefinitely once a certain point in the grid is reached.
 \item[TL] \textbf{Transfer Line} consists of $n$ machines
-sequentially connected by $n$ buffers with finite capacity $k$, and an ending ma-
-chine which may accept or reject a
+sequentially connected by $n$ buffers with finite capacity $k$, and an ending machine which may accept or reject a
 finished product. The goal of the system is to process
 elements avoiding buffer overflows and underflows. The
 system controls when to input an element from buffer
 $B_{i -1}$ into machine $M_i$ assuming infinite supply from
-the outside world for $M_0$.
+the outside world for $M_0$. The \texttt{missing liveness} modification removes the assumption that the will keep accepting products. The \texttt{removed safety} modification denies the last buffer the possibility to receive a product.
 \item[DP] \textbf{Dinning Philosophers} is the classic concurrency
 problem where $n$ philosophers are sitting around a table sharing
 one fork with the adjacent philosopher. The goal of
 the system is to control the access to the forks allowing
 each philosopher to alternate between eating and thinking.
 After grabbing a fork a philosopher needs to take $k$ intermediate
-etiquette steps before eating. 
+etiquette steps before eating. The \texttt{missing liveness} modification removes the assumption that the phisolophers should return the forks after use. The \texttt{removed safety} modification denies one philosopher the possibility to eat after acquiring the forks.
 \item[CM] The \textbf{Cat and Mouse} case has $n$ cats
 and $n$ mice placed in opposite ends of a corridor
 divided in $2k +1$ cells. They take turns to move to one
@@ -66,9 +62,10 @@ of the system is to control the movement of mice in order
 to avoid sharing an area with a cat (the movements of cats
 are uncontrollable). In the center of the corridor there is a
 mouse hole, allowing the mice to share the area with the
-cats safely. Thus, a winning strategy for the mice requires
+cats safely. We also require that the cats keep visiting the center of the corridor. 
+A winning strategy for the mice requires
 all of them to be always closer to the mouse hole than any
-cat, in order to be able to evade them.
+cat, in order to be able to evade them. The \texttt{missing liveness} modification removes the assumption that the cats should move towards the center of the corridor. The \texttt{removed} \texttt{safety} modification denies the mouse the possibility to move beyond the position prior to the center of the corridor. 
 \item[BW] In the \textbf{Bidding Workflow} a company evaluates projects to
 decide whether to bid for them or not. Here a
 document describing a project needs to be accepted by $n$
@@ -78,19 +75,19 @@ all teams reject it the system should try to reach consensus. The document can b
 team that has rejected it up to $k$ times for revision, but it
 must not be reassigned to a team that has already accepted
 it. When a team rejects the document $k$ times it can be
-discarded even with no consensus.
+discarded even with no consensus. The \texttt{missing liveness} modification removes the assumption that the document will always eventually be approved. The  \texttt{removed} \texttt{safety} modification allows the agency to neglect grant the requested amenity. 
 \item[AT] In \textbf{Air-Traffic management} a control tower receives up to $n$ simultaneous requests for landing. The tower
 needs to signal planes whether it is safe to approach the
 landing ramp or at which of $k$ air-spaces they must perform
 holding maneuvers. If two planes enter the same ramp or
-air-space, a crash may occur. The goal is to control the airtraffic to guarantee that all the planes land safely. 
+air-space, a crash may occur. The goal is to control the airtraffic to guarantee that all the planes land safely.  The \texttt{missing liveness} modification removes the assumption that the airplanes will always eventually request to initiate the landing procedure. The \texttt{removed safety} modification allows the environment to neglect the requested landing at its final step. 
 \item[TA] A \textbf{Travel Agency} receives requests for
 vacation packages, and to fulfill them, it interacts with $n$
 web-services for the provision of individual amenities. The goal
 of the system is to orchestrate the web-services in order to
 provide a complete vacation package when possible, while
 avoiding to pay for incomplete packages. The protocols for
-the services may vary (uncontrollably). 
+the services may vary (uncontrollably). The \texttt{missing liveness} modification removes the assumption that the amenities will always eventually be requested. The \texttt{removed safety} modification denies a member of the crew to emit the \texttt{approve} event. 
 \end{description}
 \vspace{-1em}
 %tool support - tool/translation/diagnosis
