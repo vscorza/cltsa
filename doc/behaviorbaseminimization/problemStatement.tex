@@ -5,14 +5,14 @@ In this section we formalize the problem of minimizing behavior while preserving
 Assume an unrealizable specification of the form $\mathcal{I} = <E, \mathcal{C}, \varphi>$. Our aim is to automatically produce an unrealizable specification $\mathcal{I'} = <E', \mathcal{C}, \varphi>$ where $E'$ has less behavior than $E$ and the witnesses for the unrealizablity of $\mathcal{I'}$ (i.e., the counter strategies) are also witnesses for the unrealizability of $\mathcal{I}$.  Furthermore, we aim for $E'$ to be minimal in the sense that it cannot be further reduced while having its associated counter strategies preserved in  $\mathcal{I}$.
 Thus, an engineer focusing on why  $\mathcal{I'}$ is unrealizable can gain insight on why $\mathcal{I}$ is unrealizable. 
 
-
-\begin{definition}\label{}\emph{(Unrealizability Preservation)}
-Given an unrealizable control problem $\mathcal{I} = <E, \mathcal{C}, \varphi>$ we say
-that $\mathcal{I'} = <E', \mathcal{C}, \varphi>$ preserves unrealizability
- if for all  winning strategy \counterS for
-the environment in $G(\mathcal{I}_P)$, $f_1^{\neg \varphi}$ is winning for the environment in
-$G(\mathcal{I}_M)$.
-\end{definition}
+%
+%\begin{definition}\label{}\emph{(Unrealizability Preservation)}
+%Given an unrealizable control problem $\mathcal{I} = <E, \mathcal{C}, \varphi>$ we say
+%that $\mathcal{I'} = <E', \mathcal{C}, \varphi>$ preserves unrealizability
+% if for all  winning strategy \counterS for
+%the environment in $G(\mathcal{I}_P)$, $f_1^{\neg \varphi}$ is winning for the environment in
+%$G(\mathcal{I}_M)$.
+%\end{definition}
 
 
 Now we define the Alternating Sub-LTS relation to capture a notion of minimization that preserves unrealizability. Such a relation preserves counter strategies and forms a semi-lattice that can be used to incrementally minimize an unrealizable specification. 
@@ -88,51 +88,53 @@ First, in states where all outgoing transitions are controllable, all transition
 If this were not the case, then a counter strategy in $P$ with $P \sublts M$ may not work in $M$ because the controller in $M$ has more controllable actions that the counter strategy in $P$ does not account for. 
 The second restriction states that in all states where at least one uncontrollable action exists, at least one uncontrollable action must be preserved. This restriction ensures that in pure uncontrollable states, no new deadlock in $P$ is introduced. Otherwise an environment strategy could win by forcing that deadlock in $P$, even when the same strategy would not win in $M$ at that state. In mixed states, removing all uncontrolled transitions would allow a counter strategy in $P$ to force the controller to move (as not doing so would result in a deadlock). However a strategy in $P$ exploiting this would not work in $M$ because reaching the same state, now a mixed state, the controller may defeat the same environment strategy by not picking any controlled action since the environment is forced to progress in this case. 
 
-The justification behind the definition of Alternating Sub-LTSs is that, for two unrealizable control problems $\mathcal{I} = <E, \mathcal{C}, \varphi>$ and $\mathcal{I'} = <E', \mathcal{C}, \varphi>$ with $E' \sublts E$, any counter strategy for the game $G(\mathcal{I'})$ is also a counter strategy for $G(\mathcal{I})$. We first introduce a corresponding notion of Alternating Sub-Game and then use it to state that the Alternating Sub-LTS relation preserves counter strategies.  
+The justification behind the definition of Alternating Sub-LTSs is that, for two unrealizable control problems $\mathcal{I} = <E, \mathcal{C}, \varphi>$ and $\mathcal{I'} = <E', \mathcal{C}, \varphi>$ with $E' \sublts E$, any winning strategy for the environment that conforms to $\mathcal{I'}$ is also winning and conforms to $G(\mathcal{I})$.
 
-\begin{definition}\label{def:sub-game}\emph{(Sub-Game)}
-Given $G = (S_g, \Gamma^{-},$ $\Gamma^{+},$ $s_{g_{0}}$$,$ $\varphi)$ and
-$G' = (S'_g, \Gamma^{-\prime}, \Gamma^{+\prime},s'_{g_{0}}, \psi)$ two-player games, we say that $G'$ is a sub-game of $G$, noted
-$G' \subgame G$, if $S'_g \subseteq S_g$, $s'_{g_{0}}=s_{g_{0}}$, $\psi = \varphi$, $\Gamma^{-\prime}\subseteq \Gamma^{-}$ and
-$\Gamma^{+\prime}\subseteq \Gamma^{+}$.
-\end{definition}
-
-\begin{definition}\label{def:alternating-sub-game}\emph{(Alternating Sub-Game)}
-Given $G = (S_g, \Gamma^{-}, \Gamma^{+},$ $s_{g_{0}}, \varphi)$ and
-$G' = (S'_g, \Gamma^{-\prime}, \Gamma^{+\prime},s'_{g_{0}}, \psi)$ both two-player games such that $G' \subgame G$, we say that $G'$ is an Alternating Sub-Game of $G$, noted
-$G'\altsubgame G$, if the following holds: $\forall s'_g \in S'_g:$ 
-$\Gamma^{+}(s'_g)=\Gamma^{+\prime}(s'_g)$ and $\Gamma^{-}(s'_g)\neq \emptyset$ $\rightarrow$ $\Gamma^{-\prime}(s'_g) \neq \emptyset$. 
-\end{definition}
-
-\begin{lemma}\emph{(Alternating Sub-LTS implies Alternating Sub-Game)}\label{theorem:alternating-sub-game}
-Let $\mathcal{I}_1 = \langle E_1, \mathcal{C}, \varphi \rangle$ and
-$\mathcal{I}_2 = \langle E_2, \mathcal{C}, \varphi \rangle$ be two
-control problems, then if $E_2 \sublts E_1$ implies $G(\mathcal{I}_2)$
-$\altsubgame$ $G(\mathcal{I}_1)$.
-\end{lemma}
+%The justification behind the definition of Alternating Sub-LTSs is that, for two unrealizable control problems $\mathcal{I} = <E, \mathcal{C}, \varphi>$ and $\mathcal{I'} = <E', \mathcal{C}, \varphi>$ with $E' \sublts E$, any counter strategy for the game $G(\mathcal{I'})$ is also a counter strategy for $G(\mathcal{I})$. We first introduce a corresponding notion of Alternating Sub-Game and then use it to state that the Alternating Sub-LTS relation preserves counter strategies.  
+%
+%\begin{definition}\label{def:sub-game}\emph{(Sub-Game)}
+%Given $G = (S_g, \Gamma^{-},$ $\Gamma^{+},$ $s_{g_{0}}$$,$ $\varphi)$ and
+%$G' = (S'_g, \Gamma^{-\prime}, \Gamma^{+\prime},s'_{g_{0}}, \psi)$ two-player games, we say that $G'$ is a sub-game of $G$, noted
+%$G' \subgame G$, if $S'_g \subseteq S_g$, $s'_{g_{0}}=s_{g_{0}}$, $\psi = \varphi$, $\Gamma^{-\prime}\subseteq \Gamma^{-}$ and
+%$\Gamma^{+\prime}\subseteq \Gamma^{+}$.
+%\end{definition}
+%
+%\begin{definition}\label{def:alternating-sub-game}\emph{(Alternating Sub-Game)}
+%Given $G = (S_g, \Gamma^{-}, \Gamma^{+},$ $s_{g_{0}}, \varphi)$ and
+%$G' = (S'_g, \Gamma^{-\prime}, \Gamma^{+\prime},s'_{g_{0}}, \psi)$ both two-player games such that $G' \subgame G$, we say that $G'$ is an Alternating Sub-Game of $G$, noted
+%$G'\altsubgame G$, if the following holds: $\forall s'_g \in S'_g:$ 
+%$\Gamma^{+}(s'_g)=\Gamma^{+\prime}(s'_g)$ and $\Gamma^{-}(s'_g)\neq \emptyset$ $\rightarrow$ $\Gamma^{-\prime}(s'_g) \neq \emptyset$. 
+%\end{definition}
+%
+%\begin{lemma}\emph{(Alternating Sub-LTS implies Alternating Sub-Game)}\label{theorem:alternating-sub-game}
+%Let $\mathcal{I}_1 = \langle E_1, \mathcal{C}, \varphi \rangle$ and
+%$\mathcal{I}_2 = \langle E_2, \mathcal{C}, \varphi \rangle$ be two
+%control problems, then if $E_2 \sublts E_1$ implies $G(\mathcal{I}_2)$
+%$\altsubgame$ $G(\mathcal{I}_1)$.
+%\end{lemma}
 
 %\input{Proof_SubLTS_SubGame}
-
-The following lemma states that removing transitions in the environment description of an unrealizable control problem, while preserving an Alternating Sub-LTS relation, yields a new unrealizable control problem in which all its counter strategies are also counter strategies of the original control problem. From this follows that inspecting the behavior of the smaller environment description provides insights on the causes for unrealizability of the original one.  
-
-\begin{lemma}\emph{(Alternating Sub-LTS preserves counter strategy)}\label{theorem:theo.preserves-non-realizability}
-Let $P$ and $M$ be two LTSs s.t. $P \sublts M$, 
-$\mathcal{I}_P = \lbrace P, \mathcal{C}, \varphi \rbrace$,
-$\mathcal{I}_M = \lbrace M, \mathcal{C}, \varphi \rbrace$
-two control problems, if
- \counterS is a winning strategy for
-the environment in $G(\mathcal{I}_P)$ 
-then $f_1^{\neg \varphi}$ is winning for the environment in
-$G(\mathcal{I}_M)$.
-\end{lemma}
-
-We provide now an informal sketch of the proof, if the environment has an infinite
-win in $\mathcal{I}_P$ not feasible in $\mathcal{I}_M$ and since $\mathcal{I}_P \subseteq \mathcal{I}_M$
-it follows that the system was able to take the play
-out of the path of the counter strategy.  This could be due to the fact that the system wins $\mathcal{I}_P$ or the environment has a strategy for  $\mathcal{I}_P$ not feasible in $\mathcal{I}_M$. If the system wins a controllable state $s_a$ must be reached where the environment strategy was denied, but following alternation all controllable options are
-preserved at $s_a$ from $M$.  If this is the case the strategy should
-hold since it wins in $P$ against every system choice for
-the preserved states. If the environment wins with a strategy not feasible in $\mathcal{I}_M$ there should exist $s_b$ where either the environment reaches a deadlock not present in $\mathcal{I}_P$ or all non controllable options are disabled forcing the system to take an action not feasible in $\mathcal{I}_M$, but this two cases are again prevented by the Alternating Sub-LTS relation.  
+%
+%The following lemma states that removing transitions in the environment description of an unrealizable control problem, while preserving an Alternating Sub-LTS relation, yields a new unrealizable control problem in which all its counter strategies are also counter strategies of the original control problem. From this follows that inspecting the behavior of the smaller environment description provides insights on the causes for unrealizability of the original one.  
+%
+%\begin{lemma}\emph{(Alternating Sub-LTS preserves counter strategy)}\label{theorem:theo.preserves-non-realizability}
+%Let $P$ and $M$ be two LTSs s.t. $P \sublts M$, 
+%$\mathcal{I}_P = \lbrace P, \mathcal{C}, \varphi \rbrace$,
+%$\mathcal{I}_M = \lbrace M, \mathcal{C}, \varphi \rbrace$
+%two control problems, if
+% \counterS is a winning strategy for
+%the environment in $G(\mathcal{I}_P)$ 
+%then $f_1^{\neg \varphi}$ is winning for the environment in
+%$G(\mathcal{I}_M)$.
+%\end{lemma}
+%
+%We provide now an informal sketch of the proof, if the environment has an infinite
+%win in $\mathcal{I}_P$ not feasible in $\mathcal{I}_M$ and since $\mathcal{I}_P \subseteq \mathcal{I}_M$
+%it follows that the system was able to take the play
+%out of the path of the counter strategy.  This could be due to the fact that the system wins $\mathcal{I}_P$ or the environment has a strategy for  $\mathcal{I}_P$ not feasible in $\mathcal{I}_M$. If the system wins a controllable state $s_a$ must be reached where the environment strategy was denied, but following alternation all controllable options are
+%preserved at $s_a$ from $M$.  If this is the case the strategy should
+%hold since it wins in $P$ against every system choice for
+%the preserved states. If the environment wins with a strategy not feasible in $\mathcal{I}_M$ there should exist $s_b$ where either the environment reaches a deadlock not present in $\mathcal{I}_P$ or all non controllable options are disabled forcing the system to take an action not feasible in $\mathcal{I}_M$, but this two cases are again prevented by the Alternating Sub-LTS relation.  
 
 Lemma ~\ref{def:induction-preserves} shows that we can move from $E$ to its closest Alternating Sub-LTS until we reach a Sub-LTS $E'$ ($E' \sublts E$) that preserves unrealizability but also has the property that any closest Alternating Sub-LTS $E''$ ($E'' \sublts E'$)  makes the problem realizable.
 \begin{lemma}\label{def:induction-preserves}(\emph{Alternating Sub-LTSs preserve realizability})

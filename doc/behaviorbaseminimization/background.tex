@@ -145,14 +145,14 @@ We now formally define the control problem for \gr formulas.
 	Given an LTS $E =  (S, \Sigma, \Delta, s_0)$, a set of controllable actions $\mathcal{C} \subseteq \Sigma$ and its complement $\mathcal{U} = \Sigma \setminus \mathcal{C}$,  a state $s \in S$ is called controllable if $\Delta(s) \cap \mathcal{C} = \Delta(s)$, non controllable if $\Delta(s) \cap \mathcal{U} \neq \emptyset$ and mixed otherwise.  We will refer to non mixed states pure states.
 \end{definition}
 
-\begin{definition}\label{def:twoplayer-game}\emph{(Two-player Game)}
-	A two player game $G$ is defined as the tuple $G=(S_g,\Gamma^{-},\Gamma^{+},s_{g0}, \varphi)$ where $S_{g}$ is a finite set of states, $\Gamma^{-}$,$\Gamma^{+}$ $\subseteq S\times S$ are transition relations defined for the uncontrollable and controllable transtiions respectively, $s_{g0}\in S_{g}$ is the initial condition and $\varphi \subseteq S_{g}^{\omega}$ is the winning condition.  We denote $\Gamma^{-}(s) =$ $\{s'|(s,s')$ $\in \Gamma^{-}\}$ and in a similar fashion for $\Gamma^{+}(s)$. A state $s$ is uncontrollable if $\Gamma^{-}(s)\neq \emptyset$ and controllable otherwise.  A play on $G$ is a sequence $p=s_0,s_1,\ldots$ an a play $p$ ending in $s_{g_{n}}$ is extended by the controller choosing a subset $\gamma \subseteq \Gamma^{+}(s_{g_{n}})$.  Then the environment chooses a state $s_{g_{n+1}}$ $\in \gamma \cup \Gamma^{-}(s_{g_{n}})$ and adds $s_{g_{n+1}}$ to $p$.
-\end{definition}
-
-\begin{definition}\label{def:strategy}\emph{((Counter)Strategy with memory)}
-	A strategy with memory $\Omega$ for the controller is a pair of functions $(\delta, u)$ where $\Omega$ is some memory domain, $\delta:\Omega\times S \rightarrow 2^{S}$ such that $\delta(\omega, s) \subseteq \Gamma^{+}(s)$ and $u:\Omega \times S \rightarrow \Omega$.
-	A counter strategy with memory $\nabla$ for the environment is a pair of functions $(\kappa, v)$ where $\nabla$ is some memory domain, $\kappa:\nabla\times S \rightarrow 2^{S}$ such that $\kappa(\nabla, s) \subseteq \Gamma^{-}(s)$ and $v:\nabla \times S \rightarrow \nabla$.
-\end{definition}
+%\begin{definition}\label{def:twoplayer-game}\emph{(Two-player Game)}
+%	A two player game $G$ is defined as the tuple $G=(S_g,\Gamma^{-},\Gamma^{+},s_{g0}, \varphi)$ where $S_{g}$ is a finite set of states, $\Gamma^{-}$,$\Gamma^{+}$ $\subseteq S\times S$ are transition relations defined for the uncontrollable and controllable transtiions respectively, $s_{g0}\in S_{g}$ is the initial condition and $\varphi \subseteq S_{g}^{\omega}$ is the winning condition.  We denote $\Gamma^{-}(s) =$ $\{s'|(s,s')$ $\in \Gamma^{-}\}$ and in a similar fashion for $\Gamma^{+}(s)$. A state $s$ is uncontrollable if $\Gamma^{-}(s)\neq \emptyset$ and controllable otherwise.  A play on $G$ is a sequence $p=s_0,s_1,\ldots$ an a play $p$ ending in $s_{g_{n}}$ is extended by the controller choosing a subset $\gamma \subseteq \Gamma^{+}(s_{g_{n}})$.  Then the environment chooses a state $s_{g_{n+1}}$ $\in \gamma \cup \Gamma^{-}(s_{g_{n}})$ and adds $s_{g_{n+1}}$ to $p$.
+%\end{definition}
+%
+%\begin{definition}\label{def:strategy}\emph{((Counter)Strategy with memory)}
+%	A strategy with memory $\Omega$ for the controller is a pair of functions $(\delta, u)$ where $\Omega$ is some memory domain, $\delta:\Omega\times S \rightarrow 2^{S}$ such that $\delta(\omega, s) \subseteq \Gamma^{+}(s)$ and $u:\Omega \times S \rightarrow \Omega$.
+%	A counter strategy with memory $\nabla$ for the environment is a pair of functions $(\kappa, v)$ where $\nabla$ is some memory domain, $\kappa:\nabla\times S \rightarrow 2^{S}$ such that $\kappa(\nabla, s) \subseteq \Gamma^{-}(s)$ and $v:\nabla \times S \rightarrow \nabla$.
+%\end{definition}
 
 
 %\begin{definition}\label{def:consistency}\emph{(Consistency under (Non)Controllability and Winning (Counter)Strategy)}
@@ -179,20 +179,20 @@ We now formally define the control problem for \gr formulas.
 %winning if every maximal play starting in $s$ and consistent under non-controllability with $(\kappa, v)$ is infinite and remains exits $\varphi$ at least at some point.  We say that the environment wins the game $G$ if it has a winning strategy from the initial state.
 %\end{definition}
 
-\begin{definition}\label{def:lts-2-game}\emph{(($G_{\mathcal{I}}$) Two-Player Game for $\mathcal{I}$ )}
-	We convert the GR(1) LTS control problem $\mathcal{I}=\langle E, \mathcal{C}, \varphi \rangle$ to a two-player GR(1) game $G (\mathcal{I})=(S_{g},\Gamma{-},\Gamma{+},s_{g0},\varphi)$ as follows: every state in $S_{g}$ encodes a state in $E$ and a valuation of all fluents
-	appearing in $\varphi$. We build $S_g$ from $E$ in such a way that states in the game encode a state in $E$ and truth values for all fluents in $\varphi$, let $S_g = S_e \times \Pi_{i=0}^{k}\{true,false\}$.  Consider state $s_g=(s_e,\alpha_1,\ldots,\alpha_k)$, given fluent $fl_i$ we say that $s_g$ satisfies $fl_i$ if and only if $\alpha_i$ is $true$. We generalize satisfaction to boolean combination of fluents in the natural way.  We build the transition relations $\Gamma^{-}$,$\Gamma^{+}$ through the following rules.  Consider state $s_g=(s_e,\alpha_1,\ldots,\alpha_k)$, for every transition $(s_e,l,s'_e) \in \Delta$ we include $(s_g,(s'_e,\alpha'_1,\ldots,\alpha'_k))$ in $\Gamma^{\beta}$ where
-	$\beta$ is $+$ if $l \in \mathcal{C}$ and in $\Gamma^{-}$ otherwise.
-	$\alpha'_i$ is $\alpha_i$ if $l \neg\in I_{fl_i} \cup T_{fl_i}$, $\alpha'_i$ is $true$ if $l \in I_{fl_i}$ and $false$ if $l \in T_{fl_i}$.  
-	If $s_e$ is a mixed state (i.e., $\Delta(s_e) \cap \mathcal{C} \neq \emptyset$
-	$\wedge$
-	$\Delta(s_e) \cap \mathcal{U} \neq \emptyset$) we only include
-	$(s_g, (s'_e,\alpha'_1,\ldots,\alpha'_k))$ in $\Gamma^{-}$
-	if $l \in \mathcal{U}$ since we will consider mixed states as 
-	non-controllable (antagonistic) in the game.
-	$s_{g0}$ is $(s_0, Init_{fl_1},\ldots, Init_{fl_k})$.
-	Let $\varphi_g \subseteq S_g^{\omega}$ be the set of sequences that satisfy $gr((\phi_1,\ldots,\phi_n),(\gamma_1,\ldots,\gamma_m))$.
-\end{definition}
+%\begin{definition}\label{def:lts-2-game}\emph{(($G_{\mathcal{I}}$) Two-Player Game for $\mathcal{I}$ )}
+%	We convert the GR(1) LTS control problem $\mathcal{I}=\langle E, \mathcal{C}, \varphi \rangle$ to a two-player GR(1) game $G (\mathcal{I})=(S_{g},\Gamma{-},\Gamma{+},s_{g0},\varphi)$ as follows: every state in $S_{g}$ encodes a state in $E$ and a valuation of all fluents
+%	appearing in $\varphi$. We build $S_g$ from $E$ in such a way that states in the game encode a state in $E$ and truth values for all fluents in $\varphi$, let $S_g = S_e \times \Pi_{i=0}^{k}\{true,false\}$.  Consider state $s_g=(s_e,\alpha_1,\ldots,\alpha_k)$, given fluent $fl_i$ we say that $s_g$ satisfies $fl_i$ if and only if $\alpha_i$ is $true$. We generalize satisfaction to boolean combination of fluents in the natural way.  We build the transition relations $\Gamma^{-}$,$\Gamma^{+}$ through the following rules.  Consider state $s_g=(s_e,\alpha_1,\ldots,\alpha_k)$, for every transition $(s_e,l,s'_e) \in \Delta$ we include $(s_g,(s'_e,\alpha'_1,\ldots,\alpha'_k))$ in $\Gamma^{\beta}$ where
+%	$\beta$ is $+$ if $l \in \mathcal{C}$ and in $\Gamma^{-}$ otherwise.
+%	$\alpha'_i$ is $\alpha_i$ if $l \neg\in I_{fl_i} \cup T_{fl_i}$, $\alpha'_i$ is $true$ if $l \in I_{fl_i}$ and $false$ if $l \in T_{fl_i}$.  
+%	If $s_e$ is a mixed state (i.e., $\Delta(s_e) \cap \mathcal{C} \neq \emptyset$
+%	$\wedge$
+%	$\Delta(s_e) \cap \mathcal{U} \neq \emptyset$) we only include
+%	$(s_g, (s'_e,\alpha'_1,\ldots,\alpha'_k))$ in $\Gamma^{-}$
+%	if $l \in \mathcal{U}$ since we will consider mixed states as 
+%	non-controllable (antagonistic) in the game.
+%	$s_{g0}$ is $(s_0, Init_{fl_1},\ldots, Init_{fl_k})$.
+%	Let $\varphi_g \subseteq S_g^{\omega}$ be the set of sequences that satisfy $gr((\phi_1,\ldots,\phi_n),(\gamma_1,\ldots,\gamma_m))$.
+%\end{definition}
 
 %Although the synthesis problem for general FLTL goals is 2EXPTIME
 %complete~\cite{DBLP:conf/popl/PnueliR89}. Nevertheless, restrictions on the form of

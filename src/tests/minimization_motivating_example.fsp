@@ -1,0 +1,72 @@
+set Global_Alphabet = {a.on, a.off, b.on, b.off, y.on, y.off}
+set Controllable_Alphabet = {y.on, y.off}
+
+Y_BEH = ( y.on -> Y_ON |  y.off -> Y_OFF),
+Y_ON = ({a.on, b.on, a.off, b.off} -> Y_ON),
+Y_OFF = ({a.on, b.on, a.off, b.off} -> Y_OFF).
+A_BEH = (a.on -> A_BEH_ON),
+A_BEH_ON = (a.off -> A_BEH).
+B_BEH = ( b.on -> B_ON_BEH | {a.on, a.off} -> b.on -> B_ON_BEH),
+B_ON_BEH = (b.off -> B_BEH | {a.on, a.off} -> b.off -> B_BEH).
+
+//||ENV = (A_BEH || B_BEH || Y_BEH).
+//||ENV = (B_BEH || Y_BEH).
+
+ENV = (y.on-> S_1|y.off-> S_2),
+S_1 = (b.on-> S_10|a.on-> S_11),
+S_2 = (b.on-> S_3|a.on-> S_4),
+S_3 = (b.off-> S_2|a.on-> S_9),
+S_4 = (b.on-> S_5),
+S_5 = (b.off-> S_6|a.off-> S_7),
+S_6 = (b.on-> S_5|a.off-> S_8),
+S_7 = (b.off-> S_2),
+S_8 = (b.on-> S_3),
+S_9 = (b.off-> S_6),
+S_10 = (b.off-> S_1|a.on-> S_16),
+S_11 = (b.on-> S_12),
+S_12 = (b.off-> S_13|a.off-> S_14),
+S_13 = (b.on-> S_12|a.off-> S_15),
+S_14 = (b.off-> S_1),
+S_15 = (b.on-> S_10),
+S_16 = (b.off-> S_13).
+
+vstate fluent F_A_ON in ENV = {S_4, S_9,S_11,S_16}.
+vstate fluent F_GOAL in ENV = {S_9}.
+
+|gr1| <{F_A_ON}><{F_GOAL}> STRAT = ENV.
+
+A_BEH >> "/tmp/motivating_example_a.rep".
+B_BEH >> "/tmp/motivating_example_b.rep".
+Y_BEH >> "/tmp/motivating_example_y.rep".
+ENV >> "/tmp/motivating_example_env.rep".
+GAME >> "/tmp/motivating_example_game.rep".
+STRAT >> "/tmp/motivating_example_strat.rep".
+/*
+fluent F_NotCooking = <{finishedCooking,overHeated}, cook> initially 1
+fluent F_MoveToBelt = <moveToBelt, cook>
+
+SUCCESSFULLY_COOKED_TWICE = (cook->cook->COOKED),
+COOKED = (moveToBelt->SUCCESSFULLY_COOKED_TWICE | cook->ERROR).
+|| ENV =(BISCOTTI || SUCCESSFULLY_COOKED_TWICE). 
+|f| ENV_G =(BISCOTTI || SUCCESSFULLY_COOKED_TWICE).
+|F| NO_MIXED_ENV = (ENV).
+
+|gr1| <{F_NotCooking}><{F_MoveToBelt}> FAILED_STRAT = ENV_G.
+|gr1| <{F_NotCooking}><{F_MoveToBelt}> STRAT = NO_MIXED_ENV.
+
+P_STRAT = (cook -> STRAT_p_1),
+STRAT_p_1 = (cooking -> STRAT_p_1 | finishedCooking -> STRAT_p_2),
+STRAT_p_2 = (cook -> STRAT_p_3),
+STRAT_p_3 = (cooking -> STRAT_p_3 | finishedCooking -> STRAT_p_4),
+STRAT_p_4 = (moveToBelt -> cook-> STRAT_p_1).
+
+// tests
+equals FATAL_Biscotti_Strategy(STRAT, P_STRAT).
+equals FAIL_Biscotti_Strategy(FAILED_STRAT, P_STRAT).
+
+ENV_G >> "/tmp/biscotti_ENV_G.rep".
+NO_MIXED_ENV >> "/tmp/biscotti_ENV_G_no_mixed.rep".
+FAILED_STRAT >> "/tmp/biscotti_failed_strat.rep".
+STRAT >> "/tmp/biscotti_strat.rep".
+STRAT_p >> "/tmp/biscotti_strat_p.rep".
+*/
