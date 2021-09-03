@@ -52,7 +52,7 @@ for ((i=1; i<=3;i++))
 	done
 ./artifact -r -o results/ $INSTANCES
 REAL_ENDTIME=$(date +%s)
-echo "It took $(($REAL_ENDTIME - $REAL_STARTTIME)) to run the realizable specifications."
+echo "It took $(($REAL_ENDTIME - $REAL_STARTTIME)) seconds to run the realizable specifications."
 ############ UNREALIZABLE CASES 
 UNREAL_STARTTIME=$(date +%s)
 echo "[[Running unrealizable examples]]"
@@ -138,7 +138,7 @@ for ((i=1; i<=3;i++))
 	done
 ./artifact -r -o results/ $INSTANCES	
 UNREAL_ENDTIME=$(date +%s)
-echo "It took $(($UNREAL_ENDTIME - $UNREAL_STARTTIME)) to run the unrealizable specifications."
+echo "It took $(($UNREAL_ENDTIME - $UNREAL_STARTTIME)) seconds  to run the unrealizable specifications."
 ############ RUN DCS CASES
 DCS_STARTTIME=$(date +%s)
 echo "[[Running DCS examples]]"
@@ -173,7 +173,7 @@ for j in "${!fileSuffixes[@]}"; do
 	./artifact -r -o results/ ${INSTANCES[j]}
 done
 DCS_ENDTIME=$(date +%s)
-echo "It took $(($DCS_ENDTIME - $DCS_STARTTIME)) to run the dcs specifications."
+echo "It took $(($DCS_ENDTIME - $DCS_STARTTIME)) seconds to run the dcs specifications."
 ############ MERGING FILES
 echo "[[Merging files]]"
 cd results
@@ -185,6 +185,6 @@ cd ..
 
 STARTTIME=$(date +%s)
 
-echo "It took $(($ENDTIME - $STARTTIME)) to run the whole process."
+echo "It took $(($ENDTIME - $STARTTIME))seconds to run the whole process."
 
 
