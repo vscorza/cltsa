@@ -145,7 +145,7 @@ echo "[[Running DCS examples]]"
 fileNames=("CM_K" "AT_N_K" "BW_N_K" "TL_N_K" "TA_N_K" "DP_N_K")
 caseNames=("cat.mouse.K" "airport.tower.N.K" "bidding.workflow.N.K" "transfer.line.N.K" "travel.agency.N.K" "dining.philosophers.N.K")
 fileNLow=("1" "2" "1" "2" "2" "2")
-fileNHi=("1" "5" "3" "3" "4" "4")
+fileNHi=("1" "5" "3" "3" "4" "3")
 fileKLow=("1" "1" "1" "1" "1" "1")
 fileKHi=("2" "2" "1" "3" "2" "2")
 fileSuffixes=(".fsp" "_missing_assumption.fsp" "_removed_safety.fsp")
