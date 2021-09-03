@@ -1,5 +1,6 @@
 #!/bin/bash
 #!/bin/bash
+STARTTIME=$(date +%s)
 echo "[[Running all reports for CONFNAME]]"
 echo "[[Building the tool]]"
 make clean
@@ -8,6 +9,7 @@ rm -f *.o
 
 
 ############ REALIZABLE CASES 
+REAL_STARTTIME=$(date +%s)
 echo "[[Running realizable examples]]"
 echo "[Lift controller]"
 INSTANCES=""
@@ -49,8 +51,10 @@ for ((i=1; i<=3;i++))
 		INSTANCES="${INSTANCES} tests/ahb_arbiter_${i2}_sched.fsp AHB.Scheduler.${i2}"; 
 	done
 ./artifact -r -o results/ $INSTANCES
-
+REAL_ENDTIME=$(date +%s)
+echo "It took $(($REAL_ENDTIME - $REAL_STARTTIME)) to run the realizable specifications."
 ############ UNREALIZABLE CASES 
+UNREAL_STARTTIME=$(date +%s)
 echo "[[Running unrealizable examples]]"
 echo "[Lift controller]"
 echo "::[Running added goal lift controller instances from size 1 to 4]::"
@@ -133,8 +137,10 @@ for ((i=1; i<=3;i++))
 		INSTANCES="${INSTANCES} tests/ahb_arbiter_${i2}_sched_removed_safety.fsp AHB.Scheduler.${i2}.(removed.safety)"; 
 	done
 ./artifact -r -o results/ $INSTANCES	
-
+UNREAL_ENDTIME=$(date +%s)
+echo "It took $(($UNREAL_ENDTIME - $UNREAL_STARTTIME)) to run the unrealizable specifications."
 ############ RUN DCS CASES
+DCS_STARTTIME=$(date +%s)
 echo "[[Running DCS examples]]"
 fileNames=("CM_K" "AT_N_K" "BW_N_K" "TL_N_K" "TA_N_K" "DP_N_K")
 caseNames=("cat.mouse.K" "airport.tower.N.K" "bidding.workflow.N.K" "transfer.line.N.K" "travel.agency.N.K" "dining.philosophers.N.K")
@@ -166,6 +172,8 @@ for j in "${!fileSuffixes[@]}"; do
 	echo "[Running ${fileSuffixes[j]} DCS suffixed cases]"			
 	./artifact -r -o results/ ${INSTANCES[j]}
 done
+DCS_ENDTIME=$(date +%s)
+echo "It took $(($DCS_ENDTIME - $DCS_STARTTIME)) to run the dcs specifications."
 ############ MERGING FILES
 echo "[[Merging files]]"
 cd results
@@ -174,4 +182,9 @@ echo 'name,realizable,ltl_model_build_time,model_build_time,composition_time,syn
 tail -q -n +2 lift_controller_2_missing_assumption.fsp.csv lift_controller_2_removed_safety.fsp.csv collector_1_in_v1_missing_assumption.fsp.csv collector_1_in_v1_removed_safety.fsp.csv exploration-robot-v1_100_missing_assumption.fsp.csv exploration-robot-v1_100_removed_safety.fsp.csv ahb_arbiter_2_sched_missing_assumption.fsp.csv ahb_arbiter_2_sched_removed_safety.fsp.csv genbuf_1_sndrs_no_automaton_missing_assumption.fsp.csv genbuf_1_sndrs_no_automaton_removed_env_safety.fsp.csv CM_1_missing_assumption.fsp.csv CM_1_removed_safety.fsp.csv >> unrealizable_data_composite.csv
 tail -q -n +2 lift_controller_2.fsp.csv lift_controller_4.fsp.csv lift_controller_6.fsp.csv lift_controller_8.fsp.csv lift_controller_10.fsp.csv collector_1_in_v1.fsp.csv collector_2_in_v1.fsp.csv collector_3_in_v1.fsp.csv collector_4_in_v1.fsp.csv collector_5_in_v1.fsp.csv collector_6_in_v1.fsp.csv exploration-robot-v1_100.fsp.csv exploration-robot-v1_200.fsp.csv exploration-robot-v1_300.fsp.csv exploration-robot-v1_400.fsp.csv exploration-robot-v1_500.fsp.csv exploration-robot-v1_600.fsp.csv ahb_arbiter_2_sched.fsp.csv ahb_arbiter_3_sched.fsp.csv ahb_arbiter_4_sched.fsp.csv genbuf_1_sndrs_no_automaton.fsp.csv genbuf_2_sndrs_no_automaton.fsp.csv genbuf_3_sndrs_no_automaton.fsp.csv CM_1.fsp.csv >> realizable_data_composite.csv
 cd ..
+
+STARTTIME=$(date +%s)
+
+echo "It took $(($ENDTIME - $STARTTIME)) to run the whole process."
+
 
