@@ -163,15 +163,12 @@ for i in "${!fileNames[@]}"; do
 				caseName="${caseName/K/$k}"				
 				msg="${msg}${fileSuffixes[j]}"
 				INSTANCES[j]="${INSTANCES[j]} tests/${msg} ${caseName}${caseSuffixes[j]}"	
+				echo "[Running ${caseName}${caseSuffixes[j]}]"			
+				./artifact -r -o results/ "tests/${msg}" "${caseName}${caseSuffixes[j]}"				
 			done
 		done		
 	done
 done	
-
-for j in "${!fileSuffixes[@]}"; do
-	echo "[Running ${fileSuffixes[j]} DCS suffixed cases]"			
-	./artifact -r -o results/ ${INSTANCES[j]}
-done
 DCS_ENDTIME=$(date +%s)
 echo "It took $(($DCS_ENDTIME - $DCS_STARTTIME)) seconds to run the dcs specifications."
 ############ MERGING FILES
