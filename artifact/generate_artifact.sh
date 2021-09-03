@@ -22,8 +22,13 @@ chmod +x "${CONF_NAME}"_artifact/run_test_cases.sh
 echo "[[Copying readme]]"
 cp artifact/artifact_readme.md "${CONF_NAME}"_artifact/readme.md
 sed -i "s/CONFNAME/${CONF_NAME}/g" "${CONF_NAME}"_artifact/readme.md
-cp artifact/artifact_readme.md "${CONF_NAME}"_artifact/readme
-sed -i "s/CONFNAME/${CONF_NAME}/g" "${CONF_NAME}"_artifact/readme
+cp artifact/artifact_readme.md "${CONF_NAME}"_artifact/README
+sed -i "s/CONFNAME/${CONF_NAME}/g" "${CONF_NAME}"_artifact/README
+cp artifact/artifact_requirements.md "${CONF_NAME}"_artifact/REQUIREMENTS
+sed -i "s/CONFNAME/${CONF_NAME}/g" "${CONF_NAME}"_artifact/REQUIREMENTS
+cp artifact/artifact_install.md "${CONF_NAME}"_artifact/INSTALL
+sed -i "s/CONFNAME/${CONF_NAME}/g" "${CONF_NAME}"_artifact/INSTALL
+
 
 echo "[[Creating syntax files]]"
 cp src/henos.lex "${CONF_NAME}"_artifact/henos.lex
