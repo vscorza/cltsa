@@ -1,14 +1,6 @@
 TODO:
 =====
-
-- Motivation	
-	-el ejemplo es de variables que cambian de estado, la verdad, no me gusta mucho porque no parece el tipo de cosas que vas a querer modelar con LTSs, no? 
-- artifact
-	- armar maquina virtual para probar la instalacion
-	- anonimizar datos
-	- generar bundle
-		- por ahí que el reporte lo saque en html para no tener que usar R
-	- probar en la máquina virtual y revisar si faltan dependencias
+- motivation hablar de fluents y no de eventos conjuntos
 - conclusion
 	- foco en event based semantic
 - discussion 

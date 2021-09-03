@@ -300,8 +300,8 @@ compositionExp:
 	;
 compositionExp2:
 	t_UPPER_IDENT indexes compositionType	{$$ = automaton_component_syntax_create($1, NULL, NULL, $2, $3);free($1);}
-	|t_IDENT indexes ':' t_UPPER_IDENT		{$$ = automaton_component_syntax_create($4, $1, NULL, $2, NULL);free($1); free($4);}
-	|index indexes ':' t_UPPER_IDENT		{$$ = automaton_component_syntax_create($4, NULL, $1, $2, NULL);free($4);}
+	|t_IDENT indexes ':' t_UPPER_IDENT		{$$ = automaton_component_syntax_create($4, $1, NULL, $2, ASYNCH_AUT);free($1); free($4);}
+	|index indexes ':' t_UPPER_IDENT		{$$ = automaton_component_syntax_create($4, NULL, $1, $2, ASYNCH_AUT);free($4);}
 	;
 compositionType:
 	t_CONCURRENT							{$$ = CONCURRENT_AUT;free($1);}

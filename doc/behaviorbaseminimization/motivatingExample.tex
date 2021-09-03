@@ -7,12 +7,12 @@ An assumption that the module will always eventually send the packets using the 
 	\begin{tabular}{ r c l }
 		$\varphi$& $=$ &$\square \Diamond tcp\implies\square \Diamond (packed \wedge header \wedge tcp)$\\
 	\end{tabular}
-\end{center}
+\end{center} 
 The left side of the implication comes from the aforementioned assumption, the right side describes the property the engineer wants to comply with.
 
 The automaton that captures this behavior is depicted in Fig. ~\ref{fig:konig_original_plant_2_clts}. At this point, the specification is not realizable since the environment can potentially use the \texttt{tcp} channel only when sending the \texttt{msg} packet, thus honoring the environmental assumption while avoiding the system to reach the winning condition.
 Our approach simplifies the specification semantically, reducing the relevant behavior and showing that it is possible for the environment to avoid state 6 by never allowing \texttt{tcp} to be chosen before sending \texttt{msg}, while at the same time not restricting the system below its original capabilities.
-Notice that if we were allowed to add the assumption that both environmental conditions hold simultaneously infinitely often ($\square \Diamond (tcp \wedge header)$) the specification would be realizable and choosing to raise use the \texttt{packed} encoding at the beginning would be sufficient to guarantee our goal, as shown in Fig. ~\ref{fig:konig_strategy_2}. After choosing \texttt{packed} the environment can move freely as long as it visits state 6 infinitely often. If the engineer has this behavior in mind as their design intent, it should be easy to see that in the semantic minimization the desired state is unreachable, hopefully guiding them to the strengthening of the assumption. 
+Notice that if we were allowed to add the assumption that both environmental conditions hold simultaneously infinitely often ($\square \Diamond (tcp \wedge header)$) the specification would be realizable and choosing to use the \texttt{packed} encoding at the beginning would be sufficient to guarantee our goal, as shown in Fig. ~\ref{fig:konig_strategy_2}. After choosing \texttt{packed} the environment can move freely as long as it visits state 6 infinitely often. If the engineer has this behavior in mind as their design intent, it should be easy to see that in the semantic minimization the desired state is unreachable, hopefully guiding them to the strengthening of the assumption. 
  % In Fig. ~\ref{fig:konig_composition_2} we show the composition of the aforementioned strategy with our minimization. Note that after letting the system raise $y$ the execution visits states 5,6,7,3,4,1 to keep alternating the values of $a$ and $b$ in mutual exclusion.
 
 %\begin{figure}[bt]
