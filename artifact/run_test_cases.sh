@@ -78,7 +78,7 @@ echo "::[Running missing assumption collector instances from size 1 to 5]::"
 INSTANCES=""
 for ((i=1; i<=5;i++)) 
 	do 
-		INSTANCES="${INSTANCES} tests/ollector_${i}_in_v1_missing_assumption.fsp Collector.${i}.(missing.liveness)"; 
+		INSTANCES="${INSTANCES} tests/collector_${i}_in_v1_missing_assumption.fsp Collector.${i}.(missing.liveness)"; 
 	done
 ./artifact -r -o results/ $INSTANCES
 echo "::[Running removed safety collector instances from size 1 to 5]::"
