@@ -1,11 +1,11 @@
 \section{Motivation}\label{sec:motivation}
 We motivate and informally introduce relevant concepts by discussing a small example.
 An engineer needs to set up a service that will continuously broadcast the available space of the system it is running on through the network . The service will sequentially send two types of packets, a \texttt{status} that informs the general state of the system (either \texttt{ok}, \texttt{maintenance} or \texttt{critical}) and a message (\texttt{msg}) with detailed information. To broadcast these packages the service uses a module that can choose to transmit either over a \texttt{tcp} or an \texttt{udp} channel depending on network congestion. The packets can be sent using 8 byte alignment (\texttt{aligned}) or a packed (\texttt{packed}) format, the engineer can decide how to encode them. 
-An assumption that the module will always eventually send the packets using the \texttt{tcp} channel has been added to the specification. A new requirement is added to restrict encoding only to the packed format to maintain compatibility with older clients. The engineer is concerned with the robustness of their service and want to verify that a critical status will always be reported. They arrive to the following formula that captures:
+An assumption that the module will always eventually send the packets using the \texttt{tcp} channel has been added to the specification. A new requirement is added to restrict encoding only to the packed format to maintain compatibility with older clients. The engineer is concerned with the robustness of their service and want to verify that a critical status will always be reported. We can assume that fluents are going to be used to express the concurrent occurrence of the events, where $f_{tcp}$ will be set with event $tcp$ and cleared with $udp$, $f_{packed}$ is set with $packed$ and afterwards remains unchanged, and $f_{header}$ is set with $header$ and cleared with either $msg$ or $udp$. They arrive to the following formula that captures:
 
 \begin{center}
 	\begin{tabular}{ r c l }
-		$\varphi$& $=$ &$\square \Diamond tcp\implies\square \Diamond (packed \wedge header \wedge tcp)$\\
+		$\varphi$& $=$ &$\square \Diamond f_{tcp}\implies\square \Diamond (f_{packed} \wedge f_{header} \wedge f_{tcp})$\\
 	\end{tabular}
 \end{center} 
 The left side of the implication comes from the aforementioned assumption, the right side describes the property the engineer wants to comply with.
