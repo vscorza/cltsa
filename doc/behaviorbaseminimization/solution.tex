@@ -152,46 +152,44 @@ since it is realizable.
 
 %\input{Proof_LTS_Preserves_Realizability}
 
-We can now describe the algorithm as
-presented in figure \ref{fig:dfs-code}. The algorithm first removes all controllable transitions from
-mixed states \listRef{A}, this step can be performed since it
-can be interpreted as the successive removals of controllable 
-transitions with each satisfying the Alternating Sub-LTS definition 
-and preserving unrealizability because if it was unrealizable
-for the mixed state it will remain unrealizable when the controllable transitions are removed since in the game built from
-the automaton at each mixed state the environment
-wins the race condition, always picking the next move when allowed.
-The next step initializes the set of 
+The minimization algorithm is
+presented in figure \ref{fig:dfs-code}, it starts by removing all controllable transitions from
+mixed states \listRef{A}, this can be thought as the successive removals of controllable 
+transitions. This step satisfies the Alternating Sub-LTS definition 
+and preserves unrealizability because, if the specification was unrealizable
+when preserving the mixed state, it will remain unrealizable when the controllable transitions are removed.  This is justified by the fact that, when the execution reaches a mixed state, the environment
+is assumed to always pick the next move before the system.
+The next step of the algorithm initializes the set of 
 candidate transitions
 for removal at \listRef{B} and the effective list
-to be removed at each iteration \texttt{to\_remove} at
+to be removed at each iteration (\texttt{to\_remove}) at
 \listRef{C}.  The latter keeps track of the transitions
 removed along our search down the space of
-Alternating Sub-LTSs for $E$.  The exploration
+Alternating Sub-LTSs that starts at $E$.  The exploration
 will continue until the candidate set is empty.
-At each cycle starting at \listRef{D} the set is updated (\listRef{E}) by 
-removing those transitions that were already removed by the reduction
-at \listRef{F} or because they would induce a deadlock 
-($d_{out}(E', t.from) == 1$ checks if there is only one
-outgoing transition in the state from which \textbf{t} originates).
+At each cycle starting at \listRef{D} the set is updated, \listRef{E}, by 
+removing those transitions that were already taken out by the reduction
+at \listRef{F} or because they would induce a deadlock. Condition 
+$d_{out}(E', t.from) == 1$ checks if there is only one
+outgoing transition in the state from which \textbf{t} originates.
 The
-reduction, at \listRef{F}, looks for the closest
+reduction at \listRef{F} looks for the closest
 Alternating Sub-LTS obtained after removing 
 transitions in \texttt{to\_remove} from $E$.
-Then it checks for realizability at \listRef{G}.  If the control problem is non
-realizable the candidate set and the last 
+Then it checks for realizability at \listRef{G}.  If the control problem is 
+unrealizable the candidate set and the last 
 Alternating Sub-LTS $E'$ are updated (since further minimization is 
 possible), otherwise a one step backtrack
 is triggered by removing the transition under test from
-the effective set \texttt{to\_remove} \listRef{H}.
+the effective set \texttt{to\_remove} at \listRef{H}.
 This is actually the backtracking point where the algorithm
-shifts the search sideways in the semi-lattice instead of downwards.
+redirects the search sideways in the semi-lattice instead of downwards.
 Once the candidate set has been completely explored
 the last unrealizability preserving LTS $E'$ is
 returned as a minimal Alternating Sub-LTS
-for $E$ and $\mathcal{C}$ \listRef{I}.
+for $E$ and $\mathcal{C}$ at \listRef{I}.
 Notice that
-in the step \listRef{H} the transition $t$ was removed
+at \listRef{H} the transition $t$ was removed
 from the candidate set but was retained in $E'$.  What happens if
 the transition could have been removed further down the semi lattice?  Removing $t$ from $E'$ and reducing the Alternating Sub-LTS 
 $E_{new}$ accordingly would render the control problem realizable.  Suppose that
@@ -202,18 +200,18 @@ If we were to remove $t$ from $E_{1,\ldots,n}$ after reducing it
 to the closest Alternating Sub-LTS we would get a new LTS
 $E'_{new}$ that can be Alternating Sub-LTS for $E_{new}$, and from lemma
 \ref{def:induction-preserves} it will render the control problem
-realizable.  We showed this way that if we are looking for just one
-conflict we can immediately remove the transition that yielded realizability 
+realizable.  This is the reason why, if we are looking for just one
+unrealizability cause, the transition that yielded realizability can be immediately removed 
 from the candidate set without jeopardizing minimality.
 %\input{optimizations}
 
 
 We introduced two modifications to the algorithm
-to improve the time taken to compute the minimization.
+to improve the time it takes to compute the minimization.
 The first optimization transforms the candidate set $\mathcal{T}_u$
 into a list and orders it according to the distance of its elements 
 with respect to the initial state.  The idea is to try and cut
-as aggressively as possible first and see if a big cut still
+as aggressively as possible, and see if an early cut still
 preserves the unrealizability cause.  The second optimization
 looks for non controllable strips within the  input automaton
 $E$, that is, sequences of non controllable actions without branches.
@@ -222,5 +220,5 @@ added to $\mathcal{T}_u$ since, if removed from $E'$
 when looking for a minimal sub LTS all the others have to be removed
 as well to preserve alternation.
 
-The second procedure follows a similar approach but uses the Delta Debugging technique presented in ~\cite{DBLP:journals/tse/ZellerH02} to accelerate the search space exploration. Instead of reducing the automaton by applying an atomic reduction at a time Delta Debugging tries to achieve a minimal diagnosis by partitioning the problem $\Delta$ into $n$ uniform subsets ($\Delta = \bigcup_{i=1}^n \Delta_i $) and then it first checks its elements $\Delta_i$ for a unrealizable smaller case, if none is found it proceeds by looking at the complement $\Delta \setminus \Delta_i$ of each element in the partition. If no smaller candidate was found it increases the granularity by updating $n$ as $max(2n,|\Delta|)$. This cycle is repeated until $n$ can not be further increased ($n \geq |\Delta|$). 
-In our application of Delta Debugging the set $\Delta$ is the set of non controllable transitions in the original plant. Instead of descending regularly down the semi lattice, Delta Debugging tries to jump further down by removing a subset of transitions from the current candidate. We can briefly prove that the application of the technique is sound since Delta Debugging ensures 1-minimality, i.e. that removing any single element from the resulting minimization breaks unrealizability which in conjunction with lemma ~\ref{def:induction-preserves} implies minimality.
+The second procedure follows a similar approach but uses the Delta Debugging technique presented in ~\cite{DBLP:journals/tse/ZellerH02} to improve the search space exploration. Instead of reducing the automaton by applying an atomic reduction at a time, Delta Debugging tries to achieve a minimal diagnosis by partitioning the problem $\Delta$ into $n$ uniform subsets ($\Delta = \bigcup_{i=1}^n \Delta_i $). It checks its elements $\Delta_i$ for a unrealizable smaller case first and if none is found it proceeds by looking at the complement $\Delta \setminus \Delta_i$ of each element in the partition. If no smaller candidate was found it increases the granularity by updating $n$ as $max(2n,|\Delta|)$. This cycle is repeated until $n$ can not be increased any further ($n \geq |\Delta|$). 
+In our application of Delta Debugging the set $\Delta$ is the set of non controllable transitions in the original plant. Instead of descending regularly down the semi lattice, Delta Debugging tries to jump further down by removing a subset of transitions from the current candidate. The application of the technique is justified by the fact that Delta Debugging ensures 1-minimality, i.e. that removing any single element from the resulting minimization breaks unrealizability, which in conjunction with lemma ~\ref{def:induction-preserves} implies minimality.

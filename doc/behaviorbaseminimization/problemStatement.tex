@@ -2,7 +2,7 @@
 
 In this section we formalize the problem of minimizing behavior while preserving unrealizability. In the next section we define a minimization procedure.
 
-Assume an unrealizable specification of the form $\mathcal{I} = <E, \mathcal{C}, \varphi>$. Our aim is to automatically produce an unrealizable specification $\mathcal{I'} = <E', \mathcal{C}, \varphi>$ where $E'$ has less behavior than $E$ and the witnesses for the unrealizablity of $\mathcal{I'}$ (i.e., the counter strategies) are also witnesses for the unrealizability of $\mathcal{I}$.  Furthermore, we aim for $E'$ to be minimal in the sense that it cannot be further reduced while having its associated counter strategies preserved in  $\mathcal{I}$.
+Assume an unrealizable specification of the form $\mathcal{I} = <E, \mathcal{C}, \varphi>$. Our aim is to automatically produce an unrealizable specification $\mathcal{I'} = <E', \mathcal{C}, \varphi>$ where $E'$ has less behavior than $E$ and the witnesses for the unrealizablity of $\mathcal{I'}$ (i.e., the environment or counter strategies) are also witnesses for the unrealizability of $\mathcal{I}$.  Furthermore, we aim for $E'$ to be minimal in the sense that it cannot be further reduced while having its associated counter strategies preserved in  $\mathcal{I}$.
 Thus, an engineer focusing on why  $\mathcal{I'}$ is unrealizable can gain insight on why $\mathcal{I}$ is unrealizable. 
 
 %
@@ -15,7 +15,7 @@ Thus, an engineer focusing on why  $\mathcal{I'}$ is unrealizable can gain insig
 %\end{definition}
 
 
-Now we define the Alternating Sub-LTS relation to capture a notion of minimization that preserves unrealizability. Such a relation preserves counter strategies and forms a semi-lattice that can be used to incrementally minimize an unrealizable specification. 
+We define the Alternating Sub-LTS relation to capture a notion of minimization that preserves unrealizability. Such a relation preserves counter strategies and forms a semi-lattice that can be used to incrementally minimize an unrealizable specification. 
 
 %\textbf{
 %CREO QUE HAY QUE BORRAR ESTE PARRAFO
@@ -161,6 +161,5 @@ implies minimality. If the problem has multiple solutions the procedure
 will yield one of those.
 Such a procedure is also sound w.r.t to the problem statement because
 at every step it holds that $E' \sublts E$, thus the alternating condition
-is met and lemma ~\ref{theorem:theo.preserves-non-realizability} shows that
-$E'$ preserves unrealizability.
+is met and $E'$ preserves unrealizability.
 %\input{Proof_CS_Preservation}
