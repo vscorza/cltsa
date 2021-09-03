@@ -1,8 +1,12 @@
 #!/bin/bash
 #!/bin/bash
 echo "[[Running all reports for CONFNAME]]"
-CLTSA_DIR=$3
-TABLE_TYPE=$5
+echo "[[Building the tool]]"
+make clean
+make 2> /dev/null
+rm -f *.o
+
+
 ############ REALIZABLE CASES 
 echo "[[Running realizable examples]]"
 echo "[Lift controller]"
@@ -42,7 +46,7 @@ INSTANCES=""
 for ((i=1; i<=3;i++)) 
 	do 
 		i2=$((i+1))
-		INSTANCES="${INSTANCES} tests/ahb_arbiter_${i2}_sched.fsp AHB.Scheduler.${i2}"; done
+		INSTANCES="${INSTANCES} tests/ahb_arbiter_${i2}_sched.fsp AHB.Scheduler.${i2}"; 
 	done
 ./artifact -r -o results/ $INSTANCES
 

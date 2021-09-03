@@ -50,11 +50,6 @@ done
 
 cp src/Makefile "${CONF_NAME}"_artifact/Makefile
 
-echo "[[Building the tool]]"
-make clean -C "${CONF_NAME}"_artifact/
-make -C "${CONF_NAME}"_artifact/ 2> /dev/null
-rm -f "${CONF_NAME}"_artifact/*.o
-
 echo "[[Creating tars]]"
 tar czf "${CONF_NAME}"_artifact.tar.gz "${CONF_NAME}_artifact"
 
