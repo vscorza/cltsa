@@ -1,11 +1,11 @@
-CC=gcc
+#CC=gcc
 #CC=gcc-8
-#CC=clang
-CPARAMS = -Wall -Wextra -pedantic -Wno-unused-variable -Wno-unused-parameter -Wno-incompatible-pointer-types
-#CPARAMS =  -Wno-unused-variable -Wno-unused-parameter -Wno-format -Wno-incompatible-pointer-types -Wno-int-conversion -Wno-pointer-integer-compare -Wno-string-compare -Wno-switch
+CC=clang
+#CPARAMS = -Wall -Wextra -pedantic -Wno-unused-variable -Wno-unused-parameter -Wno-incompatible-pointer-types
+CPARAMS =  -Wno-unused-variable -Wno-unused-parameter -Wno-format -Wno-incompatible-pointer-types -Wno-int-conversion -Wno-pointer-integer-compare -Wno-string-compare -Wno-switch
 CLIBS = -lm
-#CFLAGS= -g -O0 
-CFLAGS= -g -O3
+CFLAGS= -g -O0 
+#CFLAGS= -g -O3
 NASM=nasm
 NASMFLAGS=-f elf64 -g -F DWARF
 LEX = lex
@@ -16,9 +16,9 @@ YACC = yacc -d
 YACCFLAGS = 
 
 
-all: artifact
+all: cltsa
 
-artifact: main.c cltsa_runner_c.o parser_utils_c.o y.tab.o lex.yy.o automaton_c.o automaton_utils_c.o \
+cltsa: main.c cltsa_runner_c.o parser_utils_c.o y.tab.o lex.yy.o automaton_c.o automaton_utils_c.o \
 	automaton_context_c.o automaton_importer_c.o bucket_list_c.o ordered_list_c.o \
 	max_heap_c.o obdd_c.o obdd_cache_c.o dictionary_c.o fast_pool_c.o bool_array_hash_table_c.o \
 	automaton_composite_hash_table_c.o automaton_serializer_c.o automaton_composition_c.o \

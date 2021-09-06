@@ -1906,7 +1906,7 @@ bool automaton_statement_syntax_to_single_automaton(automaton_automata_context* 
 				if(k >= added_elements)
 					adjusted_local_alphabet[i] = automaton->local_alphabet[j++];
 				else if(j >= automaton->local_alphabet_count)
-					adjusted_local_alphabet[i] = labels_ids[k];
+					adjusted_local_alphabet[i] = labels_ids[k++];
 				else
 					adjusted_local_alphabet[i] = automaton->local_alphabet[j] < labels_ids[k] ? automaton->local_alphabet[j++] : labels_ids[k++];
 			}

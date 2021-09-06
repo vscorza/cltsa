@@ -99,7 +99,8 @@ int main (int argc, char** argv){
 			}
 		}
 	}else{
-		print_help();
+		//print_help();
+		run_parse_test("tests/current_sut.fsp", "Current sut");
 	}
 	obdd_mgr* mgr	= parser_get_obdd_mgr();
 	obdd_mgr_destroy(mgr);

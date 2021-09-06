@@ -1,49 +1,41 @@
 TODO:
 =====
-- motivation hablar de fluents y no de eventos conjuntos
-- conclusion
-	- foco en event based semantic
-- discussion 
-	- que quede claro que el input es distinto y ergo las herramientas también
 - post paper
-	- revisar extensión de alfabeto
-		set Global_Alphabet = {a.on, a.off, b.on, b.off, y.on, y.off}
-		set Controllable_Alphabet = {y.on, y.off}
-		Y_BEH = ( {y.on, y.off} -> DONE).
-		A_BEH = (a.on -> a.off -> A_BEH)+{y.on, y.off}.
-		B_BEH = ( b.on -> B_ON_BEH),
-		B_ON_BEH = (b.off -> B_BEH | {a.on, a.off} -> b.off -> B_BEH)+{y.on, y.off}.
-		||ENV = (A_BEH || B_BEH || Y_BEH).
-		A_BEH >> "/tmp/motivating_example_a.rep".
-		B_BEH >> "/tmp/motivating_example_b.rep".
-		Y_BEH >> "/tmp/motivating_example_y.rep".
-		ENV >> "/tmp/motivating_example_env.rep".
-	- agregar estados numéricos a vstate
-		fluent F_A_ON = <a.on, a.off>
-		vstate fluent F_GOAL in ENV = {7}.
-		|f|GAME = (ENV).
-	- agregar .h a dependencias del makefile
+	- tool
+		- revisar extensión de alfabeto
+			set Global_Alphabet = {a.on, a.off, b.on, b.off, y.on, y.off}
+			set Controllable_Alphabet = {y.on, y.off}
+			Y_BEH = ( {y.on, y.off} -> DONE).
+			A_BEH = (a.on -> a.off -> A_BEH)+{y.on, y.off}.
+			B_BEH = ( b.on -> B_ON_BEH),
+			B_ON_BEH = (b.off -> B_BEH | {a.on, a.off} -> b.off -> B_BEH)+{y.on, y.off}.
+			||ENV = (A_BEH || B_BEH || Y_BEH).
+			A_BEH >> "/tmp/motivating_example_a.rep".
+			B_BEH >> "/tmp/motivating_example_b.rep".
+			Y_BEH >> "/tmp/motivating_example_y.rep".
+			ENV >> "/tmp/motivating_example_env.rep".
+		- agregar estados numéricos a vstate
+			fluent F_A_ON = <a.on, a.off>
+			vstate fluent F_GOAL in ENV = {7}.
+			|f|GAME = (ENV).
+		- renombrar/esconder		
+		- agregar una salida que reporte el avance del proceso de síntesis diagnóstico
+			- puede ser un proceso aparte, revisar forma de implementar
+		
 	- re-escribir versión ahb genbuf, revisar realizabilidad-no realizabilidad
 		- testear y comparar con valuaciones por estados
 			- ahb_1_n	
 				- completo			
 		- correr tests
-	- yoshiki takashima, nadia polikarpova
-	- revisar 
-		- patterns for property specification ...
-		- Compositional Model Checking for Multi-properties
-	- revisar gcov
-	- marcar línea del error en el editor por syntax error, agregar linenumber y pos a los syntax def de paser_utils, automaton_context
-	- habilitar line number en el editor
-	- check nondeterministic automata for equivalence, gr1
-	- indices y constantes para ltl game structures
-	- renombrar/esconder
-	- improve report loading from java client (automatically load exports)
-	- allow several specs to be loaded concurrently (tabs)
-	- syntax highlight strings
-	- undo/redo 
-	- signals view as complement to automaton
-	- estados por referencia (si se complica ni bola)
+	- editor
+		- marcar línea del error en el editor por syntax error, agregar linenumber y pos a los syntax def de paser_utils, automaton_context
+		- habilitar line number en el editor
+		- indices y constantes para ltl game structures
+		- improve report loading from java client (automatically load exports)
+		- allow several specs to be loaded concurrently (tabs)
+		- syntax highlight strings
+		- undo/redo 
+		- signals view as complement to automaton
 	- serializacion
 		- serializar valuaciones
 		- reimplementar volcando el contenido binario de arreglos
@@ -53,41 +45,31 @@ TODO:
 			-https://en.wikipedia.org/wiki/Lempel%E2%80%93Ziv%E2%80%93Markov_chain_algorithm		
 	- exportar a vdhl
 		- versión básica
-	- agregar una salida que reporte el avance del proceso de síntesis diagnóstico
-		- puede ser un proceso aparte, revisar forma de implementar
+	- estados por referencia (si se complica ni bola)
+	- revisar 
+		- patterns for property specification ...
+		- Compositional Model Checking for Multi-properties
+		- gcov
 	
 - clts	
-	- revisar archivo de mati			
-	- add specific composition algorithm when all operators are asynch/synch
-	- minimización de controladores
-		- idea vieja
-			- quedarse con el autómata donde se esconden las trans. controlables
-			- meter en pending todos estados donde se cambia valuación
-			- para cada estado en pending renombrar etiquetas de transiciones sacando las que estén compartidas entre todas las transiciones
-			- agregar a pending los pred.
-			- cuando se vacía pending se pueden reemplazar las tiras de estados lineales por contadores A = (when(t < len) -> A | when(t == len) -> A_2).
-			- revisar minimización de autómatas 
-		- idea nueva
-			- quitar todas las no controlables que se pueda
-				- ver si se puede probar complejidad del problema
-			- correr minimización de hopcroft sobre el resultado
+	- rediseñar algoritmo de composicion
+	- agregar representación redundante para el juego (sin informacion de etiquetas)
+	- revisar representación de rankings
+- minimización de controladores
+	- idea vieja
+		- quedarse con el autómata donde se esconden las trans. controlables
+		- meter en pending todos estados donde se cambia valuación
+		- para cada estado en pending renombrar etiquetas de transiciones sacando las que estén compartidas entre todas las transiciones
+		- agregar a pending los pred.
+		- cuando se vacía pending se pueden reemplazar las tiras de estados lineales por contadores A = (when(t < len) -> A | when(t == len) -> A_2).
+		- revisar minimización de autómatas 
+	- idea nueva
+		- quitar todas las no controlables que se pueda
+			- ver si se puede probar complejidad del problema
+		- correr minimización de hopcroft sobre el resultado
 	- agregar #include (archivos por clausura, evaluar no haya ciclos) y #define (con parámetros)
-- rankings
-	- mejorar legibilidad de pruebas
-	- armar ejemplos
 - revisar como se extrae la estrategia del ranking clts	
 - para responder no realizabilidad, se pueden inicializar los rankings en max-delta -1 y ver si se estabiliza ahí?
-- add cites
-	- DFS cited from "Verification by Augmented Finitary Abstraction"
-	- Presented in "Algorithmic verification of linear temporal logic specifications"
-	- Taken from DTS "Temporal Verification of Reactive Systems: Safety"
-- fds -> clts
-	- propose ranking approach, for mixed transitions the ranking si defined as:
-		project monitored alphabet and take the one representative for each and set the
-		ranking of the candidate as the min within the group
-- plan clts <-> lts 
-- prove translations between FLTL and AccLTL (E x F -> E' with new states and accepting sets)
-- update clts strategy
 - pvs
 	- review 
 		- https://www.mat.unb.br/~ayala/pvsclass17/
@@ -102,25 +84,6 @@ TODO:
 	- review 
 		-event structures
 		-pom sets
-- counterstrategy
-	X run in spectra our running example
-	- ours is smaller
-- validation
-	- corrimos todo lo de konighoefer y escalamos hasta donde pudimos
-	- corrimos uno de cada tipo de maoz, traducido a mano
-		- comparar con jvts y decir que diagnosticamos
-		- escribir a maoz
-- picking criteria
-	- overall review last paper to the best of our knowledge, list of papers, try all, one of each, but clear
-		- define criteria
-		- add and expand list from validation
-		- explain that everything with liveness from syntcomp (define proper criteria)
-			- has simplified arbiter (not included bc it was covered by ahb genbuf)
-			- then we found collector and AHB - Genbuf
-		- explain how per case which mutations were evaluated
-		- rephrase scalability add it as a point to validation
-		- explain that there why there are no other liveness specs from syntcomp (if ahb is not added)
-- after paper
 	- Dalal, write monitored adjustment operator
 		- syntax
 		- operation
@@ -129,8 +92,6 @@ TODO:
 			- specify master
 			- specify slave	
 		- prove correct decomposition of ahb arbiter into modules
-	- phd meeting	
-		- plan paper for clts, tool and general thesis layout
 	- examples
 		- use mm512 operations for ordered list in aut_push_string_to_list
 		- check spectra (maoz) repository for unrealizable specs
@@ -138,13 +99,6 @@ TODO:
 		- update values and validation section
 		- run tests for genbuf 4, 5, 6
 	- for non-realizability reduce diagnosis to single liveness goal not being satisfied
-	- run tests with dd, linear, dd wo last_partition optimization, goal minimization
-	- java client
-	- review literature and tools
-		- review Interpolation-Based Semantic Gate Extraction and its Applications to QBF Preprocessing (https://www.ac.tuwien.ac.at/people/fslivovsky/)	
-		- review papers gr_1_star, performance_heuristics for gr1, minimal assumption refinement gr1 and synthesizing adaptive test stategies papers
-		- review jits from maoz, subash shankar work https://dblp.org/pers/s/Shankar:Subash.html, Modular Synthesis of Reactive Programs Aalok Thakkar, Kedar Namjoshi, Richard Trefler
-		- review minisat
 	- see if following changes are worth the worry
 		- add transition disabling to speed up minimization time (should do enabled_in_degree and enabled_out_degree)
 			- change seems to be too expensive in terms of refactoring to be worthy, since it may not prove useful once automaton copy is not as frequent
@@ -153,11 +107,6 @@ TODO:
 			- check current minimization bitvector m with previous minimization bitvector p
 				if at any step p_i & m_i != p_i skip p (was not less or equal than m)
 				if check completes then use p result for m
-
-	- see if following changes are worth the worry
-		- further improve reports
-			- report separate synthesis cases individually within same file
-			- report composition times independently from model build	
 	- jvts for clts
 	- explore controllable simplification
 		- hide queue in genbuf (hide signals, tau reduction)
@@ -165,15 +114,7 @@ TODO:
 	- implement formulaic labels, [!lock && !start]G2 = ( lock && start -> G2), 
 		will create an automaton by initializing variables as defined in [v] and defining transitions by those who satisfhy
 		rho(v, v', s, s')
-	- graph the way removed transitions increment in the lineal minimization
-	- split functionality into several files, refactor
-	- synthesis improvements
-		- take bigger values first on synthesis
-		- take noncontrollable states first on synthesis
-		- keep inf scc over rankings
-	- compare against konighoefer and jvts systems, write experimental claim
 	- implement fluent consistency check
-	- implement IS_REALIZABLE(gr1). on parser
 	- review and relate gamma sat notion from symbolic repair with non trivial controllers, add check, compare to mtsa
 	- diagnose mutation over small parameters, produce hypothesis, scale both hypothesis and parameter to see if it holds
 POST PHD
@@ -195,11 +136,7 @@ POST PHD
 - [automata-reporter]
 	- integration of cfsp editor (parsing error location info)
 	- partial automaton exploration for big automata (jung adaptation with outgoing dashed labels)
-	- alla RATSY signal reporting for automaton
-- document obdd
 - adapt examples from https://www.doulos.com/knowhow/psl/
-- solve aliases in states e.g. S[i:R] = S_p[i], S_p[i:R] = (s->S_2[i]).
-- implement relabeling and hiding (use half adder to full adder example)
 - implement symbolic synthesis
 - implement diagnosis of maximal realizable ltl spec (maximal set of ltl formula s.t. at least one liveness is satisfied)
 - aparte de <a,b,c> introducir >a,b,c< que define concurrencia débil, puede transicionar con un subconj de estos
@@ -213,11 +150,3 @@ A = ( <a, b[i], c[i]>[i:R] -> A). should translate to A = ( {<a,b.1,c.1>, <a,b.2
 - add feedback for errors
 - partitioned composition, everything not on the frontier can be downloaded to a bucket list of files in order to free the memory
 - keep indexes and other information in the automaton structure (concolyc style)
-
-Meetings
-========
-2019-10-16 meeting
-- How does CLTS control problem compares to LTS cp? Does every CLTS control problem can be encoded as LTS?
-- Where is the benefit when solving hardware specs? Is it in the formalism or the tool?
-- What happens with the language of the composition? does the components languages are included in the target?
-- Explain the motivation behind the availability of two composition semantics, motivate it as allowing encapsulation of synch component asynchronous composed with another (or viceversa)
