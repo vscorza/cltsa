@@ -58,14 +58,11 @@ ltl fluent A_2		= (full).
 
 STRAT_p = S_0,
 S_0 = (deq.on-> S_1),
-S_1 = (<deq.off,enq.on>-> S_2|<deq.off,empty.on,enq.on>-> S_3),
-S_2 = (enq.off-> S_4|<enq.off,full.on>-> S_5),
-S_3 = (<empty.off,enq.off>-> S_7|<empty.off,enq.off,full.on>-> S_8),
-S_4 = (enq.on-> S_2),
-S_5 = (<>-> S_5),
-S_7 = (enq.on-> S_14),
+S_1 = (<enq.on,slc_0.on>-> S_2|<deq.off,empty.on,enq.on,slc_0.on>-> S_3),
+S_2 = (<>-> S_2),
+S_3 = (<deq.on,empty.off>-> S_8|<deq.on,empty.off,full.on>-> S_9),
 S_8 = (<>-> S_8),
-S_14 = (enq.off-> S_7|<enq.off,full.on>-> S_8).
+S_9 = (<>-> S_9).
 
 // tests
 equals FATAL_Genbuf_2_Sndrs_Debug(STRAT,STRAT_p).

@@ -16,11 +16,10 @@ COOKED = (moveToBelt->SUCCESSFULLY_COOKED_TWICE | cook->ERROR).
 
 |gr1| <{F_NotCooking}><{F_MoveToBelt}> STRAT = ENV_G.
 
-STRAT_p = (cook -> STRAT_p_1),
-STRAT_p_1 = (cooking -> STRAT_p_1 | finishedCooking -> STRAT_p_2),
-STRAT_p_2 = (cook -> STRAT_p_3),
-STRAT_p_3 = (cooking -> STRAT_p_3 | finishedCooking -> STRAT_p_4),
-STRAT_p_4 = (moveToBelt -> cook-> STRAT_p_1).
+STRAT_p = S_0,
+S_0 = (cook-> S_1),
+S_1 = (cooking-> S_1|<cook,finishedCooking>-> S_2),
+S_2 = (overHeated-> S_2).
 
 // tests
 equals FATAL_Biscotti_Strategy_Vstates(STRAT, STRAT_p).

@@ -1,59 +1,12 @@
-const N = 2
-const K = 2
+set Global_Alphabet = {a.on, a.off, b.on, b.off, y.on, y.off}
+set Controllable_Alphabet = {y.on, y.off}
+Y_BEH = ( {y.on, y.off} -> DONE),
 
-range R_N  = 0..(N-1)
-range R_K = 0..(N-1)
-
-/*****************************************************************************/
-set Global_Alphabet = {request[n:R_N][k:R_K],grant[n:R_N][k:R_K],idle[n:R_N],blocked[n:R_N]}
-set Controllable_Alphabet = {grant[n:R_N][k:R_K]}
-
-
-CLIENT[n:R_N] = (request[n][k:R_K]-> grant[n][k] ->CLIENT[n] | idle[n] -> CLIENT[n]).
-CLIENT_E[n:R_N] = (request[n][k:R_K]-> grant[n][k] ->CLIENT_E[n] | idle[n] -> CLIENT_E[n])+{blocked[n]}.
-SERVER[n:R_N] = (request[n][k:R_K]-> grant[n][k] -> SERVER[n]).
-
-BLOCKER[n:R_N]= (blocked[n]->BLOCKER[n]).
-
-
-||CLIENTS = (CLIENT[n:R_N]).
-||CLIENTS_E = (CLIENT_E[n:R_N]).
-||SERVERS = (SERVER[n:R_N]).
-||BLOCKERS = (BLOCKER[n:R_N]).
-
-||Plant = (CLIENTS || SERVERS || BLOCKERS).
-||Plant_E = (CLIENTS_E || SERVERS || BLOCKERS).
-
-
-CLIENT_0 >> "/tmp/alphabet_extend_client_0.rep".
-CLIENT_E_0 >> "/tmp/alphabet_extend_client_e_0.rep".
-SERVER_1 >> "/tmp/alphabet_extend_server_1.rep".
-CLIENTS >> "/tmp/alphabet_extend_clients.rep".
-CLIENTS_E >> "/tmp/alphabet_extend_clients_e.rep".
-SERVERS >> "/tmp/alphabet_extend_servers.rep".
-BLOCKER_0 >> "/tmp/alphabet_extend_blocker_0.rep".
-BLOCKERS >> "/tmp/alphabet_extend_blockers.rep".
-Plant >> "/tmp/alphabet_extend_plant.rep".
-Plant_E >> "/tmp/alphabet_extend_plant_e.rep".
-
-Plant_P = S_0,
-S_0 = (blocked_1-> S_0|blocked_0-> S_0|request_1_0-> S_1|request_1_1-> S_2|idle_1-> S_0|request_0_0-> S_3|request_0_1-> S_4|idle_0-> S_0),
-S_1 = (blocked_1-> S_1|blocked_0-> S_1|grant_1_0-> S_0|request_0_0-> S_7|request_0_1-> S_5|idle_0-> S_1),
-S_2 = (blocked_1-> S_2|blocked_0-> S_2|grant_1_1-> S_0|request_0_0-> S_8|request_0_1-> S_6|idle_0-> S_2),
-S_3 = (blocked_1-> S_3|blocked_0-> S_3|request_1_0-> S_7|request_1_1-> S_8|idle_1-> S_3|grant_0_0-> S_0),
-S_4 = (blocked_1-> S_4|blocked_0-> S_4|request_1_0-> S_5|request_1_1-> S_6|idle_1-> S_4|grant_0_1-> S_0),
-S_5 = (blocked_1-> S_5|blocked_0-> S_5|grant_1_0-> S_4|grant_0_1-> S_1),S_6 = (blocked_1-> S_6|blocked_0-> S_6|grant_1_1-> S_4|grant_0_1-> S_2),
-S_7 = (blocked_1-> S_7|blocked_0-> S_7|grant_1_0-> S_3|grant_0_0-> S_1),S_8 = (blocked_1-> S_8|blocked_0-> S_8|grant_1_1-> S_3|grant_0_0-> S_2).
-
-Plant_E_P = S_0,
-S_0 = (request_1_0-> S_1|request_1_1-> S_2|idle_1-> S_0|request_0_0-> S_3|request_0_1-> S_4|idle_0-> S_0),
-S_1 = (grant_1_0-> S_0|request_0_0-> S_7|request_0_1-> S_5|idle_0-> S_1),
-S_2 = (grant_1_1-> S_0|request_0_0-> S_8|request_0_1-> S_6|idle_0-> S_2),
-S_3 = (request_1_0-> S_7|request_1_1-> S_8|idle_1-> S_3|grant_0_0-> S_0),
-S_4 = (request_1_0-> S_5|request_1_1-> S_6|idle_1-> S_4|grant_0_1-> S_0),
-S_5 = (grant_1_0-> S_4|grant_0_1-> S_1),S_6 = (grant_1_1-> S_4|grant_0_1-> S_2),
-S_7 = (grant_1_0-> S_3|grant_0_0-> S_1),S_8 = (grant_1_1-> S_3|grant_0_0-> S_2).
-
-equals FATAL_ALPHABET_EXTEND_PLANT(Plant, Plant_P).
-equals FATAL_ALPHABET_EXTEND_PLANT_EXTENDED(Plant_E, Plant_E_P).
-
+A_BEH = (a.on -> a.off -> A_BEH)+{y.on, y.off}.
+B_BEH = ( b.on -> B_ON_BEH),
+B_ON_BEH = (b.off -> B_BEH | {a.on, a.off} -> b.off -> B_BEH)+{y.on, y.off}.
+||ENV = (A_BEH || B_BEH || Y_BEH).
+A_BEH >> "/tmp/motivating_example_a.rep".
+B_BEH >> "/tmp/motivating_example_b.rep".
+Y_BEH >> "/tmp/motivating_example_y.rep".
+ENV >> "/tmp/motivating_example_env.rep".

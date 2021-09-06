@@ -2,18 +2,8 @@ TODO:
 =====
 - post paper
 	- tool
-		- revisar extensión de alfabeto
-			set Global_Alphabet = {a.on, a.off, b.on, b.off, y.on, y.off}
-			set Controllable_Alphabet = {y.on, y.off}
-			Y_BEH = ( {y.on, y.off} -> DONE).
-			A_BEH = (a.on -> a.off -> A_BEH)+{y.on, y.off}.
-			B_BEH = ( b.on -> B_ON_BEH),
-			B_ON_BEH = (b.off -> B_BEH | {a.on, a.off} -> b.off -> B_BEH)+{y.on, y.off}.
-			||ENV = (A_BEH || B_BEH || Y_BEH).
-			A_BEH >> "/tmp/motivating_example_a.rep".
-			B_BEH >> "/tmp/motivating_example_b.rep".
-			Y_BEH >> "/tmp/motivating_example_y.rep".
-			ENV >> "/tmp/motivating_example_env.rep".
+		- update tests funct-tests
+		- escribir test extensión de alfabeto
 		- agregar estados numéricos a vstate
 			fluent F_A_ON = <a.on, a.off>
 			vstate fluent F_GOAL in ENV = {7}.
@@ -21,7 +11,6 @@ TODO:
 		- renombrar/esconder		
 		- agregar una salida que reporte el avance del proceso de síntesis diagnóstico
 			- puede ser un proceso aparte, revisar forma de implementar
-		
 	- re-escribir versión ahb genbuf, revisar realizabilidad-no realizabilidad
 		- testear y comparar con valuaciones por estados
 			- ahb_1_n	
@@ -52,35 +41,12 @@ TODO:
 		- gcov
 	
 - clts	
-	- rediseñar algoritmo de composicion
+	- composición
+		- rediseñar algoritmo de composicion
+		- justificar tipos de composicion https://www.eetimes.com/understanding-clock-domain-crossing-issues/
+		- w.r.t. ||* prove clts -> lts cannot preserve consistency with parallel composition
 	- agregar representación redundante para el juego (sin informacion de etiquetas)
 	- revisar representación de rankings
-- minimización de controladores
-	- idea vieja
-		- quedarse con el autómata donde se esconden las trans. controlables
-		- meter en pending todos estados donde se cambia valuación
-		- para cada estado en pending renombrar etiquetas de transiciones sacando las que estén compartidas entre todas las transiciones
-		- agregar a pending los pred.
-		- cuando se vacía pending se pueden reemplazar las tiras de estados lineales por contadores A = (when(t < len) -> A | when(t == len) -> A_2).
-		- revisar minimización de autómatas 
-	- idea nueva
-		- quitar todas las no controlables que se pueda
-			- ver si se puede probar complejidad del problema
-		- correr minimización de hopcroft sobre el resultado
-	- agregar #include (archivos por clausura, evaluar no haya ciclos) y #define (con parámetros)
-- revisar como se extrae la estrategia del ranking clts	
-- para responder no realizabilidad, se pueden inicializar los rankings en max-delta -1 y ver si se estabiliza ahí?
-- pvs
-	- review 
-		- https://www.mat.unb.br/~ayala/pvsclass17/
-		- http://fm.csl.sri.com/SSFT11/ITPSummerFormal2011.pdf
-	- read and run http://www.fit.vutbr.cz/~matousp/doc/2001/mosis01.html
-	- write clts props
-	- read and run https://www.irif.fr/~haberm/ADVANCE/Year3/Papers/PA.ps
-	- write ltl props
-	- write simplest embedding
-- clts w.r.t. ||*
-	- prove clts -> lts cannot preserve consistency with parallel composition
 	- review 
 		-event structures
 		-pom sets
@@ -117,6 +83,33 @@ TODO:
 	- implement fluent consistency check
 	- review and relate gamma sat notion from symbolic repair with non trivial controllers, add check, compare to mtsa
 	- diagnose mutation over small parameters, produce hypothesis, scale both hypothesis and parameter to see if it holds
+	
+- minimización de controladores
+	- idea vieja
+		- quedarse con el autómata donde se esconden las trans. controlables
+		- meter en pending todos estados donde se cambia valuación
+		- para cada estado en pending renombrar etiquetas de transiciones sacando las que estén compartidas entre todas las transiciones
+		- agregar a pending los pred.
+		- cuando se vacía pending se pueden reemplazar las tiras de estados lineales por contadores A = (when(t < len) -> A | when(t == len) -> A_2).
+		- revisar minimización de autómatas 
+	- idea nueva
+		- quitar todas las no controlables que se pueda
+			- ver si se puede probar complejidad del problema
+		- correr minimización de hopcroft sobre el resultado
+	- agregar #include (archivos por clausura, evaluar no haya ciclos) y #define (con parámetros)
+- mu calculus para clts
+- revisar como se extrae la estrategia del ranking clts	
+- assume guarantee para sistemas abiertos
+- para responder no realizabilidad, se pueden inicializar los rankings en max-delta -1 y ver si se estabiliza ahí?
+- pvs
+	- review 
+		- https://www.mat.unb.br/~ayala/pvsclass17/
+		- http://fm.csl.sri.com/SSFT11/ITPSummerFormal2011.pdf
+	- read and run http://www.fit.vutbr.cz/~matousp/doc/2001/mosis01.html
+	- write clts props
+	- read and run https://www.irif.fr/~haberm/ADVANCE/Year3/Papers/PA.ps
+	- write ltl props
+	- write simplest embedding
 POST PHD
 ========
 - develop mixed structures 

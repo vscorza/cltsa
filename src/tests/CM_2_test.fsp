@@ -101,19 +101,21 @@ S_28 = (cat_move_0_0-> S_27|cat_move_0_1-> S_15),
 S_29 = (cat_move_0_0-> S_3|cat_move_0_1-> S_4),
 S_30 = (cat_move_0_0-> S_8|cat_move_0_1-> S_9).
 
-P_STRAT = S_0,
-S_0 = (mouse_move_0_2-> S_1),
-S_1 = (cat_move_0_0-> S_2|cat_move_0_1-> S_3),
-S_2 = (mouse_move_0_2-> S_45),
-S_3 = (mouse_move_0_1-> S_9),
-S_5 = (mouse_move_0_1-> S_7),
+P_STRAT  = S_0,
+S_0 = (mouse_move_0_1-> S_1),
+S_1 = (cat_move_0_0-> S_5|cat_move_0_1-> S_6),
+S_3 = (mouse_move_0_1-> S_45),
+S_4 = (mouse_move_0_1-> S_9),
+S_5 = (mouse_move_0_2-> S_7),
 S_6 = (mouse_move_0_1-> S_9),
-S_7 = (cat_move_0_0-> S_5|cat_move_0_1-> S_6),
+S_7 = (cat_move_0_0-> S_3|cat_move_0_1-> S_4),
 S_9 = (cat_move_0_0-> S_5|cat_move_0_1-> S_6|cat_move_0_2-> S_12),
-S_12 = (mouse_move_0_1-> S_28),
-S_28 = (cat_move_0_1-> S_6|cat_move_0_2-> S_12),
-S_45 = (cat_move_0_0-> S_2|cat_move_0_1-> S_3).
-P_STRAT >> "/tmp/CM_2_strat_p.rep".
+S_12 = (mouse_move_0_0-> S_28),
+S_22 = (mouse_move_0_1-> S_9),
+S_24 = (mouse_move_0_1-> S_27),
+S_27 = (cat_move_0_1-> S_6|cat_move_0_2-> S_12),
+S_28 = (cat_move_0_1-> S_22|cat_move_0_2-> S_24),
+S_45 = (cat_move_0_0-> S_5|cat_move_0_1-> S_6).
 
 P_REMOVE_NO_STRAT  = S_0,
 S_0 = (mouse_move_0_2-> S_1),
@@ -122,6 +124,8 @@ S_2 = (mouse_move_0_2-> S_11),
 S_3 = (mouse_move_0_2-> S_4),
 S_4 = (cat_move_0_0-> S_2),
 S_11 = (cat_move_0_1-> S_3).
+
+STRAT >> "/tmp/cm_2_test_strat.rep".
 
 // tests
 equals FATAL_CAT_MOUSE_ENV_TEST(ENV, P_ENV).

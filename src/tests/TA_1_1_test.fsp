@@ -115,13 +115,22 @@ ServiceMonitor_0 >> "/tmp/t_a_1_1_service_monitor_0.rep".
 AgencyMonitor >> "/tmp/t_a_1_1_agency_monitor.rep".
 Plant >> "/tmp/t_a_1_1_plant.rep".
 
-STRAT_P  = S_0,
-S_0 = (agency_request-> S_1|idle-> S_2),S_1 = (idle-> S_3|query_0-> S_4),S_2 = (agency_request-> S_3|idle-> S_2),
-S_3 = (idle-> S_3|query_0-> S_5),S_4 = (available_0-> S_21|unavailable_0-> S_22),S_5 = (available_0-> S_6|unavailable_0-> S_7),
-S_6 = (steps_0_0-> S_9),S_7 = (query_fail_0-> S_8),S_8 = (agency_fail-> S_14),S_9 = (query_succ_0-> S_10),S_10 = (select_0-> S_11),
-S_11 = (uncommited_0-> S_12|commited_0-> S_13),S_12 = (cancel_0-> S_8),S_13 = (cancel_0-> S_8),S_14 = (agency_request-> S_18|idle-> S_19),
-S_18 = (idle-> S_20|query_0-> S_4),S_19 = (agency_request-> S_20|idle-> S_19),S_20 = (idle-> S_20|query_0-> S_5),S_21 = (steps_0_0-> S_23),
-S_22 = (query_fail_0-> S_8),S_23 = (query_succ_0-> S_10).
+STRAT_P = S_0,
+S_0 = (agency_request-> S_1|idle-> S_2),
+S_1 = (idle-> S_3|query_0-> S_4),
+S_2 = (agency_request-> S_3|idle-> S_2),
+S_3 = (idle-> S_3|query_0-> S_4),
+S_4 = (unavailable_0-> S_5|available_0-> S_6),
+S_5 = (query_fail_0-> S_7),
+S_6 = (steps_0_0-> S_8),
+S_7 = (agency_fail-> S_13),
+S_8 = (query_succ_0-> S_9),
+S_9 = (select_0-> S_10),
+S_10 = (commited_0-> S_11|uncommited_0-> S_12),
+S_11 = (agency_fail-> S_13),
+S_12 = (agency_fail-> S_13),
+S_13 = (agency_request-> S_16|idle-> S_13),
+S_16 = (idle-> S_16|query_0-> S_4).
 
 ENV_P = S_0,
 S_0 = (agency_request-> S_1|idle-> S_2),S_1 = (idle-> S_3|query_0-> S_18),S_2 = (agency_request-> S_3|idle-> S_2),S_3 = (idle-> S_3|query_0-> S_4),
@@ -135,6 +144,7 @@ S_28 = (query_succ_0-> S_8),S_29 = (purchase_succ_0-> S_22).
 
 
 ENV_P >> "/tmp/t_a_1_1_env_p.rep".
+STRAT >> "/tmp/t_a_1_1_strat.rep".
 /*
 SERVICE_P
 
