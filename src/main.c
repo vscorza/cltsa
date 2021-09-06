@@ -100,7 +100,7 @@ int main (int argc, char** argv){
 		}
 	}else{
 		//print_help();
-		run_parse_test("tests/current_sut.fsp", "Current sut");
+		run_parse_test("tests/alphabet_extend_test.fsp", "Alphabet Extend");
 	}
 	obdd_mgr* mgr	= parser_get_obdd_mgr();
 	obdd_mgr_destroy(mgr);

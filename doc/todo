@@ -2,7 +2,6 @@ TODO:
 =====
 - post paper
 	- tool
-		- update tests funct-tests
 		- escribir test extensión de alfabeto
 		- agregar estados numéricos a vstate
 			fluent F_A_ON = <a.on, a.off>
