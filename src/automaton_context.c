@@ -1752,13 +1752,14 @@ bool automaton_statement_syntax_to_single_automaton(automaton_automata_context* 
 		}
 		//set declared mask
 		bool index_found	= false;
-		for(i = 0; i < ctx->state_valuations_count; i++){
-			index_found	= false;
-			for(j = 0; j < current_vstates_count; j++){
+		bool state_is_numeric	= false;
+		for(j = 0; j < current_vstates_count; j++){
+			for(i = 0; i < ctx->state_valuations_count; i++){
+				index_found	= false;
 				if(strcmp(ctx->state_valuations_names[i], current_vstates_names[j]) == 0){
-					vstates_ctx_indexes[i]	= j;
+					vstates_ctx_indexes[j]	= i;
 					index_found	= true;
-					fluent_index	= GET_STATE_FLUENT_INDEX(ctx->state_valuations_count, 0, j);
+					fluent_index	= GET_STATE_FLUENT_INDEX(ctx->state_valuations_count, 0, i);
 					SET_FLUENT_BIT(automaton->state_valuations_declared, fluent_index);
 					break;
 				}
@@ -1771,14 +1772,32 @@ bool automaton_statement_syntax_to_single_automaton(automaton_automata_context* 
 		for(i = 0; i < current_vstates_count; i++){
 			for(j = 0; j < current_vstates_syntaxes[i]->count; j++){
 				if(current_vstates_syntaxes[i]->list[j]->indexes == NULL){
-					aut_push_string_to_list(labels_list, current_vstates_syntaxes[i]->list[j]->name, &label_position);
-					//add state to valuation set
-					//***********
-					//(uint32_t)label_position
-					fluent_index	= GET_STATE_FLUENT_INDEX(ctx->state_valuations_count, label_position, vstates_ctx_indexes[i]);
-					SET_FLUENT_BIT(automaton->state_valuations, fluent_index);
-					automaton_bucket_add_entry(automaton->inverted_state_valuations[vstates_ctx_indexes[i]],
-							label_position);
+					state_is_numeric	= true;
+				    for (k = 0; k < strlen(current_vstates_syntaxes[i]->list[j]->name); k++)
+				        if (!isdigit(current_vstates_syntaxes[i]->list[j]->name[k])){
+				        	state_is_numeric	= false;
+				        	break;
+				        }
+				    if(state_is_numeric){
+						//add state to valuation set
+						//***********
+						//(uint32_t)label_position
+				    	uint32_t numeric_state	= atoi(current_vstates_syntaxes[i]->list[j]->name);
+						fluent_index	= GET_STATE_FLUENT_INDEX(ctx->state_valuations_count, numeric_state, vstates_ctx_indexes[i]);
+						SET_FLUENT_BIT(automaton->state_valuations, fluent_index);
+						automaton_bucket_add_entry(automaton->inverted_state_valuations[vstates_ctx_indexes[i]],
+								numeric_state);
+				    }else{
+
+						aut_push_string_to_list(labels_list, current_vstates_syntaxes[i]->list[j]->name, &label_position);
+						//add state to valuation set
+						//***********
+						//(uint32_t)label_position
+						fluent_index	= GET_STATE_FLUENT_INDEX(ctx->state_valuations_count, label_position, vstates_ctx_indexes[i]);
+						SET_FLUENT_BIT(automaton->state_valuations, fluent_index);
+						automaton_bucket_add_entry(automaton->inverted_state_valuations[vstates_ctx_indexes[i]],
+								label_position);
+				    }
 				}else{
 					explicit_start_valuation 	= automaton_indexes_valuation_create_from_indexes(tables, current_vstates_syntaxes[i]->list[j]->indexes, NULL);
 										if(ret_value != NULL){

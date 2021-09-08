@@ -311,10 +311,11 @@ compositionType:
 equalsExp:
 	t_EQUALS t_UPPER_IDENT '(' t_UPPER_IDENT ',' t_UPPER_IDENT ')' '.'	{$$ = automaton_equality_check_syntax_create($2,$4,$6); free($1); free($2);free($4);free($6);}
 
-	
 vstates:
 	vstates ',' ltsStateLabel						{$$ = automaton_vstates_syntax_concat_state($1,$3);}
+	|vstates ',' t_INTEGER						{$$ = automaton_vstates_syntax_concat_int($1,$3);}	
 	|ltsStateLabel									{$$ = automaton_vstates_syntax_create_from_state($1);}
+	|t_INTEGER										{$$ = automaton_vstates_syntax_create_from_int($1);}	
 	|										{$$	= NULL;}
 	;	
 stateFluent:

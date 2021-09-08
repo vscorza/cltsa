@@ -12,6 +12,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdbool.h>
+#include <ctype.h>
 #include <assert.h>
 #include <time.h>
 #include <inttypes.h>

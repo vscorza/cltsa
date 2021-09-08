@@ -1825,6 +1825,7 @@ void run_functional_tests(){
 	run_parse_test("tests/exploration-robot-realizable_test_debug.fsp", "realizable exploration robot test debug version");
 	run_parse_test_linear("tests/exploration-robot-unrealizable_test_lineal.fsp", "unrealizable exploration robot test linear test");
 	run_parse_test("tests/biscotti_vstates.fsp", "biscotti vstates");
+	run_parse_test("tests/vstates_test.fsp", "vstates test");
 	run_parse_test("tests/composition_vstates.fsp", "composition vstates");
 	run_parse_test("tests/lts_serialization.fsp", "lts serialization"); //this one has no checks
 	run_parse_test("tests/lts_serialization_composition_test.fsp", "lts serialization composition"); //this one has no checks

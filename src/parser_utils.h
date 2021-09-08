@@ -318,7 +318,9 @@ automaton_statement_syntax* automaton_statement_syntax_create(automaton_statemen
 automaton_import_syntax *automaton_import_syntax_create(char *name, char *filename);
 bool automaton_syntax_is_reserved(char* token);
 automaton_vstates_syntax* automaton_vstates_syntax_concat_state(automaton_vstates_syntax* vstates, automaton_state_label_syntax* state);
+automaton_vstates_syntax* automaton_vstates_syntax_concat_int(automaton_vstates_syntax* vstates, uint32_t state_number);
 automaton_vstates_syntax* automaton_vstates_syntax_create_from_state(automaton_state_label_syntax* state);
+automaton_vstates_syntax* automaton_vstates_syntax_create_from_int(uint32_t state_number);
 void automaton_vstates_syntax_destroy(automaton_vstates_syntax* vstates);
 automaton_vstates_fluent_syntax* automaton_vstates_fluent_syntax_create(char* name, char* automaton_name, automaton_vstates_syntax* states);
 void automaton_vstates_fluent_syntax_destroy(automaton_vstates_fluent_syntax* vstates_fluent);

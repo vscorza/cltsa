@@ -1,5 +1,5 @@
-set Global_Alphabet = {cook, finishedCooking, cooking, moveToBelt, overHeated}
-set Controllable_Alphabet = {cook, moveToBelt}
+set Global_Alphabet = {cook, finishedCooking, cooking, moveToBelt, overHeated, refine, reject, back}
+set Controllable_Alphabet = {cook, moveToBelt, refine, reject}
 
 BISCOTTI = (cook->COOKING),
 COOKING = (cooking->COOKING | finishedCooking->FINISHED | <cook,finishedCooking>->OVERHEATED), 
@@ -7,23 +7,65 @@ FINISHED = (cook->COOKING | moveToBelt->BISCOTTI),
 OVERHEATED = (overHeated->OVERHEATED).
 
 vstate fluent F_NotCooking in BISCOTTI = {FINISHED, OVERHEATED}.
-vstate fluent F_MoveToBelt in BISCOTTI = {BISCOTTI}.
+vstate fluent F_MoveToBelt in BISCOTTI = {0}.//BISCOTTI
 
 SUCCESSFULLY_COOKED_TWICE = (cook->cook->COOKED),
 COOKED = (moveToBelt->SUCCESSFULLY_COOKED_TWICE | cook->ERROR).
-|| ENV =(BISCOTTI || SUCCESSFULLY_COOKED_TWICE). 
-|f| ENV_G =(BISCOTTI || SUCCESSFULLY_COOKED_TWICE).
+|f| ENV =(BISCOTTI || SUCCESSFULLY_COOKED_TWICE). 
 
-|gr1| <{F_NotCooking}><{F_MoveToBelt}> STRAT = ENV_G.
+|gr1| <{F_NotCooking}><{F_MoveToBelt}> STRAT = ENV.
+
+
+
+STATE_TESTER = (refine -> STATE_REFINE | reject -> STATE_REJECT),
+STATE_REFINE = (back -> STATE_TESTER),
+STATE_REJECT = (back -> STATE_TESTER).
+
+vstate fluent F_REFINE in STATE_TESTER = {1}.
+
+|f| STATE_TESTER_G = (STATE_TESTER).
+
+
+|| ENV_TEST =(BISCOTTI || SUCCESSFULLY_COOKED_TWICE || STATE_TESTER). 
+|f| ENV_TEST_G =(BISCOTTI || SUCCESSFULLY_COOKED_TWICE || STATE_TESTER).
+
+|gr1| <{F_NotCooking}><{F_MoveToBelt,F_REFINE}> STRAT_TEST = ENV_TEST_G.
+
+
+BISCOTTI >> "/tmp/biscotti_biscotti.rep".
+SUCCESSFULLY_COOKED_TWICE >> "/tmp/biscotti_twice.rep".
+STATE_TESTER >> "/tmp/biscotti_state_tester.rep".
+ENV_TEST >> "/tmp/biscotti_ENV_tester.rep".
+ENV_TEST_G >> "/tmp/biscotti_ENV_G_tester.rep".
+
+ENV >> "/tmp/biscotti_ENV.rep".
+STRAT >> "/tmp/biscotti_strat.rep".
+STRAT_p >> "/tmp/biscotti_strat_p.rep".
+STRAT_TEST >> "/tmp/biscotti_strat_tester.rep".
+STATE_TESTER_G >> "/tmp/biscotti_state_tester_g.rep".
 
 STRAT_p = S_0,
 S_0 = (cook-> S_1),
-S_1 = (cooking-> S_1|<cook,finishedCooking>-> S_2),
-S_2 = (overHeated-> S_2).
+S_1 = (cooking-> S_1|finishedCooking-> S_2),
+S_2 = (cook-> S_3),
+S_3 = (cooking-> S_3|finishedCooking-> S_5),
+S_5 = (moveToBelt-> S_0).
+
+STRAT_TEST_p= S_0,
+S_0 = (refine-> S_2),
+S_1 = (cook-> S_4|back-> S_5),
+S_2 = (cook-> S_3|back-> S_0),
+S_3 = (back-> S_9|cooking-> S_3|finishedCooking-> S_11),
+S_4 = (back-> S_9|cooking-> S_3|finishedCooking-> S_11),
+S_5 = (refine-> S_2),
+S_9 = (refine-> S_3|cooking-> S_9|finishedCooking-> S_10),
+S_10 = (cook-> S_13),
+S_11 = (cook-> S_16|back-> S_10),
+S_13 = (refine-> S_16|cooking-> S_13|finishedCooking-> S_19),
+S_16 = (back-> S_13|cooking-> S_16|finishedCooking-> S_20),
+S_19 = (moveToBelt-> S_0),
+S_20 = (moveToBelt-> S_1|back-> S_19).
 
 // tests
 equals FATAL_Biscotti_Strategy_Vstates(STRAT, STRAT_p).
-
-ENV_G >> "/tmp/biscotti_ENV_G.rep".
-STRAT >> "/tmp/biscotti_strat.rep".
-STRAT_p >> "/tmp/biscotti_strat_p.rep".
+equals FATAL_Biscotti_Strategy_Composed_Vstates(STRAT_TEST, STRAT_TEST_p).

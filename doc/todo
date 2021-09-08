@@ -2,11 +2,6 @@ TODO:
 =====
 - post paper
 	- tool
-		- escribir test extensión de alfabeto
-		- agregar estados numéricos a vstate
-			fluent F_A_ON = <a.on, a.off>
-			vstate fluent F_GOAL in ENV = {7}.
-			|f|GAME = (ENV).
 		- renombrar/esconder		
 		- agregar una salida que reporte el avance del proceso de síntesis diagnóstico
 			- puede ser un proceso aparte, revisar forma de implementar

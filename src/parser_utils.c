@@ -420,11 +420,43 @@ automaton_vstates_syntax* automaton_vstates_syntax_concat_state(automaton_vstate
 	vstates->list[vstates->count - 1]	= state;
 	return vstates;
 }
+
+automaton_vstates_syntax* automaton_vstates_syntax_concat_int(automaton_vstates_syntax* vstates, uint32_t state_number){
+	vstates->count++;
+	automaton_expression_syntax** ptr	= realloc(vstates->list
+			, sizeof(automaton_state_label_syntax*) * vstates->count);
+	if(ptr == NULL){
+		printf("Could not allocate more space for vstates list\n");
+		exit(-1);
+	}
+	vstates->list	= ptr;
+	automaton_state_label_syntax	*state_label	= malloc(sizeof(automaton_state_label_syntax));
+	char *buf	= malloc(sizeof(char) * 100);
+	snprintf (buf, sizeof(buf), "%d", state_number);
+	state_label->name	=  buf;
+	state_label->indexes	= NULL;
+	vstates->list[vstates->count - 1]	= state_label;
+	return vstates;
+}
+
 automaton_vstates_syntax* automaton_vstates_syntax_create_from_state(automaton_state_label_syntax* state){
 	automaton_vstates_syntax* vstates	= malloc(sizeof(automaton_vstates_syntax));
 	vstates->count	= 1;
 	vstates->list	= malloc(sizeof(automaton_state_label_syntax*));
 	vstates->list[0]= state;
+	return vstates;
+}
+
+automaton_vstates_syntax* automaton_vstates_syntax_create_from_int(uint32_t state_number){
+	automaton_vstates_syntax* vstates	= malloc(sizeof(automaton_vstates_syntax));
+	vstates->count	= 1;
+	vstates->list	= malloc(sizeof(automaton_state_label_syntax*));
+	automaton_state_label_syntax	*state_label	= malloc(sizeof(automaton_state_label_syntax));
+	char *buf	= malloc(sizeof(char) * 100);
+	snprintf (buf, sizeof(buf), "%d", state_number);
+	state_label->name	=  buf;
+	state_label->indexes	= NULL;
+	vstates->list[0]= state_label;
 	return vstates;
 }
 
