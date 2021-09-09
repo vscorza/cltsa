@@ -166,6 +166,8 @@ typedef struct automaton_component_syntax_str{
 	automaton_index_syntax* index;
 	automaton_indexes_syntax* indexes;
 	automaton_synchronization_type_syntax synch_type;
+	struct automaton_relabel_set_str *relabel_set;
+	struct automaton_hide_set_str *hide_set;
 }automaton_component_syntax;
 typedef struct automaton_components_syntax_str{
 	uint32_t count;
@@ -240,6 +242,19 @@ typedef struct automaton_import_syntax_str{
 	char *name;
 	char *filename;
 }automaton_import_syntax;
+typedef struct automaton_relabel_set_syntax_str{
+	uint32_t count;
+	struct automaton_relabel_pair_syntax_str **pairs;
+}automaton_relabel_set_syntax;
+typedef struct automaton_hide_set_syntax_str{
+	bool	is_hiding;
+	struct automaton_set_syntax_str **elements;
+}automaton_hide_set_syntax;
+typedef struct automaton_relabel_pair_syntax_str{
+	automaton_label_syntax *old;
+	automaton_label_syntax *new;
+}automaton_relabel_pair_syntax;
+
 /****************
 ==== FUNCTIONS ====
 */
@@ -267,6 +282,10 @@ void automaton_equivalence_check_syntax_destroy(automaton_equivalence_check_synt
 void automaton_import_syntax_destroy(automaton_import_syntax* import_syntax);
 void ltl_rule_syntax_destroy(ltl_rule_syntax* ltl_rule);
 void ltl_fluent_syntax_destroy(ltl_fluent_syntax* ltl_fluent);
+void automaton_relabel_set_syntax_destroy(automaton_relabel_set_syntax *relabel_set);
+void automaton_hide_set_syntax_destroy(automaton_hide_set_syntax *hide_set);
+void automaton_relabel_pair_syntax_destroy(automaton_relabel_pair_syntax *relabel_pair);
+
 automaton_expression_syntax* automaton_expression_syntax_create(automaton_expression_type_syntax type, automaton_expression_syntax* first
 		, automaton_expression_syntax* second, char* string_terminal, int32_t integer_terminal, automaton_expression_operator_syntax op);
 automaton_set_syntax* automaton_set_syntax_create(bool is_ident, uint32_t count, uint32_t* labels_count,
@@ -307,7 +326,13 @@ automaton_gr1_game_syntax* automaton_gr1_game_syntax_create(char* name, char* co
 automaton_components_syntax* automaton_components_syntax_create(automaton_component_syntax* component);
 automaton_components_syntax* automaton_components_syntax_add_component(automaton_components_syntax* components, automaton_component_syntax* component, automaton_synchronization_type_syntax type);
 automaton_component_syntax* automaton_component_syntax_create(char* ident, char* prefix, automaton_index_syntax* index
-		, automaton_indexes_syntax* indexes,  automaton_synchronization_type_syntax type);
+		, automaton_indexes_syntax* indexes,  automaton_synchronization_type_syntax type
+		, automaton_relabel_set_syntax *relabel_set, automaton_hide_set_syntax *hide_set);
+automaton_hide_set_syntax *automaton_hide_set_syntax_create(automaton_set_syntax *elements,bool is_hiding);
+automaton_relabel_set_syntax	*automaton_relabel_set_create_from_label(automaton_relabel_pair_syntax *pair);
+automaton_relabel_set_syntax	*automaton_relabel_set_concat_labels(automaton_relabel_set_syntax *set, automaton_relabel_pair_syntax *pair);
+automaton_relabel_pair_syntax	*automaton_relabel_pair_create(automaton_label_syntax *old, automaton_label_syntax * new);
+
 automaton_program_syntax* automaton_program_syntax_create(automaton_statement_syntax* first_statement);
 automaton_program_syntax* automaton_program_syntax_add_statement(automaton_program_syntax* program, automaton_statement_syntax* statement);
 automaton_statement_syntax* automaton_statement_syntax_create(automaton_statement_type_syntax type, automaton_composition_syntax* composition_def,

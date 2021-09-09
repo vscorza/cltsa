@@ -360,15 +360,51 @@ automaton_equivalence_check_syntax* automaton_equality_check_syntax_create(char*
 	return check;
 }
 automaton_component_syntax* automaton_component_syntax_create(char* ident, char* prefix, automaton_index_syntax* index
-		, automaton_indexes_syntax* indexes,  automaton_synchronization_type_syntax type){
+		, automaton_indexes_syntax* indexes,  automaton_synchronization_type_syntax type
+		, automaton_relabel_set_syntax *relabel_set, automaton_hide_set_syntax *hide_set){
 	automaton_component_syntax* component	= malloc(sizeof(automaton_component_syntax));
 	aut_dupstr(&(component->ident), ident);
 	aut_dupstr(&(component->prefix), prefix);
 	component->index	= index;
 	component->indexes	= indexes;
-	component->synch_type		= type;
+	component->synch_type	= type;
+	component->relabel_set	= relabel_set;
+	component->hide_set		= hide_set;
 	return component;
 }
+
+automaton_hide_set_syntax *automaton_hide_set_syntax_create(automaton_set_syntax *elements,bool is_hiding){
+	automaton_hide_set_syntax	*hide_set	= malloc(sizeof(automaton_hide_set_syntax));
+	hide_set->is_hiding	= is_hiding;
+	hide_set->elements	= elements;
+	return hide_set;
+}
+
+automaton_relabel_set_syntax	*automaton_relabel_set_create_from_label(automaton_relabel_pair_syntax *pair){
+	automaton_relabel_set_syntax	*relabel_syntax	= malloc(sizeof(automaton_relabel_set_syntax));
+	relabel_syntax->count	= 1;
+	relabel_syntax->pairs	= malloc(sizeof(automaton_relabel_pair_syntax*));
+	relabel_syntax->pairs[0]	= pair;
+	return relabel_syntax;
+}
+
+automaton_relabel_set_syntax	*automaton_relabel_set_concat_labels(automaton_relabel_set_syntax *set, automaton_relabel_pair_syntax *pair){
+	set->count++;
+	automaton_relabel_pair_syntax *ptr	= realloc(set->pairs, sizeof(automaton_relabel_pair_syntax*) * set->count);
+	if(ptr == NULL){printf("[Error] Could not allocate memory for automaton_relabel_set_concat_labels.\n"); exit(-1);}
+	set->pairs	= ptr;
+	set->pairs[set->count - 1]	= pair;
+	return set;
+}
+
+automaton_relabel_pair_syntax	*automaton_relabel_pair_create(automaton_label_syntax *old, automaton_label_syntax * new){
+	automaton_relabel_pair_syntax	*pair	= malloc(sizeof(automaton_relabel_pair_syntax));
+	pair->old	= old;
+	pair->new	= new;
+	return pair;
+}
+
+
 automaton_program_syntax* automaton_program_syntax_create(automaton_statement_syntax* first_statement){
 	automaton_program_syntax* program	= malloc(sizeof(automaton_program_syntax));
 	program->count	= 1;
@@ -564,6 +600,8 @@ void automaton_component_syntax_destroy(automaton_component_syntax* component){
 	if(component->index != NULL)automaton_index_syntax_destroy(component->index);
 	if(component->indexes != NULL)automaton_indexes_syntax_destroy(component->indexes);
 	if(component->prefix != NULL)free(component->prefix);
+	if(component->relabel_set != NULL)automaton_relabel_set_syntax_destroy(component->relabel_set);
+	if(component->hide_set != NULL)automaton_hide_set_syntax_destroy(component->hide_set);
 	free(component);
 }
 void automaton_composition_syntax_destroy(automaton_composition_syntax* composition){
@@ -689,6 +727,27 @@ void automaton_expression_syntax_destroy(automaton_expression_syntax* expr){
 	if(expr->string_terminal != NULL)free(expr->string_terminal);
 	free(expr);
 }
+
+void automaton_relabel_set_syntax_destroy(automaton_relabel_set_syntax *relabel_set){
+	uint32_t i;
+	for(i = 0; i < relabel_set->count; i++)
+		automaton_relabel_pair_syntax_destroy(relabel_set->pairs[i]);
+	free(relabel_set->pairs);
+	free(relabel_set);
+}
+
+void automaton_hide_set_syntax_destroy(automaton_hide_set_syntax *hide_set){
+	if(hide_set->elements != NULL)
+		automaton_set_syntax_destroy(hide_set->elements);
+	free(hide_set);
+}
+
+void automaton_relabel_pair_syntax_destroy(automaton_relabel_pair_syntax *relabel_pair){
+	automaton_label_syntax_destroy(relabel_pair->new);
+	automaton_label_syntax_destroy(relabel_pair->old);
+	free(relabel_pair);
+}
+
 bool automaton_syntax_is_reserved(char* token){
 	uint32_t KEYWORDS_LENGTH	= 3;
 	const char *keywords[KEYWORDS_LENGTH];

@@ -1,0 +1,40 @@
+set Global_Alphabet = {a, b,c,d}
+set Controllable_Alphabet = {a,c}
+
+A = (a -> A_1),
+A_1 = (b -> A).
+
+vstate fluent F_A in A = {A}.
+
+B = (c -> B_1),
+B_1 = (d -> B).
+
+vstate fluent F_B in B = {0}.//BISCOTTI
+
+|f| ENV =(A || B). 
+
+C = (a -> C_1),
+C_1 = (b -> C).
+
+vstate fluent F_A in C = {0, 1}.//BISCOTTI
+
+|f| ENV_B =(A || B || C). 
+
+
+ENV_p = S_0,
+S_0 = (c-> S_1|a-> S_2),
+S_1 = (d-> S_0|a-> S_3),
+S_2 = (c-> S_3|b-> S_0),
+S_3 = (d-> S_2|b-> S_1).
+
+ENV_B_p = S_2,
+S_2 = (c-> S_3),
+S_3 = (d-> S_2).
+
+equals FATAL_Biscotti_Strategy_Vstates(ENV, ENV_p).
+equals FATAL_Biscotti_Strategy_Vstates(ENV_B, ENV_B_p).
+
+A >> "/tmp/vstates_test_a.rep".
+B >> "/tmp/vstates_test_b.rep".
+ENV >> "/tmp/vstates_test_env.rep".
+ENV_B >> "/tmp/vstates_test_env_b.rep".

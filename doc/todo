@@ -4,20 +4,17 @@ TODO:
 	- tool
 		- rename and hide should be applied at composition, creating a new instance per def.
 		- renombrar etiquetas
-			||SEMA2 = ( first:SEMA|| second:SEMA )
-				  /{ up/first.up,
-				     mid/first.down,
-				     mid/second.up,
-				     down/second.down}.
-			SEMA = (up->down->SEMA).
-			||SEMAPHORE(N=4) = (sema[0..N-1]:SEMA(N))
-			   /{sema[i:0..N-2].down/sema[i+1].up,
-			     up/sema[0].up,
-			     down/sema[N-1].down}.
-				- /{term_1/replace_1,...,term_N/replace_N} 
-				- terms can be indexed, either by range or variable
-			- define syntax
-			- parse elements to labels
+			- write structs
+				- relabel_expr_syntax
+				- relabel_pair_syntax
+				- relabel_hide_syntax
+			- update automaton_component_syntax add hide relabel exps
+			- write functions
+				- automaton_relabel_pair_create
+				- automaton_relabel_set_concat_labels
+				- automaton_relabel_expr_syntax_create
+			- update automaton_component_syntax_create
+			- parse elements to labels (as in alphabet extension)
 			- replace in local_alphabet
 			- replace in transitions
 		- esconder etiquetas

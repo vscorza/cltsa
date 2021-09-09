@@ -42,6 +42,9 @@ automaton_program_syntax* parsed_program = NULL;
 	automaton_vstates_syntax*		v_states;
 	automaton_vstates_fluent_syntax*	vstates_fluent;
 	automaton_serialization_syntax*	lts_serialization;
+	automaton_relabel_set_syntax*	relabel_set;
+	automaton_hide_set_syntax*		hide_set;
+	automaton_relabel_pair_syntax*	relabel_pair;
 };
 %token	t_INTEGER t_IDENT t_UPPER_IDENT t_STRING t_CONST t_RANGE t_SET t_FLUENT t_DOTS t_WHEN t_GAME_COMPOSE t_GAME_COMPOSE_NO_MIXED_STATES t_PARALLEL t_GR_1 t_INITIALLY t_LTL t_ENV t_SYS t_RHO t_THETA t_IN t_THEN t_IFF t_AND t_NEXT t_CONCURRENT t_SYNCH t_ORDER t_EQUALS t_IMPORT t_EXPORT t_VAL_STATE t_SEQ_LTS t_SEQ_TICK_LTS t_INTERLVD_LTS t_INTERLVD_TICK_LTS t_EXPORT_METRICS 
 %left '+' '-' ','
@@ -81,6 +84,9 @@ automaton_program_syntax* parsed_program = NULL;
 %type<vstates_fluent>			stateFluent
 %type<v_states>				vstates		
 %type<lts_serialization> ltsConversion
+%type<relabel_set>	relabelSet relabelExp
+%type<hide_set>	hideExp
+%type<relabel_pair> relabelPair
 %%
 program:
 	statements								{parsed_program = $1; $$ = $1;}
@@ -299,10 +305,29 @@ compositionExp:
 	|compositionExp t_PARALLEL compositionType compositionExp2	{$$ = automaton_components_syntax_add_component($1, $4, $3);free($2);}
 	;
 compositionExp2:
-	t_UPPER_IDENT indexes compositionType	{$$ = automaton_component_syntax_create($1, NULL, NULL, $2, $3);free($1);}
-	|t_IDENT indexes ':' t_UPPER_IDENT		{$$ = automaton_component_syntax_create($4, $1, NULL, $2, ASYNCH_AUT);free($1); free($4);}
-	|index indexes ':' t_UPPER_IDENT		{$$ = automaton_component_syntax_create($4, NULL, $1, $2, ASYNCH_AUT);free($4);}
+	t_UPPER_IDENT indexes compositionType relabelExp hideExp	{$$ = automaton_component_syntax_create($1, NULL, NULL, $2, $3, $4, $5);free($1);}
+	|t_IDENT indexes ':' t_UPPER_IDENT relabelExp hideExp		{$$ = automaton_component_syntax_create($4, $1, NULL, $2, ASYNCH_AUT, $4, $5);free($1); free($4);}
+	|index indexes ':' t_UPPER_IDENT relabelExp hideExp		{$$ = automaton_component_syntax_create($4, NULL, $1, $2, ASYNCH_AUT, $4, $5);free($4);}
 	;
+relabelExp:
+	'/' '{' relabelSet '}'					{$$ = $3;}
+	|										{$$ = NULL;}
+	;
+hideExp:
+	'@' '{' labels '}'					{$$ = automaton_hide_set_syntax_create($3, false);}
+	|"\\" '{' labels '}'						{$$ = automaton_hide_set_syntax_create($3, true);}
+	|									{$$ = NULL;}
+	;
+	
+relabelSet:
+	relabelSet ',' relabelPair				{$$ = automaton_relabel_set_concat_labels($1,$3);}
+	|relabelPair							{$$ = automaton_relabel_set_create_from_label($1);}
+	;	 
+	
+relabelPair:
+	label '/' label							{$$ = automaton_relabel_pair_create($1, $3);}
+	;
+
 compositionType:
 	t_CONCURRENT							{$$ = CONCURRENT_AUT;free($1);}
 	|t_SYNCH								{$$ = SYNCH_AUT; free($1);}
