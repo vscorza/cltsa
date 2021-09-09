@@ -96,14 +96,14 @@ parser_utils_c.o: parser_utils.c automaton_utils_c.o parser_utils.h
 lex.yy.o: lex.yy.c y.tab.h
 lex.yy.o y.tab.o: parser_utils.h obdd.h
 
-y.tab.c y.tab.h: henos.yacc
-	$(YACC) $(YACCFLAGS) -v henos.yacc
+y.tab.c y.tab.h: cltsa.yacc
+	$(YACC) $(YACCFLAGS) -v cltsa.yacc
 
 y.tab.o: y.tab.c
 	$(CC) $(CPARAMS) $(CFLAGS) -c $< -o $@  $(CLIBS)
 
-lex.yy.c: henos.lex
-	$(LEX) henos.lex
+lex.yy.c: cltsa.lex
+	$(LEX) cltsa.lex
 
 .PHONY: clean
 clean:

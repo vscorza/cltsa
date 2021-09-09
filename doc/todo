@@ -2,14 +2,31 @@ TODO:
 =====
 - post paper
 	- tool
-		- renombrar/esconder		
+		- rename and hide should be applied at composition, creating a new instance per def.
+		- renombrar etiquetas
+			||SEMA2 = ( first:SEMA|| second:SEMA )
+				  /{ up/first.up,
+				     mid/first.down,
+				     mid/second.up,
+				     down/second.down}.
+			SEMA = (up->down->SEMA).
+			||SEMAPHORE(N=4) = (sema[0..N-1]:SEMA(N))
+			   /{sema[i:0..N-2].down/sema[i+1].up,
+			     up/sema[0].up,
+			     down/sema[N-1].down}.
+				- /{term_1/replace_1,...,term_N/replace_N} 
+				- terms can be indexed, either by range or variable
+			- define syntax
+			- parse elements to labels
+			- replace in local_alphabet
+			- replace in transitions
+		- esconder etiquetas
+			\{term_1,...,term_N}
+				- terms can be indexed, either by range or variable			
+			- replace with tau
+			- minimize transitions where only tau is left (if it was non empty and turns empty)
 		- agregar una salida que reporte el avance del proceso de síntesis diagnóstico
 			- puede ser un proceso aparte, revisar forma de implementar
-	- re-escribir versión ahb genbuf, revisar realizabilidad-no realizabilidad
-		- testear y comparar con valuaciones por estados
-			- ahb_1_n	
-				- completo			
-		- correr tests
 	- editor
 		- marcar línea del error en el editor por syntax error, agregar linenumber y pos a los syntax def de paser_utils, automaton_context
 		- habilitar line number en el editor
@@ -28,6 +45,11 @@ TODO:
 			-https://en.wikipedia.org/wiki/Lempel%E2%80%93Ziv%E2%80%93Markov_chain_algorithm		
 	- exportar a vdhl
 		- versión básica
+	- re-escribir versión ahb genbuf, revisar realizabilidad-no realizabilidad
+		- testear y comparar con valuaciones por estados
+			- ahb_1_n	
+				- completo			
+		- correr tests
 	- estados por referencia (si se complica ni bola)
 	- revisar 
 		- patterns for property specification ...
