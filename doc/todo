@@ -2,18 +2,7 @@ TODO:
 =====
 - post paper
 	- tool
-		- rename and hide should be applied at composition, creating a new instance per def.
 		- renombrar etiquetas
-			- write structs
-				- relabel_expr_syntax
-				- relabel_pair_syntax
-				- relabel_hide_syntax
-			- update automaton_component_syntax add hide relabel exps
-			- write functions
-				- automaton_relabel_pair_create
-				- automaton_relabel_set_concat_labels
-				- automaton_relabel_expr_syntax_create
-			- update automaton_component_syntax_create
 			- parse elements to labels (as in alphabet extension)
 			- replace in local_alphabet
 			- replace in transitions

@@ -108,6 +108,8 @@ int32_t automaton_expression_syntax_evaluate(automaton_parsing_tables* tables, a
 char** automaton_set_syntax_evaluate(automaton_parsing_tables* tables, automaton_set_syntax* set, int32_t *count, char* set_def_key,
 		automaton_indexes_valuation *state_valuation);
 automaton_alphabet* automaton_parsing_tables_get_global_alphabet(automaton_parsing_tables* tables);
+automaton_automaton *automaton_hide_relabel(automaton_parsing_tables* tables, automaton_automaton *automaton
+		, automaton_relabel_set_syntax *relabel_set	, automaton_hide_set_syntax *hide_set);
 bool automaton_statement_syntax_to_composition(automaton_automata_context* ctx, automaton_composition_syntax* composition_syntax
 		, automaton_parsing_tables* tables, uint32_t main_index);
 bool automaton_statement_syntax_to_single_automaton(automaton_automata_context* ctx, automaton_composition_syntax* composition_syntax

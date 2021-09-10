@@ -758,12 +758,251 @@ automaton_indexes_valuation* automaton_indexes_valuation_create_from_indexes(aut
 	return valuation;
 }
 
+automaton_automaton *automaton_hide_relabel(automaton_parsing_tables* tables, automaton_automaton *automaton
+		, automaton_relabel_set_syntax *relabel_set	, automaton_hide_set_syntax *hide_set){
+	automaton_automaton *modified_automaton	= automaton_automaton_clone(automaton);
+	uint32_t i, j, k, l, old_label_index, new_label_index;
+	automaton_relabel_pair_syntax *current_pair;
+	automaton_automata_context *ctx	= automaton->context;
+	automaton_alphabet	*global_alphabet	= ctx->global_alphabet;
+
+	bool *should_replace	= calloc(global_alphabet->count, sizeof(bool));
+	//if a label is in the old set but not in the new, it will be removed from the local alphabet
+	bool *should_remove		= calloc(global_alphabet->count, sizeof(bool));
+	bool *should_add		= calloc(global_alphabet->count, sizeof(bool));
+	bool **new_values	= calloc(global_alphabet->count, sizeof(bool*));
+	for(i = 0; i < global_alphabet->count; i++)
+		new_values[i]	= calloc(global_alphabet->count, sizeof(bool));
+
+	//relabel transitions if needed
+	if(relabel_set != NULL){
+		//check that all pairs indexes are compatible
+		for(i = 0; i < relabel_set->count; i++){
+			current_pair	= relabel_set->pairs[i];
+			if(current_pair->new->is_set || current_pair->old->is_set){
+				printf("Relabeling pair for %s at index %d can not be sets\n", automaton->name, i); exit(-1);
+			}
+			//if((current_pair->new->indexes == NULL) != (current_pair->old->indexes == NULL)){printf("Inconsistent relabeling pair for %s at index %d\n", automaton->name, i); exit(-1);	}
+			//if((current_pair->new->indexes != NULL) && (current_pair->new->indexes->count != current_pair->old->indexes->count)){printf("Inconsistent relabeling pair for %s at index %d\n", automaton->name, i); exit(-1);}
+		}
+		//get extensive list of replacements
+		for(i = 0; i < relabel_set->count; i++){
+			automaton_indexes_valuation **old_valuations	= NULL;
+			uint32_t old_valuations_count					= 0;
+			uint32_t old_valuations_size					= 0;
+			uint32_t old_inner_count						= 1;
+			automaton_indexes_valuation **new_valuations	= NULL;
+			uint32_t new_valuations_count					= 0;
+			uint32_t new_valuations_size					= 0;
+			uint32_t new_inner_count						= 1;
+			bool label_found;
+			current_pair	= relabel_set->pairs[i];
+			if(current_pair->old->indexes != NULL){
+				uint32_t **old_values = NULL;
+				char** old_tmp_value	= malloc(sizeof(char*) * old_inner_count);
+				aut_dupstr(&(old_tmp_value[0]), current_pair->old->string_terminal);
+				automaton_indexes_syntax_eval_strings(tables, NULL, &old_valuations, &old_valuations_count, &old_valuations_size, &old_values
+						, &old_tmp_value, &old_inner_count, current_pair->old->indexes);
+
+				for(j = 0; j < old_inner_count; j++){
+					label_found	= false;
+					for(k = 0; k < global_alphabet->count; k++){
+						if(strcmp(global_alphabet->list[k].name, old_tmp_value[j])==0){
+							label_found	= true;
+							if(should_replace[k]){
+								printf("More than one relabel pair on %s\n", old_tmp_value[j]); exit(-1);
+							}
+							should_replace[k]	= true;
+							old_label_index	= k;
+							break;
+						}
+					}
+					if(!label_found){
+						printf("Could not find label %s to replace\n", old_tmp_value[j]);exit(-1);
+					}
+					if(current_pair->new->indexes != NULL){
+						uint32_t **new_values = NULL;
+						char** new_tmp_value	= malloc(sizeof(char*) * new_inner_count);
+						aut_dupstr(&(new_tmp_value[0]), current_pair->new->string_terminal);
+						automaton_indexes_syntax_eval_strings(tables, old_valuations[j], &new_valuations, &new_valuations_count, &new_valuations_size
+								, &new_values, &new_tmp_value, &new_inner_count, current_pair->new->indexes);
+						//get replacements
+						for(l = 0; l < new_inner_count; l++){
+							label_found	= false;
+							for(k = 0; k < global_alphabet->count; k++){
+								if(strcmp(global_alphabet->list[k].name, new_tmp_value[l])==0){
+									label_found	= true;
+									new_label_index	= k;
+									new_values[old_label_index][new_label_index]	= true;
+									break;
+								}
+							}
+							if(!label_found){
+								printf("Could not find label %s to replace %s\n", new_tmp_value[j]
+									, global_alphabet->list[old_label_index].name);exit(-1);
+							}
+						}
+						for(k = 0; k < new_valuations_count; k++)automaton_indexes_valuation_destroy(new_valuations[k]);
+						free(new_valuations); new_valuations = NULL; new_valuations_count = 0;
+						for(k = 0; k < (uint32_t)new_inner_count;k++)free(new_tmp_value[k]);
+						for(k = 0; k < (uint32_t)new_inner_count;k++)free(new_values[k]);
+						free(new_tmp_value);
+						free(new_values);
+					}else{
+						//get replacements
+						for(l = 0; l < new_inner_count; l++){
+							label_found	= false;
+							for(k = 0; k < global_alphabet->count; k++){
+								if(strcmp(global_alphabet->list[k].name, current_pair->new->string_terminal)==0){
+									label_found	= true;
+									new_label_index	= k;
+									new_values[old_label_index][new_label_index]	= true;
+									break;
+								}
+							}
+							if(!label_found){
+								printf("Could not find label %s to replace %s\n", current_pair->new->string_terminal
+									, global_alphabet->list[old_label_index].name);exit(-1);
+							}
+						}
+					}
+
+				}
+				for(k = 0; k < old_valuations_count; k++)automaton_indexes_valuation_destroy(old_valuations[k]);
+				free(old_valuations); old_valuations = NULL; old_valuations_count = 0;
+				for(k = 0; k < (uint32_t)old_inner_count;k++)free(old_tmp_value[k]);
+				for(k = 0; k < (uint32_t)old_inner_count;k++)free(old_values[k]);
+				free(old_tmp_value);
+				free(old_values);
+			}else{
+				label_found	= false;
+				for(k = 0; k < global_alphabet->count; k++){
+					if(strcmp(global_alphabet->list[k].name, current_pair->old->string_terminal)==0){
+						label_found	= true;
+						if(should_replace[k]){
+							printf("More than one relabel pair on %s\n", current_pair->old->string_terminal); exit(-1);
+						}
+						should_replace[k]	= true;
+						old_label_index	= k;
+						break;
+					}
+				}
+				if(!label_found){
+					printf("Could not find label %s to replace\n", current_pair->old->string_terminal);exit(-1);
+				}
+				if(current_pair->new->indexes != NULL){
+					uint32_t **new_values = NULL;
+					char** new_tmp_value	= malloc(sizeof(char*) * new_inner_count);
+					aut_dupstr(&(new_tmp_value[0]), current_pair->new->string_terminal);
+					automaton_indexes_syntax_eval_strings(tables, old_valuations[j], &new_valuations, &new_valuations_count, &new_valuations_size
+							, &new_values, &new_tmp_value, &new_inner_count, current_pair->new->indexes);
+					//get replacements
+					for(l = 0; l < new_inner_count; l++){
+						label_found	= false;
+						for(k = 0; k < global_alphabet->count; k++){
+							if(strcmp(global_alphabet->list[k].name, new_tmp_value[l])==0){
+								label_found	= true;
+								new_label_index	= k;
+								new_values[old_label_index][new_label_index]	= true;
+								break;
+							}
+						}
+						if(!label_found){
+							printf("Could not find label %s to replace %s\n", new_tmp_value[j]
+								, global_alphabet->list[old_label_index].name);exit(-1);
+						}
+					}
+					for(k = 0; k < new_valuations_count; k++)automaton_indexes_valuation_destroy(new_valuations[k]);
+					free(new_valuations); new_valuations = NULL; new_valuations_count = 0;
+					for(k = 0; k < (uint32_t)new_inner_count;k++)free(new_tmp_value[k]);
+					for(k = 0; k < (uint32_t)new_inner_count;k++)free(new_values[k]);
+					free(new_tmp_value);
+					free(new_values);
+				}else{
+					//get replacements
+					for(l = 0; l < new_inner_count; l++){
+						label_found	= false;
+						for(k = 0; k < global_alphabet->count; k++){
+							if(strcmp(global_alphabet->list[k].name, current_pair->new->string_terminal)==0){
+								label_found	= true;
+								new_label_index	= k;
+								new_values[old_label_index][new_label_index]	= true;
+								break;
+							}
+						}
+						if(!label_found){
+							printf("Could not find label %s to replace %s\n", current_pair->new->string_terminal
+								, global_alphabet->list[old_label_index].name);exit(-1);
+						}
+					}
+				}
+			}
+		}
+		//check if replaced values are kept
+		for(i = 0; i < global_alphabet->count; i++){
+			bool should_remove_label = true;
+			if(should_replace[i]){
+				for(j = 0; j < global_alphabet->count; i++){
+					if(new_values[j][i]){
+						should_remove_label	= false;
+						break;
+					}
+				}
+				if(should_remove_label)should_remove[i]	= true;
+			}
+		}
+		//update local alphabet
+		for(i = 0; i < automaton->local_alphabet_count; i++){
+			should_add[automaton->local_alphabet[i]]	= true;
+		}
+		for(i = 0; i < global_alphabet->count; i++){
+			if(should_remove[i])should_add[automaton->local_alphabet[i]]	= false;
+		}
+		for(i = 0; i < global_alphabet->count; i++){
+			for(j = 0; j < global_alphabet->count; j++){
+				if(new_values[i][j])should_add[automaton->local_alphabet[i]]	= true;
+			}
+		}
+		uint32_t new_local_alphabet_count	= 0;
+		for(i = 0; i < global_alphabet->count; i++){
+			if(should_add[i])new_local_alphabet_count++;
+		}
+		uint32_t *new_local_alphabet	= malloc(sizeof(uint32_t) * new_local_alphabet_count);
+		uint32_t current_local_alphabet_count	= 0;
+		for(i = 0; i < global_alphabet->count; i++){
+			if(should_add[i])new_local_alphabet[new_local_alphabet_count++]	= i;
+		}
+		free(automaton->local_alphabet);
+		automaton->local_alphabet	= new_local_alphabet;
+		automaton->local_alphabet_count	= new_local_alphabet_count;
+
+		//replace labels in transitions
+
+
+		free(should_replace);
+		free(should_remove);
+		free(should_add);
+		for(i = 0; i < global_alphabet->count; i++)free(new_values[i]);
+		free(new_values);
+	}
+	//hide transitions if needed
+	if(hide_set != NULL){
+		//get extensive list of elements to hide, check if list if of preserved/hidden elements
+
+		//remove elements and mark nullified transitions
+
+		//minimize automaton
+	}
+
+	return modified_automaton;
+}
+
 bool automaton_statement_syntax_to_composition(automaton_automata_context* ctx, automaton_composition_syntax* composition_syntax
 		, automaton_parsing_tables* tables, uint32_t main_index){
 	int32_t i, j, k, index;
 	aut_context_log("mult. components.%s\n", composition_syntax->name);
 	//if one component has not been solved then report pending automata
-	uint32_t automata_count = 0;
+	uint32_t automata_count = 0, modified_automata_count = 0;
 	for(i = 0; i < (int32_t)composition_syntax->count; i++){
 		if(composition_syntax->components[i]->indexes != NULL && composition_syntax->components[i]->index == NULL){
 			char label_indexes[255];
@@ -798,9 +1037,9 @@ bool automaton_statement_syntax_to_composition(automaton_automata_context* ctx, 
 				return true;
 			automata_count++;
 		}
-
-
 	}
+	//build temporary modified automata from relabling and hiding
+	automaton_automaton** modified_automata	= NULL;
 	//build composition and add to table
 	automaton_automaton** automata	= malloc(sizeof(automaton_automaton*) * automata_count);
 	automaton_synchronization_type* synch_type	= malloc(sizeof(automaton_synchronization_type) * automata_count);
@@ -821,7 +1060,22 @@ bool automaton_statement_syntax_to_composition(automaton_automata_context* ctx, 
 			bool keep_evaluating	= false;
 			for(k = 0; k < count; k++){
 				index						= automaton_parsing_tables_get_entry_index(tables, COMPOSITION_ENTRY_AUT, ret_value[k], true);
-				automata[j]					= tables->composition_entries[index]->valuation.automaton_value;
+				if(composition_syntax->components[i]->hide_set != NULL || composition_syntax->components[i]->relabel_set != NULL){
+
+					automata[j]	= automaton_hide_relabel(tables, tables->composition_entries[index]->valuation.automaton_value,
+							composition_syntax->components[i]->relabel_set, composition_syntax->components[i]->hide_set);
+					if(modified_automata == NULL){
+						modified_automata	= malloc(sizeof(automaton_automaton*));
+					}else{
+						automaton_automaton **aut_ptr	= realloc(modified_automata, sizeof(automaton_automaton*) * modified_automata_count);
+						if(aut_ptr == NULL){printf("Could not allocate memory for modified automata\n");exit(-1);}
+						modified_automata	= aut_ptr;
+					}
+
+					modified_automata[modified_automata_count++]	= automata[j];
+				}else{
+					automata[j]					= tables->composition_entries[index]->valuation.automaton_value;
+				}
 				switch(composition_syntax->components[i]->synch_type){
 					case CONCURRENT_AUT: synch_type[j++]	= CONCURRENT;break;
 					case SYNCH_AUT: synch_type[j++]		= SYNCHRONOUS;break;
@@ -835,7 +1089,22 @@ bool automaton_statement_syntax_to_composition(automaton_automata_context* ctx, 
 		}else{
 			//TODO: update transitions with prefixes/indexes
 			index						= automaton_parsing_tables_get_entry_index(tables, COMPOSITION_ENTRY_AUT, composition_syntax->components[i]->ident, true);
-			automata[j]					= tables->composition_entries[index]->valuation.automaton_value;
+			if(composition_syntax->components[i]->hide_set != NULL || composition_syntax->components[i]->relabel_set != NULL){
+
+				automata[j]	= automaton_hide_relabel(tables, tables->composition_entries[index]->valuation.automaton_value,
+						composition_syntax->components[i]->relabel_set, composition_syntax->components[i]->hide_set);
+				if(modified_automata == NULL){
+					modified_automata	= malloc(sizeof(automaton_automaton*));
+				}else{
+					automaton_automaton **aut_ptr	= realloc(modified_automata, sizeof(automaton_automaton*) * modified_automata_count);
+					if(aut_ptr == NULL){printf("Could not allocate memory for modified automata\n");exit(-1);}
+					modified_automata	= aut_ptr;
+				}
+
+				modified_automata[modified_automata_count++]	= automata[j];
+			}else{
+				automata[j]					= tables->composition_entries[index]->valuation.automaton_value;
+			}
 			switch(composition_syntax->components[i]->synch_type){
 				case CONCURRENT_AUT: synch_type[j++]	= CONCURRENT;break;
 				case SYNCH_AUT: synch_type[j++]		= SYNCHRONOUS;break;
@@ -851,6 +1120,13 @@ bool automaton_statement_syntax_to_composition(automaton_automata_context* ctx, 
 	tables->composition_entries[main_index]->valuation_count			= 1;
 	tables->composition_entries[main_index]->valuation.automaton_value	= automaton;
 	aut_context_log("done, %d states\n", automaton->transitions_count);
+	//free modified automata structs
+	if(modified_automata_count > 0){
+		for(i = 0; i < modified_automata_count; i++)
+			automaton_automaton_destroy(modified_automata[i]);
+		free(modified_automata);
+	}
+
 	free(automata);
 	free(synch_type);
 	return false;

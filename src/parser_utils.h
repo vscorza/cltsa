@@ -166,8 +166,8 @@ typedef struct automaton_component_syntax_str{
 	automaton_index_syntax* index;
 	automaton_indexes_syntax* indexes;
 	automaton_synchronization_type_syntax synch_type;
-	struct automaton_relabel_set_str *relabel_set;
-	struct automaton_hide_set_str *hide_set;
+	struct automaton_relabel_set_syntax_str *relabel_set;
+	struct automaton_hide_set_syntax_str *hide_set;
 }automaton_component_syntax;
 typedef struct automaton_components_syntax_str{
 	uint32_t count;
