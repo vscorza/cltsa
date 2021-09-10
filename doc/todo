@@ -2,22 +2,29 @@ TODO:
 =====
 - post paper
 	- tool
-		- test relabelling
 		- esconder etiquetas
 			\{term_1,...,term_N}
 				- terms can be indexed, either by range or variable			
 			- replace with tau
 			- minimize transitions where only tau is left (if it was non empty and turns empty)
+		- revisar layout convencional de linux (bin, lib, etc)
+		- armar cmake
+			- agregar CLTSA_PATH a entorno
+			- agregar un install
 		- agregar una salida que reporte el avance del proceso de síntesis diagnóstico
-			- puede ser un proceso aparte, revisar forma de implementar
+			- en un archivo dentro de CLTSA_PATH/output/
+		- si al iniciar no encuentra CLTSA_PATH que avise y exit
+		- que AUTOMATA >> . saque a un archivo por defecto CLTSA_PATH/output/name.rep
 	- editor
+		- si al iniciar no encuentra CLTSA_PATH que avise y exit
+		- que el binario lo tome de CLTSA_PATH
 		- marcar línea del error en el editor por syntax error, agregar linenumber y pos a los syntax def de paser_utils, automaton_context
 		- habilitar line number en el editor
-		- indices y constantes para ltl game structures
+		- undo/redo 
 		- improve report loading from java client (automatically load exports)
+			- que cargue de CLTSA_PATH/output/
 		- allow several specs to be loaded concurrently (tabs)
 		- syntax highlight strings
-		- undo/redo 
 		- signals view as complement to automaton
 	- serializacion
 		- serializar valuaciones
@@ -46,6 +53,7 @@ TODO:
 		- w.r.t. ||* prove clts -> lts cannot preserve consistency with parallel composition
 	- agregar representación redundante para el juego (sin informacion de etiquetas)
 	- revisar representación de rankings
+	- indices y constantes para ltl game structures
 	- review 
 		-event structures
 		-pom sets
