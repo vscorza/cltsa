@@ -1,0 +1,34 @@
+const Lo = 0
+const Hi = 5
+range R_C = Lo..(Hi-1)
+range R_C_2 = (Lo+1)..Hi
+range R_C_T = Lo..Hi
+
+set Global_Alphabet = {a,b,c,d,e,msg[r:R_C_T]}
+set Controllable_Alphabet = {a,c}
+
+A = (a -> b -> A).
+
+||ENV = (A/{a/c,b/d}).
+
+B = B[Lo],
+B[r:R_C] = (when(r < (Hi - 1)) msg[r] -> B[r+1] 
+	| when(r == (Hi - 1)) msg[r] -> B[Lo]).
+
+||ENV_B = (B/{msg[r:R_C]/msg[r+1]}).
+
+A >> "/tmp/relabel_test_a.rep".
+B >> "/tmp/relabel_test_b.rep".
+ENV >> "/tmp/relabel_test_env.rep".
+ENV_B >> "/tmp/relabel_test_env_b.rep".
+
+ENV_P	= (c -> d -> ENV_P).
+ENV_B_P	= S_0,
+S_0 = (msg_1-> S_1),
+S_1 = (msg_2-> S_2),
+S_2 = (msg_3-> S_3),
+S_3 = (msg_4-> S_4),
+S_4 = (msg_5-> S_0).
+
+equals RELABEL_ALPHABET_TEST_SIMPLE(ENV, ENV_P).
+equals RELABEL_ALPHABET_TEST_INDEXED(ENV_B, ENV_B_P).

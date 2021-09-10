@@ -80,6 +80,7 @@ typedef uint64_t double_fluent_entry_size_t;
 #define CLEAR_TRANSITION_BIT(t,index)   ( (t->signals[((index+1)/TRANSITION_ENTRY_SIZE)]) &= ~(((signal_bit_array_t)1 << ((index+1)%TRANSITION_ENTRY_SIZE))) )
 #define TEST_SIGNAL_ARRAY_BIT(arr,index)    ( (arr[((index+1)/TRANSITION_ENTRY_SIZE)]) & ((signal_bit_array_t)1 << ((index+1)%TRANSITION_ENTRY_SIZE)) )
 #define SET_SIGNAL_ARRAY_BIT(arr,index)     ( (arr[((index+1)/TRANSITION_ENTRY_SIZE)]) |= ((signal_bit_array_t)1 << ((index+1)%TRANSITION_ENTRY_SIZE)) )
+#define SIGNAL_ARRAY_SET_INPUT(arr)	(arr[0] |= ((signal_bit_array_t)0x1));
 #define CLEAR_SIGNAL_ARRAY_BIT(arr,index)   ( (arr[((index+1)/TRANSITION_ENTRY_SIZE)]) &= ~(((signal_bit_array_t)1 << ((index+1)%TRANSITION_ENTRY_SIZE))) )
 #define TEST_SIGNAL_KEY_BIT(key,index)    ( key & ((signal_bit_array_t)1 << ((index)%TRANSITION_ENTRY_SIZE)) )
 #define SET_SIGNAL_KEY_BIT(key,index)     ( key |= ((signal_bit_array_t)1 << ((index)%TRANSITION_ENTRY_SIZE)) )

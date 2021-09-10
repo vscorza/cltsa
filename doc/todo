@@ -2,10 +2,7 @@ TODO:
 =====
 - post paper
 	- tool
-		- renombrar etiquetas
-			- parse elements to labels (as in alphabet extension)
-			- replace in local_alphabet
-			- replace in transitions
+		- test relabelling
 		- esconder etiquetas
 			\{term_1,...,term_N}
 				- terms can be indexed, either by range or variable			

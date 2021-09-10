@@ -766,16 +766,18 @@ automaton_automaton *automaton_hide_relabel(automaton_parsing_tables* tables, au
 	automaton_automata_context *ctx	= automaton->context;
 	automaton_alphabet	*global_alphabet	= ctx->global_alphabet;
 
-	bool *should_replace	= calloc(global_alphabet->count, sizeof(bool));
-	//if a label is in the old set but not in the new, it will be removed from the local alphabet
-	bool *should_remove		= calloc(global_alphabet->count, sizeof(bool));
-	bool *should_add		= calloc(global_alphabet->count, sizeof(bool));
-	bool **new_values	= calloc(global_alphabet->count, sizeof(bool*));
-	for(i = 0; i < global_alphabet->count; i++)
-		new_values[i]	= calloc(global_alphabet->count, sizeof(bool));
-
 	//relabel transitions if needed
 	if(relabel_set != NULL){
+		bool *should_replace	= calloc(global_alphabet->count, sizeof(bool));
+		//if a label is in the old set but not in the new, it will be removed from the local alphabet
+		bool *should_remove		= calloc(global_alphabet->count, sizeof(bool));
+		bool *should_add		= calloc(global_alphabet->count, sizeof(bool));
+		bool **new_values	= calloc(global_alphabet->count, sizeof(bool*));
+		for(i = 0; i < global_alphabet->count; i++)
+			new_values[i]	= calloc(global_alphabet->count, sizeof(bool));
+		signal_bit_array_t **new_values_masks	= calloc(global_alphabet->count, sizeof(signal_bit_array_t*));
+		for(i = 0; i < global_alphabet->count; i++)new_values_masks[i]	= calloc(FIXED_SIGNALS_COUNT, sizeof(signal_bit_array_t));
+
 		//check that all pairs indexes are compatible
 		for(i = 0; i < relabel_set->count; i++){
 			current_pair	= relabel_set->pairs[i];
@@ -821,11 +823,11 @@ automaton_automaton *automaton_hide_relabel(automaton_parsing_tables* tables, au
 						printf("Could not find label %s to replace\n", old_tmp_value[j]);exit(-1);
 					}
 					if(current_pair->new->indexes != NULL){
-						uint32_t **new_values = NULL;
+						int32_t **new_int_values = NULL;
 						char** new_tmp_value	= malloc(sizeof(char*) * new_inner_count);
 						aut_dupstr(&(new_tmp_value[0]), current_pair->new->string_terminal);
 						automaton_indexes_syntax_eval_strings(tables, old_valuations[j], &new_valuations, &new_valuations_count, &new_valuations_size
-								, &new_values, &new_tmp_value, &new_inner_count, current_pair->new->indexes);
+								, &new_int_values, &new_tmp_value, &new_inner_count, current_pair->new->indexes);
 						//get replacements
 						for(l = 0; l < new_inner_count; l++){
 							label_found	= false;
@@ -834,6 +836,10 @@ automaton_automaton *automaton_hide_relabel(automaton_parsing_tables* tables, au
 									label_found	= true;
 									new_label_index	= k;
 									new_values[old_label_index][new_label_index]	= true;
+									if(global_alphabet->list[k].type == INPUT_SIG)
+										SIGNAL_ARRAY_SET_INPUT(new_values_masks[old_label_index]);
+									SET_SIGNAL_ARRAY_BIT(new_values_masks[old_label_index], new_label_index);
+
 									break;
 								}
 							}
@@ -845,9 +851,9 @@ automaton_automaton *automaton_hide_relabel(automaton_parsing_tables* tables, au
 						for(k = 0; k < new_valuations_count; k++)automaton_indexes_valuation_destroy(new_valuations[k]);
 						free(new_valuations); new_valuations = NULL; new_valuations_count = 0;
 						for(k = 0; k < (uint32_t)new_inner_count;k++)free(new_tmp_value[k]);
-						for(k = 0; k < (uint32_t)new_inner_count;k++)free(new_values[k]);
+						for(k = 0; k < (uint32_t)new_inner_count;k++)free(new_int_values[k]);
 						free(new_tmp_value);
-						free(new_values);
+						free(new_int_values);
 					}else{
 						//get replacements
 						for(l = 0; l < new_inner_count; l++){
@@ -857,6 +863,10 @@ automaton_automaton *automaton_hide_relabel(automaton_parsing_tables* tables, au
 									label_found	= true;
 									new_label_index	= k;
 									new_values[old_label_index][new_label_index]	= true;
+									if(global_alphabet->list[k].type == INPUT_SIG)
+										SIGNAL_ARRAY_SET_INPUT(new_values_masks[old_label_index]);
+									SET_SIGNAL_ARRAY_BIT(new_values_masks[old_label_index], new_label_index);
+
 									break;
 								}
 							}
@@ -891,11 +901,11 @@ automaton_automaton *automaton_hide_relabel(automaton_parsing_tables* tables, au
 					printf("Could not find label %s to replace\n", current_pair->old->string_terminal);exit(-1);
 				}
 				if(current_pair->new->indexes != NULL){
-					uint32_t **new_values = NULL;
+					int32_t **new_int_values = NULL;
 					char** new_tmp_value	= malloc(sizeof(char*) * new_inner_count);
 					aut_dupstr(&(new_tmp_value[0]), current_pair->new->string_terminal);
 					automaton_indexes_syntax_eval_strings(tables, old_valuations[j], &new_valuations, &new_valuations_count, &new_valuations_size
-							, &new_values, &new_tmp_value, &new_inner_count, current_pair->new->indexes);
+							, &new_int_values, &new_tmp_value, &new_inner_count, current_pair->new->indexes);
 					//get replacements
 					for(l = 0; l < new_inner_count; l++){
 						label_found	= false;
@@ -904,6 +914,10 @@ automaton_automaton *automaton_hide_relabel(automaton_parsing_tables* tables, au
 								label_found	= true;
 								new_label_index	= k;
 								new_values[old_label_index][new_label_index]	= true;
+								if(global_alphabet->list[k].type == INPUT_SIG)
+									SIGNAL_ARRAY_SET_INPUT(new_values_masks[old_label_index]);
+								SET_SIGNAL_ARRAY_BIT(new_values_masks[old_label_index], new_label_index);
+
 								break;
 							}
 						}
@@ -915,9 +929,9 @@ automaton_automaton *automaton_hide_relabel(automaton_parsing_tables* tables, au
 					for(k = 0; k < new_valuations_count; k++)automaton_indexes_valuation_destroy(new_valuations[k]);
 					free(new_valuations); new_valuations = NULL; new_valuations_count = 0;
 					for(k = 0; k < (uint32_t)new_inner_count;k++)free(new_tmp_value[k]);
-					for(k = 0; k < (uint32_t)new_inner_count;k++)free(new_values[k]);
+					for(k = 0; k < (uint32_t)new_inner_count;k++)free(new_int_values[k]);
 					free(new_tmp_value);
-					free(new_values);
+					free(new_int_values);
 				}else{
 					//get replacements
 					for(l = 0; l < new_inner_count; l++){
@@ -927,6 +941,10 @@ automaton_automaton *automaton_hide_relabel(automaton_parsing_tables* tables, au
 								label_found	= true;
 								new_label_index	= k;
 								new_values[old_label_index][new_label_index]	= true;
+								if(global_alphabet->list[k].type == INPUT_SIG)
+									SIGNAL_ARRAY_SET_INPUT(new_values_masks[old_label_index]);
+								SET_SIGNAL_ARRAY_BIT(new_values_masks[old_label_index], new_label_index);
+
 								break;
 							}
 						}
@@ -942,7 +960,7 @@ automaton_automaton *automaton_hide_relabel(automaton_parsing_tables* tables, au
 		for(i = 0; i < global_alphabet->count; i++){
 			bool should_remove_label = true;
 			if(should_replace[i]){
-				for(j = 0; j < global_alphabet->count; i++){
+				for(j = 0; j < global_alphabet->count; j++){
 					if(new_values[j][i]){
 						should_remove_label	= false;
 						break;
@@ -956,11 +974,12 @@ automaton_automaton *automaton_hide_relabel(automaton_parsing_tables* tables, au
 			should_add[automaton->local_alphabet[i]]	= true;
 		}
 		for(i = 0; i < global_alphabet->count; i++){
-			if(should_remove[i])should_add[automaton->local_alphabet[i]]	= false;
+			if(should_remove[i])should_add[i]	= false;
 		}
 		for(i = 0; i < global_alphabet->count; i++){
 			for(j = 0; j < global_alphabet->count; j++){
-				if(new_values[i][j])should_add[automaton->local_alphabet[i]]	= true;
+				if(new_values[i][j])
+					should_add[j]	= true;
 			}
 		}
 		uint32_t new_local_alphabet_count	= 0;
@@ -970,15 +989,37 @@ automaton_automaton *automaton_hide_relabel(automaton_parsing_tables* tables, au
 		uint32_t *new_local_alphabet	= malloc(sizeof(uint32_t) * new_local_alphabet_count);
 		uint32_t current_local_alphabet_count	= 0;
 		for(i = 0; i < global_alphabet->count; i++){
-			if(should_add[i])new_local_alphabet[new_local_alphabet_count++]	= i;
+			if(should_add[i])new_local_alphabet[current_local_alphabet_count++]	= i;
 		}
-		free(automaton->local_alphabet);
-		automaton->local_alphabet	= new_local_alphabet;
-		automaton->local_alphabet_count	= new_local_alphabet_count;
+		free(modified_automaton->local_alphabet);
+		modified_automaton->local_alphabet	= new_local_alphabet;
+		modified_automaton->local_alphabet_count	= new_local_alphabet_count;
 
 		//replace labels in transitions
+		//check if transition changes controllability
+		for(k = 0; k < global_alphabet->count; k++){
+			if(should_replace[k]){
+				for(i = 0; i < automaton->transitions_count; i++){
+					for(j= 0; j < automaton->out_degree[i]; j++){
+						if(TEST_SIGNAL_ARRAY_BIT(automaton->transitions[i][j].signals, k)){
+							CLEAR_SIGNAL_ARRAY_BIT(modified_automaton->transitions[i][j].signals, k);
+							for(l = 0; l < FIXED_SIGNALS_COUNT; l++)
+								modified_automaton->transitions[i][j].signals[l] |= new_values_masks[k][l];
+						}
+					}
+					for(j= 0; j < automaton->in_degree[i]; j++){
+						if(TEST_SIGNAL_ARRAY_BIT(automaton->inverted_transitions[i][j].signals, k)){
+							CLEAR_SIGNAL_ARRAY_BIT(modified_automaton->inverted_transitions[i][j].signals, k);
+							for(l = 0; l < FIXED_SIGNALS_COUNT; l++)
+								modified_automaton->inverted_transitions[i][j].signals[l] |= new_values_masks[k][l];
+						}
+					}
+				}
+			}
+		}
 
-
+		for(i = 0; i < global_alphabet->count; i++)free(new_values_masks[i]);
+		free(new_values_masks);
 		free(should_replace);
 		free(should_remove);
 		free(should_add);
