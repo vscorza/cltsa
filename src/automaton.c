@@ -1444,7 +1444,41 @@ bool automaton_automaton_update_valuation(automaton_automaton* current_automaton
 
 automaton_automaton* automaton_automaton_determinize(automaton_automaton* left_automaton){return NULL; }
 automaton_automaton* automaton_automaton_obs_minimize(automaton_automaton* left_automaton){ return NULL; }
-automaton_automaton* automaton_automaton_minimize(automaton_automaton* current_automaton){ return NULL; }
+automaton_automaton* automaton_automaton_minimize(automaton_automaton* current_automaton){
+	//partition will hold an array of double int entries, the first int indicates partition
+	//the second is the state
+	uint32_t *partition	= malloc(sizeof(uint32_t) * current_automaton->transitions * 2);
+	//inverse partition indicates at which index a state resides in the partition array
+	uint32_t *inverse_partition	= malloc(sizeof(uint32_t) * current_automaton->transitions);
+	uint32_t last_waiting_index	= 0;
+	//current element being inspected
+	uint32_t *current_partition	= malloc(sizeof(uint32_t) * current_automaton->transitions);
+	uint32_t current_partition_count	= 0;
+	uint32_t i, j, k;
+	//initialize partition
+	for(i = 0; i < current_automaton->transitions_count; i++){
+		if(i == current_automaton->initial_states[0]){
+			partition[0]	= 0;
+			partition[1]	= current_automaton->initial_states[0];
+			inverse_partition[i]	= 0;
+		}else if(i < current_automaton->initial_states[0]){
+			partition[(i + 1) * 2]		= 1;
+			partition[(i + 1) * 2 + 1]	= i;
+			inverse_partition[i]	= i+1;
+		}else{
+			partition[i * 2]		= 1;
+			partition[i * 2 + 1]	= i;
+			inverse_partition[i]	= i;
+		}
+	}
+
+	//merge states
+	//when merging states we need to check if valuations introduce a mismatch
+	free(partition);
+	free(inverse_partition);
+	free(current_partition);
+	return NULL;
+}
 
 /**
  * Checks if two deterministic and minimized automata are equivalent.

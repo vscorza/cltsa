@@ -2,11 +2,23 @@ TODO:
 =====
 - post paper
 	- tool
+		- write DFA (hopcroft) minimization
+		- add syntax to define tau: tau is "def" 
+			- implement by default will be named tau and added as first element
+
 		- esconder etiquetas
 			\{term_1,...,term_N}
 				- terms can be indexed, either by range or variable			
+			- replace with tau if turns empty (wasn't empty before)
+			\{term_1,....,term_N}_s
+			- doesn't replace with tau
+		- add observational minimization according to CCS expressions ... 
 			- replace with tau
 			- minimize transitions where only tau is left (if it was non empty and turns empty)
+		- add syntax to minimize
+			- minimization as NEW = (OLD).
+		- add syntax to minimize observationally
+			- observational minimization as NEW = (OLD).			
 		- revisar layout convencional de linux (bin, lib, etc)
 		- armar cmake
 			- agregar CLTSA_PATH a entorno
