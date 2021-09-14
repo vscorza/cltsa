@@ -1,5 +1,19 @@
 TODO:
 =====
+- clts
+	- primer lectura
+		- concurrent histories : a basis for observing distributed systems
+		- a non-interleaving semantics for ccs based on proved transitions
+		- equivalence semantics for concurrency: comparison and application
+		- enhanced event structures
+	- armar reporte para
+		- models and logics for true concurrency
+		- event structures
+		- concurrent histories : a basis for observing distributed systems
+		- a non-interleaving semantics for ccs based on proved transitions
+		- equivalence semantics for concurrency: comparison and application
+		- enhanced event structures
+	- escribir hernán por concurrencia real en eventos, copiar a Sebas y a Vic		
 - post paper
 	- tool
 		- write DFA (hopcroft) minimization
@@ -19,6 +33,7 @@ TODO:
 			- minimization as NEW = (OLD).
 		- add syntax to minimize observationally
 			- observational minimization as NEW = (OLD).			
+		- test minimization
 		- revisar layout convencional de linux (bin, lib, etc)
 		- armar cmake
 			- agregar CLTSA_PATH a entorno

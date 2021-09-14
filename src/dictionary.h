@@ -10,28 +10,28 @@
 
 #include "automaton_utils.h"
 
-#define INITIAL_DICT_ENTRIES_SIZE	20
-#define TRUE_VAR			"1"
-#define FALSE_VAR			"0"
+#define INITIAL_DICT_ENTRIES_SIZE 20
+#define TRUE_VAR "1"
+#define FALSE_VAR "0"
 
 /** STRUCTS **/
 typedef struct dictionary_entry_t {
-    char *key;
-    uint32_t value;
-}dictionary_entry;
+  char *key;
+  uint32_t value;
+} dictionary_entry;
 
-typedef struct dictionary_t{
-	uint32_t size;
-	uint32_t max_size;
-	dictionary_entry* entries;
-}dictionary;
+typedef struct dictionary_t {
+  uint32_t size;
+  uint32_t max_size;
+  dictionary_entry *entries;
+} dictionary;
 
 /** DICTIONARY **/
-dictionary* dictionary_create();
-void dictionary_destroy(dictionary* dict);
-bool dictionary_has_key(dictionary* dict, char *key);
-uint32_t dictionary_add_entry(dictionary* dict, char* key);
-uint32_t dictionary_value_for_key(dictionary* dict, char *key);
-char* dictionary_key_for_value(dictionary* dict, uint32_t value);
+dictionary *dictionary_create();
+void dictionary_destroy(dictionary *dict);
+bool dictionary_has_key(dictionary *dict, char *key);
+uint32_t dictionary_add_entry(dictionary *dict, char *key);
+uint32_t dictionary_value_for_key(dictionary *dict, char *key);
+char *dictionary_key_for_value(dictionary *dict, uint32_t value);
 
 #endif /* DICTIONARY_H_ */

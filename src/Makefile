@@ -15,6 +15,8 @@ YACC = yacc -d
 #YACCFLAGS = -Wconflicts-sr -Wconflicts-rr --debug
 YACCFLAGS = 
 
+format:
+	clang-format -i *.h *.c
 
 all: cltsa
 
