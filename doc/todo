@@ -2,17 +2,37 @@ TODO:
 =====
 - clts
 	- primer lectura
-		- concurrent histories : a basis for observing distributed systems
-		- a non-interleaving semantics for ccs based on proved transitions
-		- equivalence semantics for concurrency: comparison and application
-		- enhanced event structures
-	- armar reporte para
-		- models and logics for true concurrency
-		- event structures
-		- concurrent histories : a basis for observing distributed systems
-		- a non-interleaving semantics for ccs based on proved transitions
-		- equivalence semantics for concurrency: comparison and application
-		- enhanced event structures
+		- on the expresiveness of higher dimensional automata
+	- definir perspectiva
+		- causal, temporal
+		- sincronico, asincrónico
+		- de sistema, comportamiento
+		- concurrencia por composición de procesos (CCS) o eventos (señales)
+	- armar reporte general para
+		- on the expresiveness of higher dimensional automata (tiene un buen esquema de jerarquías al comienzo)	
+		- synchronization trees (se usa en Stark)
+		- concurrent transition systems (stark)
+		- equivalence semantics for concurrency: comparison and application (eTSS para SOS está medio muerto)
+		- Conditional rewriting logic as a unified model of concurrency (tiene muchísimas citas)
+		- compositional reasoning in model checking (señales)		
+		- models and logics for true concurrency (review)
+		- event structures (por completitud y para poder comparar)
+	- revisar definiciones
+		- a non-interleaving semantics for ccs based on proved transitions		
+		- Models for concurrency: towards a classification
+		- de lo más importante 
+			- Degano y Montanari (1987) concurrent histories : a basis for observing distributed systems
+			- Boudol & Castellani (1988) a non-interleaving semantics for ccs based on proved transitions
+			- Stark (1989) Concurrent Transitions Systems
+			- synchronization trees
+			- Conditional rewriting logic as a unified model of concurrency
+			- models and logics for true concurrency			
+		- opcional
+			- event structures
+			- concurrent histories : a basis for observing distributed systems
+			- a non-interleaving semantics for ccs based on proved transitions
+			- equivalence semantics for concurrency: comparison and application
+			- enhanced event structures
 	- escribir hernán por concurrencia real en eventos, copiar a Sebas y a Vic		
 - post paper
 	- tool
