@@ -1,22 +1,8 @@
 TODO:
 =====
+- lista de cosas a agregar/modificar del paper de ICSE para TOSEM
 - clts
-	- primer lectura
-		- on the expresiveness of higher dimensional automata
-	- definir perspectiva
-		- causal, temporal
-		- sincronico, asincrónico
-		- de sistema, comportamiento
-		- concurrencia por composición de procesos (CCS) o eventos (señales)
-	- armar reporte general para
-		- on the expresiveness of higher dimensional automata (tiene un buen esquema de jerarquías al comienzo)	
-		- synchronization trees (se usa en Stark)
-		- concurrent transition systems (stark)
-		- equivalence semantics for concurrency: comparison and application (eTSS para SOS está medio muerto)
-		- Conditional rewriting logic as a unified model of concurrency (tiene muchísimas citas)
-		- compositional reasoning in model checking (señales)		
-		- models and logics for true concurrency (review)
-		- event structures (por completitud y para poder comparar)
+	- Leer y hacer notas de A logical study of distributed transition systems
 	- revisar definiciones
 		- a non-interleaving semantics for ccs based on proved transitions		
 		- Models for concurrency: towards a classification

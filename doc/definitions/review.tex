@@ -1,0 +1,44 @@
+Los formalismos generales vienen de:
+\begin{itemize}
+	\item Calculus for communicating processes (CCS) ~\cite{milner1989communication}
+	\item Communicating Sequential Processes (CSP) ~\cite{brookes1984theory}
+	\item Distributed Transition Systems (DTS) ~\cite{lodaya1995logical,lodaya1992models}
+	\item Concurrent Transition Systems (CTS) ~\cite{boudol1988non, degano1987concurrent, stark1989concurrent}
+	\item Algebra of communicating processes ~\cite{bergstra1984process}
+	\item Petri Nets ~\cite{brauer2006petri}
+	\item Communicating sequential Agents ~\cite{lodaya1987modal, lodaya1992temporal}
+	\item Event Structures ~\cite{winskel1986event}
+	\item Synchronization trees ~\cite{winskel1984synchronization}
+	\item Labeled events structures
+	\item Transition systems with independence ~\cite{sassone1996models}
+	\item Higher dimensional Automata ~\cite{van2006expressiveness}
+\end{itemize}
+
+\textbf{Concurrent Transition Systems}~\cite{stark1989concurrent}, tiene algunas similitudes estructurales, la motivación es distinta y no tuvo mucho impacto pero se cita el trabajo siguiente y es una buena comparación.
+
+\textbf{Models and logics for true concurrency}~\cite{lodaya1992models}, es un review de modelos y lógicas de los que quisiera utilizar la categorización de concurrencia implícita y explícita (utilizando la noción de cubos o hipercubos), comparan:
+\begin{itemize}
+\item LTS, DTS
+\item Petri
+\item Event Structures
+\item Communicating Sequential Agents
+\end{itemize}
+
+\textbf{Models for concurrency: towards a classification}~\cite{sassone1996models} este trabajo es parecido al anterior, el trabajo de Winskel comparando formalismos fue bastante citado, y en este caso presentan categorías de:
+\begin{itemize}
+\item Modelo de comportamiento/sistema
+\item Interleaving/noninterleaving
+\item Lógica lineal/branching
+\end{itemize}
+Para comparar:
+\begin{itemize}
+\item Hoare languages
+\item Synchronization trees
+\item (Deterministic) Labeled events structures
+\item (Deterministic) LTS
+\item (Deterministic) Transition systems with independence
+\end{itemize}
+
+\textbf{Compositional reasoning in model checking}~\cite{berezin1997compositional} es un trabajo que presenta dos modelos de composición (sincrónico y asincrónico) para reactive systems.
+
+\textbf{On the expresiveness of higher dimensional automata}~\cite{van2006expressiveness} introduce un formalismo llamado higher dimensional automata que modela concurrencia con hipercubos para dar una representación geométrica de la ejecución concurrente de eventos como un punto que se mueve en el hipercubo [0..1] x .. x [0..1], y al comienzo presenta una jerarquía de modelos empezando con synchronization trees, event structures, petri/explicit automata y poniendo HDA arriba.
