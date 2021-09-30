@@ -21,9 +21,7 @@ x) GET_MAX_HEAP_ENTRY(heap,MAX_HEAP_R_INDEX(x)) #define
 GET_MAX_HEAP_PARENT(heap, x) GET_MAX_HEAP_ENTRY(heap,MAX_HEAP_PARENT_INDEX(x))
 */
 
-automaton_max_heap *
-automaton_max_heap_create(uint32_t sizeof_element,
-                          automaton_max_heap_compare_func compare_func) {
+automaton_max_heap *automaton_max_heap_create(uint32_t sizeof_element, automaton_max_heap_compare_func compare_func) {
   automaton_max_heap *max_heap = malloc(sizeof(automaton_max_heap));
   max_heap->cmp_func = compare_func;
   max_heap->sizeof_element = sizeof_element;
@@ -37,8 +35,7 @@ automaton_max_heap_create(uint32_t sizeof_element,
   return max_heap;
 }
 
-void automaton_max_heap_swap(automaton_max_heap *heap, uint32_t n1,
-                             uint32_t n2) {
+void automaton_max_heap_swap(automaton_max_heap *heap, uint32_t n1, uint32_t n2) {
   if (heap->values_ptrs[n1] == heap->values_ptrs[n2])
     return;
   heap->tmp_value = heap->values_ptrs[n1];
@@ -65,17 +62,12 @@ GET_MAX_HEAP_ENTRY(heap, largest)); automaton_max_heap_heapify(heap, largest);
 }
 */
 void automaton_max_heap_heapify(automaton_max_heap *heap, uint32_t i) {
-  uint32_t largest =
-      (MAX_HEAP_L_INDEX(i) < heap->count &&
-       heap->cmp_func(
-           GET_MAX_HEAP_ENTRY(heap, heap->values_ptrs[MAX_HEAP_L_INDEX(i)]),
-           GET_MAX_HEAP_ENTRY(heap, heap->values_ptrs[i])) > 0)
-          ? MAX_HEAP_L_INDEX(i)
-          : i;
-  if (MAX_HEAP_R_INDEX(i) < heap->count &&
-      heap->cmp_func(
-          GET_MAX_HEAP_ENTRY(heap, heap->values_ptrs[MAX_HEAP_R_INDEX(i)]),
-          GET_MAX_HEAP_ENTRY(heap, heap->values_ptrs[largest])) > 0)
+  uint32_t largest = (MAX_HEAP_L_INDEX(i) < heap->count && heap->cmp_func(GET_MAX_HEAP_ENTRY(heap, heap->values_ptrs[MAX_HEAP_L_INDEX(i)]),
+                                                                          GET_MAX_HEAP_ENTRY(heap, heap->values_ptrs[i])) > 0)
+                         ? MAX_HEAP_L_INDEX(i)
+                         : i;
+  if (MAX_HEAP_R_INDEX(i) < heap->count && heap->cmp_func(GET_MAX_HEAP_ENTRY(heap, heap->values_ptrs[MAX_HEAP_R_INDEX(i)]),
+                                                          GET_MAX_HEAP_ENTRY(heap, heap->values_ptrs[largest])) > 0)
     largest = MAX_HEAP_R_INDEX(i);
   if (largest != i) {
     automaton_max_heap_swap(heap, i, largest);
@@ -124,8 +116,7 @@ void *automaton_max_heap_add_entry(automaton_max_heap *heap, void *entry) {
       exit(-1);
     }
     heap->values = new_values;
-    uint32_t *new_ptrs =
-        realloc(heap->values_ptrs, sizeof(uint32_t) * new_size);
+    uint32_t *new_ptrs = realloc(heap->values_ptrs, sizeof(uint32_t) * new_size);
     if (new_ptrs == NULL) {
       printf("Could not allocate memory[automaton_max_heap_add_entry:2]");
       exit(-1);
@@ -136,14 +127,9 @@ void *automaton_max_heap_add_entry(automaton_max_heap *heap, void *entry) {
     heap->size = new_size;
   }
   // keep heap properties invariant
-  void *ret_value =
-      memcpy(GET_MAX_HEAP_ENTRY(heap, heap->values_ptrs[heap->count]), entry,
-             heap->sizeof_element);
+  void *ret_value = memcpy(GET_MAX_HEAP_ENTRY(heap, heap->values_ptrs[heap->count]), entry, heap->sizeof_element);
   i = heap->count++;
-  while (i && heap->cmp_func(
-                  entry,
-                  GET_MAX_HEAP_ENTRY(
-                      heap, heap->values_ptrs[MAX_HEAP_PARENT_INDEX(i)])) > 0) {
+  while (i && heap->cmp_func(entry, GET_MAX_HEAP_ENTRY(heap, heap->values_ptrs[MAX_HEAP_PARENT_INDEX(i)])) > 0) {
     automaton_max_heap_swap(heap, i, MAX_HEAP_PARENT_INDEX(i));
     i = MAX_HEAP_PARENT_INDEX(i);
   }
@@ -152,8 +138,7 @@ void *automaton_max_heap_add_entry(automaton_max_heap *heap, void *entry) {
 
 void automaton_max_heap_pop_entry(automaton_max_heap *heap, void *target) {
   if (heap->count > 0) {
-    memcpy(target, GET_MAX_HEAP_ENTRY(heap, heap->values_ptrs[0]),
-           heap->sizeof_element);
+    memcpy(target, GET_MAX_HEAP_ENTRY(heap, heap->values_ptrs[0]), heap->sizeof_element);
     automaton_max_heap_swap(heap, 0, --(heap->count));
     automaton_max_heap_heapify(heap, 0);
   } else {
@@ -169,11 +154,9 @@ void automaton_max_heap_destroy(automaton_max_heap *heap) {
 }
 
 /** CONCRETE PENDING STATE IMPL **/
-int32_t automaton_pending_state_compare(void *left_pending_state,
-                                        void *right_pending_state) {
+int32_t automaton_pending_state_compare(void *left_pending_state, void *right_pending_state) {
   automaton_pending_state *left = (automaton_pending_state *)left_pending_state;
-  automaton_pending_state *right =
-      (automaton_pending_state *)right_pending_state;
+  automaton_pending_state *right = (automaton_pending_state *)right_pending_state;
 
   if (left->assumption_to_satisfy > right->assumption_to_satisfy) {
     return 1;
@@ -191,8 +174,7 @@ int32_t automaton_pending_state_compare(void *left_pending_state,
 }
 
 automaton_pending_state_max_heap *automaton_pending_state_max_heap_create() {
-  automaton_pending_state_max_heap *max_heap =
-      malloc(sizeof(automaton_pending_state_max_heap));
+  automaton_pending_state_max_heap *max_heap = malloc(sizeof(automaton_pending_state_max_heap));
   max_heap->count = 0;
   max_heap->size = INITIAL_HEAP_SIZE;
   max_heap->values = malloc(sizeof(automaton_pending_state) * max_heap->size);
@@ -203,19 +185,14 @@ automaton_pending_state_max_heap *automaton_pending_state_max_heap_create() {
   return max_heap;
 }
 
-void automaton_pending_state_max_heap_heapify(
-    automaton_pending_state_max_heap *heap, uint32_t i) {
+void automaton_pending_state_max_heap_heapify(automaton_pending_state_max_heap *heap, uint32_t i) {
   uint32_t largest =
       (MAX_HEAP_L_INDEX(i) < heap->count &&
-       automaton_pending_state_compare(
-           &(heap->values[heap->values_ptrs[MAX_HEAP_L_INDEX(i)]]),
-           &(heap->values[heap->values_ptrs[i]])) > 0)
+       automaton_pending_state_compare(&(heap->values[heap->values_ptrs[MAX_HEAP_L_INDEX(i)]]), &(heap->values[heap->values_ptrs[i]])) > 0)
           ? MAX_HEAP_L_INDEX(i)
           : i;
-  if (MAX_HEAP_R_INDEX(i) < heap->count &&
-      automaton_pending_state_compare(
-          &(heap->values[heap->values_ptrs[MAX_HEAP_R_INDEX(i)]]),
-          &(heap->values[heap->values_ptrs[largest]])) > 0)
+  if (MAX_HEAP_R_INDEX(i) < heap->count && automaton_pending_state_compare(&(heap->values[heap->values_ptrs[MAX_HEAP_R_INDEX(i)]]),
+                                                                           &(heap->values[heap->values_ptrs[largest]])) > 0)
     largest = MAX_HEAP_R_INDEX(i);
   if (largest != i) {
     uint32_t tmp_value = heap->values_ptrs[i];
@@ -225,22 +202,20 @@ void automaton_pending_state_max_heap_heapify(
   }
 }
 
-automaton_pending_state *automaton_pending_state_max_heap_add_entry(
-    automaton_pending_state_max_heap *heap, automaton_pending_state *entry) {
+automaton_pending_state *automaton_pending_state_max_heap_add_entry(automaton_pending_state_max_heap *heap,
+                                                                    automaton_pending_state *entry) {
   // check if heap needs to be resized
   uint32_t i;
   if (heap->count == heap->size) {
     uint32_t new_size = heap->size * LIST_INCREASE_FACTOR;
-    void *new_values =
-        realloc(heap->values, sizeof(automaton_pending_state) * new_size);
+    void *new_values = realloc(heap->values, sizeof(automaton_pending_state) * new_size);
     if (new_values == NULL) {
       printf("Could not allocate "
              "memory[automaton_pending_state_max_heap_add_entry:1]");
       exit(-1);
     }
     heap->values = new_values;
-    uint32_t *new_ptrs =
-        realloc(heap->values_ptrs, sizeof(uint32_t) * new_size);
+    uint32_t *new_ptrs = realloc(heap->values_ptrs, sizeof(uint32_t) * new_size);
     if (new_ptrs == NULL) {
       printf("Could not allocate "
              "memory[automaton_pending_state_max_heap_add_entry:2]");
@@ -252,19 +227,14 @@ automaton_pending_state *automaton_pending_state_max_heap_add_entry(
     heap->size = new_size;
   }
   // keep heap properties invariant
-  automaton_pending_state *ret_value =
-      &(heap->values[heap->values_ptrs[heap->count]]);
+  automaton_pending_state *ret_value = &(heap->values[heap->values_ptrs[heap->count]]);
   ret_value->assumption_to_satisfy = entry->assumption_to_satisfy;
   ret_value->goal_to_satisfy = entry->goal_to_satisfy;
   ret_value->state = entry->state;
   ret_value->timestamp = entry->timestamp;
   ret_value->value = entry->value;
   i = heap->count++;
-  while (
-      i &&
-      automaton_pending_state_compare(
-          entry, &(heap->values[heap->values_ptrs[MAX_HEAP_PARENT_INDEX(i)]])) >
-          0) {
+  while (i && automaton_pending_state_compare(entry, &(heap->values[heap->values_ptrs[MAX_HEAP_PARENT_INDEX(i)]])) > 0) {
     uint32_t tmp_value = heap->values_ptrs[i];
     heap->values_ptrs[i] = heap->values_ptrs[MAX_HEAP_PARENT_INDEX(i)];
     heap->values_ptrs[MAX_HEAP_PARENT_INDEX(i)] = tmp_value;
@@ -273,8 +243,7 @@ automaton_pending_state *automaton_pending_state_max_heap_add_entry(
   return ret_value;
 }
 
-void automaton_pending_state_max_heap_pop_entry(
-    automaton_pending_state_max_heap *heap, automaton_pending_state *target) {
+void automaton_pending_state_max_heap_pop_entry(automaton_pending_state_max_heap *heap, automaton_pending_state *target) {
   if (heap->count > 0) {
     automaton_pending_state *ret_value = &(heap->values[heap->values_ptrs[0]]);
     target->assumption_to_satisfy = ret_value->assumption_to_satisfy;
@@ -293,8 +262,7 @@ void automaton_pending_state_max_heap_pop_entry(
   }
 }
 
-void automaton_pending_state_max_heap_destroy(
-    automaton_pending_state_max_heap *heap) {
+void automaton_pending_state_max_heap_destroy(automaton_pending_state_max_heap *heap) {
   free(heap->values);
   free(heap->values_ptrs);
   free(heap);

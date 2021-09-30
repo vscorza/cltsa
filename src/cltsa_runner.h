@@ -48,9 +48,7 @@ typedef enum automaton_test_type_enum {
 char *test_get_output_content(char *filename);
 void test_set_expected_content(char *content, char *filename);
 void print_test_result(bool passed, char *name, char *description);
-void run_parse_test_local(char *test_file, char *test_name, char *result_name,
-                          char *steps_name,
-                          diagnosis_search_method diagnosis_method,
+void run_parse_test_local(char *test_file, char *test_name, char *result_name, char *steps_name, diagnosis_search_method diagnosis_method,
                           bool append_results);
 void run_parse_test(char *test_file, char *test_name);
 void run_parse_test_linear(char *test_file, char *test_name);
@@ -84,22 +82,16 @@ void run_automaton_composite_hash_table_tests();
 void run_functional_tests();
 
 /** GR1 TESTS **/
-void build_automaton_and_ranking_for_tests(
-    uint32_t *assumptions_count, uint32_t *goals_count,
-    uint32_t **assumptions_indexes, uint32_t **guarantees_indexes,
-    char ***assumptions, char ***goals,
-    automaton_concrete_bucket_list ***ranking_system, uint32_t **max_delta,
-    automaton_automaton **game_automaton, automaton_test_type type);
-void destroy_automaton_and_ranking_for_tests(
-    automaton_automaton *game_automaton, uint32_t assumptions_count,
-    uint32_t guarantees_count, uint32_t *assumptions_indexes,
-    uint32_t *guarantees_indexes, char **assumptions, char **goals,
-    automaton_concrete_bucket_list **ranking_system, uint32_t *max_delta);
-void set_automaton_ranking_for_tests(
-    automaton_automaton *game_automaton, uint32_t assumptions_count,
-    uint32_t guarantees_count, uint32_t *assumptions_indexes,
-    uint32_t *guarantees_indexes,
-    automaton_concrete_bucket_list ***ranking_system);
+void build_automaton_and_ranking_for_tests(uint32_t *assumptions_count, uint32_t *goals_count, uint32_t **assumptions_indexes,
+                                           uint32_t **guarantees_indexes, char ***assumptions, char ***goals,
+                                           automaton_concrete_bucket_list ***ranking_system, uint32_t **max_delta,
+                                           automaton_automaton **game_automaton, automaton_test_type type);
+void destroy_automaton_and_ranking_for_tests(automaton_automaton *game_automaton, uint32_t assumptions_count, uint32_t guarantees_count,
+                                             uint32_t *assumptions_indexes, uint32_t *guarantees_indexes, char **assumptions, char **goals,
+                                             automaton_concrete_bucket_list **ranking_system, uint32_t *max_delta);
+void set_automaton_ranking_for_tests(automaton_automaton *game_automaton, uint32_t assumptions_count, uint32_t guarantees_count,
+                                     uint32_t *assumptions_indexes, uint32_t *guarantees_indexes,
+                                     automaton_concrete_bucket_list ***ranking_system);
 void run_gr1_initialization_tests();
 void run_ranking_arithmetic_tests();
 void run_ranking_stabilization_tests();

@@ -62,8 +62,7 @@ int main(int argc, char **argv) {
         if (di) {
           while ((dir = readdir(di)) != NULL) {
             last = NULL;
-            snprintf(curr_file, sizeof(curr_file), "%s/%s", folder,
-                     dir->d_name);
+            snprintf(curr_file, sizeof(curr_file), "%s/%s", folder, dir->d_name);
             ;
             strtok(dir->d_name, ".");
             ptr2 = strtok(NULL, ".");
@@ -91,14 +90,10 @@ int main(int argc, char **argv) {
           else
             result_name++;
           if (i == 0) {
-            snprintf(result_buff, sizeof(result_buff), "%s/%s%s", folder,
-                     result_name, suffix != NULL ? suffix : "");
+            snprintf(result_buff, sizeof(result_buff), "%s/%s%s", folder, result_name, suffix != NULL ? suffix : "");
           }
-          snprintf(steps_buff, sizeof(steps_buff), "%s/%s%s_steps", folder,
-                   result_name, suffix != NULL ? suffix : "");
-          run_parse_test_local(argv[initial_index + i * 2],
-                               argv[initial_index + i * 2 + 1], result_buff,
-                               steps_buff, DD_SEARCH, i != 0);
+          snprintf(steps_buff, sizeof(steps_buff), "%s/%s%s_steps", folder, result_name, suffix != NULL ? suffix : "");
+          run_parse_test_local(argv[initial_index + i * 2], argv[initial_index + i * 2 + 1], result_buff, steps_buff, DD_SEARCH, i != 0);
         }
       }
     }

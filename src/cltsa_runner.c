@@ -23,8 +23,7 @@ char *test_get_output_content(char *filename) {
   size = ftell(fp);       /* How many bytes did we pass ? */
   rewind(fp);
   buffer = malloc((size + 1) * sizeof(*buffer)); /* size + 1 byte for the \0 */
-  fread(buffer, size, 1,
-        fp); /* Read 1 chunk of size bytes from fp into buffer */
+  fread(buffer, size, 1, fp);                    /* Read 1 chunk of size bytes from fp into buffer */
   /* NULL-terminate the buffer */
   buffer[size] = '\0';
   /* Print it ! */
@@ -52,17 +51,13 @@ void print_test_result(bool passed, char *name, char *description) {
   printf("\t [%s] \t (%s)\n", name, description);
   fflush(stdout);
 }
-void run_parse_test_local(char *test_file, char *test_name, char *result_name,
-                          char *steps_name,
-                          diagnosis_search_method diagnosis_method,
+void run_parse_test_local(char *test_file, char *test_name, char *result_name, char *steps_name, diagnosis_search_method diagnosis_method,
                           bool append_results) {
   FILE *fd;
   char cwd[1024];
   getcwd(cwd, sizeof(cwd));
 #if VERBOSE
-  printf(
-      "Current working dir:\t%s\nFile:\t%s\nCase name:\t%s\nResult name:\t%s\n",
-      cwd, test_file, test_name, result_name);
+  printf("Current working dir:\t%s\nFile:\t%s\nCase name:\t%s\nResult name:\t%s\n", cwd, test_file, test_name, result_name);
 #endif
   if (!(yyin = fopen(test_file, "r"))) {
     printf("Could not open %s\n", test_file);
@@ -75,10 +70,8 @@ void run_parse_test_local(char *test_file, char *test_name, char *result_name,
 
   bool PRINT_FSP = true;
 
-  automaton_automata_context *ctx =
-      automaton_automata_context_create_from_syntax(
-          parsed_program, result_name, test_name, diagnosis_method, result_name,
-          steps_name, append_results);
+  automaton_automata_context *ctx = automaton_automata_context_create_from_syntax(parsed_program, result_name, test_name, diagnosis_method,
+                                                                                  result_name, steps_name, append_results);
   if (ctx != NULL)
     automaton_automata_context_destroy(ctx);
   automaton_program_syntax_destroy(parsed_program);
@@ -94,15 +87,13 @@ void run_parse_test_linear(char *test_file, char *test_name) {
   char buf[255] = {'\0'}, steps_buff[255] = {'\0'};
   snprintf(buf, sizeof(buf), "results/%s", test_name);
   snprintf(steps_buff, sizeof(steps_buff), "results/%s_steps", test_name);
-  run_parse_test_local(test_file, test_name, buf, steps_buff, LINEAR_SEARCH,
-                       false);
+  run_parse_test_local(test_file, test_name, buf, steps_buff, LINEAR_SEARCH, false);
 }
 void run_diagnosis(char *test_file, char *test_name, bool append_results) {
   char buf[255] = {'\0'}, steps_buff[255] = {'\0'};
   snprintf(buf, sizeof(buf), "results/%s", test_name);
   snprintf(steps_buff, sizeof(steps_buff), "results/%s_steps", test_name);
-  run_parse_test_local(test_file, test_name, buf, steps_buff, DD_SEARCH,
-                       append_results);
+  run_parse_test_local(test_file, test_name, buf, steps_buff, DD_SEARCH, append_results);
 }
 void run_fsp_tests(uint32_t test_count) {
   uint32_t i;
@@ -114,12 +105,8 @@ void run_fsp_tests(uint32_t test_count) {
     run_parse_test(buf, buf2);
   }
 }
-void run_automaton_export_test() {
-  run_parse_test("tests/export_test_1.fsp", "export test");
-}
-void run_automaton_import_test() {
-  run_parse_test("tests/import_test_1.fsp", "import test");
-}
+void run_automaton_export_test() { run_parse_test("tests/export_test_1.fsp", "export test"); }
+void run_automaton_import_test() { run_parse_test("tests/import_test_1.fsp", "import test"); }
 /** OBDD TESTS **/
 void run_obdd_exists() {
   obdd_mgr *new_mgr = obdd_mgr_create();
@@ -164,12 +151,9 @@ void run_obdd_exists() {
   total_img[2] = 6;
   obdd *exists_obdd = obdd_exists(x1_and_x2_obdd, "x1");
   obdd_print(exists_obdd, buff, buff_size);
-  obdd_get_valuations(new_mgr, exists_obdd, &valuations, &valuations_size,
-                      &valuations_count, total_img, img_count, dont_care_list,
-                      partial_valuation, initialized_values, valuation_set,
-                      last_nodes);
-  obdd_print_valuations(new_mgr, valuations, valuations_count, total_img,
-                        img_count, buff);
+  obdd_get_valuations(new_mgr, exists_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count, dont_care_list,
+                      partial_valuation, initialized_values, valuation_set, last_nodes);
+  obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count, buff);
   obdd_destroy(exists_obdd);
   free(total_img);
 #if PRINT_TEST_OUTPUT
@@ -182,12 +166,9 @@ void run_obdd_exists() {
   total_img[2] = 6;
   exists_obdd = obdd_exists(x1_and_x2_and_x3_obdd, "x2");
   obdd_print(exists_obdd, buff, buff_size);
-  obdd_get_valuations(new_mgr, exists_obdd, &valuations, &valuations_size,
-                      &valuations_count, total_img, img_count, dont_care_list,
-                      partial_valuation, initialized_values, valuation_set,
-                      last_nodes);
-  obdd_print_valuations(new_mgr, valuations, valuations_count, total_img,
-                        img_count, buff);
+  obdd_get_valuations(new_mgr, exists_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count, dont_care_list,
+                      partial_valuation, initialized_values, valuation_set, last_nodes);
+  obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count, buff);
   obdd_destroy(exists_obdd);
   free(total_img);
 #if PRINT_TEST_OUTPUT
@@ -200,16 +181,12 @@ void run_obdd_exists() {
   total_img[2] = 6;
   exists_obdd = obdd_exists_vector(x1_and_x2_and_x3_obdd, total_img, 2);
   obdd_print(exists_obdd, buff, buff_size);
-  obdd_get_valuations(new_mgr, exists_obdd, &valuations, &valuations_size,
-                      &valuations_count, total_img, img_count, dont_care_list,
-                      partial_valuation, initialized_values, valuation_set,
-                      last_nodes);
-  obdd_print_valuations(new_mgr, valuations, valuations_count, total_img,
-                        img_count, buff);
+  obdd_get_valuations(new_mgr, exists_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count, dont_care_list,
+                      partial_valuation, initialized_values, valuation_set, last_nodes);
+  obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count, buff);
   obdd_destroy(exists_obdd);
 
-  char *expected = test_get_output_content(
-      "tests/expected_output/run_obdd_exists_tests.exp");
+  char *expected = test_get_output_content("tests/expected_output/run_obdd_exists_tests.exp");
   bool txt_cmp = strcmp(buff, expected) == 0;
   print_test_result(txt_cmp, "OBDD EXISTS", "obdd exists test");
   free(expected);
@@ -276,12 +253,9 @@ void run_obdd_valuations() {
   img_count = 1;
   total_img = malloc(sizeof(uint32_t) * img_count);
   total_img[0] = 2 + 2;
-  obdd_get_valuations(new_mgr, not_x1_obdd, &valuations, &valuations_size,
-                      &valuations_count, total_img, img_count, dont_care_list,
-                      partial_valuation, initialized_values, valuation_set,
-                      last_nodes);
-  obdd_print_valuations(new_mgr, valuations, valuations_count, total_img,
-                        img_count, buff);
+  obdd_get_valuations(new_mgr, not_x1_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count, dont_care_list,
+                      partial_valuation, initialized_values, valuation_set, last_nodes);
+  obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count, buff);
   free(total_img);
 #if PRINT_TEST_OUTPUT
   printf("!X1 over x1, x2\n");
@@ -290,12 +264,9 @@ void run_obdd_valuations() {
   total_img = malloc(sizeof(uint32_t) * img_count);
   total_img[0] = 2;
   total_img[1] = 2 + 2;
-  obdd_get_valuations(new_mgr, not_x1_obdd, &valuations, &valuations_size,
-                      &valuations_count, total_img, img_count, dont_care_list,
-                      partial_valuation, initialized_values, valuation_set,
-                      last_nodes);
-  obdd_print_valuations(new_mgr, valuations, valuations_count, total_img,
-                        img_count, buff);
+  obdd_get_valuations(new_mgr, not_x1_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count, dont_care_list,
+                      partial_valuation, initialized_values, valuation_set, last_nodes);
+  obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count, buff);
   free(total_img);
 #if PRINT_TEST_OUTPUT
   printf("!X1 && !X2 over x1,x2\n");
@@ -304,12 +275,9 @@ void run_obdd_valuations() {
   total_img = malloc(sizeof(uint32_t) * img_count);
   for (i = 0; i < img_count; i++)
     total_img[i] = (i * 2) + 2;
-  obdd_get_valuations(new_mgr, not_x1_and_not_x2_obdd, &valuations,
-                      &valuations_size, &valuations_count, total_img, img_count,
-                      dont_care_list, partial_valuation, initialized_values,
-                      valuation_set, last_nodes);
-  obdd_print_valuations(new_mgr, valuations, valuations_count, total_img,
-                        img_count, buff);
+  obdd_get_valuations(new_mgr, not_x1_and_not_x2_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count,
+                      dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes);
+  obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count, buff);
   free(total_img);
 #if PRINT_TEST_OUTPUT
   printf("!X1 && !X2 over x1\n");
@@ -317,12 +285,9 @@ void run_obdd_valuations() {
   img_count = 1;
   total_img = malloc(sizeof(uint32_t) * img_count);
   total_img[0] = 2;
-  obdd_get_valuations(new_mgr, not_x1_and_not_x2_obdd, &valuations,
-                      &valuations_size, &valuations_count, total_img, img_count,
-                      dont_care_list, partial_valuation, initialized_values,
-                      valuation_set, last_nodes);
-  obdd_print_valuations(new_mgr, valuations, valuations_count, total_img,
-                        img_count, buff);
+  obdd_get_valuations(new_mgr, not_x1_and_not_x2_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count,
+                      dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes);
+  obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count, buff);
   obdd_print(not_x2_obdd, buff, buff_size);
   free(total_img);
 #if PRINT_TEST_OUTPUT
@@ -333,12 +298,9 @@ void run_obdd_valuations() {
   total_img[0] = 2;
   total_img[1] = 4;
   total_img[2] = 6;
-  obdd_get_valuations(new_mgr, not_x2_obdd, &valuations, &valuations_size,
-                      &valuations_count, total_img, img_count, dont_care_list,
-                      partial_valuation, initialized_values, valuation_set,
-                      last_nodes);
-  obdd_print_valuations(new_mgr, valuations, valuations_count, total_img,
-                        img_count, buff);
+  obdd_get_valuations(new_mgr, not_x2_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count, dont_care_list,
+                      partial_valuation, initialized_values, valuation_set, last_nodes);
+  obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count, buff);
   free(total_img);
 #if PRINT_TEST_OUTPUT
   printf("!X1 && !X2 over x1, x2, x3\n");
@@ -348,12 +310,9 @@ void run_obdd_valuations() {
   total_img[0] = 2;
   total_img[1] = 4;
   total_img[2] = 6;
-  obdd_get_valuations(new_mgr, not_x1_and_not_x2_obdd, &valuations,
-                      &valuations_size, &valuations_count, total_img, img_count,
-                      dont_care_list, partial_valuation, initialized_values,
-                      valuation_set, last_nodes);
-  obdd_print_valuations(new_mgr, valuations, valuations_count, total_img,
-                        img_count, buff);
+  obdd_get_valuations(new_mgr, not_x1_and_not_x2_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count,
+                      dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes);
+  obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count, buff);
   free(total_img);
 #if PRINT_TEST_OUTPUT
   printf("true over x1, x2, x3\n");
@@ -363,16 +322,12 @@ void run_obdd_valuations() {
   total_img[0] = 2;
   total_img[1] = 4;
   total_img[2] = 6;
-  obdd_get_valuations(new_mgr, true_obdd, &valuations, &valuations_size,
-                      &valuations_count, total_img, img_count, dont_care_list,
-                      partial_valuation, initialized_values, valuation_set,
-                      last_nodes);
-  obdd_print_valuations(new_mgr, valuations, valuations_count, total_img,
-                        img_count, buff);
+  obdd_get_valuations(new_mgr, true_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count, dont_care_list,
+                      partial_valuation, initialized_values, valuation_set, last_nodes);
+  obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count, buff);
   free(total_img);
 
-  char *expected = test_get_output_content(
-      "tests/expected_output/run_obdd_valuations_tests.exp");
+  char *expected = test_get_output_content("tests/expected_output/run_obdd_valuations_tests.exp");
   bool txt_cmp = strcmp(buff, expected) == 0;
   print_test_result(txt_cmp, "OBDD VALUATIONS", "obdd valuations test");
   free(expected);
@@ -416,8 +371,7 @@ void run_small_obdd_tests() {
   char *buff = calloc(buff_size, sizeof(char));
   obdd_print(x1_then_x2_obdd, buff, buff_size);
 
-  char *expected =
-      test_get_output_content("tests/expected_output/run_small_obdd_tests.exp");
+  char *expected = test_get_output_content("tests/expected_output/run_small_obdd_tests.exp");
 
   bool txt_cmp = strcmp(buff, expected) == 0;
   print_test_result(txt_cmp, "SMALL OBDD", "small obdd test");
@@ -440,12 +394,9 @@ void run_small_obdd_tests() {
 
   for (i = 0; i < img_count; i++)
     total_img[i] = i + 2;
-  obdd_get_valuations(new_mgr, x1_then_x2_obdd, &valuations, &valuations_size,
-                      &valuations_count, total_img, img_count, dont_care_list,
-                      partial_valuation, initialized_values, valuation_set,
-                      last_nodes);
-  obdd_print_valuations(new_mgr, valuations, valuations_count, total_img,
-                        img_count, buff);
+  obdd_get_valuations(new_mgr, x1_then_x2_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count, dont_care_list,
+                      partial_valuation, initialized_values, valuation_set, last_nodes);
+  obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count, buff);
   free(valuations);
   free(total_img);
   free(initialized_values);
@@ -507,15 +458,11 @@ void run_next_obdd_tests() {
 
   for (i = 0; i < img_count; i++)
     total_img[i] = i + 2;
-  obdd_get_valuations(new_mgr, not_x1_then_next_x2_obdd, &valuations,
-                      &valuations_size, &valuations_count, total_img, img_count,
-                      dont_care_list, partial_valuation, initialized_values,
-                      valuation_set, last_nodes);
-  obdd_print_valuations(new_mgr, valuations, valuations_count, total_img,
-                        img_count, buff);
+  obdd_get_valuations(new_mgr, not_x1_then_next_x2_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count,
+                      dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes);
+  obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count, buff);
 
-  char *expected =
-      test_get_output_content("tests/expected_output/run_next_obdd_tests.exp");
+  char *expected = test_get_output_content("tests/expected_output/run_next_obdd_tests.exp");
   bool txt_cmp = strcmp(buff, expected) == 0;
   print_test_result(txt_cmp, "NEXT OBDD", "next obdd test");
 
@@ -562,40 +509,28 @@ void run_obdd_tests() {
   char *buff = calloc(buff_size, sizeof(char));
   obdd_print(x1_or_x2_obdd, buff, buff_size);
 #if PRINT_TEST_OUTPUT
-  printf("x1 || x2 sat? : %s \n",
-         obdd_is_sat(new_mgr, x1_or_x2_obdd->root_obdd) ? "yes" : "no");
-  printf("x1 || x2 taut? : %s \n",
-         obdd_is_tautology(new_mgr, x1_or_x2_obdd->root_obdd) ? "yes" : "no");
+  printf("x1 || x2 sat? : %s \n", obdd_is_sat(new_mgr, x1_or_x2_obdd->root_obdd) ? "yes" : "no");
+  printf("x1 || x2 taut? : %s \n", obdd_is_tautology(new_mgr, x1_or_x2_obdd->root_obdd) ? "yes" : "no");
 #endif
   obdd_print(x1_and_x2_obdd, buff, buff_size);
 #if PRINT_TEST_OUTPUT
-  printf("x1 && x2 sat? : %s \n",
-         obdd_is_sat(new_mgr, x1_and_x2_obdd->root_obdd) ? "yes" : "no");
-  printf("x1 && x2 taut? : %s \n",
-         obdd_is_tautology(new_mgr, x1_and_x2_obdd->root_obdd) ? "yes" : "no");
+  printf("x1 && x2 sat? : %s \n", obdd_is_sat(new_mgr, x1_and_x2_obdd->root_obdd) ? "yes" : "no");
+  printf("x1 && x2 taut? : %s \n", obdd_is_tautology(new_mgr, x1_and_x2_obdd->root_obdd) ? "yes" : "no");
 #endif
   obdd_print(x1_and_not_x1_obdd, buff, buff_size);
 #if PRINT_TEST_OUTPUT
-  printf("x1 && !x1 sat? : %s \n",
-         obdd_is_sat(new_mgr, x1_and_not_x1_obdd->root_obdd) ? "yes" : "no");
-  printf("x1 && !x1 taut? : %s \n",
-         obdd_is_tautology(new_mgr, x1_and_not_x1_obdd->root_obdd) ? "yes"
-                                                                   : "no");
+  printf("x1 && !x1 sat? : %s \n", obdd_is_sat(new_mgr, x1_and_not_x1_obdd->root_obdd) ? "yes" : "no");
+  printf("x1 && !x1 taut? : %s \n", obdd_is_tautology(new_mgr, x1_and_not_x1_obdd->root_obdd) ? "yes" : "no");
 #endif
   obdd_print(x1_and_x2_then_x1, buff, buff_size);
 #if PRINT_TEST_OUTPUT
-  printf("(x1 && x2)->x1 sat? : %s \n",
-         obdd_is_sat(new_mgr, x1_and_x2_then_x1->root_obdd) ? "yes" : "no");
-  printf("(x1 && x2)->x1 taut? : %s \n",
-         obdd_is_tautology(new_mgr, x1_and_x2_then_x1->root_obdd) ? "yes"
-                                                                  : "no");
+  printf("(x1 && x2)->x1 sat? : %s \n", obdd_is_sat(new_mgr, x1_and_x2_then_x1->root_obdd) ? "yes" : "no");
+  printf("(x1 && x2)->x1 taut? : %s \n", obdd_is_tautology(new_mgr, x1_and_x2_then_x1->root_obdd) ? "yes" : "no");
 #endif
   obdd_print(exists_obdd, buff, buff_size);
 #if PRINT_TEST_OUTPUT
-  printf("E x2.(x2 = (x1 && !x1)) sat? : %s \n",
-         obdd_is_sat(new_mgr, exists_obdd->root_obdd) ? "yes" : "no");
-  printf("E x2.(x2 = (x1 && !x1)) taut? : %s \n",
-         obdd_is_tautology(new_mgr, exists_obdd->root_obdd) ? "yes" : "no");
+  printf("E x2.(x2 = (x1 && !x1)) sat? : %s \n", obdd_is_sat(new_mgr, exists_obdd->root_obdd) ? "yes" : "no");
+  printf("E x2.(x2 = (x1 && !x1)) taut? : %s \n", obdd_is_tautology(new_mgr, exists_obdd->root_obdd) ? "yes" : "no");
 #endif
   obdd_mgr_print(new_mgr, buff);
   uint32_t valuations_count;
@@ -619,45 +554,32 @@ void run_obdd_tests() {
   printf("X1 && X2\n");
 #endif
   obdd_print(x1_and_x2_obdd, buff, buff_size);
-  obdd_get_valuations(new_mgr, x1_and_x2_obdd, &valuations, &valuations_size,
-                      &valuations_count, total_img, img_count, dont_care_list,
-                      partial_valuation, initialized_values, valuation_set,
-                      last_nodes);
-  obdd_print_valuations(new_mgr, valuations, valuations_count, total_img,
-                        img_count, buff);
+  obdd_get_valuations(new_mgr, x1_and_x2_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count, dont_care_list,
+                      partial_valuation, initialized_values, valuation_set, last_nodes);
+  obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count, buff);
 #if PRINT_TEST_OUTPUT
   printf("X1 & X2 && X3\n");
 #endif
   obdd_print(x1_and_x2_and_x3_obdd, buff, buff_size);
-  obdd_get_valuations(new_mgr, x1_and_x2_and_x3_obdd, &valuations,
-                      &valuations_size, &valuations_count, total_img, img_count,
-                      dont_care_list, partial_valuation, initialized_values,
-                      valuation_set, last_nodes);
-  obdd_print_valuations(new_mgr, valuations, valuations_count, total_img,
-                        img_count, buff);
+  obdd_get_valuations(new_mgr, x1_and_x2_and_x3_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count,
+                      dont_care_list, partial_valuation, initialized_values, valuation_set, last_nodes);
+  obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count, buff);
 #if PRINT_TEST_OUTPUT
   printf("X1 || X2\n");
 #endif
   obdd_print(x1_or_x2_obdd, buff, buff_size);
-  obdd_get_valuations(new_mgr, x1_or_x2_obdd, &valuations, &valuations_size,
-                      &valuations_count, total_img, img_count, dont_care_list,
-                      partial_valuation, initialized_values, valuation_set,
-                      last_nodes);
-  obdd_print_valuations(new_mgr, valuations, valuations_count, total_img,
-                        img_count, buff);
+  obdd_get_valuations(new_mgr, x1_or_x2_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count, dont_care_list,
+                      partial_valuation, initialized_values, valuation_set, last_nodes);
+  obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count, buff);
 #if PRINT_TEST_OUTPUT
   printf("X1 || X2 || X3\n");
 #endif
   obdd_print(x1_or_x2_or_x3_obdd, buff, buff_size);
-  obdd_get_valuations(new_mgr, x1_or_x2_or_x3_obdd, &valuations,
-                      &valuations_size, &valuations_count, total_img, img_count,
-                      dont_care_list, partial_valuation, initialized_values,
-                      valuation_set, last_nodes);
-  obdd_print_valuations(new_mgr, valuations, valuations_count, total_img,
-                        img_count, buff);
+  obdd_get_valuations(new_mgr, x1_or_x2_or_x3_obdd, &valuations, &valuations_size, &valuations_count, total_img, img_count, dont_care_list,
+                      partial_valuation, initialized_values, valuation_set, last_nodes);
+  obdd_print_valuations(new_mgr, valuations, valuations_count, total_img, img_count, buff);
 
-  char *expected =
-      test_get_output_content("tests/expected_output/run_obdd_tests.exp");
+  char *expected = test_get_output_content("tests/expected_output/run_obdd_tests.exp");
   bool txt_cmp = strcmp(buff, expected) == 0;
   print_test_result(txt_cmp, "OBDD", "obdd test");
 
@@ -716,8 +638,7 @@ void run_obdd_tree_tests() {
       key1[j] = ((i >> j) & 0x1) == 0;
     }
 #if PRINT_TEST_OUTPUT
-    printf("%d:%d %s", i, obdd_state_tree_get_key(tree, key1, -1),
-           i % 5 == 0 ? "\n" : "  ");
+    printf("%d:%d %s", i, obdd_state_tree_get_key(tree, key1, -1), i % 5 == 0 ? "\n" : "  ");
 #endif
     passed = passed & ((i + 1) == obdd_state_tree_get_key(tree, key1, -1));
   }
@@ -729,8 +650,7 @@ void run_obdd_tree_tests() {
       key1[j] = ((i >> j) & 0x1) == 0;
     }
 #if PRINT_TEST_OUTPUT
-    printf("%d:%d %s", i, obdd_state_tree_get_key(tree, key1, -1),
-           i % 5 == 0 ? "\n" : "  ");
+    printf("%d:%d %s", i, obdd_state_tree_get_key(tree, key1, -1), i % 5 == 0 ? "\n" : "  ");
 #endif
     passed = passed & ((i + 1) == obdd_state_tree_get_key(tree, key1, -1));
   }
@@ -750,8 +670,7 @@ void run_obdd_cache_tests() {
   printf("CHECK NODE EQUALITY X1 && X2 USING CACHE\n");
 #endif
 
-  print_test_result(x1_and_x2_obdd->root_obdd == x1_and_x2_obdd_bis->root_obdd,
-                    "OBDD CACHE TEST", "obdd cache test");
+  print_test_result(x1_and_x2_obdd->root_obdd == x1_and_x2_obdd_bis->root_obdd, "OBDD CACHE TEST", "obdd cache test");
 
   obdd_destroy(x1_obdd);
   obdd_destroy(x2_obdd);
@@ -774,13 +693,11 @@ void run_obdd_fast_lists_tests() {
   for (i = 0; i < FAST_LIST_VAR_COUNT; i++) {
     if (!met_search)
       break;
-    result = obdd_table_search_node_ID(
-        new_mgr->table, vars[i]->root_obdd->var_ID,
-        vars[i]->root_obdd->high_obdd, vars[i]->root_obdd->low_obdd);
+    result =
+        obdd_table_search_node_ID(new_mgr->table, vars[i]->root_obdd->var_ID, vars[i]->root_obdd->high_obdd, vars[i]->root_obdd->low_obdd);
     met_search = met_search && (result != NULL);
   }
-  print_test_result(met_search, "OBDD FAST LIST ADD TEST",
-                    "obdd fast list add test");
+  print_test_result(met_search, "OBDD FAST LIST ADD TEST", "obdd fast list add test");
   for (i = 0; i < FAST_LIST_VAR_COUNT; i++) {
     if (i % 2 == 0)
       obdd_table_node_destroy(new_mgr->table, vars[i]->root_obdd);
@@ -789,9 +706,8 @@ void run_obdd_fast_lists_tests() {
   for (i = 0; i < FAST_LIST_VAR_COUNT; i++) {
     if (!met_search)
       break;
-    result = obdd_table_search_node_ID(
-        new_mgr->table, vars[i]->root_obdd->var_ID,
-        vars[i]->root_obdd->high_obdd, vars[i]->root_obdd->low_obdd);
+    result =
+        obdd_table_search_node_ID(new_mgr->table, vars[i]->root_obdd->var_ID, vars[i]->root_obdd->high_obdd, vars[i]->root_obdd->low_obdd);
     if (i % 2 == 1) {
       met_search = met_search && (result != NULL);
     } else {
@@ -803,8 +719,7 @@ void run_obdd_fast_lists_tests() {
       obdd_table_node_add(new_mgr->table, vars[i]->root_obdd);
   }
 
-  print_test_result(met_search, "OBDD FAST LIST REMOVAL TEST",
-                    "obdd fast list removal test");
+  print_test_result(met_search, "OBDD FAST LIST REMOVAL TEST", "obdd fast list removal test");
 
   for (i = 0; i < FAST_LIST_VAR_COUNT; i++) {
     obdd_destroy(vars[i]);
@@ -814,15 +729,13 @@ void run_obdd_fast_lists_tests() {
 }
 /** SRUCT TESTS **/
 void run_automaton_string_list_test() {
-  char test_list[STRING_LIST_SIZE][10] = {"dan", "edward", "carl", "albert",
-                                          "zoe", "dan",    "aark", "zoe"};
+  char test_list[STRING_LIST_SIZE][10] = {"dan", "edward", "carl", "albert", "zoe", "dan", "aark", "zoe"};
   uint32_t i, pos;
   automaton_string_list *list;
   bool passed;
   // test non sorted allow repeat
   passed = true;
-  char test_list_ns_nr[6][10] = {"dan",    "edward", "carl",
-                                 "albert", "zoe",    "aark"};
+  char test_list_ns_nr[6][10] = {"dan", "edward", "carl", "albert", "zoe", "aark"};
   list = automaton_string_list_create(false, false);
   for (i = 0; i < STRING_LIST_SIZE; i++)
     aut_push_string_to_list(list, test_list[i], &pos);
@@ -837,12 +750,10 @@ void run_automaton_string_list_test() {
     }
   }
   automaton_string_list_destroy(list);
-  print_test_result(passed, "STRING LIST !SORTED !REPEAT",
-                    "string list insert not sorted, not repeat");
+  print_test_result(passed, "STRING LIST !SORTED !REPEAT", "string list insert not sorted, not repeat");
   // test sorted allow repeat
   passed = true;
-  char test_list_s_nr[6][10] = {"aark", "albert", "carl",
-                                "dan",  "edward", "zoe"};
+  char test_list_s_nr[6][10] = {"aark", "albert", "carl", "dan", "edward", "zoe"};
   list = automaton_string_list_create(true, false);
   for (i = 0; i < STRING_LIST_SIZE; i++)
     aut_push_string_to_list(list, test_list[i], &pos);
@@ -858,12 +769,10 @@ void run_automaton_string_list_test() {
   }
 
   automaton_string_list_destroy(list);
-  print_test_result(passed, "STRING LIST SORTED !REPEAT",
-                    "string list insert sorted, not repeat");
+  print_test_result(passed, "STRING LIST SORTED !REPEAT", "string list insert sorted, not repeat");
   // test non sorted no repeat
   passed = true;
-  char test_list_ns_r[8][10] = {"dan", "edward", "carl", "albert",
-                                "zoe", "dan",    "aark", "zoe"};
+  char test_list_ns_r[8][10] = {"dan", "edward", "carl", "albert", "zoe", "dan", "aark", "zoe"};
   list = automaton_string_list_create(false, true);
   for (i = 0; i < STRING_LIST_SIZE; i++)
     aut_push_string_to_list(list, test_list[i], &pos);
@@ -878,12 +787,10 @@ void run_automaton_string_list_test() {
     }
   }
   automaton_string_list_destroy(list);
-  print_test_result(passed, "STRING LIST !SORTED REPEAT",
-                    "string list insert not sorted, allow repeat");
+  print_test_result(passed, "STRING LIST !SORTED REPEAT", "string list insert not sorted, allow repeat");
   // test sorted no repeat
   passed = true;
-  char test_list_s_r[8][10] = {"aark", "albert", "carl", "dan",
-                               "dan",  "edward", "zoe",  "zoe"};
+  char test_list_s_r[8][10] = {"aark", "albert", "carl", "dan", "dan", "edward", "zoe", "zoe"};
   list = automaton_string_list_create(true, true);
   for (i = 0; i < STRING_LIST_SIZE; i++)
     aut_push_string_to_list(list, test_list[i], &pos);
@@ -899,8 +806,7 @@ void run_automaton_string_list_test() {
   }
 
   automaton_string_list_destroy(list);
-  print_test_result(passed, "STRING LIST SORTED REPEAT",
-                    "string list insert sorted, allow repeat");
+  print_test_result(passed, "STRING LIST SORTED REPEAT", "string list insert sorted, allow repeat");
   // load test
   passed = true;
   uint32_t load = 2000;
@@ -918,8 +824,7 @@ void run_automaton_string_list_test() {
     }
   }
   automaton_string_list_destroy(list);
-  print_test_result(passed, "STRING LIST LOAD",
-                    "string list insert sorted, allow repeat, load test");
+  print_test_result(passed, "STRING LIST LOAD", "string list insert sorted, allow repeat, load test");
 }
 uint32_t test_item_compare(void *left, void *right) {
   test_item_bucket *left_entry = (test_item_bucket *)left;
@@ -932,12 +837,9 @@ uint32_t test_item_compare(void *left, void *right) {
     return -1;
   }
 }
-uint32_t test_item_extractor(void *entry) {
-  return ((test_item_bucket *)entry)->a;
-}
+uint32_t test_item_extractor(void *entry) { return ((test_item_bucket *)entry)->a; }
 void run_max_heap_tests() {
-  automaton_max_heap *heap =
-      automaton_max_heap_create(sizeof(test_item_bucket), test_item_compare);
+  automaton_max_heap *heap = automaton_max_heap_create(sizeof(test_item_bucket), test_item_compare);
   test_item_bucket current_item;
   uint32_t i;
   uint32_t cycles = 100;
@@ -960,20 +862,17 @@ void run_max_heap_tests() {
     current_item.b = i;
     current_item.a = i + cycles;
     automaton_max_heap_add_entry(heap, &current_item);
-    snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1,
-             "PUSHING ITEM <%d,%d>\n", current_item.a, current_item.b);
+    snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "PUSHING ITEM <%d,%d>\n", current_item.a, current_item.b);
   }
   for (i = 0; i < cycles; i++) {
     current_item.b = i;
     current_item.a = i;
     automaton_max_heap_add_entry(heap, &current_item);
-    snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1,
-             "PUSHING ITEM <%d,%d>\n", current_item.a, current_item.b);
+    snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "PUSHING ITEM <%d,%d>\n", current_item.a, current_item.b);
   }
   for (i = 0; i < cycles * 2; i++) {
     automaton_max_heap_pop_entry(heap, &current_item);
-    snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1,
-             "POPPING ITEM: <%d,%d>\n", i, current_item.a, current_item.b);
+    snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "POPPING ITEM: <%d,%d>\n", i, current_item.a, current_item.b);
   }
 
   automaton_max_heap_destroy(heap);
@@ -982,8 +881,7 @@ void run_max_heap_tests() {
   fprintf(ftest, "%s", buff);
   fclose(ftest);
 
-  char *expected =
-      test_get_output_content("tests/expected_output/run_max_heap_tests.exp");
+  char *expected = test_get_output_content("tests/expected_output/run_max_heap_tests.exp");
   bool txt_cmp = strcmp(buff, expected) == 0;
   print_test_result(txt_cmp, "MAX HEAP", "max heap test");
 
@@ -991,8 +889,7 @@ void run_max_heap_tests() {
   free(buff);
 }
 void run_max_heap_tests_2() {
-  automaton_pending_state_max_heap *heap =
-      automaton_pending_state_max_heap_create();
+  automaton_pending_state_max_heap *heap = automaton_pending_state_max_heap_create();
   automaton_pending_state current_item;
   uint32_t i;
   uint32_t cycles = 100;
@@ -1015,22 +912,19 @@ void run_max_heap_tests_2() {
     current_item.assumption_to_satisfy = i;
     current_item.value = i + cycles;
     automaton_pending_state_max_heap_add_entry(heap, &current_item);
-    snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1,
-             "PUSHING ITEM <%d,%d>\n", current_item.value,
+    snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "PUSHING ITEM <%d,%d>\n", current_item.value,
              current_item.assumption_to_satisfy);
   }
   for (i = 0; i < cycles; i++) {
     current_item.assumption_to_satisfy = i;
     current_item.value = i;
     automaton_pending_state_max_heap_add_entry(heap, &current_item);
-    snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1,
-             "PUSHING ITEM <%d,%d>\n", current_item.value,
+    snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "PUSHING ITEM <%d,%d>\n", current_item.value,
              current_item.assumption_to_satisfy);
   }
   for (i = 0; i < cycles * 2; i++) {
     automaton_pending_state_max_heap_pop_entry(heap, &current_item);
-    snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1,
-             "POPPING ITEM: <%d,%d>\n", i, current_item.value,
+    snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "POPPING ITEM: <%d,%d>\n", i, current_item.value,
              current_item.assumption_to_satisfy);
   }
 
@@ -1040,8 +934,7 @@ void run_max_heap_tests_2() {
   fprintf(ftest, "%s", buff);
   fclose(ftest);
 
-  char *expected =
-      test_get_output_content("tests/expected_output/run_max_heap_tests.exp");
+  char *expected = test_get_output_content("tests/expected_output/run_max_heap_tests.exp");
   bool txt_cmp = strcmp(buff, expected) == 0;
   print_test_result(txt_cmp, "MAX HEAP", "max heap test");
 
@@ -1049,8 +942,8 @@ void run_max_heap_tests_2() {
   free(buff);
 }
 void run_concrete_bucket_list_tests() {
-  automaton_concrete_bucket_list *list = automaton_concrete_bucket_list_create(
-      RANKING_BUCKET_SIZE, test_item_extractor, sizeof(test_item_bucket));
+  automaton_concrete_bucket_list *list =
+      automaton_concrete_bucket_list_create(RANKING_BUCKET_SIZE, test_item_extractor, sizeof(test_item_bucket));
   test_item_bucket current_item;
   uint32_t i;
   uint32_t cycles = 600;
@@ -1064,67 +957,50 @@ void run_concrete_bucket_list_tests() {
 
   for (i = 0; i < cycles; i++) {
     automaton_concrete_bucket_pop_entry(list, &current_item);
-    snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1,
-             "ITEM at %d: <%d,%d>\n", i, current_item.a, current_item.b);
+    snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "ITEM at %d: <%d,%d>\n", i, current_item.a, current_item.b);
   }
   automaton_concrete_bucket_destroy(list, true);
 
-  char *expected = test_get_output_content(
-      "tests/expected_output/run_concrete_bucket_list_tests.exp");
+  char *expected = test_get_output_content("tests/expected_output/run_concrete_bucket_list_tests.exp");
   bool txt_cmp = strcmp(buff, expected) == 0;
-  print_test_result(txt_cmp, "CONCRETE BUCKET LIST",
-                    "concrete bucket list test");
+  print_test_result(txt_cmp, "CONCRETE BUCKET LIST", "concrete bucket list test");
   free(expected);
   free(buff);
 }
 void run_ordered_list_tests() {
   test_item_bucket current_item;
   uint32_t i;
-  automaton_ordered_list *ordered_list = automaton_ordered_list_create(
-      2, test_item_extractor, sizeof(test_item_bucket));
+  automaton_ordered_list *ordered_list = automaton_ordered_list_create(2, test_item_extractor, sizeof(test_item_bucket));
   uint32_t cycles = 1000;
   char *buff = calloc(100 * cycles, sizeof(char));
   for (i = 0; i < cycles; i++) {
     current_item.b = i;
     current_item.a = i + cycles;
-    snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1,
-             "PUSHING ITEM at %d: <%d,%d>\n", i, current_item.a,
-             current_item.b);
+    snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "PUSHING ITEM at %d: <%d,%d>\n", i, current_item.a, current_item.b);
     automaton_ordered_list_add_entry(ordered_list, &current_item);
   }
   for (i = 0; i < cycles; i++) {
     current_item.b = i;
     current_item.a = i;
-    snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1,
-             "PUSHING ITEM at %d: <%d,%d>\n", i, current_item.a,
-             current_item.b);
+    snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "PUSHING ITEM at %d: <%d,%d>\n", i, current_item.a, current_item.b);
     automaton_ordered_list_add_entry(ordered_list, &current_item);
   }
   test_item_bucket *print_bucket;
   for (i = 0; i < ordered_list->temporary_count; i++) {
-    print_bucket =
-        GET_ORDERED_LIST_SINGLE_ENTRY(ordered_list, ordered_list->temporary, i);
-    snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1,
-             "temporary item at %d: <%d,%d>\n", i, print_bucket->a,
-             print_bucket->b);
+    print_bucket = GET_ORDERED_LIST_SINGLE_ENTRY(ordered_list, ordered_list->temporary, i);
+    snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "temporary item at %d: <%d,%d>\n", i, print_bucket->a, print_bucket->b);
   }
   for (i = 0; i < ordered_list->count; i++) {
-    print_bucket =
-        GET_ORDERED_LIST_SINGLE_ENTRY(ordered_list, ordered_list->values, i);
-    snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1,
-             "values item at %d: <%d,%d>\n", i, print_bucket->a,
-             print_bucket->b);
+    print_bucket = GET_ORDERED_LIST_SINGLE_ENTRY(ordered_list, ordered_list->values, i);
+    snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "values item at %d: <%d,%d>\n", i, print_bucket->a, print_bucket->b);
   }
   while (ordered_list->count > 0) {
     automaton_ordered_list_pop_entry(ordered_list, &current_item);
-    snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1,
-             "POPPING ITEM at %d: <%d,%d>\n", i, current_item.a,
-             current_item.b);
+    snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "POPPING ITEM at %d: <%d,%d>\n", i, current_item.a, current_item.b);
   }
   automaton_ordered_list_destroy(ordered_list);
 
-  char *expected = test_get_output_content(
-      "tests/expected_output/run_ordered_list_tests.exp");
+  char *expected = test_get_output_content("tests/expected_output/run_ordered_list_tests.exp");
   bool txt_cmp = strcmp(buff, expected) == 0;
   print_test_result(txt_cmp, "OREDERED LIST", "ordered bucket list test");
 
@@ -1178,14 +1054,10 @@ void run_tree_tests() {
 }
 void run_fast_pool_tests() {
   size_t item_size = sizeof(test_item_pool);
-  test_item_pool **pool_ref1 =
-      malloc(MAX_POOL_COUNT * sizeof(test_item_pool *));
-  test_item_pool **pool_ref2 =
-      malloc(MAX_POOL_COUNT * sizeof(test_item_pool *));
-  test_item_pool **pool_frag1 =
-      malloc(MAX_POOL_COUNT * sizeof(test_item_pool *));
-  test_item_pool **pool_frag2 =
-      malloc(MAX_POOL_COUNT * sizeof(test_item_pool *));
+  test_item_pool **pool_ref1 = malloc(MAX_POOL_COUNT * sizeof(test_item_pool *));
+  test_item_pool **pool_ref2 = malloc(MAX_POOL_COUNT * sizeof(test_item_pool *));
+  test_item_pool **pool_frag1 = malloc(MAX_POOL_COUNT * sizeof(test_item_pool *));
+  test_item_pool **pool_frag2 = malloc(MAX_POOL_COUNT * sizeof(test_item_pool *));
 
   char *buff = calloc(MAX_POOL_COUNT * 200, sizeof(char));
 
@@ -1194,16 +1066,14 @@ void run_fast_pool_tests() {
 
   uint32_t i;
   for (i = 0; i < MAX_POOL_COUNT / 2; i++) {
-    test_item_pool *item =
-        automaton_fast_pool_get_instance(pool1, (uint32_t *)&(pool_frag1[i]));
+    test_item_pool *item = automaton_fast_pool_get_instance(pool1, (uint32_t *)&(pool_frag1[i]));
     item->a = i;
     item->name[0] = 'h';
     item->name[1] = 'i';
     item->name[2] = '!';
     item->name[3] = '\0';
     pool_ref1[i] = item;
-    item =
-        automaton_fast_pool_get_instance(pool2, (uint32_t *)&(pool_frag2[i]));
+    item = automaton_fast_pool_get_instance(pool2, (uint32_t *)&(pool_frag2[i]));
     item->a = i;
     item->name[0] = 'h';
     item->name[1] = 'i';
@@ -1211,17 +1081,14 @@ void run_fast_pool_tests() {
     item->name[3] = '\0';
     pool_ref2[i] = item;
   }
-  snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1,
-           "10 100 pool \n");
+  snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "10 100 pool \n");
   for (i = 0; i < MAX_POOL_COUNT / 2; i++) {
-    snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "%d%s ",
-             pool_ref1[i]->a, pool_ref1[i]->name);
+    snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "%d%s ", pool_ref1[i]->a, pool_ref1[i]->name);
   }
   snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "\n");
   snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "5 2 pool \n");
   for (i = 0; i < MAX_POOL_COUNT / 2; i++) {
-    snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "%d%s ",
-             pool_ref2[i]->a, pool_ref2[i]->name);
+    snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "%d%s ", pool_ref2[i]->a, pool_ref2[i]->name);
   }
   snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "\n");
   for (i = 0; i < MAX_POOL_COUNT / 2; i++) {
@@ -1229,24 +1096,21 @@ void run_fast_pool_tests() {
     automaton_fast_pool_release_instance(pool2, (uintptr_t)pool_frag2[i]);
   }
   for (i = 0; i < MAX_POOL_COUNT / 2; i++) {
-    test_item_pool *item =
-        automaton_fast_pool_get_instance(pool1, (uint32_t *)&(pool_frag1[i]));
+    test_item_pool *item = automaton_fast_pool_get_instance(pool1, (uint32_t *)&(pool_frag1[i]));
     item->a = i;
     item->name[0] = 'h';
     item->name[1] = 'i';
     item->name[2] = '!';
     item->name[3] = '\0';
     pool_ref1[i] = item;
-    item =
-        automaton_fast_pool_get_instance(pool2, (uint32_t *)&(pool_frag2[i]));
+    item = automaton_fast_pool_get_instance(pool2, (uint32_t *)&(pool_frag2[i]));
     item->a = i;
     item->name[0] = 'h';
     item->name[1] = 'i';
     item->name[2] = '!';
     item->name[3] = '\0';
     pool_ref2[i] = item;
-    snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "%d%s ",
-             item->a, item->name);
+    snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "%d%s ", item->a, item->name);
   }
   snprintf(buff + strlen(buff), sizeof(buff) - strlen(buff) - 1, "\n");
   automaton_fast_pool_destroy(pool1);
@@ -1256,8 +1120,7 @@ void run_fast_pool_tests() {
   free(pool_ref1);
   free(pool_ref2);
 
-  char *expected =
-      test_get_output_content("tests/expected_output/run_fast_pool_tests.exp");
+  char *expected = test_get_output_content("tests/expected_output/run_fast_pool_tests.exp");
   bool txt_cmp = strcmp(buff, expected) == 0;
   print_test_result(txt_cmp, "FAST POOL", "fast pool test");
 
@@ -1266,8 +1129,7 @@ void run_fast_pool_tests() {
 }
 void run_bool_array_hash_table_tests() {
   int32_t variable_count = 40;
-  automaton_bool_array_hash_table *table =
-      automaton_bool_array_hash_table_create(variable_count);
+  automaton_bool_array_hash_table *table = automaton_bool_array_hash_table_create(variable_count);
   int32_t i;
   bool **values = malloc(variable_count * sizeof(bool *));
   bool test_cmp = true;
@@ -1281,8 +1143,7 @@ void run_bool_array_hash_table_tests() {
   }
   for (i = 0; i < variable_count; i++) {
     if (i % 4 == 0 && i > 0) {
-      test_cmp = test_cmp && automaton_bool_array_hash_table_get_entry(
-                                 table, values[i]) != NULL;
+      test_cmp = test_cmp && automaton_bool_array_hash_table_get_entry(table, values[i]) != NULL;
     }
     if (automaton_bool_array_hash_table_get_entry(table, values[i]) == NULL) {
       automaton_bool_array_hash_table_add_entry(table, values[i], true);
@@ -1299,15 +1160,13 @@ void run_automaton_composite_hash_table_small_tests() {
   uint32_t i, j, *current_composite_state = calloc(2, sizeof(uint32_t));
   for (i = 0; i < 2; i++)
     current_composite_state[i] = 10;
-  automaton_composite_hash_table *table =
-      automaton_composite_hash_table_create(2, current_composite_state);
+  automaton_composite_hash_table *table = automaton_composite_hash_table_create(2, current_composite_state);
   for (i = 0; i < 2; i++)
     current_composite_state[i] = 0;
   uint32_t current_index = 2 - 1;
   uint32_t *witnesses = calloc(100 * 2, sizeof(uint32_t));
   bool *initialized = calloc(100, sizeof(bool));
-  uint32_t current_state =
-      automaton_composite_hash_table_get_state(table, current_composite_state);
+  uint32_t current_state = automaton_composite_hash_table_get_state(table, current_composite_state);
   bool tests_passed = true;
   while (true) {
     if (current_composite_state[current_index] < 10 - 1) {
@@ -1335,10 +1194,8 @@ void run_automaton_composite_hash_table_small_tests() {
       if (!incremented)
         break;
     }
-    current_state = automaton_composite_hash_table_get_state(
-        table, current_composite_state);
-    if (current_state != automaton_composite_hash_table_get_state(
-                             table, current_composite_state)) {
+    current_state = automaton_composite_hash_table_get_state(table, current_composite_state);
+    if (current_state != automaton_composite_hash_table_get_state(table, current_composite_state)) {
       tests_passed = false;
       break;
     }
@@ -1356,17 +1213,14 @@ void run_automaton_composite_hash_table_small_tests() {
       for (j = 0; j < 2; j++) {
         current_composite_state[j] = i;
       }
-      uint32_t witness_state = automaton_composite_hash_table_get_state(
-          table, current_composite_state);
-      if (witnesses[witness_state * 2] != current_composite_state[0] ||
-          witnesses[witness_state * 2 + 1] != current_composite_state[1]) {
+      uint32_t witness_state = automaton_composite_hash_table_get_state(table, current_composite_state);
+      if (witnesses[witness_state * 2] != current_composite_state[0] || witnesses[witness_state * 2 + 1] != current_composite_state[1]) {
         tests_passed = false;
         break;
       }
     }
   }
-  print_test_result(tests_passed, "COMPOSITE_HASH_TABLE_SMALL",
-                    "composite states hash table small test");
+  print_test_result(tests_passed, "COMPOSITE_HASH_TABLE_SMALL", "composite states hash table small test");
   automaton_composite_hash_table_destroy(table);
 
   free(current_composite_state);
@@ -1374,23 +1228,18 @@ void run_automaton_composite_hash_table_small_tests() {
   free(initialized);
 }
 void run_automaton_composite_hash_table_tests() {
-  uint32_t i, j,
-      *current_composite_state =
-          calloc(COMPOSITE_TEST_AUTOMATA_COUNT, sizeof(uint32_t));
+  uint32_t i, j, *current_composite_state = calloc(COMPOSITE_TEST_AUTOMATA_COUNT, sizeof(uint32_t));
   for (i = 0; i < COMPOSITE_TEST_AUTOMATA_COUNT; i++)
     current_composite_state[i] = COMPOSITE_TEST_STATE_COUNT;
-  automaton_composite_hash_table *table = automaton_composite_hash_table_create(
-      COMPOSITE_TEST_AUTOMATA_COUNT, current_composite_state);
+  automaton_composite_hash_table *table = automaton_composite_hash_table_create(COMPOSITE_TEST_AUTOMATA_COUNT, current_composite_state);
   for (i = 0; i < COMPOSITE_TEST_AUTOMATA_COUNT; i++)
     current_composite_state[i] = 0;
   uint32_t current_index = COMPOSITE_TEST_AUTOMATA_COUNT - 1;
   uint32_t *witnesses = calloc(COMPOSITE_TEST_STATE_COUNT, sizeof(uint32_t));
-  uint32_t current_state =
-      automaton_composite_hash_table_get_state(table, current_composite_state);
+  uint32_t current_state = automaton_composite_hash_table_get_state(table, current_composite_state);
   bool tests_passed = true;
   while (true) {
-    if (current_composite_state[current_index] <
-        COMPOSITE_TEST_STATE_COUNT - 1) {
+    if (current_composite_state[current_index] < COMPOSITE_TEST_STATE_COUNT - 1) {
       current_composite_state[current_index]++;
     } else if (current_index == 0)
       break;
@@ -1399,8 +1248,7 @@ void run_automaton_composite_hash_table_tests() {
       current_composite_state[current_index] = 0;
       current_index--;
       do {
-        if (current_composite_state[current_index] <
-            COMPOSITE_TEST_STATE_COUNT - 1) {
+        if (current_composite_state[current_index] < COMPOSITE_TEST_STATE_COUNT - 1) {
           current_composite_state[current_index]++;
           incremented = true;
           break;
@@ -1416,10 +1264,8 @@ void run_automaton_composite_hash_table_tests() {
       if (!incremented)
         break;
     }
-    current_state = automaton_composite_hash_table_get_state(
-        table, current_composite_state);
-    if (current_state != automaton_composite_hash_table_get_state(
-                             table, current_composite_state)) {
+    current_state = automaton_composite_hash_table_get_state(table, current_composite_state);
+    if (current_state != automaton_composite_hash_table_get_state(table, current_composite_state)) {
       tests_passed = false;
       break;
     }
@@ -1439,16 +1285,14 @@ void run_automaton_composite_hash_table_tests() {
       for (j = 0; j < COMPOSITE_TEST_AUTOMATA_COUNT; j++) {
         current_composite_state[j] = i;
       }
-      uint32_t witness_state = automaton_composite_hash_table_get_state(
-          table, current_composite_state);
+      uint32_t witness_state = automaton_composite_hash_table_get_state(table, current_composite_state);
       if (witnesses[i] != witness_state) {
         tests_passed = false;
         break;
       }
     }
   }
-  print_test_result(tests_passed, "COMPOSITE_HASH_TABLE",
-                    "composite states hash table");
+  print_test_result(tests_passed, "COMPOSITE_HASH_TABLE", "composite states hash table");
   automaton_composite_hash_table_destroy(table);
 
   free(current_composite_state);
@@ -1457,10 +1301,8 @@ void run_automaton_composite_hash_table_tests() {
 /** AUTOMATON TESTS **/
 void run_automaton_tests() {
   automaton_signal_event *in = automaton_signal_event_create("in", INPUT_SIG);
-  automaton_signal_event *out =
-      automaton_signal_event_create("out", OUTPUT_SIG);
-  automaton_signal_event *tau =
-      automaton_signal_event_create("tau", INTERNAL_SIG);
+  automaton_signal_event *out = automaton_signal_event_create("out", OUTPUT_SIG);
+  automaton_signal_event *tau = automaton_signal_event_create("tau", INTERNAL_SIG);
   automaton_alphabet *alphabet = automaton_alphabet_create();
   automaton_alphabet_add_signal_event(alphabet, in);
   automaton_alphabet_add_signal_event(alphabet, out);
@@ -1474,8 +1316,8 @@ void run_automaton_tests() {
   automaton_fluent_add_ending_signals(fluents[1], alphabet, 1, &in);
 
   uint32_t fluents_count = 2;
-  automaton_automata_context *ctx = automaton_automata_context_create(
-      "Context 1", alphabet, fluents_count, fluents, 0, NULL, NULL, 0, NULL);
+  automaton_automata_context *ctx =
+      automaton_automata_context_create("Context 1", alphabet, fluents_count, fluents, 0, NULL, NULL, 0, NULL);
   automaton_automata_context_print(ctx, "\t", "\n");
   uint32_t *local_alphabet_1 = malloc(sizeof(uint32_t) * 2);
   local_alphabet_1[0] = automaton_alphabet_get_signal_index(alphabet, in);
@@ -1483,8 +1325,7 @@ void run_automaton_tests() {
   uint32_t *local_alphabet_2 = malloc(sizeof(uint32_t) * 2);
   local_alphabet_2[0] = automaton_alphabet_get_signal_index(alphabet, tau);
   local_alphabet_2[1] = automaton_alphabet_get_signal_index(alphabet, out);
-  automaton_automaton *automaton_1 = automaton_automaton_create(
-      "Automaton 1", ctx, 2, local_alphabet_1, false, false, false, false);
+  automaton_automaton *automaton_1 = automaton_automaton_create("Automaton 1", ctx, 2, local_alphabet_1, false, false, false, false);
   automaton_transition *t1_1_2 = automaton_transition_create(1, 2);
   automaton_transition *t1_2_1 = automaton_transition_create(2, 1);
   automaton_transition_add_signal_event(t1_1_2, ctx, in);
@@ -1492,8 +1333,7 @@ void run_automaton_tests() {
   automaton_automaton_add_transition(automaton_1, t1_1_2);
   automaton_automaton_add_transition(automaton_1, t1_2_1);
   automaton_automaton_add_initial_state(automaton_1, 1);
-  automaton_automaton *automaton_2 = automaton_automaton_create(
-      "Automaton 2", ctx, 2, local_alphabet_2, false, false, false, false);
+  automaton_automaton *automaton_2 = automaton_automaton_create("Automaton 2", ctx, 2, local_alphabet_2, false, false, false, false);
   automaton_transition *t2_1_2 = automaton_transition_create(1, 2);
   automaton_transition *t2_2_1 = automaton_transition_create(2, 1);
   automaton_transition_add_signal_event(t2_1_2, ctx, tau);
@@ -1506,8 +1346,7 @@ void run_automaton_tests() {
   automaton_automaton **automata = malloc(sizeof(automaton_automaton *) * 2);
   automata[0] = automaton_1;
   automata[1] = automaton_2;
-  automaton_automaton *composition =
-      automaton_automata_compose(automata, 2, CONCURRENT, false, false, "TEST");
+  automaton_automaton *composition = automaton_automata_compose(automata, 2, CONCURRENT, false, false, "TEST");
   free(automata);
   automata = NULL;
   automaton_automaton_print(composition, false, true, true, "\t", "\n");
@@ -1545,14 +1384,10 @@ void run_automaton_tests() {
   tau = NULL;
 }
 void run_report_tests() {
-  automaton_signal_event *x1 =
-      automaton_signal_event_create("x1.on", INPUT_SIG);
-  automaton_signal_event *x2 =
-      automaton_signal_event_create("x1.off", INPUT_SIG);
-  automaton_signal_event *y1 =
-      automaton_signal_event_create("y1.on", OUTPUT_SIG);
-  automaton_signal_event *y2 =
-      automaton_signal_event_create("y1.off", OUTPUT_SIG);
+  automaton_signal_event *x1 = automaton_signal_event_create("x1.on", INPUT_SIG);
+  automaton_signal_event *x2 = automaton_signal_event_create("x1.off", INPUT_SIG);
+  automaton_signal_event *y1 = automaton_signal_event_create("y1.on", OUTPUT_SIG);
+  automaton_signal_event *y2 = automaton_signal_event_create("y1.off", OUTPUT_SIG);
   automaton_alphabet *alphabet = automaton_alphabet_create();
   automaton_alphabet_add_signal_event(alphabet, x1);
   automaton_alphabet_add_signal_event(alphabet, x2);
@@ -1572,9 +1407,8 @@ void run_report_tests() {
   char **liveness_valuations_names = malloc(sizeof(char *) * 2);
   liveness_valuations_names[0] = "ass_1";
   liveness_valuations_names[1] = "goal_1";
-  automaton_automata_context *ctx = automaton_automata_context_create(
-      "CTX", alphabet, 1, fluents, 2, liveness_valuations,
-      liveness_valuations_names, 0, NULL);
+  automaton_automata_context *ctx =
+      automaton_automata_context_create("CTX", alphabet, 1, fluents, 2, liveness_valuations, liveness_valuations_names, 0, NULL);
   automaton_transition *t1 = automaton_transition_create(0, 1);
   automaton_transition_add_signal_event(t1, ctx, x1);
   automaton_transition_add_signal_event(t1, ctx, y1);
@@ -1584,8 +1418,7 @@ void run_report_tests() {
   for (i = 0; i < 4; i++)
     local_alphabet[i] = i;
 
-  automaton_automaton *automaton = automaton_automaton_create(
-      "automaton", ctx, 4, local_alphabet, true, true, false, false);
+  automaton_automaton *automaton = automaton_automaton_create("automaton", ctx, 4, local_alphabet, true, true, false, false);
   automaton_automaton_add_initial_state(automaton, 0);
   automaton_automaton_add_transition(automaton, t1);
   automaton_automaton_update_valuation(automaton);
@@ -1615,10 +1448,8 @@ void run_report_tests() {
   obdd_mgr_destroy(mgr);
 
   fclose(ftest);
-  char *current =
-      test_get_output_content("tests/expected_output/run_report_tests.test");
-  char *expected =
-      test_get_output_content("tests/expected_output/run_report_tests.exp");
+  char *current = test_get_output_content("tests/expected_output/run_report_tests.test");
+  char *expected = test_get_output_content("tests/expected_output/run_report_tests.exp");
 
   bool txt_cmp = strcmp(current, expected) == 0;
   print_test_result(txt_cmp, "REPORT", "automaton report test");
@@ -1635,27 +1466,20 @@ void run_report_tests() {
                 - satisfies goal
                 - satisfies both
                 */
-void build_automaton_and_ranking_for_tests(
-    uint32_t *assumptions_count, uint32_t *goals_count,
-    uint32_t **assumptions_indexes, uint32_t **guarantees_indexes,
-    char ***assumptions, char ***goals,
-    automaton_concrete_bucket_list ***ranking_system, uint32_t **max_delta,
-    automaton_automaton **game_automaton, automaton_test_type type) {
+void build_automaton_and_ranking_for_tests(uint32_t *assumptions_count, uint32_t *goals_count, uint32_t **assumptions_indexes,
+                                           uint32_t **guarantees_indexes, char ***assumptions, char ***goals,
+                                           automaton_concrete_bucket_list ***ranking_system, uint32_t **max_delta,
+                                           automaton_automaton **game_automaton, automaton_test_type type) {
   uint32_t i = 0;
   // initialize aux elements
   *assumptions_count = GR1_TEST_ASSUMPTION_COUNT;
   *goals_count = GR1_TEST_GOALS_COUNT;
   automaton_signal_event *in = automaton_signal_event_create("in", INPUT_SIG);
-  automaton_signal_event *in_2 =
-      automaton_signal_event_create("in_2", INPUT_SIG);
-  automaton_signal_event *in_3 =
-      automaton_signal_event_create("in_3", INPUT_SIG);
-  automaton_signal_event *out =
-      automaton_signal_event_create("out", OUTPUT_SIG);
-  automaton_signal_event *out_2 =
-      automaton_signal_event_create("out_2", OUTPUT_SIG);
-  automaton_signal_event *out_3 =
-      automaton_signal_event_create("out_3", OUTPUT_SIG);
+  automaton_signal_event *in_2 = automaton_signal_event_create("in_2", INPUT_SIG);
+  automaton_signal_event *in_3 = automaton_signal_event_create("in_3", INPUT_SIG);
+  automaton_signal_event *out = automaton_signal_event_create("out", OUTPUT_SIG);
+  automaton_signal_event *out_2 = automaton_signal_event_create("out_2", OUTPUT_SIG);
+  automaton_signal_event *out_3 = automaton_signal_event_create("out_3", OUTPUT_SIG);
   automaton_alphabet *alphabet = automaton_alphabet_create();
   automaton_alphabet_add_signal_event(alphabet, in);
   automaton_alphabet_add_signal_event(alphabet, in_2);
@@ -1679,8 +1503,8 @@ void build_automaton_and_ranking_for_tests(
   automaton_fluent_add_ending_signals(fluents[3], alphabet, 1, &in_3);
   uint32_t fluents_count = 4;
   // create context
-  automaton_automata_context *ctx = automaton_automata_context_create(
-      "Context 1", alphabet, fluents_count, fluents, 0, NULL, NULL, 0, NULL);
+  automaton_automata_context *ctx =
+      automaton_automata_context_create("Context 1", alphabet, fluents_count, fluents, 0, NULL, NULL, 0, NULL);
   uint32_t local_alphabet_count = 6;
   uint32_t *local_alphabet = malloc(sizeof(uint32_t) * local_alphabet_count);
   local_alphabet[0] = automaton_alphabet_get_signal_index(alphabet, in);
@@ -1690,9 +1514,7 @@ void build_automaton_and_ranking_for_tests(
   local_alphabet[4] = automaton_alphabet_get_signal_index(alphabet, out_2);
   local_alphabet[5] = automaton_alphabet_get_signal_index(alphabet, out_3);
   // create automaton
-  *game_automaton = automaton_automaton_create(
-      "Gr1 test automaton", ctx, local_alphabet_count, local_alphabet, true,
-      false, false, false);
+  *game_automaton = automaton_automaton_create("Gr1 test automaton", ctx, local_alphabet_count, local_alphabet, true, false, false, false);
   // add transitions
   automaton_transition *t_in = automaton_transition_create(0, 1);
   automaton_transition_add_signal_event(t_in, ctx, in);
@@ -1794,8 +1616,7 @@ void build_automaton_and_ranking_for_tests(
   // embed fluents
   automaton_automaton **automata = malloc(sizeof(automaton_automaton *) * 1);
   automata[0] = *game_automaton;
-  automaton_automaton *return_automaton =
-      automaton_automata_compose(automata, SYNCHRONOUS, 1, true, false, "TEST");
+  automaton_automaton *return_automaton = automaton_automata_compose(automata, SYNCHRONOUS, 1, true, false, "TEST");
   free(automata);
   automaton_automaton_destroy(*game_automaton);
   *game_automaton = return_automaton;
@@ -1811,18 +1632,14 @@ void build_automaton_and_ranking_for_tests(
   aut_dupstr(&((*goals)[1]), fluents[3]->name);
   int32_t first_assumption_index = 0;
 
-  automaton_get_gr1_liveness_indexes(*game_automaton, *assumptions,
-                                     *assumptions_count, *goals, *goals_count,
-                                     assumptions_indexes, guarantees_indexes);
+  automaton_get_gr1_liveness_indexes(*game_automaton, *assumptions, *assumptions_count, *goals, *goals_count, assumptions_indexes,
+                                     guarantees_indexes);
 
   // compute infinity tests
-  *max_delta = automaton_compute_infinity(*game_automaton, *assumptions_count,
-                                          *goals_count, *assumptions_indexes,
-                                          *guarantees_indexes);
+  *max_delta = automaton_compute_infinity(*game_automaton, *assumptions_count, *goals_count, *assumptions_indexes, *guarantees_indexes);
 
-  set_automaton_ranking_for_tests(*game_automaton, *assumptions_count,
-                                  *goals_count, *assumptions_indexes,
-                                  *guarantees_indexes, ranking_system);
+  set_automaton_ranking_for_tests(*game_automaton, *assumptions_count, *goals_count, *assumptions_indexes, *guarantees_indexes,
+                                  ranking_system);
 
   automaton_transition_destroy(t_in, true);
   automaton_transition_destroy(t_in_in2, true);
@@ -1856,11 +1673,9 @@ void build_automaton_and_ranking_for_tests(
   out_2 = NULL;
   free(local_alphabet);
 }
-void destroy_automaton_and_ranking_for_tests(
-    automaton_automaton *game_automaton, uint32_t assumptions_count,
-    uint32_t guarantees_count, uint32_t *assumptions_indexes,
-    uint32_t *guarantees_indexes, char **assumptions, char **goals,
-    automaton_concrete_bucket_list **ranking_system, uint32_t *max_delta) {
+void destroy_automaton_and_ranking_for_tests(automaton_automaton *game_automaton, uint32_t assumptions_count, uint32_t guarantees_count,
+                                             uint32_t *assumptions_indexes, uint32_t *guarantees_indexes, char **assumptions, char **goals,
+                                             automaton_concrete_bucket_list **ranking_system, uint32_t *max_delta) {
   uint32_t i = 0;
   for (i = 0; i < guarantees_count; i++) {
     automaton_concrete_bucket_destroy(ranking_system[i], true);
@@ -1881,19 +1696,15 @@ void destroy_automaton_and_ranking_for_tests(
   free(guarantees_indexes);
 }
 
-void set_automaton_ranking_for_tests(
-    automaton_automaton *game_automaton, uint32_t assumptions_count,
-    uint32_t guarantees_count, uint32_t *assumptions_indexes,
-    uint32_t *guarantees_indexes,
-    automaton_concrete_bucket_list ***ranking_system) {
+void set_automaton_ranking_for_tests(automaton_automaton *game_automaton, uint32_t assumptions_count, uint32_t guarantees_count,
+                                     uint32_t *assumptions_indexes, uint32_t *guarantees_indexes,
+                                     automaton_concrete_bucket_list ***ranking_system) {
   uint32_t i, j, fluent_index;
   automaton_ranking concrete_ranking;
-  automaton_concrete_bucket_list **ranking_list =
-      malloc(sizeof(automaton_concrete_bucket_list *) * guarantees_count);
+  automaton_concrete_bucket_list **ranking_list = malloc(sizeof(automaton_concrete_bucket_list *) * guarantees_count);
   for (i = 0; i < guarantees_count; i++)
-    ranking_list[i] = automaton_concrete_bucket_list_create(
-        RANKING_BUCKET_SIZE, automaton_ranking_key_extractor,
-        sizeof(automaton_ranking));
+    ranking_list[i] =
+        automaton_concrete_bucket_list_create(RANKING_BUCKET_SIZE, automaton_ranking_key_extractor, sizeof(automaton_ranking));
   for (i = 0; i < game_automaton->transitions_count; i++) {
     for (j = 0; j < guarantees_count; j++) {
       if (game_automaton->out_degree[i] == 0) {
@@ -1926,101 +1737,77 @@ void run_gr1_initialization_tests() {
   bool test_result = false;
   /**** CASE: avoid sigma trap *****/
   // build
-  build_automaton_and_ranking_for_tests(
-      &assumptions_count, &goals_count, &assumptions_indexes,
-      &guarantees_indexes, &assumptions, &goals, &ranking_system, &max_delta,
-      &game_automaton, TEST_AVOID_SIGMA_TRAP);
+  build_automaton_and_ranking_for_tests(&assumptions_count, &goals_count, &assumptions_indexes, &guarantees_indexes, &assumptions, &goals,
+                                        &ranking_system, &max_delta, &game_automaton, TEST_AVOID_SIGMA_TRAP);
 
   // test partial increment
 
   // test update
 
   // test realizability
-  test_result = automaton_is_gr1_realizable(
-      game_automaton, assumptions, assumptions_count, goals, goals_count);
+  test_result = automaton_is_gr1_realizable(game_automaton, assumptions, assumptions_count, goals, goals_count);
   print_test_result(test_result, "AVOID SIGMA", "win by avoiding sigma trap");
   // destroy automaton
-  destroy_automaton_and_ranking_for_tests(
-      game_automaton, assumptions_count, goals_count, assumptions_indexes,
-      guarantees_indexes, assumptions, goals, ranking_system, max_delta);
+  destroy_automaton_and_ranking_for_tests(game_automaton, assumptions_count, goals_count, assumptions_indexes, guarantees_indexes,
+                                          assumptions, goals, ranking_system, max_delta);
 
   /**** CASE: lose by deadlock *****/
   // build
-  build_automaton_and_ranking_for_tests(
-      &assumptions_count, &goals_count, &assumptions_indexes,
-      &guarantees_indexes, &assumptions, &goals, &ranking_system, &max_delta,
-      &game_automaton, TEST_LOSE_DEADLOCK);
+  build_automaton_and_ranking_for_tests(&assumptions_count, &goals_count, &assumptions_indexes, &guarantees_indexes, &assumptions, &goals,
+                                        &ranking_system, &max_delta, &game_automaton, TEST_LOSE_DEADLOCK);
   // test partial increment
 
   // test update
 
   // test realizability
-  test_result = automaton_is_gr1_realizable(
-      game_automaton, assumptions, assumptions_count, goals, goals_count);
+  test_result = automaton_is_gr1_realizable(game_automaton, assumptions, assumptions_count, goals, goals_count);
   // destroy automaton
-  destroy_automaton_and_ranking_for_tests(
-      game_automaton, assumptions_count, goals_count, assumptions_indexes,
-      guarantees_indexes, assumptions, goals, ranking_system, max_delta);
-  print_test_result(!test_result, "DEADLOCK TEST",
-                    "lose by deadlock realizability test");
+  destroy_automaton_and_ranking_for_tests(game_automaton, assumptions_count, goals_count, assumptions_indexes, guarantees_indexes,
+                                          assumptions, goals, ranking_system, max_delta);
+  print_test_result(!test_result, "DEADLOCK TEST", "lose by deadlock realizability test");
   /**** CASE: avoid sigma trap (empty transtiions) *****/
   // build
-  build_automaton_and_ranking_for_tests(
-      &assumptions_count, &goals_count, &assumptions_indexes,
-      &guarantees_indexes, &assumptions, &goals, &ranking_system, &max_delta,
-      &game_automaton, TEST_AVOID_SIGMA_NO_LABEL);
+  build_automaton_and_ranking_for_tests(&assumptions_count, &goals_count, &assumptions_indexes, &guarantees_indexes, &assumptions, &goals,
+                                        &ranking_system, &max_delta, &game_automaton, TEST_AVOID_SIGMA_NO_LABEL);
   // test partial increment
 
   // test update
 
   // test realizability
-  test_result = automaton_is_gr1_realizable(
-      game_automaton, assumptions, assumptions_count, goals, goals_count);
-  print_test_result(test_result, "AVOID SIGMA NO LABEL",
-                    "win by avoiding sigma trap (empty transitions)");
+  test_result = automaton_is_gr1_realizable(game_automaton, assumptions, assumptions_count, goals, goals_count);
+  print_test_result(test_result, "AVOID SIGMA NO LABEL", "win by avoiding sigma trap (empty transitions)");
   // destroy automaton
-  destroy_automaton_and_ranking_for_tests(
-      game_automaton, assumptions_count, goals_count, assumptions_indexes,
-      guarantees_indexes, assumptions, goals, ranking_system, max_delta);
+  destroy_automaton_and_ranking_for_tests(game_automaton, assumptions_count, goals_count, assumptions_indexes, guarantees_indexes,
+                                          assumptions, goals, ranking_system, max_delta);
   /**** CASE: alternating goals *****/
   // build
-  build_automaton_and_ranking_for_tests(
-      &assumptions_count, &goals_count, &assumptions_indexes,
-      &guarantees_indexes, &assumptions, &goals, &ranking_system, &max_delta,
-      &game_automaton, TEST_ALTERNATING_GOALS);
+  build_automaton_and_ranking_for_tests(&assumptions_count, &goals_count, &assumptions_indexes, &guarantees_indexes, &assumptions, &goals,
+                                        &ranking_system, &max_delta, &game_automaton, TEST_ALTERNATING_GOALS);
   // test partial increment
 
   // test update
 
   // test realizability
-  test_result = automaton_is_gr1_realizable(
-      game_automaton, assumptions, assumptions_count, goals, goals_count);
-  print_test_result(test_result, "ALTERNATING GOALS",
-                    "win by satisfying several goals");
+  test_result = automaton_is_gr1_realizable(game_automaton, assumptions, assumptions_count, goals, goals_count);
+  print_test_result(test_result, "ALTERNATING GOALS", "win by satisfying several goals");
   // destroy automaton
-  destroy_automaton_and_ranking_for_tests(
-      game_automaton, assumptions_count, goals_count, assumptions_indexes,
-      guarantees_indexes, assumptions, goals, ranking_system, max_delta);
+  destroy_automaton_and_ranking_for_tests(game_automaton, assumptions_count, goals_count, assumptions_indexes, guarantees_indexes,
+                                          assumptions, goals, ranking_system, max_delta);
 
   /**** CASE: lose by entering sigma trap *****/
   // build
-  build_automaton_and_ranking_for_tests(
-      &assumptions_count, &goals_count, &assumptions_indexes,
-      &guarantees_indexes, &assumptions, &goals, &ranking_system, &max_delta,
-      &game_automaton, TEST_LOSE_SIGMA_TRAP);
+  build_automaton_and_ranking_for_tests(&assumptions_count, &goals_count, &assumptions_indexes, &guarantees_indexes, &assumptions, &goals,
+                                        &ranking_system, &max_delta, &game_automaton, TEST_LOSE_SIGMA_TRAP);
   // test partial increment
 
   // test update
 
   // test realizability
-  test_result = automaton_is_gr1_realizable(
-      game_automaton, assumptions, assumptions_count, goals, goals_count);
-  print_test_result(!test_result, "LOSE SIGMA TRAP",
-                    "lose by entering sigma trap");
+  test_result = automaton_is_gr1_realizable(game_automaton, assumptions, assumptions_count, goals, goals_count);
+  print_test_result(!test_result, "LOSE SIGMA TRAP", "lose by entering sigma trap");
   // destroy automaton
-  destroy_automaton_and_ranking_for_tests(
-      game_automaton, assumptions_count, goals_count, assumptions_indexes,
-      guarantees_indexes, assumptions, goals, ranking_system, max_delta);
+  destroy_automaton_and_ranking_for_tests(game_automaton, assumptions_count, goals_count, assumptions_indexes, guarantees_indexes,
+                                          assumptions, goals, ranking_system, max_delta);
 }
 void run_ranking_arithmetic_tests() {
   automaton_ranking *left = automaton_ranking_create(0, 0);
@@ -2108,30 +1895,21 @@ void run_functional_tests() {
   run_parse_test("tests/ranges_7.fsp", "range 7 test");
   run_parse_test("tests/alphabet_extend_test.fsp", "Alphabet extend test");
   run_parse_test("tests/alphabet_relabel_test.fsp", "Alphabet relabel test");
-  run_parse_test(
-      "tests/mixed_3_signals_2_labels.fsp",
-      "mixed model 3 signals 2 labels"); // mixed model 3 signals 2 labels
+  run_parse_test("tests/mixed_3_signals_2_labels.fsp",
+                 "mixed model 3 signals 2 labels");             // mixed model 3 signals 2 labels
   run_parse_test("tests/two_floors_lift.fsp", "lift 2 floors"); // lift 2 floors
-  run_parse_test("tests/concurrency_equiv_test.fsp",
-                 "Asynch composition equiv. test");
-  run_parse_test("tests/nonreal_test_1_realizable_version.fsp",
-                 "non realizable test 1 (realizable version)");
-  run_parse_test("tests/nonreal_test_2_realizable_version.fsp",
-                 "non realizable test 2 (realizable version)");
+  run_parse_test("tests/concurrency_equiv_test.fsp", "Asynch composition equiv. test");
+  run_parse_test("tests/nonreal_test_1_realizable_version.fsp", "non realizable test 1 (realizable version)");
+  run_parse_test("tests/nonreal_test_2_realizable_version.fsp", "non realizable test 2 (realizable version)");
   run_parse_test("tests/obdd_context_1.fsp", "OBDD NEXT IFF TEST");
-  run_parse_test(
-      "tests/genbuf_2_sndrs_debug.fsp",
-      "GenBuf 2 sndrs(debug version)"); // GENBUF 2 Sndrs debug version
+  run_parse_test("tests/genbuf_2_sndrs_debug.fsp",
+                 "GenBuf 2 sndrs(debug version)"); // GENBUF 2 Sndrs debug version
   run_parse_test("tests/nonreal_test_1.fsp", "non realizable test 1");
   run_parse_test("tests/localizer.fsp", "non realizable localizer test");
-  run_parse_test("tests/exploration-robot-realizable_test.fsp",
-                 "realizable exploration robot test");
-  run_parse_test("tests/exploration-robot-unrealizable_test.fsp",
-                 "unrealizable exploration robot test");
-  run_parse_test("tests/exploration-robot-realizable_test_debug.fsp",
-                 "realizable exploration robot test debug version");
-  run_parse_test_linear("tests/exploration-robot-unrealizable_test_lineal.fsp",
-                        "unrealizable exploration robot test linear test");
+  run_parse_test("tests/exploration-robot-realizable_test.fsp", "realizable exploration robot test");
+  run_parse_test("tests/exploration-robot-unrealizable_test.fsp", "unrealizable exploration robot test");
+  run_parse_test("tests/exploration-robot-realizable_test_debug.fsp", "realizable exploration robot test debug version");
+  run_parse_test_linear("tests/exploration-robot-unrealizable_test_lineal.fsp", "unrealizable exploration robot test linear test");
   run_parse_test("tests/biscotti_vstates.fsp", "biscotti vstates");
   run_parse_test("tests/vstates_test.fsp", "vstates test");
   run_parse_test("tests/composition_vstates.fsp", "composition vstates");
@@ -2144,14 +1922,11 @@ void run_functional_tests() {
   run_parse_test("tests/CM_2_test.fsp",
                  "Cat and Mouse tests"); // this one has no checks
   run_parse_test("tests/BW_1_1_test.fsp", "Bidding workflow test");
-  run_parse_test("tests/BW_2_1_test.fsp",
-                 "Bidding workflow test (multiple automata)");
+  run_parse_test("tests/BW_2_1_test.fsp", "Bidding workflow test (multiple automata)");
   run_parse_test("tests/AT_2_2_test.fsp", "Air tower test");
   run_parse_test("tests/TA_1_1_test.fsp", "Travel Agency test");
-  run_parse_test("tests/TA_2_2_test.fsp",
-                 "Travel Agency test (multiple automata)");
-  run_parse_test("tests/DP_2_2_test.fsp",
-                 "Dining philosophers test (multiple automata)");
+  run_parse_test("tests/TA_2_2_test.fsp", "Travel Agency test (multiple automata)");
+  run_parse_test("tests/DP_2_2_test.fsp", "Dining philosophers test (multiple automata)");
 }
 void run_load_tests() {
   run_parse_test("tests/k_10_100_graph.fsp", "k 10, 100 graph tests");

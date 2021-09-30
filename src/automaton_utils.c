@@ -17,8 +17,7 @@ void aut_add_ptr_list(void ***list, void *element, uint32_t *count) {
   *count = *count + 1;
   *list = new_list;
 }
-void aut_add_incr_ptr_list(void ***list, void *element, uint32_t *size,
-                           uint32_t *count) {
+void aut_add_incr_ptr_list(void ***list, void *element, uint32_t *size, uint32_t *count) {
   if (*count < *size) {
     *list[*count] = element;
     *count = *count + 1;
@@ -57,8 +56,7 @@ void aut_dupstr(char **dst, char *src) {
   }
 }
 
-automaton_string_list *automaton_string_list_create(bool sorted,
-                                                    bool repeat_values) {
+automaton_string_list *automaton_string_list_create(bool sorted, bool repeat_values) {
   automaton_string_list *ret_value = calloc(1, sizeof(automaton_string_list));
   ret_value->sorted = sorted;
   ret_value->repeat_values = repeat_values;
@@ -82,8 +80,7 @@ void automaton_string_list_destroy(automaton_string_list *list) {
   free(list);
 }
 
-void aut_merge_string_lists(automaton_string_list *a, char **b,
-                            uint32_t count) {
+void aut_merge_string_lists(automaton_string_list *a, char **b, uint32_t count) {
   if ((a->count == 0 && count == 0) || (count == 0))
     return;
   // a = a+b
@@ -99,8 +96,7 @@ void aut_merge_string_lists(automaton_string_list *a, char **b,
  * @param position the position where the string was added at, if the string was
  * already present and repeat_values is set to false, previous position is set
  */
-bool aut_push_string_to_list(automaton_string_list *list, char *element,
-                             int32_t *position) {
+bool aut_push_string_to_list(automaton_string_list *list, char *element, int32_t *position) {
   int32_t i;
   int32_t a_b_cmp;
   // get the position of the element to be added
@@ -113,10 +109,8 @@ bool aut_push_string_to_list(automaton_string_list *list, char *element,
       medium = floor((left + right) / 2);
       a_b_cmp = strcmp(list->list[list->ordered_list[medium]], element);
 #if DEBUG_STRING_LIST
-      printf("l:%d\tr:%d\tm:%d\to[%d]:%d\tv[o[m]=%d]:%s\te:%s\n", left, right,
-             medium, medium, list->ordered_list[medium],
-             list->ordered_list[medium], list->list[list->ordered_list[medium]],
-             element);
+      printf("l:%d\tr:%d\tm:%d\to[%d]:%d\tv[o[m]=%d]:%s\te:%s\n", left, right, medium, medium, list->ordered_list[medium],
+             list->ordered_list[medium], list->list[list->ordered_list[medium]], element);
 #endif
       if (a_b_cmp < 0) {
         if (medium >= right) {
@@ -172,8 +166,7 @@ bool aut_push_string_to_list(automaton_string_list *list, char *element,
       exit(-1);
     }
     list->counts = new_counts;
-    uint32_t *new_ordered_list =
-        realloc(list->ordered_list, sizeof(uint32_t) * list->size);
+    uint32_t *new_ordered_list = realloc(list->ordered_list, sizeof(uint32_t) * list->size);
     if (new_ordered_list == NULL) {
       printf("Could not reallocate memory [aut_push_string_to_list:4]\n");
       exit(-1);
@@ -198,8 +191,7 @@ bool aut_push_string_to_list(automaton_string_list *list, char *element,
     }
     list->raw_data = new_raw_data;
     for (i = 0; i < list->count; i++) {
-      list->list[i] =
-          (char *)((uintptr_t)(list->raw_data) + (uintptr_t)(list->counts[i]));
+      list->list[i] = (char *)((uintptr_t)(list->raw_data) + (uintptr_t)(list->counts[i]));
     }
   }
   // rearrange pointers if needed

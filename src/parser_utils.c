@@ -3,12 +3,10 @@
 
 static obdd_mgr *parser_obdd_mgr = NULL;
 
-automaton_expression_syntax *automaton_expression_syntax_create(
-    automaton_expression_type_syntax type, automaton_expression_syntax *first,
-    automaton_expression_syntax *second, char *string_terminal,
-    int32_t integer_terminal, automaton_expression_operator_syntax op) {
-  automaton_expression_syntax *expr =
-      malloc(sizeof(automaton_expression_syntax));
+automaton_expression_syntax *automaton_expression_syntax_create(automaton_expression_type_syntax type, automaton_expression_syntax *first,
+                                                                automaton_expression_syntax *second, char *string_terminal,
+                                                                int32_t integer_terminal, automaton_expression_operator_syntax op) {
+  automaton_expression_syntax *expr = malloc(sizeof(automaton_expression_syntax));
   expr->type = type;
   expr->first = first;
   expr->second = second;
@@ -17,9 +15,8 @@ automaton_expression_syntax *automaton_expression_syntax_create(
   expr->op = op;
   return expr;
 }
-automaton_set_syntax *automaton_set_syntax_create(
-    bool is_ident, uint32_t count, uint32_t *labels_count,
-    automaton_label_syntax ***labels, char *string_terminal) {
+automaton_set_syntax *automaton_set_syntax_create(bool is_ident, uint32_t count, uint32_t *labels_count, automaton_label_syntax ***labels,
+                                                  char *string_terminal) {
   automaton_set_syntax *set = malloc(sizeof(automaton_set_syntax));
   set->is_ident = is_ident;
   if (count > 0) {
@@ -30,8 +27,7 @@ automaton_set_syntax *automaton_set_syntax_create(
       set->labels_count[i] = labels_count[i];
     set->labels = malloc(sizeof(automaton_label_syntax **) * count);
     for (i = 0; i < count; i++) {
-      set->labels[i] =
-          calloc(labels_count[i], sizeof(automaton_label_syntax *));
+      set->labels[i] = calloc(labels_count[i], sizeof(automaton_label_syntax *));
       for (j = 0; j < labels_count[i]; j++) {
         (set->labels[i])[j] = labels[i][j];
       }
@@ -51,19 +47,15 @@ void automaton_program_add_obdd_primed_variables() {
   for (i = 2; i < old_size; i++) {
     char *substr = strstr(dict->entries[i].key, SIGNAL_PRIME_SUFFIX);
     int position = substr - dict->entries[i].key;
-    bool is_suffix = position == (strlen(dict->entries[i].key) -
-                                  strlen(SIGNAL_PRIME_SUFFIX));
+    bool is_suffix = position == (strlen(dict->entries[i].key) - strlen(SIGNAL_PRIME_SUFFIX));
     if (substr == NULL || (!is_suffix)) {
       strcpy(prime_name, dict->entries[i].key);
       strcat(prime_name, SIGNAL_PRIME_SUFFIX);
-      parser_add_primed_variables(dictionary_add_entry(dict, prime_name),
-                                  dict->entries[i].value);
+      parser_add_primed_variables(dictionary_add_entry(dict, prime_name), dict->entries[i].value);
     }
   }
 }
-automaton_set_syntax *
-automaton_set_syntax_create_concurrent(char *string_terminal,
-                                       automaton_indexes_syntax *indexes) {
+automaton_set_syntax *automaton_set_syntax_create_concurrent(char *string_terminal, automaton_indexes_syntax *indexes) {
   automaton_set_syntax *set = malloc(sizeof(automaton_set_syntax));
   set->is_ident = false;
   set->count = 1;
@@ -71,34 +63,27 @@ automaton_set_syntax_create_concurrent(char *string_terminal,
   set->labels_count[0] = 1;
   set->labels = malloc(sizeof(automaton_label_syntax **) * set->count);
   set->labels[0] = malloc(sizeof(automaton_label_syntax *));
-  set->labels[0][0] = automaton_label_syntax_create(false, false, NULL,
-                                                    string_terminal, indexes);
+  set->labels[0][0] = automaton_label_syntax_create(false, false, NULL, string_terminal, indexes);
   set->string_terminal = NULL;
   return set;
 }
-automaton_set_syntax *
-automaton_set_syntax_concat_concurrent(automaton_set_syntax *set,
-                                       char *string_terminal,
-                                       automaton_indexes_syntax *indexes) {
+automaton_set_syntax *automaton_set_syntax_concat_concurrent(automaton_set_syntax *set, char *string_terminal,
+                                                             automaton_indexes_syntax *indexes) {
   set->labels_count[0]++;
-  automaton_label_syntax **new_labels =
-      malloc(sizeof(automaton_label_syntax *) * set->labels_count[0]);
+  automaton_label_syntax **new_labels = malloc(sizeof(automaton_label_syntax *) * set->labels_count[0]);
   uint32_t i;
   if (set->labels_count[0] > 1) {
     for (i = 0; i < (set->labels_count[0] - 1); i++) {
       new_labels[i] = set->labels[0][i];
     }
   }
-  new_labels[set->labels_count[0] - 1] = automaton_label_syntax_create(
-      false, false, NULL, string_terminal, indexes);
+  new_labels[set->labels_count[0] - 1] = automaton_label_syntax_create(false, false, NULL, string_terminal, indexes);
   free(set->labels[0]);
   set->labels[0] = new_labels;
   return set;
 }
-automaton_label_syntax *
-automaton_label_syntax_create(bool is_set, bool is_concurrent,
-                              automaton_set_syntax *set, char *string_terminal,
-                              automaton_indexes_syntax *indexes) {
+automaton_label_syntax *automaton_label_syntax_create(bool is_set, bool is_concurrent, automaton_set_syntax *set, char *string_terminal,
+                                                      automaton_indexes_syntax *indexes) {
   automaton_label_syntax *label = malloc(sizeof(automaton_label_syntax));
   label->is_set = is_set;
   label->is_concurrent = is_concurrent;
@@ -121,26 +106,21 @@ automaton_label_syntax *automaton_label_syntax_create_empty() {
   label->set = NULL;
   return label;
 }
-automaton_set_syntax *
-automaton_set_syntax_create_from_label(automaton_label_syntax *label) {
+automaton_set_syntax *automaton_set_syntax_create_from_label(automaton_label_syntax *label) {
   automaton_set_syntax *set = malloc(sizeof(automaton_set_syntax));
   set->is_ident = false;
   set->count = 1;
   set->labels_count = malloc(sizeof(uint32_t) * set->count);
   set->labels_count[0] = 1;
   set->labels = malloc(sizeof(automaton_label_syntax **) * set->count);
-  set->labels[0] =
-      malloc(sizeof(automaton_label_syntax *) * set->labels_count[0]);
+  set->labels[0] = malloc(sizeof(automaton_label_syntax *) * set->labels_count[0]);
   set->labels[0][0] = label;
   set->string_terminal = NULL;
   return set;
 }
-automaton_set_syntax *
-automaton_set_syntax_concat_labels(automaton_set_syntax *set,
-                                   automaton_label_syntax *label) {
+automaton_set_syntax *automaton_set_syntax_concat_labels(automaton_set_syntax *set, automaton_label_syntax *label) {
   set->labels_count[0]++;
-  automaton_label_syntax **new_labels =
-      malloc(sizeof(automaton_label_syntax *) * set->labels_count[0]);
+  automaton_label_syntax **new_labels = malloc(sizeof(automaton_label_syntax *) * set->labels_count[0]);
   uint32_t i;
   if (set->labels_count[0] > 1) {
     for (i = 0; i < (set->labels_count[0] - 1); i++) {
@@ -155,18 +135,15 @@ automaton_set_syntax_concat_labels(automaton_set_syntax *set,
 automaton_set_syntax *automaton_set_syntax_create_from_ident(char *ident) {
   return automaton_set_syntax_create(true, 0, NULL, NULL, ident);
 }
-automaton_set_def_syntax *
-automaton_set_def_syntax_create(automaton_set_syntax *set, char *name) {
+automaton_set_def_syntax *automaton_set_def_syntax_create(automaton_set_syntax *set, char *name) {
   automaton_set_def_syntax *set_def = malloc(sizeof(automaton_set_def_syntax));
   set_def->set = set;
   aut_dupstr(&(set_def->name), name);
   return set_def;
 }
-automaton_fluent_syntax *
-automaton_fluent_syntax_create(char *name, automaton_set_syntax *initiating_set,
-                               automaton_set_syntax *finishing_set,
-                               uint32_t initial_value,
-                               automaton_indexes_syntax *indexes) {
+automaton_fluent_syntax *automaton_fluent_syntax_create(char *name, automaton_set_syntax *initiating_set,
+                                                        automaton_set_syntax *finishing_set, uint32_t initial_value,
+                                                        automaton_indexes_syntax *indexes) {
   automaton_fluent_syntax *fluent = malloc(sizeof(automaton_fluent_syntax));
   fluent->initiating_set = initiating_set;
   fluent->finishing_set = finishing_set;
@@ -175,10 +152,8 @@ automaton_fluent_syntax_create(char *name, automaton_set_syntax *initiating_set,
   aut_dupstr(&(fluent->name), name);
   return fluent;
 }
-automaton_index_syntax *
-automaton_index_syntax_create(bool is_expr, bool is_range,
-                              automaton_expression_syntax *expr,
-                              char *lower_ident, char *upper_ident) {
+automaton_index_syntax *automaton_index_syntax_create(bool is_expr, bool is_range, automaton_expression_syntax *expr, char *lower_ident,
+                                                      char *upper_ident) {
   automaton_index_syntax *index = malloc(sizeof(automaton_index_syntax));
 
   if (is_expr) {
@@ -202,20 +177,16 @@ automaton_index_syntax_create(bool is_expr, bool is_range,
   }
   return index;
 }
-automaton_indexes_syntax *
-automaton_indexes_syntax_create(automaton_index_syntax *first_index) {
+automaton_indexes_syntax *automaton_indexes_syntax_create(automaton_index_syntax *first_index) {
   automaton_indexes_syntax *indexes = malloc(sizeof(automaton_indexes_syntax));
   indexes->count = 1;
   indexes->indexes = malloc(sizeof(automaton_index_syntax *) * indexes->count);
   indexes->indexes[0] = first_index;
   return indexes;
 }
-automaton_indexes_syntax *
-automaton_indexes_syntax_add_index(automaton_indexes_syntax *indexes,
-                                   automaton_index_syntax *index) {
+automaton_indexes_syntax *automaton_indexes_syntax_add_index(automaton_indexes_syntax *indexes, automaton_index_syntax *index) {
   indexes->count++;
-  automaton_index_syntax **new_indexes =
-      malloc(sizeof(automaton_index_syntax *) * indexes->count);
+  automaton_index_syntax **new_indexes = malloc(sizeof(automaton_index_syntax *) * indexes->count);
   uint32_t i;
   for (i = 0; i < (indexes->count - 1); i++)
     new_indexes[i] = indexes->indexes[i];
@@ -224,40 +195,30 @@ automaton_indexes_syntax_add_index(automaton_indexes_syntax *indexes,
   indexes->indexes = new_indexes;
   return indexes;
 }
-automaton_trace_label_atom_syntax *
-automaton_trace_label_atom_syntax_create_from_index(
-    automaton_index_syntax *first_index) {
-  automaton_trace_label_atom_syntax *label_atom =
-      malloc(sizeof(automaton_trace_label_atom_syntax));
+automaton_trace_label_atom_syntax *automaton_trace_label_atom_syntax_create_from_index(automaton_index_syntax *first_index) {
+  automaton_trace_label_atom_syntax *label_atom = malloc(sizeof(automaton_trace_label_atom_syntax));
   label_atom->label = NULL;
   label_atom->indexes = automaton_indexes_syntax_create(first_index);
   return label_atom;
 }
-automaton_trace_label_atom_syntax *
-automaton_trace_label_atom_syntax_create(automaton_label_syntax *label,
-                                         automaton_indexes_syntax *indexes) {
-  automaton_trace_label_atom_syntax *label_atom =
-      malloc(sizeof(automaton_trace_label_atom_syntax));
+automaton_trace_label_atom_syntax *automaton_trace_label_atom_syntax_create(automaton_label_syntax *label,
+                                                                            automaton_indexes_syntax *indexes) {
+  automaton_trace_label_atom_syntax *label_atom = malloc(sizeof(automaton_trace_label_atom_syntax));
   label_atom->label = label;
   label_atom->indexes = indexes;
   return label_atom;
 }
-automaton_trace_label_syntax *automaton_trace_label_syntax_create(
-    automaton_trace_label_atom_syntax *first_atom) {
-  automaton_trace_label_syntax *trace_label =
-      malloc(sizeof(automaton_trace_label_syntax));
+automaton_trace_label_syntax *automaton_trace_label_syntax_create(automaton_trace_label_atom_syntax *first_atom) {
+  automaton_trace_label_syntax *trace_label = malloc(sizeof(automaton_trace_label_syntax));
   trace_label->count = 1;
-  trace_label->atoms =
-      malloc(sizeof(automaton_trace_label_atom_syntax *) * trace_label->count);
+  trace_label->atoms = malloc(sizeof(automaton_trace_label_atom_syntax *) * trace_label->count);
   trace_label->atoms[0] = first_atom;
   return trace_label;
 }
-automaton_trace_label_syntax *
-automaton_trace_label_syntax_add_atom(automaton_trace_label_syntax *trace_label,
-                                      automaton_trace_label_atom_syntax *atom) {
+automaton_trace_label_syntax *automaton_trace_label_syntax_add_atom(automaton_trace_label_syntax *trace_label,
+                                                                    automaton_trace_label_atom_syntax *atom) {
   trace_label->count++;
-  automaton_trace_label_atom_syntax **new_atoms =
-      malloc(sizeof(automaton_trace_label_atom_syntax *) * trace_label->count);
+  automaton_trace_label_atom_syntax **new_atoms = malloc(sizeof(automaton_trace_label_atom_syntax *) * trace_label->count);
   uint32_t i;
   for (i = 0; i < (trace_label->count - 1); i++)
     new_atoms[i] = trace_label->atoms[i];
@@ -266,18 +227,14 @@ automaton_trace_label_syntax_add_atom(automaton_trace_label_syntax *trace_label,
   trace_label->atoms = new_atoms;
   return trace_label;
 }
-automaton_transition_syntax *
-automaton_transition_syntax_finish(automaton_expression_syntax *condition,
-                                   automaton_transition_syntax *trace,
-                                   automaton_state_label_syntax *state) {
+automaton_transition_syntax *automaton_transition_syntax_finish(automaton_expression_syntax *condition, automaton_transition_syntax *trace,
+                                                                automaton_state_label_syntax *state) {
   trace->condition = condition;
   trace->to_state = state;
   return trace;
 }
-automaton_transition_syntax *automaton_transition_syntax_create_from_trace(
-    automaton_trace_label_syntax *trace) {
-  automaton_transition_syntax *transition =
-      malloc(sizeof(automaton_transition_syntax));
+automaton_transition_syntax *automaton_transition_syntax_create_from_trace(automaton_trace_label_syntax *trace) {
+  automaton_transition_syntax *transition = malloc(sizeof(automaton_transition_syntax));
   transition->count = 1;
   transition->condition = NULL;
   transition->to_state = NULL;
@@ -285,12 +242,10 @@ automaton_transition_syntax *automaton_transition_syntax_create_from_trace(
   transition->labels[0] = trace;
   return transition;
 }
-automaton_transition_syntax *
-automaton_transition_syntax_add_trace(automaton_transition_syntax *transition,
-                                      automaton_trace_label_syntax *trace) {
+automaton_transition_syntax *automaton_transition_syntax_add_trace(automaton_transition_syntax *transition,
+                                                                   automaton_trace_label_syntax *trace) {
   transition->count++;
-  automaton_trace_label_syntax **new_labels =
-      malloc(sizeof(automaton_trace_label_syntax *) * transition->count);
+  automaton_trace_label_syntax **new_labels = malloc(sizeof(automaton_trace_label_syntax *) * transition->count);
   uint32_t i;
   for (i = 0; i < (transition->count - 1); i++)
     new_labels[i] = transition->labels[i];
@@ -299,22 +254,17 @@ automaton_transition_syntax_add_trace(automaton_transition_syntax *transition,
   transition->labels = new_labels;
   return transition;
 }
-automaton_transitions_syntax *
-automaton_transitions_syntax_create(automaton_transition_syntax *transition) {
-  automaton_transitions_syntax *transitions =
-      malloc(sizeof(automaton_transitions_syntax));
+automaton_transitions_syntax *automaton_transitions_syntax_create(automaton_transition_syntax *transition) {
+  automaton_transitions_syntax *transitions = malloc(sizeof(automaton_transitions_syntax));
   transitions->count = 1;
-  transitions->transitions =
-      malloc(sizeof(automaton_transition_syntax *) * transitions->count);
+  transitions->transitions = malloc(sizeof(automaton_transition_syntax *) * transitions->count);
   transitions->transitions[0] = transition;
   return transitions;
 }
-automaton_transitions_syntax *automaton_transitions_syntax_add_transition(
-    automaton_transitions_syntax *transitions,
-    automaton_transition_syntax *transition) {
+automaton_transitions_syntax *automaton_transitions_syntax_add_transition(automaton_transitions_syntax *transitions,
+                                                                          automaton_transition_syntax *transition) {
   transitions->count++;
-  automaton_transition_syntax **new_transitions =
-      malloc(sizeof(automaton_transition_syntax *) * transitions->count);
+  automaton_transition_syntax **new_transitions = malloc(sizeof(automaton_transition_syntax *) * transitions->count);
   uint32_t i;
   for (i = 0; i < (transitions->count - 1); i++)
     new_transitions[i] = transitions->transitions[i];
@@ -323,10 +273,8 @@ automaton_transitions_syntax *automaton_transitions_syntax_add_transition(
   transitions->transitions = new_transitions;
   return transitions;
 }
-automaton_state_syntax *
-automaton_state_syntax_create(bool is_ref, automaton_state_label_syntax *label,
-                              automaton_state_label_syntax *ref,
-                              automaton_transitions_syntax *transitions) {
+automaton_state_syntax *automaton_state_syntax_create(bool is_ref, automaton_state_label_syntax *label, automaton_state_label_syntax *ref,
+                                                      automaton_transitions_syntax *transitions) {
   automaton_state_syntax *state = malloc(sizeof(automaton_state_syntax));
   state->label = label;
   if (is_ref) {
@@ -342,29 +290,22 @@ automaton_state_syntax_create(bool is_ref, automaton_state_label_syntax *label,
   }
   return state;
 }
-automaton_state_label_syntax *
-automaton_state_label_syntax_create(char *name,
-                                    automaton_indexes_syntax *indexes) {
-  automaton_state_label_syntax *state_label =
-      malloc(sizeof(automaton_state_label_syntax));
+automaton_state_label_syntax *automaton_state_label_syntax_create(char *name, automaton_indexes_syntax *indexes) {
+  automaton_state_label_syntax *state_label = malloc(sizeof(automaton_state_label_syntax));
   aut_dupstr(&(state_label->name), name);
   state_label->indexes = indexes;
   return state_label;
 }
-automaton_states_syntax *
-automaton_states_syntax_create(automaton_state_syntax *state) {
+automaton_states_syntax *automaton_states_syntax_create(automaton_state_syntax *state) {
   automaton_states_syntax *states = malloc(sizeof(automaton_states_syntax));
   states->count = 1;
   states->states = malloc(sizeof(automaton_state_syntax *) * states->count);
   states->states[0] = state;
   return states;
 }
-automaton_states_syntax *
-automaton_states_syntax_add_state(automaton_states_syntax *states,
-                                  automaton_state_syntax *state) {
+automaton_states_syntax *automaton_states_syntax_add_state(automaton_states_syntax *states, automaton_state_syntax *state) {
   states->count++;
-  automaton_state_syntax **new_states =
-      malloc(sizeof(automaton_state_syntax *) * states->count);
+  automaton_state_syntax **new_states = malloc(sizeof(automaton_state_syntax *) * states->count);
   uint32_t i;
   for (i = 0; i < (states->count - 1); i++)
     new_states[i] = states->states[i];
@@ -373,10 +314,9 @@ automaton_states_syntax_add_state(automaton_states_syntax *states,
   states->states = new_states;
   return states;
 }
-automaton_composition_syntax *automaton_composition_syntax_create_from_states(
-    automaton_states_syntax *states, automaton_set_syntax *set_syntax) {
-  automaton_composition_syntax *composition =
-      malloc(sizeof(automaton_composition_syntax));
+automaton_composition_syntax *automaton_composition_syntax_create_from_states(automaton_states_syntax *states,
+                                                                              automaton_set_syntax *set_syntax) {
+  automaton_composition_syntax *composition = malloc(sizeof(automaton_composition_syntax));
   aut_dupstr(&(composition->name), states->states[0]->label->name);
   composition->components = NULL;
   composition->count = states->count;
@@ -385,11 +325,9 @@ automaton_composition_syntax *automaton_composition_syntax_create_from_states(
   composition->extended_set = set_syntax;
   return composition;
 }
-automaton_composition_syntax *automaton_composition_syntax_create_from_ref(
-    char *name, automaton_components_syntax *components, bool is_game,
-    bool no_mixed_states) {
-  automaton_composition_syntax *composition =
-      malloc(sizeof(automaton_composition_syntax));
+automaton_composition_syntax *automaton_composition_syntax_create_from_ref(char *name, automaton_components_syntax *components,
+                                                                           bool is_game, bool no_mixed_states) {
+  automaton_composition_syntax *composition = malloc(sizeof(automaton_composition_syntax));
   aut_dupstr(&(composition->name), name);
   composition->components = components->components;
   composition->count = components->count;
@@ -400,36 +338,28 @@ automaton_composition_syntax *automaton_composition_syntax_create_from_ref(
 
   return composition;
 }
-automaton_gr1_game_syntax *
-automaton_gr1_game_syntax_create(char *name, char *composition_name,
-                                 automaton_set_syntax *assumptions,
-                                 automaton_set_syntax *goals) {
-  automaton_gr1_game_syntax *gr1_game =
-      malloc(sizeof(automaton_gr1_game_syntax));
+automaton_gr1_game_syntax *automaton_gr1_game_syntax_create(char *name, char *composition_name, automaton_set_syntax *assumptions,
+                                                            automaton_set_syntax *goals) {
+  automaton_gr1_game_syntax *gr1_game = malloc(sizeof(automaton_gr1_game_syntax));
   aut_dupstr(&(gr1_game->name), name);
   aut_dupstr(&(gr1_game->composition_name), composition_name);
   gr1_game->assumptions = assumptions;
   gr1_game->guarantees = goals;
   return gr1_game;
 }
-automaton_components_syntax *
-automaton_components_syntax_create(automaton_component_syntax *component) {
-  automaton_components_syntax *components =
-      malloc(sizeof(automaton_components_syntax));
+automaton_components_syntax *automaton_components_syntax_create(automaton_component_syntax *component) {
+  automaton_components_syntax *components = malloc(sizeof(automaton_components_syntax));
   components->count = 1;
-  components->components =
-      malloc(sizeof(automaton_component_syntax *) * components->count);
+  components->components = malloc(sizeof(automaton_component_syntax *) * components->count);
   components->components[0] = component;
   return components;
 }
 
-automaton_components_syntax *automaton_components_syntax_add_component(
-    automaton_components_syntax *components,
-    automaton_component_syntax *component,
-    automaton_synchronization_type_syntax type) {
+automaton_components_syntax *automaton_components_syntax_add_component(automaton_components_syntax *components,
+                                                                       automaton_component_syntax *component,
+                                                                       automaton_synchronization_type_syntax type) {
   components->count++;
-  automaton_component_syntax **new_components =
-      malloc(sizeof(automaton_component_syntax *) * components->count);
+  automaton_component_syntax **new_components = malloc(sizeof(automaton_component_syntax *) * components->count);
   uint32_t i;
   for (i = 0; i < (components->count - 1); i++)
     new_components[i] = components->components[i];
@@ -439,24 +369,18 @@ automaton_components_syntax *automaton_components_syntax_add_component(
   components->components = new_components;
   return components;
 }
-automaton_equivalence_check_syntax *
-automaton_equality_check_syntax_create(char *name, char *left, char *right) {
-  automaton_equivalence_check_syntax *check =
-      malloc(sizeof(automaton_equivalence_check_syntax));
+automaton_equivalence_check_syntax *automaton_equality_check_syntax_create(char *name, char *left, char *right) {
+  automaton_equivalence_check_syntax *check = malloc(sizeof(automaton_equivalence_check_syntax));
   aut_dupstr(&(check->name), name);
   aut_dupstr(&(check->left), left);
   aut_dupstr(&(check->right), right);
   return check;
 }
-automaton_component_syntax *
-automaton_component_syntax_create(char *ident, char *prefix,
-                                  automaton_index_syntax *index,
-                                  automaton_indexes_syntax *indexes,
-                                  automaton_synchronization_type_syntax type,
-                                  automaton_relabel_set_syntax *relabel_set,
-                                  automaton_hide_set_syntax *hide_set) {
-  automaton_component_syntax *component =
-      malloc(sizeof(automaton_component_syntax));
+automaton_component_syntax *automaton_component_syntax_create(char *ident, char *prefix, automaton_index_syntax *index,
+                                                              automaton_indexes_syntax *indexes, automaton_synchronization_type_syntax type,
+                                                              automaton_relabel_set_syntax *relabel_set,
+                                                              automaton_hide_set_syntax *hide_set) {
+  automaton_component_syntax *component = malloc(sizeof(automaton_component_syntax));
   aut_dupstr(&(component->ident), ident);
   aut_dupstr(&(component->prefix), prefix);
   component->index = index;
@@ -467,32 +391,24 @@ automaton_component_syntax_create(char *ident, char *prefix,
   return component;
 }
 
-automaton_hide_set_syntax *
-automaton_hide_set_syntax_create(automaton_set_syntax *elements,
-                                 bool is_hiding) {
-  automaton_hide_set_syntax *hide_set =
-      malloc(sizeof(automaton_hide_set_syntax));
+automaton_hide_set_syntax *automaton_hide_set_syntax_create(automaton_set_syntax *elements, bool is_hiding) {
+  automaton_hide_set_syntax *hide_set = malloc(sizeof(automaton_hide_set_syntax));
   hide_set->is_hiding = is_hiding;
   hide_set->elements = elements;
   return hide_set;
 }
 
-automaton_relabel_set_syntax *
-automaton_relabel_set_create_from_label(automaton_relabel_pair_syntax *pair) {
-  automaton_relabel_set_syntax *relabel_syntax =
-      malloc(sizeof(automaton_relabel_set_syntax));
+automaton_relabel_set_syntax *automaton_relabel_set_create_from_label(automaton_relabel_pair_syntax *pair) {
+  automaton_relabel_set_syntax *relabel_syntax = malloc(sizeof(automaton_relabel_set_syntax));
   relabel_syntax->count = 1;
   relabel_syntax->pairs = malloc(sizeof(automaton_relabel_pair_syntax *));
   relabel_syntax->pairs[0] = pair;
   return relabel_syntax;
 }
 
-automaton_relabel_set_syntax *
-automaton_relabel_set_concat_labels(automaton_relabel_set_syntax *set,
-                                    automaton_relabel_pair_syntax *pair) {
+automaton_relabel_set_syntax *automaton_relabel_set_concat_labels(automaton_relabel_set_syntax *set, automaton_relabel_pair_syntax *pair) {
   set->count++;
-  automaton_relabel_pair_syntax *ptr =
-      realloc(set->pairs, sizeof(automaton_relabel_pair_syntax *) * set->count);
+  automaton_relabel_pair_syntax *ptr = realloc(set->pairs, sizeof(automaton_relabel_pair_syntax *) * set->count);
   if (ptr == NULL) {
     printf("[Error] Could not allocate memory for "
            "automaton_relabel_set_concat_labels.\n");
@@ -503,31 +419,23 @@ automaton_relabel_set_concat_labels(automaton_relabel_set_syntax *set,
   return set;
 }
 
-automaton_relabel_pair_syntax *
-automaton_relabel_pair_create(automaton_label_syntax *old,
-                              automaton_label_syntax *new) {
-  automaton_relabel_pair_syntax *pair =
-      malloc(sizeof(automaton_relabel_pair_syntax));
+automaton_relabel_pair_syntax *automaton_relabel_pair_create(automaton_label_syntax *old, automaton_label_syntax *new) {
+  automaton_relabel_pair_syntax *pair = malloc(sizeof(automaton_relabel_pair_syntax));
   pair->old = old;
   pair->new = new;
   return pair;
 }
 
-automaton_program_syntax *
-automaton_program_syntax_create(automaton_statement_syntax *first_statement) {
+automaton_program_syntax *automaton_program_syntax_create(automaton_statement_syntax *first_statement) {
   automaton_program_syntax *program = malloc(sizeof(automaton_program_syntax));
   program->count = 1;
-  program->statements =
-      malloc(sizeof(automaton_statement_syntax *) * program->count);
+  program->statements = malloc(sizeof(automaton_statement_syntax *) * program->count);
   program->statements[0] = first_statement;
   return program;
 }
-automaton_program_syntax *
-automaton_program_syntax_add_statement(automaton_program_syntax *program,
-                                       automaton_statement_syntax *statement) {
+automaton_program_syntax *automaton_program_syntax_add_statement(automaton_program_syntax *program, automaton_statement_syntax *statement) {
   program->count++;
-  automaton_statement_syntax **new_statements =
-      malloc(sizeof(automaton_statement_syntax *) * program->count);
+  automaton_statement_syntax **new_statements = malloc(sizeof(automaton_statement_syntax *) * program->count);
   uint32_t i;
   for (i = 0; i < (program->count - 1); i++)
     new_statements[i] = program->statements[i];
@@ -537,18 +445,12 @@ automaton_program_syntax_add_statement(automaton_program_syntax *program,
   return program;
 }
 automaton_statement_syntax *automaton_statement_syntax_create(
-    automaton_statement_type_syntax type,
-    automaton_composition_syntax *composition_def,
-    automaton_expression_syntax *range_def,
-    automaton_expression_syntax *const_def, automaton_fluent_syntax *fluent_def,
-    automaton_set_def_syntax *set_def, automaton_gr1_game_syntax *gr1_game_def,
-    ltl_rule_syntax *ltl_rule, ltl_fluent_syntax *ltl_fluent,
-    automaton_equivalence_check_syntax *equivalence_check,
-    automaton_import_syntax *import_syntax,
-    automaton_vstates_fluent_syntax *vstates_fluent_syntax,
-    automaton_serialization_syntax *serialization_syntax) {
-  automaton_statement_syntax *statement =
-      malloc(sizeof(automaton_statement_syntax));
+    automaton_statement_type_syntax type, automaton_composition_syntax *composition_def, automaton_expression_syntax *range_def,
+    automaton_expression_syntax *const_def, automaton_fluent_syntax *fluent_def, automaton_set_def_syntax *set_def,
+    automaton_gr1_game_syntax *gr1_game_def, ltl_rule_syntax *ltl_rule, ltl_fluent_syntax *ltl_fluent,
+    automaton_equivalence_check_syntax *equivalence_check, automaton_import_syntax *import_syntax,
+    automaton_vstates_fluent_syntax *vstates_fluent_syntax, automaton_serialization_syntax *serialization_syntax) {
+  automaton_statement_syntax *statement = malloc(sizeof(automaton_statement_syntax));
   statement->type = type;
   statement->composition_def = composition_def;
   statement->range_def = range_def;
@@ -565,12 +467,9 @@ automaton_statement_syntax *automaton_statement_syntax_create(
   return statement;
 }
 
-automaton_vstates_syntax *
-automaton_vstates_syntax_concat_state(automaton_vstates_syntax *vstates,
-                                      automaton_state_label_syntax *state) {
+automaton_vstates_syntax *automaton_vstates_syntax_concat_state(automaton_vstates_syntax *vstates, automaton_state_label_syntax *state) {
   vstates->count++;
-  automaton_expression_syntax **ptr = realloc(
-      vstates->list, sizeof(automaton_state_label_syntax *) * vstates->count);
+  automaton_expression_syntax **ptr = realloc(vstates->list, sizeof(automaton_state_label_syntax *) * vstates->count);
   if (ptr == NULL) {
     printf("Could not allocate more space for vstates list\n");
     exit(-1);
@@ -580,19 +479,15 @@ automaton_vstates_syntax_concat_state(automaton_vstates_syntax *vstates,
   return vstates;
 }
 
-automaton_vstates_syntax *
-automaton_vstates_syntax_concat_int(automaton_vstates_syntax *vstates,
-                                    uint32_t state_number) {
+automaton_vstates_syntax *automaton_vstates_syntax_concat_int(automaton_vstates_syntax *vstates, uint32_t state_number) {
   vstates->count++;
-  automaton_expression_syntax **ptr = realloc(
-      vstates->list, sizeof(automaton_state_label_syntax *) * vstates->count);
+  automaton_expression_syntax **ptr = realloc(vstates->list, sizeof(automaton_state_label_syntax *) * vstates->count);
   if (ptr == NULL) {
     printf("Could not allocate more space for vstates list\n");
     exit(-1);
   }
   vstates->list = ptr;
-  automaton_state_label_syntax *state_label =
-      malloc(sizeof(automaton_state_label_syntax));
+  automaton_state_label_syntax *state_label = malloc(sizeof(automaton_state_label_syntax));
   char *buf = malloc(sizeof(char) * 100);
   snprintf(buf, sizeof(buf), "%d", state_number);
   state_label->name = buf;
@@ -601,8 +496,7 @@ automaton_vstates_syntax_concat_int(automaton_vstates_syntax *vstates,
   return vstates;
 }
 
-automaton_vstates_syntax *automaton_vstates_syntax_create_from_state(
-    automaton_state_label_syntax *state) {
+automaton_vstates_syntax *automaton_vstates_syntax_create_from_state(automaton_state_label_syntax *state) {
   automaton_vstates_syntax *vstates = malloc(sizeof(automaton_vstates_syntax));
   vstates->count = 1;
   vstates->list = malloc(sizeof(automaton_state_label_syntax *));
@@ -610,13 +504,11 @@ automaton_vstates_syntax *automaton_vstates_syntax_create_from_state(
   return vstates;
 }
 
-automaton_vstates_syntax *
-automaton_vstates_syntax_create_from_int(uint32_t state_number) {
+automaton_vstates_syntax *automaton_vstates_syntax_create_from_int(uint32_t state_number) {
   automaton_vstates_syntax *vstates = malloc(sizeof(automaton_vstates_syntax));
   vstates->count = 1;
   vstates->list = malloc(sizeof(automaton_state_label_syntax *));
-  automaton_state_label_syntax *state_label =
-      malloc(sizeof(automaton_state_label_syntax));
+  automaton_state_label_syntax *state_label = malloc(sizeof(automaton_state_label_syntax));
   char *buf = malloc(sizeof(char) * 100);
   snprintf(buf, sizeof(buf), "%d", state_number);
   state_label->name = buf;
@@ -635,28 +527,24 @@ void automaton_vstates_syntax_destroy(automaton_vstates_syntax *vstates) {
   free(vstates);
 }
 
-automaton_vstates_fluent_syntax *
-automaton_vstates_fluent_syntax_create(char *name, char *automaton_name,
-                                       automaton_vstates_syntax *states) {
-  automaton_vstates_fluent_syntax *vstates_fluent =
-      malloc(sizeof(automaton_vstates_fluent_syntax));
+automaton_vstates_fluent_syntax *automaton_vstates_fluent_syntax_create(char *name, char *automaton_name,
+                                                                        automaton_vstates_syntax *states) {
+  automaton_vstates_fluent_syntax *vstates_fluent = malloc(sizeof(automaton_vstates_fluent_syntax));
   aut_dupstr(&(vstates_fluent->name), name);
   aut_dupstr(&(vstates_fluent->automaton_name), automaton_name);
   vstates_fluent->vstates = states;
   return vstates_fluent;
 }
-void automaton_vstates_fluent_syntax_destroy(
-    automaton_vstates_fluent_syntax *vstates_fluent) {
+void automaton_vstates_fluent_syntax_destroy(automaton_vstates_fluent_syntax *vstates_fluent) {
   automaton_vstates_syntax_destroy(vstates_fluent->vstates);
   free(vstates_fluent->name);
   free(vstates_fluent->automaton_name);
   free(vstates_fluent);
 }
 
-automaton_serialization_syntax *automaton_serialization_syntax_create_from_ref(
-    char *name, char *automaton_name, bool sequential, bool has_ticks) {
-  automaton_serialization_syntax *automaton_serialization =
-      malloc(sizeof(automaton_serialization_syntax));
+automaton_serialization_syntax *automaton_serialization_syntax_create_from_ref(char *name, char *automaton_name, bool sequential,
+                                                                               bool has_ticks) {
+  automaton_serialization_syntax *automaton_serialization = malloc(sizeof(automaton_serialization_syntax));
   aut_dupstr(&(automaton_serialization->name), name);
   aut_dupstr(&(automaton_serialization->automaton_name), automaton_name);
   automaton_serialization->sequential = sequential;
@@ -664,8 +552,7 @@ automaton_serialization_syntax *automaton_serialization_syntax_create_from_ref(
   return automaton_serialization;
 }
 
-void automaton_serialization_syntax_destroy(
-    automaton_serialization_syntax *automaton_serialization) {
+void automaton_serialization_syntax_destroy(automaton_serialization_syntax *automaton_serialization) {
   if (automaton_serialization->name != NULL)
     free(automaton_serialization->name);
   if (automaton_serialization->automaton_name != NULL)
@@ -673,8 +560,7 @@ void automaton_serialization_syntax_destroy(
   free(automaton_serialization);
 }
 
-ltl_rule_syntax *ltl_rule_syntax_create(bool is_theta, bool is_env, char *name,
-                                        char *game_structure_name, obdd *obdd) {
+ltl_rule_syntax *ltl_rule_syntax_create(bool is_theta, bool is_env, char *name, char *game_structure_name, obdd *obdd) {
   ltl_rule_syntax *ltl_rule = malloc(sizeof(ltl_rule_syntax));
   ltl_rule->is_theta = is_theta;
   ltl_rule->is_env = is_env;
@@ -691,10 +577,8 @@ ltl_fluent_syntax *automaton_ltl_fluent_syntax_create(char *name, obdd *obdd) {
   return ltl_fluent;
 }
 
-automaton_import_syntax *automaton_import_syntax_create(char *name,
-                                                        char *filename) {
-  automaton_import_syntax *import_syntax =
-      malloc(sizeof(automaton_import_syntax));
+automaton_import_syntax *automaton_import_syntax_create(char *name, char *filename) {
+  automaton_import_syntax *import_syntax = malloc(sizeof(automaton_import_syntax));
   aut_dupstr(&(import_syntax->name), name);
   filename[strlen(filename) - 1] = '\0';
   aut_dupstr(&(import_syntax->filename), &(filename[1]));
@@ -757,8 +641,7 @@ void automaton_statement_syntax_destroy(automaton_statement_syntax *statement) {
   }
   free(statement);
 }
-void automaton_components_syntax_destroy(
-    automaton_components_syntax *components) {
+void automaton_components_syntax_destroy(automaton_components_syntax *components) {
   uint32_t i;
   for (i = 0; i < components->count; i++)
     automaton_component_syntax_destroy(components->components[i]);
@@ -780,8 +663,7 @@ void automaton_component_syntax_destroy(automaton_component_syntax *component) {
     automaton_hide_set_syntax_destroy(component->hide_set);
   free(component);
 }
-void automaton_composition_syntax_destroy(
-    automaton_composition_syntax *composition) {
+void automaton_composition_syntax_destroy(automaton_composition_syntax *composition) {
   uint32_t i;
   if (composition->name != NULL)
     free(composition->name);
@@ -830,24 +712,21 @@ void automaton_state_syntax_destroy(automaton_state_syntax *state) {
     free(state->transitions);
   free(state);
 }
-void automaton_state_label_syntax_destroy(
-    automaton_state_label_syntax *state_label) {
+void automaton_state_label_syntax_destroy(automaton_state_label_syntax *state_label) {
   if (state_label->name != NULL)
     free(state_label->name);
   if (state_label->indexes != NULL)
     automaton_indexes_syntax_destroy(state_label->indexes);
   free(state_label);
 }
-void automaton_transitions_syntax_destroy(
-    automaton_transitions_syntax *transitions) {
+void automaton_transitions_syntax_destroy(automaton_transitions_syntax *transitions) {
   uint32_t i;
   for (i = 0; i < transitions->count; i++)
     automaton_transition_syntax_destroy(transitions->transitions[i]);
   free(transitions->transitions);
   free(transitions);
 }
-void automaton_transition_syntax_destroy(
-    automaton_transition_syntax *transition) {
+void automaton_transition_syntax_destroy(automaton_transition_syntax *transition) {
   uint32_t i;
   if (transition->condition != NULL)
     automaton_expression_syntax_destroy(transition->condition);
@@ -858,16 +737,14 @@ void automaton_transition_syntax_destroy(
     automaton_state_label_syntax_destroy(transition->to_state);
   free(transition);
 }
-void automaton_trace_label_syntax_destroy(
-    automaton_trace_label_syntax *trace_label) {
+void automaton_trace_label_syntax_destroy(automaton_trace_label_syntax *trace_label) {
   uint32_t i;
   for (i = 0; i < trace_label->count; i++)
     automaton_trace_label_atom_syntax_destroy(trace_label->atoms[i]);
   free(trace_label->atoms);
   free(trace_label);
 }
-void automaton_trace_label_atom_syntax_destroy(
-    automaton_trace_label_atom_syntax *trace_label_atom) {
+void automaton_trace_label_atom_syntax_destroy(automaton_trace_label_atom_syntax *trace_label_atom) {
   if (trace_label_atom->label != NULL || trace_label_atom->indexes != NULL) {
     if (trace_label_atom->label != NULL)
       automaton_label_syntax_destroy(trace_label_atom->label);
@@ -944,8 +821,7 @@ void automaton_expression_syntax_destroy(automaton_expression_syntax *expr) {
   free(expr);
 }
 
-void automaton_relabel_set_syntax_destroy(
-    automaton_relabel_set_syntax *relabel_set) {
+void automaton_relabel_set_syntax_destroy(automaton_relabel_set_syntax *relabel_set) {
   uint32_t i;
   for (i = 0; i < relabel_set->count; i++)
     automaton_relabel_pair_syntax_destroy(relabel_set->pairs[i]);
@@ -959,8 +835,7 @@ void automaton_hide_set_syntax_destroy(automaton_hide_set_syntax *hide_set) {
   free(hide_set);
 }
 
-void automaton_relabel_pair_syntax_destroy(
-    automaton_relabel_pair_syntax *relabel_pair) {
+void automaton_relabel_pair_syntax_destroy(automaton_relabel_pair_syntax *relabel_pair) {
   automaton_label_syntax_destroy(relabel_pair->new);
   automaton_label_syntax_destroy(relabel_pair->old);
   free(relabel_pair);
@@ -1002,16 +877,13 @@ uint32_t *parser_get_primed_variables() {
   if (parser_primed_variables == NULL) {
     parser_primed_variables_size = LIST_INITIAL_SIZE;
     parser_primed_variables_count = 0;
-    parser_primed_variables =
-        malloc(sizeof(uint32_t) * parser_primed_variables_size);
-    parser_primed_original_variables =
-        malloc(sizeof(uint32_t) * parser_primed_variables_size);
+    parser_primed_variables = malloc(sizeof(uint32_t) * parser_primed_variables_size);
+    parser_primed_original_variables = malloc(sizeof(uint32_t) * parser_primed_variables_size);
   }
   return parser_primed_variables;
 }
 
-void parser_add_primed_variables(uint32_t primed_variable,
-                                 uint32_t original_var_ID) {
+void parser_add_primed_variables(uint32_t primed_variable, uint32_t original_var_ID) {
   int32_t last_less_than = -1;
   int32_t i;
   parser_get_primed_variables();
@@ -1023,15 +895,13 @@ void parser_add_primed_variables(uint32_t primed_variable,
   }
   if ((parser_primed_variables_count + 1) == parser_primed_variables_size) {
     uint32_t new_size = parser_primed_variables_size * LIST_INCREASE_FACTOR;
-    uint32_t *ptr =
-        realloc(parser_primed_variables, sizeof(uint32_t) * new_size);
+    uint32_t *ptr = realloc(parser_primed_variables, sizeof(uint32_t) * new_size);
     if (ptr == NULL) {
       printf("Could not allocate more space for primed variables list\n");
       exit(-1);
     }
     parser_primed_variables = ptr;
-    ptr =
-        realloc(parser_primed_original_variables, sizeof(uint32_t) * new_size);
+    ptr = realloc(parser_primed_original_variables, sizeof(uint32_t) * new_size);
     if (ptr == NULL) {
       printf("Could not allocate more space for primed variables list\n");
       exit(-1);
@@ -1041,16 +911,14 @@ void parser_add_primed_variables(uint32_t primed_variable,
   }
   for (i = parser_primed_variables_count; i > last_less_than && i > 0; i--) {
     parser_primed_variables[i] = parser_primed_variables[i - 1];
-    parser_primed_original_variables[i] =
-        parser_primed_original_variables[i - 1];
+    parser_primed_original_variables[i] = parser_primed_original_variables[i - 1];
   }
   parser_primed_variables[last_less_than + 1] = primed_variable;
   parser_primed_original_variables[last_less_than + 1] = original_var_ID;
   parser_primed_variables_count++;
 }
 
-void automaton_equivalence_check_syntax_destroy(
-    automaton_equivalence_check_syntax *check) {
+void automaton_equivalence_check_syntax_destroy(automaton_equivalence_check_syntax *check) {
   if (check->name != NULL)
     free(check->name);
   if (check->left != NULL)

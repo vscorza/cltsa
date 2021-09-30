@@ -1,6 +1,41 @@
 TODO:
 =====
+- tool
+	- write DFA (hopcroft) minimization
+	- add syntax to define tau: tau is "def" 
+		- implement by default will be named tau and added as first element
+	- esconder etiquetas
+		\{term_1,...,term_N}
+			- terms can be indexed, either by range or variable			
+		- replace with tau if turns empty (wasn't empty before)
+		\{term_1,....,term_N}_s
+		- doesn't replace with tau
+	- add observational minimization according to CCS expressions ... 
+		- replace with tau
+		- minimize transitions where only tau is left (if it was non empty and turns empty)
+	- add syntax to minimize
+		- minimization as NEW = (OLD).
+	- add syntax to minimize observationally
+		- observational minimization as NEW = (OLD).			
+	- test minimization
+	- revisar layout convencional de linux (bin, lib, etc)
+	- armar cmake
+		- agregar CLTSA_PATH a entorno
+		- agregar un install
+	- agregar una salida que reporte el avance del proceso de síntesis diagnóstico
+		- en un archivo dentro de CLTSA_PATH/output/
+	- si al iniciar no encuentra CLTSA_PATH que avise y exit
+	- que AUTOMATA >> . saque a un archivo por defecto CLTSA_PATH/output/name.rep
 - lista de cosas a agregar/modificar del paper de ICSE para TOSEM
+	- Extender benchmark.
+	- Mostrar el comparativo de tiempo para búsqueda lineal vs DD, comparar entre no ordenar transiciones vs ordenar respecto de la distancia a s_0.
+		- Mostrar (proxy) que sería utilizable el feedback para entender un problema de realizabilidad (i.e., sirve)
+	- Mostrar ejemplos concretos de las minimizaciones y explicar por qué ayudarían a quién está escribiendo las especificaciones.
+	- Mostrar (proxy) que es distinto (superador) en alguna dimensión a la competencia basada en mostrar estrategias (i.e., contribuye)
+		- Meter una implementación de contra-estrategia de GR1 y comparar con la técnica general. Serían tres cosas en verdad, qué tan compacto es lo nuestro vs contra-estrategia, se puede hablar de qué tan difícil de implementar es y agrega un poco de feedback al toolset de diagnóstico (pero esto último no creo que sea funcional a una publicación de minimización agnóstica de la fórmula)
+	- Mostrar que es computable ese feedback en ejemplos "reales" (i.e., va levemente más allá de una idea)
+	- Las propiedades que enunciamos son correctas (ie., la pruebas extendidas)
+	- Agregar minimización de goal, básicamente en fórmulas que tienen varios átomos de liveness de sistema dejar sólo uno que no está siendo satisfecho. Es más que nada por completitud con el esquema planteado por Cimatti,se puede pensar como un paso previo a la minimización de comportamiento, no toca a la técnica en sí, sino a su aplicación en un contexto GR(1).
 - clts
 	- Leer y hacer notas de A logical study of distributed transition systems
 	- revisar definiciones
@@ -20,66 +55,44 @@ TODO:
 			- equivalence semantics for concurrency: comparison and application
 			- enhanced event structures
 	- escribir hernán por concurrencia real en eventos, copiar a Sebas y a Vic		
-- post paper
-	- tool
-		- write DFA (hopcroft) minimization
-		- add syntax to define tau: tau is "def" 
-			- implement by default will be named tau and added as first element
+- editor
+	- si al iniciar no encuentra CLTSA_PATH que avise y exit
+	- que el binario lo tome de CLTSA_PATH
+	- marcar línea del error en el editor por syntax error, agregar linenumber y pos a los syntax def de paser_utils, automaton_context
+	- habilitar line number en el editor
+	- undo/redo 
+	- improve report loading from java client (automatically load exports)
+		- que cargue de CLTSA_PATH/output/
+	- allow several specs to be loaded concurrently (tabs)
+	- syntax highlight strings
+	- signals view as complement to automaton
+- puede que haga falta incorporar independencia al formalismo: 
+	- ejemplo: A = (a -> a). B = (b -> b). ||C = (A ||_c B). da que C = ({a,b,<a,b>} -> C) y si g = []<>(a && b)
+		con a y b controlables el problema parece realizable, cuando en realidad no es necesariamente el caso
+		porque a y b son independientes. (Revisar sistemas de transición con independencia)
+- serializacion
+	- serializar valuaciones
+	- reimplementar volcando el contenido binario de arreglos
+		- trans
+		- valuaciones
+	- evaluar agregar utilidades de compresión
+		-https://en.wikipedia.org/wiki/Lempel%E2%80%93Ziv%E2%80%93Markov_chain_algorithm		
+- se puede usar inducción en composicion:
+	- M_1 |= phi, M_k |= phi => M_k || M_(k+1) |= phi
+- exportar a vdhl
+	- versión básica
+- re-escribir versión ahb genbuf, revisar realizabilidad-no realizabilidad
+	- testear y comparar con valuaciones por estados
+		- ahb_1_n	
+			- completo			
+	- correr tests
+- estados por referencia (si se complica ni bola)
+- revisar 
+	- patterns for property specification ...
+	- Compositional Model Checking for Multi-properties
+	- gcov
 
-		- esconder etiquetas
-			\{term_1,...,term_N}
-				- terms can be indexed, either by range or variable			
-			- replace with tau if turns empty (wasn't empty before)
-			\{term_1,....,term_N}_s
-			- doesn't replace with tau
-		- add observational minimization according to CCS expressions ... 
-			- replace with tau
-			- minimize transitions where only tau is left (if it was non empty and turns empty)
-		- add syntax to minimize
-			- minimization as NEW = (OLD).
-		- add syntax to minimize observationally
-			- observational minimization as NEW = (OLD).			
-		- test minimization
-		- revisar layout convencional de linux (bin, lib, etc)
-		- armar cmake
-			- agregar CLTSA_PATH a entorno
-			- agregar un install
-		- agregar una salida que reporte el avance del proceso de síntesis diagnóstico
-			- en un archivo dentro de CLTSA_PATH/output/
-		- si al iniciar no encuentra CLTSA_PATH que avise y exit
-		- que AUTOMATA >> . saque a un archivo por defecto CLTSA_PATH/output/name.rep
-	- editor
-		- si al iniciar no encuentra CLTSA_PATH que avise y exit
-		- que el binario lo tome de CLTSA_PATH
-		- marcar línea del error en el editor por syntax error, agregar linenumber y pos a los syntax def de paser_utils, automaton_context
-		- habilitar line number en el editor
-		- undo/redo 
-		- improve report loading from java client (automatically load exports)
-			- que cargue de CLTSA_PATH/output/
-		- allow several specs to be loaded concurrently (tabs)
-		- syntax highlight strings
-		- signals view as complement to automaton
-	- serializacion
-		- serializar valuaciones
-		- reimplementar volcando el contenido binario de arreglos
-			- trans
-			- valuaciones
-		- evaluar agregar utilidades de compresión
-			-https://en.wikipedia.org/wiki/Lempel%E2%80%93Ziv%E2%80%93Markov_chain_algorithm		
-	- exportar a vdhl
-		- versión básica
-	- re-escribir versión ahb genbuf, revisar realizabilidad-no realizabilidad
-		- testear y comparar con valuaciones por estados
-			- ahb_1_n	
-				- completo			
-		- correr tests
-	- estados por referencia (si se complica ni bola)
-	- revisar 
-		- patterns for property specification ...
-		- Compositional Model Checking for Multi-properties
-		- gcov
-	
-- clts	
+- tool	
 	- composición
 		- rediseñar algoritmo de composicion
 		- justificar tipos de composicion https://www.eetimes.com/understanding-clock-domain-crossing-issues/

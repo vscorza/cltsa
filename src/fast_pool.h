@@ -25,13 +25,9 @@ typedef struct automaton_fast_pool_str {
   uint32_t composite_count;
 } automaton_fast_pool;
 
-automaton_fast_pool *automaton_fast_pool_create(size_t sizeof_element,
-                                                uint32_t initial_size,
-                                                uint32_t fragment_size);
+automaton_fast_pool *automaton_fast_pool_create(size_t sizeof_element, uint32_t initial_size, uint32_t fragment_size);
 void automaton_fast_pool_destroy(automaton_fast_pool *pool);
-void *automaton_fast_pool_get_instance(automaton_fast_pool *pool,
-                                       uint32_t *fragment_ID);
-bool automaton_fast_pool_release_instance(automaton_fast_pool *pool,
-                                          uint32_t fragment_ID);
+void *automaton_fast_pool_get_instance(automaton_fast_pool *pool, uint32_t *fragment_ID);
+bool automaton_fast_pool_release_instance(automaton_fast_pool *pool, uint32_t fragment_ID);
 
 #endif /* SRC_FAST_POOL_H_ */

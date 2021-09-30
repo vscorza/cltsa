@@ -24,17 +24,17 @@
 typedef __int128 int128_t;
 typedef unsigned __int128 uint128_t;
 
-#define max(a, b)                                                              \
-  ({                                                                           \
-    __typeof__(a) _a = (a);                                                    \
-    __typeof__(b) _b = (b);                                                    \
-    _a > _b ? _a : _b;                                                         \
+#define max(a, b)                                                                                                                          \
+  ({                                                                                                                                       \
+    __typeof__(a) _a = (a);                                                                                                                \
+    __typeof__(b) _b = (b);                                                                                                                \
+    _a > _b ? _a : _b;                                                                                                                     \
   })
-#define min(a, b)                                                              \
-  ({                                                                           \
-    __typeof__(a) _a = (a);                                                    \
-    __typeof__(b) _b = (b);                                                    \
-    _a < _b ? _a : _b;                                                         \
+#define min(a, b)                                                                                                                          \
+  ({                                                                                                                                       \
+    __typeof__(a) _a = (a);                                                                                                                \
+    __typeof__(b) _b = (b);                                                                                                                \
+    _a < _b ? _a : _b;                                                                                                                     \
   })
 
 #define TRUE_VAR "1"
@@ -68,16 +68,13 @@ typedef struct automaton_string_list_str {
 
 /** LIST FUNCTIONS **/
 void aut_add_ptr_list(void ***list, void *element, uint32_t *count);
-void aut_add_incr_ptr_list(void ***list, void *element, uint32_t *size,
-                           uint32_t *count);
+void aut_add_incr_ptr_list(void ***list, void *element, uint32_t *size, uint32_t *count);
 void aut_free_ptr_list(void ***list, uint32_t *count);
 /** STRING FUNCTIONS **/
 void aut_dupstr(char **dst, char *src);
-automaton_string_list *automaton_string_list_create(bool sorted,
-                                                    bool repeat_values);
+automaton_string_list *automaton_string_list_create(bool sorted, bool repeat_values);
 void automaton_string_list_destroy(automaton_string_list *list);
 void aut_merge_string_lists(automaton_string_list *a, char **b, uint32_t count);
-bool aut_push_string_to_list(automaton_string_list *a, char *element,
-                             int32_t *position);
+bool aut_push_string_to_list(automaton_string_list *a, char *element, int32_t *position);
 int32_t aut_string_list_index_of(automaton_string_list *a, char *element);
 #endif /* AUTOMATON_UTILS_H_ */

@@ -36,23 +36,11 @@ typedef uint16_t signal_bit_array_t;
 ==== ENUMS ====
 ****************/
 
-typedef enum automaton_signal_type_enum {
-  INPUT_SIG = 0,
-  OUTPUT_SIG = 1,
-  INTERNAL_SIG = 2
-} automaton_signal_type;
+typedef enum automaton_signal_type_enum { INPUT_SIG = 0, OUTPUT_SIG = 1, INTERNAL_SIG = 2 } automaton_signal_type;
 
-typedef enum automaton_synchronization_type_enum {
-  CONCURRENT = 0,
-  ASYNCHRONOUS = 1,
-  SYNCHRONOUS = 2
-} automaton_synchronization_type;
+typedef enum automaton_synchronization_type_enum { CONCURRENT = 0, ASYNCHRONOUS = 1, SYNCHRONOUS = 2 } automaton_synchronization_type;
 
-typedef enum automaton_import_type_enum {
-  IMPORT_INT = 0,
-  IMPORT_BOOL = 1,
-  IMPORT_STRING = 2
-} automaton_import_type;
+typedef enum automaton_import_type_enum { IMPORT_INT = 0, IMPORT_BOOL = 1, IMPORT_STRING = 2 } automaton_import_type;
 
 typedef enum automaton_source_type_enum {
   SOURCE_GAME = 0x1,

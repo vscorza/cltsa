@@ -12,10 +12,8 @@
  * @param variable_count the lenght of each boolean array to be stored
  * @return an empty hash table structure
  */
-automaton_bool_array_hash_table *
-automaton_bool_array_hash_table_create(uint32_t variable_count) {
-  automaton_bool_array_hash_table *table =
-      calloc(1, sizeof(automaton_bool_array_hash_table));
+automaton_bool_array_hash_table *automaton_bool_array_hash_table_create(uint32_t variable_count) {
+  automaton_bool_array_hash_table *table = calloc(1, sizeof(automaton_bool_array_hash_table));
   table->variable_count = variable_count;
   table->entries = calloc((2 << BOOL_ARRAY_HASH_TABLE_SIZE), sizeof(bool ***));
   return table;
@@ -25,8 +23,7 @@ automaton_bool_array_hash_table_create(uint32_t variable_count) {
  * Destroys the boolean array hash table provided as input
  * @param table the hash table to be destroyed
  */
-void automaton_bool_array_hash_table_destroy(
-    automaton_bool_array_hash_table *table) {
+void automaton_bool_array_hash_table_destroy(automaton_bool_array_hash_table *table) {
   uint32_t i, j, k;
   for (i = 0; i < (2 << BOOL_ARRAY_HASH_TABLE_SIZE); i++) {
     if (table->entries[i] != NULL) {
@@ -60,8 +57,7 @@ void automaton_bool_array_hash_table_destroy(
  * @return the boolean array already stored that is equivalent to the one
  * provided
  */
-bool *automaton_bool_array_hash_table_add_or_get_entry(
-    automaton_bool_array_hash_table *table, bool *entry, bool copy_entry) {
+bool *automaton_bool_array_hash_table_add_or_get_entry(automaton_bool_array_hash_table *table, bool *entry, bool copy_entry) {
   bool *current_entry = NULL;
   current_entry = automaton_bool_array_hash_table_get_entry(table, entry);
   if (current_entry != NULL)
@@ -81,12 +77,10 @@ bool *automaton_bool_array_hash_table_add_or_get_entry(
  * @return the boolean array already stored that is equivalent to the one
  * provided
  */
-bool *automaton_bool_array_hash_table_get_entry(
-    automaton_bool_array_hash_table *table, bool *entry) {
+bool *automaton_bool_array_hash_table_get_entry(automaton_bool_array_hash_table *table, bool *entry) {
   // build index entries for first and second level
   uint32_t first_level_index, second_level_index, i, j;
-  automaton_bool_array_hash_table_get_entry_indexes(
-      table, entry, &first_level_index, &second_level_index);
+  automaton_bool_array_hash_table_get_entry_indexes(table, entry, &first_level_index, &second_level_index);
   if (table->entries[first_level_index] == NULL)
     return false;
   if (table->entries[first_level_index][second_level_index] == NULL)
@@ -121,20 +115,16 @@ bool *automaton_bool_array_hash_table_get_entry(
  * @param entry the boolean array to be added
  * @param copy_entry whether the entry should be stored as is or cloned
  */
-void automaton_bool_array_hash_table_add_entry(
-    automaton_bool_array_hash_table *table, bool *entry, bool copy_entry) {
+void automaton_bool_array_hash_table_add_entry(automaton_bool_array_hash_table *table, bool *entry, bool copy_entry) {
   uint32_t first_level_index, second_level_index;
   int32_t i;
-  automaton_bool_array_hash_table_get_entry_indexes(
-      table, entry, &first_level_index, &second_level_index);
+  automaton_bool_array_hash_table_get_entry_indexes(table, entry, &first_level_index, &second_level_index);
   // inner entries will be created if needed
   if (table->entries[first_level_index] == NULL) {
-    table->entries[first_level_index] =
-        calloc((2 << BOOL_ARRAY_HASH_TABLE_SIZE), sizeof(bool **));
+    table->entries[first_level_index] = calloc((2 << BOOL_ARRAY_HASH_TABLE_SIZE), sizeof(bool **));
   }
   if (table->entries[first_level_index][second_level_index] == NULL) {
-    table->entries[first_level_index][second_level_index] =
-        calloc(2 << BOOL_ARRAY_HASH_TABLE_SIZE, sizeof(bool *));
+    table->entries[first_level_index][second_level_index] = calloc(2 << BOOL_ARRAY_HASH_TABLE_SIZE, sizeof(bool *));
   }
   // existing internal array is full shift all entries one position up and
   // delete the last
@@ -163,16 +153,12 @@ void automaton_bool_array_hash_table_add_entry(
  * @param first_level_index placeholder for the first level index
  * @param scond_level_index placeholder for the second level index
  */
-void automaton_bool_array_hash_table_get_entry_indexes(
-    automaton_bool_array_hash_table *table, bool *entry,
-    uint32_t *first_level_index, uint32_t *second_level_index) {
+void automaton_bool_array_hash_table_get_entry_indexes(automaton_bool_array_hash_table *table, bool *entry, uint32_t *first_level_index,
+                                                       uint32_t *second_level_index) {
   *first_level_index = 0;
   *second_level_index = 0;
   // adjust evaluation limit according to variable count
-  uint32_t i, j,
-      limit = BOOL_ARRAY_HASH_TABLE_SIZE > table->variable_count
-                  ? table->variable_count
-                  : BOOL_ARRAY_HASH_TABLE_SIZE;
+  uint32_t i, j, limit = BOOL_ARRAY_HASH_TABLE_SIZE > table->variable_count ? table->variable_count : BOOL_ARRAY_HASH_TABLE_SIZE;
   // convert partial boolean array to int
   for (i = 0; i < limit; i++) {
     *first_level_index <<= 1;
@@ -181,8 +167,7 @@ void automaton_bool_array_hash_table_get_entry_indexes(
   }
   // convert partial boolean array to int
   if (table->variable_count > BOOL_ARRAY_HASH_TABLE_SIZE) {
-    limit = BOOL_ARRAY_HASH_TABLE_SIZE >
-                    (table->variable_count - BOOL_ARRAY_HASH_TABLE_SIZE)
+    limit = BOOL_ARRAY_HASH_TABLE_SIZE > (table->variable_count - BOOL_ARRAY_HASH_TABLE_SIZE)
                 ? (table->variable_count - BOOL_ARRAY_HASH_TABLE_SIZE)
                 : BOOL_ARRAY_HASH_TABLE_SIZE;
     for (i = 0; i < limit; i++) {

@@ -1,10 +1,7 @@
 #include "automaton_composite_hash_table.h"
 
-automaton_composite_hash_table *
-automaton_composite_hash_table_create(uint32_t automata_count,
-                                      uint32_t *automata_state_count) {
-  automaton_composite_hash_table *hash_table =
-      calloc(1, sizeof(automaton_composite_hash_table));
+automaton_composite_hash_table *automaton_composite_hash_table_create(uint32_t automata_count, uint32_t *automata_state_count) {
+  automaton_composite_hash_table *hash_table = calloc(1, sizeof(automaton_composite_hash_table));
 
   uint32_t i;
   hash_table->max_states = 0;
@@ -21,8 +18,7 @@ automaton_composite_hash_table_create(uint32_t automata_count,
   hash_table->shift = sizeof(uint32_t) * 8 - log_value;
   hash_table->composite_count = 0;
   hash_table->max_keys = hash_table->slots * COMPOSITE_TABLE_MAX_DENSITY;
-  hash_table->levels =
-      calloc(hash_table->slots, sizeof(automaton_composite_hash_table_entry));
+  hash_table->levels = calloc(hash_table->slots, sizeof(automaton_composite_hash_table_entry));
   // get max order
   uint32_t max_order = 1;
   for (i = 0; i < automata_count; i++) {
@@ -60,9 +56,7 @@ automaton_composite_hash_table_create(uint32_t automata_count,
     exit(-1);
   }
 #if CT_USE_POOL
-  hash_table->entries_pool =
-      automaton_fast_pool_create(sizeof(automaton_composite_hash_table_entry),
-                                 CT_FRAGMENTS_SIZE, CT_FRAGMENT_SIZE);
+  hash_table->entries_pool = automaton_fast_pool_create(sizeof(automaton_composite_hash_table_entry), CT_FRAGMENTS_SIZE, CT_FRAGMENT_SIZE);
 #endif
   hash_table->log_sizes = calloc(automata_count, sizeof(uint32_t));
   hash_table->order_processed = calloc(automata_count, sizeof(bool));
@@ -71,8 +65,7 @@ automaton_composite_hash_table_create(uint32_t automata_count,
   return hash_table;
 }
 
-void automaton_composite_hash_table_resize(
-    automaton_composite_hash_table *table) {
+void automaton_composite_hash_table_resize(automaton_composite_hash_table *table) {
   uint32_t old_slots = table->slots;
   uint32_t old_shift = table->shift;
   automaton_composite_hash_table_entry **old_level = table->levels;
@@ -81,15 +74,12 @@ void automaton_composite_hash_table_resize(
   table->slots = old_slots << 1;
   table->shift = old_shift - 1;
   table->max_keys = table->slots * COMPOSITE_TABLE_MAX_DENSITY;
-  table->levels =
-      calloc(table->slots, sizeof(automaton_composite_hash_table_entry *));
+  table->levels = calloc(table->slots, sizeof(automaton_composite_hash_table_entry *));
 #if DEBUG_CT
-  printf("Composite hash table resized to %d slots %d bits shift\n",
-         table->slots, table->shift);
+  printf("Composite hash table resized to %d slots %d bits shift\n", table->slots, table->shift);
 #endif
   uint32_t j, pos;
-  automaton_composite_hash_table_entry **even_node, **odd_node, *current_node,
-      *next_node;
+  automaton_composite_hash_table_entry **even_node, **odd_node, *current_node, *next_node;
   /* Move the nodes from the old table to the new table.
   ** This code depends on the type of hash function.
   ** It assumes that the effect of doubling the size of the table
@@ -116,9 +106,7 @@ void automaton_composite_hash_table_resize(
   free(old_level);
 }
 
-uint32_t
-automaton_composite_hash_table_get_state(automaton_composite_hash_table *table,
-                                         uint32_t *composite_states) {
+uint32_t automaton_composite_hash_table_get_state(automaton_composite_hash_table *table, uint32_t *composite_states) {
   // get first hash
   uint32_t i, j, pos = 0, original_key = 0;
   for (i = 0; i < table->automata_count; i++) {
@@ -137,14 +125,11 @@ automaton_composite_hash_table_get_state(automaton_composite_hash_table *table,
   } else {
     uint32_t previous_state = composite_states[table->previous_order[0]];
     for (i = 1; i < table->automata_count; i++) {
-      if (composite_states[table->previous_order[i]] >
-          composite_states[table->previous_order[i - 1]]) {
+      if (composite_states[table->previous_order[i]] > composite_states[table->previous_order[i - 1]]) {
         ordered = false;
         break;
       }
-      if ((composite_states[table->previous_order[i]] ==
-           composite_states[table->previous_order[i - 1]]) !=
-          table->previous_equality[i]) {
+      if ((composite_states[table->previous_order[i]] == composite_states[table->previous_order[i - 1]]) != table->previous_equality[i]) {
         ordered = false;
         break;
       }
@@ -195,8 +180,7 @@ automaton_composite_hash_table_get_state(automaton_composite_hash_table *table,
       table->previous_order_key += table->previous_order[j] * order_fact;
       order_fact /= (table->automata_count - j);
 #if DEBUG_CT
-      printf("%d %s", table->previous_order[j],
-             j < table->automata_count - 1 ? "<" : "");
+      printf("%d %s", table->previous_order[j], j < table->automata_count - 1 ? "<" : "");
 #endif
     }
 #if DEBUG_CT
@@ -221,8 +205,7 @@ automaton_composite_hash_table_get_state(automaton_composite_hash_table *table,
     compound_key |= composite_states[i];
   }
 #if DEBUG_CT
-  printf("\nhead 0x%#018llu%#018llu\n", (uint64_t)(compound_key >> 64),
-         (uint64_t)compound_key);
+  printf("\nhead 0x%#018llu%#018llu\n", (uint64_t)(compound_key >> 64), (uint64_t)compound_key);
 #endif
   compound_key <<= table->order_bits;
   compound_key |= table->previous_order_key;
@@ -232,12 +215,10 @@ automaton_composite_hash_table_get_state(automaton_composite_hash_table *table,
     compound_key |= table->previous_equality[i];
   }
 #if DEBUG_CT
-  printf("Full 0x%#018llu%#018llu\n", (uint64_t)(compound_key >> 64),
-         (uint64_t)compound_key);
+  printf("Full 0x%#018llu%#018llu\n", (uint64_t)(compound_key >> 64), (uint64_t)compound_key);
 #endif
   // check if node exists
-  automaton_composite_hash_table_entry *current_entry = table->levels[pos],
-                                       *last_entry = NULL;
+  automaton_composite_hash_table_entry *current_entry = table->levels[pos], *last_entry = NULL;
   while (current_entry != NULL) {
     if (compound_key > current_entry->key) {
       last_entry = current_entry;
@@ -249,12 +230,10 @@ automaton_composite_hash_table_get_state(automaton_composite_hash_table *table,
   }
 #if CT_USE_POOL
   uint32_t fragment_ID;
-  automaton_composite_hash_table_entry *new_entry =
-      automaton_fast_pool_get_instance(table->entries_pool, &fragment_ID);
+  automaton_composite_hash_table_entry *new_entry = automaton_fast_pool_get_instance(table->entries_pool, &fragment_ID);
   new_entry->fragment_ID = fragment_ID;
 #else
-  automaton_composite_hash_table_entry *new_entry =
-      calloc(1, sizeof(automaton_composite_hash_table_entry));
+  automaton_composite_hash_table_entry *new_entry = calloc(1, sizeof(automaton_composite_hash_table_entry));
 #endif
   new_entry->original_key = original_key;
   new_entry->state = table->max_value++;
@@ -276,19 +255,16 @@ automaton_composite_hash_table_get_state(automaton_composite_hash_table *table,
   return new_entry->state;
 }
 
-void automaton_composite_hash_table_destroy(
-    automaton_composite_hash_table *table) {
+void automaton_composite_hash_table_destroy(automaton_composite_hash_table *table) {
   free(table->max_states);
   uint32_t i;
-  automaton_composite_hash_table_entry *current_entry = NULL,
-                                       *next_entry = NULL;
+  automaton_composite_hash_table_entry *current_entry = NULL, *next_entry = NULL;
   for (i = 0; i < table->slots; i++) {
     current_entry = table->levels[i];
     while (current_entry != NULL) {
       next_entry = current_entry->next;
 #if CT_USE_POOL
-      automaton_fast_pool_release_instance(table->entries_pool,
-                                           current_entry->fragment_ID);
+      automaton_fast_pool_release_instance(table->entries_pool, current_entry->fragment_ID);
 #else
       free(next_entry);
 #endif

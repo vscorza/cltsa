@@ -6,8 +6,7 @@
  */
 #include "obdd.h"
 
-obdd_cache *obdd_cache_create(obdd_mgr *mgr, uint32_t cache_size,
-                              uint32_t cache_max_size) {
+obdd_cache *obdd_cache_create(obdd_mgr *mgr, uint32_t cache_size, uint32_t cache_max_size) {
   obdd_cache *cache = calloc(1, sizeof(obdd_cache));
   cache->mgr = mgr;
   uint32_t log_size = 0;
@@ -34,8 +33,7 @@ obdd_cache *obdd_cache_create(obdd_mgr *mgr, uint32_t cache_size,
   return cache;
 }
 
-void obdd_cache_insert(obdd_cache *cache, uintptr_t op, obdd_node *f,
-                       obdd_node *g, obdd_node *h, obdd_node *data) {
+void obdd_cache_insert(obdd_cache *cache, uintptr_t op, obdd_node *f, obdd_node *g, obdd_node *h, obdd_node *data) {
   int32_t pos;
   obdd_cache_item *item;
   uintptr_t uf, ug, uh;
@@ -64,8 +62,7 @@ void obdd_cache_insert(obdd_cache *cache, uintptr_t op, obdd_node *f,
   item->data = data;
   item->data->ref_count++;
 }
-void obdd_cache_insert2(obdd_cache *cache, uintptr_t op, obdd_node *f,
-                        obdd_node *g, obdd_node *data) {
+void obdd_cache_insert2(obdd_cache *cache, uintptr_t op, obdd_node *f, obdd_node *g, obdd_node *data) {
   int32_t pos;
   obdd_cache_item *item;
   uintptr_t uf, ug;
@@ -91,8 +88,7 @@ void obdd_cache_insert2(obdd_cache *cache, uintptr_t op, obdd_node *f,
   item->data->ref_count++;
 }
 
-void obdd_cache_insert1(obdd_cache *cache, uintptr_t op, obdd_node *f,
-                        obdd_node *data) {
+void obdd_cache_insert1(obdd_cache *cache, uintptr_t op, obdd_node *f, obdd_node *data) {
   int32_t pos;
   obdd_cache_item *item;
 
@@ -120,8 +116,7 @@ obdd_node *obdd_cache_insert_var(obdd_cache *cache, obdd_var_size_t var_id) {
   if ((var_id + 1) > cache->vars_size) {
     uint32_t i, old_size = cache->vars_size;
     cache->vars_size = var_id * LIST_INCREASE_FACTOR;
-    obdd_node **ptr =
-        realloc(cache->cache_vars, sizeof(obdd_node *) * (cache->vars_size));
+    obdd_node **ptr = realloc(cache->cache_vars, sizeof(obdd_node *) * (cache->vars_size));
     if (ptr == NULL) {
       printf("Could not allocate memory[obdd_cache_insert_var:1]\n");
       exit(-1);
@@ -131,8 +126,7 @@ obdd_node *obdd_cache_insert_var(obdd_cache *cache, obdd_var_size_t var_id) {
         cache->cache_vars[i] = NULL;
       }
     }
-    ptr = realloc(cache->cache_neg_vars,
-                  sizeof(obdd_node *) * (cache->vars_size));
+    ptr = realloc(cache->cache_neg_vars, sizeof(obdd_node *) * (cache->vars_size));
     if (ptr == NULL) {
       printf("Could not allocate memory[obdd_cache_insert_var:2]\n");
       exit(-1);
@@ -144,21 +138,18 @@ obdd_node *obdd_cache_insert_var(obdd_cache *cache, obdd_var_size_t var_id) {
     }
   }
   if (cache->cache_vars[var_id] == NULL) {
-    cache->cache_vars[var_id] = obdd_mgr_mk_node_ID(
-        cache->mgr, var_id, cache->mgr->true_obdd->root_obdd,
-        cache->mgr->false_obdd->root_obdd);
+    cache->cache_vars[var_id] =
+        obdd_mgr_mk_node_ID(cache->mgr, var_id, cache->mgr->true_obdd->root_obdd, cache->mgr->false_obdd->root_obdd);
     cache->cache_vars[var_id]->ref_count++;
   }
   return cache->cache_vars[var_id];
 }
 
-obdd_node *obdd_cache_insert_neg_var(obdd_cache *cache,
-                                     obdd_var_size_t var_id) {
+obdd_node *obdd_cache_insert_neg_var(obdd_cache *cache, obdd_var_size_t var_id) {
   if ((var_id + 1) > cache->vars_size) {
     uint32_t i, old_size = cache->vars_size;
     cache->vars_size = var_id * LIST_INCREASE_FACTOR;
-    obdd_node **ptr =
-        realloc(cache->cache_vars, sizeof(obdd_node *) * (cache->vars_size));
+    obdd_node **ptr = realloc(cache->cache_vars, sizeof(obdd_node *) * (cache->vars_size));
     if (ptr == NULL) {
       printf("Could not allocate memory[obdd_cache_insert_neg_var:1]\n");
       exit(-1);
@@ -168,8 +159,7 @@ obdd_node *obdd_cache_insert_neg_var(obdd_cache *cache,
         cache->cache_vars[i] = NULL;
       }
     }
-    ptr = realloc(cache->cache_neg_vars,
-                  sizeof(obdd_node *) * (cache->vars_size));
+    ptr = realloc(cache->cache_neg_vars, sizeof(obdd_node *) * (cache->vars_size));
     if (ptr == NULL) {
       printf("Could not allocate memory[obdd_cache_insert_neg_var:2]\n");
       exit(-1);
@@ -181,16 +171,14 @@ obdd_node *obdd_cache_insert_neg_var(obdd_cache *cache,
     }
   }
   if (cache->cache_neg_vars[var_id] == NULL) {
-    cache->cache_neg_vars[var_id] = obdd_mgr_mk_node_ID(
-        cache->mgr, var_id, cache->mgr->false_obdd->root_obdd,
-        cache->mgr->true_obdd->root_obdd);
+    cache->cache_neg_vars[var_id] =
+        obdd_mgr_mk_node_ID(cache->mgr, var_id, cache->mgr->false_obdd->root_obdd, cache->mgr->true_obdd->root_obdd);
     cache->cache_neg_vars[var_id]->ref_count++;
   }
   return cache->cache_neg_vars[var_id];
 }
 
-obdd_node *obdd_cache_lookup(obdd_cache *cache, uintptr_t op, obdd_node *f,
-                             obdd_node *g, obdd_node *h) {
+obdd_node *obdd_cache_lookup(obdd_cache *cache, uintptr_t op, obdd_node *f, obdd_node *g, obdd_node *h) {
   obdd_cache_item *item;
   obdd_node *data;
   int32_t pos;
@@ -203,21 +191,18 @@ obdd_node *obdd_cache_lookup(obdd_cache *cache, uintptr_t op, obdd_node *f,
   pos = ddCHash2(uh, uf, ug, cache->cache_shift);
   item = &(cache->cache_items[pos]);
 
-  if (item->data != NULL && item->f == (obdd_node *)uf &&
-      item->g == (obdd_node *)ug && item->h == uh) {
+  if (item->data != NULL && item->f == (obdd_node *)uf && item->g == (obdd_node *)ug && item->h == uh) {
     data = item->data;
     cache->cache_hits++;
     return data;
   }
 
   cache->cache_misses++;
-  if (cache->cache_slack >= 0 &&
-      cache->cache_hits > cache->cache_misses * cache->min_hits)
+  if (cache->cache_slack >= 0 && cache->cache_hits > cache->cache_misses * cache->min_hits)
     obdd_cache_resize(cache);
   return NULL;
 }
-obdd_node *obdd_cache_lookup2(obdd_cache *cache, uintptr_t op, obdd_node *f,
-                              obdd_node *g) {
+obdd_node *obdd_cache_lookup2(obdd_cache *cache, uintptr_t op, obdd_node *f, obdd_node *g) {
   obdd_cache_item *item;
   obdd_node *data;
   uint64_t pos;
@@ -234,8 +219,7 @@ obdd_node *obdd_cache_lookup2(obdd_cache *cache, uintptr_t op, obdd_node *f,
   }
 
   cache->cache_misses++;
-  if (cache->cache_slack >= 0 &&
-      cache->cache_hits > cache->cache_misses * cache->min_hits)
+  if (cache->cache_slack >= 0 && cache->cache_hits > cache->cache_misses * cache->min_hits)
     obdd_cache_resize(cache);
   return NULL;
 }
@@ -255,14 +239,11 @@ obdd_node *obdd_cache_lookup1(obdd_cache *cache, uintptr_t op, obdd_node *f) {
   }
 
   cache->cache_misses++;
-  if (cache->cache_slack >= 0 &&
-      cache->cache_hits > cache->cache_misses * cache->min_hits)
+  if (cache->cache_slack >= 0 && cache->cache_hits > cache->cache_misses * cache->min_hits)
     obdd_cache_resize(cache);
   return NULL;
 }
-obdd_node *obdd_cache_constant_lookup(obdd_cache *cache, uintptr_t op,
-                                      obdd_node *f, obdd_node *g,
-                                      obdd_node *h) {
+obdd_node *obdd_cache_constant_lookup(obdd_cache *cache, uintptr_t op, obdd_node *f, obdd_node *g, obdd_node *h) {
   obdd_cache_item *item;
   obdd_node *data;
   int32_t pos;
@@ -277,16 +258,14 @@ obdd_node *obdd_cache_constant_lookup(obdd_cache *cache, uintptr_t op,
 
   // no reclaim
 
-  if (item->data != NULL && item->f == (obdd_node *)uf &&
-      item->g == (obdd_node *)ug && item->h == uh) {
+  if (item->data != NULL && item->f == (obdd_node *)uf && item->g == (obdd_node *)ug && item->h == uh) {
     data = item->data;
     cache->cache_hits++;
     return data;
   }
 
   cache->cache_misses++;
-  if (cache->cache_slack >= 0 &&
-      cache->cache_hits > cache->cache_misses * cache->min_hits)
+  if (cache->cache_slack >= 0 && cache->cache_hits > cache->cache_misses * cache->min_hits)
     obdd_cache_resize(cache);
   return NULL;
 }
@@ -405,8 +384,7 @@ obdd_table *obdd_table_create(obdd_mgr *mgr) {
   for (i = 0; i < new_table->size; i++) {
     new_table->levels[i] = calloc(new_table->slots[i], sizeof(obdd_node *));
   }
-  new_table->levels_composite_counts =
-      calloc(new_table->size, sizeof(uint64_t));
+  new_table->levels_composite_counts = calloc(new_table->size, sizeof(uint64_t));
   new_table->mgr = mgr;
   new_table->max_live_fast_nodes = 0;
   new_table->live_fast_nodes = 0;
@@ -453,8 +431,7 @@ void obdd_table_resize(obdd_table *table, uint32_t level) {
     odd_node = &(table->levels[level][(j << 1) + 1]);
     while (current_node != NULL) {
       next_node = current_node->next;
-      pos = ddHash(current_node->high_obdd, current_node->low_obdd,
-                   table->shift[level]);
+      pos = ddHash(current_node->high_obdd, current_node->low_obdd, table->shift[level]);
       if (pos & 1) {
         *odd_node = current_node;
         odd_node = &(current_node->next);
@@ -478,23 +455,20 @@ void obdd_table_node_add(obdd_table *table, obdd_node *node) {
     uint32_t old_size = table->size;
     while ((table->size - 1) <= node->var_ID)
       table->size *= 2;
-    obdd_node ***ptr =
-        realloc(table->levels, sizeof(obdd_node **) * (table->size));
+    obdd_node ***ptr = realloc(table->levels, sizeof(obdd_node **) * (table->size));
     if (ptr == NULL) {
       printf("Could not allocate memory[obdd_table_node_add:1]\n");
       exit(-1);
     } else
       table->levels = ptr;
-    uint64_t *uint_ptr = realloc(table->levels_composite_counts,
-                                 sizeof(uint64_t) * (table->size));
+    uint64_t *uint_ptr = realloc(table->levels_composite_counts, sizeof(uint64_t) * (table->size));
     if (uint_ptr == NULL) {
       printf("Could not allocate memory[obdd_table_node_add:2]\n");
       exit(-1);
     } else
       table->levels_composite_counts = uint_ptr;
 
-    uint32_t *uint32_ptr =
-        realloc(table->slots, sizeof(uint32_t) * table->size);
+    uint32_t *uint32_ptr = realloc(table->slots, sizeof(uint32_t) * table->size);
     if (uint32_ptr == NULL) {
       printf("Could not allocate memory[obdd_table_node_add:3]\n");
       exit(-1);
@@ -530,8 +504,7 @@ void obdd_table_node_add(obdd_table *table, obdd_node *node) {
     }
   }
   // pick entry level
-  uint32_t pos =
-      ddHash(node->high_obdd, node->low_obdd, table->shift[node->var_ID]);
+  uint32_t pos = ddHash(node->high_obdd, node->low_obdd, table->shift[node->var_ID]);
 
   if (table->levels[node->var_ID][pos] == NULL) {
     table->live_fast_nodes++;
@@ -546,12 +519,10 @@ void obdd_table_node_add(obdd_table *table, obdd_node *node) {
     while (current_fast_node != NULL) {
       if ((current_fast_node->next != NULL) &&
           ((current_fast_node->low_obdd < node->low_obdd) ||
-           ((current_fast_node->low_obdd == node->low_obdd) &&
-            (current_fast_node->high_obdd < node->high_obdd)))) {
+           ((current_fast_node->low_obdd == node->low_obdd) && (current_fast_node->high_obdd < node->high_obdd)))) {
         previous_fast_node = current_fast_node;
         current_fast_node = current_fast_node->next;
-      } else if ((current_fast_node->low_obdd == node->low_obdd) &&
-                 (current_fast_node->high_obdd == node->high_obdd)) {
+      } else if ((current_fast_node->low_obdd == node->low_obdd) && (current_fast_node->high_obdd == node->high_obdd)) {
         return;
       } else {
         table->live_fast_nodes++;
@@ -570,17 +541,14 @@ void obdd_table_node_add(obdd_table *table, obdd_node *node) {
       }
     }
   }
-  if (table->levels_composite_counts[node->var_ID] >
-      table->max_keys[node->var_ID]) {
+  if (table->levels_composite_counts[node->var_ID] > table->max_keys[node->var_ID]) {
     obdd_table_resize(table, node->var_ID);
   }
 }
 
 void obdd_table_node_destroy(obdd_table *table, obdd_node *node) {
-  obdd_node *current_fast_node = NULL, *last_fast_node = NULL,
-            *to_remove = NULL;
-  uint32_t pos =
-      ddHash(node->high_obdd, node->low_obdd, table->shift[node->var_ID]);
+  obdd_node *current_fast_node = NULL, *last_fast_node = NULL, *to_remove = NULL;
+  uint32_t pos = ddHash(node->high_obdd, node->low_obdd, table->shift[node->var_ID]);
   if (node->var_ID >= (table->size))
     return;
   if (table->levels[node->var_ID][pos] == NULL)
@@ -591,16 +559,14 @@ void obdd_table_node_destroy(obdd_table *table, obdd_node *node) {
   current_fast_node = table->levels[node->var_ID][pos];
   while (current_fast_node != NULL) {
     if ((current_fast_node->low_obdd < node->low_obdd) ||
-        ((current_fast_node->low_obdd == node->low_obdd) &&
-         (current_fast_node->high_obdd < node->high_obdd))) {
+        ((current_fast_node->low_obdd == node->low_obdd) && (current_fast_node->high_obdd < node->high_obdd))) {
       last_fast_node = current_fast_node;
       if (current_fast_node->next != NULL) {
         current_fast_node = current_fast_node->next;
       } else {
         break;
       }
-    } else if ((current_fast_node->low_obdd == node->low_obdd) &&
-               (current_fast_node->high_obdd == node->high_obdd)) {
+    } else if ((current_fast_node->low_obdd == node->low_obdd) && (current_fast_node->high_obdd == node->high_obdd)) {
       to_remove = current_fast_node;
       if (last_fast_node != NULL) {
         last_fast_node->next = current_fast_node->next;
@@ -621,8 +587,7 @@ void obdd_table_node_destroy(obdd_table *table, obdd_node *node) {
     node->ref_count--;
 }
 
-obdd_node *obdd_table_search_node_ID(obdd_table *table, obdd_var_size_t var_ID,
-                                     obdd_node *high, obdd_node *low) {
+obdd_node *obdd_table_search_node_ID(obdd_table *table, obdd_var_size_t var_ID, obdd_node *high, obdd_node *low) {
   uint32_t current_level = 0;
   obdd_node *current_node = NULL, *last_node = NULL, *tmp_node = NULL;
   if (var_ID >= (table->size)) {
@@ -632,12 +597,10 @@ obdd_node *obdd_table_search_node_ID(obdd_table *table, obdd_var_size_t var_ID,
 
   current_node = table->levels[var_ID][pos];
   while (current_node != NULL) {
-    if ((current_node->low_obdd < low) ||
-        ((current_node->low_obdd == low) && (current_node->high_obdd < high))) {
+    if ((current_node->low_obdd < low) || ((current_node->low_obdd == low) && (current_node->high_obdd < high))) {
       last_node = current_node;
       current_node = current_node->next;
-    } else if ((current_node->low_obdd == low) &&
-               (current_node->high_obdd == high)) {
+    } else if ((current_node->low_obdd == low) && (current_node->high_obdd == high)) {
       table->fast_hits++;
       return current_node;
     } else {
@@ -648,27 +611,23 @@ obdd_node *obdd_table_search_node_ID(obdd_table *table, obdd_var_size_t var_ID,
   return NULL;
 }
 
-obdd_node *obdd_table_mk_node_ID(obdd_table *table, obdd_var_size_t var_ID,
-                                 obdd_node *high, obdd_node *low) {
+obdd_node *obdd_table_mk_node_ID(obdd_table *table, obdd_var_size_t var_ID, obdd_node *high, obdd_node *low) {
   // if node is trivially redundant, solve redundancy in situ
   if (high == low) {
     return high;
   }
   // check if single var
-  if (high->var_ID == 0 && low->var_ID == 1 &&
-      table->mgr->cache->cache_vars[var_ID] != NULL) {
+  if (high->var_ID == 0 && low->var_ID == 1 && table->mgr->cache->cache_vars[var_ID] != NULL) {
     table->mgr->cache->cache_vars[var_ID]->ref_count++;
     return table->mgr->cache->cache_vars[var_ID];
   }
-  if (high->var_ID == 1 && low->var_ID == 0 &&
-      table->mgr->cache->cache_neg_vars[var_ID] != NULL) {
+  if (high->var_ID == 1 && low->var_ID == 0 && table->mgr->cache->cache_neg_vars[var_ID] != NULL) {
     table->mgr->cache->cache_neg_vars[var_ID]->ref_count++;
     return table->mgr->cache->cache_neg_vars[var_ID];
   }
   // check if node exists
   obdd_node *current_node = NULL, *last_node = NULL;
-  obdd_node *current_fast_node = NULL, *last_fast_node = NULL,
-            *new_fast_node = NULL;
+  obdd_node *current_fast_node = NULL, *last_fast_node = NULL, *new_fast_node = NULL;
   current_fast_node = obdd_table_search_node_ID(table, var_ID, high, low);
   if (current_fast_node != NULL) {
     current_fast_node->ref_count++;
@@ -677,8 +636,7 @@ obdd_node *obdd_table_mk_node_ID(obdd_table *table, obdd_var_size_t var_ID,
   // return new node
 #if OBDD_USE_POOL
   uint32_t fragment_ID;
-  obdd_node *new_node =
-      automaton_fast_pool_get_instance(table->mgr->nodes_pool, &fragment_ID);
+  obdd_node *new_node = automaton_fast_pool_get_instance(table->mgr->nodes_pool, &fragment_ID);
 #else
   obdd_node *new_node = calloc(1, sizeof(obdd_node));
 #endif
@@ -736,8 +694,7 @@ void obdd_table_print_fast_lists(obdd_table *table) {
         continue;
       current_fast_node = table->levels[i][j];
       while (current_fast_node != NULL) {
-        printf("[0x%x:0x%x]", (((uint64_t)current_fast_node) >> 4) % 0xFFFF,
-               (((uint64_t)current_fast_node->next) >> 4) % 0xFFFF);
+        printf("[0x%x:0x%x]", (((uint64_t)current_fast_node) >> 4) % 0xFFFF, (((uint64_t)current_fast_node->next) >> 4) % 0xFFFF);
         current_fast_node = current_fast_node->next;
       }
       printf("\n");

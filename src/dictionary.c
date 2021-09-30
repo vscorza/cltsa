@@ -9,8 +9,7 @@
 /** DICTIONARY FUNCTIONS **/
 struct dictionary_t *dictionary_create() {
   struct dictionary_t *new_dict = malloc(sizeof(struct dictionary_t));
-  new_dict->entries =
-      malloc(sizeof(dictionary_entry) * INITIAL_DICT_ENTRIES_SIZE);
+  new_dict->entries = malloc(sizeof(dictionary_entry) * INITIAL_DICT_ENTRIES_SIZE);
   new_dict->max_size = INITIAL_DICT_ENTRIES_SIZE;
   new_dict->size = 0;
   return new_dict;
@@ -51,8 +50,7 @@ uint32_t dictionary_add_entry(struct dictionary_t *dict, char *key) {
   // if the entries array is full its capacity is doubled
   if (dict->size == (dict->max_size - 1)) {
     dict->max_size *= 2;
-    dictionary_entry *ptr =
-        realloc(dict->entries, sizeof(dictionary_entry) * dict->max_size);
+    dictionary_entry *ptr = realloc(dict->entries, sizeof(dictionary_entry) * dict->max_size);
     if (ptr == NULL) {
       printf("Could not allocate space for dictionary entries\n");
       exit(-1);
@@ -72,9 +70,7 @@ uint32_t dictionary_value_for_key(struct dictionary_t *dict, char *key) {
   return 0;
 }
 
-char *dictionary_key_for_value(struct dictionary_t *dict, uint32_t value) {
-  return dict->entries[value].key;
-}
+char *dictionary_key_for_value(struct dictionary_t *dict, uint32_t value) { return dict->entries[value].key; }
 
 int32_t dictionary_var_cmp(struct dictionary_t *dict, char *a, char *b) {
   uint32_t value_a = dictionary_value_for_key(dict, a);
