@@ -1,5 +1,6 @@
 #include "automaton.h"
 #include "assert.h"
+#include "qsort.h"
 
 int __automaton_global_print_id = -1;
 
@@ -1522,20 +1523,21 @@ automaton_automaton *automaton_automaton_minimize(automaton_automaton *current_a
   // (P) partition will hold an array of double int entries, the first int indicates
   // partition the second is the state
   uint32_t *partition = malloc(sizeof(uint32_t) * current_automaton->transitions_count * 2);
-  // (W) waiting will hold an array of double int entries, the first int indicates
-  // partition the second is the state
-  uint32_t *waiting = malloc(sizeof(uint32_t) * current_automaton->transitions_count * 2);
+  // (W) waiting will hold an array of int entries indicating if a partition is waiting to be processed
+  uint32_t *waiting = malloc(sizeof(uint32_t) * current_automaton->transitions_count);
+  // indicate whether i-th partition is in waiting queue
+  bool *inverse_waiting = calloc(current_automaton->transitions_count, sizeof(bool));
+
   // these are the double buffers for partition and waiting
   uint32_t *partition_buffer = malloc(sizeof(uint32_t) * current_automaton->transitions_count * 2);
-  uint32_t *waiting_buffer = malloc(sizeof(uint32_t) * current_automaton->transitions_count * 2);
   uint32_t *tmp_buffer = NULL;
-  // partition size, entry[i * 2] holds partitition_i size, entry[i * 2 + 1] holds P_i cup Y size
-  uint32_t *partition_size = malloc(sizeof(uint32_t) * current_automaton->transitions_count * 2);
+  // partition size, entry[i * 3] holds partitition_i size, entry[i * 3 + 1] holds P_i cup Y size
+  // entry[i * 3 + 2] holds partition start index at array
+  uint32_t *partition_size = malloc(sizeof(uint32_t) * current_automaton->transitions_count * 3);
   // inverse partition indicates at which index a state resides in the partition
   // array
-  uint32_t *inverse_partition = malloc(sizeof(uint32_t) * current_automaton->transitions_count);
-  uint32_t waiting_start_index = 1;
-  uint32_t waiting_end_index = current_automaton->transitions_count - 1;
+  uint32_t *inverse_partition = calloc(current_automaton->transitions_count, sizeof(uint32_t));
+  uint32_t waiting_count = 2;
   uint32_t partition_count = 2;
   // current element being inspected, follows states order as in automaton
   bool *current_partition = calloc(current_automaton->transitions_count, sizeof(bool));
@@ -1558,22 +1560,33 @@ automaton_automaton *automaton_automaton_minimize(automaton_automaton *current_a
       partition[i * 2 + 1] = i;
       inverse_partition[i] = i;
     }
-    partition_size[0] = 1;
-    partition_size[1] = 0;
   }
-  partition_size[2] = current_automaton->transitions_count - 1;
-  partition_size[3] = 0;
+  partition_size[0] = 1;
+  partition_size[1] = 0;
+  partition_size[2] = 0;
+  partition_size[3] = current_automaton->transitions_count - 1;
+  partition_size[4] = 0;
+  partition_size[5] = 1;
+  //initialize waiting
+  waiting[0] = 0;
+  waiting[1] = 1;
+  inverse_waiting[0] = true;
+  inverse_waiting[1] = true;
 
+  uint32_t last_source_index = 0;
+  uint32_t last_cap_index = 0;
+  uint32_t last_minus_index = 0;
+  uint32_t added_partitions = 0;
   // start refining
   uint32_t current_state, incoming_transition_from_state;
-  while (waiting_start_index > 0) {
+  while (waiting_count > 0) {
     // clear current partition and parttion cross
     for (i = 0; i < current_automaton->transitions_count; i++) {
       current_partition[i] = false;
       partition_cross[i * 2] = partition_cross[i * 2 + 1] = false;
     }
     // get X
-    for (i = waiting_start_index; i <= waiting_end_index; i++) {
+    for (i = partition_size[waiting[(waiting_count - 1) * 3 + 2]]; i <= partition_size[waiting[(waiting_count - 1) * 3 + 2]] + partition_size[waiting[(waiting_count - 1) * 3]]; i++) {
       current_state = partition[i * 2 + 1];
       for (j = 0; j < current_automaton->in_degree[current_state]; j++) {
         incoming_transition_from_state = current_automaton->inverted_transitions[current_state][j].state_from;
@@ -1581,58 +1594,108 @@ automaton_automaton *automaton_automaton_minimize(automaton_automaton *current_a
         current_partition[incoming_transition_from_state] = true;
         partition_cross[inverse_partition[incoming_transition_from_state]] = true;
         // update intersection size
-        partition_size[partition[inverse_partition[incoming_transition_from_state] * 2] * 2 + 1]++;
+        partition_size[partition[inverse_partition[incoming_transition_from_state] * 2] * 3 + 1]++;
       }
     }
+    inverse_waiting[(waiting_count - 1)] = false;
+    waiting_count--;
     // update partition (move from - to buffer)
     // P <- P minus Y cup {X cap Y, Y minus X}
-    uint32_t last_source_index = 0;
-    uint32_t last_cap_index = 0;
-    uint32_t last_minus_index = 0;
-    uint32_t added_partitions = 0;
+    last_source_index = 0;
+    last_cap_index = 0;
+    last_minus_index = 0;
+    added_partitions = 0;
 
     for (i = 0; i < partition_count; i++) {
+      // check cap and minus not empty
+      if(partition_size[i * 3 + 1] == 0 || partition_size[i * 3 + 1] == partition_size[i * 3 ])continue;
       // cap set starts at the same place as the original partition
       last_cap_index = last_source_index;
       // cap set starts at the same place as the original partition + cup size - minus size
-      last_minus_index = last_source_index + last_source_index + partition_size[partition[inverse_partition[i] * 2] * 2] -
-                         last_source_index + partition_size[partition[inverse_partition[i] * 2] * 2 + 1];
-      for (j = last_source_index; j <= (last_source_index + partition_size[partition[inverse_partition[i] * 2] * 2]); j++) {
+      last_minus_index = last_source_index + partition_size[i  * 3] -
+                         partition_size[i * 3 + 1];
+      // update W
+      // Y in W: W <- W minus Y cup {X cap Y, Y minus X}
+      // |X cap Y| <= |Y minus X|: W <- W cup {X cap Y}
+      // otherwise: W <- W cup {Y minus X}
+      if(inverse_waiting[i]){
+        waiting[waiting_count++] = partition[j * 2];
+        waiting[waiting_count++] = partition_count + added_partitions;
+        inverse_waiting[partition[j * 2]] = true;
+        inverse_waiting[partition_count + added_partitions] = true;
+      }else if(partition_size[i * 3 + 1] <= (partition_size[i * 3] - partition_size[i * 3 + 1])){
+        waiting[waiting_count++] = partition[j * 2];
+        inverse_waiting[partition[j * 2]] = true;
+      }else{
+        waiting[waiting_count++] = partition_count + added_partitions;
+        inverse_waiting[partition_count + added_partitions] = true;
+      }
+      for (j = last_source_index; j <= (last_source_index + partition_size[i * 3]); j++) {
         if (partition_cross[j]) {
-          partition_buffer[last_cap_index * 2] = partition_count + added_partitions;
+          //previous partition index is used for cap
+          partition_buffer[last_cap_index * 2] = partition[j * 2];
+          //update state in partition and inverse partition
           partition_buffer[last_cap_index * 2 + 1] = partition[j * 2 + 1];
+          inverse_partition[partition[j * 2 + 1]] = last_cap_index * 2 + 1;
           last_cap_index++;
         } else {
-          partition_buffer[last_minus_index * 2] = partition_count + added_partitions + 1;
+          //minus set is set as fresh partition
+          partition_buffer[last_minus_index * 2] = partition_count + added_partitions;
+          //update state in partition and inverse partition
           partition_buffer[last_minus_index * 2 + 1] = partition[j * 2 + 1];
+          inverse_partition[partition[j * 2 + 1]] = last_minus_index * 2 + 1;
           last_minus_index++;
         }
-        added_partitions += 2;
       }
-      last_source_index += partition_size[partition[inverse_partition[i] * 2] * 2];
+      //update partition size
+      //order of updates is important to keep dependencies working
+      uint32_t next_source_index = last_source_index + partition_size[partition[inverse_partition[i] * 2] * 2];
+      partition_size[(partition_count + added_partitions) * 3] = last_minus_index;
+      partition_size[(partition_count + added_partitions) * 3 + 1] = 0;
+      partition_size[(partition_count + added_partitions) * 3 + 2] = last_source_index + partition_size[i * 3] -
+          partition_size[i * 3 + 1];
+      partition_size[i * 3] = last_cap_index;
+      partition_size[i * 3 + 1] = 0;
+      partition_size[i * 3 + 2] = last_source_index;
+      last_source_index = next_source_index;
+      added_partitions++;
     }
     partition_count += added_partitions;
 
     tmp_buffer = partition;
     partition = partition_buffer;
     partition_buffer = tmp_buffer;
-
-    // update waiting (from to buffer)
-    // Y in W: W <- W minus Y cup {X cap Y, Y minus X}
-    // |X cap Y| <= |Y minus X|: W <- W cup {X cap Y}
-    // otherwise: W <- W cup {Y minus X}
-
-    // update partition size
   }
 
-  // merge states
 
-  // when merging states we need to check if valuations introduce a mismatch
+  // merge states,if valuations introduce a mismatch dont merge
+  //sort according to valuations
+  last_source_index = 0;
+  for (i = 0; i < partition_count; i++) {
+    for (j = last_source_index; j <= (last_source_index + partition_size[i * 3]); j++) {
+      //sort elements of each partition
+      /*
+void isort(int A[], size_t n)
+{
+    const char *tmpName;
+    int tmpAge;
+#define LESS(i, j) ages[i] < ages[j]
+#define SWAP(i, j) tmpName  = names[i], tmpAge  = ages[i], \
+                   names[i] = names[j], ages[i] = ages[j], \
+                   names[j] = tmpName,  ages[j] = tmpAge
+    QSORT(n, LESS, SWAP);
+}
+       * */
+
+    }
+    last_source_index += partition_size[partition[inverse_partition[i] * 2] * 2];
+  }
+  //update inverse partition to use a map from state to representative state
 
   free(partition);
   free(waiting);
   free(partition_buffer);
-  free(waiting_buffer);
+  free(inverse_waiting);
   free(partition_size);
   free(inverse_partition);
   free(current_partition);
