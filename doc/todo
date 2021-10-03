@@ -2,11 +2,10 @@ TODO:
 =====
 - tool
 	- write DFA (hopcroft) minimization
-		- define less in terms of valuations
-		- finish implementation draft
 		- select example
 		- write debugging output
 		- debug
+	- review sorts and try to change with qsort
 	- add syntax to define tau: tau is "def" 
 		- implement by default will be named tau and added as first element
 	- esconder etiquetas

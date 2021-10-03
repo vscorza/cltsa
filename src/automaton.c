@@ -1520,6 +1520,10 @@ automaton_automaton *automaton_automaton_determinize(automaton_automaton *left_a
 automaton_automaton *automaton_automaton_obs_minimize(automaton_automaton *left_automaton) { return NULL; }
 
 automaton_automaton *automaton_automaton_minimize(automaton_automaton *current_automaton) {
+  if(current_automaton->is_game){
+    printf("Could no minimize automaton %s since it has valuations associated to it", current_automaton->name);
+    exit(-1);
+  }
   // (P) partition will hold an array of double int entries, the first int indicates
   // partition the second is the state
   uint32_t *partition = malloc(sizeof(uint32_t) * current_automaton->transitions_count * 2);
@@ -1544,7 +1548,7 @@ automaton_automaton *automaton_automaton_minimize(automaton_automaton *current_a
   // arithmetic results with current element being inspected,
   // if X cap Y holds it is set to true, following partition order
   bool *partition_cross = calloc(current_automaton->transitions_count, sizeof(bool));
-  uint32_t i, j, k;
+  int32_t i, j, k;
   // initialize partition
   for (i = 0; i < current_automaton->transitions_count; i++) {
     if (i == current_automaton->initial_states[0]) {
@@ -1649,7 +1653,7 @@ automaton_automaton *automaton_automaton_minimize(automaton_automaton *current_a
       }
       //update partition size
       //order of updates is important to keep dependencies working
-      uint32_t next_source_index = last_source_index + partition_size[partition[inverse_partition[i] * 2] * 2];
+      uint32_t next_source_index = last_source_index + partition_size[i * 2];
       partition_size[(partition_count + added_partitions) * 3] = last_minus_index;
       partition_size[(partition_count + added_partitions) * 3 + 1] = 0;
       partition_size[(partition_count + added_partitions) * 3 + 2] = last_source_index + partition_size[i * 3] -
@@ -1668,27 +1672,23 @@ automaton_automaton *automaton_automaton_minimize(automaton_automaton *current_a
   }
 
 
-  // merge states,if valuations introduce a mismatch dont merge
-  //sort according to valuations
+  // NOTE: we are not checking for valuations inconsistencies when mergings, this will be too expensive
+  // due to the fact in which we encode valutions fro each state (unaligned)
+  // merge states  //sort according to valuations
   last_source_index = 0;
+  uint32_t candidate_state = 0;
   for (i = 0; i < partition_count; i++) {
-    for (j = last_source_index; j <= (last_source_index + partition_size[i * 3]); j++) {
-      //sort elements of each partition
-      /*
-void isort(int A[], size_t n)
-{
-    const char *tmpName;
-    int tmpAge;
-#define LESS(i, j) ages[i] < ages[j]
-#define SWAP(i, j) tmpName  = names[i], tmpAge  = ages[i], \
-                   names[i] = names[j], ages[i] = ages[j], \
-                   names[j] = tmpName,  ages[j] = tmpAge
-    QSORT(n, LESS, SWAP);
-}
-       * */
+    candidate_state = partition_size[i * 3 + 1];
+    for (j = last_source_index; j <= (last_source_index + partition_size[i * 3]); j++)
+      partition[j * 2 + 1] = candidate_state;
+    last_source_index += partition_size[i * 2];
+  }
+  automaton_transition tmp_transition = {.state_from = 0, .state_to = 0};
+  automaton_transition *current_transition = NULL;
+  for( i = 0; i < current_automaton->transitions_count; i++){
+    for(j = current_automaton->out_degree[i] - 1; j >= 0; j--){
 
     }
-    last_source_index += partition_size[partition[inverse_partition[i] * 2] * 2];
   }
   //update inverse partition to use a map from state to representative state
 
@@ -1699,7 +1699,7 @@ void isort(int A[], size_t n)
   free(partition_size);
   free(inverse_partition);
   free(current_partition);
-  return NULL;
+  return current_automaton;
 }
 
 /**
