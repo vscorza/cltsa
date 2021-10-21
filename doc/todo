@@ -22,6 +22,7 @@ TODO:
 	- add syntax to minimize observationally
 		- observational minimization as NEW = (OLD).			
 	- test minimization
+	- review assume guarantee distributed systems and on the relation between reactive synthesis of superviosry control of io behaviours
 	- revisar layout convencional de linux (bin, lib, etc)
 	- armar cmake
 		- agregar CLTSA_PATH a entorno
