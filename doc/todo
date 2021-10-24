@@ -1,5 +1,16 @@
 TODO:
 =====
+- lista de cosas a agregar/modificar del paper de ICSE para TOSEM
+	- Extender benchmark.
+	- Mostrar el comparativo de tiempo para búsqueda lineal vs DD, comparar entre no ordenar transiciones vs ordenar respecto de la distancia a s_0.
+		- Mostrar (proxy) que sería utilizable el feedback para entender un problema de realizabilidad (i.e., sirve)
+	- Mostrar ejemplos concretos de las minimizaciones y explicar por qué ayudarían a quién está escribiendo las especificaciones.
+	- Mostrar (proxy) que es distinto (superador) en alguna dimensión a la competencia basada en mostrar estrategias (i.e., contribuye)
+		- Meter una implementación de contra-estrategia de GR1 y comparar con la técnica general. Serían tres cosas en verdad, qué tan compacto es lo nuestro vs contra-estrategia, se puede hablar de qué tan difícil de implementar es y agrega un poco de feedback al toolset de diagnóstico (pero esto último no creo que sea funcional a una publicación de minimización agnóstica de la fórmula)
+	- Mostrar que es computable ese feedback en ejemplos "reales" (i.e., va levemente más allá de una idea)
+	- Las propiedades que enunciamos son correctas (ie., la pruebas extendidas)
+	- Agregar minimización de goal, básicamente en fórmulas que tienen varios átomos de liveness de sistema dejar sólo uno que no está siendo satisfecho. Es más que nada por completitud con el esquema planteado por Cimatti,se puede pensar como un paso previo a la minimización de comportamiento, no toca a la técnica en sí, sino a su aplicación en un contexto GR(1).
+- tesis
 - tool
 	- write DFA (hopcroft) minimization
 		- select example
@@ -31,16 +42,6 @@ TODO:
 		- en un archivo dentro de CLTSA_PATH/output/
 	- si al iniciar no encuentra CLTSA_PATH que avise y exit
 	- que AUTOMATA >> . saque a un archivo por defecto CLTSA_PATH/output/name.rep
-- lista de cosas a agregar/modificar del paper de ICSE para TOSEM
-	- Extender benchmark.
-	- Mostrar el comparativo de tiempo para búsqueda lineal vs DD, comparar entre no ordenar transiciones vs ordenar respecto de la distancia a s_0.
-		- Mostrar (proxy) que sería utilizable el feedback para entender un problema de realizabilidad (i.e., sirve)
-	- Mostrar ejemplos concretos de las minimizaciones y explicar por qué ayudarían a quién está escribiendo las especificaciones.
-	- Mostrar (proxy) que es distinto (superador) en alguna dimensión a la competencia basada en mostrar estrategias (i.e., contribuye)
-		- Meter una implementación de contra-estrategia de GR1 y comparar con la técnica general. Serían tres cosas en verdad, qué tan compacto es lo nuestro vs contra-estrategia, se puede hablar de qué tan difícil de implementar es y agrega un poco de feedback al toolset de diagnóstico (pero esto último no creo que sea funcional a una publicación de minimización agnóstica de la fórmula)
-	- Mostrar que es computable ese feedback en ejemplos "reales" (i.e., va levemente más allá de una idea)
-	- Las propiedades que enunciamos son correctas (ie., la pruebas extendidas)
-	- Agregar minimización de goal, básicamente en fórmulas que tienen varios átomos de liveness de sistema dejar sólo uno que no está siendo satisfecho. Es más que nada por completitud con el esquema planteado por Cimatti,se puede pensar como un paso previo a la minimización de comportamiento, no toca a la técnica en sí, sino a su aplicación en un contexto GR(1).
 - clts
 	- Leer y hacer notas de A logical study of distributed transition systems
 	- revisar definiciones
