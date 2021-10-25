@@ -15,9 +15,6 @@ YACC = yacc -d
 #YACCFLAGS = -Wconflicts-sr -Wconflicts-rr --debug
 YACCFLAGS = 
 
-format:
-	clang-format -i *.h *.c
-
 all: cltsa
 
 cltsa: main.c cltsa_runner_c.o parser_utils_c.o y.tab.o lex.yy.o automaton_c.o automaton_utils_c.o \
@@ -106,6 +103,9 @@ y.tab.o: y.tab.c
 
 lex.yy.c: cltsa.lex
 	$(LEX) cltsa.lex
+
+format:
+	clang-format -i *.h *.c
 
 .PHONY: clean
 clean:

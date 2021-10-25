@@ -12,7 +12,10 @@ TODO:
 	- Agregar minimización de goal, básicamente en fórmulas que tienen varios átomos de liveness de sistema dejar sólo uno que no está siendo satisfecho. Es más que nada por completitud con el esquema planteado por Cimatti,se puede pensar como un paso previo a la minimización de comportamiento, no toca a la técnica en sí, sino a su aplicación en un contexto GR(1).
 - tesis
 - tool
-	- write DFA (hopcroft) minimization
+	- rewrite minimization
+		- review an n log n minimization algorithm for kripke structures
+		- review valuation encoding retrieval
+		- rewrite algorithm
 		- select example
 		- write debugging output
 		- debug

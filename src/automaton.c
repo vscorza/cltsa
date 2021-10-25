@@ -1520,7 +1520,7 @@ automaton_automaton *automaton_automaton_determinize(automaton_automaton *left_a
 automaton_automaton *automaton_automaton_obs_minimize(automaton_automaton *left_automaton) { return NULL; }
 
 automaton_automaton *automaton_automaton_minimize(automaton_automaton *current_automaton) {
-  if(current_automaton->is_game){
+  if (current_automaton->is_game) {
     printf("Could no minimize automaton %s since it has valuations associated to it", current_automaton->name);
     exit(-1);
   }
@@ -1571,7 +1571,7 @@ automaton_automaton *automaton_automaton_minimize(automaton_automaton *current_a
   partition_size[3] = current_automaton->transitions_count - 1;
   partition_size[4] = 0;
   partition_size[5] = 1;
-  //initialize waiting
+  // initialize waiting
   waiting[0] = 0;
   waiting[1] = 1;
   inverse_waiting[0] = true;
@@ -1590,7 +1590,8 @@ automaton_automaton *automaton_automaton_minimize(automaton_automaton *current_a
       partition_cross[i * 2] = partition_cross[i * 2 + 1] = false;
     }
     // get X
-    for (i = partition_size[waiting[(waiting_count - 1) * 3 + 2]]; i <= partition_size[waiting[(waiting_count - 1) * 3 + 2]] + partition_size[waiting[(waiting_count - 1) * 3]]; i++) {
+    for (i = partition_size[waiting[(waiting_count - 1) * 3 + 2]];
+         i <= partition_size[waiting[(waiting_count - 1) * 3 + 2]] + partition_size[waiting[(waiting_count - 1) * 3]]; i++) {
       current_state = partition[i * 2 + 1];
       for (j = 0; j < current_automaton->in_degree[current_state]; j++) {
         incoming_transition_from_state = current_automaton->inverted_transitions[current_state][j].state_from;
@@ -1612,52 +1613,51 @@ automaton_automaton *automaton_automaton_minimize(automaton_automaton *current_a
 
     for (i = 0; i < partition_count; i++) {
       // check cap and minus not empty
-      if(partition_size[i * 3 + 1] == 0 || partition_size[i * 3 + 1] == partition_size[i * 3 ])continue;
+      if (partition_size[i * 3 + 1] == 0 || partition_size[i * 3 + 1] == partition_size[i * 3])
+        continue;
       // cap set starts at the same place as the original partition
       last_cap_index = last_source_index;
       // cap set starts at the same place as the original partition + cup size - minus size
-      last_minus_index = last_source_index + partition_size[i  * 3] -
-                         partition_size[i * 3 + 1];
+      last_minus_index = last_source_index + partition_size[i * 3] - partition_size[i * 3 + 1];
       // update W
       // Y in W: W <- W minus Y cup {X cap Y, Y minus X}
       // |X cap Y| <= |Y minus X|: W <- W cup {X cap Y}
       // otherwise: W <- W cup {Y minus X}
-      if(inverse_waiting[i]){
+      if (inverse_waiting[i]) {
         waiting[waiting_count++] = partition[j * 2];
         waiting[waiting_count++] = partition_count + added_partitions;
         inverse_waiting[partition[j * 2]] = true;
         inverse_waiting[partition_count + added_partitions] = true;
-      }else if(partition_size[i * 3 + 1] <= (partition_size[i * 3] - partition_size[i * 3 + 1])){
+      } else if (partition_size[i * 3 + 1] <= (partition_size[i * 3] - partition_size[i * 3 + 1])) {
         waiting[waiting_count++] = partition[j * 2];
         inverse_waiting[partition[j * 2]] = true;
-      }else{
+      } else {
         waiting[waiting_count++] = partition_count + added_partitions;
         inverse_waiting[partition_count + added_partitions] = true;
       }
       for (j = last_source_index; j <= (last_source_index + partition_size[i * 3]); j++) {
         if (partition_cross[j]) {
-          //previous partition index is used for cap
+          // previous partition index is used for cap
           partition_buffer[last_cap_index * 2] = partition[j * 2];
-          //update state in partition and inverse partition
+          // update state in partition and inverse partition
           partition_buffer[last_cap_index * 2 + 1] = partition[j * 2 + 1];
           inverse_partition[partition[j * 2 + 1]] = last_cap_index * 2 + 1;
           last_cap_index++;
         } else {
-          //minus set is set as fresh partition
+          // minus set is set as fresh partition
           partition_buffer[last_minus_index * 2] = partition_count + added_partitions;
-          //update state in partition and inverse partition
+          // update state in partition and inverse partition
           partition_buffer[last_minus_index * 2 + 1] = partition[j * 2 + 1];
           inverse_partition[partition[j * 2 + 1]] = last_minus_index * 2 + 1;
           last_minus_index++;
         }
       }
-      //update partition size
-      //order of updates is important to keep dependencies working
+      // update partition size
+      // order of updates is important to keep dependencies working
       uint32_t next_source_index = last_source_index + partition_size[i * 2];
       partition_size[(partition_count + added_partitions) * 3] = last_minus_index;
       partition_size[(partition_count + added_partitions) * 3 + 1] = 0;
-      partition_size[(partition_count + added_partitions) * 3 + 2] = last_source_index + partition_size[i * 3] -
-          partition_size[i * 3 + 1];
+      partition_size[(partition_count + added_partitions) * 3 + 2] = last_source_index + partition_size[i * 3] - partition_size[i * 3 + 1];
       partition_size[i * 3] = last_cap_index;
       partition_size[i * 3 + 1] = 0;
       partition_size[i * 3 + 2] = last_source_index;
@@ -1671,9 +1671,8 @@ automaton_automaton *automaton_automaton_minimize(automaton_automaton *current_a
     partition_buffer = tmp_buffer;
   }
 
-
-  // NOTE: we are not checking for valuations inconsistencies when mergings, this will be too expensive
-  // due to the fact in which we encode valutions fro each state (unaligned)
+  // NOTE: we are not checking for valuations inconsistencies when merging, this will be too expensive
+  // due to the fact in which we encode valuations for each state (unaligned)
   // merge states  //sort according to valuations
   last_source_index = 0;
   uint32_t candidate_state = 0;
@@ -1685,12 +1684,11 @@ automaton_automaton *automaton_automaton_minimize(automaton_automaton *current_a
   }
   automaton_transition tmp_transition = {.state_from = 0, .state_to = 0};
   automaton_transition *current_transition = NULL;
-  for( i = 0; i < current_automaton->transitions_count; i++){
-    for(j = current_automaton->out_degree[i] - 1; j >= 0; j--){
-
+  for (i = 0; i < current_automaton->transitions_count; i++) {
+    for (j = current_automaton->out_degree[i] - 1; j >= 0; j--) {
     }
   }
-  //update inverse partition to use a map from state to representative state
+  // update inverse partition to use a map from state to representative state
 
   free(partition);
   free(waiting);
