@@ -1,5 +1,13 @@
 TODO:
 =====
+
+- armar ejemplos de comparación
+	- Traducción de Maoz a Event Based, en el estilo que usan los estudiantes.
+	- Comparar con una contraestrategia.
+	- Corregir errores para FSE, comparar con contraestrategias.
+	- Vic: comparar con JVTS, minimización de fórmulas, contraestrategias que parezca justo
+	
+	
 - lista de cosas a agregar/modificar del paper de ICSE para TOSEM
 	- Extender benchmark.
 	- Mostrar el comparativo de tiempo para búsqueda lineal vs DD, comparar entre no ordenar transiciones vs ordenar respecto de la distancia a s_0.
@@ -10,6 +18,11 @@ TODO:
 	- Mostrar que es computable ese feedback en ejemplos "reales" (i.e., va levemente más allá de una idea)
 	- Las propiedades que enunciamos son correctas (ie., la pruebas extendidas)
 	- Agregar minimización de goal, básicamente en fórmulas que tienen varios átomos de liveness de sistema dejar sólo uno que no está siendo satisfecho. Es más que nada por completitud con el esquema planteado por Cimatti,se puede pensar como un paso previo a la minimización de comportamiento, no toca a la técnica en sí, sino a su aplicación en un contexto GR(1).
+- reporte 
+	- (env friendly gr1) https://arxiv.org/pdf/1902.05629.pdf
+	- (assume guarantee schmuck) https://people.mpi-sws.org/~kmallik/uploads/AGDistSynth2020.pdf
+	- (assume guarantee finkbeiner) https://publications.cispa.saarland/3441/1/FP21.pdf
+
 - tesis
 - tool
 	- rewrite minimization
