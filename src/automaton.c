@@ -1519,6 +1519,15 @@ bool automaton_automaton_update_valuation(automaton_automaton *current_automaton
 automaton_automaton *automaton_automaton_determinize(automaton_automaton *left_automaton) { return NULL; }
 automaton_automaton *automaton_automaton_obs_minimize(automaton_automaton *left_automaton) { return NULL; }
 
+#define DFAMIN_PART(i)(partition[i * 2])
+#define DFAMIN_PART_STATE(i)(partition[i * 2 + 1])
+#define DFAMIN_PART_SIZE(i)(partition_size[i * 3])
+#define DFAMIN_CROSS_SIZE(i)(partition_size[i * 3 + 1])
+#define DFAMIN_PART_FIRST_ENTRY(i)(partition_size[i * 3 + 2])
+#define DFAMIN_PART_SIZE_CURR (DFAMIN_PART_SIZE(waiting[waiting_count -1]))
+#define DFAMIN_CROSS_SIZE_CURR (DFAMIN_CROSS_SIZE(waiting[waiting_count -1]))
+#define DFAMIN_PART_FIRST_ENTRY_CURR (DFAMIN_PART_FIRST_ENTRY(waiting[waiting_count -1]))
+
 automaton_automaton *automaton_automaton_minimize(automaton_automaton *current_automaton) {
   if (current_automaton->is_game) {
     printf("Could no minimize automaton %s since it has valuations associated to it", current_automaton->name);
@@ -1535,7 +1544,7 @@ automaton_automaton *automaton_automaton_minimize(automaton_automaton *current_a
   // these are the double buffers for partition and waiting
   uint32_t *partition_buffer = malloc(sizeof(uint32_t) * current_automaton->transitions_count * 2);
   uint32_t *tmp_buffer = NULL;
-  // partition size, entry[i * 3] holds partitition_i size, entry[i * 3 + 1] holds P_i cup Y size
+  // partition size, entry[i * 3] holds partitition_i size, entry[i * 3 + 1] holds P_i * Y size
   // entry[i * 3 + 2] holds partition start index at array
   uint32_t *partition_size = malloc(sizeof(uint32_t) * current_automaton->transitions_count * 3);
   // inverse partition indicates at which index a state resides in the partition
@@ -1546,25 +1555,31 @@ automaton_automaton *automaton_automaton_minimize(automaton_automaton *current_a
   // current element being inspected, follows states order as in automaton
   bool *current_partition = calloc(current_automaton->transitions_count, sizeof(bool));
   // arithmetic results with current element being inspected,
-  // if X cap Y holds it is set to true, following partition order
+  // if |X * Y| > 0 it is set to true, following partition order
   bool *partition_cross = calloc(current_automaton->transitions_count, sizeof(bool));
   int32_t i, j, k;
   // initialize partition
+#if DEBUG_MINIMIZATION
+  printf("\tInitializing partition for %d states.\n", current_automaton->transitions_count);
+#endif
   for (i = 0; i < current_automaton->transitions_count; i++) {
     if (i == current_automaton->initial_states[0]) {
-      partition[0] = 0;
-      partition[1] = current_automaton->initial_states[0];
+      DFAMIN_PART(0) = 0;
+      DFAMIN_PART_STATE(0) = current_automaton->initial_states[0];
       inverse_partition[i] = 0;
     } else if (i < current_automaton->initial_states[0]) {
-      partition[(i + 1) * 2] = 1;
-      partition[(i + 1) * 2 + 1] = i;
+      DFAMIN_PART(i + 1) = 1;
+      DFAMIN_PART_STATE(i + 1) = i;
       inverse_partition[i] = i + 1;
     } else {
-      partition[i * 2] = 1;
-      partition[i * 2 + 1] = i;
+      DFAMIN_PART(i) = 1;
+      DFAMIN_PART_STATE(i) = i;
       inverse_partition[i] = i;
     }
   }
+#if DEBUG_MINIMIZATION
+  printf("\tFirst partition contains the initial state, second partition contains the rest.\n");
+#endif
   partition_size[0] = 1;
   partition_size[1] = 0;
   partition_size[2] = 0;
@@ -1585,82 +1600,123 @@ automaton_automaton *automaton_automaton_minimize(automaton_automaton *current_a
   uint32_t current_state, incoming_transition_from_state;
   while (waiting_count > 0) {
     // clear current partition and parttion cross
+#if DEBUG_MINIMIZATION
+    printf("\t\t[waiting: %d]\n\t\tClearing current partition and cross structures.\n", waiting_count);
+#endif
     for (i = 0; i < current_automaton->transitions_count; i++) {
       current_partition[i] = false;
-      partition_cross[i * 2] = partition_cross[i * 2 + 1] = false;
+      partition_cross[i] = false;
     }
-    // get X
-    for (i = partition_size[waiting[(waiting_count - 1) * 3 + 2]];
-         i <= partition_size[waiting[(waiting_count - 1) * 3 + 2]] + partition_size[waiting[(waiting_count - 1) * 3]]; i++) {
-      current_state = partition[i * 2 + 1];
+#if DEBUG_MINIMIZATION
+    printf("\t\t[current_partition (X): ");
+#endif
+    // get X as all the states leading to the current partition
+    for (i = DFAMIN_PART_FIRST_ENTRY_CURR; i <= DFAMIN_PART_FIRST_ENTRY_CURR + DFAMIN_PART_SIZE_CURR; i++) {
+      current_state = DFAMIN_PART_STATE(i);
       for (j = 0; j < current_automaton->in_degree[current_state]; j++) {
         incoming_transition_from_state = current_automaton->inverted_transitions[current_state][j].state_from;
-        // update current partition and parttion cross
+#if DEBUG_MINIMIZATION
+        printf("%d ", incoming_transition_from_state);
+#endif
+        // update current partition and partition cross
         current_partition[incoming_transition_from_state] = true;
         partition_cross[inverse_partition[incoming_transition_from_state]] = true;
         // update intersection size
-        partition_size[partition[inverse_partition[incoming_transition_from_state] * 2] * 3 + 1]++;
+        DFAMIN_CROSS_SIZE(DFAMIN_PART(inverse_partition[incoming_transition_from_state]))++;
       }
     }
+#if DEBUG_MINIMIZATION
+    printf("]\n");
+#endif
     inverse_waiting[(waiting_count - 1)] = false;
     waiting_count--;
     // update partition (move from - to buffer)
-    // P <- P minus Y cup {X cap Y, Y minus X}
+    // P <- P - {Y} + {X * Y, Y - X}
     last_source_index = 0;
     last_cap_index = 0;
     last_minus_index = 0;
     added_partitions = 0;
 
     for (i = 0; i < partition_count; i++) {
-      // check cap and minus not empty
-      if (partition_size[i * 3 + 1] == 0 || partition_size[i * 3 + 1] == partition_size[i * 3])
+      // check * and - not empty
+      if (DFAMIN_CROSS_SIZE(i) == 0 || DFAMIN_CROSS_SIZE(i) == DFAMIN_PART_SIZE(i))
         continue;
+#if DEBUG_MINIMIZATION
+    printf("\t\t[Update W]\n");
+    printf("\t\t\t[Update start indexes]\n");
+#endif
       // cap set starts at the same place as the original partition
       last_cap_index = last_source_index;
       // cap set starts at the same place as the original partition + cup size - minus size
-      last_minus_index = last_source_index + partition_size[i * 3] - partition_size[i * 3 + 1];
+      last_minus_index = last_source_index + DFAMIN_PART_SIZE(i) - DFAMIN_CROSS_SIZE(i);
       // update W
-      // Y in W: W <- W minus Y cup {X cap Y, Y minus X}
-      // |X cap Y| <= |Y minus X|: W <- W cup {X cap Y}
-      // otherwise: W <- W cup {Y minus X}
+      // Y in W: W <- W - {Y} + {X * Y, Y - X}
+      // |X * Y| <= |Y - X|: W <- W + {X * Y}
+      // otherwise: W <- W + {Y - X}
       if (inverse_waiting[i]) {
-        waiting[waiting_count++] = partition[j * 2];
+#if DEBUG_MINIMIZATION
+    printf("\t\t\t[Y?W]\n");
+#endif
+        waiting[waiting_count++] = DFAMIN_PART(j);
         waiting[waiting_count++] = partition_count + added_partitions;
         inverse_waiting[partition[j * 2]] = true;
         inverse_waiting[partition_count + added_partitions] = true;
-      } else if (partition_size[i * 3 + 1] <= (partition_size[i * 3] - partition_size[i * 3 + 1])) {
-        waiting[waiting_count++] = partition[j * 2];
+      } else if (DFAMIN_CROSS_SIZE(i) <= (DFAMIN_PART_SIZE(i) - DFAMIN_CROSS_SIZE(i))) {
+#if DEBUG_MINIMIZATION
+    printf("\t\t\t[|X*Y|<=|Y-X|]\n");
+#endif
+        waiting[waiting_count++] = DFAMIN_PART(j);
         inverse_waiting[partition[j * 2]] = true;
       } else {
+#if DEBUG_MINIMIZATION
+    printf("\t\t\t[|X*Y|>|Y-X|]\n");
+#endif
         waiting[waiting_count++] = partition_count + added_partitions;
         inverse_waiting[partition_count + added_partitions] = true;
       }
-      for (j = last_source_index; j <= (last_source_index + partition_size[i * 3]); j++) {
+#if DEBUG_MINIMIZATION
+    printf("\t\t[Update partition buffer]\n");
+#endif
+      for (j = last_source_index; j <= (last_source_index + DFAMIN_PART_SIZE(i)); j++) {
+#if DEBUG_MINIMIZATION
+    printf("\t\t\t[");
+#endif
         if (partition_cross[j]) {
-          // previous partition index is used for cap
-          partition_buffer[last_cap_index * 2] = partition[j * 2];
+          // previous partition index is used for *
+          partition_buffer[last_cap_index * 2] = DFAMIN_PART(j);
           // update state in partition and inverse partition
-          partition_buffer[last_cap_index * 2 + 1] = partition[j * 2 + 1];
-          inverse_partition[partition[j * 2 + 1]] = last_cap_index * 2 + 1;
+          partition_buffer[last_cap_index * 2 + 1] = DFAMIN_PART_STATE(j);
+          inverse_partition[DFAMIN_PART_STATE(j)] = last_cap_index * 2 + 1;
           last_cap_index++;
+#if DEBUG_MINIMIZATION
+    printf("(*%d:(%d,%d))", last_cap_index, DFAMIN_PART(j), DFAMIN_PART_STATE(j));
+#endif
         } else {
-          // minus set is set as fresh partition
+          // - set is set as fresh partition
           partition_buffer[last_minus_index * 2] = partition_count + added_partitions;
           // update state in partition and inverse partition
-          partition_buffer[last_minus_index * 2 + 1] = partition[j * 2 + 1];
-          inverse_partition[partition[j * 2 + 1]] = last_minus_index * 2 + 1;
+          partition_buffer[last_minus_index * 2 + 1] = DFAMIN_PART_STATE(j);
+          inverse_partition[DFAMIN_PART_STATE(j)] = last_minus_index * 2 + 1;
           last_minus_index++;
+#if DEBUG_MINIMIZATION
+    printf("(-%d:(%d,%d))", last_minus_index, partition_count + added_partitions, DFAMIN_PART_STATE(j));
+#endif
         }
       }
+#if DEBUG_MINIMIZATION
+    printf("]\n");
+    printf("\t\t[Update partition idxs and sizes]\n");
+    printf("\t\t[|P|:%d]\n", partition_count + added_partitions);
+#endif
       // update partition size
       // order of updates is important to keep dependencies working
-      uint32_t next_source_index = last_source_index + partition_size[i * 2];
-      partition_size[(partition_count + added_partitions) * 3] = last_minus_index;
-      partition_size[(partition_count + added_partitions) * 3 + 1] = 0;
-      partition_size[(partition_count + added_partitions) * 3 + 2] = last_source_index + partition_size[i * 3] - partition_size[i * 3 + 1];
-      partition_size[i * 3] = last_cap_index;
-      partition_size[i * 3 + 1] = 0;
-      partition_size[i * 3 + 2] = last_source_index;
+      uint32_t next_source_index = last_source_index + DFAMIN_PART_SIZE(i);
+      DFAMIN_PART_SIZE(partition_count + added_partitions) = last_minus_index;
+      DFAMIN_CROSS_SIZE(partition_count + added_partitions) = 0;
+      DFAMIN_PART_FIRST_ENTRY(partition_count + added_partitions) = last_source_index + DFAMIN_PART_SIZE(i) - DFAMIN_CROSS_SIZE(i);
+      DFAMIN_PART_SIZE(i) = last_cap_index;
+      DFAMIN_CROSS_SIZE(i) = 0;
+      DFAMIN_PART_FIRST_ENTRY(i) = last_source_index;
       last_source_index = next_source_index;
       added_partitions++;
     }
@@ -1672,20 +1728,51 @@ automaton_automaton *automaton_automaton_minimize(automaton_automaton *current_a
   }
 
   // NOTE: we are not checking for valuations inconsistencies when merging, this will be too expensive
-  // due to the fact in which we encode valuations for each state (unaligned)
+  // due to the way in which we encode valuations for each state (unaligned)
   // merge states  //sort according to valuations
   last_source_index = 0;
   uint32_t candidate_state = 0;
+#if DEBUG_MINIMIZATION
+  printf("\t\t[Normalize states]\n");
+  printf("\t\t\t[");
+#endif
   for (i = 0; i < partition_count; i++) {
-    candidate_state = partition_size[i * 3 + 1];
-    for (j = last_source_index; j <= (last_source_index + partition_size[i * 3]); j++)
-      partition[j * 2 + 1] = candidate_state;
-    last_source_index += partition_size[i * 2];
+    candidate_state = DFAMIN_PART_STATE(i);
+    for (j = last_source_index; j <= (last_source_index + DFAMIN_PART_SIZE(i)); j++){
+#if DEBUG_MINIMIZATION
+      printf("(%d<-%d)", DFAMIN_PART_STATE(j), candidate_state);
+#endif
+
+      DFAMIN_PART_STATE(j) = candidate_state;
+    }
+    last_source_index += DFAMIN_PART_SIZE(i);
   }
+#if DEBUG_MINIMIZATION
+  printf("]\n");
+#endif
   automaton_transition tmp_transition = {.state_from = 0, .state_to = 0};
   automaton_transition *current_transition = NULL;
+  // if the current transition is redundant after minimization
+  // it is removed from the automaton
   for (i = 0; i < current_automaton->transitions_count; i++) {
     for (j = current_automaton->out_degree[i] - 1; j >= 0; j--) {
+      current_transition = &(current_automaton->transitions[i][j]);
+      automaton_transition_copy(current_transition, &tmp_transition);
+      // check if current transition is not the candidate to be kept
+      if(tmp_transition.state_from != DFAMIN_PART_STATE(inverse_partition[tmp_transition.state_from]) ||
+          tmp_transition.state_to != DFAMIN_PART_STATE(inverse_partition[tmp_transition.state_to])){
+        // normalize transition
+        tmp_transition.state_from = DFAMIN_PART_STATE(inverse_partition[tmp_transition.state_from]);
+        tmp_transition.state_to = DFAMIN_PART_STATE(inverse_partition[tmp_transition.state_to]);
+        if(automaton_automaton_has_transition(current_automaton, &tmp_transition)){
+#if DEBUG_MINIMIZATION
+          printf("\t\t[Removing");
+          automaton_transition_print(current_transition, current_automaton->context, false, NULL, NULL, 0);
+          printf("]\n");
+#endif
+          automaton_automaton_remove_transition(current_automaton, current_transition);
+        }
+      }
     }
   }
   // update inverse partition to use a map from state to representative state
@@ -1697,6 +1784,7 @@ automaton_automaton *automaton_automaton_minimize(automaton_automaton *current_a
   free(partition_size);
   free(inverse_partition);
   free(current_partition);
+  free(partition_cross);
   return current_automaton;
 }
 

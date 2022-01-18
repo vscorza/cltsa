@@ -31,6 +31,7 @@
 #define DEBUG_LTL_AUTOMATON 0
 #define DEBUG_OBDD_DEADLOCK 0
 #define DEADLOCK_TRACE_COUNT 0
+#define DEBUG_MINIMIZATION 1
 
 /****************************
  * FUNCTIONAL FLAGS
