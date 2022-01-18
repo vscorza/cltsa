@@ -1533,6 +1533,11 @@ automaton_automaton *automaton_automaton_minimize(automaton_automaton *current_a
     printf("Could no minimize automaton %s since it has valuations associated to it", current_automaton->name);
     exit(-1);
   }
+  char min_name[255];
+  sprintf(min_name, "%s_minimization", current_automaton->name);
+  automaton_automaton *return_automaton = automaton_automaton_create(min_name,
+      current_automaton->context, current_automaton->local_alphabet_count,
+      current_automaton->local_alphabet, false, false, false, false);
   // (P) partition will hold an array of double int entries, the first int indicates
   // partition the second is the state
   uint32_t *partition = malloc(sizeof(uint32_t) * current_automaton->transitions_count * 2);
@@ -1758,23 +1763,22 @@ automaton_automaton *automaton_automaton_minimize(automaton_automaton *current_a
     for (j = current_automaton->out_degree[i] - 1; j >= 0; j--) {
       current_transition = &(current_automaton->transitions[i][j]);
       automaton_transition_copy(current_transition, &tmp_transition);
-      // check if current transition is not the candidate to be kept
-      if(tmp_transition.state_from != DFAMIN_PART_STATE(inverse_partition[tmp_transition.state_from]) ||
-          tmp_transition.state_to != DFAMIN_PART_STATE(inverse_partition[tmp_transition.state_to])){
         // normalize transition
-        tmp_transition.state_from = DFAMIN_PART_STATE(inverse_partition[tmp_transition.state_from]);
-        tmp_transition.state_to = DFAMIN_PART_STATE(inverse_partition[tmp_transition.state_to]);
-        if(automaton_automaton_has_transition(current_automaton, &tmp_transition)){
+      tmp_transition.state_from = DFAMIN_PART_STATE(inverse_partition[tmp_transition.state_from]);
+      tmp_transition.state_to = DFAMIN_PART_STATE(inverse_partition[tmp_transition.state_to]);
 #if DEBUG_MINIMIZATION
-          printf("\t\t[Removing");
-          automaton_transition_print(current_transition, current_automaton->context, false, NULL, NULL, 0);
+      if(!automaton_automaton_has_transition(return_automaton, &tmp_transition)){
+          printf("\t\t[Adding");
+          automaton_transition_print(&tmp_transition, current_automaton->context, false, NULL, NULL, 0);
           printf("]\n");
-#endif
-          automaton_automaton_remove_transition(current_automaton, current_transition);
-        }
       }
+#endif
+      automaton_automaton_add_transition(return_automaton, &tmp_transition);
     }
   }
+  automaton_automaton_add_initial_state(return_automaton, DFAMIN_PART_STATE(
+      inverse_partition[current_automaton->initial_states[0]]));
+
   // update inverse partition to use a map from state to representative state
 
   free(partition);
@@ -1785,7 +1789,7 @@ automaton_automaton *automaton_automaton_minimize(automaton_automaton *current_a
   free(inverse_partition);
   free(current_partition);
   free(partition_cross);
-  return current_automaton;
+  return return_automaton;
 }
 
 /**
