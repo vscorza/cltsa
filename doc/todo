@@ -1,5 +1,10 @@
 TODO:
 =====
+- minimizacion
+	- cambiar encoding de valuaciones para que quede al menos alineado a byte
+	- armar estructura que ordena valuaciones y mapea a conjunto de estados para armar D
+	- escribir inline min_D, reach_D
+	- implementar minimize 
 
 - armar ejemplos de comparación
 	- Traducción de Maoz a Event Based, en el estilo que usan los estudiantes.

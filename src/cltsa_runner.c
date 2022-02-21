@@ -1858,6 +1858,54 @@ void run_ranking_stabilization_tests() {
   // CLEAR AUTOMATON AND RANKING SYSTEM
 }
 void run_strategy_build_tests() {}
+
+#define AUT_TEST_ADD_TRANS(aut, trans, s, t)(trans)->state_from = s;\
+  (trans)->state_to = t;\
+  automaton_automaton_add_transition(aut, trans);
+
+void run_minimization_tests(){
+  automaton_signal_event *zero = automaton_signal_event_create("zero", INPUT_SIG);
+  automaton_signal_event *one = automaton_signal_event_create("one", OUTPUT_SIG);
+  automaton_alphabet *alphabet = automaton_alphabet_create();
+  automaton_alphabet_add_signal_event(alphabet, zero);
+  automaton_alphabet_add_signal_event(alphabet, one);
+  automaton_automata_context *ctx =
+      automaton_automata_context_create("Context 1", alphabet, 0, NULL, 0, NULL, NULL, 0, NULL);
+  uint32_t *local_alphabet_1 = malloc(sizeof(uint32_t) * 2);
+  local_alphabet_1[0] = automaton_alphabet_get_signal_index(alphabet, zero);
+  local_alphabet_1[1] = automaton_alphabet_get_signal_index(alphabet, one);
+  automaton_automaton *sut  = automaton_automaton_create("SUT", ctx, 2, local_alphabet_1, false, false, false, false);
+  automaton_transition *zero_trans  = automaton_transition_create(0, 0);
+  automaton_transition *one_trans  = automaton_transition_create(0, 0);
+  automaton_transition_add_signal_event(zero_trans, ctx, zero);
+  automaton_transition_add_signal_event(one_trans, ctx, one);
+  automaton_automaton_add_initial_state(sut, 0);
+  AUT_TEST_ADD_TRANS(sut, one_trans, 0, 1)
+  AUT_TEST_ADD_TRANS(sut, one_trans, 1, 0)
+  AUT_TEST_ADD_TRANS(sut, one_trans, 1, 3)
+  AUT_TEST_ADD_TRANS(sut, zero_trans, 2, 1)
+  AUT_TEST_ADD_TRANS(sut, one_trans, 2, 4)
+  AUT_TEST_ADD_TRANS(sut, one_trans, 3, 5)
+  AUT_TEST_ADD_TRANS(sut, zero_trans, 3, 5)
+  AUT_TEST_ADD_TRANS(sut, one_trans, 4, 3)
+  AUT_TEST_ADD_TRANS(sut, zero_trans, 4, 3)
+  AUT_TEST_ADD_TRANS(sut, one_trans, 5, 5)
+  AUT_TEST_ADD_TRANS(sut, zero_trans, 5, 5)
+  automaton_automaton_print(sut, false, false, false, NULL, NULL);
+  automaton_automaton *minimization = automaton_automaton_minimize(sut);
+  automaton_automaton_print(minimization, false, false, false, NULL, NULL);
+  bool rnk_cmp  = false;
+  print_test_result(rnk_cmp, "RANKING", "automaton ranking eq test");
+  free(local_alphabet_1);
+  automaton_signal_event_destroy(one, true);
+  automaton_signal_event_destroy(zero, true);
+  automaton_alphabet_destroy(alphabet);
+  automaton_automaton_destroy(sut);
+  automaton_automaton_destroy(minimization);
+  automaton_automata_context_destroy(ctx);
+  automaton_transition_destroy(zero_trans, true);
+  automaton_transition_destroy(one_trans, true);
+}
 /** MACRO TESTS **/
 void run_functional_tests() {
   // MODULE TESTING

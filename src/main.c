@@ -98,8 +98,9 @@ int main(int argc, char **argv) {
       }
     }
   } else {
-    // print_help();
-    run_parse_test("tests/alphabet_relabel_test.fsp", "Alphabet Extend");
+    print_help();
+    //run_parse_test("tests/alphabet_relabel_test.fsp", "Alphabet Extend");
+    //run_minimization_tests();
   }
   obdd_mgr *mgr = parser_get_obdd_mgr();
   obdd_mgr_destroy(mgr);
