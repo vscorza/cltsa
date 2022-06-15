@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 #define LIST_INITIAL_SIZE 32
 #define LIST_INCREASE_FACTOR 2
