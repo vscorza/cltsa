@@ -1,41 +1,42 @@
-const MAX_RETRY = 4
-const MAX_REINIT = 4
-const MAX_TIMEOUT = 4
-range R_RETRY = 1..(MAX_RETRY-1)
-range R_REINIT = 1..(MAX_REINIT-1)
-range R_TIMEOUT = 1..(MAX_TIMEOUT-1)
+const MAX_RETRY = 3
+const MAX_REINIT = 3
+const MAX_TIMEOUT = 3
+range R_RETRY = 1..(MAX_RETRY + 1)
+range R_REINIT = 1..(MAX_REINIT + 1)
+range R_TIMEOUT = 1..(MAX_TIMEOUT + 1)
 
-set Global_Alphabet = {phy.done, phy.pending, phy.reinit, phy.max, req, ack, error, retry, timeout.threshold}
-set Controllable_Alphabet = {req, retry}
+set Global_Alphabet = {phy.done, phy.pending, phy.reinit, phy.max, req, ack, error, timeout.threshold, timeout.reset}
+set Controllable_Alphabet = {req, timeout.reset}
 
 RETRY_AUT = RETRY[1],
 RETRY[i:R_RETRY] = (
-	when (i < (MAX_RETRY - 1)) req -> RETRY[i + 1] |
-	when (i == (MAX_RETRY - 1)) {phy.reinit, phy.max} -> RETRY_MAX |
-	when ((i < (MAX_RETRY)) * (i > 1)) ack -> RETRY[1] 
+	phy.max -> ABORT |
+	when (i < (MAX_RETRY + 1)) req -> RETRY[i + 1] |
+	when (i == (MAX_RETRY + 1)) phy.reinit -> RETRY_MAX |
+	when ((i <= (MAX_RETRY + 1)) * (i > 1)) ack -> RETRY[1] 
 	),
-RETRY_MAX = ({<phy.done, ack>,phy.done} -> RETRY[1]).
+RETRY_MAX = ({<phy.done, ack>,phy.done} -> RETRY[1] | phy.max -> ABORT).
 RETRY_AUT >> "/tmp/cxl_RETRY.rep".
 
 PHY_REINIT = PHY[1],
 PHY[i:R_REINIT] = ( 
-	when (i < (MAX_REINIT - 1)) phy.reinit -> PHY[i + 1] |
-	when (i == (MAX_REINIT - 1)) phy.max -> PHY_MAX |
-	when (i < (MAX_REINIT)) ack -> PHY[1]  |
-	when ((i < (MAX_REINIT)) * (i > 1)) {phy.pending, phy.done} -> PHY[i] 
+	when (i < (MAX_REINIT + 1)) phy.reinit -> PHY[i + 1] |
+	when (i == (MAX_REINIT + 1)) phy.max -> PHY_MAX |
+	when (i <= (MAX_REINIT + 1)) ack -> PHY[1]  |
+	when ((i <= (MAX_REINIT + 1)) * (i > 1)) {phy.pending, phy.done} -> PHY[i] 
 	).
 PHY_REINIT >> "/tmp/cxl_PHY.rep".
 
 PHY_LAYER = ( phy.reinit -> REINIT),
 REINIT = ( phy.pending -> REINIT | phy.done -> PHY_LAYER).
 
-RETRY_TIMEOUT = ({req, ack} -> RETRY_TIMEOUT | error -> TO[1]),
+RETRY_TIMEOUT = ({req, timeout.reset} -> RETRY_TIMEOUT | error -> TO[1]),
 TO[i:R_TIMEOUT] = (
-		ack -> RETRY_TIMEOUT |
-		when (i < (MAX_TIMEOUT - 1)) {req,error} -> TO[i + 1] |
-		when (i == (MAX_TIMEOUT - 1)) {req,error} -> TIMEOUT_MAX
+		timeout.reset -> RETRY_TIMEOUT |
+		when (i < (MAX_TIMEOUT)) {req,error} -> TO[i + 1] |
+		when (i == (MAX_TIMEOUT)) {req,error} -> TIMEOUT_MAX
 		),
-TIMEOUT_MAX = ( timeout.threshold -> TIMEOUT_MAX | <timeout.threshold, retry> -> RETRY_TIMEOUT).
+TIMEOUT_MAX = ( timeout.threshold -> TIMEOUT_MAX | <timeout.threshold, timeout.reset> -> RETRY_TIMEOUT).
 RETRY_TIMEOUT >> "/tmp/cxl_TIMEOUT.rep".
 
 FLIT = ({ack, req, error} -> FLIT).
@@ -43,12 +44,14 @@ FLIT >> "/tmp/cxl_FLIT.rep".
 
 LRSM = (error -> LLREQ),
 LLREQ = (req -> IDLE | error -> LLREQ | phy.max -> ABORT),
-IDLE = ({error, req} -> IDLE | retry -> LLREQ | ack -> LRSM ),
+IDLE = ({error, req} -> IDLE | <timeout.reset, timeout.threshold> -> LLREQ | <ack, timeout.reset> -> LRSM ),
 PHY_REINIT = (phy.pending -> PHY_REINIT | phy.done -> LLREQ).
 LRSM >> "/tmp/cxl_LRSM.rep".
 
-//||SUV = (PHY_REINIT || RETRY_AUT || RETRY_TIMEOUT || FLIT || LRSM).
-||SUV = (PHY_REINIT || RETRY_AUT  || RETRY_TIMEOUT || PHY_LAYER || FLIT || LRSM).
+||LRSM_TIMEOUT = (LRSM || RETRY_TIMEOUT || PHY_REINIT || PHY_LAYER || FLIT).
+LRSM_TIMEOUT >> "/tmp/cxl_lrsm_timeout.rep".
+
+||SUV =  ((RETRY_AUT ||_c PHY_REINIT ||_c RETRY_TIMEOUT) || PHY_LAYER  || FLIT || LRSM).
 SUV  >> "/tmp/cxl_suv.rep".
 /*
 BISCOTTI = (cook->COOKING),
