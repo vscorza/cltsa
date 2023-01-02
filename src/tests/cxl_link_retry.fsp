@@ -1,0 +1,122 @@
+const MAX_RETRY = 4
+const MAX_REINIT = 4
+const MAX_TIMEOUT = 4
+range R_RETRY = 1..(MAX_RETRY-1)
+range R_REINIT = 1..(MAX_REINIT-1)
+range R_TIMEOUT = 1..(MAX_TIMEOUT-1)
+
+set Global_Alphabet = {phy.done, phy.pending, phy.reinit, phy.max, req, ack, error, retry, timeout.threshold}
+set Controllable_Alphabet = {req, retry}
+
+RETRY_AUT = RETRY[1],
+RETRY[i:R_RETRY] = (
+	when (i < (MAX_RETRY - 1)) req -> RETRY[i + 1] |
+	when (i == (MAX_RETRY - 1)) {phy.reinit, phy.max} -> RETRY_MAX |
+	when ((i < (MAX_RETRY)) * (i > 1)) ack -> RETRY[1] 
+	),
+RETRY_MAX = ({<phy.done, ack>,phy.done} -> RETRY[1]).
+RETRY_AUT >> "/tmp/cxl_RETRY.rep".
+
+PHY_REINIT = PHY[1],
+PHY[i:R_REINIT] = ( 
+	when (i < (MAX_REINIT - 1)) phy.reinit -> PHY[i + 1] |
+	when (i == (MAX_REINIT - 1)) phy.max -> PHY_MAX |
+	when (i < (MAX_REINIT)) ack -> PHY[1]  |
+	when ((i < (MAX_REINIT)) * (i > 1)) {phy.pending, phy.done} -> PHY[i] 
+	).
+PHY_REINIT >> "/tmp/cxl_PHY.rep".
+
+PHY_LAYER = ( phy.reinit -> REINIT),
+REINIT = ( phy.pending -> REINIT | phy.done -> PHY_LAYER).
+
+RETRY_TIMEOUT = ({req, ack} -> RETRY_TIMEOUT | error -> TO[1]),
+TO[i:R_TIMEOUT] = (
+		ack -> RETRY_TIMEOUT |
+		when (i < (MAX_TIMEOUT - 1)) {req,error} -> TO[i + 1] |
+		when (i == (MAX_TIMEOUT - 1)) {req,error} -> TIMEOUT_MAX
+		),
+TIMEOUT_MAX = ( timeout.threshold -> TIMEOUT_MAX | <timeout.threshold, retry> -> RETRY_TIMEOUT).
+RETRY_TIMEOUT >> "/tmp/cxl_TIMEOUT.rep".
+
+FLIT = ({ack, req, error} -> FLIT).
+FLIT >> "/tmp/cxl_FLIT.rep".
+
+LRSM = (error -> LLREQ),
+LLREQ = (req -> IDLE | error -> LLREQ | phy.max -> ABORT),
+IDLE = ({error, req} -> IDLE | retry -> LLREQ | ack -> LRSM ),
+PHY_REINIT = (phy.pending -> PHY_REINIT | phy.done -> LLREQ).
+LRSM >> "/tmp/cxl_LRSM.rep".
+
+//||SUV = (PHY_REINIT || RETRY_AUT || RETRY_TIMEOUT || FLIT || LRSM).
+||SUV = (PHY_REINIT || RETRY_AUT  || RETRY_TIMEOUT || PHY_LAYER || FLIT || LRSM).
+SUV  >> "/tmp/cxl_suv.rep".
+/*
+BISCOTTI = (cook->COOKING),
+COOKING = (cooking->COOKING | finishedCooking->FINISHED | <cook,finishedCooking>->OVERHEATED), 
+FINISHED = (cook->COOKING | moveToBelt->BISCOTTI),  
+OVERHEATED = (overHeated->OVERHEATED).
+
+vstate fluent F_NotCooking in BISCOTTI = {FINISHED, OVERHEATED}.
+vstate fluent F_MoveToBelt in BISCOTTI = {0}.//BISCOTTI
+
+SUCCESSFULLY_COOKED_TWICE = (cook->cook->COOKED),
+COOKED = (moveToBelt->SUCCESSFULLY_COOKED_TWICE | cook->ERROR).
+|f| ENV =(BISCOTTI || SUCCESSFULLY_COOKED_TWICE). 
+
+|gr1| <{F_NotCooking}><{F_MoveToBelt}> STRAT = ENV.
+
+
+
+STATE_TESTER = (refine -> STATE_REFINE | reject -> STATE_REJECT),
+STATE_REFINE = (back -> STATE_TESTER),
+STATE_REJECT = (back -> STATE_TESTER).
+
+vstate fluent F_REFINE in STATE_TESTER = {1}.
+
+|f| STATE_TESTER_G = (STATE_TESTER).
+
+
+|| ENV_TEST =(BISCOTTI || SUCCESSFULLY_COOKED_TWICE || STATE_TESTER). 
+|f| ENV_TEST_G =(BISCOTTI || SUCCESSFULLY_COOKED_TWICE || STATE_TESTER).
+
+|gr1| <{F_NotCooking}><{F_MoveToBelt,F_REFINE}> STRAT_TEST = ENV_TEST_G.
+
+
+BISCOTTI >> "/tmp/biscotti_biscotti.rep".
+SUCCESSFULLY_COOKED_TWICE >> "/tmp/biscotti_twice.rep".
+STATE_TESTER >> "/tmp/biscotti_state_tester.rep".
+ENV_TEST >> "/tmp/biscotti_ENV_tester.rep".
+ENV_TEST_G >> "/tmp/biscotti_ENV_G_tester.rep".
+
+ENV >> "/tmp/biscotti_ENV.rep".
+STRAT >> "/tmp/biscotti_strat.rep".
+STRAT_p >> "/tmp/biscotti_strat_p.rep".
+STRAT_TEST >> "/tmp/biscotti_strat_tester.rep".
+STATE_TESTER_G >> "/tmp/biscotti_state_tester_g.rep".
+
+STRAT_p = S_0,
+S_0 = (cook-> S_1),
+S_1 = (cooking-> S_1|finishedCooking-> S_2),
+S_2 = (cook-> S_3),
+S_3 = (cooking-> S_3|finishedCooking-> S_5),
+S_5 = (moveToBelt-> S_0).
+
+STRAT_TEST_p= S_0,
+S_0 = (refine-> S_2),
+S_1 = (cook-> S_4|back-> S_5),
+S_2 = (cook-> S_3|back-> S_0),
+S_3 = (back-> S_9|cooking-> S_3|finishedCooking-> S_11),
+S_4 = (back-> S_9|cooking-> S_3|finishedCooking-> S_11),
+S_5 = (refine-> S_2),
+S_9 = (refine-> S_3|cooking-> S_9|finishedCooking-> S_10),
+S_10 = (cook-> S_13),
+S_11 = (cook-> S_16|back-> S_10),
+S_13 = (refine-> S_16|cooking-> S_13|finishedCooking-> S_19),
+S_16 = (back-> S_13|cooking-> S_16|finishedCooking-> S_20),
+S_19 = (moveToBelt-> S_0),
+S_20 = (moveToBelt-> S_1|back-> S_19).
+
+// tests
+equals FATAL_Biscotti_Strategy_Vstates(STRAT, STRAT_p).
+equals FATAL_Biscotti_Strategy_Composed_Vstates(STRAT_TEST, STRAT_TEST_p).
+*/
