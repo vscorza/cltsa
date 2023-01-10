@@ -1,0 +1,73 @@
+const MAX_RETRY = 2
+const MAX_REINIT = 2
+const MAX_TIMEOUT = 2
+range R_RETRY = 1..(MAX_RETRY + 1)
+range R_REINIT = 1..(MAX_REINIT + 1)
+range R_TIMEOUT = 1..(MAX_TIMEOUT + 1)
+
+set Global_Alphabet = {phy.reset, phy.done, phy.pending, phy.reinit, phy.max, req, ack, error, to.max, to.reset, to.log}
+set Controllable_Alphabet = {req, to.reset}
+
+RETRY_AUT = RETRY[1],
+RETRY[i:R_RETRY] = (
+	phy.max -> ABORT |
+	phy.reset -> RETRY_MAX |
+	when (i < (MAX_RETRY + 1)) req -> RETRY[i + 1] |
+	when (i < (MAX_RETRY + 1)) error -> RETRY[i] |
+	when (i <= (MAX_RETRY + 1)) ack -> RETRY[1]  |
+	when (i == (MAX_RETRY + 1)) phy.reinit -> RETRY_MAX 
+	),
+RETRY_MAX = (phy.done -> RETRY[1] | {ack, error} -> RETRY_MAX | phy.max -> ABORT),
+ABORT = (phy.max -> ABORT).
+RETRY_AUT >> "/tmp/cxl_RETRY.rep".
+
+PHY_REINIT = PHY[1],
+PHY[i:R_REINIT] = ( 
+	when (i < (MAX_REINIT + 1)) {phy.reinit, phy.reset} -> PHY[i + 1] |
+	when (i == (MAX_REINIT + 1)) phy.max -> PHY_MAX |
+	when (i <= (MAX_REINIT + 1)) ack -> PHY[1]  |
+	when (i <= (MAX_REINIT + 1)) {phy.pending, phy.done} -> PHY[i]
+	),
+PHY_MAX = (phy.max -> PHY_MAX).
+PHY_REINIT >> "/tmp/cxl_PHY.rep".
+
+PHY_LAYER = ( {phy.reinit, phy.reset} -> REINIT),
+REINIT = ( phy.pending -> REINIT | phy.done -> PHY_LAYER).
+
+RETRY_TIMEOUT = ({req, to.reset, phy.reset, phy.pending, phy.done} -> RETRY_TIMEOUT | error -> TO[1]),
+TO[i:R_TIMEOUT] = (
+		to.reset -> RETRY_TIMEOUT |
+		when (i < (MAX_TIMEOUT)) {req,error, phy.reset, phy.pending, phy.done} -> TO[i + 1] |
+		when (i == (MAX_TIMEOUT)) {req,error, phy.reset, phy.pending, phy.done} -> TIMEOUT_MAX
+		),
+TIMEOUT_MAX = ( {to.max,  phy.reset, phy.pending, phy.done} -> TIMEOUT_MAX |  to.reset -> RETRY_TIMEOUT).
+RETRY_TIMEOUT >> "/tmp/cxl_TIMEOUT.rep".
+
+LRSM = (error -> LLREQ | phy.reset -> to.reset -> PHY_REINIT | {phy.pending, phy.done, to.reset} -> LRSM),
+LLREQ = (req -> IDLE | error -> LLREQ | phy.max -> ABORT | phy.reset -> to.reset -> LLREQ | {phy.pending, phy.done} -> LLREQ),
+IDLE = ({error, req, phy.pending, phy.done} -> IDLE | to.max -> to.reset -> LLREQ | ack -> to.reset -> LRSM | phy.reset -> to.reset -> PHY_REINIT ),
+PHY_REINIT = (phy.pending -> PHY_REINIT | phy.done -> LLREQ),
+ABORT = (phy.max -> ABORT).
+LRSM >> "/tmp/cxl_LRSM.rep".
+
+FLIT = (error -> PENDING),
+PENDING = ({error, req} -> PENDING | ack -> FLIT).
+FLIT >> "/tmp/cxl_FLIT.rep".
+
+/*
+BLOCKER = (error -> ERROR),
+ERROR = (ack -> ERROR | to.max -> BLOCKED),
+BLOCKED = (to.max -> BLOCKED)+{phy.reset}.*/
+
+TIMEOUT_LOGGER = (to.max -> LOG),
+LOG = (to.log -> LOG).
+
+|f|SUV =  (LRSM || RETRY_TIMEOUT || PHY_REINIT  || PHY_LAYER  || FLIT || LRSM || RETRY_AUT || TIMEOUT_LOGGER).
+SUV  >> "/tmp/cxl_suv.rep".
+
+vstate fluent F_NotAborted in RETRY_AUT = {RETRY_1}.
+vstate fluent F_NotPhyMax in PHY_REINIT = {PHY_1}.
+vstate fluent F_NotTimedOut in RETRY_TIMEOUT = {RETRY_TIMEOUT}.
+
+|gr1| <{F_NotAborted, F_NotPhyMax}><{F_NotTimedOut}> STRAT_SUV = SUV.
+STRAT_SUV >> "/tmp/cxl_strat.rep".
